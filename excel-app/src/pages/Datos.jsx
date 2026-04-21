@@ -67,7 +67,8 @@ const SimuladorMAT251 = () => {
 
             // Usamos tu BASE_URL (http://127.0.0.1:8000) que tienes en api.js
             // Y llamamos al endpoint de descarga: /files/{filename}
-            const BASE_URL = "http://127.0.0.1:8000";
+            //const BASE_URL = "http://127.0.0.1:8000";
+            const BASE_URL = "https://api-admin-shc170.onrender.com";
             const urlDescarga = `${BASE_URL}/files/${encodeURIComponent(filename)}`;
 
             const response = await fetch(urlDescarga);
