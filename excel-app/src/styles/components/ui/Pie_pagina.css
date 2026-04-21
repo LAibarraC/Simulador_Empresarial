@@ -7,7 +7,7 @@
   margin-top: 50px;
   background-color: var(--header-bg); 
 /*   border-top: 2px solid var(--primary-color); */
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, sans-serif; 
 }
 
 .pie-top {
@@ -121,4 +121,43 @@ html.dark .pie-logo-usfx {
 
 html.dark .pie-logo-siglos {
   filter: invert(0);
+}
+
+
+
+/* --- MEDIA QUERIES (EL TRUCO PARA CELULAR) --- */
+
+@media (max-width: 768px) {
+  .pie-top {
+    flex-direction: column; /* Apila los logos uno sobre otro */
+    text-align: center;
+  }
+
+  /* Forzamos a que las columnas no ocupen espacio extra */
+  .pie-col-izq, .pie-col-centro, .pie-col-der {
+    flex: none; 
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+  }
+  .pie-divisor {
+    display: none; /* Quitamos la línea vertical en móviles */
+  }
+
+  .pie-col-izq {
+    flex: none;
+    width: 100%;
+  }
+
+  .pie-bottom {
+    flex-direction: column-reverse; /* Redes sociales arriba, texto abajo */
+    text-align: center;
+  }
+
+  .pie-copy {
+    text-align: center;
+    font-size: 0.8rem;
+  }
 }

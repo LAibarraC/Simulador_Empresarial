@@ -16,14 +16,28 @@
 }
 
 .logo-inicio {
-  width: 500px;
+  /* En lugar de width: 500px, usamos esto: */
+  width: 100%;           /* Ocupa el ancho disponible */
+  max-width: 500px;      /* Pero no te pases de 500px en pantallas grandes */
+  
   height: auto;
   margin-bottom: 2rem;
   animation: latido 3s infinite ease-in-out;
+  
+  /* Esto ayuda a que si la pantalla es muy pequeña, no toque los bordes */
+  padding: 0 20px; 
+  box-sizing: border-box;
+
   filter: invert(0.8) drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.1));
   transition: filter 0.3s ease;
 }
 
 html.dark .logo-inicio {
   filter: invert(0) drop-shadow(0px 10px 20px rgba(255, 255, 255, 0.1));
+} 
+
+@media (max-width: 950px) {
+  .inicio-container {
+    height: 80vh; /* Un poco más alto en móviles si es necesario */
+  }
 }
