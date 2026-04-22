@@ -64,19 +64,7 @@ const SimuladorMAT251 = () => {
         if (!filename) return;
         try {
             setCargandoApi(true);
-
-            // Usamos tu BASE_URL (http://127.0.0.1:8000) que tienes en api.js
-            // Y llamamos al endpoint de descarga: /files/{filename}
-            //const BASE_URL = "http://127.0.0.1:8000";
-            const BASE_URL = "https://api-admin-shc170.onrender.com";
-            const urlDescarga = `${BASE_URL}/files/${encodeURIComponent(filename)}`;
-
-            const response = await fetch(urlDescarga);
-            if (!response.ok) throw new Error("No se pudo descargar el archivo del servidor.");
-
-            const dataBuffer = await response.arrayBuffer();
-
-            // Creamos el archivo virtual para engañar al sistema
+            const dataBuffer= await api.descargarArchivoExcel(filename);
             const fileVirtual = new File([dataBuffer], filename, {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             });

@@ -1,7 +1,7 @@
-//const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "http://127.0.0.1:8000";
 
 //Base url de Render
-const BASE_URL = "https://api-admin-shc170.onrender.com";
+//const BASE_URL = "https://api-admin-shc170.onrender.com";
 
 export const api = {
 
@@ -151,6 +151,18 @@ export const api = {
 
         }catch (error){
             console.error("Error en api.actualizarExcel", error);
+            throw error;
+        }
+    },
+
+    descargarArchivoExcel: async (filename) => {
+        try {
+            const res = await fetch(`${BASE_URL}/files/${encodeURIComponent(filename)}`);
+            if (!res.ok) throw new Error("No se pudo descargar el archivo del servidor.");
+            // Retornamos directamente el ArrayBuffer
+            return await res.arrayBuffer();
+        } catch (error) {
+            console.error("Error en api.descargarArchivoExcel:", error);
             throw error;
         }
     },

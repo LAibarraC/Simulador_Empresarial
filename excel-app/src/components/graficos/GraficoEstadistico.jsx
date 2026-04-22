@@ -28,6 +28,7 @@ const MaximizeButton = ({ isExpanded, onToggle }) => (
 
 const ChartContent = ({ tipo, datos, isExpanded }) => {
   const axisTextStyle = { fontSize: 12, fill: '#6b7280' };
+  const isMobile = window.innerWidth < 768; // Detecta si la pantalla es menor a 768px
 
   const [activeIndex, setActiveIndex] = useState(null);
   const coloresDinamicos = useMemo(() => {
@@ -47,7 +48,7 @@ const ChartContent = ({ tipo, datos, isExpanded }) => {
         <BarChart
           data={datos}
           margin={{ top: 20, right: 20, left: -20, bottom: 20 }}
-          barCategoryGap={2} // 👈 1. Esto elimina la separación entre las barras
+          barCategoryGap={7} // 👈 1. Esto elimina la separación entre las barras
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
           <XAxis dataKey="x_i" tick={axisTextStyle} dy={10} stroke="#000000" />
@@ -71,7 +72,7 @@ const ChartContent = ({ tipo, datos, isExpanded }) => {
               dataKey="f_i"
               position="top"
               fill="var(--text-main)"
-              fontSize={isExpanded ? 14 : 12} // 
+              fontSize={isExpanded ? 14 : 12}
               fontWeight="bold"
             />
           </Bar>
@@ -81,8 +82,12 @@ const ChartContent = ({ tipo, datos, isExpanded }) => {
 case 'pastel': { 
       const datosLimpios = datos.filter(item => item.x_i !== 'f_i' && item.x_i !== 'x_i' && item.x_i !== 'Total');
       const pieMargins = isExpanded 
-        ? { top: 40, right: 120, bottom: 80, left: 120 } 
-        : { top: 30, right: 60, bottom: 60, left: 60 };
+        ? (isMobile 
+            ? { top: 40, right: 10, bottom: 40, left: 10 } // Móvil maximizado
+            : { top: 40, right: 40, bottom: 50, left: 40 }) // Escritorio maximizado
+        : { top: 10, right: 10, bottom: 20, left: 10 };
+        
+
       const renderLeyendaEnU = (props) => {
         const { payload } = props;
         const payloadLimpio = payload.filter(entry => 
@@ -123,7 +128,7 @@ case 'pastel': {
             margin: '0 auto', 
             marginLeft: isExpanded ? 'auto' : '0px',  
             marginRight: isExpanded ? 'auto' : '0px', 
-            fontSize: isExpanded ? '13px' : '11px' 
+            fontSize: isExpanded ? '13px' : '11px'
           }}>
             
             <div style={{ 
@@ -154,20 +159,23 @@ case 'pastel': {
       return (
         <PieChart margin={pieMargins}>
           <Pie
-            data={datosLimpios} 
+           data={datosLimpios} 
             dataKey="f_i"
             nameKey="x_i"
             cx="50%"
             cy="50%"
-            innerRadius={isExpanded ? 20 : 10} 
-            outerRadius={isExpanded ? 150 : 60}
+            innerRadius={isExpanded ? 30 : 10} 
+            outerRadius={isExpanded 
+              ? (isMobile ? 85 : 115) 
+              : 75}
             fill="#8884d8"
             paddingAngle={2} 
             labelLine={false}
             isAnimationActive={false}
             onMouseEnter={(data) => setActiveIndex(String(data.name))}
             onMouseLeave={() => setActiveIndex(null)}
-
+            
+            
             label={({ cx, cy, midAngle, innerRadius, outerRadius, value, percent }) => {
               if (percent < 0.015) return null; 
               const mostrarAdentro = percent >= 0.04;
@@ -177,8 +185,10 @@ case 'pastel': {
               const innerRadiusText = innerRadius + (outerRadius - innerRadius) * 0.5; 
               const inx = cx + innerRadiusText * cos;
               const iny = cy + innerRadiusText * sin;
-              const offset = isExpanded ? 30 : 20; 
-              const xTextOffset = isExpanded ? 15 : 10; 
+
+              const offset = isExpanded ? (isMobile ? 15 : 25) : 15; 
+              const xTextOffset = isExpanded ? 10 : 8; 
+
               const sx = cx + outerRadius * cos; 
               const sy = cy + outerRadius * sin;
               const mx = cx + (outerRadius + offset * 0.5) * cos; 

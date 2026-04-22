@@ -1,11 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Menu from "./components/ui/Menu";
-
-// 👈 1. IMPORTAMOS EL COMPONENTE (Ajusta la ruta si lo guardaste dentro de 'ui')
 import Pie_pagina from "./components/ui/Pie_pagina"; 
-
-import { useState } from "react";
-
+import { useState, useEffect } from "react"; 
 import { sileo, Toaster } from "sileo";
 
 import Inicio from "./pages/Inicio";
@@ -15,31 +11,33 @@ import About from "./pages/About";
 import Login from "./pages/Login";
 
 import MAT251 from "./pages/MAT251/Pantalla"
-
 import "./App.css"; 
 
-
-
 function App() {
-  const [isAuth, setIsAuth] = useState(false);
+  // 👇 1. Modificamos el estado inicial para que lea el localStorage
+  const [isAuth, setIsAuth] = useState(() => {
+    const logueado = localStorage.getItem("isAuth");
+    return logueado === "true"; 
+  });
+
+  // 👇 2. Agregamos un efecto para guardar cualquier cambio en localStorage
+  useEffect(() => {
+    localStorage.setItem("isAuth", isAuth);
+  }, [isAuth]);
 
   return (
     <Router>
       <div className="App">
-
-        {/* 👇 2. Colocamos el Toaster en la parte más alta de la app */}
         <>
           <Toaster position="bottom-right" />
         </>
         
-        {/* Menú de navegación con el botón incluido */}
         {isAuth && (
           <header className="flex justify-between items-center p-4 shadow-md">
-            <Menu /> {/* 👈 Ahora el botón está dentro del Menu */}
+            <Menu /> 
           </header>
         )}
 
-        {/* Contenido que cambia según la ruta */}
         <div className="content">
           <Routes>
             {!isAuth ? (

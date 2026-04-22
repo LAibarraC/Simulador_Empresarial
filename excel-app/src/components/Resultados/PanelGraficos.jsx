@@ -7,9 +7,43 @@ import GraficoDispersionForma from "../graficos/GraficoDispersionForma";
 import GraficoTendenciaPosicion from "../graficos/GraficoTendenciaPosicion";
 import GraficoRegresion from "../graficos/GraficoRegresion";
 import GraficoSeriesTiempo from "../graficos/GraficoSeriesTiempo";
-import GraficoIndices from "../graficos/GraficoIndices"; // 👈 IMPORTADO CORRECTAMENTE
+import GraficoIndices from "../graficos/GraficoIndices";
+
+// --- IMPORTACIONES DE DRAG AND DROP ---
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// --- NUEVA TARJETA QUE MANTIENE TU CSS INTACTO ---
+// Esto reemplaza al <div className="grafico-card"> sin agregar divs extra
+function SortableGraficoCard({ id, children, customStyle = {} }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  
+  const style = {
+    ...customStyle,
+    transform: CSS.Transform.toString(transform),
+    transition,
+    cursor: "grab"
+  };
+
+  return (
+    <div className="grafico-card" ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
 
 export default function PanelGraficos({ resultado, esIntervalo }) {
+  // Estados para el orden
+  const [ordenBivariada, setOrdenBivariada] = useState(['agrupadas', 'apiladas']);
+  const [ordenFrecuencias, setOrdenFrecuencias] = useState(['barras', 'pastel']);
+
+  // Sensor para no bloquear el botón de "Maximizar"
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    })
+  );
 
   if (!resultado) return null;
 
@@ -30,13 +64,12 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
     return <GraficoSeriesTiempo resultado={resultado} />;
   }
 
-  // 👇 =======================================================
+  // =======================================================
   // GRÁFICOS TEMA 8: NÚMEROS ÍNDICES Y DEFLACIÓN
-  // ======================================================= 👇
+  // =======================================================
   if (["indices_compuestos", "operaciones_indices", "deflacion_financiera"].includes(resultado.tipo)) {
     return <GraficoIndices resultado={resultado} />;
   }
-  // ☝️ =======================================================
 
   // =======================================================
   // GRÁFICOS TEMA 4: VARIABILIDAD Y FORMA
@@ -67,8 +100,6 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
     const graficosTema3 = resultado.graficosTema3?.graficoData;
     const indicadores = resultado.graficosTema3?.indicadores;
 
-    // MAGIA DE REUTILIZACIÓN: Formateamos los datosPuros al vuelo para que 
-    // tu componente GraficoDispersionForma crea que viene del Tema 4 y dibuje el Boxplot.
     let mockResultadoBoxplot = null;
     if (resultado.datosPuros && resultado.datosPuros.length >= 4) {
       const datos = resultado.datosPuros;
@@ -89,9 +120,8 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
       const outliers = datos.filter(v => v < LIIS || v > LSIS);
       const inliers = datos.filter(v => v >= LIIS && v <= LSIS);
       
-      // Creamos la estructura idéntica a la que espera el Boxplot
       mockResultadoBoxplot = {
-        graficos: { histograma: [], desviaciones: [] }, // No los usa el boxplot, pero evita errores
+        graficos: { histograma: [], desviaciones: [] },
         estadisticas: {
           absoluteMin: datos[0],
           absoluteMax: datos[n - 1],
@@ -115,7 +145,6 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
           <GraficoTendenciaPosicion tipo="ojiva" graficos={graficosTema3} />
         </div>
 
-        {/* Reutilizamos el Boxplot de Variabilidad */}
         {mockResultadoBoxplot && (
           <div className="grafico-card" style={{ width: "100%", height: "350px", gridColumn: "1 / -1" }}>
             <h4>Diagrama de Caja y Bigotes (Medidas de Posición)</h4>
@@ -130,51 +159,69 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
   }
 
   // =======================================================
-  // GRÁFICOS TEMA 2 Y 5: TABLAS SIMPLES, INTERVALOS, BIVARIADAS
+  // GRÁFICOS TEMA 2 Y 5: TABLAS SIMPLES, INTERVALOS, BIVARIADAS (ARRASTRABLES)
   // =======================================================
   return (
     <div className="graficos-grid">
       {esBivariada ? (
-        <>
-          <div className="grafico-card" style={{ width: "100%", height: "350px" }}>
-            <h4>Gráfico de Barras Agrupadas</h4>
-            <GraficoBivariado datos={resultado} tipo="agrupadas" />
-          </div>
-          <div className="grafico-card" style={{ width: "100%", height: "350px" }}>
-            <h4>Gráfico de Barras Apiladas (100%)</h4>
-            <GraficoBivariado datos={resultado} tipo="apiladas_100" />
-          </div>
-        </>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(e) => {
+            if (e.over && e.active.id !== e.over.id) {
+              setOrdenBivariada(items => arrayMove(items, items.indexOf(e.active.id), items.indexOf(e.over.id)));
+            }
+          }}
+        >
+          <SortableContext items={ordenBivariada} strategy={rectSortingStrategy}>
+            {ordenBivariada.map(id => (
+              id === 'agrupadas' ? (
+                <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "350px" }}>
+                  <h4>Gráfico de Barras Agrupadas</h4>
+                  <GraficoBivariado datos={resultado} tipo="agrupadas" />
+                </SortableGraficoCard>
+              ) : (
+                <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "350px" }}>
+                  <h4>Gráfico de Barras Apiladas (100%)</h4>
+                  <GraficoBivariado datos={resultado} tipo="apiladas_100" />
+                </SortableGraficoCard>
+              )
+            ))}
+          </SortableContext>
+        </DndContext>
+
       ) : Array.isArray(resultado) && esIntervalo ? (
         <div className="grafico-card" style={{ width: "100%", minHeight: "400px" }}> 
           <h3>Gráficos de Intervalos</h3>
           <GraficoIntervalos datos={resultado} />
         </div>
+
       ) : Array.isArray(resultado) ? (
-        <>
-          <div className="grafico-card" >
-            <h4
-            style={
-            {
-              fontSize: "1.1em",
-              padding: "5px",
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(e) => {
+            if (e.over && e.active.id !== e.over.id) {
+              setOrdenFrecuencias(items => arrayMove(items, items.indexOf(e.active.id), items.indexOf(e.over.id)));
             }
-            }
-            >Gráfico de Barras</h4> 
-            <GraficoEstadistico datos={resultado} tipo="barras" />
-          </div>
-          <div className="grafico-card">
-            <h4
-            style={
-            {
-              fontSize: "1.1em",
-              padding: "5px",
-            }
-            }
-            >Gráfico Circular</h4>
-            <GraficoEstadistico datos={resultado} tipo="pastel" />
-          </div>
-        </> 
+          }}
+        >
+          <SortableContext items={ordenFrecuencias} strategy={rectSortingStrategy}>
+            {ordenFrecuencias.map(id => (
+              id === 'barras' ? (
+                <SortableGraficoCard key={id} id={id}>
+                  <h4 style={{ fontSize: "1.1em", padding: "5px" }}>Gráfico de Barras</h4> 
+                  <GraficoEstadistico datos={resultado} tipo="barras" />
+                </SortableGraficoCard>
+              ) : (
+                <SortableGraficoCard key={id} id={id}>
+                  <h4 style={{ fontSize: "1.1em", padding: "5px" }}>Gráfico Circular</h4>
+                  <GraficoEstadistico datos={resultado} tipo="pastel" />
+                </SortableGraficoCard>
+              )
+            ))}
+          </SortableContext>
+        </DndContext>
       ) : null}
     </div>
   );

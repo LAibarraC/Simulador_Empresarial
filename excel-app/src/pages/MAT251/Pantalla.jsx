@@ -33,7 +33,6 @@ export default function Pantalla() {
           display: 'flex',
           gap: '10px',
           overflowX: 'auto',
-          paddingBottom: '10px',
           justifyContent: "center",
         }}>
           {nombresVentanas.map((nombre, index) => (
@@ -41,7 +40,7 @@ export default function Pantalla() {
               key={index}
               onClick={() => setPestanaActiva(index)}
               style={{
-                padding: '10px 20px',
+                padding: '9px 20px',
                 borderRadius: '5px',
                 border: 'none',
                 cursor: 'pointer',

@@ -323,7 +323,18 @@ export default function Calculos() {
                   {mostrarTabla && excelData.length > 0 && (
                     <div className=".container_dataset" style={{ marginTop: "10px" }}>
                       <p className="info_vista">Vista Previa (Doble clic para editar):</p>
-                      <DataGrid columns={rdgColumns} rows={excelData} onRowsChange={handleGridChange} className="rdg-light" style={{ blockSize: "100%", border: "1px solid var(--border-color)", height: "400px", textAlign: "center" }} />
+                      <DataGrid
+                        columns={rdgColumns}
+                        rows={excelData}
+                        onRowsChange={handleGridChange}
+                        className="rdg-light"
+                        style={{
+                          blockSize: "100%",
+                          border: "1px solid var(--border-color)",
+                          height: "350px",
+                          maxHeight: "75vh",
+                          textAlign: "center"
+                        }} />
                     </div>
                   )}
                   <button onClick={ejecutarCalculo} className="button_calcular" style={{ marginTop: "15px" }}>CALCULAR</button>
@@ -395,7 +406,12 @@ export default function Calculos() {
                 </p>
               )}
             </div>
-            <PanelGraficos resultado={resultado} esIntervalo={esIntervalo} />
+            {resultado && calculo !== "estadistica_descriptiva" &&
+              calculo !== "tendencia_central" &&
+              calculo !== "distribucion_bivariada_avanzada" &&
+              calculo !== "medidas_posicion" && (
+                <PanelGraficos resultado={resultado} esIntervalo={esIntervalo} />
+              )}
           </>
         )}
       </div>
