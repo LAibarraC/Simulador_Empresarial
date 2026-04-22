@@ -10,7 +10,7 @@ import GraficoSeriesTiempo from "../graficos/GraficoSeriesTiempo";
 import GraficoIndices from "../graficos/GraficoIndices";
 
 // --- IMPORTACIONES DE DRAG AND DROP ---
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors , TouchSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -42,7 +42,13 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
-    })
+    }),
+    useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250, // 👈 IMPORTANTE: Tienes que presionar por 250ms antes de mover
+      tolerance: 5,
+    },
+  })
   );
 
   if (!resultado) return null;
