@@ -6,7 +6,6 @@ import "react-data-grid/lib/styles.css";
 
 import Calculator from "../components/excel/Calculator";
 import ExcelContent from "../components/excel/ExcelContent";
-import TablaDinamica from "../components/excel/TablaDinamica";
 import { useCalculadoraExcel } from "../hooks/useCalculadoraExcel";
 import { useData } from "../components/excel/DataContext";
 import { api } from "../services/api";
@@ -44,7 +43,6 @@ export default function Calculos() {
   const [selectedFile, setSelectedFile] = useState("");
   const [selectedSheet, setSelectedSheet] = useState(0);
 
-  const [modoCreacion, setModoCreacion] = useState(false);
   const [mostrarTabla, _setMostrarTabla] = useState(true);
   const [mostrarCalculadora, setMostrarCalculadora] = useState(false);
   const [filtroFractil, setFiltroFractil] = useState("Cuartil");
@@ -150,7 +148,7 @@ export default function Calculos() {
         {panelAbierto && (
           <>
             <label className="etiqueta">Selecciona un archivo:</label>
-            <select value={selectedFile} onChange={(e) => { setSelectedFile(e.target.value); setModoCreacion(false); }} className="selector-archivo">
+            <select value={selectedFile} onChange={(e) => { setSelectedFile(e.target.value); }} className="selector-archivo">
               {files.map((file) => <option key={file.filename} value={file.filename}>{file.filename} ({file.author || "Desconocido"})</option>)}
             </select>
 
@@ -344,10 +342,6 @@ export default function Calculos() {
               )}
             </div>
             <br />
-            <button onClick={() => setModoCreacion(!modoCreacion)} className="button_resultados" style={{ backgroundColor: modoCreacion ? "var(--text-muted)" : "var(--accent-color)" }}>
-              {modoCreacion ? "Volver a Resultados" : "Crear Tabla de Datos"}
-            </button>
-            <br />
             <button onClick={() => setMostrarCalculadora(!mostrarCalculadora)} style={{ width: "100%", padding: "8px", background: "#6b7280" }}>
               {mostrarCalculadora ? "Ocultar Calculadora Manual" : "Mostrar Calculadora Manual"}
             </button>
@@ -358,9 +352,6 @@ export default function Calculos() {
 
       {/* ================= DERECHA: RESULTADOS ================= */}
       <div className="calculadora-resultados">
-        {modoCreacion ? (
-          <TablaDinamica onTablaCreada={() => { cargarArchivos(); setModoCreacion(false); }} />
-        ) : (
           <>
             <div className="frecuencias">
               <h3>Resultados: {calculo.replace(/_/g, " ").toUpperCase()}</h3>
@@ -413,7 +404,6 @@ export default function Calculos() {
                 <PanelGraficos resultado={resultado} esIntervalo={esIntervalo} />
               )}
           </>
-        )}
       </div>
     </div>
   );

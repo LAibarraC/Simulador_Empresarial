@@ -112,9 +112,8 @@ async def view_excel(filename: str, hoja: int = 0):
             # Eliminar filas totalmente vacías
             df = df.dropna(how="all")
             
-            # 🛠️ CORRECCIÓN CRÍTICA: Reemplazar NaN (vacíos) con None (null en JSON)
-            # Esto arregla el problema de las columnas con diferente cantidad de datos
-            df = df.where(pd.notnull(df), None)
+            # 🛠️ CORRECCIÓN CRÍTICA: Reemplazar NaN con strings vacíos para evitar errores JSON (NaN no es compatible con JSON)
+            df = df.fillna("")
 
             if df.empty:
                 return {"error": "Archivo sin datos detectables"}
@@ -202,10 +201,9 @@ async def save_table(body: dict = Body(...)):
 
         # Convertir a DataFrame
         df = pd.DataFrame(tabla)
-        # Generar nombre de archivo
-
-        df.replace("", pd.NA , inplace= True)
-        df.dropna(how="all", inplace= True)
+        
+        # La limpieza de filas completamente vacías ya se hace en el frontend.
+        # No aplicamos dropna aquí para evitar pérdida de datos si hay ceros u otros valores.
 
 
         contador = 1
@@ -398,9 +396,6 @@ async def update_excel(body: dict = Body(...)):
         file_path = os.path.join(EXCEL_FOLDER, filename)
         
         df_nuevo = pd.DataFrame(datos)
-
-        for col in df_nuevo.columns:
-            df_nuevo = df_nuevo[df_nuevo[col] != col]
 
         with pd.ExcelFile(file_path) as xls:
             nombre_hoja = xls.sheet_names[hoja_index]

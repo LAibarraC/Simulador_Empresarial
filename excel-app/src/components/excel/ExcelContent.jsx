@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { DataGrid } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 
@@ -27,9 +27,31 @@ function textEditor({ row, column, onRowChange, onClose }) {
     <input
       className="text_editor"
       autoFocus
-      value={row[column.key]}
+      value={row[column.key] ?? ''}
       onChange={(e) => onRowChange({ ...row, [column.key]: e.target.value })}
       onBlur={() => onClose(true)}
+      onKeyDown={(e) => {
+        if (['Enter', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault();
+          const teclaDestino = e.key === 'Enter' ? 'ArrowDown' : e.key;
+          onClose(true);
+          
+          setTimeout(() => {
+            const celdaViva = document.activeElement;
+            if (celdaViva && celdaViva.classList.contains('rdg-cell')) {
+              celdaViva.dispatchEvent(
+                new KeyboardEvent('keydown', { key: teclaDestino, bubbles: true })
+              );
+            }
+          }, 10);
+        } else if (e.key === 'Escape') {
+          onClose(false);
+        }
+      }}
+      style={{
+        width: '100%', height: '100%', border: 'none',
+        padding: '0 8px', outline: '2px solid #217346', boxSizing: 'border-box'
+      }}
     />
   );
 }
@@ -45,10 +67,17 @@ export default function ExcelContent({ filename, onSheetChange, mostrarTabla = t
   const [huboCambios, setHuboCambios] = useState(false);
   const [cargandoGuardado, setCargandoGuardado] = useState(false);
 
+  // Referencia para siempre tener los datos más recientes al guardar
+  const rowsRef = React.useRef(rows);
+  useEffect(() => {
+    rowsRef.current = rows;
+  }, [rows]);
+
   // 1. CARGAR HOJAS
   useEffect(() => {
     if (!filename) return;
     setSheets([]); setRows([]); setColumns([]); setSelectedSheet(0); setError("");
+    setHuboCambios(false); // Ocultar el botón al cambiar de archivo
     if (onSheetChange) onSheetChange(0);
 
     const fetchHojas = async () => {
@@ -74,6 +103,7 @@ export default function ExcelContent({ filename, onSheetChange, mostrarTabla = t
   useEffect(() => {
     if (!filename || sheets.length === 0 || !mostrarTabla) return;
     setLoading(true);
+    setHuboCambios(false); // Ocultar el botón al cambiar de hoja
 
     const fetchDatos = async () => {
       try {
@@ -82,7 +112,11 @@ export default function ExcelContent({ filename, onSheetChange, mostrarTabla = t
         if (Array.isArray(json) && json.length > 0) {
           const rawKeys = Object.keys(json[0]);
 
-          const cols = rawKeys.map((key, index) => ({
+          // Crear 10 columnas adicionales vacías
+          const extraKeys = Array.from({ length: 10 }).map((_, i) => `__extra_col_${i}`);
+          const allKeys = [...rawKeys, ...extraKeys];
+
+          const cols = allKeys.map((key, index) => ({
             key: key,
             name: getExcelColumnName(index),
             resizable: true,
@@ -90,15 +124,41 @@ export default function ExcelContent({ filename, onSheetChange, mostrarTabla = t
             width: 150,
             minWidth: 80,
             renderEditCell: textEditor,
+            renderHeaderCell: () => (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                {getExcelColumnName(index)}
+              </div>
+            )
           }));
 
           const headerRow = {};
-          rawKeys.forEach(key => {
-            headerRow[key] = key.startsWith("Unnamed:") ? "" : key;
+          allKeys.forEach(key => {
+            if (rawKeys.includes(key)) {
+              headerRow[key] = key.startsWith("Unnamed:") ? "" : key;
+            } else {
+              headerRow[key] = ""; // Columnas nuevas sin nombre
+            }
           });
 
           setColumns(cols);
-          setRows([headerRow, ...json]);
+          
+          // Generar 50 filas vacías para que el usuario pueda agregar más datos
+          const emptyRows = Array.from({ length: 50 }).map(() => {
+            const emptyRow = {};
+            allKeys.forEach(key => { emptyRow[key] = ""; });
+            return emptyRow;
+          });
+
+          // Rellenar las filas existentes con las nuevas columnas vacías
+          const jsonConExtraCols = json.map(row => {
+            const newRow = { ...row };
+            extraKeys.forEach(k => { newRow[k] = ""; });
+            return newRow;
+          });
+
+          // Asignamos un ID único a cada fila (incluidas las vacías)
+          const dataWithIds = [headerRow, ...jsonConExtraCols, ...emptyRows].map((r, i) => ({ ...r, _id: i }));
+          setRows(dataWithIds);
         } else {
           setRows([]);
           setColumns([]);
@@ -135,7 +195,53 @@ export default function ExcelContent({ filename, onSheetChange, mostrarTabla = t
   const guardarExcel = async () => {
     setCargandoGuardado(true);
     try {
-      await api.actualizarExcel(filename, selectedSheet, rows);
+      if (rowsRef.current.length === 0) return;
+
+      // 1. Obtener la primera fila, que contiene los verdaderos títulos de las columnas (editables por el usuario)
+      const editedHeader = rowsRef.current[0];
+
+      // Identificar cuáles de las columnas extra realmente se usaron (si tienen datos o les pusieron título)
+      const extraKeys = Object.keys(editedHeader).filter(k => k.startsWith('__extra_col_'));
+      const columnasExtraUsadas = new Set();
+
+      rowsRef.current.forEach(r => {
+        extraKeys.forEach(k => {
+          if (r[k] !== "" && r[k] !== null && r[k] !== undefined && r[k].trim?.() !== "") {
+            columnasExtraUsadas.add(k);
+          }
+        });
+      });
+
+      // 2. Reconstruir los datos usando los nuevos títulos de columnas (ignorando filas 100% vacías)
+      const datosParaGuardar = rowsRef.current.slice(1).reduce((acc, r) => {
+        // Verificar si la fila está completamente vacía (solo espacios en blanco o nada)
+        const isRowEmpty = Object.keys(r).every(key => 
+          key === '_id' || r[key] === "" || r[key] === null || r[key] === undefined || (typeof r[key] === 'string' && r[key].trim() === "")
+        );
+
+        if (!isRowEmpty) {
+          const newRecord = {};
+          Object.keys(r).forEach(key => {
+            if (key !== '_id') {
+              if (key.startsWith('__extra_col_') && !columnasExtraUsadas.has(key)) {
+                return; // Ignorar columnas extra que nunca se usaron
+              }
+
+              let newColName = editedHeader[key] !== undefined ? editedHeader[key] : key;
+              
+              if (key.startsWith('__extra_col_') && newColName === "") {
+                newColName = `Nueva_Columna_${key.split('_').pop()}`; // Título genérico si olvidaron ponerle nombre
+              }
+
+              newRecord[newColName] = r[key];
+            }
+          });
+          acc.push(newRecord);
+        }
+        return acc;
+      }, []);
+
+      await api.actualizarExcel(filename, selectedSheet, datosParaGuardar);
       setHuboCambios(false);
       alerta.success("cambios guardados");
     } catch (err) {
@@ -143,7 +249,7 @@ export default function ExcelContent({ filename, onSheetChange, mostrarTabla = t
     } finally {
       setCargandoGuardado(false);
     }
-  };
+  }; 
 
   return (
     <div className="container_content" style={{
@@ -207,6 +313,7 @@ export default function ExcelContent({ filename, onSheetChange, mostrarTabla = t
               columns={columns}
               rows={rows}
               onRowsChange={handleRowsChange}
+              rowKeyGetter={(row) => row._id}
               className="rdg-light personalizado"
             />
           </div>

@@ -14,14 +14,15 @@
 }
 
 .container_modal {
-    background-Color: #ffffff;
+    background-Color: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
     border-Radius: 12px;
     width: 100%;
     max-Width: 500px;
     max-Height: 90vh;
     display: flex;
     flex-Direction: column;
-    box-Shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-Shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
     animation: fadeInUp 0.2s ease-out;
     text-Align: center;
 }
@@ -31,18 +32,21 @@
     justify-Content: space-between;
     align-Items: center;
     padding: 10px 20px;
-    border-Bottom: 1px solid #e2e8f0;
-    background-Color: #f8fafc;
+    background-Color: var(--bg-input, #f8fafc);
     border-Top-Left-Radius: 12px;
     border-Top-Right-Radius: 12px;
     text-Align: center;
+    border-bottom: none !important;
 }
 
 .modal_header h3{
      margin: auto; 
-     color: #1e293b; 
+     color: var(--text-main, #1e293b); 
      font-Size: 1rem; 
      text-Align: center;
+     border-bottom: none !important;
+     text-decoration: none !important;
+     box-shadow: none !important;
 }
 
 .modal_button {

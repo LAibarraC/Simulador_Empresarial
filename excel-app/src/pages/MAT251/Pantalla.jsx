@@ -22,7 +22,8 @@ export default function Pantalla() {
   ];*/
 
   const nombresVentanas = [
-    "Gestión de Datos"
+    "Gestión de Datos",
+    "Tema 1"
   ];
   return (
     <DataProvider>

@@ -21,7 +21,7 @@ export default function GraficoRegresion({ resultado }) {
   const minX = Math.min(...xVals);
   const maxX = Math.max(...xVals);
   
-  const datosCurvas = [];
+  const datosCurvas = []; 
   const pasos = 100;
   const pasoX = (maxX - minX) / pasos;
   const inicioX = minX <= 0 ? 0.001 : minX;

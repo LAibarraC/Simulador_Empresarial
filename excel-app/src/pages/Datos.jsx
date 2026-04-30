@@ -25,6 +25,17 @@ const SimuladorMAT251 = () => {
     } = useData();
 
     const [selection, setSelection] = useState({ start: null, end: null, isDragging: false });
+    const selectionRef = useRef(selection);
+    const variablesRef = useRef(variables);
+
+    useEffect(() => {
+        selectionRef.current = selection;
+    }, [selection]);
+
+    useEffect(() => {
+        variablesRef.current = variables;
+    }, [variables]);
+
     const [isDraggingFile, setIsDraggingFile] = useState(false);
 
 
@@ -285,29 +296,30 @@ const SimuladorMAT251 = () => {
         const keys = Object.keys(rowData[0]);
         const rowNumberCol = {
             headerName: '', valueGetter: "node.rowIndex + 1", width: 45, pinned: 'left',
-            cellStyle: { backgroundColor: '#f8fafc', fontWeight: 'bold', textAlign: 'center', color: '#64748b', fontSize: '11px' }
+            cellStyle: { backgroundColor: 'var(--bg-input, #f8fafc)', fontWeight: 'bold', textAlign: 'center', color: 'var(--text-muted, #64748b)', fontSize: '11px' }
         };
 
         const dataCols = keys.map(key => ({
             headerName: key, field: key, width: 120, resizable: true,
             cellClassRules: {
                 'celda-azul-seleccion': params => {
-                    if (!selection.start || !selection.end) return false;
+                    const sel = selectionRef.current;
+                    if (!sel || !sel.start || !sel.end) return false;
                     const r = params.node.rowIndex, c = keyToNum(params.column.colId);
-                    const rMin = Math.min(selection.start.row, selection.end.row), rMax = Math.max(selection.start.row, selection.end.row);
-                    const cMin = Math.min(selection.start.col, selection.end.col), cMax = Math.max(selection.start.col, selection.end.col);
+                    const rMin = Math.min(sel.start.row, sel.end.row), rMax = Math.max(sel.start.row, sel.end.row);
+                    const cMin = Math.min(sel.start.col, sel.end.col), cMax = Math.max(sel.start.col, sel.end.col);
                     return r >= rMin && r <= rMax && c >= cMin && c <= cMax;
                 }
             },
             cellStyle: params => {
+                const vars = variablesRef.current || [];
                 const r = params.node.rowIndex, c = keyToNum(params.column.colId);
-                const v = variables.find(vItem => vItem.sheet === currentSheet && vItem.coords && r >= vItem.coords.rMin && r <= vItem.coords.rMax && c >= vItem.coords.cMin && c <= vItem.coords.cMax);
+                const v = vars.find(vItem => vItem.sheet === currentSheet && vItem.coords && r >= vItem.coords.rMin && r <= vItem.coords.rMax && c >= vItem.coords.cMin && c <= vItem.coords.cMax);
                 return v ? { backgroundColor: v.color, fontWeight: 'bold', fontSize: '10px' } : { fontSize: '11px' };
             }
         }));
         return [rowNumberCol, ...dataCols];
-    }, [rowData, variables, currentSheet, selection]);
-    console.log("ESTADO DE VARIABLES:", variables);
+    }, [rowData, currentSheet]); // Se removió 'selection' y 'variables' para evitar re-renderizados completos de columnas
 
     return (
         <AgGridProvider modules={[AllCommunityModule]}>

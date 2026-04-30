@@ -1,7 +1,9 @@
-//const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "http://127.0.0.1:8000";
 
 //Base url de Render
-const BASE_URL = "https://api-admin-shc170.onrender.com";
+//const BASE_URL = "https://api-admin-shc170.onrender.com";
+//uvicorn main:app --reload
+
 
 export const api = {
 
@@ -9,7 +11,10 @@ export const api = {
     obtenerDatosHoja: async (filename, hojaIndex) => {
         try {
             // Usamos encodeURIComponent por si el archivo tiene espacios en el nombre
-            const res = await fetch(`${BASE_URL}/view/${encodeURIComponent(filename)}?hoja=${hojaIndex}`);
+            // Añadimos cache: 'no-store' para que siempre traiga los datos frescos del servidor
+            const res = await fetch(`${BASE_URL}/view/${encodeURIComponent(filename)}?hoja=${hojaIndex}`, {
+                cache: 'no-store'
+            });
             if (!res.ok) throw new Error("Error al leer la hoja del servidor");
             return await res.json();
         } catch (error) {
@@ -21,7 +26,9 @@ export const api = {
     // --- Función para obtener las hojas de un Excel ---
     obtenerHojas: async (filename) => {
         try {
-            const res = await fetch(`${BASE_URL}/sheets/${encodeURIComponent(filename)}`);
+            const res = await fetch(`${BASE_URL}/sheets/${encodeURIComponent(filename)}`, {
+                cache: 'no-store'
+            });
             if (!res.ok) throw new Error("Error al obtener las hojas");
             return await res.json();
         } catch (error) {
@@ -125,7 +132,9 @@ export const api = {
     // --- OBTENER LISTA DE ARCHIVOS ---
     obtenerArchivos: async () => {
         try {
-            const res = await fetch(`${BASE_URL}/files`);
+            const res = await fetch(`${BASE_URL}/files`, {
+                cache: 'no-store'
+            });
             if (!res.ok) throw new Error("Error al obtener la lista de archivos");
             return await res.json();
         } catch (error) {
@@ -141,7 +150,7 @@ export const api = {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     filename: filename,
-                    hojaindex:hojaindex,
+                    hoja_index: hojaindex,
                     datos: datos
                 }),
             });
@@ -157,7 +166,9 @@ export const api = {
 
     descargarArchivoExcel: async (filename) => {
         try {
-            const res = await fetch(`${BASE_URL}/files/${encodeURIComponent(filename)}`);
+            const res = await fetch(`${BASE_URL}/files/${encodeURIComponent(filename)}`, {
+                cache: 'no-store'
+            });
             if (!res.ok) throw new Error("No se pudo descargar el archivo del servidor.");
             // Retornamos directamente el ArrayBuffer
             return await res.arrayBuffer();

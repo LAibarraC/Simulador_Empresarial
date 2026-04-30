@@ -9,16 +9,14 @@ import GraficoRegresion from "../graficos/GraficoRegresion";
 import GraficoSeriesTiempo from "../graficos/GraficoSeriesTiempo";
 import GraficoIndices from "../graficos/GraficoIndices";
 
-// --- IMPORTACIONES DE DRAG AND DROP ---
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors , TouchSensor } from '@dnd-kit/core';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, TouchSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// --- NUEVA TARJETA QUE MANTIENE TU CSS INTACTO ---
-// Esto reemplaza al <div className="grafico-card"> sin agregar divs extra
+
 function SortableGraficoCard({ id, children, customStyle = {} }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  
+
   const style = {
     ...customStyle,
     transform: CSS.Transform.toString(transform),
@@ -35,6 +33,7 @@ function SortableGraficoCard({ id, children, customStyle = {} }) {
 
 export default function PanelGraficos({ resultado, esIntervalo }) {
   // Estados para el orden
+const [ordenVariabilidad, setOrdenVariabilidad] = useState(['boxplot', 'campana', 'desviaciones']);
   const [ordenBivariada, setOrdenBivariada] = useState(['agrupadas', 'apiladas']);
   const [ordenFrecuencias, setOrdenFrecuencias] = useState(['barras', 'pastel']);
 
@@ -44,16 +43,16 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
       activationConstraint: { distance: 5 },
     }),
     useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 250, // 👈 IMPORTANTE: Tienes que presionar por 250ms antes de mover
-      tolerance: 5,
-    },
-  })
+      activationConstraint: {
+        delay: 250, // 👈 IMPORTANTE: Tienes que presionar por 250ms antes de mover
+        tolerance: 5,
+      },
+    })
   );
 
   if (!resultado) return null;
 
-  const esBivariada = !Array.isArray(resultado) && 
+  const esBivariada = !Array.isArray(resultado) &&
     (resultado.tipo === "bivariada" || resultado.tipo === "bivariada_avanzada");
 
   // =======================================================
@@ -80,22 +79,51 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
   // =======================================================
   // GRÁFICOS TEMA 4: VARIABILIDAD Y FORMA
   // =======================================================
-  if (resultado.tipo === "variabilidad_y_forma") {
+if (resultado.tipo === "variabilidad_y_forma") {
     return (
-      <div className="graficos-grid">
-        <div className="grafico-card" style={{ width: "100%", height: "350px" }}>
-          <h4>Diagrama de Caja y Bigotes (Boxplot)</h4>
-          <GraficoDispersionForma tipo="boxplot" resultado={resultado} />
-        </div>
-        <div className="grafico-card" style={{ width: "100%", height: "350px" }}>
-          <h4>Histograma y Curva de Densidad Normal</h4>
-          <GraficoDispersionForma tipo="campana" resultado={resultado} />
-        </div>
-        <div className="grafico-card" style={{ width: "100%", height: "350px", gridColumn: "1 / -1" }}>
-          <h4>Gráfico de Desviaciones (x - μ)</h4>
-          <GraficoDispersionForma tipo="desviaciones" resultado={resultado} />
-        </div>
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => {
+          if (e.over && e.active.id !== e.over.id) {
+            setOrdenVariabilidad((items) => 
+              arrayMove(items, items.indexOf(e.active.id), items.indexOf(e.over.id))
+            );
+          }
+        }}
+      >
+        <SortableContext items={ordenVariabilidad} strategy={rectSortingStrategy}>
+          <div className="graficos-grid">
+            {ordenVariabilidad.map((id) => {
+              if (id === 'boxplot') {
+                return (
+                  <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "400px" }}>
+                    <h4 style={{ textAlign: "center", padding: '5px' }}>Diagrama de Caja y Bigotes (Boxplot)</h4>
+                    <GraficoDispersionForma tipo="boxplot" resultado={resultado} />
+                  </SortableGraficoCard>
+                );
+              }
+              if (id === 'campana') {
+                return (
+                  <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "400px" }}>
+                    <h4 style={{ textAlign: "center", padding: '5px' }}>Histograma y Curva de Densidad Normal</h4>
+                    <GraficoDispersionForma tipo="campana" resultado={resultado} />
+                  </SortableGraficoCard>
+                );
+              }
+              if (id === 'desviaciones') {
+                return (
+                  <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "400px", gridColumn: "1 / -1" }}>
+                    <h4 style={{ textAlign: "center", padding: '5px' }}>Gráfico de Desviaciones (x - μ)</h4>
+                    <GraficoDispersionForma tipo="desviaciones" resultado={resultado} />
+                  </SortableGraficoCard>
+                );
+              }
+              return null;
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
     );
   }
 
@@ -110,22 +138,22 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
     if (resultado.datosPuros && resultado.datosPuros.length >= 4) {
       const datos = resultado.datosPuros;
       const n = datos.length;
-      
+
       const getQ = (p) => {
         const pos = (n - 1) * p; const base = Math.floor(pos); const rest = pos - base;
         return datos[base + 1] !== undefined ? datos[base] + rest * (datos[base + 1] - datos[base]) : datos[base];
       };
-      
+
       const q1 = getQ(0.25);
       const mediana = getQ(0.50);
       const q3 = getQ(0.75);
       const RI = q3 - q1;
       const LIIS = q1 - 1.5 * RI;
       const LSIS = q3 + 1.5 * RI;
-      
+
       const outliers = datos.filter(v => v < LIIS || v > LSIS);
       const inliers = datos.filter(v => v >= LIIS && v <= LSIS);
-      
+
       mockResultadoBoxplot = {
         graficos: { histograma: [], desviaciones: [] },
         estadisticas: {
@@ -141,20 +169,33 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
 
     return (
       <div className="graficos-grid">
-        <div className="grafico-card" style={{ width: "100%", height: "350px" }}>
-          <h4>Histograma de Tendencia Central</h4>
+        <div className="grafico-card" style={{ width: "100%", height: "400px" }}>
+          <h4 style={{
+            textAlign: "center",
+            padding: '5px'
+          }}>Histograma de Tendencia Central</h4>
           <GraficoTendenciaPosicion tipo="histograma_tendencia" graficos={graficosTema3} indicadores={indicadores} />
         </div>
-        
-        <div className="grafico-card" style={{ width: "100%", height: "350px" }}>
-          <h4>Gráfico de Ojiva (Frecuencias Acumuladas)</h4>
+
+        <div className="grafico-card" style={{ width: "100%", height: "400px" }}>
+          <h4
+            style={{
+              textAlign: "center",
+              padding: '5px'
+            }}
+          >Gráfico de Ojiva (Frecuencias Acumuladas)</h4>
           <GraficoTendenciaPosicion tipo="ojiva" graficos={graficosTema3} />
         </div>
 
         {mockResultadoBoxplot && (
-          <div className="grafico-card" style={{ width: "100%", height: "350px", gridColumn: "1 / -1" }}>
-            <h4>Diagrama de Caja y Bigotes (Medidas de Posición)</h4>
-            <p style={{textAlign: "center", color: "var(--text-muted)", fontSize: "0.9em", margin: "0 0 10px 0"}}>
+          <div className="grafico-card" style={{ width: "100%", height: "420px", gridColumn: "1 / -1" }}>
+            <h4
+              style={{
+                textAlign: "center",
+                padding: '5px'
+              }}
+            >Diagrama de Caja y Bigotes (Medidas de Posición)</h4>
+            <p style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "0.9em", margin: "0 0 10px 0" }}>
               Visualización de los Cuartiles y Valores Atípicos (Método Tukey)
             </p>
             <GraficoDispersionForma tipo="boxplot" resultado={mockResultadoBoxplot} />
@@ -182,13 +223,13 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
           <SortableContext items={ordenBivariada} strategy={rectSortingStrategy}>
             {ordenBivariada.map(id => (
               id === 'agrupadas' ? (
-                <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "350px" }}>
-                  <h4>Gráfico de Barras Agrupadas</h4>
+                <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "400px" }}>
+                  <h4 style={{textAlign:'center', padding:'5px'}}>Gráfico de Barras Agrupadas</h4>
                   <GraficoBivariado datos={resultado} tipo="agrupadas" />
                 </SortableGraficoCard>
               ) : (
-                <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "350px" }}>
-                  <h4>Gráfico de Barras Apiladas (100%)</h4>
+                <SortableGraficoCard key={id} id={id} customStyle={{ width: "100%", height: "400px" }}>
+                  <h4 style={{textAlign:'center', padding:'5px'}}>Gráfico de Barras Apiladas (100%)</h4>
                   <GraficoBivariado datos={resultado} tipo="apiladas_100" />
                 </SortableGraficoCard>
               )
@@ -197,7 +238,7 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
         </DndContext>
 
       ) : Array.isArray(resultado) && esIntervalo ? (
-        <div className="grafico-card" style={{ width: "100%", minHeight: "400px" }}> 
+        <div className="grafico-card" style={{ width: "100%", minHeight: "400px" }}>
           <h3>Gráficos de Intervalos</h3>
           <GraficoIntervalos datos={resultado} />
         </div>
@@ -216,7 +257,7 @@ export default function PanelGraficos({ resultado, esIntervalo }) {
             {ordenFrecuencias.map(id => (
               id === 'barras' ? (
                 <SortableGraficoCard key={id} id={id}>
-                  <h4 style={{ fontSize: "1.1em", padding: "5px" }}>Gráfico de Barras</h4> 
+                  <h4 style={{ fontSize: "1.1em", padding: "5px" }}>Gráfico de Barras</h4>
                   <GraficoEstadistico datos={resultado} tipo="barras" />
                 </SortableGraficoCard>
               ) : (

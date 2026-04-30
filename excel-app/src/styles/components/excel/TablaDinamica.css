@@ -5,6 +5,7 @@
     outline: none;
     background: transparent;
     color: inherit;
+    text-align: center;
 }
 
 .columnas_editor {
@@ -12,7 +13,7 @@
     border: none;
     background: transparent;
     color: inherit;
-    font-Weight: bold;
+    font-Weight: bold; 
     outline: none;
     text-Align: center;
 }
@@ -47,6 +48,19 @@
 
 .container_input_datos input {
     flex: 1;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color, #cbd5e0);
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: var(--bg-input, #ffffff);
+    color: var(--text-main, #2d3748);
+    transition: all 0.2s ease;
+}
+
+.container_input_datos input:focus {
+    outline: none;
+    border-color: var(--accent-color, #3182ce);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
 }
 
 .container_input_datos span {
@@ -62,19 +76,70 @@
 }
 
 .button_fila_columna {
-    background-Color: var(--bg-input);
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
+    background-Color: var(--bg-input, #ffffff);
+    color: var(--text-main, #2d3748);
+    border: 1px solid var(--border-color, #cbd5e0);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.button_fila_columna:hover {
+    background-color: color-mix(in srgb, var(--accent-color, #3182ce) 10%, transparent);
+    border-color: var(--accent-color, #3182ce);
+    color: var(--accent-color, #3182ce);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.1);
 }
 
 .button_eliminar_fila {
-    background-Color: var(--bg-input);
-    color: red;
-    border: 1px solid var(--border-color);
+    background-Color: var(--bg-input, #ffffff);
+    color: var(--error-color, #e53e3e);
+    border: 1px solid var(--border-color, #cbd5e0);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.button_eliminar_fila:hover {
+    background-color: color-mix(in srgb, var(--error-color, #e53e3e) 10%, transparent);
+    border-color: var(--error-color, #e53e3e);
+    color: var(--error-color, #e53e3e);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(229, 62, 62, 0.1);
 }
 
 .button_guardar {
-    background-Color: var(--accent-color);
+    background-Color: var(--accent-color, #3182ce);
+    color: white;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
+}
+
+.button_guardar:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(49, 130, 206, 0.3);
+}
+
+.button_guardar:disabled {
+    background-color: var(--text-muted, #a0aec0);
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 .mensaje {
@@ -87,8 +152,205 @@
     border: 1px solid var(--border-color);
 }
 
+.container_grilla .rdg-cell {
+    text-align: center;
+}
+
 .informacion_grilla {
-    margin-Top: 10px;
-    font-Size: 0.8em;
+    margin-top: 10px;
+    font-size: 0.8em;
     color: var(--text-muted);
+}
+
+/* Estilos para el Generador de Matriz */
+.generador_matriz_container {
+    background-color: transparent;
+    border: 1px solid color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.generador_matriz_inputs {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.input_group_matriz {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input_group_matriz label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-main, #4a5568);
+    letter-spacing: 0.5px;
+}
+
+.input_matriz {
+    width: 110px;
+    padding: 5px 20px;
+    border: 1px solid var(--border-color, #cbd5e0);
+    border-radius: 5px;
+    background-color: var(--bg-card, #ffffff);
+    color: var(--text-main, #2d3748);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.input_matriz:focus {
+    outline: none;
+    border-color: var(--accent-color, #3182ce);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+}
+
+.button_generar_matriz {
+    background-color: var(--accent-color, #3182ce);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 25px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 22px; 
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
+}
+
+
+/* Modal de Configuración de Columnas */
+.modal_overlay_col {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal_content_col {
+    background: var(--bg-card, #ffffff);
+    padding: 24px;
+    border-radius: 8px;
+    width: 320px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal_content_col h4 {
+    margin: 0;
+    color: var(--primary-color, #2d3748);
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.form_group_col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form_group_col label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main, #4a5568);
+}
+
+.form_group_col input, .form_group_col select {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color, #cbd5e0);
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.button_guardar_col {
+    background-color: var(--accent-color, #3182ce);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.button_guardar_col:hover {
+    filter: brightness(1.1);
+}
+
+.button_eliminar_col_esp {
+    background-color: var(--error-color, #e53e3e);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    flex: 1;
+}
+
+.button_eliminar_col_esp:hover {
+    filter: brightness(1.1);
+}
+
+.btn_config_columna {
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.btn_config_columna:hover {
+    color: var(--accent-color, #3182ce) !important;
+    transform: scale(1.1);
+}
+
+/* Estilos para el selector de categoría en las celdas */
+.select_categoria {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    text-align: center;
+    cursor: pointer;
+    color: inherit;
+    font-family: inherit;
+}
+
+.select_categoria option {
+    background-color: var(--bg-card, #ffffff);
+    color: var(--text-main, #333333);
+    text-align: center;
+}
+
+/* Validación de Celdas */
+.celda_error {
+    background-color: rgba(229, 62, 62, 0.9) !important; /* Rojo intenso */
+    color: white !important;
+    font-weight: bold;
+}
+
+/* Ocultar flechas en inputs numéricos (spin buttons) */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
 }
