@@ -334,39 +334,6 @@
   }
 }
 
-@media (max-width: 500px) {
-
-  /* En celulares muy angostos, que vuelvan a ser 1 sola columna */
-  .variable-card {
-    flex: 0.5 0.5 60%;
-  }
-
-  .bloque-variables {
-    max-height: 300px !important;
-    /* Más pequeño aún para dejar ver el Excel abajo */
-  }
-
-  .contenedor-tarjetas {
-    justify-content: center;
-  }
-
-    .upload-container {
-    flex-direction: column; /* Se ponen uno debajo del otro */
-  }
-
-  .column-divider {
-    display: none; /* Ocultamos la línea vertical */
-    height: 1px;
-    width: 100%;
-    margin: 5px 0;
-    background-color: var(--border-color);
-  }
-
-  .upload-column {
-    width: 100%;
-    box-sizing: border-box;
-  }
-}
 
 
 
@@ -469,4 +436,35 @@
     margin: 10px 0;
     flex-shrink: 0;
     display: block;
+}
+
+@media (max-width: 768px) {
+
+  /* En celulares y tablets, que vuelvan a ser 1 sola columna */
+  .variable-card {
+    flex: 0.5 0.5 60%;
+  }
+
+  .bloque-variables {
+    max-height: 300px !important;
+    /* Más pequeño aún para dejar ver el Excel abajo */
+  }
+
+  .contenedor-tarjetas {
+    justify-content: center;
+  }
+
+  .upload-container {
+    flex-direction: column; /* Se ponen uno debajo del otro */
+    gap: 15px; /* Damos un poco de espacio extra */
+  }
+
+  .column-divider {
+    display: none; /* Ocultamos la línea vertical */
+  }
+
+  .upload-column {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }

@@ -20,7 +20,7 @@ export default function Calculadora() {
                     <button
                         className={`tab-btn ${pestanaActiva === "crear_tabla" ? "active" : ""}`}
                         onClick={() => setPestanaActiva("crear_tabla")}
-                    > Crear Tabla de Datos </button>
+                    > Crear Tabla </button>
                     <button
                         className={`tab-btn ${pestanaActiva === "datos" ? "active" : ""}`}
                         onClick={() => setPestanaActiva("datos")}
@@ -29,7 +29,7 @@ export default function Calculadora() {
                     <button
                         className={`tab-btn ${pestanaActiva === "calculos" ? "active" : ""}`}
                         onClick={() => setPestanaActiva("calculos")}
-                    > Procesamiento y Cálculos </button>
+                    > Cálculos </button>
                 </div>
 
                 <div className="ventana-contenido-principal">

@@ -129,31 +129,58 @@ html.dark .pie-logo-siglos {
 
 @media (max-width: 768px) {
   .pie-top {
-    flex-direction: column; /* Apila los logos uno sobre otro */
-    text-align: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas para los logos */
+    align-items: center;
+    justify-items: center;
+    gap: 10px; 
+    padding: 20px 5%; 
   }
 
-  /* Forzamos a que las columnas no ocupen espacio extra */
-  .pie-col-izq, .pie-col-centro, .pie-col-der {
-    flex: none; 
+  /* Reducir el tamaño de los logos en celulares para que quepan lado a lado */
+  .pie-logo-usfx {
     width: 100%;
-    display: flex;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
+    max-width: 130px;
   }
-  .pie-divisor {
-    display: none; /* Quitamos la línea vertical en móviles */
+
+  .pie-logo-siglos {
+    width: 100%;
+    max-width: 100px;
   }
 
   .pie-col-izq {
-    flex: none;
     width: 100%;
+    display: flex;
+    justify-content: center; /* Centrar en su mitad para dar más espacio */
+    margin: 0;
+    padding: 0;
+  }
+
+  .pie-col-centro {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Centrar en su mitad para dar más espacio */
+    margin: 0;
+    padding: 0;
+  }
+
+  .pie-col-der {
+    grid-column: span 2; /* Las vistas ocupan toda la fila de abajo */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    padding: 0;
+  }
+  
+  .pie-divisor {
+    display: none; /* Quitamos la línea vertical en móviles */
   }
 
   .pie-bottom {
     flex-direction: column-reverse; /* Redes sociales arriba, texto abajo */
     text-align: center;
+    gap: 15px; /* Darle espacio entre redes sociales y texto */
   }
 
   .pie-copy {

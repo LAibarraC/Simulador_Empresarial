@@ -354,3 +354,47 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
     -moz-appearance: textfield; /* Firefox */
 }
+
+/* Responsividad para móviles */
+@media (max-width: 600px) {
+    .generador_matriz_inputs {
+        justify-content: center;
+    }
+    
+    .button_generar_matriz {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    /* Mejora de la barra de herramientas para móviles */
+    .container_herramientas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    /* El tercer botón (Agregar Variable) toma el ancho completo */
+    .container_herramientas button:nth-child(3) {
+        grid-column: span 2;
+    }
+
+    /* Las estadísticas (Variables: X, Observaciones: Y) se centran abajo */
+    .container_herramientas > div:nth-child(4) {
+        grid-column: span 2;
+        justify-content: center;
+        margin-left: 0 !important;
+        margin-top: 5px;
+    }
+
+    /* Ocultar el espaciador vacío */
+    .container_herramientas > div:nth-child(5) {
+        display: none;
+    }
+
+    /* El botón Guardar Tabla toma el ancho completo y se centra */
+    .container_herramientas .button_guardar {
+        grid-column: span 2;
+        width: 100%;
+        margin-top: 5px;
+    }
+}
