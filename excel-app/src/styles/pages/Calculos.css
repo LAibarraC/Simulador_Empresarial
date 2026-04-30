@@ -50,6 +50,17 @@
   left: 30px;
 }
 
+/* En mobile: el ícono apunta hacia abajo/arriba (layout vertical) */
+@media (max-width: 900px) {
+  .icono-toggle.abierto {
+    transform: rotate(-90deg) !important;
+    margin: 0 !important;
+  }
+  .icono-toggle.cerrado {
+    transform: rotate(90deg) !important;
+    margin: 0 !important;
+  }
+}
 
 /* ========================================= */
 /* ANIMACIÓN DEL ICONO (+ a -)               */
@@ -311,4 +322,35 @@
   padding-Bottom: 5px;
 }
 
+/* ========================================= */
+/* RESPONSIVIDAD PARA CELULARES              */
+/* ========================================= */
+@media (max-width: 768px) {
 
+  /* Reducir el tamaño de las tablas de resultados para que no desborden en móviles */
+  .tabla-academica {
+    font-size: 0.85em;
+  }
+
+  .tabla-academica th,
+  .tabla-academica td {
+    padding: 4px 2px;
+    font-size: 0.85em;
+    /* Forzamos reducción en celdas por si heredan otro tamaño */
+  }
+
+  /* Si la tabla tiene fórmulas matemáticas complejas, esto previene que se rompan */
+  .container_tablas_academica {
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .frecuencias {
+    padding: 10px;
+    /* Reducimos el margen interno del contenedor en celulares */
+  }
+
+  .frecuencias h3 {
+    font-size: 1.1rem;
+  }
+}

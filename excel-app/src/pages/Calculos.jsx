@@ -136,7 +136,21 @@ export default function Calculos() {
   return (
     <div className={`calculadora-layout ${panelAbierto ? "" : "colapsado"}`} style={{ position: "relative" }}>
       <button onClick={() => setPanelAbierto(!panelAbierto)} className={`boton-toggle-medio ${panelAbierto ? "abierto" : "cerrado"}`} title={panelAbierto ? "Ocultar panel" : "Mostrar panel"}>
-        <span className="icono-animado"></span>
+        <span className={`icono-toggle ${panelAbierto ? 'abierto' : 'cerrado'}`} style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            fontSize: '14px',
+            color: '#ffffff',
+            transform: panelAbierto ? 'scaleX(1)' : 'scaleX(-1)',
+            transition: 'transform 0.3s ease',
+            lineHeight: 0,
+            marginTop: '-2px',
+            marginLeft: '-1px'
+        }}>
+            ❮
+        </span>
       </button>
 
       {/* ================= IZQUIERDA: CONTROLES ================= */}
