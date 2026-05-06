@@ -67,3 +67,52 @@
   font-size: 0.85rem;
   text-align: center;
 }
+
+/* ===== BARRA DE NAVEGACIÓN MAT-251 (igual a Calculadora) ===== */
+.mat251-contenedor {
+  margin-top: 5px;
+  min-height: 100vh;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+}
+
+.mat251-navegacion {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+/* Hereda el fondo azul (var(--primary-color)) y texto blanco del global button{} */
+.mat251-tab-btn {
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  min-width: 200px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.mat251-tab-btn.active {
+  background-color: var(--accent-color);
+  color: white;
+  border-bottom: none;
+}
+
+@media (max-width: 600px) {
+  .mat251-navegacion {
+    flex-direction: row;
+    width: 100%;
+    padding: 5px;
+  }
+
+  .mat251-tab-btn {
+    min-width: 0;
+    flex: 1;
+    font-size: 0.75rem;
+    padding: 8px 5px;
+    white-space: normal;
+    text-align: center;
+  }
+}

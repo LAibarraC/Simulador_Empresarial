@@ -50,22 +50,16 @@
   left: 30px;
 }
 
-/* En mobile: el ícono apunta hacia abajo/arriba (layout vertical) */
 @media (max-width: 900px) {
   .icono-toggle.abierto {
     transform: rotate(-90deg) !important;
     margin: 0 !important;
   }
-
   .icono-toggle.cerrado {
     transform: rotate(90deg) !important;
     margin: 0 !important;
   }
 }
-
-/* ========================================= */
-/* ANIMACIÓN DEL ICONO (+ a -)               */
-/* ========================================= */
 
 .icono-animado {
   position: relative;
@@ -124,75 +118,75 @@
 }
 
 .selector-archivo {
-  margin-Bottom: 15px;
+  margin-bottom: 15px;
   width: 100%;
 }
 
 .panel-controles-excel {
-  margin-Top: 20px;
+  margin-top: 20px;
   padding: 15px;
   border: 1px solid var(--border-color);
-  border-Radius: 8px;
+  border-radius: 8px;
   background: var(--bg-card);
 }
 
 .panel-controles-excel_h3 {
-  font-Size: 1.1em;
-  margin-Bottom: 10px;
-  border-Bottom: 1px solid var(--border-color);
+  font-size: 1.1em;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .container_operaciones {
   width: 100%;
   padding: 8px;
-  border-Radius: 4px;
+  border-radius: 4px;
   border: 1px solid var(--border-color);
-  background-Color: var(--bg-card);
+  background-color: var(--bg-card);
   color: var(--text-color);
-  margin-Bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .container_dataset {
-  margin-Bottom: 15px;
+  margin-bottom: 15px;
   height: 350px;
   display: flex;
-  flex-Direction: column;
+  flex-direction: column;
 }
 
 .info_vista {
-  font-Size: 0.8em;
-  font-Weight: bold;
-  margin-Bottom: 5px;
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-bottom: 5px;
   color: var(--text-muted);
 }
 
 .container_intervalos {
   padding: 10px;
   border: 1px solid var(--border-color);
-  border-Radius: 4px;
-  margin-Bottom: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
 }
 
 .container_select {
   width: 100%;
-  margin-Bottom: 8px;
+  margin-bottom: 8px;
 }
 
 .container_cal_input {
   width: 100%;
-  margin-Top: 5px;
+  margin-top: 5px;
 }
 
 .container_cal_percentil {
   padding: 10px;
   border: 1px solid var(--border-color);
-  border-Radius: 4px;
-  margin-Bottom: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
 }
 
 .container_cal_percentil label {
   display: block;
-  margin-Bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .container_cal_percentil input {
@@ -207,13 +201,13 @@
 .container_tendencia_posicion {
   padding: 10px;
   border: 1px solid var(--border-color);
-  border-Radius: 4px;
-  margin-Bottom: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
 }
 
 .container_tendencia_posicion label {
   display: block;
-  margin-Bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .container_tendencia_posicion input {
@@ -222,22 +216,22 @@
 }
 
 .button_calcular {
-  width: 100%;
-  padding: 10px;
-  margin-Top: 10px;
+  padding: 10px 35px;
+  margin-top: 10px;
+  /* El ancho se controla ahora desde el componente con fit-content */
 }
 
 .info_cargando {
-  text-Align: center;
+  text-align: center;
   color: var(--text-muted);
 }
 
 .button_resultados {
   width: 100%;
   padding: 10px;
-  margin-Bottom: 20px;
-  font-Weight: bold;
-  font-Size: 1em;
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-size: 1em;
 }
 
 .button_resultados_manual {
@@ -247,21 +241,21 @@
 }
 
 .frecuencias {
-  background-Color: var(--bg-card);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   padding: 15px;
-  border-Radius: 8px;
+  border-radius: 8px;
 }
 
 .tendencias {
   color: var(--primary-color);
-  border-Bottom: 2px solid var(--border-color);
-  padding-Bottom: 5px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 5px;
 }
 
 .container_tablas_academica {
-  overflow-X: auto;
-  margin-Bottom: 30px;
+  overflow-x: auto;
+  margin-bottom: 30px;
 }
 
 .tabla-academica {
@@ -285,72 +279,22 @@
   font-weight: bold;
 }
 
-.container_tendencia_posicion {
-  display: flex;
-  justify-Content: space-between;
-  align-Items: center;
-  border-Bottom: 2px solid var(--border-color);
-  padding-Bottom: 5px;
-  margin-Bottom: 10px;
-}
-
-.container_tendencia_posicion h4 {
-  color: var(--primary-color);
-  margin: 0;
-}
-
-.container_subtendencia {
-  display: flex;
-  gap: 5px;
-}
-
-.button_subtendencia {
-  padding: 5px 15px;
-  cursor: pointer;
-  border-Radius: 4px;
-  border: 1px solid var(--border-color);
-}
-
-.contenedor-variabilidad-forma h4 {
-  color: var(--primary-color);
-  border-Bottom: 2px solid var(--border-color);
-  padding-Bottom: 5px;
-}
-
-.contenedor-bivariada-avanzada h4 {
-  color: var(--primary-color);
-  border-Bottom: 2px solid var(--border-color);
-  padding-Bottom: 5px;
-}
-
-/* ========================================= */
-/* RESPONSIVIDAD PARA CELULARES              */
-/* ========================================= */
 @media (max-width: 768px) {
-
-  /* Reducir el tamaño de las tablas de resultados para que no desborden en móviles */
   .tabla-academica {
     font-size: 0.85em;
   }
-
   .tabla-academica th,
   .tabla-academica td {
     padding: 4px 2px;
     font-size: 0.85em;
-    /* Forzamos reducción en celdas por si heredan otro tamaño */
   }
-
-  /* Si la tabla tiene fórmulas matemáticas complejas, esto previene que se rompan */
   .container_tablas_academica {
     padding: 0;
     margin-bottom: 20px;
   }
-
   .frecuencias {
     padding: 10px;
-    /* Reducimos el margen interno del contenedor en celulares */
   }
-
   .frecuencias h3 {
     font-size: 1.1rem;
   }
