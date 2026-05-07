@@ -8,7 +8,7 @@ export const OPERACIONES = [
     opciones: [
       { value: 'permutacion', label: 'Permutación (nPr)' },
       { value: 'combinacion', label: 'Combinación (nCr)' },
-      { value: 'probabilidad', label: 'Probabilidad Clásica' },
+      { value: 'probabilidad', label: 'Cálculo de Probabilidad' },
     ],
   },
 ];

@@ -50,11 +50,22 @@
   left: 30px;
 }
 
+/* Desktop: el panel está al lado — flecha apunta ◀ (abierto) o ▶ (cerrado) */
+.icono-toggle.abierto {
+  transform: scaleX(1);
+}
+
+.icono-toggle.cerrado {
+  transform: scaleX(-1);
+}
+
+/* Móvil: el layout se apila — flecha apunta ▲ (abierto) o ▼ (cerrado) */
 @media (max-width: 900px) {
   .icono-toggle.abierto {
     transform: rotate(-90deg) !important;
     margin: 0 !important;
   }
+
   .icono-toggle.cerrado {
     transform: rotate(90deg) !important;
     margin: 0 !important;
@@ -101,7 +112,7 @@
   border-radius: 10px;
   padding: 20px;
   height: fit-content;
-  overflow: hidden;
+  overflow: visible;
   transition: padding 0.3s ease;
 }
 
@@ -128,12 +139,6 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-card);
-}
-
-.panel-controles-excel_h3 {
-  font-size: 1.1em;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .container_operaciones {
@@ -283,18 +288,22 @@
   .tabla-academica {
     font-size: 0.85em;
   }
+
   .tabla-academica th,
   .tabla-academica td {
     padding: 4px 2px;
     font-size: 0.85em;
   }
+
   .container_tablas_academica {
     padding: 0;
     margin-bottom: 20px;
   }
+
   .frecuencias {
     padding: 10px;
   }
+
   .frecuencias h3 {
     font-size: 1.1rem;
   }

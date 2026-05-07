@@ -45,6 +45,7 @@ const SimuladorMAT251 = () => {
     const [cargandoApi, setCargandoApi] = useState(false); 
     const [archivoActivo, setArchivoActivo] = useState(null); 
     const [_selectedApiFile, setSelectedApiFile] = useState("");
+    const [modalMatrizInfo, setModalMatrizInfo] = useState(null);
 
     // USE-EFFECT: Cargar lista de archivos de FastAPI 
     useEffect(() => {
@@ -134,6 +135,7 @@ const SimuladorMAT251 = () => {
     const actions = {
         delete: eliminarVariable,
         update: actualizarVariable,
+        openMatrixModal: (v) => setModalMatrizInfo(v),
         switchSheet: (name) => name && workbook && cargarHoja(workbook, name),
         assignName: (id) => {
             const val = rowData[selection.start?.row]?.[getExcelChar(selection.start?.col)];
@@ -180,25 +182,29 @@ const SimuladorMAT251 = () => {
             let contadorTextos = 0;
 
             for (let r = rMin; r <= rMax; r++) {
+                const filaValores = [];
+                let tieneDatos = false;
+
                 for (let c = cMin; c <= cMax; c++) {
-
-                    // 1. Obtenemos el dato en bruto. ¡NADA de parseFloat aquí!
-                    const columnaLetra = getExcelChar(c);
-                    const rawVal = rowData[r]?.[columnaLetra];
-
-                    // 2. Si la celda NO está vacía, NO es nula, y NO es undefined
+                    const rawVal = rowData[r]?.[getExcelChar(c)];
                     if (rawVal !== undefined && rawVal !== null && rawVal !== "") {
-
-                        // 3. Lo guardamos INMEDIATAMENTE en el array (sea lo que sea)
-                        datosValidos.push(rawVal);
-
-                        // 4. Ahora sí, clasificamos qué fue lo que acabamos de guardar
-                        // Usamos Number() solo para comprobar, no para transformar el dato original
+                        filaValores.push(rawVal);
+                        tieneDatos = true;
                         if (isNaN(Number(rawVal))) {
                             contadorTextos++;
                         } else {
                             contadorNumeros++;
                         }
+                    } else {
+                        filaValores.push("");
+                    }
+                }
+
+                if (tieneDatos) {
+                    if (cMax > cMin) {
+                        datosValidos.push(filaValores.join(" | "));
+                    } else {
+                        datosValidos.push(filaValores[0]);
                     }
                 }
             }
@@ -215,13 +221,24 @@ const SimuladorMAT251 = () => {
                 }
             }
 
+            // NOMBRES DE COLUMNAS (Intento de leer la fila anterior como headers)
+            let nombresColumnas = [];
+            if (cMax > cMin) {
+                const headerRow = rMin > 0 ? rMin - 1 : rMin; 
+                for (let c = cMin; c <= cMax; c++) {
+                    const headerVal = rowData[headerRow]?.[getExcelChar(c)];
+                    nombresColumnas.push(headerVal !== undefined && headerVal !== "" ? String(headerVal) : `Col ${getExcelChar(c)}`);
+                }
+            }
+
             // Actualizamos la variable inyectando los datos y el tipo
             actualizarVariable(id, {
                 rangoLabel: `${getExcelChar(cMin)}${rMin + 1}:${getExcelChar(cMax)}${rMax + 1}`,
                 coords: { rMin, rMax, cMin, cMax },
                 datos: datosValidos, // 👈 Ahora esto ya no estará vacío
                 sheet: currentSheet,
-                tipo: tipoDetectado
+                tipo: tipoDetectado,
+                nombresColumnas: nombresColumnas
             });
 
             setSelection({ start: null, end: null, isDragging: false });
@@ -246,16 +263,29 @@ const SimuladorMAT251 = () => {
                 let contadorTextos = 0;
 
                 for (let r = coords.rMin; r <= coords.rMax; r++) {
+                    const filaValores = [];
+                    let tieneDatos = false;
+
                     for (let c = coords.cMin; c <= coords.cMax; c++) {
                         const rawVal = rowData[r]?.[getExcelChar(c)];
                         if (rawVal !== undefined && rawVal !== null && rawVal !== "") {
-                            datosValidos.push(rawVal);
-
+                            filaValores.push(rawVal);
+                            tieneDatos = true;
                             if (isNaN(Number(rawVal))) {
                                 contadorTextos++;
                             } else {
                                 contadorNumeros++;
                             }
+                        } else {
+                            filaValores.push("");
+                        }
+                    }
+
+                    if (tieneDatos) {
+                        if (coords.cMax > coords.cMin) {
+                            datosValidos.push(filaValores.join(" | "));
+                        } else {
+                            datosValidos.push(filaValores[0]);
                         }
                     }
                 }
@@ -278,12 +308,23 @@ const SimuladorMAT251 = () => {
                     }
                 }
 
+                // NOMBRES DE COLUMNAS
+                let nombresColumnas = [];
+                if (coords.cMax > coords.cMin) {
+                    const headerRow = coords.rMin > 0 ? coords.rMin - 1 : coords.rMin; 
+                    for (let c = coords.cMin; c <= coords.cMax; c++) {
+                        const headerVal = rowData[headerRow]?.[getExcelChar(c)];
+                        nombresColumnas.push(headerVal !== undefined && headerVal !== "" ? String(headerVal) : `Col ${getExcelChar(c)}`);
+                    }
+                }
+
                 actualizarVariable(id, {
                     rangoLabel: nuevoTexto,
                     coords,
                     datos: datosValidos,
                     sheet: currentSheet,
-                    tipo: tipoDetectado // Inyectamos el tipo también aquí
+                    tipo: tipoDetectado, // Inyectamos el tipo también aquí
+                    nombresColumnas: nombresColumnas
                 });
             } else {
                 actualizarVariable(id, { rangoLabel: nuevoTexto });
@@ -464,6 +505,62 @@ const SimuladorMAT251 = () => {
                         )}
                     </section>
                 </div>
+
+                {/* MODAL MATRIZ DETALLES */}
+                {modalMatrizInfo && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+                        display: 'flex', justifyContent: 'center', alignItems: 'center'
+                    }} onClick={() => setModalMatrizInfo(null)}>
+                        <div style={{
+                            backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '10px',
+                            maxWidth: '400px', width: '90%', border: '1px solid var(--border-color)',
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }} onClick={e => e.stopPropagation()}>
+                            <h3 style={{ margin: '0 0 15px', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                    <line x1="3" y1="15" x2="21" y2="15"></line>
+                                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                                    <line x1="15" y1="3" x2="15" y2="21"></line>
+                                </svg>
+                                Detalles de la Matriz
+                            </h3>
+                            <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                                <strong>Variable:</strong> {modalMatrizInfo.nombre}
+                            </p>
+                            <p style={{ margin: '0 0 10px', fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                                <strong>Dimensiones:</strong> {modalMatrizInfo.coords.rMax - modalMatrizInfo.coords.rMin + 1} filas × {modalMatrizInfo.coords.cMax - modalMatrizInfo.coords.cMin + 1} columnas
+                            </p>
+                            <div style={{ marginTop: '15px' }}>
+                                <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Columnas detectadas:</strong>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '5px' }}>
+                                    {modalMatrizInfo.nombresColumnas && modalMatrizInfo.nombresColumnas.length > 0 ? (
+                                        modalMatrizInfo.nombresColumnas.map((col, idx) => (
+                                            <span key={idx} style={{ background: 'rgba(192, 132, 252, 0.1)', border: '1px solid #c084fc', color: '#9333ea', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                [{col}]
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>[Columna 1] [Columna 2]</span>
+                                    )}
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setModalMatrizInfo(null)}
+                                style={{
+                                    marginTop: '20px', width: '100%', padding: '8px',
+                                    backgroundColor: 'var(--primary-color)', color: 'white', border: 'none',
+                                    borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold'
+                                }}
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </AgGridProvider>
     );

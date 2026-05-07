@@ -77,7 +77,7 @@ const renderCustomizedLabelText = (props, colores) => {
 };
 
 
-export default function GraficosProbabilidad({ resProbabilidad, datosArray }) {
+export default function GraficosProbabilidad({ resProbabilidad, datosArray, isCond }) {
     if (!resProbabilidad) return null;
 
     const dataPie = [
@@ -92,10 +92,17 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray }) {
         `hsl(${(tonoBase + 180) % 360}, 20%, 70%)`
     ];
 
-    const frecuencias = datosArray.reduce((acc, current) => {
-        acc[current] = (acc[current] || 0) + 1;
-        return acc;
-    }, {});
+    const frecuencias = {};
+    datosArray.forEach(current => {
+        if (typeof current === 'string' && current.includes(' | ')) {
+            const partes = current.split(' | ').map(p => p.trim());
+            partes.forEach(p => {
+                if (p) frecuencias[p] = (frecuencias[p] || 0) + 1;
+            });
+        } else {
+            if (current) frecuencias[current] = (frecuencias[current] || 0) + 1;
+        }
+    });
 
     const dataBarra = Object.keys(frecuencias).map(key => ({
         nombre: key,
@@ -104,16 +111,97 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray }) {
 
     return (
         <div className="contenedor-graficos-prob">
-            {/* ESTILOS INYECTADOS PARA LA MEJORA VISUAL */}
-            <style>{`
-                .titulo-profesional {
-                    font-size: 1.15rem;
-                    font-weight: 700;
-                    color: #1e293b;
-                    margin-bottom: 20px;
-                    text-align: center;
-                }
-            `}</style>
+            {isCond && resProbabilidad.vennStats && (
+                <>
+                    <div className="grafico-card" style={{ marginBottom: '20px' }}>
+                        <h3 className="titulo-profesional" style={{ textAlign: 'center' }}>Diagrama de Venn (Relación de Eventos)</h3>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', maxWidth: '600px', margin: '0 auto', position: 'relative' }}>
+                            <svg width="100%" height="auto" viewBox="0 0 600 350" style={{ maxHeight: '380px' }}>
+                                {/* Universo */}
+                                <rect x="10" y="10" width="580" height="330" fill="var(--bg-body)" stroke="var(--border-color)" strokeWidth="2" rx="10" />
+                                <text x="25" y="35" fill="var(--text-muted)" fontSize="14" fontWeight="bold">Universo (N={resProbabilidad.vennStats.nTotal})</text>
+
+                                {/* Círculo Evento A */}
+                                <circle cx="230" cy="190" r="120" fill="#3b82f6" fillOpacity="0.15" stroke="#3b82f6" strokeWidth="2.5" />
+                                <text x="160" y="55" fill="#3b82f6" fontSize="16" fontWeight="bold" textAnchor="middle">Evento A</text>
+
+                                {/* Círculo Evento B */}
+                                <circle cx="370" cy="190" r="120" fill="var(--primary-color)" fillOpacity="0.15" stroke="var(--primary-color)" strokeWidth="2.5" />
+                                <text x="440" y="55" fill="var(--primary-color)" fontSize="16" fontWeight="bold" textAnchor="middle">Evento B</text>
+
+                                {/* Valores Exclusivos */}
+                                <text x="165" y="200" fill="#3b82f6" fontSize="26" fontWeight="bold" textAnchor="middle">
+                                    {resProbabilidad.vennStats.nA - resProbabilidad.vennStats.nAB}
+                                </text>
+                                <text x="435" y="200" fill="var(--primary-color)" fontSize="26" fontWeight="bold" textAnchor="middle">
+                                    {resProbabilidad.vennStats.nB - resProbabilidad.vennStats.nAB}
+                                </text>
+
+                                {/* Intersección */}
+                                <text x="300" y="200" fill="var(--text-color)" fontSize="32" fontWeight="extrabold" textAnchor="middle">
+                                    {resProbabilidad.vennStats.nAB}
+                                </text>
+
+                                {/* Afuera (Ninguno) */}
+                                <text x="510" y="315" fill="var(--text-muted)" fontSize="16" fontWeight="bold" textAnchor="middle">
+                                    Ninguno: {resProbabilidad.vennStats.nTotal - (resProbabilidad.vennStats.nA + resProbabilidad.vennStats.nB - resProbabilidad.vennStats.nAB)}
+                                </text>
+                            </svg>
+                        </div>
+                        <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '5px' }}>
+                            <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>■ Evento A</span> | <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>■ Evento B (Condición)</span> | <span style={{ color: 'var(--text-color)', fontWeight: 'bold' }}>■ Intersección (A ∩ B)</span>
+                        </div>
+                    </div>
+
+                    <div className="grafico-card" style={{ marginBottom: '20px' }}>
+                        <h3 className="titulo-profesional" style={{ textAlign: 'center' }}>Frecuencias del Cálculo Condicional</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart
+                                data={[
+                                    { nombre: 'Intersección (A ∩ B)', valor: resProbabilidad.vennStats.nAB, color: '#f87171' },
+                                    { nombre: 'Universo Total (N)', valor: resProbabilidad.vennStats.nTotal, color: '#9ca3af' },
+                                    { nombre: 'Condición n(B)', valor: resProbabilidad.vennStats.nB, color: '#93c5fd' }
+                                ]}
+                                margin={{ top: 30, right: 30, left: 10, bottom: 30 }}
+                                barCategoryGap="25%"
+                            >
+                                <CartesianGrid strokeDasharray="3 3" strokeWidth={1.5} fill="var(--border-color)" fillOpacity={0.06} />
+                                <XAxis
+                                    dataKey="nombre"
+                                    axisLine={{ stroke: 'var(--text-muted)', strokeWidth: 1.5 }}
+                                    tickLine={{ stroke: 'var(--text-muted)' }}
+                                    tick={{ fill: 'var(--text-color)', fontSize: 13, fontWeight: 600, dy: 10 }}
+                                />
+                                <YAxis
+                                    axisLine={{ stroke: 'var(--text-muted)', strokeWidth: 1.5 }}
+                                    tickLine={{ stroke: 'var(--text-muted)' }}
+                                    tick={{ fill: 'var(--text-color)', fontSize: 12 }}
+                                    allowDecimals={false}
+                                >
+                                    <Label value="Frecuencia (n)" angle={-90} position="insideLeft" style={{ fill: 'var(--text-muted)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }} />
+                                </YAxis>
+                                <Tooltip
+                                    cursor={{ fill: 'var(--border-color)', fillOpacity: 0.3 }}
+                                    contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' }}
+                                    itemStyle={{ color: 'var(--text-color)', fontWeight: 'bold' }}
+                                    labelStyle={{ color: 'var(--text-muted)' }}
+                                />
+                                <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
+                                    {[
+                                        { color: '#f87171' },
+                                        { color: '#9ca3af' },
+                                        { color: '#93c5fd' }
+                                    ].map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                    <LabelList dataKey="valor" position="top" style={{ fill: 'var(--text-color)', fontSize: '14px', fontWeight: 'bold' }} />
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </>
+            )}
+
 
             <div className="grafico-card full-width">
                 <h3 className="titulo-profesional">Probabilidad de Ocurrencia</h3>
@@ -130,13 +218,13 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray }) {
 
             <div className="grid-graficos">
                 <div className="grafico-card">
-                    <h3 className="titulo-profesional">Distribución del Evento</h3>
-                    <ResponsiveContainer width="100%" height={260}>
-                        <PieChart margin={{ top: 10, right: 30, left: 30, bottom: 20 }}>
+                    <h3 className="titulo-profesional">{isCond ? 'Distribución dentro de Condición (B)' : 'Distribución del Evento'}</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <PieChart margin={{ top: 10, right: 30, left: 30, bottom: 30 }}>
                             <Pie
                                 data={dataPie}
                                 cx="50%"
-                                cy="50%"
+                                cy="45%"
                                 innerRadius={55}
                                 outerRadius={75}
                                 paddingAngle={0}
@@ -148,22 +236,26 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray }) {
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip formatter={(value, name) => [`${value} casos`, name]} />
+                            <Tooltip 
+                                formatter={(value, name) => [`${value} casos`, name]}
+                                contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' }}
+                                itemStyle={{ color: 'var(--text-color)', fontWeight: 'bold' }}
+                                labelStyle={{ color: 'var(--text-muted)' }}
+                            />
                             <Legend
                                 verticalAlign="bottom"
-                                height={20}
-                                wrapperStyle={{ paddingTop: '25px' }}
+                                wrapperStyle={{ paddingTop: '15px', color: 'var(--text-color)' }}
                             />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
 
                 <div className="grafico-card">
-                    <h3 className="titulo-profesional">Frecuencia de Datos Únicos</h3>
-                    <ResponsiveContainer width="100%" height={260}>
+                    <h3 className="titulo-profesional">{isCond ? 'Frecuencia en Condición (B)' : 'Frecuencia de Datos Únicos'}</h3>
+                    <ResponsiveContainer width="100%" height={300}>
                         <BarChart
                             data={dataBarra}
-                            margin={{ top: 30, right: 30, left: 10, bottom: 20 }}
+                            margin={{ top: 30, right: 30, left: 10, bottom: 30 }}
                             barCategoryGap="15%"
                         >
                             <defs>
@@ -176,53 +268,54 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray }) {
                             <CartesianGrid
                                 strokeDasharray="3 3"
                                 strokeWidth={1.5}
-                                fill="#979696"
+                                fill="var(--border-color)"
                                 fillOpacity={0.06}
                             />
 
                             <XAxis
                                 dataKey="nombre"
-                                axisLine={{ stroke: '#000000', strokeWidth: 1.5 }}
-                                tickLine={{ stroke: '#000000' }}
-                                tick={{ fill: '#475569', fontSize: 12, fontWeight: 600, dy: 10 }}
+                                axisLine={{ stroke: 'var(--text-muted)', strokeWidth: 1.5 }}
+                                tickLine={{ stroke: 'var(--text-muted)' }}
+                                tick={{ fill: 'var(--text-color)', fontSize: 12, fontWeight: 600, dy: 10 }}
                             >
                                 <Label
                                     value="Valor"
                                     offset={-15}
                                     position="insideBottom"
-                                    style={{ fill: '#64748b', fontSize: 13, fontWeight: 'bold' }}
+                                    style={{ fill: 'var(--text-muted)', fontSize: 13, fontWeight: 'bold' }}
                                 />
                             </XAxis>
 
                             <YAxis
-                                axisLine={{ stroke: '#000000', strokeWidth: 1.5 }}
-                                tickLine={{ stroke: '#000000' }}
-                                tick={{ fill: '#94a3b8', fontSize: 12 }}
+                                axisLine={{ stroke: 'var(--text-muted)', strokeWidth: 1.5 }}
+                                tickLine={{ stroke: 'var(--text-muted)' }}
+                                tick={{ fill: 'var(--text-color)', fontSize: 12 }}
                                 allowDecimals={false}
                             >
                                 <Label
                                     value="Frecuencia"
                                     angle={-90}
                                     position="insideLeft"
-
-                                    style={{ fill: '#2a2a2a', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                    style={{ fill: 'var(--text-muted)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
                                 />
                             </YAxis>
 
                             <Tooltip
-                                cursor={{ fill: '#f8fafc' }}
-                                contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}
+                                cursor={{ fill: 'var(--border-color)', fillOpacity: 0.3 }}
+                                contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' }}
+                                itemStyle={{ color: 'var(--text-color)', fontWeight: 'bold' }}
+                                labelStyle={{ color: 'var(--text-muted)' }}
                             />
 
                             <Bar
                                 dataKey="frecuencia"
                                 fill="url(#colorBarraPro)"
-                                radius={[1, 1, 0, 0]}
+                                radius={[4, 4, 0, 0]}
                             >
                                 <LabelList
                                     dataKey="frecuencia"
                                     position="top"
-                                    style={{ fill: '#1e3a8a', fontSize: '13px', fontWeight: 'bold' }}
+                                    style={{ fill: 'var(--text-color)', fontSize: '13px', fontWeight: 'bold' }}
                                 />
                             </Bar>
                         </BarChart>

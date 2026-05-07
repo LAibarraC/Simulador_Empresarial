@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Datos from "../Datos";
 import { DataProvider } from "../../components/excel/DataContext";
 import { useCalculadoraExcel } from "../../hooks/useCalculadoraExcel";
-import CalculosMat251 from '../../components/MAT251/Principal/Principal';
+import Principal from '../../components/MAT251/Principal/Principal';
 import "../../styles/pages/MAT251/Pantalla.css";
 
 export default function Pantalla() {
@@ -29,8 +29,6 @@ export default function Pantalla() {
   return (
     <DataProvider>
       <div className="mat251-contenedor">
-
-        {/* BARRA DE NAVEGACIÓN */}
         <div className="mat251-navegacion">
           {nombresVentanas.map((nombre, index) => (
             <button
@@ -42,11 +40,7 @@ export default function Pantalla() {
             </button>
           ))}
         </div>
-
-        {/* AQUÍ ESTÁ EL CAMBIO IMPORTANTE  */}
         <div style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>
-
-          {/* Gestión de Datos: Ocultar con CSS, NO destruir */}
           <div style={{ display: pestanaActiva === 0 ? 'block' : 'none' }}>
             <Datos
               setSelectedFile={setSelectedFile}
@@ -55,9 +49,8 @@ export default function Pantalla() {
             />
           </div>
 
-          {/* Calculos MAT-251 */}
           <div style={{ display: pestanaActiva === 1 ? 'block' : 'none' }}>
-            <CalculosMat251 />
+            <Principal />
           </div>
 
           {/* Resto de Temas */}

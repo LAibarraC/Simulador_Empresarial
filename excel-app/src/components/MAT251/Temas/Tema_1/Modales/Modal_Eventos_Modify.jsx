@@ -1,15 +1,33 @@
 import React from 'react';
 import { overlayStyle, modalBoxStyle, FS, RADIUS } from '../../../Principal/Constantes';
 
-export default function ModalEventosModify({modalEvento, setModalEvento, statsEventos, eventoFavorable, setEventoFavorable, SetResProbabilidad}){
+export default function ModalEventosModify({modalEvento, setModalEvento, statsEventos, eventoFavorable, setEventoFavorable, setResProbabilidad, titulo}){
+    const [filtro, setFiltro] = React.useState('');
+
     if(!modalEvento) return null;
+
+    const eventosFiltrados = statsEventos.filter(e => e.valor.toLowerCase().includes(filtro.toLowerCase()));
+
+    const seleccionarTodosVisibles = () => {
+        const nuevosValores = eventosFiltrados.map(e => e.valor);
+        const combinados = Array.from(new Set([...eventoFavorable, ...nuevosValores]));
+        setEventoFavorable(combinados);
+        setResProbabilidad(null);
+    };
+
+    const deseleccionarTodosVisibles = () => {
+        const valoresAEliminar = eventosFiltrados.map(e => e.valor);
+        const filtrados = eventoFavorable.filter(v => !valoresAEliminar.includes(v));
+        setEventoFavorable(filtrados);
+        setResProbabilidad(null);
+    };
 
     return (
         <div style={overlayStyle} onClick={() => setModalEvento(false)}>
           <div style={{ ...modalBoxStyle, maxWidth: '420px', padding: '24px' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary-color)' }}>
-                Evento Favorable (A)
+                {titulo || 'Evento Favorable (A)'}
               </h3>
               <button onClick={() => setModalEvento(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -17,11 +35,27 @@ export default function ModalEventosModify({modalEvento, setModalEvento, statsEv
             </div>
 
             <p style={{ fontSize: FS.sm, color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.4' }}>
-              Selecciona uno o varios valores que definen tu evento <strong>favorable</strong>.
+              Selecciona uno o varios valores que definen este evento.
             </p>
 
+            <div style={{ marginBottom: '15px' }}>
+                <input 
+                    type="text" 
+                    placeholder="Filtrar por texto (ej. Sistemas, Sí...)" 
+                    value={filtro}
+                    onChange={(e) => setFiltro(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', fontSize: FS.sm, outline: 'none', boxSizing: 'border-box' }}
+                />
+                {filtro && (
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                        <button onClick={seleccionarTodosVisibles} style={{ flex: 1, padding: '6px', fontSize: FS.xs, background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer' }}>Seleccionar Visibles</button>
+                        <button onClick={deseleccionarTodosVisibles} style={{ flex: 1, padding: '6px', fontSize: FS.xs, background: '#cbd5e1', color: '#1e293b', border: 'none', borderRadius: RADIUS, cursor: 'pointer' }}>Deseleccionar Visibles</button>
+                    </div>
+                )}
+            </div>
+
             <div style={{ maxHeight: '350px', overflowY: 'auto', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-body)' }}>
-              {statsEventos.map(({ valor, count }) => {
+              {eventosFiltrados.map(({ valor, count }) => {
                 const isSelected = eventoFavorable.includes(valor);
 
                 return (

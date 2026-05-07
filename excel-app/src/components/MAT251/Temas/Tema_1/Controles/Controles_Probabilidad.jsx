@@ -6,8 +6,8 @@ import {IconoVariables} from '../../../../ui/iconos';
 
 export default function ControlesProbabilidad({ setModalVars, varSeleccionada }) {
     return (
-        <div style={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
-            <label style={labelStyle}>Variable (Opcional):</label>
+        <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column' }}>
+            <label style={labelStyle}>Variables (Opcional):</label>
             <button
                 onClick={() => setModalVars(true)}
                 className="btn-icon"
@@ -15,11 +15,12 @@ export default function ControlesProbabilidad({ setModalVars, varSeleccionada })
                     width: 'fit-content',
                     alignSelf: 'center',
                     marginBottom: '10px',
+                    marginTopS: '10px',
                     background: 'var(--primary-color)',
                     color: 'white',
                     borderRadius: RADIUS,
                     fontSize: FS.sm,
-                    padding: '8px 20px',
+                    padding: '5px 20px',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                     border: 'none',
                     fontWeight: 600,

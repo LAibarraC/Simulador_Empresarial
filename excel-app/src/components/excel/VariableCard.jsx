@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import "../../styles/components/excel/VariableCard.css";
 
 const VariableCard = ({ v, currentSheet, actions }) => {
+    const [showMatrix, setShowMatrix] = useState(false);
 
     /*const dynamicBackground = `linear-gradient(90deg, 
         ${v.color.replace('0.4', '0.3')} 15%, 
@@ -73,6 +74,42 @@ const VariableCard = ({ v, currentSheet, actions }) => {
                     Capturar
                 </button>
             </div>
+            
+            {/* --- NUEVA INTERFAZ PARA MATRICES --- */}
+            {v.coords && v.coords.cMax > v.coords.cMin && (
+                <div style={{ marginTop: '10px' }}>
+                    <button 
+                        onClick={() => actions.openMatrixModal(v)}
+                        style={{
+                            width: '100%',
+                            background: 'var(--bg-body)',
+                            border: '1px solid #c084fc',
+                            color: '#9333ea',
+                            padding: '4px',
+                            borderRadius: '5px',
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '5px',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(192, 132, 252, 0.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--bg-body)'}
+                    >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="3" y1="15" x2="21" y2="15"></line>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                            <line x1="15" y1="3" x2="15" y2="21"></line>
+                        </svg>
+                        Matriz Detectada (Ver Detalles)
+                    </button>
+                </div>
+            )}
 
             <div className='container_muestras' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>Muestras: <strong style={{ color: 'var(--text-main)' }}>{v.datos ? v.datos.length : 0}</strong></span>
