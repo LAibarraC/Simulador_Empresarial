@@ -98,6 +98,31 @@ export default function Principal() {
             .sort((a, b) => a.valor.localeCompare(b.valor));
     }, [filas]);
 
+    // Frecuencias agrupadas por columna (para datos multi-columna)
+    const statsEventosPorColumna = useMemo(() => {
+        const nombresColumnas = varSeleccionada?.nombresColumnas;
+        if (!nombresColumnas || nombresColumnas.length <= 1) return null; // null = sin agrupación
+
+        const validas = filas.map(f => (f.valor || '').toString().trim()).filter(Boolean);
+        // Construir contadores por columna
+        const porColumna = nombresColumnas.map(nombre => ({ nombre, counts: {} }));
+
+        validas.forEach(v => {
+            const partes = v.split(' | ').map(p => p.trim());
+            nombresColumnas.forEach((_, idx) => {
+                const val = partes[idx];
+                if (val) porColumna[idx].counts[val] = (porColumna[idx].counts[val] || 0) + 1;
+            });
+        });
+
+        return porColumna.map(col => ({
+            nombre: col.nombre,
+            eventos: Object.entries(col.counts)
+                .map(([valor, count]) => ({ valor, count }))
+                .sort((a, b) => a.valor.localeCompare(b.valor))
+        }));
+    }, [filas, varSeleccionada]);
+
 
     // Columnas dinámicas para el DataGrid (Editor)
     const columns = useMemo(() => {
@@ -201,7 +226,9 @@ export default function Principal() {
             nombre: nombreCombinado,
             esCombinada: arr.length > 1,
             datos: nuevas.map(n => n.valor),
-            nombresColumnas: arr[0]?.nombresColumnas || null
+            // Si es combinación de varias variables, los nombres de columna son los nombres de esas variables
+            // Si es una sola variable, usa su propio nombresColumnas (puede existir si viene de Excel multi-col)
+            nombresColumnas: arr.length > 1 ? arr.map(v => v.nombre) : (arr[0]?.nombresColumnas || null)
         });
         setModalVars(false);
     };
@@ -468,8 +495,8 @@ export default function Principal() {
 
             {/* MODALES*/}
             <ModalEditor modalEditor={modalEditor} setModalEditor={setModalEditor} filasTemp={filasTemp} setFilasTemp={setFilasTemp} columns={columns} guardarEditor={guardarEditor} hayCambiosEditor={hayCambiosEditor} titulo={subTipoProbabilidad === 'frecuentista' ? 'Editor de Datos Históricos' : 'Editor de Espacio Muestral'} />
-            <ModalEventos modalEvento={modalEvento} setModalEvento={setModalEvento} statsEventos={statsEventos} eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable} setResProbabilidad={setResProbabilidad} titulo={subTipoProbabilidad === 'frecuentista' ? 'Seleccionar Evento de Interés' : 'Seleccionar Eventos Favorables'} />
-            <ModalEventos modalEvento={modalCondicion} setModalEvento={setModalCondicion} statsEventos={statsEventos} eventoFavorable={eventoCondicion} setEventoFavorable={setEventoCondicion} setResProbabilidad={setResProbabilidad} titulo="Seleccionar Eventos para Condición (B)" />
+            <ModalEventos modalEvento={modalEvento} setModalEvento={setModalEvento} statsEventos={statsEventos} statsEventosPorColumna={statsEventosPorColumna} eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable} setResProbabilidad={setResProbabilidad} titulo={subTipoProbabilidad === 'frecuentista' ? 'Seleccionar Evento de Interés' : 'Seleccionar Eventos Favorables'} />
+            <ModalEventos modalEvento={modalCondicion} setModalEvento={setModalCondicion} statsEventos={statsEventos} statsEventosPorColumna={statsEventosPorColumna} eventoFavorable={eventoCondicion} setEventoFavorable={setEventoCondicion} setResProbabilidad={setResProbabilidad} titulo="Seleccionar Eventos para Condición (B)" />
             <ModalVariables modalVars={modalVars} setModalVars={setModalVars} variables={variables} cargarVariable={cargarVariable} />
         </div>
     );
