@@ -6,8 +6,7 @@ import { alerta } from "../utils/Notificaciones";
 import { useNavigate } from "react-router-dom";
 import "../styles/pages/Historial.css";
 
-export default function Historial() {
-  const { usuario } = useData();
+export default function Historial({ usuario }) {
   const navigate = useNavigate();
 
   const [registros, setRegistros] = useState([]);

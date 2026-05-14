@@ -1,37 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router-dom"; // 🆕 Importamos Link para la navegación
+import { Link } from "react-router-dom";
 import logoCarrera from "../assets/images/Logo-Adm.png";
-
 import { alerta } from '../utils/Notificaciones';
+import "../styles/pages/Auth.css";
 
 export default function Login({ onLogin }) {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
-  const [error, setError] = useState(""); 
 
-  // 🆕 Convertimos la función a asíncrona para comunicarnos con FastAPI
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
-      // Hacemos la petición a la nueva ruta que creamos en el backend
-     /*  const response = await fetch("http://localhost:8000/login_local", { */
-     // CÁMBIALO POR ESTO:
-// Reemplaza la URL manual por la variable de entorno
-const response = await fetch(`${import.meta.env.VITE_API_URL}/login_local`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ usuario: user, password: pass })
-});
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/login_local`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario: user, password: pass })
+      });
 
       if (response.ok) {
-        // Si el backend dice que todo está bien, recibimos el perfil
         const perfil = await response.json();
-        
         onLogin(perfil); 
         alerta.success("Acceso concedido", `Bienvenido, ${perfil.nombre}`);
       } else {
-        // Si la contraseña está mal o el usuario no existe
         alerta.error("Credenciales incorrectas", "Por favor, verifica tu usuario y contraseña.");
       }
     } catch (error) {
@@ -41,8 +32,8 @@ const response = await fetch(`${import.meta.env.VITE_API_URL}/login_local`, {
 
   return (
     <div className="login-container">
-      <div className="login-card">
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+      <div className="login-card auth-animate-card">
+        <div style={{ textAlign: 'center', marginBottom: '20px' }} className="auth-logo-animate">
           <img
             src={logoCarrera}
             alt="Logo Administración de Empresas"
@@ -51,7 +42,7 @@ const response = await fetch(`${import.meta.env.VITE_API_URL}/login_local`, {
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ textAlign: 'left' }}>
+          <div className="auth-field delay-1" style={{ textAlign: 'left' }}>
             <label className="etiqueta">Usuario</label>
             <input
               type="text"
@@ -61,7 +52,7 @@ const response = await fetch(`${import.meta.env.VITE_API_URL}/login_local`, {
             />
           </div>
 
-          <div style={{ textAlign: 'left' }}>
+          <div className="auth-field delay-2" style={{ textAlign: 'left' }}>
             <label className="etiqueta">Contraseña</label>
             <input
               type="password"
@@ -71,7 +62,7 @@ const response = await fetch(`${import.meta.env.VITE_API_URL}/login_local`, {
             />
           </div>
 
-          <button type="submit" style={{
+          <button type="submit" className="auth-field delay-3" style={{
             backgroundColor: 'var(--accent-color)',
             padding: '12px',
             fontSize: '1rem',
@@ -81,24 +72,13 @@ const response = await fetch(`${import.meta.env.VITE_API_URL}/login_local`, {
           }}>
             Ingresar
           </button>
-
-          {error && (
-            <div style={{
-              color: '#dc2626',
-              fontSize: '1rem',
-              textAlign: 'center'
-            }}>
-              {error}
-            </div>
-          )}
         </form>
 
-        {/* 🆕 Enlace para ir a la pantalla de Registro */}
-        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>
+        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }} className="auth-field delay-4">
           <p>¿No tienes una cuenta? <Link to="/registro" style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>Regístrate aquí</Link></p>
         </div>
 
       </div>
     </div>
   );
-}
+}

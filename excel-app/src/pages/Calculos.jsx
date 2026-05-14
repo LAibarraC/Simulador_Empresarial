@@ -192,21 +192,50 @@ export default function Calculos() {
   const handleGuardarResultado = async () => {
     if (!usuario) return;
     try {
+      let archivoAFijar = selectedFile;
+
+      // 🔍 CASO ESPECIAL: Si no hay archivo seleccionado pero sí hay datos en la tabla
+      // (Significa que cargó un Excel local o creó variables en Gestión de Datos)
+      if (!archivoAFijar && excelData && excelData.length > 0) {
+        alerta.success("Subiendo datos...", "Tus datos locales se están guardando en la nube.");
+        
+        // Creamos un nombre único para esta "fuente de datos"
+        const fecha = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+        const nombreAuto = `Datos_Calculo_${fecha}_${Math.floor(Math.random() * 1000)}.xlsx`;
+
+        // 1. Guardamos la tabla físicamente en el servidor
+        const resGuardar = await api.guardarTabla(nombreAuto, excelData, usuario.nombre);
+        
+        if (resGuardar && resGuardar.filename) {
+          archivoAFijar = resGuardar.filename;
+          setSelectedFile(archivoAFijar); // Actualizamos el estado local
+          await cargarArchivos(); // Refrescamos la lista de archivos para que aparezca
+        } else {
+          throw new Error("No se pudo generar el archivo de respaldo en el servidor.");
+        }
+      }
+
+      if (!archivoAFijar) {
+        alerta.error("Sin datos", "No hay datos cargados para guardar este cálculo.");
+        return;
+      }
+
       alerta.success("Guardando...", "Registrando configuración del cálculo.");
 
-      // Pasamos las variables de estado actuales: selectedColumn y selectedColumnY
+      // 2. Guardamos en historial apuntando al archivo (ya sea el original o el auto-generado)
       await api.guardarEnHistorial(
         usuario.nombre,
         calculo,
-        selectedFile,
+        archivoAFijar,
         selectedColumn,
         selectedColumnY,
         selectedSheet
       );
 
-      alerta.exito("¡Guardado!", "El historial ahora recordará las columnas usadas.");
+      alerta.exito("¡Guardado!", "El cálculo y su fuente de datos han sido registrados.");
     } catch (error) {
-      alerta.error("Error", "No se pudo guardar la configuración.");
+      console.error("Error al guardar:", error);
+      alerta.error("Error", error.message || "No se pudo guardar la configuración.");
     }
   };
 

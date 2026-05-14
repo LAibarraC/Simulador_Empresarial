@@ -1,0 +1,59 @@
+/* --- ANIMACIONES DE ENSAMBLAJE (SOLICITADAS ANTES) --- */
+@keyframes cardEntry {
+    0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fieldAssemble {
+    0% { opacity: 0; transform: translateX(-20px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes logoDrop {
+    0% { opacity: 0; transform: translateY(-30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.auth-animate-card { animation: cardEntry 0.5s ease-out forwards; }
+.auth-logo-animate { animation: logoDrop 0.6s ease-out forwards; }
+.auth-field { opacity: 0; animation: fieldAssemble 0.4s ease-out forwards; }
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.15s; }
+.delay-3 { animation-delay: 0.2s; }
+.delay-4 { animation-delay: 0.25s; }
+.delay-5 { animation-delay: 0.3s; }
+.delay-6 { animation-delay: 0.35s; }
+.delay-7 { animation-delay: 0.4s; }
+
+/* --- ÚNICA MEJORA: INPUTS Y PLACEHOLDERS --- */
+
+.login-card input, 
+.login-card select {
+    width: 100% !important;
+    padding: 14px 18px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    background-color: #ffffff !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    transition: all 0.25s ease !important;
+    outline: none !important;
+}
+
+.login-card input::placeholder {
+    color: #94a3b8 !important;
+    font-size: 0.85rem !important;
+    font-weight: 400 !important;
+    opacity: 0.8 !important;
+}
+
+.login-card input:focus {
+    border-color: var(--accent-color, #d97706) !important;
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1) !important;
+}
+
+.login-card input:focus::placeholder {
+    opacity: 0.8 !important;
+}

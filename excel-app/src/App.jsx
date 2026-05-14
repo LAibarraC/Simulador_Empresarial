@@ -29,37 +29,24 @@ function App() {
   const isAuth = usuario !== null;
 
   return (
-    // 👇 2. ENVOLVEMOS TODA LA APLICACIÓN CON EL DATAPROVIDER
-    <DataProvider usuario={usuario}>
-      <Router>
+    <Router>
+      <DataProvider usuario={usuario}>
         <div className="App">
-
-          <>
-            <Toaster position="bottom-right" />
-          </>
+          <Toaster position="bottom-right" />
           
-          {/* Menú de navegación unificado */}
-         {/* Menú de navegación unificado */}
           {isAuth && (
             <header style={{ width: '100%' }}>
-              {/* Le pasamos la variable 'usuario' como prop al componente Menu */}
               <Menu usuario={usuario} /> 
             </header>
           )}
 
-         {/* Contenido que cambia según la ruta */}
           <div className="content">
             <Routes>
               {!isAuth ? (
                 <>
-                  {/* 🆕 3. Pasamos setUsuario a tus puertas de acceso en lugar de setIsAuth */}
                   <Route path="/login" element={<Login onLogin={setUsuario} />} />
-                  
-                  {/* 🆕 NUEVO: Añadimos la ruta del Registro aquí */}
                   <Route path="/registro" element={<Registro />} />
-                  
                   <Route path="/lti-tester" element={<LtiTester onLogin={setUsuario} />} />
-                  
                   <Route path="*" element={<Navigate to="/login" />} />
                 </>
               ) : (
@@ -67,28 +54,23 @@ function App() {
                   <Route path="/" element={<Inicio />} />
                   <Route path="/archivos" element={<Archivos usuario={usuario} />} />
                   <Route path="/calculadora" element={<Calculadora />} />
-                  <Route path="/historial" element={<Historial />} />
+                  <Route path="/MAT251" element={<MAT251 usuario={usuario} />} />
+                  <Route path="/historial" element={<Historial usuario={usuario} />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/perfil" element={<Perfil usuario={usuario} setUsuario={setUsuario} />} />
 
                   <Route path="/lti-tester" element={<Navigate to="/" />} />
                   <Route path="/login" element={<Navigate to="/" />} />
-                  
-                  {/* 🆕 NUEVO: Si ya inició sesión y trata de registrarse, lo mandamos al inicio */}
                   <Route path="/registro" element={<Navigate to="/" />} />
-                  
-                  <Route path="/MAT251" element={<MAT251 usuario={usuario} />} />
-
-                  <Route path="/perfil" element={<Perfil usuario={usuario} setUsuario={setUsuario} />} />
                 </>
               )}
             </Routes>
           </div>
           
           {isAuth && <Pie_pagina />}
-
         </div>
-      </Router>
-    </DataProvider>
+      </DataProvider>
+    </Router>
   );
 }
 

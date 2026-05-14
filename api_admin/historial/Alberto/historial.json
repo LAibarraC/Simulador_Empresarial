@@ -1,0 +1,32 @@
+[
+    {
+        "id": "HIST_1778786579",
+        "fecha": "14/05/2026",
+        "hora": "15:22:59",
+        "calculo": "frecuencias_completas",
+        "archivo_origen": "Datos_Calculo_20260514_525.xlsx.xlsx",
+        "columna_x": "Variable 1",
+        "columna_y": "",
+        "hoja": 0
+    },
+    {
+        "id": "HIST_1778786136",
+        "fecha": "14/05/2026",
+        "hora": "15:15:36",
+        "calculo": "frecuencias_completas",
+        "archivo_origen": "Probabilidad Condicional.xlsx",
+        "columna_x": "Variable 1",
+        "columna_y": "Edad (Entero)",
+        "hoja": 0
+    },
+    {
+        "id": "HIST_1778772591",
+        "fecha": "14/05/2026",
+        "hora": "11:29:51",
+        "calculo": "frecuencias_completas",
+        "archivo_origen": "Probabilidad Condicional.xlsx",
+        "columna_x": "ID",
+        "columna_y": "Edad (Entero)",
+        "hoja": 0
+    }
+]
