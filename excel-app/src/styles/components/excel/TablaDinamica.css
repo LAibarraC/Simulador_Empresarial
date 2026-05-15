@@ -1,264 +1,275 @@
-.editor_text {
-    width: 100%;
-    border: none;
-    padding: 0 5px;
-    outline: none;
-    background: transparent;
-    color: inherit;
-    text-align: center;
-}
-
-.columnas_editor {
-    width: 100%;
-    border: none;
-    background: transparent;
-    color: inherit;
-    font-Weight: bold; 
-    outline: none;
-    text-Align: center;
-}
+/* ============================================
+   TABLA DINÁMICA - ESTILOS PRINCIPALES
+   ============================================ */
 
 .container_tablas_Dinamica {
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    border-Radius: 8px;
-    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg-main, #f7fafc);
 }
 
+/* --- TÍTULO --- */
 .titulo_tabla {
-    margin-Top: 0;
-    color: var(--primary-color);
-    
+    color: var(--primary-color, #2d3748);
+    font-size: 1.2rem;
+    text-align: center;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
 }
 
+/* --- INPUT NOMBRE ARCHIVO --- */
 .container_input {
-    margin-Bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .container_input label {
-    display: block;
-    margin-Bottom: 5px;
-    font-Weight: bold;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main, #4a5568);
 }
 
 .container_input_datos {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 6px;
 }
 
 .container_input_datos input {
     flex: 1;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border: 1px solid var(--border-color, #cbd5e0);
     border-radius: 6px;
-    font-size: 14px;
-    background-color: var(--bg-input, #ffffff);
-    color: var(--text-main, #2d3748);
-    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    outline: none;
 }
 
 .container_input_datos input:focus {
-    outline: none;
-    border-color: var(--accent-color, #3182ce);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+    border-color: var(--primary-color, #4a5568);
+    box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
 }
 
 .container_input_datos span {
-    align-Self: center;
-    color: var(--text-muted);
-}
-
-.container_herramientas {
-    margin-Bottom: 15px;
-    display: flex;
-    gap: 10px;
-    flex-Wrap: wrap;
-}
-
-.button_fila_columna {
-    background-Color: var(--bg-input, #ffffff);
-    color: var(--text-main, #2d3748);
-    border: 1px solid var(--border-color, #cbd5e0);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.button_fila_columna:hover {
-    background-color: color-mix(in srgb, var(--accent-color, #3182ce) 10%, transparent);
-    border-color: var(--accent-color, #3182ce);
-    color: var(--accent-color, #3182ce);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.1);
-}
-
-.button_eliminar_fila {
-    background-Color: var(--bg-input, #ffffff);
-    color: var(--error-color, #e53e3e);
-    border: 1px solid var(--border-color, #cbd5e0);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.button_eliminar_fila:hover {
-    background-color: color-mix(in srgb, var(--error-color, #e53e3e) 10%, transparent);
-    border-color: var(--error-color, #e53e3e);
-    color: var(--error-color, #e53e3e);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(229, 62, 62, 0.1);
-}
-
-.button_guardar {
-    background-Color: var(--accent-color, #3182ce);
-    color: white;
-    border: none;
-    font-size: 13px;
+    color: var(--text-muted, #718096);
+    font-size: 0.9rem;
     font-weight: 600;
-    padding: 8px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
 }
 
-.button_guardar:hover:not(:disabled) {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(49, 130, 206, 0.3);
-}
-
-.button_guardar:disabled {
-    background-color: var(--text-muted, #a0aec0);
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.mensaje {
-    margin-Bottom: 15px;
-    font-Weight: bold;
-}
-
-.container_grilla {
-    height: 400px;
-    border: 1px solid var(--border-color);
-}
-
-.container_grilla .rdg-cell {
-    text-align: center;
-}
-
-.informacion_grilla {
-    margin-top: 10px;
-    font-size: 0.8em;
-    color: var(--text-muted);
-}
-
-/* Estilos para el Generador de Matriz */
+/* --- GENERADOR DE MATRIZ --- */
 .generador_matriz_container {
-    background-color: transparent;
-    border: 1px solid color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
-    border-radius: 5px;
-    padding: 10px 20px;
-    margin-top: 15px;
-    margin-bottom: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 10px;
+    padding: 15px 20px;
 }
 
 .generador_matriz_inputs {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    align-items: flex-end;
+    gap: 15px;
     flex-wrap: wrap;
 }
 
 .input_group_matriz {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
 }
 
 .input_group_matriz label {
     font-size: 0.75rem;
-    font-weight: bold;
-    color: var(--text-main, #4a5568);
-    letter-spacing: 0.5px;
+    font-weight: 700;
+    color: var(--text-muted, #718096);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .input_matriz {
-    width: 110px;
-    padding: 5px 20px;
+    padding: 8px 12px;
     border: 1px solid var(--border-color, #cbd5e0);
-    border-radius: 5px;
-    background-color: var(--bg-card, #ffffff);
-    color: var(--text-main, #2d3748);
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
-    transition: all 0.2s ease;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    width: 120px;
+    outline: none;
+    box-sizing: border-box;
 }
 
 .input_matriz:focus {
-    outline: none;
-    border-color: var(--accent-color, #3182ce);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+    border-color: var(--primary-color, #4a5568);
 }
 
 .button_generar_matriz {
-    background-color: var(--accent-color, #3182ce);
+    background-color: var(--primary-color, #4a5568);
     color: white;
     border: none;
-    border-radius: 5px;
-    padding: 5px 25px;
+    padding: 9px 18px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.9rem;
     cursor: pointer;
-    margin-top: 22px; 
-    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
+.button_generar_matriz:hover {
+    background-color: #2d3748;
+}
 
-/* Modal de Configuración de Columnas */
+/* --- BARRA DE HERRAMIENTAS --- */
+.container_herramientas {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 15px;
+    background: white;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 10px;
+}
+
+.container_herramientas button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.button_fila_columna {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    border: 1px solid #bee3f8 !important;
+}
+
+.button_fila_columna:hover {
+    background-color: #bee3f8;
+}
+
+.button_eliminar_fila {
+    background-color: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fed7d7 !important;
+}
+
+.button_eliminar_fila:hover {
+    background-color: #fed7d7;
+}
+
+.button_guardar {
+    background-color: #48bb78;
+    color: white;
+    border: none !important;
+}
+
+.button_guardar:hover {
+    background-color: #38a169;
+}
+
+.button_guardar:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+}
+
+/* --- GRILLA --- */
+.container_grilla {
+    flex: 1;
+    min-height: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.celda_error {
+    background-color: #fff5f5 !important;
+    color: #c53030 !important;
+}
+
+.informacion_grilla {
+    font-size: 0.8rem;
+    color: var(--text-muted, #718096);
+    margin: 0;
+    text-align: center;
+}
+
+/* ============================================
+   MODAL DE CONFIGURACIÓN DE COLUMNA
+   ============================================ */
+
 .modal_overlay_col {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 9999;
+    justify-content: center;
+    z-index: 1000;
 }
 
 .modal_content_col {
-    background: var(--bg-card, #ffffff);
+    background: white;
+    width: 420px;
+    max-width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 14px;
     padding: 24px;
-    border-radius: 8px;
-    width: 320px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    box-sizing: border-box;
 }
 
 .modal_content_col h4 {
-    margin: 0;
+    margin: 0 0 4px 0;
     color: var(--primary-color, #2d3748);
-    font-size: 1.2rem;
-    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
 }
 
+.modal_close_btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: #f1f5f9;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    color: #718096;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.modal_close_btn:hover {
+    background: #e2e8f0;
+    color: #2d3748;
+}
+
+/* --- FORMULARIO DEL MODAL --- */
 .form_group_col {
     display: flex;
     flex-direction: column;
@@ -271,114 +282,130 @@
     color: var(--text-main, #4a5568);
 }
 
-.form_group_col input, .form_group_col select {
+.form_group_col input,
+.form_group_col select {
     padding: 8px 10px;
     border: 1px solid var(--border-color, #cbd5e0);
     border-radius: 6px;
     font-size: 0.95rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    background: white;
 }
 
-.button_guardar_col {
-    background-color: var(--accent-color, #3182ce);
+.form_group_col input:focus,
+.form_group_col select:focus {
+    border-color: var(--primary-color, #4a5568);
+    box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+}
+
+/* --- DOS INPUTS EN FILA --- */
+.row_inputs_col {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.row_inputs_col .form_group_col {
+    flex: 1;
+    min-width: 0;
+}
+
+/* --- SECCIÓN GENERADOR ALEATORIO --- */
+.generador_aleatorio_section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.subtitulo_modal {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #2d3748;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.btn_generar_col_mini {
+    background: #667eea;
     color: white;
+    padding: 8px 14px;
     border: none;
-    border-radius: 6px;
-    padding: 10px;
+    border-radius: 7px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn_generar_col_mini:hover {
+    background: #5a67d8;
+}
+
+/* --- BOTONES DEL FOOTER DEL MODAL --- */
+.button_guardar_col {
+    background-color: var(--primary-color, #4a5568);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
 }
 
 .button_guardar_col:hover {
-    filter: brightness(1.1);
+    background-color: #2d3748;
 }
 
 .button_eliminar_col_esp {
-    background-color: var(--error-color, #e53e3e);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px;
+    background-color: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fed7d7;
+    padding: 10px 16px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 10px;
-    flex: 1;
+    transition: all 0.2s;
+    font-size: 0.9rem;
 }
 
 .button_eliminar_col_esp:hover {
-    filter: brightness(1.1);
-}
-
-.btn_config_columna {
-    transition: color 0.2s ease, transform 0.1s ease;
+    background-color: #fed7d7;
 }
 
 .btn_config_columna:hover {
-    color: var(--accent-color, #3182ce) !important;
-    transform: scale(1.1);
+    color: var(--primary-color, #4a5568) !important;
 }
 
-/* Estilos para el selector de categoría en las celdas */
-.select_categoria {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: transparent;
-    outline: none;
-    text-align: center;
-    cursor: pointer;
-    color: inherit;
-    font-family: inherit;
-}
-
-.select_categoria option {
-    background-color: var(--bg-card, #ffffff);
-    color: var(--text-main, #333333);
-    text-align: center;
-}
-
-/* Validación de Celdas */
-.celda_error {
-    background-color: rgba(229, 62, 62, 0.9) !important; /* Rojo intenso */
-    color: white !important;
-    font-weight: bold;
-}
-
-/* Ocultar flechas en inputs numéricos (spin buttons) */
-input[type="number"]::-webkit-inner-spin-button, 
-input[type="number"]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
-}
-
-input[type="number"] {
-    -moz-appearance: textfield; /* Firefox */
-}
-
-/* Responsividad para móviles */
-@media (max-width: 600px) {
-    .generador_matriz_inputs {
-        justify-content: center;
-    }
-    
-    .button_generar_matriz {
-        width: 100%;
-        margin-top: 15px;
-    }
-
-    /* Mejora de la barra de herramientas para móviles */
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
     .container_herramientas {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
 
-    /* El tercer botón (Agregar Variable) toma el ancho completo */
     .container_herramientas button:nth-child(3) {
         grid-column: span 2;
     }
 
-    /* Las estadísticas (Variables: X, Observaciones: Y) se centran abajo */
     .container_herramientas > div:nth-child(4) {
         grid-column: span 2;
         justify-content: center;
@@ -386,15 +413,18 @@ input[type="number"] {
         margin-top: 5px;
     }
 
-    /* Ocultar el espaciador vacío */
     .container_herramientas > div:nth-child(5) {
         display: none;
     }
 
-    /* El botón Guardar Tabla toma el ancho completo y se centra */
     .container_herramientas .button_guardar {
         grid-column: span 2;
         width: 100%;
         margin-top: 5px;
+    }
+
+    .button_generar_matriz {
+        width: 100%;
+        margin-top: 15px;
     }
 }

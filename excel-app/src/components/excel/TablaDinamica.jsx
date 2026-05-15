@@ -125,6 +125,14 @@ export default function TablaDinamica({ onTablaCreada }) {
   const [inputFilas, setInputFilas] = useState("");
   const [inputColumnas, setInputColumnas] = useState("");
 
+  // Estados temporales para el modal de configuración de regla aleatoria
+  const [modalGenTipo, setModalGenTipo] = useState("uniforme");
+  const [modalGenFormato, setModalGenFormato] = useState("flotante");
+  const [modalGenMin, setModalGenMin] = useState("0");
+  const [modalGenMax, setModalGenMax] = useState("100");
+  const [modalGenMedia, setModalGenMedia] = useState("50");
+  const [modalGenDesv, setModalGenDesv] = useState("10");
+
   const [columns, setColumns] = useState([
     {
       key: "obs",
@@ -216,16 +224,95 @@ export default function TablaDinamica({ onTablaCreada }) {
     if (rows.length > 0) setRows(rows.slice(0, -1));
   };
 
+  // --- LÓGICA DE GENERACIÓN ALEATORIA (REGLAS POR VARIABLE) ---
+  
+  const calcularValorAleatorio = (regla) => {
+    if (!regla || !regla.tipo) return "";
+    
+    let valor;
+    if (regla.tipo === "uniforme") {
+      const min = parseFloat(regla.min) || 0;
+      const max = parseFloat(regla.max) || 100;
+      valor = Math.random() * (max - min) + min;
+    } else {
+      // Normal (Box-Muller)
+      const mean = parseFloat(regla.media) || 0;
+      const stdDev = parseFloat(regla.desv) || 1;
+      const u = 1 - Math.random();
+      const v = Math.random();
+      const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+      valor = z * stdDev + mean;
+    }
+
+    if (regla.formato === "entero") return Math.round(valor);
+    return parseFloat(valor.toFixed(2));
+  };
+
+  const handleLlenarColumnaActual = () => {
+    if (rows.length === 0) {
+      alerta.warning("Sin filas", "Agrega filas antes de generar datos.");
+      return;
+    }
+
+    const reglaActual = {
+      tipo: modalGenTipo,
+      formato: modalGenFormato,
+      min: modalGenMin,
+      max: modalGenMax,
+      media: modalGenMedia,
+      desv: modalGenDesv
+    };
+
+    const updatedRows = rows.map(row => ({
+      ...row,
+      [configColId]: String(calcularValorAleatorio(reglaActual))
+    }));
+
+    setRows(updatedRows);
+    alerta.exito("Columna Generada", `Se llenaron ${updatedRows.length} celdas.`);
+  };
+
   // --- GENERAR MATRIZ AUTOMÁTICA ---
   const cargarMatriz = () => {
     const numFilas = parseInt(inputFilas, 10);
     const numCols = parseInt(inputColumnas, 10);
 
-    if (isNaN(numFilas) || isNaN(numCols) || numFilas <= 0 || numCols <= 0) {
-      alerta.error("Valores inválidos", "Ingresa números mayores a 0 para filas y columnas.");
+    if (isNaN(numFilas) || numFilas <= 0) {
+      alerta.error("Valor inválido", "Ingresa un número de filas mayor a 0.");
       return;
     }
 
+    // Caso 1: Solo queremos agregar más filas a la estructura actual
+    if (isNaN(numCols) || numCols <= 0) {
+      if (rows.length > 0) {
+        const diff = numFilas - rows.length;
+        if (diff > 0) {
+          const nuevasFilas = [...rows];
+          for (let i = 0; i < diff; i++) {
+            const row = {};
+            columns.forEach(col => {
+              if (col.key === "obs") return;
+              if (col.randomRule) {
+                row[col.key] = String(calcularValorAleatorio(col.randomRule));
+              } else {
+                row[col.key] = "";
+              }
+            });
+            nuevasFilas.push(row);
+          }
+          setRows(nuevasFilas);
+          alerta.exito("Filas agregadas", `Se han sumado ${diff} nuevas observaciones.`);
+          return;
+        } else {
+          alerta.warning("Sin cambios", "El número de observaciones es menor o igual al actual.");
+          return;
+        }
+      }
+      alerta.error("Faltan columnas", "Define el número de variables para generar la matriz.");
+      return;
+    }
+
+    // Caso 2: Generar matriz completa o ajustar tamaño
     const nuevasColumnas = [
       {
         key: "obs",
@@ -243,28 +330,37 @@ export default function TablaDinamica({ onTablaCreada }) {
 
     for (let i = 0; i < numCols; i++) {
       const existingCol = columns.find(c => c.key === i.toString());
-      if (existingCol) {
-        nuevasColumnas.push(existingCol);
-      } else {
-        nuevasColumnas.push({
-          key: i.toString(),
-          name: `Var ${i + 1}`,
-          renderEditCell: textEditor,
-          editable: true,
-          resizable: true,
-          width: 150,
-          minWidth: 150
-        });
-      }
+      nuevasColumnas.push({
+        key: i.toString(),
+        name: existingCol ? existingCol.name : `Var ${i + 1}`,
+        renderEditCell: textEditor,
+        dataType: existingCol ? existingCol.dataType : "numero",
+        randomRule: existingCol ? existingCol.randomRule : null,
+        editable: true,
+        resizable: true,
+        width: 150,
+        minWidth: 150
+      });
     }
 
     const nuevasFilas = [];
     for (let i = 0; i < numFilas; i++) {
       const row = {};
-      const existingRow = rows[i]; // Preservamos los datos de la fila si ya existía
-      for (let j = 0; j < numCols; j++) {
-        row[j.toString()] = existingRow && existingRow[j.toString()] !== undefined ? existingRow[j.toString()] : "";
-      }
+      const existingRow = rows[i];
+      nuevasColumnas.forEach(col => {
+        if (col.key === "obs") return;
+        
+        // Si la celda ya existe y tiene datos, los mantenemos
+        if (existingRow && existingRow[col.key] !== undefined && existingRow[col.key] !== "") {
+          row[col.key] = existingRow[col.key];
+        } 
+        // Si es una celda nueva o vacía y la columna tiene regla, generamos
+        else if (col.randomRule) {
+          row[col.key] = String(calcularValorAleatorio(col.randomRule));
+        } else {
+          row[col.key] = "";
+        }
+      });
       nuevasFilas.push(row);
     }
 
@@ -338,22 +434,38 @@ export default function TablaDinamica({ onTablaCreada }) {
     }
 
     setLoading(true);
+    
     const datosLimpios = filasValidas.map(row => {
       let obj = {};
       columnasVariables.forEach(col => {
         const val = row[col.key];
-        obj[col.name] = (val !== undefined && val !== null) ? String(val) : "";
+        
+        // Si el valor es nulo o indefinido, guardamos cadena vacía
+        if (val === undefined || val === null || String(val).trim() === "") {
+          obj[col.name] = "";
+        } else {
+          // Si la columna es de tipo número, intentamos guardarlo como número real
+          if (col.dataType === 'numero') {
+            const num = Number(val);
+            obj[col.name] = !isNaN(num) ? num : String(val);
+          } else {
+            obj[col.name] = String(val);
+          }
+        }
       });
       return obj;
     });
 
     try {
-      await api.guardarTabla(nombre, datosLimpios, usuario?.nombre);
-      alerta.success(`Guardado: ${nombre}.xlsx`, "Datos almacenados correctamente.");
+      // Usamos el nombre del usuario logueado como autor
+      const autorFinal = usuario?.nombre || "Anonimo";
+      
+      await api.guardarTabla(nombre, datosLimpios, autorFinal);
+      alerta.success(`¡Guardado!`, `${nombre}.xlsx se guardó correctamente.`);
       if (onTablaCreada) onTablaCreada();
     } catch (err) {
-      console.error(err);
-      alerta.error("Error", "No se pudo guardar la tabla.");
+      console.error("Error al guardar tabla:", err);
+      alerta.error("Error al guardar", "No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
     }
@@ -512,6 +624,23 @@ export default function TablaDinamica({ onTablaCreada }) {
             onClick={() => {
               setConfigColId(col.key);
               setTempOpciones((col.opciones || []).join(", "));
+              // Cargar valores actuales de la regla si existen
+              if (col.randomRule) {
+                setModalGenTipo(col.randomRule.tipo);
+                setModalGenFormato(col.randomRule.formato);
+                setModalGenMin(col.randomRule.min);
+                setModalGenMax(col.randomRule.max);
+                setModalGenMedia(col.randomRule.media);
+                setModalGenDesv(col.randomRule.desv);
+              } else {
+                // Reset a valores por defecto
+                setModalGenTipo("uniforme");
+                setModalGenFormato("flotante");
+                setModalGenMin("0");
+                setModalGenMax("100");
+                setModalGenMedia("50");
+                setModalGenDesv("10");
+              }
             }}
             style={{
               background: 'none', border: 'none', cursor: 'pointer', padding: '0', color: '#718096', display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -535,31 +664,9 @@ export default function TablaDinamica({ onTablaCreada }) {
     <div className="container_tablas_Dinamica">
       {/* MODAL DE CONFIGURACIÓN DE COLUMNA */}
       {configColId && colConfiguracion && (
-        <div className="modal_overlay_col">
-          <div className="modal_content_col" style={{ position: 'relative' }}>
-            <button
-              onClick={() => setConfigColId(null)}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--text-muted, #a0aec0)',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%',
-                transition: 'background-color 0.2s, color 0.2s'
-              }}
-              title="Cerrar"
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; e.currentTarget.style.color = 'var(--error-color, #e53e3e)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-muted, #a0aec0)'; }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
+        <div className="modal_overlay_col" onClick={() => setConfigColId(null)}>
+          <div className="modal_content_col" onClick={(e) => e.stopPropagation()}>
+            <button className="modal_close_btn" onClick={() => setConfigColId(null)}>&times;</button>
             <h4>Configurar Variable</h4>
 
             <div className="form_group_col">
@@ -570,6 +677,7 @@ export default function TablaDinamica({ onTablaCreada }) {
                   const val = e.target.value;
                   setColumns(prev => prev.map(c => c.key === configColId ? { ...c, name: val } : c));
                 }}
+                placeholder="Ej: Edad"
               />
             </div>
 
@@ -600,22 +708,98 @@ export default function TablaDinamica({ onTablaCreada }) {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            {/* SECCIÓN GENERADOR ALEATORIO DENTRO DE CONFIGURACIÓN */}
+            {colConfiguracion.dataType === 'numero' && (
+              <div className="generador_aleatorio_section">
+                <h5 className="subtitulo_modal">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                  Configurar Regla Aleatoria
+                </h5>
+                
+                <div className="form_group_col">
+                  <label>Distribución</label>
+                  <select value={modalGenTipo} onChange={(e) => setModalGenTipo(e.target.value)}>
+                    <option value="uniforme">Uniforme (Rango)</option>
+                    <option value="normal">Normal (Media/Desv)</option>
+                  </select>
+                </div>
+
+                <div className="form_group_col">
+                  <label>Tipo de Número</label>
+                  <select value={modalGenFormato} onChange={(e) => setModalGenFormato(e.target.value)}>
+                    <option value="flotante">Flotante (2 dec.)</option>
+                    <option value="entero">Entero</option>
+                  </select>
+                </div>
+
+                {modalGenTipo === 'uniforme' ? (
+                  <div className="row_inputs_col">
+                    <div className="form_group_col">
+                      <label>Min</label>
+                      <input type="number" value={modalGenMin} onChange={(e) => setModalGenMin(e.target.value)} placeholder="0" />
+                    </div>
+                    <div className="form_group_col">
+                      <label>Max</label>
+                      <input type="number" value={modalGenMax} onChange={(e) => setModalGenMax(e.target.value)} placeholder="100" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="row_inputs_col">
+                    <div className="form_group_col">
+                      <label>Media (μ)</label>
+                      <input type="number" value={modalGenMedia} onChange={(e) => setModalGenMedia(e.target.value)} placeholder="50" />
+                    </div>
+                    <div className="form_group_col">
+                      <label>Desv. (σ)</label>
+                      <input type="number" value={modalGenDesv} onChange={(e) => setModalGenDesv(e.target.value)} placeholder="10" />
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '15px' }}>
+                  <button 
+                    className="btn_generar_col_mini"
+                    onClick={handleLlenarColumnaActual}
+                    title="Llenar las filas actuales con datos aleatorios"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline></svg>
+                    Generar Datos
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '5px' }}>
               <button
                 className="button_guardar_col"
-                style={{ flex: 1 }}
+                style={{ flex: 1, margin: 0 }}
                 onClick={() => {
-                  if (colConfiguracion.dataType === 'categoria') {
-                    const arrOpciones = tempOpciones.split(",").map(s => s.trim()).filter(s => s);
-                    setColumns(prev => prev.map(c => c.key === configColId ? { ...c, opciones: arrOpciones } : c));
-                  }
+                  const arrOpciones = colConfiguracion.dataType === 'categoria' 
+                    ? tempOpciones.split(",").map(s => s.trim()).filter(s => s)
+                    : [];
+                  
+                  setColumns(prev => prev.map(c => c.key === configColId ? { 
+                    ...c, 
+                    opciones: arrOpciones,
+                    // Guardamos la regla de generación en la columna
+                    randomRule: colConfiguracion.dataType === 'numero' ? {
+                      tipo: modalGenTipo,
+                      formato: modalGenFormato,
+                      min: modalGenMin,
+                      max: modalGenMax,
+                      media: modalGenMedia,
+                      desv: modalGenDesv
+                    } : null
+                  } : c));
+                  
                   setConfigColId(null);
                 }}
               >
-                Listo
+                Guardar
               </button>
               <button
                 className="button_eliminar_col_esp"
+                style={{ margin: 0 }}
                 onClick={() => eliminarColumnaEspecifica(configColId)}
               >
                 Eliminar
