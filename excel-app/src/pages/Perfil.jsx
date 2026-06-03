@@ -24,6 +24,36 @@ export default function Perfil({ usuario, setUsuario }) {
   const [passEliminar, setPassEliminar] = useState("");
   const [palabraConfirmacion, setPalabraConfirmacion] = useState("");
 
+  // --- ESTADOS PARA ESTADÍSTICAS REALES ---
+  const [numCalculos, setNumCalculos] = useState(0);
+  const [numArchivos, setNumArchivos] = useState(0);
+  const [cargandoStats, setCargandoStats] = useState(true);
+
+  useEffect(() => {
+    if (!usuario) return;
+
+    const cargarStats = async () => {
+      try {
+        setCargandoStats(true);
+        // Obtener historial
+        const resHistorial = await api.obtenerHistorial(usuario.nombre);
+        const totalCalculos = resHistorial && resHistorial.historial ? resHistorial.historial.length : 0;
+        setNumCalculos(totalCalculos);
+
+        // Obtener archivos personales
+        const resArchivos = await api.obtenerArchivos(usuario.nombre, "personal");
+        const totalArchivos = resArchivos && resArchivos.files ? resArchivos.files.length : 0;
+        setNumArchivos(totalArchivos);
+      } catch (error) {
+        console.error("Error al cargar estadísticas del perfil:", error);
+      } finally {
+        setCargandoStats(false);
+      }
+    };
+
+    cargarStats();
+  }, [usuario]);
+
   useEffect(() => {
     if (usuario && usuario.rol === "Administrador") {
       cargarUsuarios();
@@ -177,11 +207,15 @@ export default function Perfil({ usuario, setUsuario }) {
 
           <div className="perfil-stats-container">
             <div className="perfil-stat-box">
-              <h4 style={{ margin: 0, fontSize: '1.6rem', color: 'var(--primary-color)' }}>12</h4>
+              <h4 style={{ margin: 0, fontSize: '1.6rem', color: 'var(--primary-color)' }}>
+                {cargandoStats ? "..." : numCalculos}
+              </h4>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Cálculos Guardados</p>
             </div>
             <div className="perfil-stat-box">
-              <h4 style={{ margin: 0, fontSize: '1.6rem', color: 'var(--primary-color)' }}>5</h4>
+              <h4 style={{ margin: 0, fontSize: '1.6rem', color: 'var(--primary-color)' }}>
+                {cargandoStats ? "..." : numArchivos}
+              </h4>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Archivos Excel</p>
             </div>
           </div>
@@ -190,7 +224,7 @@ export default function Perfil({ usuario, setUsuario }) {
 
           <div className="perfil-buttons-container">
             <button
-              onClick={() => navigate('/calculos')}
+              onClick={() => navigate('/calculadora')}
               className="perfil-button-secondary"
             >
               Volver a la Calculadora

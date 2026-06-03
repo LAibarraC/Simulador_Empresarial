@@ -6,6 +6,60 @@ import { useData } from "../../components/excel/DataContext";
 import Principal from '../../components/MAT251/Principal/Principal';
 import "../../styles/pages/MAT251/Pantalla.css";
 
+const TypingTitle = () => {
+  const fullText = "Estadística Matemática (MAT251)";
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [speed, setSpeed] = useState(100);
+
+  useEffect(() => {
+    let timer;
+    const handleType = () => {
+      if (!isDeleting) {
+        setDisplayText((current) => {
+          if (current.length < fullText.length) {
+            setSpeed(100);
+            return fullText.substring(0, current.length + 1);
+          } else {
+            setIsDeleting(true);
+            setSpeed(2500);
+            return current;
+          }
+        });
+      } else {
+        setDisplayText((current) => {
+          if (current.length > 0) {
+            setSpeed(40);
+            return fullText.substring(0, current.length - 1);
+          } else {
+            setIsDeleting(false);
+            setSpeed(500);
+            return current;
+          }
+        });
+      }
+    };
+
+    timer = setTimeout(handleType, speed);
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, speed]);
+
+  return (
+    <h2 
+      className="restricted-title" 
+      style={{ 
+        fontSize: "1.6rem", 
+        color: "var(--text-main)", 
+        margin: "0 0 10px 0", 
+        fontWeight: "700"
+      }}
+    >
+      {displayText}
+      <span className="typing-cursor">|</span>
+    </h2>
+  );
+};
+
 export default function Pantalla() {
   const { usuario } = useData();
   const navigate = useNavigate();
@@ -115,9 +169,7 @@ export default function Pantalla() {
             </div>
           </div>
 
-          <h2 className="restricted-title" style={{ fontSize: "1.6rem", color: "var(--text-main)", margin: "0 0 10px 0", fontWeight: "700" }}>
-            Estadística Matemática (MAT251)
-          </h2>
+          <TypingTitle />
           
           <div 
             style={{ 
@@ -139,7 +191,7 @@ export default function Pantalla() {
           </div>
 
           <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", lineHeight: "1.6", margin: "0 0 25px 0" }}>
-            Este módulo se encuentra en fase de desarrollo por el departamento técnico. Estará disponible próximamente.
+            Este módulo se encuentra en fase de desarrollo. Estará disponible próximamente.
           </p>
 
           {/* Contador de Tiempo */}

@@ -34,12 +34,14 @@
 }
 
 .perfil-stat-box {
-  background-color: var(--bg-main);
+  background-color: transparent;
   padding: 15px;
-  border-radius: 8px;
   flex: 1;
   text-align: center;
-  border: 1px solid var(--border-color);
+}
+
+.perfil-stat-box:not(:last-child) {
+  border-right: 1px solid var(--border-color);
 }
 
 .perfil-buttons-container {
@@ -50,18 +52,25 @@
 
 .perfil-button-secondary {
   flex: 1;
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
+  background-color: var(--primary-color, #3498db);
+  color: white;
+  border: none;
   padding: 12px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
 }
 
 .perfil-button-secondary:hover {
-  background-color: var(--bg-input);
+  background-color: var(--primary-hover, #2980b9);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+}
+
+.perfil-button-secondary:active {
+  transform: translateY(0);
 }
 
 .perfil-button-danger {
@@ -73,11 +82,18 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
 
 .perfil-button-danger:hover {
-  opacity: 0.9;
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
+}
+
+.perfil-button-danger:active {
+  transform: translateY(0);
 }
 
 .perfil-security-form {
@@ -248,6 +264,11 @@ html.dark .admin-users-table tr:nth-child(even) {
   
   .perfil-stat-box {
     padding: 12px !important;
+    border-right: none !important;
+  }
+  
+  .perfil-stat-box:not(:last-child) {
+    border-bottom: 1px solid var(--border-color) !important;
   }
   
   .perfil-buttons-container {

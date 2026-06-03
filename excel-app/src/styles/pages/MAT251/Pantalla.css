@@ -334,6 +334,7 @@
   }
   .restricted-title {
     font-size: 1.3rem !important;
+    min-height: 3.8rem;
   }
   .restricted-countdown {
     gap: 6px !important;
@@ -348,4 +349,23 @@
   .countdown-label {
     font-size: 0.6rem !important;
   }
+}
+
+/* ===== EFECTO DE ESCRITURA (TYPING EFFECT) ===== */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor {
+  font-weight: 300;
+  margin-left: 3px;
+  color: var(--accent-color, #f39c12);
+  animation: cursor-blink 1s step-end infinite;
+}
+
+.restricted-title {
+  text-align: center;
+  min-height: 2.5rem;
+  word-wrap: break-word;
 }

@@ -7,34 +7,37 @@ export default function BannerEntornoBeta() {
       className="banner-entorno-beta" 
       style={{
         display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        padding: "16px 20px",
-        borderRadius: "10px",
-        backgroundColor: "var(--bg-beta-banner, rgba(245, 158, 11, 0.08))",
-        border: "1px solid var(--border-beta-banner, rgba(245, 158, 11, 0.25))",
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: "15px",
+        padding: "10px 16px",
+        borderRadius: "8px",
+        backgroundColor: "var(--bg-beta-banner, rgba(245, 158, 11, 0.06))",
+        border: "1px solid var(--border-beta-banner, rgba(245, 158, 11, 0.2))",
         color: "var(--text-main, #374151)",
-        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.02)",
-        marginBottom: "20px",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.01)",
+        marginBottom: "15px",
         width: "100%",
         boxSizing: "border-box",
         textAlign: "left",
         fontFamily: "inherit"
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <IconoCohete style={{ color: "#d97706" }} />
-        <strong style={{ fontSize: "1.1rem", color: "#d97706" }}>
-          Entorno de Pruebas (Beta)
-        </strong>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.92rem", lineHeight: "1.5" }}>
-        <p style={{ margin: 0 }}>
-          <strong>Reactivación:</strong> Por inactividad de 15 min, el primer cálculo o inicio de sesión puede demorar hasta 60 segundos.
-        </p>
-        <p style={{ margin: 0 }}>
-          <strong>Archivos:</strong> Los Excel se procesan al instante para los cálculos estadísticos, pero por políticas del servidor gratuito, el archivo físico no se almacena permanentemente.
-        </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <IconoCohete style={{ color: "#d97706", width: "16px", height: "16px" }} />
+          <strong style={{ fontSize: "0.95rem", color: "#d97706" }}>
+            Entorno de Pruebas (Beta)
+          </strong>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px", fontSize: "0.85rem", lineHeight: "1.4", color: "var(--text-muted)" }}>
+          <span style={{ minWidth: "250px", flex: "1 1 auto" }}>
+            <strong>Reactivación:</strong> Por inactividad de 15 min, la carga inicial puede demorar hasta 60s.
+          </span>
+          <span style={{ minWidth: "250px", flex: "1 1 auto" }}>
+            <strong>Archivos:</strong> Los archivos Excel no se almacenan permanentemente en el servidor gratuito.
+          </span>
+        </div>
       </div>
     </div>
   );
