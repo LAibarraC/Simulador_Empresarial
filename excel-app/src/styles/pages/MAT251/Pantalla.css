@@ -311,3 +311,41 @@
 .btn-cerrar-modal:active {
   transform: translateY(0) scale(0.98);
 }
+
+/* ===== ESTILOS PARA MÓDULO RESTRINGIDO / EN DESARROLLO ===== */
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+@media (max-width: 480px) {
+  .restricted-card {
+    padding: 30px 15px !important;
+    width: 95% !important;
+  }
+  .restricted-buttons {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .restricted-title {
+    font-size: 1.3rem !important;
+  }
+  .restricted-countdown {
+    gap: 6px !important;
+  }
+  .countdown-unit {
+    min-width: 50px !important;
+    padding: 8px 4px !important;
+  }
+  .countdown-value {
+    font-size: 1.1rem !important;
+  }
+  .countdown-label {
+    font-size: 0.6rem !important;
+  }
+}

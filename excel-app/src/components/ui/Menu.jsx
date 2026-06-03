@@ -4,6 +4,7 @@ import OscuroClaro from "./oscuro_claro";
 import escudoAdmin from "../../assets/images/Logo-Adm.png";
 import '../../styles/components/ui/Menu.css';
 import { alerta } from "../../utils/Notificaciones";
+import { IconoUsuario } from "./iconos";
 
 export default function Menu({ usuario, setUsuario }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,7 @@ export default function Menu({ usuario, setUsuario }) {
   const [dropdownOpen, setDropdownOpen] = useState(false); 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const perfilRef = useRef(null);
+  const esAdmin = usuario?.rol === "Administrador" || usuario?.isAdmin === true;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -112,16 +114,31 @@ export default function Menu({ usuario, setUsuario }) {
                 </NavLink>
               </li>
               <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
-                <NavLink
-                  to="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alerta.advertencia("Próximamente", "Estadística Matemática estará disponible en una futura versión.");
-                  }}
+                <NavLink 
+                  to="/MAT251" 
+                  onClick={closeMenu} 
                   className="dropdown-item"
                   style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
                 >
-                  <span>Estadística Matemática 🔒</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    Estadística Matemática
+                    {!esAdmin && (
+                      <svg 
+                        width="14" 
+                        height="14" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                        style={{ opacity: 0.8 }}
+                      >
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                    )}
+                  </span>
                 </NavLink>
               </li>
             </ul>
@@ -153,8 +170,8 @@ export default function Menu({ usuario, setUsuario }) {
                 setMenuAbierto(!menuAbierto);
               }}
             >
-              <div className="avatar-naranja">
-                {usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : '👤'}
+              <div className="avatar-naranja" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : <IconoUsuario width="14" height="14" />}
               </div>
               <span className="user-name-text">
                 {usuario.nombre?.split(' ')[0] || 'Usuario'}

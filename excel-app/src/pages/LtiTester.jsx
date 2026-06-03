@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { IconoMatraz, IconoCheck } from '../components/ui/iconos';
 
 const LtiTester = ({ onLogin }) => {
   const query = new URLSearchParams(useLocation().search);
@@ -23,10 +24,14 @@ const LtiTester = ({ onLogin }) => {
   
   return (
     <div style={{ padding: '20px', border: '2px dashed #4A90E2', margin: '20px', textAlign: 'center' }}>
-      <h1>🧪 Panel de Verificación LTI</h1>
+      <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+        <IconoMatraz /> Panel de Verificación LTI
+      </h1>
       {name ? (
         <div style={{ background: '#e0f7fa', padding: '1rem', borderRadius: '8px', display: 'inline-block' }}>
-          <p style={{color: 'green', fontSize: '1.2rem', fontWeight: 'bold'}}>✅ Token validado por FastAPI</p>
+          <p style={{color: 'green', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}>
+            <IconoCheck /> Token validado por FastAPI
+          </p>
           <hr style={{ margin: '10px 0' }}/>
           <p><strong>Usuario institucional:</strong> {name}</p>
           <p><strong>Rol en plataforma:</strong> {role}</p>

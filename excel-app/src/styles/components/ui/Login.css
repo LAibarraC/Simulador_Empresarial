@@ -9,22 +9,37 @@
   padding: 20px;
 }
 
+@keyframes flipIn {
+  0% {
+    transform: perspective(800px) rotateY(90deg);
+  }
+  100% {
+    transform: perspective(800px) rotateY(0deg);
+  }
+}
+
+@keyframes flipOut {
+  0% {
+    transform: perspective(800px) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(800px) rotateY(-90deg);
+  }
+}
+
 .login-card {
-  /* Tu degradado original para el modo claro */
   background: linear-gradient(180deg, var(--accent-color) 0%, #ff9e2e 60%, #dfb687 100%);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 30px;
   width: 100%;
   max-width: 350px;
-  transition: background 0.3s ease, border 0.3s ease;
+  animation: flipIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  transform-origin: center;
 }
 
-/* 🆕 Cuando el modo oscuro se activa, sobrescribimos el fondo de la tarjeta */
-html.dark .login-card {
-  background: var(--bg-card); /* Usa el fondo oscuro de tu App.css */
-  border: 1px solid var(--accent-color); /* Mantenemos un toque naranja sutil en el borde */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+.login-card.flipping-out {
+  animation: flipOut 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards !important;
 }
 
 .login-card input {
@@ -34,27 +49,90 @@ html.dark .login-card {
   padding: 10px;
   font-size: 1rem;
   outline: none;
-  /* 🆕 Obligamos a los inputs a escuchar tus variables globales */
-  background-color: var(--bg-input);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
 }
 
-/* 🆕 Aseguramos que el texto (etiquetas y enlaces) contraste bien en ambos modos */
-.login-card label, 
+/* Suavizar el texto de ayuda (placeholder) */
+.login-card input::placeholder {
+  color: #a0aec0; /* Un gris muy suave y elegante */
+  opacity: 1; /* Firefox reduce la opacidad por defecto, esto lo normaliza */
+}
+
+/* Cuando el modo oscuro se activa, sobrescribimos el fondo de la tarjeta */
+html.dark .login-card {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-color);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.login-card label,
 .login-card .etiqueta,
 .login-card p {
   color: var(--text-main);
 }
 
-html.dark .login-card p,
-html.dark .login-card label {
-  color: var(--text-main);
+.registro-row {
+  display: flex;
+  gap: 15px;
+}
+
+.login-footer-link {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: 1.2s; /* Se anima al final */
+}
+
+.login-link-bold {
+  color: var(--accent-color);
+  font-weight: bold;
 }
 
 @media (max-width: 480px) {
   .login-card {
     padding: 20px;
   }
+  .registro-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .login-footer-link {
+    flex-direction: column;
+    gap: 5px;
+  }
 }
+
+/* EFECTO ARMAR CAMPOS (Build-up) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Aplicamos la animación a los hijos del formulario de forma escalonada */
+.login-card form > div,
+.login-card form > button,
+.login-card img,
+.login-card h3,
+.login-card p {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Retrasos escalonados para que caigan uno tras otro de forma más relajada */
+.login-card img { animation-delay: 0.3s; }
+.login-card h3, .login-card p { animation-delay: 0.4s; }
+.login-card form > div:nth-child(1) { animation-delay: 0.5s; }
+.login-card form > div:nth-child(2) { animation-delay: 0.65s; }
+.login-card form > div:nth-child(3) { animation-delay: 0.8s; }
+.login-card form > div:nth-child(4) { animation-delay: 0.95s; }
+.login-card form > button { animation-delay: 1.1s; }

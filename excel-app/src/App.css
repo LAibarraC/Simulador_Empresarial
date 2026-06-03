@@ -92,7 +92,10 @@ button:hover { filter: brightness(1.1); }
   box-sizing: border-box;
 }
 
-@media (max-width: 768px) { #root { padding: 1rem; } }
+@media (max-width: 768px) { 
+  #root { padding: 1rem; } 
+  .content { padding: 10px; }
+}
 
 .App {
   display: flex;

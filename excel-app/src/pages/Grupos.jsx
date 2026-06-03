@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useData } from "../components/excel/DataContext";
 import { alerta } from "../utils/Notificaciones";
 import api, { BASE_URL } from "../services/api";
+import { IconoBasura, IconoAlerta } from "../components/ui/iconos";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import escudoAdmin from "../assets/images/escudoAdmin.png";
@@ -456,7 +457,11 @@ export default function Grupos() {
                         cursor: "pointer",
                         fontWeight: "bold",
                         color: "#dc2626",
-                        transition: "all 0.2s"
+                        transition: "all 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px"
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = "#dc2626";
@@ -467,7 +472,7 @@ export default function Grupos() {
                         e.currentTarget.style.color = "#dc2626";
                       }}
                     >
-                      🗑️ Eliminar Curso
+                      <IconoBasura /> Eliminar Curso
                     </button>
                   )}
                 </div>
@@ -651,7 +656,9 @@ export default function Grupos() {
       {mostrarModalEliminar && cursoAEliminar && (
         <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
           <div style={{ background: "var(--bg-card)", padding: "30px", borderRadius: "10px", width: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", border: "1px solid rgba(220, 38, 38, 0.3)" }}>
-            <h2 style={{ marginTop: 0, color: "#dc2626" }}>⚠️ Eliminar Curso</h2>
+            <h2 style={{ marginTop: 0, color: "#dc2626", display: "flex", alignItems: "center", gap: "8px" }}>
+              <IconoAlerta /> Eliminar Curso
+            </h2>
             <p style={{ color: "var(--text-main)", fontSize: "0.95rem", marginBottom: "15px" }}>
               ¿Estás seguro de que deseas eliminar permanentemente el curso <strong>{cursoAEliminar.nombre}</strong>?
             </p>

@@ -1,0 +1,291 @@
+/* Estilos responsivos para Perfil */
+.perfil-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.grafico-card {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  min-width: 0;
+}
+
+.perfil-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  position: relative;
+  z-index: 1;
+  margin-top: 20px;
+}
+
+.perfil-stats-container {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.perfil-stat-box {
+  background-color: var(--bg-main);
+  padding: 15px;
+  border-radius: 8px;
+  flex: 1;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.perfil-buttons-container {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+.perfil-button-secondary {
+  flex: 1;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.perfil-button-secondary:hover {
+  background-color: var(--bg-input);
+}
+
+.perfil-button-danger {
+  flex: 1;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.perfil-button-danger:hover {
+  opacity: 0.9;
+}
+
+.perfil-security-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.perfil-input-group-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.danger-zone-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Panel de Administrador */
+.admin-panel-card {
+  margin-top: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  background-color: var(--bg-card);
+  padding: 30px;
+}
+
+.admin-panel-title {
+  margin: 0 0 10px 0;
+  color: var(--text-main);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.admin-panel-desc {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.admin-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.admin-users-table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  background-color: var(--bg-main);
+  overflow: hidden;
+}
+
+.admin-users-table th {
+  background-color: var(--accent-color);
+  color: white;
+  text-align: left;
+  padding: 12px;
+  font-weight: bold;
+}
+
+.admin-users-table td {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.admin-users-table tr {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-users-table tr:last-child {
+  border-bottom: none;
+}
+
+.admin-users-table tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+html.dark .admin-users-table tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.admin-user-name {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.admin-user-email {
+  color: var(--text-muted);
+}
+
+.rol-badge {
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.badge-administrador {
+  background-color: #ff4d4f;
+}
+
+.badge-docente {
+  background-color: #52c41a;
+}
+
+.badge-estudiante {
+  background-color: #1890ff;
+}
+
+.admin-users-table select {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.rol-protegido {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.perfil-seguridad-card {
+  margin-top: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  background-color: var(--bg-card);
+  padding: 30px;
+}
+
+.perfil-peligro-card {
+  margin-top: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  background-color: var(--bg-card);
+  padding: 30px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+/* ===== MEDIA QUERIES RESPONSIVOS PARA MOBILE ===== */
+@media (max-width: 580px) {
+  .perfil-container {
+    margin: 10px auto;
+    padding: 0;
+  }
+  
+  .perfil-card-content {
+    padding: 20px 15px !important;
+    margin-top: 10px !important;
+  }
+  
+  .perfil-stats-container {
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .perfil-stat-box {
+    padding: 12px !important;
+  }
+  
+  .perfil-buttons-container {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .perfil-button-secondary,
+  .perfil-button-danger {
+    width: 100% !important;
+    flex: none !important;
+    padding: 10px !important;
+  }
+  
+  .danger-zone-buttons {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .danger-zone-buttons button {
+    width: 100% !important;
+  }
+
+  .perfil-seguridad-card,
+  .perfil-peligro-card,
+  .admin-panel-card {
+    padding: 15px !important;
+    margin-top: 20px !important;
+  }
+  
+  .admin-users-table th, 
+  .admin-users-table td {
+    padding: 8px !important;
+    font-size: 0.8rem;
+  }
+  
+  .admin-users-table select {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+  }
+}

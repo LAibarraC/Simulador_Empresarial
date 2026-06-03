@@ -14,6 +14,7 @@ export default function Registro() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [isFlipping, setIsFlipping] = useState(false); // 🆕 Estado para el efecto visual al salir
   
   const navigate = useNavigate();
 
@@ -79,15 +80,23 @@ export default function Registro() {
     }
   };
 
+  const handleNavToLogin = (e) => {
+    e.preventDefault();
+    setIsFlipping(true);
+    setTimeout(() => {
+      navigate("/login");
+    }, 300); // Se navega a los 300ms (cuando está de perfil y casi invisible)
+  };
+
   return (
     <div className="login-container" style={{ padding: '20px', position: 'relative' }}>
       
-      {/* Botón en la esquina superior izquierda */}
-      <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000 }}>
+      {/* Botón en la esquina superior derecha */}
+      <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 1000 }}>
         <OscuroClaro />
       </div>
 
-      <div className="login-card" style={{ maxWidth: '500px', width: '100%' }}>
+      <div className={`login-card ${isFlipping ? 'flipping-out' : ''}`} style={{ maxWidth: '500px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <img src={logoCarrera} alt="Logo" style={{ width: '150px', height: 'auto' }} />
           <h3 style={{ marginTop: '15px', color: 'var(--text-main)' }}>Registro de Usuario</h3>
@@ -96,7 +105,7 @@ export default function Registro() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           
-          <div style={{ display: 'flex', gap: '15px' }}>
+          <div className="registro-row">
             <div style={{ textAlign: 'left', flex: 1 }}>
               <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Nombres</label>
               <input 
@@ -133,9 +142,9 @@ export default function Registro() {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '15px' }}>
+          <div className="registro-row">
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Contraseña (mínimo 6 caracteres)</label>
+              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Contraseña</label>
               <input 
                 type="password" 
                 value={pass} 
@@ -192,8 +201,9 @@ export default function Registro() {
           </button>
         </form>
 
-        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>
-          <p style={{ color: 'var(--text-main)' }}>¿Ya tienes una cuenta? <Link to="/login" style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>Inicia sesión aquí</Link></p>
+        <div className="login-footer-link">
+          <span style={{ color: 'var(--text-main)' }}>¿Ya tienes una cuenta?</span>
+          <Link to="/login" onClick={handleNavToLogin} className="login-link-bold">Inicia sesión aquí</Link>
         </div>
       </div>
     </div>

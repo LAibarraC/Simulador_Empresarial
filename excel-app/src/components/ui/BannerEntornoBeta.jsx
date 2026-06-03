@@ -1,4 +1,5 @@
 import React from "react";
+import { IconoCohete } from "./iconos";
 
 export default function BannerEntornoBeta() {
   return (
@@ -22,7 +23,7 @@ export default function BannerEntornoBeta() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <span style={{ fontSize: "1.25rem" }}>🚀</span>
+        <IconoCohete style={{ color: "#d97706" }} />
         <strong style={{ fontSize: "1.1rem", color: "#d97706" }}>
           Entorno de Pruebas (Beta)
         </strong>
