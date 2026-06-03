@@ -22,6 +22,7 @@ export default function Login({ onLogin }) {
     
     try {
       const perfil = await api.loginLocal(email, pass);
+      localStorage.setItem("token", perfil.token); // Save the JWT token
       onLogin(perfil); 
       alerta.success("Acceso concedido", `Bienvenido, ${perfil.nombre}`);
     } catch (error) {

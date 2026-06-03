@@ -64,7 +64,12 @@ for u in usuarios_iniciales:
         db.add(u)
         print(f"Usuario {u.nombre} agregado (con contraseña encriptada).")
     else:
-        print(f"El usuario {u.nombre} ya existía.")
+        existente.nombre = u.nombre
+        existente.password = u.password
+        existente.rol = u.rol
+        existente.perfil = u.perfil
+        existente.institucion = u.institucion
+        print(f"El usuario {u.nombre} ya existía. Datos y rol actualizados.")
 
 db.commit()
 print("¡Base de datos actualizada con éxito y de forma segura!")
