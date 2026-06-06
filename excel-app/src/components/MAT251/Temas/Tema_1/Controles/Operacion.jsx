@@ -20,16 +20,11 @@ export default function Operacion({ operacion, handleOperacion }) {
     
     // Íconos temáticos para las opciones
     const getIcon = (val) => {
-        if (val === 'permutacion') return (
+        if (val === 'conteo') return (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line>
-                <path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
-            </svg>
-        );
-        if (val === 'combinacion') return (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
             </svg>
         );
         if (val === 'probabilidad') return (
@@ -45,6 +40,42 @@ export default function Operacion({ operacion, handleOperacion }) {
         if (val === 'simulador_total') return (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 10h16"></path><path d="M4 14h16"></path><path d="M12 4v16"></path>
+            </svg>
+        );
+        if (val === 'regla_adicion') return (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="12" r="5"></circle>
+                <circle cx="15" cy="12" r="5"></circle>
+            </svg>
+        );
+        if (val === 'regla_multiplicacion') return (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="12" r="3"></circle>
+                <line x1="9" y1="12" x2="15" y2="12"></line>
+                <polyline points="13 10 15 12 13 14"></polyline>
+            </svg>
+        );
+        if (val === 'muestreo') return (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+        );
+        if (val === 'dist_uniforme') return (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19h16"></path>
+                <path d="M4 15h16"></path>
+                <path d="M4 15v4"></path>
+                <path d="M20 15v4"></path>
+                <path d="M4 11v-4"></path>
+                <path d="M20 11v-4"></path>
+                <path d="M4 11h16"></path>
+                <path d="M4 7h16"></path>
             </svg>
         );
         return null;

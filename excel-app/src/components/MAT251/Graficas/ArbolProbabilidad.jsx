@@ -1,12 +1,15 @@
 import React from 'react';
 import { FONT, FS, RADIUS } from '../Principal/Constantes';
 
-export default function ArbolProbabilidad({ resultado, ramas }) {
+export default function ArbolProbabilidad({ resultado, ramas, causaBayes }) {
     if (!resultado || !ramas || ramas.length === 0) return null;
 
     const height = Math.max(400, ramas.length * 140);
     const rootX = 60, rootY = height / 2, nodeAX = 420, nodeBX = 720;
-    const highlightColor = '#0ea5e9', dimColor = '#94a3b8';
+    const defaultHighlightColor = '#0ea5e9';
+    const bayesHighlightColor = '#f97316';
+    const dimColor = '#94a3b8';
+    const veryDimColor = '#cbd5e1';
 
     // Pre-calcular anchos uniformes para alineación perfecta
     let maxWPill = 80;
@@ -58,23 +61,30 @@ export default function ArbolProbabilidad({ resultado, ramas }) {
                     const midX3 = (nodeAX + nodeBX - 70) / 2;
                     const midY3 = (nodeAY + nodeAY + 35) / 2;
 
+                    const isBayesTarget = causaBayes && rama.nombre === causaBayes;
+                    const isOtherBayes = causaBayes && rama.nombre !== causaBayes;
+                    
+                    const currentColor = isBayesTarget ? bayesHighlightColor : (isOtherBayes ? veryDimColor : defaultHighlightColor);
+                    const strokeWidthCurrent = isBayesTarget ? "3.5" : "2.5";
+                    const strokeWidthSubCurrent = isBayesTarget ? "3" : "2";
+
                     return (
                         <g key={rama.id}>
                             {/* === RAMA PRINCIPAL (Hacia A_i) === */}
                             <line
                                 x1={rootX} y1={rootY}
                                 x2={pillX} y2={nodeAY}
-                                stroke={highlightColor} strokeWidth="2.5" opacity="0.9"
+                                stroke={currentColor} strokeWidth={strokeWidthCurrent} opacity={isOtherBayes ? "0.6" : "0.9"}
                             />
 
                             {/* Etiqueta P(A_i) sobre la línea */}
-                            <rect x={midX1 - wLabel1 / 2} y={midY1 - 12} width={wLabel1} height="24" rx="4" fill="white" stroke={highlightColor} strokeWidth="1" />
-                            <text x={midX1} y={midY1 + 4} textAnchor="middle" fontSize="11" fill={highlightColor} fontWeight="bold">
+                            <rect x={midX1 - wLabel1 / 2} y={midY1 - 12} width={wLabel1} height="24" rx="4" fill="white" stroke={currentColor} strokeWidth="1" />
+                            <text x={midX1} y={midY1 + 4} textAnchor="middle" fontSize="11" fill={currentColor} fontWeight="bold">
                                 {label1Text}
                             </text>
 
                             {/* Nodo A_i (Píldora dinámica) */}
-                            <rect x={pillX} y={nodeAY - 14} width={wPill} height="28" rx="14" fill={highlightColor} />
+                            <rect x={pillX} y={nodeAY - 14} width={wPill} height="28" rx="14" fill={currentColor} />
                             <text x={pillX + wPill / 2} y={nodeAY + 4} textAnchor="middle" fontSize="11" fontWeight="bold" fill="white">
                                 {pillText}
                             </text>
@@ -83,20 +93,20 @@ export default function ArbolProbabilidad({ resultado, ramas }) {
                             <line
                                 x1={nodeAX} y1={nodeAY}
                                 x2={nodeBX - 70} y2={nodeAY - 35}
-                                stroke={highlightColor} strokeWidth="2"
+                                stroke={currentColor} strokeWidth={strokeWidthSubCurrent} opacity={isOtherBayes ? "0.6" : "1"}
                             />
                             {/* Etiqueta P(B|A_i) */}
-                            <rect x={midX2 - wLabel2 / 2} y={midY2 - 12} width={wLabel2} height="24" rx="4" fill="white" stroke={highlightColor} strokeWidth="1" />
-                            <text x={midX2} y={midY2 + 4} textAnchor="middle" fontSize="11" fill={highlightColor} fontWeight="bold">
+                            <rect x={midX2 - wLabel2 / 2} y={midY2 - 12} width={wLabel2} height="24" rx="4" fill="white" stroke={currentColor} strokeWidth="1" />
+                            <text x={midX2} y={midY2 + 4} textAnchor="middle" fontSize="11" fill={currentColor} fontWeight="bold">
                                 {label2Text}
                             </text>
 
                             {/* Nodo B (Éxito) */}
-                            <rect x={nodeBX - 70} y={nodeAY - 35 - 12} width="70" height="24" rx="4" fill={highlightColor} />
+                            <rect x={nodeBX - 70} y={nodeAY - 35 - 12} width="70" height="24" rx="4" fill={currentColor} />
                             <text x={nodeBX - 35} y={nodeAY - 35 + 4} textAnchor="middle" fontSize="11" fontWeight="bold" fill="white">B (Éxito)</text>
 
                             {/* Multiplicador Final */}
-                            <text x={nodeBX + 10} y={nodeAY - 35 + 4} fontSize="12" fontWeight="bold" fill={highlightColor}>
+                            <text x={nodeBX + 10} y={nodeAY - 35 + 4} fontSize="12" fontWeight="bold" fill={currentColor}>
                                 = {rama.mult.toFixed(4)}
                             </text>
 
@@ -120,8 +130,11 @@ export default function ArbolProbabilidad({ resultado, ramas }) {
                 })}
                 {/* LEYENDA */}
                 <text x={width / 2} y={height + 25} textAnchor="middle" fontSize="12" fill="var(--text-muted)">
-                    <tspan fill={highlightColor} fontWeight="bold">■ </tspan>
-                    Rutas ponderadas que conforman la Probabilidad Total del evento analizado
+                    <tspan fill={defaultHighlightColor} fontWeight="bold">■ </tspan>
+                    Rutas ponderadas que conforman la Probabilidad Total
+                    {causaBayes && (
+                        <tspan fill={bayesHighlightColor} fontWeight="bold"> | ■ Ruta evaluada con el Teorema de Bayes</tspan>
+                    )}
                 </text>
             </svg>
         </div>

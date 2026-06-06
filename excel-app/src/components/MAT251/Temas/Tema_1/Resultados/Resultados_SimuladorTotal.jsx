@@ -18,6 +18,7 @@ import { IconoCalculadora, EditarDatos } from '../../../../ui/iconos';
 import katex from 'katex';
 import ArbolProbabilidad from '../../../Graficas/ArbolProbabilidad';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
+import { calcularProbabilidadTotal } from '../../../Matematicas/logica_Tema1';
 
 const FormulaMatematica = ({ resultado }) => {
     const formulaRef = useRef(null);
@@ -50,6 +51,29 @@ const FormulaMatematica = ({ resultado }) => {
     );
 };
 
+const FormulaBayes = ({ resultado, ramaSeleccionada }) => {
+    const formulaRef = useRef(null);
+
+    useEffect(() => {
+        if (formulaRef.current && resultado && ramaSeleccionada) {
+            let formulaLatex = `\\begin{aligned}\n`;
+            formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\frac{P(\\text{${ramaSeleccionada.nombre}}) \\cdot P(B|\\text{${ramaSeleccionada.nombre}})}{P(B)} \\\\\n`;
+            formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\frac{${ramaSeleccionada.pA.toFixed(4)} \\cdot ${ramaSeleccionada.pB_A.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
+            formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\frac{${ramaSeleccionada.mult.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
+            formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\mathbf{${(ramaSeleccionada.mult / resultado.probB).toFixed(4)}}\n`;
+            formulaLatex += `\\end{aligned}`;
+
+            katex.render(formulaLatex, formulaRef.current, { throwOnError: false, displayMode: true });
+        }
+    }, [resultado, ramaSeleccionada]);
+
+    return (
+        <div style={{ overflowX: 'auto', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS }}>
+            <div ref={formulaRef}></div>
+        </div>
+    );
+};
+
 export default function ResultadosSimuladorTotal({
     filas, varSeleccionada,
     colCausa, setColCausa,
@@ -61,6 +85,7 @@ export default function ResultadosSimuladorTotal({
     statsDatos, abrirEditor
 }) {
     const [ordenWidgets, setOrdenWidgets] = useState(['w-arbol']);
+    const [causaBayes, setCausaBayes] = useState('');
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -106,61 +131,16 @@ export default function ResultadosSimuladorTotal({
             return;
         }
 
-        const idxCausa = varSeleccionada.nombresColumnas.indexOf(colCausa);
-        const idxEvento = varSeleccionada.nombresColumnas.indexOf(colEvento);
-
-        if (idxCausa === -1 || idxEvento === -1) {
-            setErrorSimulador("Columnas no encontradas en la matriz.");
+        const res = calcularProbabilidadTotal(filas, varSeleccionada.nombresColumnas, colCausa, colEvento, valExito);
+        if (res.error) {
+            setErrorSimulador(res.error);
             setResultadoSimulador(null);
-            return;
+        } else {
+            setRamas(res.resultado.desglose);
+            setResultadoSimulador(res.resultado);
+            setErrorSimulador('');
+            setCausaBayes(''); // Reset Bayes when calculating again
         }
-
-        // Extraer valores estructurados
-        const datosParseados = filas.map(f => {
-            const p = f.valor.split(' | ').map(v => v.trim());
-            return { causa: p[idxCausa], evento: p[idxEvento] };
-        }).filter(d => d.causa !== undefined && d.evento !== undefined && d.causa !== '' && d.evento !== '');
-
-        const totalDatos = datosParseados.length;
-        if (totalDatos === 0) {
-            setErrorSimulador("No hay datos válidos para procesar.");
-            setResultadoSimulador(null);
-            return;
-        }
-
-        // Identificar causas únicas
-        const causasUnicas = [...new Set(datosParseados.map(d => d.causa))].sort();
-
-        let probB = 0;
-        const desglose = [];
-
-        causasUnicas.forEach((causa, index) => {
-            const datosCausa = datosParseados.filter(d => d.causa === causa);
-            const n_Ai = datosCausa.length;
-            const pA = n_Ai / totalDatos;
-
-            const datosExito = datosCausa.filter(d => d.evento === valExito);
-            const n_B_dado_Ai = datosExito.length;
-            const pB_A = n_Ai > 0 ? n_B_dado_Ai / n_Ai : 0;
-
-            const mult = pA * pB_A;
-            probB += mult;
-
-            desglose.push({
-                id: index + 1,
-                nombre: causa,
-                n_Ai: n_Ai,
-                totalDatos: totalDatos,
-                pA: pA,
-                n_B_dado_Ai: n_B_dado_Ai,
-                pB_A: pB_A,
-                mult: mult
-            });
-        });
-
-        setRamas(desglose);
-        setResultadoSimulador({ probB, desglose });
-        setErrorSimulador('');
     };
 
     // Recalcular automáticamente si cambian los datos o las selecciones
@@ -169,6 +149,7 @@ export default function ResultadosSimuladorTotal({
             calcular();
         } else {
             setResultadoSimulador(null);
+            setCausaBayes('');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filas, colCausa, colEvento, valExito, varSeleccionada]);
@@ -339,7 +320,7 @@ export default function ResultadosSimuladorTotal({
 
                     <div style={{ ...cardStyle, marginBottom: '20px' }}>
                         <h3 style={{ color: 'var(--primary-color)', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', fontSize: FS.md, margin: '0 0 15px 0' }}>
-                            Desarrollo Matemático
+                            Desarrollo Matemático: Probabilidad Total
                         </h3>
                         <FormulaMatematica resultado={resultado} />
                         <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(2, 132, 199, 0.05)', border: '1.5px solid var(--primary-color)', borderRadius: RADIUS, textAlign: 'center' }}>
@@ -352,6 +333,53 @@ export default function ResultadosSimuladorTotal({
                         </div>
                     </div>
 
+                    {/* SECCIÓN BAYES */}
+                    <div style={{ ...cardStyle, marginBottom: '20px' }}>
+                        <h3 style={{ color: 'var(--primary-color)', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', fontSize: FS.md, margin: '0 0 15px 0' }}>
+                            Teorema de Bayes
+                        </h3>
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                                Causa a Investigar (Bayes):
+                            </label>
+                            <select
+                                value={causaBayes}
+                                onChange={(e) => setCausaBayes(e.target.value)}
+                                className="container_cal_input"
+                                style={{ width: '100%', maxWidth: '400px', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
+                            >
+                                <option value="">-- Seleccionar Causa --</option>
+                                {ramas.map(r => (
+                                    <option key={r.id} value={r.nombre}>{r.nombre}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {causaBayes && (
+                            <>
+                                <h4 style={{ color: 'var(--primary-color)', fontSize: FS.sm, margin: '15px 0 10px 0' }}>Desarrollo Matemático: Teorema de Bayes</h4>
+                                <FormulaBayes resultado={resultado} ramaSeleccionada={ramas.find(r => r.nombre === causaBayes)} />
+                                
+                                {(() => {
+                                    const rama = ramas.find(r => r.nombre === causaBayes);
+                                    if (!rama) return null;
+                                    const bayesResult = rama.mult / resultado.probB;
+                                    return (
+                                        <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(249, 115, 22, 0.05)', border: '1.5px solid #f97316', borderRadius: RADIUS, textAlign: 'center' }}>
+                                            <div style={{ fontSize: FS.lg, fontWeight: 'bold', color: '#ea580c' }}>
+                                                P({rama.nombre} | B) = {bayesResult.toFixed(4)}
+                                            </div>
+                                            <div style={{ fontSize: FS.sm, color: 'var(--text-main)', marginTop: '4px' }}>
+                                                ({(bayesResult * 100).toFixed(2)}% probabilidad)
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </>
+                        )}
+                    </div>
+
+
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={ordenWidgets} strategy={rectSortingStrategy}>
                             <div style={{ width: '100%', minWidth: 0 }}>
@@ -360,7 +388,7 @@ export default function ResultadosSimuladorTotal({
                                         return (
                                             <MarcoWidgetMAT251 key={id} id={id} titulo="Árbol de Probabilidad" anchoCompleto={true} alto={`${Math.max(400, ramas.length * 140) + 120}px`}>
                                                 <div style={{ width: '100%', height: '100%', minWidth: 0 }}>
-                                                    <ArbolProbabilidad resultado={resultado} ramas={ramas} />
+                                                    <ArbolProbabilidad resultado={resultado} ramas={ramas} causaBayes={causaBayes} />
                                                 </div>
                                             </MarcoWidgetMAT251>
                                         );

@@ -139,7 +139,7 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
             {/* Header del Modal */}
             <div className="widget-header" style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <IconoArbol /> {titulo} <span style={{ fontSize: '0.8em', color: '#888', fontWeight: 'normal' }}>(Vista Detallada)</span>
+                <IconoArbol /> {titulo}
               </h3>
               <button
                 onClick={() => setIsMaximized(false)}

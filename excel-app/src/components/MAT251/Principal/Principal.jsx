@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import 'react-data-grid/lib/styles.css';
 import { useMAT251Data } from '../../../components/excel/DataContext';
-import { calcularTecnicasConteo, calcularProbabilidadClasica } from '../Matematicas/logica_Tema1';
+import { calcularTecnicasConteo, calcularProbabilidadClasica, calcularProbabilidadCondicional, calcularProbabilidadTotalParticion } from '../Matematicas/logica_Tema1';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import '../../../styles/pages/MAT251/CalculosMat251.css';
+import '../../../styles/pages/MAT251/Pantalla.css';
+
 
 // ── IMPORTACIONES DE LA NUEVA ESTRUCTURA ──
 import { FONT, FS, RADIUS, OPERACIONES, filaVacia, labelStyle } from '../Principal/Constantes';
@@ -17,6 +18,11 @@ import ControlesProbabilidad from '../Temas/Tema_1/Controles/Controles_Probabili
 import ResultadosConteo from '../Temas/Tema_1/Resultados/Resultados_conteo';
 import ResultadosProbabilidad from '../Temas/Tema_1/Resultados/Resultados_Probabilidad';
 import ResultadosSimuladorTotal from '../Temas/Tema_1/Resultados/Resultados_SimuladorTotal';
+import ControlesReglaAdicion from '../Temas/Tema_1/Controles/Controles_ReglaAdicion';
+import ResultadosReglaAdicion from '../Temas/Tema_1/Resultados/Resultados_ReglaAdicion';
+import ResultadosReglaMultiplicacion from '../Temas/Tema_1/Resultados/Resultados_ReglaMultiplicacion';
+import ResultadosMuestreo from '../Temas/Tema_1/Resultados/Resultados_Muestreo';
+import ResultadosUniforme from '../Temas/Tema_1/Resultados/Resultados_Uniforme';
 
 import Operacion from '../Temas/Tema_1/Controles/Operacion';
 
@@ -25,7 +31,7 @@ export default function Principal() {
 
     // ── UI ───────────────────────────────────────────────────────────────────────
     const [panelAbierto, setPanelAbierto] = useState(true);
-    const [operacion, setOperacion] = useState('permutacion');
+    const [operacion, setOperacion] = useState('conteo');
     const [subTipoProbabilidad, setSubTipoProbabilidad] = useState('clasica');
     const [columnaParticion, setColumnaParticion] = useState(''); // Para probabilidad total
 
@@ -33,7 +39,6 @@ export default function Principal() {
     const [n, setN] = useState('0');
     const [r, setR] = useState('0');
     const [resConteo, setResConteo] = useState(null);
-    const formulaConteoRef = useRef(null);
 
     // ── Probabilidad ─────────────────────────────────────────────────────────────
     const [filas, setFilas] = useState([filaVacia(1), filaVacia(2), filaVacia(3)]);
@@ -56,6 +61,37 @@ export default function Principal() {
     const [colCausa, setColCausa] = useState('');
     const [colEvento, setColEvento] = useState('');
     const [valExito, setValExito] = useState('');
+
+    // ── Regla de Adición ─────────────────────────────────────────────────────────────
+    const [colA_Adicion, setColA_Adicion] = useState('');
+    const [valA_Adicion, setValA_Adicion] = useState('');
+    const [colB_Adicion, setColB_Adicion] = useState('');
+    const [valB_Adicion, setValB_Adicion] = useState('');
+    const [resultadoAdicion, setResultadoAdicion] = useState(null);
+    const [errorAdicion, setErrorAdicion] = useState('');
+
+    // ── Regla de Multiplicación ──────────────────────────────────────────────────
+    const [modReemplazo, setModReemplazo] = useState('con_reemplazo');
+    const [colA_Mult, setColA_Mult] = useState('');
+    const [valA_Mult, setValA_Mult] = useState('');
+    const [colB_Mult, setColB_Mult] = useState('');
+    const [valB_Mult, setValB_Mult] = useState('');
+    const [resultadoMult, setResultadoMult] = useState(null);
+    const [errorMult, setErrorMult] = useState('');
+
+    // ── Muestreo ─────────────────────────────────────────────────────────────────
+    const [metodoMuestreo, setMetodoMuestreo] = useState('mas');
+    const [tamanoMuestra, setTamanoMuestra] = useState('');
+    const [varEstratificacion, setVarEstratificacion] = useState('');
+    const [resultadoMuestreo, setResultadoMuestreo] = useState(null);
+    const [errorMuestreo, setErrorMuestreo] = useState('');
+
+    // ── Uniforme ─────────────────────────────────────────────────────────────────
+    const [varUniforme, setVarUniforme] = useState('');
+    const [inputMin, setInputMin] = useState('');
+    const [inputMax, setInputMax] = useState('');
+    const [resultadoUniforme, setResultadoUniforme] = useState(null);
+    const [errorUniforme, setErrorUniforme] = useState('');
 
     // FUNCIONES //
 
@@ -274,15 +310,7 @@ export default function Principal() {
 
     // Katex
 
-    useEffect(() => {
-        if (formulaConteoRef.current && resConteo) {
-            const esP = resConteo.simbolo === 'nPr';
-            const latex = esP
-                ? `P(${n},\\,${r})=\\dfrac{${n}!}{(${n}-${r})!}=${resConteo.resultado.toLocaleString()}`
-                : `C(${n},\\,${r})=\\dfrac{${n}!}{${r}!(${n}-${r})!}=${resConteo.resultado.toLocaleString()}`;
-            katex.render(latex, formulaConteoRef.current, { throwOnError: false, displayMode: true });
-        }
-    }, [resConteo, n, r]);
+
 
     useEffect(() => {
         if (formulaProbRef.current && resProbabilidad) {
@@ -303,122 +331,28 @@ export default function Principal() {
     // Calcular
 
     const ejecutar = () => {
-        if (operacion === 'permutacion' || operacion === 'combinacion') {
-            const res = calcularTecnicasConteo(n, r, operacion === 'permutacion');
+        if (operacion === 'conteo') {
+            const res = calcularTecnicasConteo(n, r);
             if (res?.error) { alert(res.error); return; }
-            setResConteo(res);
+            setResConteo({ ...res, n, r });
             setResProbabilidad(null);
         } else {
             if (!inputDatos) { alert('Agrega datos al espacio muestral'); return; }
             const arr = inputDatos.split(',').map(d => d.trim()).filter(Boolean);
 
             if (subTipoProbabilidad === 'condicional') {
-                if (eventoCondicion.length === 0) { alert('Selecciona al menos un evento para la Condición (B)'); return; }
-                if (eventoFavorable.length === 0) { alert('Selecciona al menos un Evento de Interés (A)'); return; }
-
-                // Filtrar el arreglo base para que solo queden los elementos que contienen la condición B
-                const arrFiltrado = arr.filter(d => {
-                    const partes = d.split(' | ').map(p => p.trim());
-                    return eventoCondicion.some(cond => partes.includes(cond));
-                });
-
-                if (arrFiltrado.length === 0) { alert('La condición (B) no tiene ocurrencias en los datos. Probabilidad indefinida.'); return; }
-
-                // La probabilidad de A dado B es encontrar A dentro del arrFiltrado
-                const casosA = arrFiltrado.filter(d => {
-                    const partes = d.split(' | ').map(p => p.trim());
-                    return eventoFavorable.some(fav => partes.includes(fav));
-                }).length;
-
-                const casosATotal = arr.filter(d => {
-                    const partes = d.split(' | ').map(p => p.trim());
-                    return eventoFavorable.some(fav => partes.includes(fav));
-                }).length;
-
-                const res = {
-                    casosFavorables: casosA,
-                    casosTotales: arrFiltrado.length,
-                    probabilidadDecimal: (casosA / arrFiltrado.length).toFixed(4),
-                    probabilidadPorcentaje: ((casosA / arrFiltrado.length) * 100).toFixed(2),
-                    vennStats: {
-                        nA: casosATotal,
-                        nB: arrFiltrado.length,
-                        nAB: casosA,
-                        nTotal: arr.length
-                    },
-                    arrFiltrado: arrFiltrado
-                };
-
+                const res = calcularProbabilidadCondicional(arr, eventoFavorable, eventoCondicion);
+                if (res?.error) { alert(res.error); return; }
                 setResProbabilidad(res);
                 setResConteo(null);
             } else if (subTipoProbabilidad === 'total') {
-                if (!columnaParticion) { alert('Selecciona una variable (columna) de partición B_i'); return; }
-                if (eventoFavorable.length === 0) { alert('Selecciona al menos un Evento de Interés (A)'); return; }
-
-                const colIndex = varSeleccionada.nombresColumnas.indexOf(columnaParticion);
-                if (colIndex === -1) return;
-
-                const valoresParticion = [...new Set(arr.map(d => d.split(' | ')[colIndex]?.trim()).filter(Boolean))];
-
-                let totalA = 0;
-                const desglose = valoresParticion.map(bi => {
-                    const arrBi = arr.filter(d => {
-                        const partes = d.split(' | ').map(p => p.trim());
-                        return partes[colIndex] === bi;
-                    });
-                    const n_Bi = arrBi.length;
-                    const p_Bi = n_Bi / arr.length;
-
-                    const casosA_en_Bi = arrBi.filter(d => {
-                        const partes = d.split(' | ').map(p => p.trim());
-                        return eventoFavorable.some(fav => partes.includes(fav));
-                    }).length;
-                    const p_A_dado_Bi = n_Bi > 0 ? casosA_en_Bi / n_Bi : 0;
-                    
-                    const contribucion = p_A_dado_Bi * p_Bi;
-                    totalA += casosA_en_Bi;
-
-                    return {
-                        bi,
-                        n_Bi,
-                        p_Bi: p_Bi.toFixed(4),
-                        n_A_inter_Bi: casosA_en_Bi,
-                        p_A_dado_Bi: p_A_dado_Bi.toFixed(4),
-                        contribucion: contribucion.toFixed(4)
-                    };
-                });
-
-                const res = {
-                    casosFavorables: totalA,
-                    casosTotales: arr.length,
-                    probabilidadDecimal: (totalA / arr.length).toFixed(4),
-                    probabilidadPorcentaje: ((totalA / arr.length) * 100).toFixed(2),
-                    desgloseTotal: desglose
-                };
-
+                const res = calcularProbabilidadTotalParticion(arr, varSeleccionada?.nombresColumnas, columnaParticion, eventoFavorable);
+                if (res?.error) { alert(res.error); return; }
                 setResProbabilidad(res);
                 setResConteo(null);
             } else {
-                if (eventoFavorable.length === 0) { alert('Selecciona al menos un evento favorable'); return; }
-
-                const casosA = arr.filter(d => {
-                    const partes = d.split(' | ').map(p => p.trim());
-                    return eventoFavorable.some(fav => partes.includes(fav));
-                }).length;
-
-                const res = {
-                    casosFavorables: casosA,
-                    casosTotales: arr.length,
-                    probabilidadDecimal: (casosA / arr.length).toFixed(4),
-                    probabilidadPorcentaje: ((casosA / arr.length) * 100).toFixed(2),
-                    vennStats: {
-                        nA: casosA,
-                        nB: 0,
-                        nAB: 0,
-                        nTotal: arr.length
-                    }
-                };
-
+                const res = calcularProbabilidadClasica(arr, eventoFavorable);
+                if (res?.error) { alert(res.error); return; }
                 setResProbabilidad(res);
                 setResConteo(null);
             }
@@ -430,6 +364,14 @@ export default function Principal() {
         if (val === 'probabilidad') setSubTipoProbabilidad('clasica');
         setResConteo(null);
         setResProbabilidad(null);
+        setResultadoAdicion(null);
+        setErrorAdicion('');
+        setResultadoMult(null);
+        setErrorMult('');
+        setResultadoMuestreo(null);
+        setErrorMuestreo('');
+        setResultadoUniforme(null);
+        setErrorUniforme('');
     };
 
     // Al cambiar subTipo, borrar resultados
@@ -531,10 +473,10 @@ export default function Principal() {
                         )}
 
                         {/* SEPARACION DE CONTROLES */}
-                        {(operacion === 'permutacion' || operacion === 'combinacion') && (
+                        {operacion === 'conteo' && (
                             <ControlesConteo n={n} setN={setN} r={r} setR={setR} ajustar={ajustar} ejecutar={ejecutar} />
                         )}
-                        {(operacion === 'probabilidad' || operacion === 'simulador_total') && (
+                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'dist_uniforme') && (
                             <ControlesProbabilidad setModalVars={setModalVars} varSeleccionada={varSeleccionada} />
                         )}
                     </div>
@@ -546,12 +488,51 @@ export default function Principal() {
             <div className="calculadora-resultados" style={{ fontFamily: FONT }}>
                 <div className="frecuencias" style={{ borderRadius: RADIUS }}>
                     <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 600 }}>
-                        Resultados: {operacion === 'permutacion' ? 'PERMUTACIÓN' : operacion === 'combinacion' ? 'COMBINACIÓN' : operacion === 'simulador_total' ? 'PROBABILIDAD TOTAL' : (subTipoProbabilidad === 'clasica' ? 'PROBABILIDAD CLÁSICA' : subTipoProbabilidad === 'frecuentista' ? 'PROBABILIDAD FRECUENTISTA' : 'PROBABILIDAD CONDICIONAL')}
+                        Resultados: {operacion === 'conteo' ? 'TÉCNICAS DE CONTEO' : operacion === 'simulador_total' ? 'PROBABILIDAD TOTAL' : operacion === 'regla_adicion' ? 'AXIOMAS Y REGLA DE LA ADICIÓN' : operacion === 'regla_multiplicacion' ? 'REGLA DE LA MULTIPLICACIÓN' : operacion === 'muestreo' ? 'INTRODUCCIÓN AL MUESTREO' : operacion === 'dist_uniforme' ? 'DISTRIBUCIÓN UNIFORME CONTINUA' : (subTipoProbabilidad === 'clasica' ? 'PROBABILIDAD CLÁSICA' : subTipoProbabilidad === 'frecuentista' ? 'PROBABILIDAD FRECUENTISTA' : 'PROBABILIDAD CONDICIONAL')}
                     </h3>
 
                     {/* RESULTADOS */}
-                    {operacion === 'simulador_total' ? (
-                        <ResultadosSimuladorTotal 
+                    {operacion === 'dist_uniforme' ? (
+                        <ResultadosUniforme
+                            varSeleccionada={varSeleccionada} filas={filas}
+                            varUniforme={varUniforme} setVarUniforme={setVarUniforme}
+                            inputMin={inputMin} setInputMin={setInputMin}
+                            inputMax={inputMax} setInputMax={setInputMax}
+                            resultado={resultadoUniforme} setResultado={setResultadoUniforme}
+                            error={errorUniforme} setError={setErrorUniforme}
+                            statsDatos={statsDatos} abrirEditor={abrirEditor}
+                        />
+                    ) : operacion === 'muestreo' ? (
+                        <ResultadosMuestreo
+                            varSeleccionada={varSeleccionada} filas={filas}
+                            metodoMuestreo={metodoMuestreo} setMetodoMuestreo={setMetodoMuestreo}
+                            tamanoMuestra={tamanoMuestra} setTamanoMuestra={setTamanoMuestra}
+                            varEstratificacion={varEstratificacion} setVarEstratificacion={setVarEstratificacion}
+                            resultado={resultadoMuestreo} setResultado={setResultadoMuestreo}
+                            error={errorMuestreo} setError={setErrorMuestreo}
+                            statsDatos={statsDatos} abrirEditor={abrirEditor}
+                        />
+                    ) : operacion === 'regla_multiplicacion' ? (
+                        <ResultadosReglaMultiplicacion
+                            varSeleccionada={varSeleccionada} filas={filas}
+                            modReemplazo={modReemplazo} setModReemplazo={setModReemplazo}
+                            colA={colA_Mult} setColA={setColA_Mult} valA={valA_Mult} setValA={setValA_Mult}
+                            colB={colB_Mult} setColB={setColB_Mult} valB={valB_Mult} setValB={setValB_Mult}
+                            resultado={resultadoMult} setResultado={setResultadoMult}
+                            error={errorMult} setError={setErrorMult}
+                            statsDatos={statsDatos} abrirEditor={abrirEditor}
+                        />
+                    ) : operacion === 'regla_adicion' ? (
+                        <ResultadosReglaAdicion
+                            resultado={resultadoAdicion} error={errorAdicion}
+                            varSeleccionada={varSeleccionada} filas={filas}
+                            colA={colA_Adicion} setColA={setColA_Adicion} valA={valA_Adicion} setValA={setValA_Adicion}
+                            colB={colB_Adicion} setColB={setColB_Adicion} valB={valB_Adicion} setValB={setValB_Adicion}
+                            setResultado={setResultadoAdicion} setError={setErrorAdicion}
+                            statsDatos={statsDatos} abrirEditor={abrirEditor}
+                        />
+                    ) : operacion === 'simulador_total' ? (
+                        <ResultadosSimuladorTotal
                             filas={filas} varSeleccionada={varSeleccionada}
                             colCausa={colCausa} setColCausa={setColCausa}
                             colEvento={colEvento} setColEvento={setColEvento}
@@ -561,8 +542,8 @@ export default function Principal() {
                             errorSimulador={errorSimulador} setErrorSimulador={setErrorSimulador}
                             statsDatos={statsDatos} abrirEditor={abrirEditor}
                         />
-                    ) : (operacion === 'permutacion' || operacion === 'combinacion') ? (
-                        <ResultadosConteo resConteo={resConteo} formulaConteoRef={formulaConteoRef} hayResultado={hayResultado} />
+                    ) : operacion === 'conteo' ? (
+                        <ResultadosConteo resConteo={resConteo} hayResultado={hayResultado} />
                     ) : (
                         <ResultadosProbabilidad
                             statsDatos={statsDatos} abrirEditor={abrirEditor} valoresUnicos={valoresUnicos}

@@ -17,7 +17,7 @@
 }
 
 .calculadora-layout.colapsado {
-  grid-template-columns: 45px minmax(0, 1fr);
+  grid-template-columns: 15px minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .calculadora-layout.colapsado .boton-toggle-medio {
-  left: 30px;
+  left: 20px;
 }
 
 /* Desktop: el panel está al lado — flecha apunta ◀ (abierto) o ▶ (cerrado) */
@@ -121,6 +121,7 @@
   border: none;
   opacity: 0;
   margin: 0;
+  overflow: hidden;
 }
 
 .etiqueta {
@@ -311,11 +312,13 @@
   .calculadora-layout.colapsado .boton-toggle-medio {
     left: 50%;
     right: auto;
-    top: -20px; /* Al colapsar, lo dejamos centrado un poco más arriba */
+    top: -20px;
+    /* Al colapsar, lo dejamos centrado un poco más arriba */
   }
 
   .calculadora-layout.colapsado .calculadora-datos {
-    display: none; /* Oculta completamente el panel de parámetros al colapsar en móvil */
+    display: none;
+    /* Oculta completamente el panel de parámetros al colapsar en móvil */
   }
 }
 

@@ -6,10 +6,13 @@ export const OPERACIONES = [
   {
     grupo: 'Tema 1: Probabilidad y Conteo',
     opciones: [
-      { value: 'permutacion', label: 'Permutación (nPr)' },
-      { value: 'combinacion', label: 'Combinación (nCr)' },
+      { value: 'conteo', label: 'Técnicas de Conteo (nPr / nCr)' },
       { value: 'probabilidad', label: 'Cálculo de Probabilidad' },
       { value: 'simulador_total', label: 'Teorema Probabilidad Total' },
+      { value: 'regla_adicion', label: 'Axiomas y Propiedades (Adición)' },
+      { value: 'regla_multiplicacion', label: 'Regla de la Multiplicación (Sucesivos)' },
+      { value: 'muestreo', label: 'Introducción al Muestreo' },
+      { value: 'dist_uniforme', label: 'Distribución Uniforme Continua' },
     ],
   },
 ];

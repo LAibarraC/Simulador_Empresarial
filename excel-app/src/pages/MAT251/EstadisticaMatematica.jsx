@@ -5,6 +5,7 @@ import { useCalculadoraExcel } from "../../hooks/useCalculadoraExcel";
 import { useData } from "../../components/excel/DataContext";
 import Principal from '../../components/MAT251/Principal/Principal';
 import "../../styles/pages/MAT251/Pantalla.css";
+import "../../styles/pages/MAT251/CalculosMat251.css";
 
 const TypingTitle = () => {
   const fullText = "Estadística Matemática (MAT251)";

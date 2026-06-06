@@ -9,7 +9,7 @@ import Archivos from "./pages/Archivos";
 import Calculadora from "./pages/Calculadora";
 import About from "./pages/About";
 import Login from "./pages/Login";
-import MAT251 from "./pages/MAT251/Pantalla";
+import MAT251 from "./pages/MAT251/EstadisticaMatematica";
 import Registro from "./pages/Registro";
 import Perfil from "./pages/Perfil";
 import ForgotPassword from "./pages/ForgotPassword";
