@@ -1,10 +1,5 @@
-/* const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; */
-//Base url de Render
-/* const BASE_URL = "https://api-admin-shc170.onrender.com"; */
-
-/*uvicorn main:app --reload*/
-
-export const BASE_URL = import.meta.env.VITE_API_URL;
+// Base URL de la API del Backend (usando variable de entorno o fallback local)
+export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 
 export const api = {

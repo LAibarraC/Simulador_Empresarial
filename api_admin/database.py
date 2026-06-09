@@ -1,7 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-
 import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env si existe
+load_dotenv()
 
 # En producción, leemos la URL de la base de datos desde variables de entorno.
 # Si no está definida, usamos la conexión por defecto de XAMPP local.
@@ -15,8 +18,20 @@ SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or "mysql+pymysql://root:23l
 if SQLALCHEMY_DATABASE_URL.startswith("mysql://"):
     SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("mysql://", "mysql+pymysql://", 1)
 
+# Eliminar parámetros de consulta (ej. ?ssl-mode=REQUIRED) que PyMySQL no soporta en la URL
+if "?" in SQLALCHEMY_DATABASE_URL:
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.split("?")[0]
+
+# Aiven MySQL requiere SSL. Configuramos connect_args si es una base de datos en la nube.
+connect_args = {}
+if "localhost" not in SQLALCHEMY_DATABASE_URL and "127.0.0.1" not in SQLALCHEMY_DATABASE_URL:
+    ca_path = os.path.join(os.path.dirname(__file__), "ca.pem")
+    if os.path.exists(ca_path):
+        connect_args["ssl"] = {"ca": ca_path}
+
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 
+    connect_args=connect_args,
     pool_pre_ping=True, 
     pool_recycle=3600
 )

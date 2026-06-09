@@ -21,6 +21,7 @@ origins = [
     "http://127.0.0.1:3000",         # Desarrollo local (React alternativo)
     "https://calculadora-estadistica-3inh.onrender.com",  # Producción en Render
     "https://api-admin-shc170.onrender.com",
+    "https://api-shc170.onrender.com",                   # Versión limpia sin la palabra 'admin' para evitar bloqueadores
     "https://administracion-calculadora.vercel.app",  # Enlace oficial Vercel
     "https://proyecto-shc-170-54eovb4bb-coadiegos-projects.vercel.app", # Enlace temporal Vercel
     "https://proyecto-shc-170.vercel.app", # Enlace limpio Vercel
