@@ -1,5 +1,5 @@
 import React from "react";
-import escudoAdmin from "../../assets/images/escudoAdmin.png";
+import escudoAdmin from "../../assets/images/simuledu.png";
 import TablaRegresion from "./TablaRegresion";
 import TablaSeriesTiempo from "./TablaSeriesTiempo";
 import TablaIndices from "./TablaIndices";

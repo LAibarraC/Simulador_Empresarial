@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import "../styles/pages/Historial.css";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import escudoAdmin from "../assets/images/escudoAdmin.png";
+import escudoAdmin from "../assets/images/simuledu.png";
 
 export default function Historial() {
   const { usuario } = useData();

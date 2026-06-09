@@ -404,12 +404,12 @@
   width: 450px;
   /* Tamaño del escudo */
   height: 450px;
-  background-image: url('../../assets/images/escudoAdmin.png');
+  background-image: url('../../assets/images/simuledu.png');
   /* ⚠️ Verifica ruta */
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  opacity: 0.08;
+  opacity: 0.04;
   /* Muy sutil */
   z-index: 0;
   pointer-events: none;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom"; 
-import logoCarrera from "../assets/images/Logo-Adm.png";
+import logoCarrera from "../assets/images/simuledu_logo.png";
 import { api } from "../services/api";
 import { alerta } from '../utils/Notificaciones';
 import '../styles/components/ui/Login.css';

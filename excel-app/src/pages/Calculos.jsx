@@ -15,6 +15,7 @@ import { alerta } from "../utils/Notificaciones";
 import ReportePDF from "../components/Resultados/ReportePDF";
 import PanelResultados from "../components/Resultados/PanelResultados";
 import PanelConfiguracion from "../components/Resultados/PanelConfiguracion";
+import { IconoReloj } from "../components/ui/iconos";
 
 export default function Calculos() {
   const { variables, usuario } = useModuleData();
@@ -637,7 +638,10 @@ export default function Calculos() {
           padding: "8px 15px", display: "flex", justifyContent: "space-between", alignItems: "center",
           fontWeight: "bold", fontSize: "0.9rem", boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
         }}>
-          <span>⏱️ Viendo cálculo del historial (Modo Congelado).</span>
+          <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <IconoReloj size={16} color="white" />
+            Viendo cálculo del historial (Modo Congelado).
+          </span>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <button 
               onClick={salirModoHistorialManual} 

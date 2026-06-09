@@ -371,9 +371,10 @@
 }
 
 /* Si tu app usa una clase "dark" en el body o contenedor para el modo oscuro */
-body.dark-mode .logo-espera {
+html.dark .logo-espera {
   /* En modo oscuro, le damos un brillo sutil en lugar de sombra negra */
-  filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.2));
+  filter: drop-shadow(0px 0px 4px rgba(255, 255, 255, 0.4))
+          drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.2));
 }
 
 /* ======================================================= */

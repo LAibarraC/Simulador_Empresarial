@@ -11,7 +11,7 @@
 
 .login-card {
   /* Tu degradado original para el modo claro */
-  background: linear-gradient(180deg, var(--accent-color) 0%, #ff9e2e 60%, #dfb687 100%);
+  background: linear-gradient(180deg, #1A2D42 0%, #2E4156 50%, #AAB7B7 100%);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 30px;
@@ -41,16 +41,34 @@ html.dark .login-card {
   transition: all 0.3s ease;
 }
 
-/* 🆕 Aseguramos que el texto (etiquetas y enlaces) contraste bien en ambos modos */
-.login-card label, 
+/* Texto blanco sobre el fondo oscuro de la tarjeta */
+.login-card label,
 .login-card .etiqueta,
-.login-card p {
+.login-card p,
+.login-card h2,
+.login-card h3,
+.login-card span {
+  color: #ffffff;
+}
+
+.login-card a {
+  color: #D4D8DD !important;
+}
+
+.login-card a:hover {
+  color: #ffffff !important;
+}
+
+html.dark .login-card label,
+html.dark .login-card .etiqueta,
+html.dark .login-card p,
+html.dark .login-card h2,
+html.dark .login-card h3 {
   color: var(--text-main);
 }
 
-html.dark .login-card p,
-html.dark .login-card label {
-  color: var(--text-main);
+html.dark .login-card a {
+  color: var(--accent-color) !important;
 }
 
 @media (max-width: 480px) {

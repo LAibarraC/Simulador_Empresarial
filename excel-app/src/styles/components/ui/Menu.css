@@ -814,3 +814,12 @@ html.dark .notif-badge-type.personal {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
   }
 }
+
+/* Logo visibility in dark mode */
+html.dark .nav-logo {
+  filter: drop-shadow(0px 0px 1px rgba(255, 255, 255, 0.9))
+          drop-shadow(0px 0px 2px rgba(255, 255, 255, 0.7))
+          drop-shadow(0px 0px 4px rgba(255, 255, 255, 0.4));
+  transition: filter 0.3s ease;
+}
+

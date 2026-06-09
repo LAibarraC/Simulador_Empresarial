@@ -69,15 +69,15 @@ export default function GestionDocente({ usuario }) {
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '40px auto', padding: '0 20px', position: 'relative' }}>
+    <div className="gestion-docente-container" style={{ maxWidth: '1100px', margin: '40px auto', padding: '0 20px', position: 'relative' }}>
       
       {/* CABECERA */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
         <div>
-          <h2 style={{ fontSize: '2rem', margin: '0 0 5px 0', color: 'var(--text-main)' }}>
+          <h2 style={{ fontSize: 'clamp(1.3rem, 4vw, 1.8rem)', margin: '0 0 5px 0', color: 'var(--text-main)' }}>
             Gestión de Alumnos
           </h2>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>
+          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 'clamp(0.85rem, 2.5vw, 0.95rem)' }}>
             Selecciona un grupo para visualizar y administrar la lista de estudiantes inscritos.
           </p>
         </div>
@@ -123,7 +123,7 @@ export default function GestionDocente({ usuario }) {
 
       {/* CONTENIDO PRINCIPAL */}
       <div 
-        className="grafico-card" 
+        className="grafico-card gestion-docente-card" 
         style={{ 
           borderRadius: '12px', 
           boxShadow: '0 8px 24px rgba(0,0,0,0.1)', 
@@ -208,11 +208,20 @@ export default function GestionDocente({ usuario }) {
         )}
       </div>
 
-      {/* ESTILOS DE ANIMACIÓN SPIN */}
+      {/* ESTILOS DE ANIMACIÓN SPIN Y RESPONSIVIDAD */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 480px) {
+          .gestion-docente-container {
+            margin: 15px auto !important;
+            padding: 0 !important;
+          }
+          .gestion-docente-card {
+            padding: 15px 12px !important;
+          }
         }
       `}</style>
     </div>

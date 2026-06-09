@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { alerta } from "../utils/Notificaciones";
-import logoCarrera from "../assets/images/Logo-Adm.png";
+import logoCarrera from "../assets/images/simuledu_logo.png";
 import OscuroClaro from "../components/ui/oscuro_claro.jsx";
 import "../styles/components/ui/Login.css";
 
@@ -65,7 +65,7 @@ export default function ResetPassword() {
 
       <div className="login-card">
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <img src={logoCarrera} alt="Logo" style={{ width: "200px", height: "auto" }} />
+          <img src={logoCarrera} alt="Logo" className="auth-logo" style={{ width: "200px", height: "auto" }} />
         </div>
 
         <h3 style={{ color: "var(--text-main)", marginBottom: "15px", textAlign: "center" }}>

@@ -5,16 +5,17 @@
 .pie-pagina-institucional {
   width: 100%;
   margin-top: 50px;
-  background-color: var(--header-bg); 
-/*   border-top: 2px solid var(--primary-color); */
-  font-family: system-ui, sans-serif; 
+  background-color: #2E4156;
+  color: #D4D8DD;
+  font-family: system-ui, sans-serif;
+  border-top: 3px solid #AAB7B7;
 }
 
 .pie-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 5%;
+  padding: 8px 5%;
   flex-wrap: wrap; 
   gap: 20px;
 }
@@ -22,11 +23,30 @@
 .pie-col-izq {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 14px;
+}
+
+.pie-marca {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pie-nombre {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 2px;
+}
+
+.pie-slogan {
+  font-size: 0.75rem;
+  color: #AAB7B7;
+  letter-spacing: 0.5px;
 }
 
 .pie-logo-usfx {
-  width: 250px;
+  width: 60px;
   height: auto;
   
   /* ✨ EL TRUCO MAGISTRAL PARA MODO CLARO ✨ */
@@ -37,31 +57,39 @@
 }
 
 .pie-divisor {
-  width: 2px;
-  height: 50px;
-  background-color: var(--border-color);
+  width: 1px;
+  height: 40px;
+  background-color: #AAB7B7;
+  opacity: 0.5;
 }
 
 .pie-texto-oficial {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-main);
+  color: #D4D8DD;
   line-height: 1.4;
 }
 
-.pie-logo-siglos {
-  width: 180px;
-  height: auto;
-  filter: invert(0.8);
-  transition: filter 0.3s ease;
+.pie-col-centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pie-slogan-central {
+  font-size: 0.82rem;
+  color: #C0C8CA;
+  letter-spacing: 0.5px;
+  font-style: italic;
 }
 
 .pie-col-der {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+  color: #AAB7B7;
+  font-size: 0.82rem;
   font-weight: 500;
 }
 
@@ -72,13 +100,22 @@
 
 .pie-bottom {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 15px 5%;
-  background-color: var(--bg-card); 
-  border-top: 1px solid var(--border-color);
-  color: var(--text-muted);
-  font-size: 0.85rem;
+  padding: 6px 5%;
+  background-color: #1A2D42;
+  border-top: 1px solid rgba(170, 183, 183, 0.3);
+  font-size: 0.8rem;
+}
+
+.pie-copy {
+  color: #AAB7B7;
+  text-align: center;
+  margin: 0;
+}
+
+.pie-copy strong {
+  color: #D4D8DD;
 }
 
 /* --- ICONOS DE REDES SOCIALES --- */
@@ -116,11 +153,45 @@
 }
 
 html.dark .pie-logo-usfx {
-  filter: drop-shadow(0px 0px 0px rgba(0, 0, 0, 0));
+  filter: drop-shadow(0px 0px 1px rgba(255, 255, 255, 0.9))
+          drop-shadow(0px 0px 2px rgba(255, 255, 255, 0.7))
+          drop-shadow(0px 0px 4px rgba(255, 255, 255, 0.4));
 }
 
-html.dark .pie-logo-siglos {
-  filter: invert(0);
+/* === MODO OSCURO - PIE DE PÁGINA === */
+html.dark .pie-pagina-institucional {
+  background-color: var(--bg-card);
+  border-top-color: var(--border-color);
+}
+
+html.dark .pie-nombre {
+  color: var(--text-main);
+}
+
+html.dark .pie-slogan,
+html.dark .pie-slogan-central {
+  color: var(--text-muted);
+}
+
+html.dark .pie-divisor {
+  background-color: var(--border-color);
+}
+
+html.dark .pie-col-der {
+  color: var(--text-muted);
+}
+
+html.dark .pie-bottom {
+  background-color: var(--bg-body);
+  border-top-color: var(--border-color);
+}
+
+html.dark .pie-copy {
+  color: var(--text-muted);
+}
+
+html.dark .pie-copy strong {
+  color: var(--text-main);
 }
 
 
@@ -128,63 +199,55 @@ html.dark .pie-logo-siglos {
 /* --- MEDIA QUERIES (EL TRUCO PARA CELULAR) --- */
 
 @media (max-width: 768px) {
+  /* --- PIE DE PÁGINA RESPONSIVO --- */
   .pie-top {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas para los logos */
+    flex-direction: column;
     align-items: center;
-    justify-items: center;
-    gap: 10px; 
-    padding: 20px 5%; 
-  }
-
-  /* Reducir el tamaño de los logos en celulares para que quepan lado a lado */
-  .pie-logo-usfx {
-    width: 100%;
-    max-width: 130px;
-  }
-
-  .pie-logo-siglos {
-    width: 100%;
-    max-width: 100px;
+    text-align: center;
+    padding: 8px 5%;
+    gap: 10px;
   }
 
   .pie-col-izq {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     width: 100%;
-    display: flex;
-    justify-content: center; /* Centrar en su mitad para dar más espacio */
-    margin: 0;
-    padding: 0;
+  }
+
+  .pie-logo-usfx {
+    width: 50px;
+  }
+
+  .pie-marca {
+    align-items: center;
+  }
+
+  .pie-divisor {
+    display: none;
   }
 
   .pie-col-centro {
     width: 100%;
-    display: flex;
-    justify-content: center; /* Centrar en su mitad para dar más espacio */
-    margin: 0;
-    padding: 0;
+    align-items: center;
+  }
+
+  .pie-slogan-central {
+    text-align: center;
   }
 
   .pie-col-der {
-    grid-column: span 2; /* Las vistas ocupan toda la fila de abajo */
     width: 100%;
-    display: flex;
     justify-content: center;
-    margin-top: 10px;
-    padding: 0;
-  }
-  
-  .pie-divisor {
-    display: none; /* Quitamos la línea vertical en móviles */
   }
 
   .pie-bottom {
-    flex-direction: column-reverse; /* Redes sociales arriba, texto abajo */
+    padding: 10px 5%;
     text-align: center;
-    gap: 15px; /* Darle espacio entre redes sociales y texto */
   }
 
   .pie-copy {
-    text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
   }
-}
+}

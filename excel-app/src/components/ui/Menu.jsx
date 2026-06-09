@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import OscuroClaro from "./oscuro_claro";
-import escudoAdmin from "../../assets/images/Logo-Adm.png";
+import escudoAdmin from "../../assets/images/simuledu_logo.png";
 import '../../styles/components/ui/Menu.css';
 import { alerta } from "../../utils/Notificaciones";
 import { api } from "../../services/api";
+import { IconoBloqueado } from "./iconos";
 
 export default function Menu({ usuario, setUsuario }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,9 +23,10 @@ export default function Menu({ usuario, setUsuario }) {
   const cargarNotificaciones = async () => {
     try {
       const data = await api.obtenerNotificaciones();
-      setNotificaciones(data);
+      setNotificaciones(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error al cargar notificaciones:", error);
+      setNotificaciones([]);
     }
   };
 
@@ -97,12 +99,19 @@ export default function Menu({ usuario, setUsuario }) {
 
   useEffect(() => {
     const updateUnderline = () => {
-      let activeLink = navLinksRef.current?.querySelector('a.active, span.active');
+      const container = navLinksRef.current;
+      if (!container) return;
+
+      // Buscamos cualquier elemento activo: NavLink (a.active) o span dropdown activo
+      let activeLink =
+        container.querySelector('a.active:not(.dropdown-item)') ||
+        container.querySelector('span.active');
+
       if (activeLink) {
         let leftPos = activeLink.offsetLeft;
         let width = activeLink.offsetWidth;
 
-        // Corregimos la posición si es parte del menú desplegable
+        // Si el activo es un NavLink dentro de un dropdown, apuntamos al contenedor padre
         const dropdownParent = activeLink.closest('.dropdown-container');
         if (dropdownParent) {
           leftPos = dropdownParent.offsetLeft;
@@ -110,23 +119,21 @@ export default function Menu({ usuario, setUsuario }) {
           width = span ? span.offsetWidth : dropdownParent.offsetWidth;
         }
 
-        setUnderlineStyle({
-          left: leftPos,
-          width: width,
-          opacity: 1
-        });
+        setUnderlineStyle({ left: leftPos, width: width, opacity: 1 });
       } else {
         setUnderlineStyle(prev => ({ ...prev, opacity: 0 }));
       }
     };
 
-    updateUnderline();
+    // Ejecutamos en el siguiente tick para que el DOM ya tenga las clases actualizadas
+    const timer1 = setTimeout(updateUnderline, 0);
+    const timer2 = setTimeout(updateUnderline, 150);
     window.addEventListener("resize", updateUnderline);
-    const timer = setTimeout(updateUnderline, 100);
 
     return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
       window.removeEventListener("resize", updateUnderline);
-      clearTimeout(timer);
     };
   }, [location.pathname]);
 
@@ -167,17 +174,26 @@ export default function Menu({ usuario, setUsuario }) {
                 </NavLink>
               </li>
               <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
-                <NavLink
-                  to="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alerta.advertencia("Próximamente", "Estadística Matemática estará disponible en una futura versión.");
-                  }}
-                  className="dropdown-item"
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
-                >
-                  <span>Estadística Matemática 🔒</span>
-                </NavLink>
+                {usuario?.rol === "Administrador" ? (
+                  <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
+                    Estadística Matemática
+                  </NavLink>
+                ) : (
+                  <NavLink
+                    to="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alerta.advertencia("Próximamente", "Estadística Matemática estará disponible en una futura versión.");
+                    }}
+                    className="dropdown-item"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                  >
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      Estadística Matemática
+                      <IconoBloqueado size={13} color="var(--text-muted)" />
+                    </span>
+                  </NavLink>
+                )}
               </li>
             </ul>
           </li>
@@ -190,15 +206,23 @@ export default function Menu({ usuario, setUsuario }) {
             >
               <span className={`nav-link-dropdown ${isGruposActive ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
                 Grupos
+                <svg 
+                  className={`chevron-icon ${gruposDropdownOpen ? 'open' : ''}`} 
+                  width="16" height="16" viewBox="0 0 24 24" 
+                  fill="none" stroke="currentColor" strokeWidth="3.5" 
+                  strokeLinecap="round" strokeLinejoin="round"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
               </span>
 
               <ul className={`dropdown-menu ${gruposDropdownOpen ? 'show' : ''}`}>
-                <li className="dropdown-li">
+                <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
                   <NavLink to="/grupos" onClick={closeMenu} className="dropdown-item">
                     Gestión Grupos
                   </NavLink>
                 </li>
-                <li className="dropdown-li">
+                <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
                   <NavLink to="/gestion-docente" onClick={closeMenu} className="dropdown-item">
                     Gestión Alumnos
                   </NavLink>
@@ -270,7 +294,7 @@ export default function Menu({ usuario, setUsuario }) {
                             <span className={`notif-badge-type ${n.tipo === 'sistema' ? 'sistema' : 'personal'}`}>
                               {n.tipo === 'sistema' ? 'Sistema' : 'Personal'}
                             </span>
-                            <span>{n.fecha_creacion.split(' ')[0]}</span>
+                            <span>{n.fecha_creacion ? n.fecha_creacion.split(' ')[0] : ''}</span>
                           </div>
                         </li>
                       ))

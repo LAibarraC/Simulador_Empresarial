@@ -11,7 +11,7 @@ import "../styles/pages/Archivos.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import escudoAdmin from "../assets/images/escudoAdmin.png";
+import escudoAdmin from "../assets/images/simuledu.png";
 
 export default function Archivos({ usuario }) {
   const navigate = useNavigate();

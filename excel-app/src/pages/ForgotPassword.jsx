@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { alerta } from "../utils/Notificaciones";
-import logoCarrera from "../assets/images/Logo-Adm.png";
+import logoCarrera from "../assets/images/simuledu_logo.png";
 import OscuroClaro from "../components/ui/oscuro_claro.jsx";
 import "../styles/components/ui/Login.css";
 
@@ -56,10 +56,10 @@ export default function ForgotPassword() {
 
       <div className="login-card">
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <img src={logoCarrera} alt="Logo" style={{ width: "200px", height: "auto" }} />
+          <img src={logoCarrera} alt="Logo" className="auth-logo" style={{ width: "110px", height: "auto" }} />
         </div>
 
-        <h3 style={{ color: "var(--text-main)", marginBottom: "15px", textAlign: "center" }}>
+        <h3 style={{ color: "#ffffff", marginBottom: "15px", textAlign: "center" }}>
           Recuperar Contraseña
         </h3>
 
@@ -76,12 +76,12 @@ export default function ForgotPassword() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", textAlign: "center", margin: 0 }}>
+            <p style={{ fontSize: "0.85rem", color: "#D4D8DD", textAlign: "center", margin: 0 }}>
               Introduce tu correo electrónico y te enviaremos un enlace seguro para restablecer tu contraseña.
             </p>
 
             <div style={{ textAlign: "left" }}>
-              <label className="etiqueta" style={{ color: "var(--text-main)" }}>Correo Electrónico</label>
+              <label className="etiqueta" style={{ color: "#ffffff" }}>Correo Electrónico</label>
               <input
                 type="email"
                 value={email}
@@ -104,24 +104,25 @@ export default function ForgotPassword() {
               type="submit"
               disabled={loading || !canSubmit}
               style={{
-                backgroundColor: loading || !canSubmit ? "var(--border-color)" : "var(--accent-color)",
+              backgroundColor: loading ? "#AAB7B7" : !canSubmit ? "rgba(255,255,255,0.15)" : "var(--accent-color)",
                 cursor: loading || !canSubmit ? "not-allowed" : "pointer",
                 padding: "12px",
                 fontSize: "1rem",
-                color: "white",
-                border: "none",
+                color: loading ? "#1A2D42" : "white",
+                border: !canSubmit && !loading ? "1px solid rgba(255,255,255,0.3)" : "none",
                 borderRadius: "5px",
                 fontWeight: "bold",
-                transition: "background-color 0.2s"
+                opacity: !canSubmit && !loading ? 0.6 : 1,
+                transition: "all 0.2s"
               }}
             >
               {loading ? "Enviando..." : "Enviar Enlace"}
             </button>
 
             <div style={{ textAlign: "center", fontSize: "0.9rem", marginTop: "5px" }}>
-              <p style={{ color: "var(--text-main)" }}>
+              <p style={{ color: "#ffffff" }}>
                 ¿Recordaste tu contraseña?{" "}
-                <Link to="/login" style={{ color: "var(--accent-color)", fontWeight: "bold", textDecoration: "none" }}>
+                <Link to="/login" style={{ color: "#D4D8DD", fontWeight: "bold", textDecoration: "none" }}>
                   Inicia sesión aquí
                 </Link>
               </p>

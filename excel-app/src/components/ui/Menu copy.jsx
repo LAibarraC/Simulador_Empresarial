@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import OscuroClaro from "./oscuro_claro";
-import escudoAdmin from "../../assets/images/Logo-Adm.png";
+import escudoAdmin from "../../assets/images/simuledu_logo.png";
 
 export default function Menu({ usuario }) {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; 
-import logoCarrera from "../assets/images/Logo-Adm.png";
+import logoCarrera from "../assets/images/simuledu_logo.png";
 import { api } from "../services/api";
 import { alerta } from '../utils/Notificaciones';
 import '../styles/components/ui/Login.css';
@@ -127,7 +127,8 @@ export default function Login({ onLogin }) {
           <img
             src={logoCarrera}
             alt="Logo Administración de Empresas"
-            style={{ width: '200px', height: 'auto' }}
+            className="auth-logo"
+            style={{ width: '120px', height: 'auto' }}
           />
         </div>
 

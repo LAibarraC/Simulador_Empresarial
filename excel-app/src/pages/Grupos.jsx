@@ -5,7 +5,7 @@ import { alerta } from "../utils/Notificaciones";
 import api, { BASE_URL } from "../services/api";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import escudoAdmin from "../assets/images/escudoAdmin.png";
+import escudoAdmin from "../assets/images/simuledu.png";
 
 export default function Grupos() {
   const { usuario } = useData();
@@ -350,14 +350,14 @@ export default function Grupos() {
           pointerEvents: "none"
         }}
       />
-      <div style={{ marginBottom: "30px", borderBottom: "2px solid var(--border-color)", paddingBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ marginBottom: "30px", borderBottom: "2px solid var(--border-color)", paddingBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
         <div>
-          <h1 style={{ color: "var(--text-main)", margin: 0 }}>Gestión Académica y Cursos</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "1.1rem", margin: "5px 0 0 0" }}>
+          <h1 style={{ color: "var(--text-main)", margin: 0, fontSize: "clamp(1.3rem, 4vw, 2rem)" }}>Gestión Académica y Cursos</h1>
+          <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)", margin: "5px 0 0 0" }}>
             Bienvenido, {usuario.nombre || usuario.nombres}
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <button
             onClick={iniciarTour}
             className="guia-rapida-flotante"
@@ -380,14 +380,14 @@ export default function Grupos() {
       {/* ========================================= */}
       {(esDocente || esAdmin) && (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <h2 id="tour-titulo-cursos" style={{ color: "var(--primary-color)", margin: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
+            <h2 id="tour-titulo-cursos" style={{ color: "var(--primary-color)", margin: 0, fontSize: "clamp(1.1rem, 3.5vw, 1.6rem)" }}>
               {esAdmin ? "Todos los Cursos del Sistema (Vista Global)" : "Mis Cursos Creados"}
             </h2>
             <button
               id="tour-btn-crear-curso"
               onClick={() => setMostrarModal(true)}
-              style={{ background: "var(--accent-color)", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", transition: "background 0.3s" }}
+              style={{ background: "var(--accent-color)", color: "white", padding: "10px 20px", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", transition: "all 0.3s ease", whiteSpace: "nowrap" }}
             >
               + Crear Nuevo Curso
             </button>
@@ -483,24 +483,24 @@ export default function Grupos() {
       {usuario.rol === "Estudiante" && (
         <div>
           <div id="tour-matriculacion-seccion" style={{ background: "var(--bg-card, white)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-color, #eee)", marginBottom: "30px" }}>
-            <h3 style={{ margin: "0 0 15px 0", color: "var(--text-main, #333)" }}>Matricularse a un Curso</h3>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <h3 style={{ margin: "0 0 15px 0", color: "var(--text-main, #333)", fontSize: "clamp(1rem, 3vw, 1.3rem)" }}>Matricularse a un Curso</h3>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <input
                 type="text"
                 value={codigoBusqueda}
                 onChange={(e) => setCodigoBusqueda(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleUnirseCurso()}
                 placeholder="Ingresa el código proporcionado por tu docente (Ej: MAT-205)..."
-                style={{ padding: "10px", flex: 1, borderRadius: "5px", border: "1px solid var(--border-color)", background: "var(--bg-input)", color: "var(--text-main)", textTransform: "uppercase" }}
+                style={{ padding: "10px", flex: "1 1 200px", minWidth: "0", borderRadius: "5px", border: "1px solid var(--border-color)", background: "var(--bg-input)", color: "var(--text-main)", textTransform: "uppercase" }}
               />
-              <button id="tour-btn-unirse" onClick={handleUnirseCurso} style={{ background: "#27ae60", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
+              <button id="tour-btn-unirse" onClick={handleUnirseCurso} style={{ background: "#27ae60", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap" }}>
                 Unirse al Curso
               </button>
             </div>
           </div>
 
           <div id="tour-clases-activas">
-            <h2 style={{ color: "#27ae60", marginBottom: "20px" }}>Mis Clases Activas</h2>
+            <h2 style={{ color: "#27ae60", marginBottom: "20px", fontSize: "clamp(1.1rem, 3.5vw, 1.6rem)" }}>Mis Clases Activas</h2>
 
             {cursosInscritos.length === 0 ? (
               <div style={{ padding: "30px", textAlign: "center", background: "var(--bg-main)", borderRadius: "8px", color: "var(--text-muted)" }}>
@@ -536,8 +536,8 @@ export default function Grupos() {
       {/* ========================================= */}
       {mostrarModal && (
         <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
-          <div style={{ background: "var(--bg-card)", padding: "30px", borderRadius: "10px", width: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", border: "1px solid var(--border-color)" }}>
-            <h2 style={{ marginTop: 0, color: "var(--primary-color)" }}>Crear Nuevo Curso</h2>
+          <div style={{ background: "var(--bg-card)", padding: "30px", borderRadius: "10px", width: "90%", maxWidth: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", border: "1px solid var(--border-color)" }}>
+            <h2 style={{ marginTop: 0, color: "var(--primary-color)", fontSize: "clamp(1.2rem, 4vw, 1.5rem)" }}>Crear Nuevo Curso</h2>
             <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px" }}>
               El código de acceso se generará automáticamente de forma segura.
             </p>
@@ -583,8 +583,8 @@ export default function Grupos() {
       {/* ========================================= */}
       {mostrarModalEditar && cursoAEditar && (
         <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
-          <div style={{ background: "var(--bg-card)", padding: "30px", borderRadius: "10px", width: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", border: "1px solid var(--border-color)" }}>
-            <h2 style={{ marginTop: 0, color: "var(--primary-color)" }}>Gestionar Curso</h2>
+          <div style={{ background: "var(--bg-card)", padding: "30px", borderRadius: "10px", width: "90%", maxWidth: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", border: "1px solid var(--border-color)" }}>
+            <h2 style={{ marginTop: 0, color: "var(--primary-color)", fontSize: "clamp(1.2rem, 4vw, 1.5rem)" }}>Gestionar Curso</h2>
             <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px" }}>
               Código de acceso (Sólo lectura): <strong>{cursoAEditar.codigo}</strong>
             </p>
@@ -650,8 +650,8 @@ export default function Grupos() {
       {/* ========================================= */}
       {mostrarModalEliminar && cursoAEliminar && (
         <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
-          <div style={{ background: "var(--bg-card)", padding: "30px", borderRadius: "10px", width: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", border: "1px solid rgba(220, 38, 38, 0.3)" }}>
-            <h2 style={{ marginTop: 0, color: "#dc2626" }}>Eliminar Curso</h2>
+          <div style={{ background: "var(--bg-card)", padding: "30px", borderRadius: "10px", width: "90%", maxWidth: "400px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", border: "1px solid rgba(220, 38, 38, 0.3)" }}>
+            <h2 style={{ marginTop: 0, color: "#dc2626", fontSize: "clamp(1.2rem, 4vw, 1.5rem)" }}>Eliminar Curso</h2>
             <p style={{ color: "var(--text-main)", fontSize: "0.95rem", marginBottom: "15px" }}>
               ¿Estás seguro de que deseas eliminar permanentemente el curso <strong>{cursoAEliminar.nombre}</strong>?
             </p>

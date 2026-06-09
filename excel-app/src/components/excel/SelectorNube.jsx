@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../../services/api";
 import { alerta } from "../../utils/Notificaciones";
+import { IconoNube } from "../ui/iconos";
 
 export default function SelectorNube({ usuario, onImportar }) {
   const [archivos, setArchivos] = useState([]);
@@ -48,7 +49,7 @@ export default function SelectorNube({ usuario, onImportar }) {
       borderRadius: '8px',
       marginTop: '10px'
     }}>
-      <span style={{ fontSize: '1.2rem' }}>☁️</span>
+      <IconoNube size={20} color="var(--text-muted)" />
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
         <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-muted)' }}>
           Importar desde mi nube

@@ -554,6 +554,20 @@
 
 /* Celulares (max-width: 480px) */
 @media (max-width: 480px) {
+  .perfil-container {
+    margin: 10px auto;
+    padding: 0;
+  }
+
+  .perfil-card-body {
+    padding: 20px 12px;
+  }
+
+  .perfil-card-secondary, .perfil-card-danger {
+    padding: 15px 12px;
+    margin-top: 15px;
+  }
+
   .perfil-banner {
     height: 90px;
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { alerta } from '../utils/Notificaciones';
+import { IconoAdvertencia } from '../components/ui/iconos';
 
 export default function Admin() {
   const [usuarios, setUsuarios] = useState([]);
@@ -271,7 +272,8 @@ export default function Admin() {
             }}
           >
             <h3 style={{ margin: '0 0 15px 0', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              ⚠️ Confirmar Eliminación Permanente
+              <IconoAdvertencia size={18} color="#ef4444" />
+              Confirmar Eliminación Permanente
             </h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', marginBottom: '20px' }}>
               Estás a punto de eliminar al usuario <strong>{usuarioAEliminar.nombre}</strong> ({usuarioAEliminar.email}). Esto borrará permanentemente su cuenta, archivos, historial de cálculos e inscripciones. Esta acción no se puede deshacer.

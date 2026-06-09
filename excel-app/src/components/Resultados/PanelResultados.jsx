@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import escudoAdmin from "../../assets/images/escudoAdmin.png";
+
 import TablaDinamica from "../excel/TablaDinamica";
 import TablaRegresion from "./TablaRegresion";
 import TablaSeriesTiempo from "./TablaSeriesTiempo";
@@ -8,7 +8,7 @@ import TablasBivariantes from "./TablasBivariantes";
 import TablasUnidimensionales from "./TablasUnidimensionales";
 import PanelGraficos from "./PanelGraficos";
 import { generarPDFReporte } from "../../utils/exportUtils";
-import { IconoPDF, IconoGuardar } from "../ui/iconos";
+import { IconoPDF, IconoGuardar, IconoAdvertencia } from "../ui/iconos";
 import { glosarioEstadistico } from "../../utils/diccionario";
 
 // Este componente envuelve tus símbolos en un tooltip automático
@@ -69,11 +69,6 @@ export default function PanelResultados({
         />
       ) : !resultado && !errorNumerico ? (
         <div className="contenedor-espera-logo">
-          <img
-            src={escudoAdmin}
-            alt="Escudo Administración de Empresas"
-            className="logo-espera"
-          />
         </div>
       ) : (
         <div className="contenedor-resultados-vacio">
@@ -96,8 +91,9 @@ export default function PanelResultados({
                   marginBottom: "15px",
                 }}
               >
-                <p style={{ margin: "0" }}>
-                  ⚠️ Error: Faltan datos numéricos o hay celdas de texto en el cálculo actual.
+                <p style={{ margin: "0", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                  <IconoAdvertencia size={16} color="#d9534f" />
+                  Error: Faltan datos numéricos o hay celdas de texto en el cálculo actual.
                 </p>
               </div>
             )}

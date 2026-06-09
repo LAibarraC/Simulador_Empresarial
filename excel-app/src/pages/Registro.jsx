@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import logoCarrera from "../assets/images/Logo-Adm.png";
+import logoCarrera from "../assets/images/simuledu_logo.png";
 import { alerta } from '../utils/Notificaciones';
 import '../styles/components/ui/Login.css'; // Aseguramos que cargue los estilos de la tarjeta
 
@@ -89,16 +89,16 @@ export default function Registro() {
 
       <div className="login-card" style={{ maxWidth: '500px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <img src={logoCarrera} alt="Logo" style={{ width: '150px', height: 'auto' }} />
-          <h3 style={{ marginTop: '15px', color: 'var(--text-main)' }}>Registro de Usuario</h3>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Crea tu cuenta para acceder al sistema.</p>
+          <img src={logoCarrera} alt="Logo" className="auth-logo" style={{ width: '150px', height: 'auto' }} />
+          <h3 style={{ marginTop: '15px', color: '#ffffff' }}>Registro de Usuario</h3>
+          <p style={{ fontSize: '0.9rem', color: '#D4D8DD' }}>Crea tu cuenta para acceder al sistema.</p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           
           <div style={{ display: 'flex', gap: '15px' }}>
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Nombres</label>
+              <label className="etiqueta" style={{ color: '#ffffff' }}>Nombres</label>
               <input 
                 type="text" 
                 value={nombres} 
@@ -109,7 +109,7 @@ export default function Registro() {
               />
             </div>
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Apellidos</label>
+              <label className="etiqueta" style={{ color: '#ffffff' }}>Apellidos</label>
               <input 
                 type="text" 
                 value={apellidos} 
@@ -122,7 +122,7 @@ export default function Registro() {
           </div>
 
           <div style={{ textAlign: 'left' }}>
-            <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Correo Electrónico</label>
+            <label className="etiqueta" style={{ color: '#ffffff' }}>Correo Electrónico</label>
             <input 
               type="email" 
               value={email} 
@@ -135,12 +135,12 @@ export default function Registro() {
 
           <div style={{ display: 'flex', gap: '15px' }}>
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Contraseña (mínimo 6 caracteres)</label>
+              <label className="etiqueta" style={{ color: '#ffffff' }}>Contraseña</label>
               <input 
                 type="password" 
                 value={pass} 
                 onChange={(e) => setPass(e.target.value)} 
-                placeholder="Mínimo 6 caracteres" 
+                placeholder="Ingrese su contraseña" 
                 style={{ 
                   width: '100%',
                   borderColor: isPasswordTooShort ? '#dc2626' : 'var(--border-color)' 
@@ -154,7 +154,7 @@ export default function Registro() {
               )}
             </div>
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Confirmar Contraseña</label>
+              <label className="etiqueta" style={{ color: '#ffffff' }}>Confirmar Contraseña</label>
               <input 
                 type="password" 
                 value={confirmPass} 
@@ -193,7 +193,7 @@ export default function Registro() {
         </form>
 
         <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>
-          <p style={{ color: 'var(--text-main)' }}>¿Ya tienes una cuenta? <Link to="/login" style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>Inicia sesión aquí</Link></p>
+          <p style={{ color: '#ffffff' }}>¿Ya tienes una cuenta? <Link to="/login" style={{ color: '#D4D8DD', fontWeight: 'bold' }}>Inicia sesión aquí</Link></p>
         </div>
       </div>
     </div>
