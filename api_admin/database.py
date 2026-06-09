@@ -5,7 +5,11 @@ import os
 
 # En producción, leemos la URL de la base de datos desde variables de entorno.
 # Si no está definida, usamos la conexión por defecto de XAMPP local.
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or "mysql+pymysql://root:@localhost/estadistica_db"
+
+#ibarra
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or "mysql+pymysql://root:23luis99@localhost:3306/estadistica_db"
+#Diego
+#SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or "mysql+pymysql://root:@localhost/estadistica_db"
 
 # Si la URL empieza con mysql:// (sin especificar driver), forzamos mysql+pymysql:// para SQLAlchemy
 if SQLALCHEMY_DATABASE_URL.startswith("mysql://"):
