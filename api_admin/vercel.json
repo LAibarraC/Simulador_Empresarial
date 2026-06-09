@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://backend-shc170.onrender.com/:path*"
+    }
+  ]
+}
