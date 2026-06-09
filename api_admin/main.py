@@ -23,6 +23,7 @@ origins = [
     "https://administracion-calculadora.vercel.app",  # Enlace oficial Vercel
     "https://proyecto-shc-170-54eovb4bb-coadiegos-projects.vercel.app", # Enlace temporal Vercel
     "https://proyecto-shc-170.vercel.app", # Enlace limpio Vercel
+    "https://simul-edu.vercel.app", # Enlace limpio Vercel
 ]
 
 app.add_middleware(
