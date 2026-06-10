@@ -77,7 +77,14 @@ const renderCustomizedLabelText = (props, colores) => {
 };
 
 
-export default function GraficosProbabilidad({ resProbabilidad, datosArray, isCond }) {
+export default function GraficosProbabilidad({ 
+    resProbabilidad, 
+    datosArray, 
+    isCond,
+    eventoFavorable = [],
+    eventoCondicion = [],
+    isManual = false
+}) {
     if (!resProbabilidad) return null;
 
     const dataPie = [
@@ -92,22 +99,25 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray, isCo
         `hsl(${(tonoBase + 180) % 360}, 20%, 70%)`
     ];
 
-    const frecuencias = {};
-    datosArray.forEach(current => {
-        if (typeof current === 'string' && current.includes(' | ')) {
-            const partes = current.split(' | ').map(p => p.trim());
-            partes.forEach(p => {
-                if (p) frecuencias[p] = (frecuencias[p] || 0) + 1;
-            });
-        } else {
-            if (current) frecuencias[current] = (frecuencias[current] || 0) + 1;
-        }
-    });
+    // Nueva lógica: Contar frecuencias absolutas únicamente de los eventos seleccionados
+    const eventosFav = Array.isArray(eventoFavorable) ? eventoFavorable : [];
+    const eventosCond = Array.isArray(eventoCondicion) ? eventoCondicion : [];
+    const selectedEvents = [...new Set([...eventosFav, ...eventosCond])].filter(Boolean);
 
-    const dataBarra = Object.keys(frecuencias).map(key => ({
-        nombre: key,
-        frecuencia: frecuencias[key]
-    })).sort((a, b) => a.nombre - b.nombre);
+    const dataBarra = selectedEvents.map(ev => {
+        let count = 0;
+        datosArray.forEach(row => {
+            if (typeof row === 'string') {
+                if (row.includes(' | ')) {
+                    const partes = row.split(' | ').map(p => p.trim());
+                    if (partes.includes(ev)) count++;
+                } else {
+                    if (row.trim() === ev) count++;
+                }
+            }
+        });
+        return { name: ev, nombre: ev, frecuencia: count };
+    });
 
     return (
         <div className="contenedor-graficos-prob">
@@ -216,8 +226,8 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray, isCo
                 <p className="leyenda-termometro">0% (Imposible) — 100% (Seguro)</p>
             </div>
 
-            <div className="grid-graficos">
-                <div className="grafico-card">
+            <div className="grid-graficos" style={isManual ? { display: 'flex', justifyContent: 'center' } : {}}>
+                <div className="grafico-card" style={isManual ? { width: '100%', maxWidth: '600px' } : {}}>
                     <h3 className="titulo-profesional">{isCond ? 'Distribución dentro de Condición (B)' : 'Distribución del Evento'}</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart margin={{ top: 10, right: 30, left: 30, bottom: 30 }}>
@@ -250,77 +260,80 @@ export default function GraficosProbabilidad({ resProbabilidad, datosArray, isCo
                     </ResponsiveContainer>
                 </div>
 
-                <div className="grafico-card">
-                    <h3 className="titulo-profesional">{isCond ? 'Frecuencia en Condición (B)' : 'Frecuencia de Datos Únicos'}</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart
-                            data={dataBarra}
-                            margin={{ top: 30, right: 30, left: 10, bottom: 30 }}
-                            barCategoryGap="15%"
-                        >
-                            <defs>
-                                <linearGradient id="colorBarraPro" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor="#1e40af" stopOpacity={1} />
-                                </linearGradient>
-                            </defs>
+                {!isManual && (
+                    <div className="grafico-card">
+                        <h3 className="titulo-profesional">{isCond ? 'Frecuencia en Condición (B)' : 'Frecuencia de Datos Únicos'}</h3>
+                        {dataBarra.length === 0 ? (
+                            <div style={{ display: 'flex', height: 300, alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '14px', textAlign: 'center', border: '1px dashed var(--border-color)', borderRadius: '8px', background: 'var(--bg-body)' }}>
+                                Sin eventos seleccionados. Activa algún evento para ver el gráfico.
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart
+                                    data={dataBarra}
+                                    margin={{ top: 20, right: 20, left: -20, bottom: 60 }}
+                                    barCategoryGap="15%"
+                                >
+                                    <defs>
+                                        <linearGradient id="colorBarraPro" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
+                                            <stop offset="100%" stopColor="#1e40af" stopOpacity={1} />
+                                        </linearGradient>
+                                    </defs>
 
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                strokeWidth={1.5}
-                                fill="var(--border-color)"
-                                fillOpacity={0.06}
-                            />
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        strokeWidth={1.5}
+                                        fill="var(--border-color)"
+                                        fillOpacity={0.06}
+                                    />
 
-                            <XAxis
-                                dataKey="nombre"
-                                axisLine={{ stroke: 'var(--text-muted)', strokeWidth: 1.5 }}
-                                tickLine={{ stroke: 'var(--text-muted)' }}
-                                tick={{ fill: 'var(--text-color)', fontSize: 12, fontWeight: 600, dy: 10 }}
-                            >
-                                <Label
-                                    value="Valor"
-                                    offset={-15}
-                                    position="insideBottom"
-                                    style={{ fill: 'var(--text-muted)', fontSize: 13, fontWeight: 'bold' }}
-                                />
-                            </XAxis>
+                                    <XAxis
+                                        dataKey="name"
+                                        angle={-45}
+                                        textAnchor="end"
+                                        tick={{ fontSize: 12, fill: '#64748b' }}
+                                        interval={0}
+                                        dy={10}
+                                    />
 
-                            <YAxis
-                                axisLine={{ stroke: 'var(--text-muted)', strokeWidth: 1.5 }}
-                                tickLine={{ stroke: 'var(--text-muted)' }}
-                                tick={{ fill: 'var(--text-color)', fontSize: 12 }}
-                                allowDecimals={false}
-                            >
-                                <Label
-                                    value="Frecuencia"
-                                    angle={-90}
-                                    position="insideLeft"
-                                    style={{ fill: 'var(--text-muted)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
-                                />
-                            </YAxis>
+                                    <YAxis
+                                        axisLine={{ stroke: 'var(--text-muted)', strokeWidth: 1.5 }}
+                                        tickLine={{ stroke: 'var(--text-muted)' }}
+                                        tick={{ fill: 'var(--text-color)', fontSize: 12 }}
+                                        allowDecimals={false}
+                                    >
+                                        <Label
+                                            value="Frecuencia"
+                                            angle={-90}
+                                            position="insideLeft"
+                                            style={{ fill: 'var(--text-muted)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                        />
+                                    </YAxis>
 
-                            <Tooltip
-                                cursor={{ fill: 'var(--border-color)', fillOpacity: 0.3 }}
-                                contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' }}
-                                itemStyle={{ color: 'var(--text-color)', fontWeight: 'bold' }}
-                                labelStyle={{ color: 'var(--text-muted)' }}
-                            />
+                                    <Tooltip
+                                        cursor={{ fill: 'var(--border-color)', fillOpacity: 0.3 }}
+                                        contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' }}
+                                        itemStyle={{ color: 'var(--text-color)', fontWeight: 'bold' }}
+                                        labelStyle={{ color: 'var(--text-muted)' }}
+                                    />
 
-                            <Bar
-                                dataKey="frecuencia"
-                                fill="url(#colorBarraPro)"
-                                radius={[4, 4, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="frecuencia"
-                                    position="top"
-                                    style={{ fill: 'var(--text-color)', fontSize: '13px', fontWeight: 'bold' }}
-                                />
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
+                                    <Bar
+                                        dataKey="frecuencia"
+                                        fill="url(#colorBarraPro)"
+                                        radius={[4, 4, 0, 0]}
+                                    >
+                                        <LabelList
+                                            dataKey="frecuencia"
+                                            position="top"
+                                            style={{ fontSize: '11px', fill: '#475569', fontWeight: 600 }}
+                                        />
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -30,7 +30,7 @@ const generarPermutaciones = (elementos, r) => {
     return perms;
 };
 
-export const calcularTecnicasConteo = (n, r) => {
+export const calcularTecnicasConteo = (n, r, customElements = []) => {
     const numN = parseInt(n);
     const numR = parseInt(r);
 
@@ -52,18 +52,19 @@ export const calcularTecnicasConteo = (n, r) => {
     }
     resC = Math.round(resC);
 
-    let elementos = [];
+    const elementos = customElements && customElements.length === numN
+        ? customElements
+        : Array.from({ length: numN }, (_, i) => String.fromCharCode(65 + i));
+
     let elementosP = [];
     let elementosC = [];
 
     // Límite de seguridad para evitar que el navegador se congele
     if (numN <= 10 && numR > 0 && resP <= 5000) {
-        elementos = Array.from({ length: numN }, (_, i) => String.fromCharCode(65 + i));
-        elementosP = generarPermutaciones(elementos, numR).map(arr => arr.join(''));
-        elementosC = generarCombinaciones(elementos, numR).map(arr => arr.join(''));
+        elementosP = generarPermutaciones(elementos, numR).map(arr => arr.join('-'));
+        elementosC = generarCombinaciones(elementos, numR).map(arr => arr.join('-'));
     } else if (numN <= 10 && numR > 0 && resC <= 5000) {
-        elementos = Array.from({ length: numN }, (_, i) => String.fromCharCode(65 + i));
-        elementosC = generarCombinaciones(elementos, numR).map(arr => arr.join(''));
+        elementosC = generarCombinaciones(elementos, numR).map(arr => arr.join('-'));
     }
 
     return {

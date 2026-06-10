@@ -39,6 +39,42 @@ export default function Principal() {
     const [n, setN] = useState('0');
     const [r, setR] = useState('0');
     const [resConteo, setResConteo] = useState(null);
+    const [tipoElementos, setTipoElementos] = useState('letras');
+    const [customElementsInput, setCustomElementsInput] = useState('');
+
+    const parsedElements = useMemo(() => {
+        if (!customElementsInput.trim()) {
+            return [];
+        }
+        return customElementsInput.split(',').map(el => el.trim()).filter(Boolean);
+    }, [customElementsInput]);
+
+    const finalElements = useMemo(() => {
+        const numN = parseInt(n) || 0;
+        if (tipoElementos === 'letras') {
+            return Array.from({ length: numN }, (_, i) => String.fromCharCode(65 + i));
+        }
+        if (tipoElementos === 'numeros') {
+            return Array.from({ length: numN }, (_, i) => (i + 1).toString());
+        }
+
+        let elements = [...parsedElements];
+        if (elements.length < numN) {
+            let index = 0;
+            while (elements.length < numN) {
+                let candidate = String.fromCharCode(65 + index);
+                while (elements.includes(candidate)) {
+                    index++;
+                    candidate = String.fromCharCode(65 + index);
+                }
+                elements.push(candidate);
+                index++;
+            }
+        } else if (elements.length > numN) {
+            elements = elements.slice(0, numN);
+        }
+        return elements;
+    }, [parsedElements, tipoElementos, n]);
 
     // ── Probabilidad ─────────────────────────────────────────────────────────────
     const [filas, setFilas] = useState([filaVacia(1), filaVacia(2), filaVacia(3)]);
@@ -332,7 +368,7 @@ export default function Principal() {
 
     const ejecutar = () => {
         if (operacion === 'conteo') {
-            const res = calcularTecnicasConteo(n, r);
+            const res = calcularTecnicasConteo(n, r, finalElements);
             if (res?.error) { alert(res.error); return; }
             setResConteo({ ...res, n, r });
             setResProbabilidad(null);
@@ -474,7 +510,15 @@ export default function Principal() {
 
                         {/* SEPARACION DE CONTROLES */}
                         {operacion === 'conteo' && (
-                            <ControlesConteo n={n} setN={setN} r={r} setR={setR} ajustar={ajustar} ejecutar={ejecutar} />
+                            <ControlesConteo 
+                                n={n} setN={setN} r={r} setR={setR} 
+                                ajustar={ajustar} ejecutar={ejecutar} 
+                                customElementsInput={customElementsInput} 
+                                setCustomElementsInput={setCustomElementsInput} 
+                                parsedElements={parsedElements}
+                                tipoElementos={tipoElementos}
+                                setTipoElementos={setTipoElementos}
+                            />
                         )}
                         {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'dist_uniforme') && (
                             <ControlesProbabilidad setModalVars={setModalVars} varSeleccionada={varSeleccionada} />

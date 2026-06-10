@@ -3,7 +3,11 @@ import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Cons
 
 import { IconoCalculadora } from '../../../../ui/iconos';
 
-export default function ControlesConteo({ n, setN, r, setR, ajustar, ejecutar }) {
+export default function ControlesConteo({ 
+    n, setN, r, setR, ajustar, ejecutar, 
+    customElementsInput, setCustomElementsInput, parsedElements,
+    tipoElementos, setTipoElementos
+}) {
     return (
         <>
             <div style={{ ...cardStyle, marginBottom: '15px' }}>
@@ -18,6 +22,56 @@ export default function ControlesConteo({ n, setN, r, setR, ajustar, ejecutar })
                         </div>
                     </div>
                 ))}
+
+                <div style={{ marginTop: '15px' }}>
+                    <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>Tipo de Elementos:</label>
+                    <select 
+                        value={tipoElementos} 
+                        onChange={(e) => setTipoElementos(e.target.value)} 
+                        style={{ 
+                            width: '100%', 
+                            padding: '8px', 
+                            borderRadius: RADIUS, 
+                            fontSize: FS.sm, 
+                            border: '1px solid var(--border-color)', 
+                            backgroundColor: 'var(--bg-input)', 
+                            color: 'var(--text-main)', 
+                            outline: 'none',
+                            marginBottom: '10px'
+                        }}
+                    >
+                        <option value="letras">Letras por defecto (A, B, C...)</option>
+                        <option value="numeros">Números por defecto (1, 2, 3...)</option>
+                        <option value="personalizado">Elementos personalizados</option>
+                    </select>
+
+                    {tipoElementos === 'personalizado' && (
+                        <>
+                            <input 
+                                type="text" 
+                                value={customElementsInput} 
+                                onChange={(e) => setCustomElementsInput(e.target.value)} 
+                                placeholder="Ej. perro, gato, loro"
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '8px', 
+                                    borderRadius: RADIUS, 
+                                    fontSize: FS.sm, 
+                                    border: '1px solid var(--border-color)', 
+                                    backgroundColor: 'var(--bg-input)', 
+                                    color: 'var(--text-main)', 
+                                    outline: 'none',
+                                    boxSizing: 'border-box'
+                                }} 
+                            />
+                            {customElementsInput.trim() && parsedElements.length !== (parseInt(n) || 0) && (
+                                <div style={{ color: '#d97706', fontSize: '0.75rem', marginTop: '6px', fontWeight: 500, lineHeight: '1.3' }}>
+                                    ⚠️ Ingresaste {parsedElements.length} elementos para un total n = {n}. Se autocompletará o truncará al calcular.
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
 
             <button onClick={ejecutar} className="button_calcular btn-icon" style={{ width: 'fit-content', alignSelf: 'center', padding: '8px 35px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
