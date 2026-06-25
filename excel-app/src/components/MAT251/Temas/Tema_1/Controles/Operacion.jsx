@@ -23,6 +23,9 @@ const getIcon = (val) => {
         case 'muestreo': return (
             <svg {...props}><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
         );
+        case 'dist_uniforme': return (
+            <svg {...props}><line x1="3" y1="20" x2="21" y2="20" /><line x1="3" y1="4" x2="3" y2="20" /><rect x="6" y="10" width="12" height="10" /></svg>
+        );
         case 'dist_continua': return (
             <svg {...props}><path d="M4 19h16" /><path d="M4 15h16" /><path d="M4 15v4" /><path d="M20 15v4" /><path d="M4 11v-4" /><path d="M20 11v-4" /><path d="M4 11h16" /><path d="M4 7h16" /></svg>
         );
