@@ -135,11 +135,29 @@
 }
 
 .panel-controles-excel {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-card);
+  margin-top: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Banner de bienvenida — modo claro */
+.banner-bienvenida {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+  border-radius: 5px;
+  color: #0f172a;
+  border: 1px solid #93c5fd;
+}
+
+/* Banner de bienvenida — modo oscuro */
+html.dark .banner-bienvenida {
+  background: linear-gradient(135deg, #1e293b 0%, #263650 100%);
+  color: #bfdbfe;
+  border-color: #334155;
 }
 
 .container_operaciones {

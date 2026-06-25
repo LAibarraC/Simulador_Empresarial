@@ -1,7 +1,7 @@
 import React from 'react';
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
 
-import { IconoCalculadora } from '../../../../ui/iconos';
+import { IconoCalculadora, IconoAlerta } from '../../../../ui/iconos';
 
 export default function ControlesConteo({ 
     n, setN, r, setR, ajustar, ejecutar, 
@@ -65,8 +65,9 @@ export default function ControlesConteo({
                                 }} 
                             />
                             {customElementsInput.trim() && parsedElements.length !== (parseInt(n) || 0) && (
-                                <div style={{ color: '#d97706', fontSize: '0.75rem', marginTop: '6px', fontWeight: 500, lineHeight: '1.3' }}>
-                                    ⚠️ Ingresaste {parsedElements.length} elementos para un total n = {n}. Se autocompletará o truncará al calcular.
+                                <div style={{ color: '#d97706', fontSize: '0.75rem', marginTop: '6px', fontWeight: 500, lineHeight: '1.3', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <IconoAlerta width="14" height="14" style={{ flexShrink: 0 }} />
+                                    <span>Ingresaste {parsedElements.length} elementos para un total n = {n}. Se autocompletará o truncará al calcular.</span>
                                 </div>
                             )}
                         </>

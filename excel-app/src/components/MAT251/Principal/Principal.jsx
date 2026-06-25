@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import 'react-data-grid/lib/styles.css';
 import { useMAT251Data } from '../../../components/excel/DataContext';
 import { calcularTecnicasConteo, calcularProbabilidadClasica, calcularProbabilidadCondicional, calcularProbabilidadTotalParticion } from '../Matematicas/logica_Tema1';
+import { calcularMomentosDiscreta } from '../Matematicas/logica_Tema2';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import '../../../styles/pages/MAT251/Pantalla.css';
@@ -22,16 +23,27 @@ import ControlesReglaAdicion from '../Temas/Tema_1/Controles/Controles_ReglaAdic
 import ResultadosReglaAdicion from '../Temas/Tema_1/Resultados/Resultados_ReglaAdicion';
 import ResultadosReglaMultiplicacion from '../Temas/Tema_1/Resultados/Resultados_ReglaMultiplicacion';
 import ResultadosMuestreo from '../Temas/Tema_1/Resultados/Resultados_Muestreo';
-import ResultadosUniforme from '../Temas/Tema_1/Resultados/Resultados_Uniforme';
+import ResultadosEspacioContinuo from '../Temas/Tema_1/Resultados/Resultados_EspacioContinuo';
 
 import Operacion from '../Temas/Tema_1/Controles/Operacion';
+import Controles_DistribucionDiscreta from '../Temas/Tema_2/Controles/Controles_DistribucionDiscreta';
+import ControlDistribucionContinua from '../Temas/Tema_2/Controles/ControlDistribucionContinua';
+import Resultados_DistribucionDiscreta from '../Temas/Tema_2/Resultados/Resultados_DistribucionDiscreta';
+import ResultadoDistribucionContinua from '../Temas/Tema_2/Resultados/ResultadoDistribucionContinua';
+import '../../../styles/components/MAT251/Tema2.css';
+
+import Controles_ModelosDiscretos from '../Temas/Tema_3/Controles/Controles_ModelosDiscretos';
+import Resultados_ModelosDiscretos from '../Temas/Tema_3/Resultados/Resultados_ModelosDiscretos';
+import GraficoBastonesModelos from '../Graficas/Tema_3/GraficoBastonesModelos';
+import ModalProcedimientoModelos from '../Temas/Tema_3/Modales/ModalProcedimientoModelos';
+import '../../../styles/components/MAT251/Tema3.css';
 
 export default function Principal() {
     const { variables } = useMAT251Data();
 
     // ── UI ───────────────────────────────────────────────────────────────────────
     const [panelAbierto, setPanelAbierto] = useState(true);
-    const [operacion, setOperacion] = useState('conteo');
+    const [operacion, setOperacion] = useState('');
     const [subTipoProbabilidad, setSubTipoProbabilidad] = useState('clasica');
     const [columnaParticion, setColumnaParticion] = useState(''); // Para probabilidad total
 
@@ -129,7 +141,15 @@ export default function Principal() {
     const [resultadoUniforme, setResultadoUniforme] = useState(null);
     const [errorUniforme, setErrorUniforme] = useState('');
 
-    // FUNCIONES //
+    // Estados para Tema 2: Discreta y Continua
+    const [datosDiscretos, setDatosDiscretos] = useState(null);
+    const [datosContinuos, setDatosContinuos] = useState(null);
+
+    // Estados para Tema 3: Modelos
+    const [datosTema3, setDatosTema3] = useState(null);
+    const [modalProcTema3, setModalProcTema3] = useState(false);
+
+    // ==========================================FUNCIONES //
 
     // Valores unicos de un Espacio mustral
     const valoresUnicos = useMemo(() => {
@@ -352,7 +372,7 @@ export default function Principal() {
         if (formulaProbRef.current && resProbabilidad) {
             let latex = '';
             if (subTipoProbabilidad === 'frecuentista') {
-                latex = `P(A)=\\dfrac{f_A}{N}=\\dfrac{${resProbabilidad.casosFavorables}}{${resProbabilidad.casosTotales}}=${resProbabilidad.probabilidadDecimal}`;
+                latex = `P(A)=\\dfrac{f}{n}=\\dfrac{${resProbabilidad.casosFavorables}}{${resProbabilidad.casosTotales}}=${resProbabilidad.probabilidadDecimal}`;
             } else if (subTipoProbabilidad === 'condicional') {
                 latex = `P(A|B)=\\dfrac{n(A \\cap B)}{n(B)}=\\dfrac{${resProbabilidad.casosFavorables}}{${resProbabilidad.casosTotales}}=${resProbabilidad.probabilidadDecimal}`;
             } else if (subTipoProbabilidad === 'total') {
@@ -465,15 +485,27 @@ export default function Principal() {
 
             {/* PANEL IZQUIERDO */}
             <div className="calculadora-datos" style={{ fontFamily: FONT }}>
-                <div style={{ borderBottom: panelAbierto ? '0px solid var(--border-color)' : 'none', paddingBottom: '5px', marginBottom: panelAbierto ? '5px' : '0' }}>
-                    {panelAbierto && <h3 style={{ margin: 0, fontSize: FS.lg, fontFamily: FONT, fontWeight: 600 }}>Parámetros</h3>}
+                <div>
+                    {panelAbierto && <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 600 }}>Parámetros</h3>}
                 </div>
                 {panelAbierto && (
-                    <div className="panel-controles-excel" style={{ marginTop: '10px', fontFamily: FONT, display: 'flex', flexDirection: 'column' }}>
+                    <div className="panel-controles-excel" style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column' }}>
                         {/* Selector de operación iterativo (Personalizado) */}
                         {/* Selector de operación iterativo (Personalizado) */}
-                        <label style={{ ...labelStyle, fontSize: '1.2em' }}>Operación:</label>
+                        <label style={{ ...labelStyle, fontSize: FS.xs, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Operación:</label>
                         <Operacion operacion={operacion} handleOperacion={handleOperacion} />
+
+                        {/* Hint cuando no hay operación */}
+                        {!operacion && (
+                            <div style={{ padding: '12px', background: 'var(--bg-body, #f8fafc)', border: '1px dashed var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)', opacity: 0.5, marginBottom: '6px' }}>
+                                    <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                </svg>
+                                <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                    Expande un tema y elige<br />una operación para continuar.
+                                </p>
+                            </div>
+                        )}
 
                         {/* SUB-SELECTOR DE PROBABILIDAD */}
                         {operacion === 'probabilidad' && (
@@ -510,17 +542,17 @@ export default function Principal() {
 
                         {/* SEPARACION DE CONTROLES */}
                         {operacion === 'conteo' && (
-                            <ControlesConteo 
-                                n={n} setN={setN} r={r} setR={setR} 
-                                ajustar={ajustar} ejecutar={ejecutar} 
-                                customElementsInput={customElementsInput} 
-                                setCustomElementsInput={setCustomElementsInput} 
+                            <ControlesConteo
+                                n={n} setN={setN} r={r} setR={setR}
+                                ajustar={ajustar} ejecutar={ejecutar}
+                                customElementsInput={customElementsInput}
+                                setCustomElementsInput={setCustomElementsInput}
                                 parsedElements={parsedElements}
                                 tipoElementos={tipoElementos}
                                 setTipoElementos={setTipoElementos}
                             />
                         )}
-                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'dist_uniforme') && (
+                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'dist_uniforme' || operacion === 'dist_discreta' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos') && (
                             <ControlesProbabilidad setModalVars={setModalVars} varSeleccionada={varSeleccionada} />
                         )}
                     </div>
@@ -531,21 +563,110 @@ export default function Principal() {
 
             <div className="calculadora-resultados" style={{ fontFamily: FONT }}>
                 <div className="frecuencias" style={{ borderRadius: RADIUS }}>
-                    <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 600 }}>
-                        Resultados: {operacion === 'conteo' ? 'TÉCNICAS DE CONTEO' : operacion === 'simulador_total' ? 'PROBABILIDAD TOTAL' : operacion === 'regla_adicion' ? 'AXIOMAS Y REGLA DE LA ADICIÓN' : operacion === 'regla_multiplicacion' ? 'REGLA DE LA MULTIPLICACIÓN' : operacion === 'muestreo' ? 'INTRODUCCIÓN AL MUESTREO' : operacion === 'dist_uniforme' ? 'DISTRIBUCIÓN UNIFORME CONTINUA' : (subTipoProbabilidad === 'clasica' ? 'PROBABILIDAD CLÁSICA' : subTipoProbabilidad === 'frecuentista' ? 'PROBABILIDAD FRECUENTISTA' : 'PROBABILIDAD CONDICIONAL')}
-                    </h3>
+                    {operacion && (
+                        <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 600 }}>
+                            Resultados: {operacion === 'conteo' ? 'TÉCNICAS DE CONTEO' : operacion === 'simulador_total' ? 'PROBABILIDAD TOTAL' : operacion === 'regla_adicion' ? 'AXIOMAS Y REGLA DE LA ADICIÓN' : operacion === 'regla_multiplicacion' ? 'REGLA DE LA MULTIPLICACIÓN' : operacion === 'muestreo' ? 'INTRODUCCIÓN AL MUESTREO' : operacion === 'dist_uniforme' ? 'PROBABILIDAD EN ESPACIO CONTINUO' : operacion === 'dist_discreta' ? 'VARIABLE ALEATORIA DISCRETA' : operacion === 'dist_continua' ? 'VARIABLE ALEATORIA CONTINUA' : operacion === 'modelos_discretos' ? 'MODELOS DISCRETOS ESPECIALES' : (subTipoProbabilidad === 'clasica' ? 'PROBABILIDAD CLÁSICA' : subTipoProbabilidad === 'frecuentista' ? 'PROBABILIDAD FRECUENTISTA' : 'PROBABILIDAD CONDICIONAL')}
+                        </h3>
+                    )}
 
                     {/* RESULTADOS */}
-                    {operacion === 'dist_uniforme' ? (
-                        <ResultadosUniforme
-                            varSeleccionada={varSeleccionada} filas={filas}
-                            varUniforme={varUniforme} setVarUniforme={setVarUniforme}
-                            inputMin={inputMin} setInputMin={setInputMin}
-                            inputMax={inputMax} setInputMax={setInputMax}
-                            resultado={resultadoUniforme} setResultado={setResultadoUniforme}
-                            error={errorUniforme} setError={setErrorUniforme}
-                            statsDatos={statsDatos} abrirEditor={abrirEditor}
-                        />
+                    {!operacion ? (
+                        <div style={{ padding: '24px 20px', fontFamily: FONT }}>
+                            {/* Header bienvenida */}
+                            <div className="banner-bienvenida">
+                                <div style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.9, marginBottom: '6px' }}>
+                                    MAT 251 — Estadística Matemática
+                                </div>
+                                <p style={{ margin: 0, fontSize: FS.xs, opacity: 0.75 }}>
+                                    Selecciona un tema del panel izquierdo para comenzar
+                                </p>
+                            </div>
+
+                            {/* Tarjetas de los 6 temas */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
+                                {[
+                                    { num: '01', titulo: 'Cálculo de probabilidades e introducción al muestreo', ops: 7, activo: true },
+                                    { num: '02', titulo: 'Variables aleatorias', ops: 2, activo: true },
+                                    { num: '03', titulo: 'Distribuciones discretas y continuas importantes', ops: 1, activo: true },
+                                    { num: '04', titulo: 'Distribuciones en el muestreo estadístico', ops: 0, activo: false },
+                                    { num: '05', titulo: 'Pruebas de hipótesis paramétricas y no paramétricas', ops: 0, activo: false },
+                                    { num: '06', titulo: 'Estimación e inferencia estadística', ops: 0, activo: false },
+                                ].map(t => (
+                                    <div key={t.num} style={{
+                                        padding: '12px 14px',
+                                        border: `1px solid ${t.activo ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                                        borderRadius: RADIUS,
+                                        background: t.activo ? 'rgba(0,123,255,0.04)' : 'var(--bg-card)',
+                                        opacity: t.activo ? 1 : 0.55,
+                                        cursor: t.activo ? 'default' : 'not-allowed',
+                                        transition: 'all 0.2s',
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                                            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: t.activo ? 'var(--primary-color)' : 'var(--text-muted)', lineHeight: 1 }}>
+                                                T{t.num}
+                                            </span>
+                                            {t.activo ? (
+                                                <span style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: '999px', background: 'rgba(0,123,255,0.12)', color: 'var(--primary-color)', fontWeight: 700 }}>
+                                                    {t.ops} operaciones
+                                                </span>
+                                            ) : (
+                                                <span style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: '999px', background: 'rgba(148,163,184,0.15)', color: '#94a3b8', fontWeight: 600 }}>
+                                                    Próximamente
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p style={{ margin: 0, fontSize: FS.xs, color: t.activo ? 'var(--text-color)' : 'var(--text-muted)', lineHeight: 1.4 }}>
+                                            {t.titulo}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : operacion === 'dist_discreta' ? (
+                        <div className="tema2-container">
+                            <Controles_DistribucionDiscreta
+                                varSeleccionada={varSeleccionada}
+                                filas={filas}
+                                statsDatos={statsDatos}
+                                abrirEditor={abrirEditor}
+                                onCalcular={(datosRaw) => {
+                                    const calculos = calcularMomentosDiscreta(datosRaw);
+                                    setDatosDiscretos(calculos);
+                                }}
+                            />
+                            <Resultados_DistribucionDiscreta resultados={datosDiscretos} />
+                        </div>
+                    ) : operacion === 'dist_continua' ? (
+                        <div className="tema2-container">
+                            <ControlDistribucionContinua onCalcular={setDatosContinuos} />
+                            <ResultadoDistribucionContinua resultados={datosContinuos} />
+                        </div>
+                    ) : operacion === 'modelos_discretos' ? (
+                        <div className="tema3-container">
+                            <Controles_ModelosDiscretos 
+                                varSeleccionada={varSeleccionada}
+                                filas={filas}
+                                statsDatos={statsDatos}
+                                abrirEditor={abrirEditor}
+                                onCalcular={(datos) => {
+                                    setDatosTema3(datos);
+                                }}
+                            />
+                            {datosTema3 && (
+                                <>
+                                    <Resultados_ModelosDiscretos 
+                                        resultados={datosTema3.resultados} 
+                                        modelo={datosTema3.modelo} 
+                                        onOpenProcedimiento={(tipo) => setModalProcTema3(tipo)}
+                                    />
+                                    <GraficoBastonesModelos 
+                                        datos={datosTema3.datosGrafico} 
+                                        condicion={datosTema3.condicion} 
+                                        resultados={datosTema3.resultados}
+                                    />
+                                </>
+                            )}
+                        </div>
                     ) : operacion === 'muestreo' ? (
                         <ResultadosMuestreo
                             varSeleccionada={varSeleccionada} filas={filas}
@@ -608,6 +729,17 @@ export default function Principal() {
             <ModalEventos modalEvento={modalEvento} setModalEvento={setModalEvento} statsEventos={statsEventos} statsEventosPorColumna={statsEventosPorColumnaParaA} eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable} setResProbabilidad={setResProbabilidad} titulo={subTipoProbabilidad === 'frecuentista' ? 'Seleccionar Evento de Interés' : 'Seleccionar Eventos Favorables'} />
             <ModalEventos modalEvento={modalCondicion} setModalEvento={setModalCondicion} statsEventos={statsEventos} statsEventosPorColumna={statsEventosPorColumna} eventoFavorable={eventoCondicion} setEventoFavorable={setEventoCondicion} setResProbabilidad={setResProbabilidad} titulo="Seleccionar Eventos para Condición (B)" />
             <ModalVariables modalVars={modalVars} setModalVars={setModalVars} variables={variables} cargarVariable={cargarVariable} />
+            
+            {/* Modales Tema 3 */}
+            {modalProcTema3 && datosTema3 && (
+                <ModalProcedimientoModelos 
+                    modelo={datosTema3.modelo}
+                    params={datosTema3.params}
+                    condicion={datosTema3.condicion}
+                    momento={modalProcTema3}
+                    onClose={() => setModalProcTema3(false)}
+                />
+            )}
         </div>
     );
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea, ReferenceLine } from 'recharts';
-import { FONT } from '../Principal/Constantes';
+import { FONT } from '../../Principal/Constantes';
 
 export default function GraficoUniformeArea({ A, B, a, b, H }) {
     if (A === undefined || B === undefined) return null;

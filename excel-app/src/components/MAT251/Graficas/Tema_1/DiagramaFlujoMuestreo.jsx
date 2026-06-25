@@ -1,5 +1,5 @@
 import React from 'react';
-import { FONT } from '../Principal/Constantes';
+import { FONT } from '../../Principal/Constantes';
 
 export default function DiagramaFlujoMuestreo({ N, n, metodo }) {
     const strokeColor = "#3b82f6"; // blue

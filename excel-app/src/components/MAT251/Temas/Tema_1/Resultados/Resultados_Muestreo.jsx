@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
-import DiagramaFlujoMuestreo from '../../../Graficas/DiagramaFlujoMuestreo';
-import GraficoRepresentatividad from '../../../Graficas/GraficoRepresentatividad';
+import DiagramaFlujoMuestreo from '../../../Graficas/Tema_1/DiagramaFlujoMuestreo';
+import GraficoRepresentatividad from '../../../Graficas/Tema_1/GraficoRepresentatividad';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { IconoCalculadora, EditarDatos } from '../../../../ui/iconos';
 import { calcularMuestreo } from '../../../Matematicas/logica_Tema1';
@@ -20,6 +20,11 @@ export default function ResultadosMuestreo({
         if (!varSeleccionada) {
             setError("Importa una Matriz de Excel primero.");
             setResultado(null);
+            return;
+        }
+
+        if (metodoMuestreo === 'estratificado' && (!varEstratificacion || varEstratificacion === '')) {
+            setError("Para el Muestreo Estratificado es obligatorio seleccionar una Variable de Estratificación");
             return;
         }
 
@@ -64,6 +69,7 @@ export default function ResultadosMuestreo({
                             <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', fontWeight: 600 }}>Método de Muestreo:</label>
                             <select value={metodoMuestreo} onChange={(e) => setMetodoMuestreo(e.target.value)} style={{ width: '100%', maxWidth: '300px', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--primary-color)', background: '#fff', fontWeight: 600 }}>
                                 <option value="mas">Muestreo Aleatorio Simple (MAS)</option>
+                                <option value="sistematico">Muestreo Sistemático</option>
                                 {varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 && (
                                     <option value="estratificado">Muestreo Estratificado</option>
                                 )}
@@ -75,18 +81,20 @@ export default function ResultadosMuestreo({
                             <input type="number" min="1" max={filas.length} value={tamanoMuestra} onChange={(e) => setTamanoMuestra(e.target.value)} placeholder={`Ej. ${Math.min(30, filas.length)}`} style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }} />
                         </div>
 
-                        {metodoMuestreo === 'estratificado' && varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 && (
+                        {varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 && (
                             <div style={{ flex: 1, minWidth: '200px' }}>
-                                <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', color: 'var(--primary-color)', fontWeight: 'bold' }}>Variable de Estratificación:</label>
-                                <select value={varEstratificacion} onChange={(e) => setVarEstratificacion(e.target.value)} style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '2px solid var(--primary-color)' }}>
-                                    <option value="">-- Seleccionar Variable --</option>
+                                <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', color: metodoMuestreo === 'estratificado' ? 'var(--primary-color)' : 'var(--text-main)', fontWeight: 'bold' }}>
+                                    {metodoMuestreo === 'estratificado' ? 'Variable de Estratificación:' : 'Variable para Gráfico (Opcional):'}
+                                </label>
+                                <select value={varEstratificacion} onChange={(e) => setVarEstratificacion(e.target.value)} style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: metodoMuestreo === 'estratificado' ? '2px solid var(--primary-color)' : '1px solid var(--border-color)' }}>
+                                    <option value="">{metodoMuestreo === 'estratificado' ? '-- Seleccionar Variable --' : '-- Usar Primera Columna --'}</option>
                                     {varSeleccionada.nombresColumnas.map(col => <option key={col} value={col}>{col}</option>)}
                                 </select>
                             </div>
                         )}
 
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-                            <button onClick={calcular} disabled={!tamanoMuestra || (metodoMuestreo === 'estratificado' && !varEstratificacion)} style={{ padding: '8px 30px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '38px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button onClick={calcular} disabled={!tamanoMuestra} style={{ padding: '8px 30px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '38px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <IconoCalculadora /> EXTRAER MUESTRA
                             </button>
                         </div>
@@ -116,6 +124,16 @@ export default function ResultadosMuestreo({
                             <div style={{ width: '100%', minWidth: 0, padding: '10px', overflowX: 'auto', overflowY: 'hidden' }}>
                                 <DiagramaFlujoMuestreo N={resultado.N} n={resultado.n} metodo={metodoMuestreo} />
                             </div>
+                            {metodoMuestreo === 'sistematico' && resultado.k !== null && resultado.r !== null && (
+                                <div style={{ padding: '10px 15px', background: 'var(--bg-card)', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                                    <div style={{ background: '#eff6ff', padding: '8px 15px', borderRadius: RADIUS, border: '1px solid #bfdbfe', color: '#1e3a8a', fontSize: FS.sm }}>
+                                        <strong>Intervalo de Salto (k):</strong> {resultado.k}
+                                    </div>
+                                    <div style={{ background: '#fdf4ff', padding: '8px 15px', borderRadius: RADIUS, border: '1px solid #fbcfe8', color: '#86198f', fontSize: FS.sm }}>
+                                        <strong>Arranque Aleatorio (r):</strong> {resultado.r}
+                                    </div>
+                                </div>
+                            )}
                         </MarcoWidgetMAT251>
                     </div>
 

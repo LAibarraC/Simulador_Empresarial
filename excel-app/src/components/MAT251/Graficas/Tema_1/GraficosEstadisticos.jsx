@@ -3,7 +3,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList,
     PieChart, Pie, Cell, Label
 } from 'recharts';
-import '../../../styles/components/MAT251/Graficas/GraficosEstadisticos.css';
+import '../../../../styles/components/MAT251/Graficas/GraficosEstadisticos.css';
 
 const RADIAN = Math.PI / 180;
 
@@ -104,7 +104,10 @@ export default function GraficosProbabilidad({
     const eventosCond = Array.isArray(eventoCondicion) ? eventoCondicion : [];
     const selectedEvents = [...new Set([...eventosFav, ...eventosCond])].filter(Boolean);
 
-    const dataBarra = selectedEvents.map(ev => {
+    const dataBarra = isCond ? [
+        { name: 'Éxito (A ∩ B)', frecuencia: resProbabilidad.casosFavorables },
+        { name: 'Resto de B', frecuencia: resProbabilidad.casosTotales - resProbabilidad.casosFavorables }
+    ] : selectedEvents.map(ev => {
         let count = 0;
         datosArray.forEach(row => {
             if (typeof row === 'string') {
@@ -290,11 +293,11 @@ export default function GraficosProbabilidad({
 
                                     <XAxis
                                         dataKey="name"
-                                        angle={-45}
-                                        textAnchor="end"
+                                        angle={isCond ? 0 : -45}
+                                        textAnchor={isCond ? 'middle' : 'end'}
                                         tick={{ fontSize: 12, fill: '#64748b' }}
                                         interval={0}
-                                        dy={10}
+                                        dy={isCond ? 5 : 10}
                                     />
 
                                     <YAxis
@@ -320,9 +323,11 @@ export default function GraficosProbabilidad({
 
                                     <Bar
                                         dataKey="frecuencia"
-                                        fill="url(#colorBarraPro)"
                                         radius={[4, 4, 0, 0]}
                                     >
+                                        {dataBarra.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={isCond ? COLORS[index % COLORS.length] : 'url(#colorBarraPro)'} />
+                                        ))}
                                         <LabelList
                                             dataKey="frecuencia"
                                             position="top"

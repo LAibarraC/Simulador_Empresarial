@@ -3,9 +3,9 @@ import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Cons
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
-import GraficosProbabilidad from '../../../Graficas/GraficosEstadisticos';
+import GraficosProbabilidad from '../../../Graficas/Tema_1/GraficosEstadisticos';
 
-import { IconoCalculadora, EditarDatos, ModificarSeleccion } from '../../../../ui/iconos';
+import { IconoCalculadora, EditarDatos, ModificarSeleccion, IconoAlerta } from '../../../../ui/iconos';
 
 
 export default function ResultadosProbabilidad({
@@ -17,6 +17,33 @@ export default function ResultadosProbabilidad({
     const isFrec = tipo === 'frecuentista';
     const isCond = tipo === 'condicional';
 
+    const getLabels = () => {
+        if (isCond) {
+            return {
+                numerador: "Casos de Intersección n(A ∩ B)",
+                denominador: "Casos de la Condición n(B)",
+                tarjetaNumerador: "Intersección n(A∩B)",
+                tarjetaDenominador: "Condición n(B)"
+            };
+        }
+        if (isFrec) {
+            return {
+                numerador: "Frecuencia de Éxitos (f)",
+                denominador: "Total de Experimentos / Observaciones (n)",
+                tarjetaNumerador: "Frecuencia f(A)",
+                tarjetaDenominador: "Total n"
+            };
+        }
+        return {
+            numerador: "Casos Favorables n(A)",
+            denominador: "Total de Casos Posibles (N)",
+            tarjetaNumerador: "Casos n(A)",
+            tarjetaDenominador: "Total N"
+        };
+    };
+
+    const labels = getLabels();
+
     const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
     const [manualN, setManualN] = useState('10');
     const [manualF, setManualF] = useState('2');
@@ -26,11 +53,11 @@ export default function ResultadosProbabilidad({
 
     let errorManual = '';
     if (nVal <= 0) {
-        errorManual = 'N (Total de Casos) debe ser mayor a 0.';
+        errorManual = `${labels.denominador} debe ser mayor a 0.`;
     } else if (fVal < 0) {
-        errorManual = 'f (Casos Favorables) no puede ser menor a 0.';
+        errorManual = `${labels.numerador} no puede ser menor a 0.`;
     } else if (fVal > nVal) {
-        errorManual = 'f (Casos Favorables) no puede ser mayor que N (Total de Casos).';
+        errorManual = `${labels.numerador} no puede ser mayor que ${labels.denominador}.`;
     }
 
     const activeRes = (() => {
@@ -61,14 +88,16 @@ export default function ResultadosProbabilidad({
         if (formulaProbRef.current && activeRes) {
             let latex = '';
             if (inputMode === 'manual') {
-                if (isFrec) {
-                    latex = `P(A)=\\dfrac{f_A}{N}=\\dfrac{${activeRes.casosFavorables}}{${activeRes.casosTotales}}=${activeRes.probabilidadDecimal}`;
+                if (isCond) {
+                    latex = `P(A|B)=\\dfrac{n(A \\cap B)}{n(B)}=\\dfrac{${activeRes.casosFavorables}}{${activeRes.casosTotales}}=${activeRes.probabilidadDecimal}`;
+                } else if (isFrec) {
+                    latex = `P(A)=\\dfrac{f}{n}=\\dfrac{${activeRes.casosFavorables}}{${activeRes.casosTotales}}=${activeRes.probabilidadDecimal}`;
                 } else {
                     latex = `P(A)=\\dfrac{n(A)}{N}=\\dfrac{${activeRes.casosFavorables}}{${activeRes.casosTotales}}=${activeRes.probabilidadDecimal}`;
                 }
             } else {
                 if (isFrec) {
-                    latex = `P(A)=\\dfrac{f_A}{N}=\\dfrac{${activeRes.casosFavorables}}{${activeRes.casosTotales}}=${activeRes.probabilidadDecimal}`;
+                    latex = `P(A)=\\dfrac{f}{n}=\\dfrac{${activeRes.casosFavorables}}{${activeRes.casosTotales}}=${activeRes.probabilidadDecimal}`;
                 } else if (isCond) {
                     latex = `P(A|B)=\\dfrac{n(A \\cap B)}{n(B)}=\\dfrac{${activeRes.casosFavorables}}{${activeRes.casosTotales}}=${activeRes.probabilidadDecimal}`;
                 } else if (tipo === 'total') {
@@ -122,7 +151,7 @@ export default function ResultadosProbabilidad({
                             transition: 'all 0.2s'
                         }}
                     >
-                        Modo Manual (Libro)
+                        Modo Manual
                     </button>
                 </div>
             </div>
@@ -134,26 +163,7 @@ export default function ResultadosProbabilidad({
                         <h4 style={{ margin: 0, fontSize: FS.sm, fontWeight: 700, color: 'var(--primary-color)' }}>Datos del Ejercicio (Ingreso Manual)</h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <label style={labelStyle}>Total de Casos / Observaciones (N):</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={manualN}
-                                    onChange={(e) => setManualN(e.target.value)}
-                                    style={{
-                                        padding: '8px 12px',
-                                        borderRadius: RADIUS,
-                                        border: '1px solid var(--border-color)',
-                                        background: 'var(--bg-input)',
-                                        color: 'var(--text-color)',
-                                        fontSize: FS.sm,
-                                        outline: 'none',
-                                        fontFamily: FONT
-                                    }}
-                                />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <label style={labelStyle}>Casos Favorables / Frecuencia (f):</label>
+                                <label style={labelStyle}>{labels.numerador}:</label>
                                 <input
                                     type="number"
                                     min="0"
@@ -171,10 +181,30 @@ export default function ResultadosProbabilidad({
                                     }}
                                 />
                             </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <label style={labelStyle}>{labels.denominador}:</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={manualN}
+                                    onChange={(e) => setManualN(e.target.value)}
+                                    style={{
+                                        padding: '8px 12px',
+                                        borderRadius: RADIUS,
+                                        border: '1px solid var(--border-color)',
+                                        background: 'var(--bg-input)',
+                                        color: 'var(--text-color)',
+                                        fontSize: FS.sm,
+                                        outline: 'none',
+                                        fontFamily: FONT
+                                    }}
+                                />
+                            </div>
                         </div>
                         {errorManual && (
-                            <div style={{ color: '#ef4444', fontSize: FS.xs, fontWeight: 600, marginTop: '-5px' }}>
-                                ⚠ {errorManual}
+                            <div style={{ color: '#ef4444', fontSize: FS.xs, fontWeight: 600, marginTop: '-5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <IconoAlerta width="14" height="14" />
+                                {errorManual}
                             </div>
                         )}
                     </div>
@@ -368,8 +398,8 @@ export default function ResultadosProbabilidad({
                         <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
                             {[
                                 { label: (isCond || isFrec) ? 'Evento (A)' : 'Eventos (A)', val: inputMode === 'manual' ? 'Manual (A)' : eventoFavorable.join(', ') },
-                                { label: isCond ? 'Intersección n(A∩B)' : isFrec ? 'Frecuencia f(A)' : 'Casos n(A)', val: activeRes.casosFavorables },
-                                { label: isCond ? 'Casos n(B)' : 'Total N', val: activeRes.casosTotales },
+                                { label: labels.tarjetaNumerador, val: activeRes.casosFavorables },
+                                { label: labels.tarjetaDenominador, val: activeRes.casosTotales },
                                 { label: 'Decimal', val: activeRes.probabilidadDecimal },
                                 { label: 'Porcentaje', val: `${activeRes.probabilidadPorcentaje}%` },
                             ].map(({ label, val }) => (
@@ -382,7 +412,7 @@ export default function ResultadosProbabilidad({
                         <GraficosProbabilidad
                             resProbabilidad={activeRes}
                             datosArray={inputMode === 'manual' ? [] : (activeRes.arrFiltrado || inputDatos.split(',').map(d => d.trim()).filter(Boolean))}
-                            isCond={inputMode === 'manual' ? false : isCond}
+                            isCond={isCond}
                             eventoFavorable={inputMode === 'manual' ? [] : eventoFavorable}
                             eventoCondicion={inputMode === 'manual' ? [] : eventoCondicion}
                             isManual={inputMode === 'manual'}

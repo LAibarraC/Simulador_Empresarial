@@ -1,5 +1,5 @@
 import React from 'react';
-import { FONT, FS, RADIUS } from '../Principal/Constantes';
+import { FONT, FS, RADIUS } from '../../Principal/Constantes';
 
 export default function ArbolProbabilidad({ resultado, ramas, causaBayes }) {
     if (!resultado || !ramas || ramas.length === 0) return null;

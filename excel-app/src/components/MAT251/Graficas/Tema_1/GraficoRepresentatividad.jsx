@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList 
 } from 'recharts';
-import { FONT } from '../Principal/Constantes';
+import { FONT } from '../../Principal/Constantes';
 
 export default function GraficoRepresentatividad({ data }) {
     const dataFormateada = useMemo(() => {

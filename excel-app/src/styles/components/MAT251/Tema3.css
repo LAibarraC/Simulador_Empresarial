@@ -1,0 +1,116 @@
+/* src/components/MAT251/Temas/Tema_3/Tema3.css */
+.tema3-container {
+    padding: 20px;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #334155;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.tema3-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.tema3-title {
+    color: #1e3a8a;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #bfdbfe;
+    padding-bottom: 10px;
+}
+
+.tema3-form-group {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.tema3-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #475569;
+}
+
+.tema3-input, .tema3-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.tema3-input:focus, .tema3-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tema3-btn {
+    background-color: #3b82f6;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.tema3-btn:hover {
+    background-color: #2563eb;
+}
+
+.tema3-btn:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.tema3-switch-container {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.tema3-switch-btn {
+    flex: 1;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: #64748b;
+}
+
+.tema3-switch-btn.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.tema3-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 600px) {
+    .tema3-grid {
+        grid-template-columns: 1fr;
+    }
+}

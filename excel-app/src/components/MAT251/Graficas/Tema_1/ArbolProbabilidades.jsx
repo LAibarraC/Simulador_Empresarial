@@ -1,9 +1,72 @@
 import React, { useMemo } from 'react';
-import { FONT } from '../Principal/Constantes';
+import { FONT } from '../../Principal/Constantes';
 
-export default function ArbolProbabilidades({ resultado, filas, varSeleccionada, colA, colB, modReemplazo }) {
+export default function ArbolProbabilidades({ resultado, filas, varSeleccionada, colA, colB, modReemplazo, inputMode = 'matriz' }) {
     const dataArbol = useMemo(() => {
-        if (!resultado || !filas || !varSeleccionada || !colA || !colB) return null;
+        if (!resultado) return null;
+
+        if (inputMode === 'manual') {
+            const pA_comp = 1 - resultado.pA;
+            const pB_comp = 1 - resultado.pB;
+
+            const nameA_comp = `No ${resultado.nameA}`;
+            const nameB_comp = `No ${resultado.nameB}`;
+
+            const ramasA = [
+                {
+                    valor: resultado.nameA,
+                    count: '-',
+                    pA: resultado.pA,
+                    esActiva: true,
+                    hijos: [
+                        {
+                            valor: resultado.nameB,
+                            count: '-',
+                            total: '-',
+                            pB: resultado.pB,
+                            pJoint: resultado.pA * resultado.pB,
+                            esActiva: true
+                        },
+                        {
+                            valor: nameB_comp,
+                            count: '-',
+                            total: '-',
+                            pB: pB_comp,
+                            pJoint: resultado.pA * pB_comp,
+                            esActiva: false
+                        }
+                    ]
+                },
+                {
+                    valor: nameA_comp,
+                    count: '-',
+                    pA: pA_comp,
+                    esActiva: false,
+                    hijos: [
+                        {
+                            valor: resultado.nameB,
+                            count: '-',
+                            total: '-',
+                            pB: resultado.pB,
+                            pJoint: pA_comp * resultado.pB,
+                            esActiva: false
+                        },
+                        {
+                            valor: nameB_comp,
+                            count: '-',
+                            total: '-',
+                            pB: pB_comp,
+                            pJoint: pA_comp * pB_comp,
+                            esActiva: false
+                        }
+                    ]
+                }
+            ];
+            return { N: '-', ramasA };
+        }
+
+        // Modo Matriz Original
+        if (!filas || !varSeleccionada || !colA || !colB) return null;
 
         const idxA = varSeleccionada.nombresColumnas.indexOf(colA);
         const idxB = varSeleccionada.nombresColumnas.indexOf(colB);
@@ -36,11 +99,9 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
                 let countB = conteoB_inicial[valB];
                 
                 if (modReemplazo === 'sin_reemplazo') {
-                    // countA es N_A
-                    // nA_and_B es el número de elementos que tienen colA === valA y colB === valB
                     const nA_and_B = datosParseados.filter(d => d.valA === valA && d.valB === valB).length;
                     const reduccion = countA > 0 ? (nA_and_B / countA) : 0;
-                    countB = Math.max(0, countB - reduccion);
+                    countB = Number(Math.max(0, countB - reduccion).toFixed(2));
                 }
 
                 const pB = totalB > 0 ? countB / totalB : 0;
@@ -66,7 +127,7 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
         });
 
         return { N, ramasA };
-    }, [resultado, filas, varSeleccionada, colA, colB, modReemplazo]);
+    }, [resultado, filas, varSeleccionada, colA, colB, modReemplazo, inputMode]);
 
     if (!dataArbol) return null;
 
@@ -136,7 +197,7 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
                             {/* Probabilidad en flecha L1 */}
                             <rect x={(rootX + l1X)/2 - 30} y={(rootY + rama.y)/2 - 15} width="60" height="20" fill="white" opacity="0.8" />
                             <text x={(rootX + l1X)/2} y={(rootY + rama.y)/2} textAnchor="middle" fontSize="11" fill={colorL1} fontWeight="bold">
-                                {rama.count}/{N}
+                                {rama.count === '-' ? `P=${rama.pA.toFixed(4)}` : `${rama.count}/${N}`}
                             </text>
 
                             {/* Caja Nivel 1 */}
@@ -149,7 +210,7 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
                                 {rama.valor.length > 15 ? rama.valor.substring(0, 15) + '...' : rama.valor}
                             </text>
                             <text x={l1X} y={rama.y + 12} textAnchor="middle" fontSize="12" fill={rama.esActiva ? activeColor : "#64748b"} fontWeight="bold">
-                                n={rama.count}
+                                {rama.count === '-' ? `P=${rama.pA.toFixed(4)}` : `n=${rama.count}`}
                             </text>
 
                             {/* Dibujar Ramas Nivel 2 */}
@@ -170,7 +231,7 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
                                         {/* Probabilidad en flecha L2 */}
                                         <rect x={(l1X + l2X)/2 - 30} y={(rama.y + hijo.y)/2 - 15} width="60" height="20" fill="white" opacity="0.8" />
                                         <text x={(l1X + l2X)/2} y={(rama.y + hijo.y)/2} textAnchor="middle" fontSize="11" fill={colorL2} fontWeight="bold">
-                                            {hijo.count}/{hijo.total}
+                                            {hijo.count === '-' ? `P=${hijo.pB.toFixed(4)}` : `${hijo.count}/${hijo.total}`}
                                         </text>
 
                                         {/* Caja Nivel 2 */}
@@ -183,7 +244,7 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
                                             {hijo.valor.length > 15 ? hijo.valor.substring(0, 15) + '...' : hijo.valor}
                                         </text>
                                         <text x={l2X} y={hijo.y + 12} textAnchor="middle" fontSize="12" fill={hijo.esActiva ? activeColor : "#64748b"} fontWeight="bold">
-                                            P = {(hijo.pJoint).toFixed(4)}
+                                            P = {(hijo.pB).toFixed(4)}
                                         </text>
 
                                         {hijo.esActiva && (

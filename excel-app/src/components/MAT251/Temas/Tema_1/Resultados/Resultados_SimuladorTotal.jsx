@@ -14,9 +14,9 @@ import {
     rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
-import { IconoCalculadora, EditarDatos } from '../../../../ui/iconos';
+import { IconoCalculadora, EditarDatos, IconoAlerta } from '../../../../ui/iconos';
 import katex from 'katex';
-import ArbolProbabilidad from '../../../Graficas/ArbolProbabilidad';
+import ArbolProbabilidad from '../../../Graficas/Tema_1/ArbolProbabilidad';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { calcularProbabilidadTotal } from '../../../Matematicas/logica_Tema1';
 
@@ -60,7 +60,8 @@ const FormulaBayes = ({ resultado, ramaSeleccionada }) => {
             formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\frac{P(\\text{${ramaSeleccionada.nombre}}) \\cdot P(B|\\text{${ramaSeleccionada.nombre}})}{P(B)} \\\\\n`;
             formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\frac{${ramaSeleccionada.pA.toFixed(4)} \\cdot ${ramaSeleccionada.pB_A.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
             formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\frac{${ramaSeleccionada.mult.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
-            formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\mathbf{${(ramaSeleccionada.mult / resultado.probB).toFixed(4)}}\n`;
+            const bayesVal = resultado.probB > 0 ? (ramaSeleccionada.mult / resultado.probB) : 0;
+            formulaLatex += `P(\\text{${ramaSeleccionada.nombre}} | B) &= \\mathbf{${bayesVal.toFixed(4)}}\n`;
             formulaLatex += `\\end{aligned}`;
 
             katex.render(formulaLatex, formulaRef.current, { throwOnError: false, displayMode: true });
@@ -84,8 +85,72 @@ export default function ResultadosSimuladorTotal({
     errorSimulador, setErrorSimulador,
     statsDatos, abrirEditor
 }) {
+    const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
+    const [manualBranches, setManualBranches] = useState([
+        { id: 1, name: 'Causa 1', pA: '', pBA: '' },
+        { id: 2, name: 'Causa 2', pA: '', pBA: '' }
+    ]);
+
     const [ordenWidgets, setOrdenWidgets] = useState(['w-arbol']);
     const [causaBayes, setCausaBayes] = useState('');
+
+    // Mapear ramas manuales al formato del motor existente
+    const { mappedRamas, mappedResultado } = useMemo(() => {
+        const mapped = manualBranches.map(b => {
+            const pAVal = parseFloat(b.pA) || 0;
+            const pBAVal = parseFloat(b.pBA) || 0;
+            const mult = pAVal * pBAVal;
+            return {
+                id: b.id,
+                nombre: b.name || `Causa ${b.id}`,
+                n_Ai: 0,
+                totalDatos: 0,
+                pA: pAVal,
+                n_B_dado_Ai: 0,
+                pB_A: pBAVal,
+                mult: mult
+            };
+        });
+        const probB = mapped.reduce((acc, r) => acc + r.mult, 0);
+        return {
+            mappedRamas: mapped,
+            mappedResultado: { probB, desglose: mapped }
+        };
+    }, [manualBranches]);
+
+    // Usar datos dinámicos según el modo activo
+    const activeRamas = inputMode === 'manual' ? mappedRamas : ramas;
+    const activeResultado = inputMode === 'manual' ? mappedResultado : resultado;
+
+    const agregarRama = () => {
+        const nextId = manualBranches.length > 0 ? Math.max(...manualBranches.map(b => b.id)) + 1 : 1;
+        setManualBranches([...manualBranches, { id: nextId, name: `Causa ${nextId}`, pA: '', pBA: '' }]);
+    };
+
+    const eliminarRama = (id) => {
+        if (manualBranches.length <= 2) return;
+        const filtradas = manualBranches.filter(b => b.id !== id);
+        setManualBranches(filtradas);
+        const eliminada = manualBranches.find(b => b.id === id);
+        if (eliminada && causaBayes === eliminada.name) {
+            setCausaBayes('');
+        }
+    };
+
+    const handleBranchChange = (id, field, value) => {
+        setManualBranches(manualBranches.map(b => {
+            if (b.id === id) {
+                return { ...b, [field]: value };
+            }
+            return b;
+        }));
+    };
+
+    const sumPA = useMemo(() => {
+        return manualBranches.reduce((acc, b) => acc + (parseFloat(b.pA) || 0), 0);
+    }, [manualBranches]);
+
+    const showSumaWarning = Math.abs(sumPA - 1) > 0.0001 && manualBranches.some(b => b.pA !== '');
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -158,131 +223,307 @@ export default function ResultadosSimuladorTotal({
 
     return (
         <div style={{ marginTop: '0px' }}>
-            <div style={{ ...cardStyle, marginBottom: '20px' }}>
-                {/* ── BARRA DE DATOS Y EDITOR ── */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-                    <div>
-                        <span style={{ ...labelStyle, margin: 0 }}>Matriz Detectada (Datos Históricos):</span>
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
-                            <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                Cargados: <strong style={{ color: 'var(--primary-color)' }}>{statsDatos?.cargados || 0}</strong>
-                            </small>
-                            <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos?.agregados || 0}</strong>
-                            </small>
-                            <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                Total: <strong>{statsDatos?.total || 0}</strong>
-                            </small>
-                        </div>
-                    </div>
+            {/* SELECTOR DE MODO DE ENTRADA */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+                <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                     <button
-                        onClick={abrirEditor}
-                        className="btn-icon"
+                        type="button"
+                        onClick={() => setInputMode('matriz')}
                         style={{
-                            borderRadius: RADIUS,
+                            padding: '6px 16px',
+                            borderRadius: '6px',
                             fontSize: FS.sm,
-                            padding: '6px 14px',
-                            background: 'var(--primary-color)',
-                            color: 'white',
+                            fontWeight: 600,
                             border: 'none',
                             cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
+                            background: inputMode === 'matriz' ? 'var(--primary-color)' : 'transparent',
+                            color: inputMode === 'matriz' ? '#fff' : 'var(--text-muted)',
+                            transition: 'all 0.2s'
                         }}
                     >
-                        <EditarDatos />
-                        Editar Datos
+                        Análisis de Matriz
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setInputMode('manual')}
+                        style={{
+                            padding: '6px 16px',
+                            borderRadius: '6px',
+                            fontSize: FS.sm,
+                            fontWeight: 600,
+                            border: 'none',
+                            cursor: 'pointer',
+                            background: inputMode === 'manual' ? 'var(--primary-color)' : 'transparent',
+                            color: inputMode === 'manual' ? '#fff' : 'var(--text-muted)',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        Modo Manual
                     </button>
                 </div>
-                {varSeleccionada && varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'flex-end', marginBottom: '20px', background: 'var(--bg-input)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                        <div style={{ flex: 1, minWidth: '200px' }}>
-                            <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600 }}>
-                                Variable Causa <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A_i') }} />:
-                            </label>
-                            <select
-                                value={colCausa}
-                                onChange={(e) => {
-                                    setColCausa(e.target.value);
-                                }}
-                                className="container_cal_input"
-                                style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
-                            >
-                                <option value="">-- Seleccionar --</option>
-                                {varSeleccionada.nombresColumnas.map(col => (
-                                    <option key={col} value={col}>{col}</option>
-                                ))}
-                            </select>
+            </div>
+
+            <div style={{ ...cardStyle, marginBottom: '20px' }}>
+                {inputMode === 'manual' ? (
+                    /* FORMULARIO DE INGRESO MANUAL */
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <h4 style={{ margin: 0, fontSize: FS.sm, fontWeight: 700, color: 'var(--primary-color)' }}>Datos del Ejercicio (Ingreso Manual)</h4>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {manualBranches.map((rama) => (
+                                <div key={rama.id} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                                    <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={labelStyle}>Nombre de la Causa:</label>
+                                        <input
+                                            type="text"
+                                            value={rama.name}
+                                            onChange={(e) => handleBranchChange(rama.id, 'name', e.target.value)}
+                                            placeholder={`Causa ${rama.id}`}
+                                            style={{
+                                                padding: '8px 12px',
+                                                borderRadius: RADIUS,
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-card)',
+                                                color: 'var(--text-color)',
+                                                fontSize: FS.sm,
+                                                outline: 'none',
+                                                fontFamily: FONT
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={labelStyle}>Probabilidad P(Ai):</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="1"
+                                            value={rama.pA}
+                                            onChange={(e) => handleBranchChange(rama.id, 'pA', e.target.value)}
+                                            placeholder="0.00"
+                                            style={{
+                                                padding: '8px 12px',
+                                                borderRadius: RADIUS,
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-card)',
+                                                color: 'var(--text-color)',
+                                                fontSize: FS.sm,
+                                                outline: 'none',
+                                                fontFamily: FONT
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={labelStyle}>Probabilidad P(B|Ai):</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="1"
+                                            value={rama.pBA}
+                                            onChange={(e) => handleBranchChange(rama.id, 'pBA', e.target.value)}
+                                            placeholder="0.00"
+                                            style={{
+                                                padding: '8px 12px',
+                                                borderRadius: RADIUS,
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-card)',
+                                                color: 'var(--text-color)',
+                                                fontSize: FS.sm,
+                                                outline: 'none',
+                                                fontFamily: FONT
+                                            }}
+                                        />
+                                    </div>
+                                    {manualBranches.length > 2 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => eliminarRama(rama.id)}
+                                            style={{
+                                                marginTop: '20px',
+                                                padding: '8px 14px',
+                                                background: '#ef4444',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: RADIUS,
+                                                cursor: 'pointer',
+                                                fontSize: FS.xs,
+                                                fontWeight: 700
+                                            }}
+                                        >
+                                            Eliminar
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
                         </div>
 
-                        <div style={{ flex: 1, minWidth: '200px' }}>
-                            <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600 }}>
-                                Variable Evento <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B') }} />:
-                            </label>
-                            <select
-                                value={colEvento}
-                                onChange={(e) => {
-                                    setColEvento(e.target.value);
-                                    setValExito('');
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+                            <button
+                                type="button"
+                                onClick={agregarRama}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: 'var(--primary-color)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: RADIUS,
+                                    cursor: 'pointer',
+                                    fontSize: FS.sm,
+                                    fontWeight: 700
                                 }}
-                                className="container_cal_input"
-                                style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
                             >
-                                <option value="">-- Seleccionar --</option>
-                                {varSeleccionada.nombresColumnas.filter(c => c !== colCausa).map(col => (
-                                    <option key={col} value={col}>{col}</option>
-                                ))}
-                            </select>
+                                + Agregar nueva Causa (Rama)
+                            </button>
                         </div>
 
-                        {colEvento && valoresUnicosEvento.length > 0 && (
-                            <div style={{ flex: 1, minWidth: '200px' }}>
-                                <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', color: 'var(--primary-color)', fontWeight: 'bold' }}>Valor de "Éxito":</label>
-                                <select
-                                    value={valExito}
-                                    onChange={(e) => {
-                                        setValExito(e.target.value);
-                                    }}
-                                    className="container_cal_input"
-                                    style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '2px solid var(--primary-color)' }}
-                                >
-                                    <option value="">-- Seleccionar --</option>
-                                    {valoresUnicosEvento.map(val => (
-                                        <option key={val} value={val}>{val}</option>
-                                    ))}
-                                </select>
+                        {showSumaWarning && (
+                            <div style={{
+                                padding: '10px 15px',
+                                background: 'rgba(234, 88, 12, 0.05)',
+                                color: '#ea580c',
+                                border: '1.5px dashed #ea580c',
+                                borderRadius: RADIUS,
+                                fontSize: FS.sm,
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                <IconoAlerta width="18" height="18" style={{ flexShrink: 0 }} />
+                                La suma de las probabilidades marginales P(Ai) es {(sumPA * 100).toFixed(2)}%. Recuerde que la suma debe ser igual al 100% (1.0).
                             </div>
                         )}
-
-                        <button
-                            onClick={calcular}
-                            className="button_calcular btn-icon"
-                            style={{ padding: '8px 25px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer' }}
-                            disabled={!varSeleccionada || !colCausa || !colEvento || !valExito}
-                        >
-                            <IconoCalculadora />
-                            CALCULAR
-                        </button>
-                    </div>
-                ) : varSeleccionada ? (
-                    <div style={{ padding: '10px', background: '#fee2e2', color: '#b91c1c', borderRadius: RADIUS, fontSize: FS.sm, marginBottom: '15px' }}>
-                        Para usar el Teorema de Probabilidad Total, debes importar una "Matriz" que contenga al menos 2 columnas.
                     </div>
                 ) : (
-                    <p style={{ color: 'var(--text-muted)', fontSize: FS.sm }}>
-                        Importa una matriz en el panel izquierdo para comenzar.
-                    </p>
-                )}
+                    /* MODO MATRIZ */
+                    <>
+                        {/* ── BARRA DE DATOS Y EDITOR ── */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                            <div>
+                                <span style={{ ...labelStyle, margin: 0 }}>Matriz Detectada (Datos Históricos):</span>
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
+                                    <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                        Cargados: <strong style={{ color: 'var(--primary-color)' }}>{statsDatos?.cargados || 0}</strong>
+                                    </small>
+                                    <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                        Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos?.agregados || 0}</strong>
+                                    </small>
+                                    <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                        Total: <strong>{statsDatos?.total || 0}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                            <button
+                                onClick={abrirEditor}
+                                className="btn-icon"
+                                style={{
+                                    borderRadius: RADIUS,
+                                    fontSize: FS.sm,
+                                    padding: '6px 14px',
+                                    background: 'var(--primary-color)',
+                                    color: 'white',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <EditarDatos />
+                                Editar Datos
+                            </button>
+                        </div>
+                        {varSeleccionada && varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'flex-end', marginBottom: '20px', background: 'var(--bg-input)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                                <div style={{ flex: 1, minWidth: '200px' }}>
+                                    <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600 }}>
+                                        Variable Causa <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A_i') }} />:
+                                    </label>
+                                    <select
+                                        value={colCausa}
+                                        onChange={(e) => {
+                                            setColCausa(e.target.value);
+                                        }}
+                                        className="container_cal_input"
+                                        style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
+                                    >
+                                        <option value="">-- Seleccionar --</option>
+                                        {varSeleccionada.nombresColumnas.map(col => (
+                                            <option key={col} value={col}>{col}</option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                {errorSimulador && (
-                    <div style={{ marginBottom: '15px', padding: '10px', background: '#fee2e2', color: '#b91c1c', borderRadius: RADIUS, border: '1px solid #f87171', fontWeight: 'bold', fontSize: FS.xs }}>
-                        {errorSimulador}
-                    </div>
+                                <div style={{ flex: 1, minWidth: '200px' }}>
+                                    <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600 }}>
+                                        Variable Evento <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B') }} />:
+                                    </label>
+                                    <select
+                                        value={colEvento}
+                                        onChange={(e) => {
+                                            setColEvento(e.target.value);
+                                            setValExito('');
+                                        }}
+                                        className="container_cal_input"
+                                        style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
+                                    >
+                                        <option value="">-- Seleccionar --</option>
+                                        {varSeleccionada.nombresColumnas.filter(c => c !== colCausa).map(col => (
+                                            <option key={col} value={col}>{col}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {colEvento && valoresUnicosEvento.length > 0 && (
+                                    <div style={{ flex: 1, minWidth: '200px' }}>
+                                        <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', color: 'var(--primary-color)', fontWeight: 'bold' }}>Valor de "Éxito":</label>
+                                        <select
+                                            value={valExito}
+                                            onChange={(e) => {
+                                                setValExito(e.target.value);
+                                            }}
+                                            className="container_cal_input"
+                                            style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '2px solid var(--primary-color)' }}
+                                        >
+                                            <option value="">-- Seleccionar --</option>
+                                            {valoresUnicosEvento.map(val => (
+                                                <option key={val} value={val}>{val}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={calcular}
+                                    className="button_calcular btn-icon"
+                                    style={{ padding: '8px 25px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer' }}
+                                    disabled={!varSeleccionada || !colCausa || !colEvento || !valExito}
+                                >
+                                    <IconoCalculadora />
+                                    CALCULAR
+                                </button>
+                            </div>
+                        ) : varSeleccionada ? (
+                            <div style={{ padding: '10px', background: '#fee2e2', color: '#b91c1c', borderRadius: RADIUS, fontSize: FS.sm, marginBottom: '15px' }}>
+                                Para usar el Teorema de Probabilidad Total, debes importar una "Matriz" que contenga al menos 2 columnas.
+                            </div>
+                        ) : (
+                            <p style={{ color: 'var(--text-muted)', fontSize: FS.sm }}>
+                                Importa una matriz en el panel izquierdo para comenzar.
+                            </p>
+                        )}
+
+                        {errorSimulador && (
+                            <div style={{ marginBottom: '15px', padding: '10px', background: '#fee2e2', color: '#b91c1c', borderRadius: RADIUS, border: '1px solid #f87171', fontWeight: 'bold', fontSize: FS.xs }}>
+                                {errorSimulador}
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
-            {resultado && (
+            {activeResultado && (
                 <>
                     <div style={{ ...cardStyle, marginBottom: '20px' }}>
                         <h4 style={{ color: 'var(--primary-color)', margin: '0 0 10px 0', fontSize: FS.sm }}>
@@ -293,23 +534,27 @@ export default function ResultadosSimuladorTotal({
                                 <thead>
                                     <tr style={{ background: 'var(--bg-input)', borderBottom: '2px solid var(--border-color)' }}>
                                         <th style={{ padding: '8px 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>Causa Única <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A_i') }} /></th>
-                                        <th style={{ padding: '8px 6px', color: 'var(--text-muted)', fontWeight: 500 }}>Frecuencia <span dangerouslySetInnerHTML={{ __html: katex.renderToString('(n)') }} /></th>
+                                        {inputMode === 'matriz' && <th style={{ padding: '8px 6px', color: 'var(--text-muted)', fontWeight: 500 }}>Frecuencia <span dangerouslySetInnerHTML={{ __html: katex.renderToString('(n)') }} /></th>}
                                         <th style={{ padding: '8px 6px' }}><span dangerouslySetInnerHTML={{ __html: katex.renderToString('P(A_i)') }} /></th>
-                                        <th style={{ padding: '8px 6px', color: 'var(--text-muted)', fontWeight: 500 }}>Éxitos en <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A_i') }} /></th>
+                                        {inputMode === 'matriz' && <th style={{ padding: '8px 6px', color: 'var(--text-muted)', fontWeight: 500 }}>Éxitos en <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A_i') }} /></th>}
                                         <th style={{ padding: '8px 6px' }}><span dangerouslySetInnerHTML={{ __html: katex.renderToString('P(B|A_i)') }} /></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {ramas.map((rama) => (
+                                    {activeRamas.map((rama) => (
                                         <tr key={rama.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                                             <td style={{ padding: '8px 6px', fontWeight: 600 }}>{rama.nombre}</td>
-                                            <td style={{ padding: '8px 6px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
-                                                {rama.n_Ai} / {rama.totalDatos}
-                                            </td>
+                                            {inputMode === 'matriz' && (
+                                                <td style={{ padding: '8px 6px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
+                                                    {rama.n_Ai} / {rama.totalDatos}
+                                                </td>
+                                            )}
                                             <td style={{ padding: '8px 6px', fontWeight: 'bold' }}>{rama.pA.toFixed(4)}</td>
-                                            <td style={{ padding: '8px 6px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
-                                                {rama.n_B_dado_Ai} / {rama.n_Ai}
-                                            </td>
+                                            {inputMode === 'matriz' && (
+                                                <td style={{ padding: '8px 6px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
+                                                    {rama.n_B_dado_Ai} / {rama.n_Ai}
+                                                </td>
+                                            )}
                                             <td style={{ padding: '8px 6px', fontWeight: 'bold' }}>{rama.pB_A.toFixed(4)}</td>
                                         </tr>
                                     ))}
@@ -322,13 +567,13 @@ export default function ResultadosSimuladorTotal({
                         <h3 style={{ color: 'var(--primary-color)', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', fontSize: FS.md, margin: '0 0 15px 0' }}>
                             Desarrollo Matemático: Probabilidad Total
                         </h3>
-                        <FormulaMatematica resultado={resultado} />
+                        <FormulaMatematica resultado={activeResultado} />
                         <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(2, 132, 199, 0.05)', border: '1.5px solid var(--primary-color)', borderRadius: RADIUS, textAlign: 'center' }}>
                             <div style={{ fontSize: FS.lg, fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                                P(B) = {resultado.probB.toFixed(4)}
+                                P(B) = {activeResultado.probB.toFixed(4)}
                             </div>
                             <div style={{ fontSize: FS.sm, color: 'var(--text-main)', marginTop: '4px' }}>
-                                ({(resultado.probB * 100).toFixed(2)}% probabilidad)
+                                ({(activeResultado.probB * 100).toFixed(2)}% probabilidad)
                             </div>
                         </div>
                     </div>
@@ -349,7 +594,7 @@ export default function ResultadosSimuladorTotal({
                                 style={{ width: '100%', maxWidth: '400px', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
                             >
                                 <option value="">-- Seleccionar Causa --</option>
-                                {ramas.map(r => (
+                                {activeRamas.map(r => (
                                     <option key={r.id} value={r.nombre}>{r.nombre}</option>
                                 ))}
                             </select>
@@ -358,12 +603,12 @@ export default function ResultadosSimuladorTotal({
                         {causaBayes && (
                             <>
                                 <h4 style={{ color: 'var(--primary-color)', fontSize: FS.sm, margin: '15px 0 10px 0' }}>Desarrollo Matemático: Teorema de Bayes</h4>
-                                <FormulaBayes resultado={resultado} ramaSeleccionada={ramas.find(r => r.nombre === causaBayes)} />
+                                <FormulaBayes resultado={activeResultado} ramaSeleccionada={activeRamas.find(r => r.nombre === causaBayes)} />
                                 
                                 {(() => {
-                                    const rama = ramas.find(r => r.nombre === causaBayes);
+                                    const rama = activeRamas.find(r => r.nombre === causaBayes);
                                     if (!rama) return null;
-                                    const bayesResult = rama.mult / resultado.probB;
+                                    const bayesResult = activeResultado.probB > 0 ? rama.mult / activeResultado.probB : 0;
                                     return (
                                         <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(249, 115, 22, 0.05)', border: '1.5px solid #f97316', borderRadius: RADIUS, textAlign: 'center' }}>
                                             <div style={{ fontSize: FS.lg, fontWeight: 'bold', color: '#ea580c' }}>
@@ -386,9 +631,9 @@ export default function ResultadosSimuladorTotal({
                                 {ordenWidgets.map((id) => {
                                     if (id === 'w-arbol') {
                                         return (
-                                            <MarcoWidgetMAT251 key={id} id={id} titulo="Árbol de Probabilidad" anchoCompleto={true} alto={`${Math.max(400, ramas.length * 140) + 120}px`}>
+                                            <MarcoWidgetMAT251 key={id} id={id} titulo="Árbol de Probabilidad" anchoCompleto={true} alto={`${Math.max(400, activeRamas.length * 140) + 120}px`}>
                                                 <div style={{ width: '100%', height: '100%', minWidth: 0 }}>
-                                                    <ArbolProbabilidad resultado={resultado} ramas={ramas} causaBayes={causaBayes} />
+                                                    <ArbolProbabilidad resultado={activeResultado} ramas={activeRamas} causaBayes={causaBayes} />
                                                 </div>
                                             </MarcoWidgetMAT251>
                                         );

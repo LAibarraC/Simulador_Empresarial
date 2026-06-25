@@ -1,19 +1,51 @@
+// v2 — Tema 2 habilitado
 export const FONT = 'system-ui, -apple-system, sans-serif';
 export const FS = { xs: '0.75rem', sm: '0.85rem', base: '0.95rem', md: '1rem', lg: '1.1rem' };
 export const RADIUS = '5px';
 
 export const OPERACIONES = [
   {
-    grupo: 'Tema 1: Probabilidad y Conteo',
-    opciones: [
+    tema: 'Tema 1',
+    titulo: 'Cálculo de probabilidades e introducción al muestreo',
+    operaciones: [
       { value: 'conteo', label: 'Técnicas de Conteo (nPr / nCr)' },
       { value: 'probabilidad', label: 'Cálculo de Probabilidad' },
-      { value: 'simulador_total', label: 'Teorema Probabilidad Total' },
-      { value: 'regla_adicion', label: 'Axiomas y Propiedades (Adición)' },
-      { value: 'regla_multiplicacion', label: 'Regla de la Multiplicación (Sucesivos)' },
+      { value: 'simulador_total', label: 'Teorema de Probabilidad Total' },
+      { value: 'regla_adicion', label: 'Axiomas y Regla de la Adición' },
+      { value: 'regla_multiplicacion', label: 'Regla de la Multiplicación' },
       { value: 'muestreo', label: 'Introducción al Muestreo' },
-      { value: 'dist_uniforme', label: 'Distribución Uniforme Continua' },
+      { value: 'dist_uniforme', label: 'Probabilidad en Espacio Continuo' },
     ],
+  },
+  {
+    tema: 'Tema 2',
+    titulo: 'Variables aleatorias',
+    operaciones: [
+      { value: 'dist_discreta', label: 'Variable Aleatoria Discreta' },
+      { value: 'dist_continua', label: 'Variable Aleatoria Continua' },
+    ],
+  },
+  {
+    tema: 'Tema 3',
+    titulo: 'Distribuciones discretas y continuas importantes',
+    operaciones: [
+      { value: 'modelos_discretos', label: 'Modelos Discretos Especiales' }
+    ],
+  },
+  {
+    tema: 'Tema 4',
+    titulo: 'Distribuciones en el muestreo estadístico',
+    operaciones: [],
+  },
+  {
+    tema: 'Tema 5',
+    titulo: 'Pruebas de hipótesis paramétricas y no paramétricas',
+    operaciones: [],
+  },
+  {
+    tema: 'Tema 6',
+    titulo: 'Estimación e inferencia estadística',
+    operaciones: [],
   },
 ];
 

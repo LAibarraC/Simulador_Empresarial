@@ -309,7 +309,7 @@ export const calcularReglaMultiplicacion = (filas, nombresColumnas, colA, valA, 
     if (modReemplazo === 'sin_reemplazo') {
         totalB = totalA - 1;
         const reduccion = countA > 0 ? (countAandB / countA) : 0;
-        countB = Math.max(0, countB_inicial - reduccion);
+        countB = Number(Math.max(0, countB_inicial - reduccion).toFixed(2));
     }
 
     if (totalB <= 0) {
@@ -402,6 +402,8 @@ export const calcularMuestreo = (filas, nombresColumnas, metodoMuestreo, tamanoM
 
     let muestra = [];
     let repData = [];
+    let k = null;
+    let r = null;
     const copyFilas = [...filas];
 
     if (metodoMuestreo === 'mas') {
@@ -415,13 +417,19 @@ export const calcularMuestreo = (filas, nombresColumnas, metodoMuestreo, tamanoM
         const countMue = {};
         const hasCols = nombresColumnas && nombresColumnas.length > 0;
         
+        let colIdxChart = 0;
+        if (hasCols && varEstratificacion) {
+            const idx = nombresColumnas.indexOf(varEstratificacion);
+            if (idx !== -1) colIdxChart = idx;
+        }
+        
         filas.forEach(f => {
-            const v = hasCols ? f.valor.split(' | ')[0].trim() : f.valor.trim();
-            if (v) countPob[v] = (countPob[v] || 0) + 1;
+            const valorDinamico = hasCols ? f.valor.split(' | ')[colIdxChart].trim() : f.valor.trim();
+            if (valorDinamico) countPob[valorDinamico] = (countPob[valorDinamico] || 0) + 1;
         });
         muestra.forEach(f => {
-            const v = hasCols ? f.valor.split(' | ')[0].trim() : f.valor.trim();
-            if (v) countMue[v] = (countMue[v] || 0) + 1;
+            const valorDinamico = hasCols ? f.valor.split(' | ')[colIdxChart].trim() : f.valor.trim();
+            if (valorDinamico) countMue[valorDinamico] = (countMue[valorDinamico] || 0) + 1;
         });
 
         Object.keys(countPob).sort().forEach(k => {
@@ -433,7 +441,9 @@ export const calcularMuestreo = (filas, nombresColumnas, metodoMuestreo, tamanoM
         });
 
     } else if (metodoMuestreo === 'estratificado') {
-        if (!varEstratificacion) {
+        const selectedVariable = varEstratificacion; // Renombrado para la lógica dinámica
+        
+        if (!selectedVariable) {
             return { error: "Selecciona una variable para estratificar." };
         }
 
@@ -441,16 +451,17 @@ export const calcularMuestreo = (filas, nombresColumnas, metodoMuestreo, tamanoM
             return { error: "La variable de estratificación requiere una matriz con columnas." };
         }
 
-        const colIdx = nombresColumnas.indexOf(varEstratificacion);
+        const colIdx = nombresColumnas.indexOf(selectedVariable);
         if (colIdx === -1) {
-            return { error: "Variable no encontrada." };
+            return { error: `La variable seleccionada '${selectedVariable}' no fue encontrada.` };
         }
 
+        // Extracción Dinámica: Agrupando en base al índice dinámico (equivalente a item[selectedVariable])
         const estratos = {};
         copyFilas.forEach(f => {
-            const v = f.valor.split(' | ')[colIdx].trim();
-            if (!estratos[v]) estratos[v] = [];
-            estratos[v].push(f);
+            const valorDinamico = f.valor.split(' | ')[colIdx].trim();
+            if (!estratos[valorDinamico]) estratos[valorDinamico] = [];
+            estratos[valorDinamico].push(f);
         });
 
         const estratosObj = Object.keys(estratos).map(k => {
@@ -486,16 +497,58 @@ export const calcularMuestreo = (filas, nombresColumnas, metodoMuestreo, tamanoM
                 pool.splice(randIndex, 1);
             }
 
+            // Gráfica de Representatividad Dinámica
+            // e.key representa los valores únicos categóricos extraídos de selectedVariable
             repData.push({
                 label: e.key,
                 pPob: e.N_i / N,
                 pMuestra: extractedCount / n
             });
         });
+    } else if (metodoMuestreo === 'sistematico') {
+        k = Math.floor(N / n);
+        if (k < 1) {
+            return { error: `La muestra (n=${n}) es demasiado grande para la población (N=${N}). Ajusta el tamaño de la muestra.` };
+        }
+        r = Math.floor(Math.random() * k) + 1;
+        
+        for (let i = 0; i < n; i++) {
+            const index = (r - 1) + (i * k);
+            if (index < N) {
+                muestra.push(copyFilas[index]);
+            }
+        }
+
+        const countPob = {};
+        const countMue = {};
+        const hasCols = nombresColumnas && nombresColumnas.length > 0;
+        
+        let colIdxChart = 0;
+        if (hasCols && varEstratificacion) {
+            const idx = nombresColumnas.indexOf(varEstratificacion);
+            if (idx !== -1) colIdxChart = idx;
+        }
+        
+        filas.forEach(f => {
+            const valorDinamico = hasCols ? f.valor.split(' | ')[colIdxChart].trim() : f.valor.trim();
+            if (valorDinamico) countPob[valorDinamico] = (countPob[valorDinamico] || 0) + 1;
+        });
+        muestra.forEach(f => {
+            const valorDinamico = hasCols ? f.valor.split(' | ')[colIdxChart].trim() : f.valor.trim();
+            if (valorDinamico) countMue[valorDinamico] = (countMue[valorDinamico] || 0) + 1;
+        });
+
+        Object.keys(countPob).sort().forEach(key => {
+            repData.push({
+                label: key,
+                pPob: countPob[key] / N,
+                pMuestra: (countMue[key] || 0) / muestra.length
+            });
+        });
     }
 
     return {
-        resultado: { N, n, muestra, repData }
+        resultado: { N, n: muestra.length, muestra, repData, k, r }
     };
 };
 
@@ -531,8 +584,8 @@ export const calcularDistribucionUniforme = (minVal, maxVal, inputMin, inputMax)
         return { error: "Debes ingresar valores numéricos válidos para tu rango de interés (a y b)." };
     }
 
-    if (a >= b) {
-        return { error: "El valor mínimo de interés (a) debe ser estrictamente menor que el máximo (b)." };
+    if (a > b) {
+        return { error: "El valor mínimo de interés (a) debe ser menor o igual que el máximo (b)." };
     }
 
     if (a < A || b > B) {

@@ -8,7 +8,7 @@ import TablasBivariantes from "./TablasBivariantes";
 import TablasUnidimensionales from "./TablasUnidimensionales";
 import PanelGraficos from "./PanelGraficos";
 import { generarPDFReporte } from "../../utils/exportUtils";
-import { IconoPDF, IconoGuardar } from "../ui/iconos";
+import { IconoPDF, IconoGuardar, IconoAlerta } from "../ui/iconos";
 import { glosarioEstadistico } from "../../utils/diccionario";
 
 // Este componente envuelve tus símbolos en un tooltip automático
@@ -96,8 +96,9 @@ export default function PanelResultados({
                   marginBottom: "15px",
                 }}
               >
-                <p style={{ margin: "0" }}>
-                  ⚠️ Error: Faltan datos numéricos o hay celdas de texto en el cálculo actual.
+                <p style={{ margin: "0", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                  <IconoAlerta width="18" height="18" style={{ flexShrink: 0 }} />
+                  Error: Faltan datos numéricos o hay celdas de texto en el cálculo actual.
                 </p>
               </div>
             )}

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { FONT } from '../Principal/Constantes';
+import { FONT } from '../../Principal/Constantes';
 
 export default function GraficoUniformeMosaico({ dataReales, A, B, H }) {
     
@@ -79,8 +79,8 @@ export default function GraficoUniformeMosaico({ dataReales, A, B, H }) {
                     <Line 
                         type="monotone" 
                         dataKey="densidadTeorica" 
-                        name="Línea Teórica Uniforme (H)" 
-                        stroke="#1e3a8a" 
+                        name="Línea de Probabilidad Continua (H)" 
+                        stroke="var(--primary-color)" 
                         strokeWidth={3} 
                         dot={false} 
                         activeDot={false}
