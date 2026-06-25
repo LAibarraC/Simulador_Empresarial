@@ -667,6 +667,16 @@ export default function Principal() {
                                 </>
                             )}
                         </div>
+                    ) : operacion === 'dist_uniforme' ? (
+                        <ResultadosEspacioContinuo
+                            varSeleccionada={varSeleccionada} filas={filas}
+                            varUniforme={varUniforme} setVarUniforme={setVarUniforme}
+                            inputMin={inputMin} setInputMin={setInputMin}
+                            inputMax={inputMax} setInputMax={setInputMax}
+                            resultado={resultadoUniforme} setResultado={setResultadoUniforme}
+                            error={errorUniforme} setError={setErrorUniforme}
+                            statsDatos={statsDatos} abrirEditor={abrirEditor}
+                        />
                     ) : operacion === 'muestreo' ? (
                         <ResultadosMuestreo
                             varSeleccionada={varSeleccionada} filas={filas}
