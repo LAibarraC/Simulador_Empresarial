@@ -69,7 +69,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
             return (
                 <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', padding: '10px', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                     <p style={{ margin: 0, fontWeight: 600, color: '#334155' }}>x = {label}</p>
-                    <p style={{ margin: 0, color: '#3b82f6' }}>P(x) = {p.toFixed(4)}</p>
+                    <p style={{ margin: 0, color: '#3b82f6' }}>P(x) = {p.toFixed(2)}</p>
                 </div>
             );
         }
@@ -140,7 +140,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
                                     stroke="#dc2626"
                                     strokeDasharray="3 3"
                                     strokeWidth={1.5}
-                                    label={{ position: 'top', value: `E(X) = ${esperanza.toFixed(2)}`, fill: '#dc2626', fontSize: 11, fontWeight: 700 }}
+                                    label={{ position: 'top', value: `E(X) = ${esperanza.toFixed(2)}`, fill: '#dc2626', fontSize: 10, fontWeight: 700 }}
                                 />
                             )}
 
@@ -159,8 +159,8 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
                                         const entry = datosRecortados[index];
                                         if (entry && isResaltado(entry.x)) {
                                             return (
-                                                <text x={x + width / 2} y={y - 5} fill="#3b82f6" textAnchor="middle" fontSize="11" fontWeight="bold">
-                                                    {value.toFixed(4)}
+                                                <text x={x + width / 2} y={y - 5} fill="#3b82f6" textAnchor="middle" fontSize="9" fontWeight="bold">
+                                                    {value.toFixed(2)}
                                                 </text>
                                             );
                                         }

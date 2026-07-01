@@ -63,43 +63,45 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
                     const totalElements = datos.elementos.length;
                     const extraCount = totalElements - maxRender;
                     const isDarkMode = document.documentElement.classList.contains('dark');
-                    
+
                     return (
                         <div style={{ marginTop: '20px' }}>
-                            <p style={{ margin: '0 0 10px', color: 'var(--text-main)', fontSize: FS.sm, fontWeight: 'bold', borderBottom: '1px solid var(--border-color)', paddingBottom: '5px' }}>
-                                Visualización de Elementos ({totalElements}):
+                            <p style={{ margin: '0 0 10px', color: 'var(--text-main)', fontSize: FS.sm, borderBottom: '1px solid var(--border-color)', paddingBottom: '5px' }}>
+                                Visualización de Elementos <strong style={{ color: 'var(--text-main)', fontSize: '0.9em' }}>({totalElements})</strong>:
                             </p>
                             <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--border-color)', padding: '10px', borderRadius: RADIUS, background: 'var(--bg-body)' }}>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                     {itemsToRender.map((el, idx) => (
-                                        <span key={idx} style={{ 
-                                            display: 'inline-block', 
-                                            fontFamily: 'monospace', 
-                                            fontSize: '0.72rem', 
-                                            padding: '2px 6px', 
-                                            borderRadius: '3px', 
-                                            backgroundColor: isDarkMode ? '#2d3748' : '#f3f4f6', 
-                                            border: '1px solid var(--border-color)', 
-                                            color: 'var(--text-main)',
-                                            whiteSpace: 'nowrap'
-                                        }}>
-                                            <span style={{ fontWeight: 'bold', marginRight: '4px', opacity: 0.6 }}>
+                                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <strong style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.8rem' }}>
                                                 {idx + 1}.
+                                            </strong>
+                                            <span style={{
+                                                display: 'inline-block',
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.72rem',
+                                                padding: '2px 6px',
+                                                borderRadius: '3px',
+                                                backgroundColor: isDarkMode ? '#000000ff' : '#f3f4f6',
+                                                border: '1px dashed var(--text-variable)',
+                                                color: 'var(--text-main)',
+                                                whiteSpace: 'nowrap'
+                                            }}>
+                                                {el}
                                             </span>
-                                            {el}
-                                        </span>
+                                        </div>
                                     ))}
                                     {extraCount > 0 && (
-                                        <button 
+                                        <button
                                             onClick={() => setLimite(prev => prev + 50)}
-                                            style={{ 
-                                                display: 'inline-block', 
-                                                fontFamily: 'monospace', 
-                                                fontSize: '0.72rem', 
+                                            style={{
+                                                display: 'inline-block',
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.72rem',
                                                 fontWeight: 'bold',
-                                                padding: '2px 8px', 
-                                                borderRadius: '3px', 
-                                                backgroundColor: 'var(--primary-color)', 
+                                                padding: '2px 8px',
+                                                borderRadius: '3px',
+                                                backgroundColor: 'var(--primary-color)',
                                                 color: '#fff',
                                                 border: 'none',
                                                 cursor: 'pointer',
