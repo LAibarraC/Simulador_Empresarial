@@ -4,7 +4,7 @@ import Datos from "./Datos";
 import Calculos from "./Calculos";
 import TablaDinamica from "../components/excel/TablaDinamica";
 import { useCalculadoraExcel } from "../hooks/useCalculadoraExcel";
-import BannerEntornoBeta from "../components/ui/BannerEntornoBeta";
+
 
 import "../styles/pages/Calculadora.css";
 
@@ -33,7 +33,7 @@ export default function Calculadora() {
 
   return (
     <div className="contenedor-principal-sistema">
-      <BannerEntornoBeta />
+
       <div className="ventana-contenido-principal">
         {/* Le pasamos paramsReabrir a Calculos para que sepa qué cálculo seleccionar */}
         <Calculos stats={stats} paramsReabrir={paramsReabrir} />

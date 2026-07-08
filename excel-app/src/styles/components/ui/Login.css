@@ -58,3 +58,16 @@ html.dark .login-card label {
     padding: 20px;
   }
 }
+
+/* 🆕 Diseño responsivo para filas del formulario */
+.form-row-responsive {
+  display: flex;
+  gap: 15px;
+}
+
+@media (max-width: 600px) {
+  .form-row-responsive {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

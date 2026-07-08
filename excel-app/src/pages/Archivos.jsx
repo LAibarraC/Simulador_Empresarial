@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import ExcelViewer from "../components/excel/ExcelViewer";
 import ExcelUploader from "../components/excel/ExcelUploader";
 import ExcelContent from "../components/excel/ExcelContent";
-import BannerEntornoBeta from "../components/ui/BannerEntornoBeta";
 
 import { api, BASE_URL } from "../services/api";
+
 import { alerta } from "../utils/Notificaciones";
 import "../styles/pages/Archivos.css";
 
@@ -240,7 +240,7 @@ export default function Archivos({ usuario }) {
 
   return (
     <div className="page-container">
-      <BannerEntornoBeta />
+
       {/* Marca de agua de fondo */}
       <div 
         style={{

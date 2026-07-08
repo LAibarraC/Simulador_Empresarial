@@ -2,6 +2,8 @@
 
 .perfil-container {
   max-width: 850px;
+  width: 95%;
+  box-sizing: border-box;
   margin: 40px auto;
   padding: 20px;
 }
@@ -508,8 +510,10 @@
 /* Tablets y pantallas medianas (max-width: 768px) */
 @media (max-width: 768px) {
   .perfil-container {
-    margin: 20px auto;
-    padding: 15px;
+    margin: 10px auto;
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
   }
 
   .perfil-card-body {
@@ -550,10 +554,75 @@
   .perfil-btn-group button {
     width: 100%;
   }
+
+  /* Tabla Responsiva tipo Tarjetas */
+  .perfil-table-container {
+    overflow-x: hidden;
+  }
+
+  .perfil-table, .perfil-table tbody, .perfil-table tr, .perfil-table th {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .perfil-table thead {
+    display: none !important;
+  }
+
+  .perfil-table-row {
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-main) !important;
+    padding: 10px;
+  }
+
+  .perfil-table td.perfil-td, 
+  .perfil-table td.perfil-td-center, 
+  .perfil-table td.perfil-td-muted {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: right;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .perfil-td:last-child, .perfil-td-center:last-child, .perfil-td-muted:last-child {
+    border-bottom: none;
+  }
+
+  .perfil-td::before, .perfil-td-center::before, .perfil-td-muted::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: var(--text-muted);
+    flex: 1;
+    text-align: left;
+    margin-right: 10px;
+  }
+
+  .perfil-table-actions {
+    justify-content: flex-end;
+    width: 100%;
+  }
 }
 
-/* Celulares (max-width: 480px) */
-@media (max-width: 480px) {
+/* Celulares (max-width: 600px) */
+@media (max-width: 600px) {
+  .perfil-container {
+    margin: 10px auto;
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .perfil-card-body {
+    padding: 20px 15px 15px 15px;
+  }
+
   .perfil-banner {
     height: 90px;
   }
@@ -584,13 +653,22 @@
   }
 
   .perfil-stats {
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
     margin-bottom: 20px;
   }
 
   .perfil-stat-box {
-    width: 100%;
+    width: 50%;
+    padding: 10px;
+  }
+  
+  .perfil-stat-value {
+    font-size: 1.3rem;
+  }
+  
+  .perfil-stat-label {
+    font-size: 0.75rem;
   }
 
   .perfil-actions {

@@ -131,7 +131,7 @@ export default function Perfil({ usuario, setUsuario }) {
     <div className="perfil-container">
       
       {/* TARJETA DE PERFIL */}
-      <div className="grafico-card perfil-card">
+      <div className="perfil-card">
         <div className="perfil-banner"></div>
 
         <div className="perfil-card-body">
@@ -195,7 +195,7 @@ export default function Perfil({ usuario, setUsuario }) {
       </div>
 
       {/* --- SECCIÓN HISTORIAL DE CÁLCULOS --- */}
-      <div className="grafico-card perfil-card-secondary">
+      <div className="perfil-card-secondary">
         <h3 className="perfil-section-title">
           <span>Mi Historial de Cálculos Recientes</span>
           <button 
@@ -226,21 +226,21 @@ export default function Perfil({ usuario, setUsuario }) {
               <tbody>
                 {historial.slice(0, 5).map((reg, index) => (
                   <tr key={reg.id} className="perfil-table-row">
-                    <td className="perfil-td">
+                    <td className="perfil-td" data-label="Fecha / Hora">
                       <div className="perfil-date-cell">
                         <strong>{reg.fecha}</strong>
                         <small className="perfil-small-text">{reg.hora}</small>
                       </div>
                     </td>
-                    <td className="perfil-td">
+                    <td className="perfil-td" data-label="Tipo de Cálculo">
                       <span className="perfil-calc-badge">
                         {reg.calculo.replace(/_/g, " ").toUpperCase()}
                       </span>
                     </td>
-                    <td className="perfil-td-muted">
+                    <td className="perfil-td-muted" data-label="Archivo Fuente">
                       {reg.archivo_origen}
                     </td>
-                    <td className="perfil-td-center">
+                    <td className="perfil-td-center" data-label="Acciones">
                       <div className="perfil-table-actions">
                         <button
                           onClick={() => {

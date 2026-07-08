@@ -57,7 +57,8 @@ async def obtener_notificaciones(db: Session = Depends(get_db), current_user: mo
         
         res = []
         for n in notificaciones:
-            leido_status = n.leido if n.tipo != "sistema" else (n.id <= current_user.ultimo_aviso_global_id)
+            ultimo_id = current_user.ultimo_aviso_global_id or 0
+            leido_status = n.leido if n.tipo != "sistema" else (n.id <= ultimo_id)
             res.append({
                 "id": n.id,
                 "tipo": n.tipo,
@@ -81,7 +82,8 @@ async def marcar_como_leida(notificacion_id: int, db: Session = Depends(get_db),
         raise HTTPException(status_code=403, detail="No tienes permisos para leer esta notificación")
         
     if notif.tipo == "sistema":
-        current_user.ultimo_aviso_global_id = max(current_user.ultimo_aviso_global_id, notif.id)
+        ultimo_id = current_user.ultimo_aviso_global_id or 0
+        current_user.ultimo_aviso_global_id = max(ultimo_id, notif.id)
     else:
         notif.leido = True
         
@@ -104,7 +106,8 @@ async def marcar_todas_como_leidas(db: Session = Depends(get_db), current_user: 
         ).scalar()
         
         if max_global_id:
-            current_user.ultimo_aviso_global_id = max(current_user.ultimo_aviso_global_id, max_global_id)
+            ultimo_id = current_user.ultimo_aviso_global_id or 0
+            current_user.ultimo_aviso_global_id = max(ultimo_id, max_global_id)
             
         db.commit()
         return {"message": "Todas las notificaciones fueron marcadas como leídas"}

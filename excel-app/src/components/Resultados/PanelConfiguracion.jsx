@@ -208,7 +208,7 @@ export default function PanelConfiguracion({
           top: "50%",
           left: 0,
           transform: "translateY(-50%)",
-          zIndex: 9999,
+          zIndex: 50,
           backgroundColor: "var(--accent-color, #FF7000)",
           color: "white",
           border: "1px solid var(--border-color, #eee)",

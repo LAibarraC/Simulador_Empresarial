@@ -81,20 +81,21 @@ select option {
     box-sizing: border-box;
   }
   table.tabla-responsive tr {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--bg-card);
-    padding: 10px;
+    padding: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
   table.tabla-responsive td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 10px !important;
+    padding: 8px 8px !important;
     border-bottom: 1px solid var(--border-color) !important;
     text-align: right;
+    font-size: 0.85rem;
   }
   table.tabla-responsive td:last-child {
     border-bottom: none !important;
@@ -104,9 +105,9 @@ select option {
     content: attr(data-label);
     font-weight: bold;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     text-align: left;
-    margin-right: 15px;
+    margin-right: 10px;
     flex-shrink: 0;
   }
 }
@@ -379,20 +380,21 @@ html.dark .pie-logo-usfx, html.dark .pie-logo-siglos { filter: invert(0); }
     box-sizing: border-box !important;
   }
   table.tabla-responsiva-panel tr {
-    margin-bottom: 20px !important;
+    margin-bottom: 12px !important;
     border: 1px solid var(--border-color) !important;
     border-radius: 8px !important;
     background-color: var(--bg-card) !important;
-    padding: 15px !important;
+    padding: 8px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
   }
   table.tabla-responsiva-panel td {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 12px 10px !important;
+    padding: 8px 8px !important;
     border-bottom: 1px solid var(--border-color) !important;
     text-align: right !important;
+    font-size: 0.85rem !important;
   }
   table.tabla-responsiva-panel td:last-child {
     border-bottom: none !important;
@@ -403,9 +405,9 @@ html.dark .pie-logo-usfx, html.dark .pie-logo-siglos { filter: invert(0); }
   table.tabla-responsiva-panel td::before {
     font-weight: bold !important;
     color: var(--text-muted) !important;
-    font-size: 0.85rem !important;
+    font-size: 0.75rem !important;
     text-align: left !important;
-    margin-right: 15px !important;
+    margin-right: 10px !important;
     flex-shrink: 0 !important;
     text-transform: uppercase !important;
   }

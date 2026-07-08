@@ -470,15 +470,24 @@ guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto) => {
 
   // --- SISTEMA DE NOTIFICACIONES ---
   obtenerNotificaciones: async () => {
-    const res = await fetch(`${BASE_URL}/notificaciones`);
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/notificaciones`, { headers });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error al obtener notificaciones");
     return data;
   },
 
   marcarNotificacionLeida: async (id) => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(`${BASE_URL}/notificaciones/${id}/leer`, {
       method: "PUT",
+      headers
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error al marcar la notificación como leída");
@@ -486,8 +495,13 @@ guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto) => {
   },
 
   marcarTodasLeidas: async () => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(`${BASE_URL}/notificaciones/leer_todas`, {
       method: "PUT",
+      headers
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error al marcar todas las notificaciones como leídas");
@@ -495,9 +509,13 @@ guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto) => {
   },
 
   crearNotificacion: async (tipo, mensaje, usuario_id = null) => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(`${BASE_URL}/notificaciones`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ tipo, mensaje, usuario_id }),
     });
     const data = await res.json();

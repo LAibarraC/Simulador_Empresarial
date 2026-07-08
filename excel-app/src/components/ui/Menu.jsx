@@ -5,6 +5,7 @@ import escudoAdmin from "../../assets/images/Logo-Adm.png";
 import '../../styles/components/ui/Menu.css';
 import { alerta } from "../../utils/Notificaciones";
 import { api } from "../../services/api";
+import { IconoCandado } from "./iconos";
 
 export default function Menu({ usuario, setUsuario }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +19,10 @@ export default function Menu({ usuario, setUsuario }) {
   const [notificaciones, setNotificaciones] = useState([]);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const notifRef = useRef(null);
+  
+  // Refs para cerrar el menú móvil (hamburguesa)
+  const mobileMenuRef = useRef(null);
+  const hamburgerRef = useRef(null);
 
   const cargarNotificaciones = async () => {
     try {
@@ -73,6 +78,18 @@ export default function Menu({ usuario, setUsuario }) {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
         setNotifDropdownOpen(false);
       }
+      if (navLinksRef.current && !navLinksRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+        setGruposDropdownOpen(false);
+      }
+      if (
+        mobileMenuRef.current && 
+        !mobileMenuRef.current.contains(event.target) &&
+        hamburgerRef.current &&
+        !hamburgerRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -97,7 +114,11 @@ export default function Menu({ usuario, setUsuario }) {
 
   useEffect(() => {
     const updateUnderline = () => {
-      let activeLink = navLinksRef.current?.querySelector('a.active, span.active');
+      // Buscar el NavLink que coincida con la ruta actual o los spans activos
+      const activeLinks = Array.from(navLinksRef.current?.querySelectorAll('a.active, span.active, a[aria-current="page"]') || []);
+      // Seleccionamos el último (para evitar que atrape '/' si no tiene 'end')
+      let activeLink = activeLinks[activeLinks.length - 1];
+
       if (activeLink) {
         let leftPos = activeLink.offsetLeft;
         let width = activeLink.offsetWidth;
@@ -137,15 +158,18 @@ export default function Menu({ usuario, setUsuario }) {
        <img src={escudoAdmin} alt="Escudo Administración" className="nav-logo" />
       </div>
 
-      <div className={`nav-menu ${isOpen ? "active" : ""}`}>
+      <div className={`nav-menu ${isOpen ? "active" : ""}`} ref={mobileMenuRef}>
         <ul className="nav-links" ref={navLinksRef}>
-          <li><NavLink to="/" onClick={closeMenu}>Inicio</NavLink></li>
+          <li><NavLink to="/" end onClick={closeMenu}>Inicio</NavLink></li>
           <li><NavLink to="/archivos" onClick={closeMenu}>Archivos</NavLink></li>
           
           {/* EL CONTENEDOR DESPLEGABLE */}
           <li 
             className="nav-item dropdown-container"
-            onClick={() => setDropdownOpen(!dropdownOpen)} // Abrir solo con clic
+            onClick={() => {
+              setDropdownOpen(!dropdownOpen);
+              if (!dropdownOpen) setGruposDropdownOpen(false);
+            }} // Abrir solo con clic y cerrar el otro
           >
             {/* El título "Calculadora" se marca como activo si estamos en esas rutas */}
             <span className={`nav-link-dropdown ${isCalculadoraActive ? 'active' : ''}`}>
@@ -167,8 +191,8 @@ export default function Menu({ usuario, setUsuario }) {
                 </NavLink>
               </li>
               <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
-                <NavLink
-                  to="#"
+                <a
+                  href="#"
                   onClick={(e) => {
                     e.preventDefault();
                     alerta.advertencia("Próximamente", "Estadística Matemática estará disponible en una futura versión.");
@@ -176,8 +200,8 @@ export default function Menu({ usuario, setUsuario }) {
                   className="dropdown-item"
                   style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
                 >
-                  <span>Estadística Matemática 🔒</span>
-                </NavLink>
+                  <span style={{ display: "flex", alignItems: "center" }}>Estadística Matemática <IconoCandado /></span>
+                </a>
               </li>
             </ul>
           </li>
@@ -186,19 +210,30 @@ export default function Menu({ usuario, setUsuario }) {
           {usuario && (usuario.rol === "Docente" || usuario.rol === "Administrador") ? (
             <li 
               className="nav-item dropdown-container"
-              onClick={() => setGruposDropdownOpen(!gruposDropdownOpen)}
+              onClick={() => {
+                setGruposDropdownOpen(!gruposDropdownOpen);
+                if (!gruposDropdownOpen) setDropdownOpen(false);
+              }}
             >
               <span className={`nav-link-dropdown ${isGruposActive ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
                 Grupos
+                <svg 
+                  className={`chevron-icon ${gruposDropdownOpen ? 'open' : ''}`} 
+                  width="16" height="16" viewBox="0 0 24 24" 
+                  fill="none" stroke="currentColor" strokeWidth="3.5" 
+                  strokeLinecap="round" strokeLinejoin="round"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
               </span>
 
               <ul className={`dropdown-menu ${gruposDropdownOpen ? 'show' : ''}`}>
-                <li className="dropdown-li">
+                <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
                   <NavLink to="/grupos" onClick={closeMenu} className="dropdown-item">
                     Gestión Grupos
                   </NavLink>
                 </li>
-                <li className="dropdown-li">
+                <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
                   <NavLink to="/gestion-docente" onClick={closeMenu} className="dropdown-item">
                     Gestión Alumnos
                   </NavLink>
@@ -233,7 +268,13 @@ export default function Menu({ usuario, setUsuario }) {
             <div className="notificaciones-container" ref={notifRef}>
               <button 
                 className="bell-btn" 
-                onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                onClick={() => {
+                  setNotifDropdownOpen(!notifDropdownOpen);
+                  if (!notifDropdownOpen) {
+                    setIsOpen(false);
+                    setMenuAbierto(false);
+                  }
+                }}
                 title="Notificaciones"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
@@ -288,6 +329,10 @@ export default function Menu({ usuario, setUsuario }) {
                 onClick={(e) => {
                   e.stopPropagation();
                   setMenuAbierto(!menuAbierto);
+                  if (!menuAbierto) {
+                    setIsOpen(false);
+                    setNotifDropdownOpen(false);
+                  }
                 }}
               >
                 <div className="avatar-naranja">
@@ -349,8 +394,15 @@ export default function Menu({ usuario, setUsuario }) {
       </div>
 
       <button 
+        ref={hamburgerRef}
         className={`hamburger-menu ${isOpen ? "open" : ""}`} 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) {
+            setMenuAbierto(false);
+            setNotifDropdownOpen(false);
+          }
+        }}
         aria-label="Abrir menú"
       >
         <span className="bar"></span>

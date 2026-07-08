@@ -350,14 +350,14 @@ export default function Grupos() {
           pointerEvents: "none"
         }}
       />
-      <div style={{ marginBottom: "30px", borderBottom: "2px solid var(--border-color)", paddingBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ marginBottom: "clamp(15px, 4vw, 30px)", borderBottom: "2px solid var(--border-color)", paddingBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
         <div>
-          <h1 style={{ color: "var(--text-main)", margin: 0 }}>Gestión Académica y Cursos</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "1.1rem", margin: "5px 0 0 0" }}>
+          <h1 style={{ color: "var(--text-main)", margin: 0, fontSize: "clamp(1.3rem, 4vw, 1.8rem)" }}>Gestión Académica y Cursos</h1>
+          <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.9rem, 3vw, 1.1rem)", margin: "5px 0 0 0" }}>
             Bienvenido, {usuario.nombre || usuario.nombres}
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <button
             onClick={iniciarTour}
             className="guia-rapida-flotante"
@@ -380,14 +380,14 @@ export default function Grupos() {
       {/* ========================================= */}
       {(esDocente || esAdmin) && (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <h2 id="tour-titulo-cursos" style={{ color: "var(--primary-color)", margin: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
+            <h2 id="tour-titulo-cursos" style={{ color: "var(--primary-color)", margin: 0, fontSize: "clamp(1.1rem, 3vw, 1.5rem)" }}>
               {esAdmin ? "Todos los Cursos del Sistema (Vista Global)" : "Mis Cursos Creados"}
             </h2>
             <button
               id="tour-btn-crear-curso"
               onClick={() => setMostrarModal(true)}
-              style={{ background: "var(--accent-color)", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", transition: "background 0.3s" }}
+              style={{ background: "var(--accent-color)", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", transition: "background 0.3s", textAlign: "center" }}
             >
               + Crear Nuevo Curso
             </button>

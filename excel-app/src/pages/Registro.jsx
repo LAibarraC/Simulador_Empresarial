@@ -6,9 +6,9 @@ import '../styles/components/ui/Login.css'; // Aseguramos que cargue los estilos
 
 // Importamos el componente de modo oscuro
 import OscuroClaro from "../components/ui/oscuro_claro.jsx"; 
-import { BASE_URL } from "../services/api";
+import { BASE_URL, api } from "../services/api";
 
-export default function Registro() {
+export default function Registro({ onLogin }) {
   const [nombres, setNombres] = useState("");
   const [apellidos, setApellidos] = useState("");
   const [email, setEmail] = useState("");
@@ -48,8 +48,21 @@ export default function Registro() {
         });
 
         if (response.ok) {
-          alerta.success("Cuenta creada", "Tu cuenta ha sido registrada exitosamente.");
-          navigate("/login"); 
+          // Auto-login después de registro
+          try {
+            const data = await api.loginLocal(email, pass);
+            if (data.token) {
+              localStorage.setItem("token", data.token);
+            }
+            if (onLogin) {
+              onLogin(data);
+            }
+            alerta.success("Cuenta creada", "Te has registrado e iniciado sesión automáticamente.");
+            navigate("/"); 
+          } catch (error) {
+            alerta.success("Cuenta creada", "Tu cuenta ha sido registrada exitosamente. Por favor, inicia sesión.");
+            navigate("/login"); 
+          }
         } else {
           let msgError = "No se pudo registrar.";
           try {
@@ -96,8 +109,8 @@ export default function Registro() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           
-          <div style={{ display: 'flex', gap: '15px' }}>
-            <div style={{ textAlign: 'left', flex: 1 }}>
+          <div className="form-row-responsive">
+            <div style={{ textAlign: 'left', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Nombres</label>
               <input 
                 type="text" 
@@ -108,7 +121,7 @@ export default function Registro() {
                 required
               />
             </div>
-            <div style={{ textAlign: 'left', flex: 1 }}>
+            <div style={{ textAlign: 'left', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Apellidos</label>
               <input 
                 type="text" 
@@ -133,9 +146,9 @@ export default function Registro() {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '15px' }}>
-            <div style={{ textAlign: 'left', flex: 1 }}>
-              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Contraseña (mínimo 6 caracteres)</label>
+          <div className="form-row-responsive">
+            <div style={{ textAlign: 'left', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Contraseña</label>
               <input 
                 type="password" 
                 value={pass} 
@@ -153,7 +166,7 @@ export default function Registro() {
                 </span>
               )}
             </div>
-            <div style={{ textAlign: 'left', flex: 1 }}>
+            <div style={{ textAlign: 'left', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <label className="etiqueta" style={{ color: 'var(--text-main)' }}>Confirmar Contraseña</label>
               <input 
                 type="password" 

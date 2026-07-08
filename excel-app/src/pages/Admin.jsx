@@ -75,15 +75,15 @@ export default function Admin() {
   );
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '40px auto', padding: '0 20px', position: 'relative' }}>
+    <div style={{ maxWidth: '1100px', margin: 'clamp(15px, 4vw, 40px) auto', padding: '0 20px', position: 'relative' }}>
       
       {/* CABECERA */}
-      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
+      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 4vw, 30px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
         <div className="admin-title-container">
-          <h2 style={{ fontSize: '2rem', margin: '0 0 5px 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h2 style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', margin: '0 0 5px 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             Panel de Administración Real
           </h2>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>
+          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 'clamp(0.85rem, 3vw, 0.95rem)' }}>
             Administra roles, suspende cuentas y elimina registros de forma centralizada.
           </p>
         </div>
@@ -147,8 +147,10 @@ export default function Admin() {
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)'}
                   >
                     <td data-label="Nombre / Correo" style={{ padding: '15px' }}>
-                      <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{u.nombre}</div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '100%' }}>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{u.nombre}</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                      </div>
                     </td>
                     <td data-label="Rol" style={{ padding: '15px' }}>
                       <select 

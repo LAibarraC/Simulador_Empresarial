@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Menu from "./components/ui/Menu";
 import Pie_pagina from "./components/ui/Pie_pagina"; 
 import { useState, useEffect } from "react";
@@ -14,7 +14,7 @@ import Registro from "./pages/Registro";
 import Perfil from "./pages/Perfil";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import Admin from "./pages/Admin";
+import Admin from "./pages/Admin"; 
 import GestionDocente from "./pages/GestionDocente";
 
 import SelectorRol from './components/ui/SelectorRol';
@@ -73,7 +73,7 @@ function App() {
     <DataProvider usuario={usuario} setUsuario={setUsuario}>
       <CalculadoraDataProvider usuario={usuario}>
         <MAT251DataProvider usuario={usuario}>
-          <Router>
+          <HashRouter>
             <SelectorRol />
             <div className="App">
 
@@ -99,7 +99,7 @@ function App() {
                       <Route path="/login" element={<Login onLogin={setUsuario} />} />
                       
                       {/* 🆕 NUEVO: Añadimos la ruta del Registro aquí */}
-                      <Route path="/registro" element={<Registro />} />
+                      <Route path="/registro" element={<Registro onLogin={setUsuario} />} />
 
                       <Route path="/forgot-password" element={<ForgotPassword />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
@@ -144,7 +144,7 @@ function App() {
               {isAuth && <Pie_pagina />}
 
             </div>
-          </Router>
+          </HashRouter>
         </MAT251DataProvider>
       </CalculadoraDataProvider>
     </DataProvider>

@@ -69,15 +69,15 @@ export default function GestionDocente({ usuario }) {
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '40px auto', padding: '0 20px', position: 'relative' }}>
+    <div style={{ maxWidth: '1100px', margin: 'clamp(15px, 3vw, 25px) auto', padding: '0 20px', position: 'relative' }}>
       
       {/* CABECERA */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 3vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
         <div>
-          <h2 style={{ fontSize: '2rem', margin: '0 0 5px 0', color: 'var(--text-main)' }}>
+          <h2 style={{ fontSize: 'clamp(1.3rem, 4vw, 1.8rem)', margin: '0 0 5px 0', color: 'var(--text-main)' }}>
             Gestión de Alumnos
           </h2>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>
+          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 'clamp(0.85rem, 3vw, 0.95rem)' }}>
             Selecciona un grupo para visualizar y administrar la lista de estudiantes inscritos.
           </p>
         </div>
@@ -168,10 +168,10 @@ export default function GestionDocente({ usuario }) {
                     }}
                   >
                     <td data-label="Nombre del Estudiante" style={{ padding: '15px', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                      {est.nombre}
+                      <div style={{ textAlign: 'right', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{est.nombre}</div>
                     </td>
                     <td data-label="Correo Electrónico" style={{ padding: '15px', color: 'var(--text-main)' }}>
-                      {est.email}
+                      <div style={{ textAlign: 'right', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{est.email}</div>
                     </td>
                     <td data-label="Fecha de Inscripción" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                       {est.fecha_creacion ? est.fecha_creacion.split(' ')[0] : 'N/A'}
