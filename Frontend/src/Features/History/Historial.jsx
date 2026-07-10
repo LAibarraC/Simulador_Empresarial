@@ -4,7 +4,7 @@ import { api } from "../../services/api";
 import { alerta } from "../../utils/Notificaciones";
 
 import { useNavigate } from "react-router-dom";
-import "../../styles/pages/historial.css";
+import "../../styles/pages/Historial.css";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import escudoAdmin from "../../assets/images/escudoAdmin.png";
