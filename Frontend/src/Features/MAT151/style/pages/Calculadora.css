@@ -1,0 +1,473 @@
+.contenedor-principal-sistema {
+  padding: 15px;
+  width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.navegacion-superior {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 0;
+}
+
+.tab-btn {
+  color: var(--primary-color);
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  color: black
+}
+
+.tab-btn.active {
+  background-color: var(--accent-color);
+  color: white;
+  border-bottom: none;
+}
+
+.ventana-contenido-principal {
+  min-height: 600px;
+}
+
+.animate-fade {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .navegacion-superior {
+    flex-direction: row;
+    width: 100%;
+    padding: 5px;
+  }
+
+  .tab-btn {
+    min-width: 0;
+    flex: 1;
+    font-size: 0.75rem;
+    padding: 8px 5px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+.contenedor-principal-sistema {
+  margin-top: 5px;
+  min-height: 100vh;
+}
+
+.navegacion-superior {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 0;
+}
+
+.tab-btn {
+  color: var(--primary-color);
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  color: black
+}
+
+.tab-btn.active {
+  background-color: var(--accent-color);
+  color: white;
+  border-bottom: none;
+}
+
+.ventana-contenido-principal {
+  min-height: 600px;
+}
+
+.animate-fade {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .navegacion-superior {
+    flex-direction: row;
+    width: 100%;
+    padding: 5px;
+  }
+
+  .tab-btn {
+    min-width: 0;
+    flex: 1;
+    font-size: 0.75rem;
+    padding: 8px 5px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* =========================================
+   ESTILOS PARA LOS WIDGETS GRÁFICOS (DASHBOARD)
+   ========================================= */
+.widget-grafico {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: both;
+  /* flex: 0 0 auto quita el estiramiento automático. Así obedece milimétricamente al ratón. */
+  flex: 0 0 auto;
+  width: calc(50% - 15px);
+  /* Inicia repartiendo la pantalla 50/50 */
+  min-width: 280px;
+  min-height: 420px;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+  color: var(--text-color);
+}
+
+.widget-grafico.minimizada {
+  min-height: auto;
+  height: auto !important;
+  resize: none;
+}
+
+.widget-grafico:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Busca y actualiza esta parte en tu CSS */
+.widget-grafico.maximizada {
+  position: fixed;
+  top: 5vh;
+  left: 5vw;
+  width: 90vw !important;
+  /* 👈 !important es vital aquí */
+  height: 90vh !important;
+  /* 👈 !important es vital aquí */
+  z-index: 9999;
+  resize: none;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: var(--bg-secondary);
+  /* 👈 Modo oscuro activado */
+  border-bottom: 1px solid var(--border-color);
+  cursor: grab;
+}
+
+.widget-header:active {
+  cursor: grabbing;
+}
+
+.widget-titulo {
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--text-color);
+  margin: 0;
+  pointer-events: none;
+}
+
+.widget-controles {
+  display: flex;
+  gap: 8px;
+}
+
+.widget-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 2px 5px;
+  color: var(--text-color);
+  /* 👈 Botones visibles en modo oscuro */
+}
+
+.widget-btn:hover {
+  opacity: 1;
+}
+
+.widget-body {
+  padding: 15px;
+  width: 100%;
+  display: block;
+  /* 👈 LA CURA AL PROBLEMA: No usar flex aquí */
+  overflow: hidden;
+}
+
+.contenedor-grafico-interno {
+  width: 100%;
+  height: 100%;
+  /* Ahora sí ocupará todo el contenedor relativo */
+  transition: height 0.3s ease;
+}
+
+/* Al maximizar, la altura estricta cambia al tamaño de la pantalla */
+.maximizada .contenedor-grafico-interno {
+  height: 100%;
+}
+
+.widget-body.oculto {
+  display: none;
+}
+
+/* Ajuste de la cuadrícula de gráficos (Renombrado para evitar conflicto con App.css) */
+.panel-graficos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  padding: 10px;
+  align-items: stretch;
+}
+
+/* Para gráficos que quieras que ocupen todo el ancho (como Regresión) */
+.grafico-ancho-completo {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .widget-grafico {
+    /* En móviles, forzamos a que ocupen toda la pantalla siempre */
+    width: 100% !important;
+    min-width: 100% !important;
+    flex: 0 0 100% !important;
+    /* Apagamos la esquina de estirar porque en táctil no sirve y rompe el diseño */
+    resize: none !important;
+  }
+}
+
+/* ========================================= */
+/* BOTÓN FLOTANTE LATERAL (Estilo Redes)     */
+/* ========================================= */
+.flotante-lateral-datos {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.btn-flotante-datos {
+  background-color: var(--accent-color, #FF7000);
+  color: white;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+  width: 48px;
+  /* Solo icono inicialmente */
+  white-space: nowrap;
+}
+
+.texto-flotante {
+  max-width: 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+.btn-flotante-datos:hover {
+  width: 200px;
+  /* Se expande */
+  gap: 10px;
+  padding-left: 15px;
+  background-color: #e65c00;
+}
+
+.btn-flotante-datos:hover .texto-flotante {
+  max-width: 150px;
+  opacity: 1;
+}
+
+/* ========================================= */
+/* PANTALLA EMERGENTE DE DATOS (MODAL)       */
+/* ========================================= */
+.modal-overlay-datos {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75);
+  /* Fondo oscuro semitransparente */
+  z-index: 2000;
+  /* Por encima de todo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content-datos {
+  background-color: var(--bg-body, #ffffff);
+  width: 95%;
+  height: 95%;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow-y: auto;
+  padding-top: 0;
+  /* Eliminado el padding que ocupaba espacio */
+}
+
+/* Botón de cerrar */
+.btn-cerrar-modal {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(239, 68, 68, 0.9);
+  /* Rojo con ligera transparencia */
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 16px;
+  border-radius: 50px;
+  /* Estilo píldora */
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  z-index: 2010;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  backdrop-filter: blur(4px);
+  /* Glassmorphism sutil */
+}
+
+.btn-cerrar-modal:hover {
+  background-color: #ef4444;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.btn-cerrar-modal:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* El contenedor debe ocupar el espacio disponible */
+.contenedor-resultados-vacio {
+  position: relative;
+  width: 100%;
+  min-height: 80vh;
+  /* Altura suficiente para ver el escudo */
+  display: flex;
+  flex-direction: column;
+}
+
+/* El Escudo de la Facultad */
+.contenedor-resultados-vacio::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 450px;
+  /* Tamaño del escudo */
+  height: 450px;
+  background-image: url('../../assets/images/escudoAdmin.png');
+  /* ⚠️ Verifica ruta */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.08;
+  /* Muy sutil */
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Para que el texto de bienvenida esté centrado y por encima del logo */
+.mensaje-bienvenida {
+  margin-top: 100px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.mensaje-bienvenida p {
+  color: var(--text-main);
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.mensaje-bienvenida p {
+  color: var(--text-main);
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+/* ========================================= */
+/* ESTILOS ESPECÍFICOS PARA EL REPORTE PDF   */
+/* ========================================= */
+#reporte-formal-pdf .panel-graficos-grid {
+  display: block !important; 
+  padding: 0 !important;
+}
+
+#reporte-formal-pdf .widget-grafico {
+  width: 100% !important;
+  min-width: 100% !important;
+  height: 400px !important; 
+  margin-bottom: 30px !important;
+  break-inside: avoid; 
+  resize: none !important;
+  border: 1px solid #ddd !important;
+  box-shadow: none !important;
+}
+
+#reporte-formal-pdf .widget-header {
+  background-color: #f8f9fa !important;
+  color: black !important;
+  border-bottom: 1px solid #ddd !important;
+}
+
+#reporte-formal-pdf .widget-controles {
+  display: none !important; 
+}
+
+#reporte-formal-pdf .widget-body {
+  padding: 10px !important;
+  background-color: white !important;
+}

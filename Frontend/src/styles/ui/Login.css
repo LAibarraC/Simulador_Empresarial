@@ -1,0 +1,419 @@
+/* =========================================
+   ESTILOS DE LA PANTALLA DE LOGIN
+   ========================================= */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+/* =========================================
+   TOGGLE TEMA — override solo en Login
+   (no afecta al Menu ni otros lugares)
+   ========================================= */
+.login-theme-toggle .theme-toggle-btn {
+  background-color: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+.login-theme-toggle .theme-toggle-thumb {
+  background-color: #555;
+}
+
+/* Modo oscuro: vuelve al estilo original de App.css */
+html.dark .login-theme-toggle .theme-toggle-btn {
+  background-color: #333333;
+  border-color: #555555;
+}
+
+html.dark .login-theme-toggle .theme-toggle-thumb {
+  background-color: #1e293b;
+}
+
+
+.login-card {
+  /* Tu degradado original para el modo claro */
+  background: linear-gradient(180deg, var(--accent-color) 0%, #ff9e2e 60%, #dfb687 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 30px;
+  width: 100%;
+  max-width: 350px;
+  box-sizing: border-box;
+  /* Solución al scroll horizontal */
+  transition: background 0.3s ease, border 0.3s ease;
+  animation: flipIn360 0.5s ease-out forwards;
+}
+
+@keyframes flipIn360 {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-180deg) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg) scale(1);
+  }
+}
+
+/* 🆕 Animaciones para los botones principales */
+.btn-auth {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, filter 0.2s ease !important;
+}
+
+.btn-auth:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.05);
+}
+
+.btn-auth:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+/* 🆕 Cuando el modo oscuro se activa, sobrescribimos el fondo de la tarjeta */
+html.dark .login-card {
+  background: var(--bg-card);
+  /* Usa el fondo oscuro de tu App.css */
+  border: 1px solid var(--accent-color);
+  /* Mantenemos un toque naranja sutil en el borde */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.login-card input:not(.floating-input-group input) {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
+  padding: 10px;
+  font-size: 1rem;
+  outline: none;
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+/* 🆕 Aseguramos que el texto (etiquetas y enlaces) contraste bien en ambos modos */
+.login-card label,
+.login-card .etiqueta,
+.login-card p {
+  color: var(--text-main);
+}
+
+html.dark .login-card p,
+html.dark .login-card label {
+  color: var(--text-main);
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px;
+  }
+}
+
+/* 🆕 Diseño responsivo para filas del formulario */
+.form-row-responsive {
+  display: flex;
+  gap: 15px;
+}
+
+@media (max-width: 600px) {
+  .form-row-responsive {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Evitar que flex: 1 aplaste la altura en modo columna y forzar ancho completo */
+  .form-row-responsive>* {
+    flex: none !important;
+    width: 100% !important;
+  }
+}
+
+/* =========================================
+   EFECTO FLOATING LABEL (Material Design)
+   ========================================= */
+.floating-input-group {
+  position: relative;
+  margin-top: 8px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* El div que dibuja el borde simple (sin notch) - DESACTIVADO */
+.floating-input-group .border-notch {
+  display: none;
+}
+
+/* =========================================
+   FIELDSET PARA EL BORDE CON HUECO (NOTCH)
+   ========================================= */
+.floating-input-group fieldset.notch {
+  position: absolute;
+  top: 0;
+  /* CLAVE: top 0 para alinear con el centro del flex container */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0 10px;
+  pointer-events: none;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition: border-color 0.2s ease, border-width 0.2s ease;
+  z-index: 0;
+}
+
+/* Borde activo al enfocar */
+.floating-input-group input:focus~fieldset.notch {
+  border-color: var(--accent-color);
+  border-width: 2px;
+}
+
+/* La leyenda crea el hueco (notch) en el borde superior */
+.floating-input-group fieldset.notch legend {
+  padding: 0;
+  display: block;
+  width: auto;
+  max-width: 0px;
+  /* Oculto (colapsado) por defecto */
+  visibility: hidden;
+  transition: max-width 100ms ease-out;
+  font-size: 0.75em;
+  /* Coincide con scale(0.75) del label */
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Abre el hueco cuando tiene foco o texto */
+.floating-input-group input:focus~fieldset.notch legend,
+.floating-input-group input:not(:placeholder-shown)~fieldset.notch legend,
+.floating-input-group.always-floating fieldset.notch legend {
+  max-width: 100%;
+  transition: max-width 50ms ease-in;
+}
+
+.floating-input-group fieldset.notch legend span {
+  padding: 0 4px;
+  /* Espacio del hueco para respirar */
+  display: inline-block;
+  opacity: 0;
+  /* Invisible — solo ocupa espacio fisico para el gap */
+}
+
+
+/* Ajustes específicos para el input de floating label */
+.floating-input-group input {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  height: 100% !important;
+  padding: 0 40px 0 14px !important;
+  margin: 0 !important;
+  background-color: transparent !important;
+  color: black !important;
+  border: none !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+  position: relative;
+  z-index: 1;
+}
+
+.floating-input-group input::placeholder {
+  font-size: 0.85em;
+  /* Placeholder un poco más pequeño */
+  opacity: 0.8;
+  /* Suavizar un poco el color si es necesario */
+}
+
+/* 🔥 HACK DEFINITIVO PARA MANTENER LA TRANSPARENCIA EN AUTOFILL DE CHROME 🔥 */
+/* Como tu fondo es un gradiente naranja, no podemos usar box-shadow blanco o sólido.
+   La única forma de mantener la transparencia es "congelar" el fondo usando una transición infinita */
+.floating-input-group input:-webkit-autofill,
+.floating-input-group input:-webkit-autofill:hover,
+.floating-input-group input:-webkit-autofill:focus,
+.floating-input-group input:-webkit-autofill:active {
+  -webkit-text-fill-color: black !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  padding: 0 40px 0 14px !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+}
+
+html.dark .floating-input-group input {
+  color: white !important;
+}
+
+html.dark .floating-input-group input:-webkit-autofill,
+html.dark .floating-input-group input:-webkit-autofill:hover,
+html.dark .floating-input-group input:-webkit-autofill:focus,
+html.dark .floating-input-group input:-webkit-autofill:active {
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+.floating-input-group label.etiqueta {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  background-color: transparent !important;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.6) !important;
+  font-weight: 400 !important;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin: 0;
+  line-height: normal;
+  z-index: 2;
+  font-size: clamp(0.75rem, 2.5vw, 0.95rem);
+  /* Responsivo: mín 12px, máx 16px */
+}
+
+html.dark .floating-input-group label.etiqueta {
+  color: rgba(255, 255, 255, 0.6) !important;
+  /* Suave en modo oscuro */
+}
+
+/* Cuando el input tiene foco o contiene texto */
+.floating-input-group input:focus~label.etiqueta,
+.floating-input-group input:not(:placeholder-shown)~label.etiqueta,
+.floating-input-group.always-floating label.etiqueta {
+  top: 0;
+  left: 14px;
+  transform: translateY(-50%) scale(0.75);
+  color: white !important;
+  font-weight: 600 !important;
+  /* Sin background — el hueco lo crea el fieldset legend */
+}
+
+html.dark .floating-input-group input:focus~label.etiqueta,
+html.dark .floating-input-group input:not(:placeholder-shown)~label.etiqueta,
+html.dark .floating-input-group.always-floating label.etiqueta {
+  color: white !important;
+}
+
+
+
+
+.floating-input-group fieldset.notch-hidden {
+  display: none;
+}
+
+/* =========================================
+   WIZARD STEPPER (Registro)
+   ========================================= */
+.stepper-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+  position: relative;
+  width: 100%;
+}
+
+.stepper-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60px;
+  /* Ancho fijo para alinear el texto debajo del círculo */
+}
+
+.step-counter {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--bg-color);
+  /* Si es transparente no pasa nada porque ya no hay línea detrás */
+  border: 2px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: var(--text-muted);
+  transition: all 0.4s ease;
+  z-index: 2;
+}
+
+/* Círculo verde cuando está activo o completado */
+.stepper-item.completed .step-counter,
+.stepper-item.active .step-counter {
+  background-color: #22c55e;
+  border-color: #22c55e;
+  color: white;
+}
+
+.step-name {
+  position: absolute;
+  top: 35px;
+  /* Colocado debajo del círculo */
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Texto resaltado si está activo o completado */
+.stepper-item.completed .step-name,
+.stepper-item.active .step-name {
+  color: var(--text-main);
+}
+
+.step-line {
+  flex: 1;
+  height: 4px;
+  /* Línea más gruesa */
+  background-color: var(--border-color);
+  margin-top: 13px;
+  /* A la altura de la mitad del círculo de 30px (15px - 2px) */
+  margin-left: -15px;
+  margin-right: -15px;
+  z-index: 1;
+  position: relative;
+}
+
+/* El relleno verde animado */
+.step-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background-color: #22c55e;
+  transition: width 0.5s ease-in-out;
+  /* Animación fluida de izquierda a derecha */
+}
+
+/* Cuando se completa, el relleno ocupa todo el ancho */
+.step-line.completed::after {
+  width: 100%;
+}
+
+/* Animación para transición entre pasos */
+.step-animation {
+  animation: fadeInStep 0.4s ease forwards;
+}
+
+@keyframes fadeInStep {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

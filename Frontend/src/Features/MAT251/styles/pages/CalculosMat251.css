@@ -1,0 +1,366 @@
+.editor_text {
+  width: 100%;
+  border: none;
+  padding: 0 5px;
+  outline: none;
+  background: transparent;
+  color: inherit;
+}
+
+.calculadora-layout {
+  display: grid;
+  grid-template-columns: 350px minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+  transition: grid-template-columns 0.3s ease;
+  position: relative;
+}
+
+.calculadora-layout.colapsado {
+  grid-template-columns: 15px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.boton-toggle-medio {
+  position: absolute;
+  top: 15px;
+  left: 355px;
+  transform: translateY(-50%) translateX(-50%);
+  z-index: 2;
+  background-color: var(--accent-color);
+  color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  width: 25px;
+  height: 25px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: left 0.3s ease, transform 0.2s, background-color 0.2s;
+}
+
+.boton-toggle-medio:hover {
+  background-color: #e65c00;
+  transform: translateY(-50%) translateX(-50%) scale(1.1);
+}
+
+.calculadora-layout.colapsado .boton-toggle-medio {
+  left: 20px;
+}
+
+/* Desktop: el panel está al lado — flecha apunta ◀ (abierto) o ▶ (cerrado) */
+.icono-toggle.abierto {
+  transform: scaleX(1);
+}
+
+.icono-toggle.cerrado {
+  transform: scaleX(-1);
+}
+
+/* Móvil: el layout se apila — flecha apunta ▲ (abierto) o ▼ (cerrado) */
+@media (max-width: 900px) {
+  .icono-toggle.abierto {
+    transform: rotate(-90deg) !important;
+    margin: 0 !important;
+  }
+
+  .icono-toggle.cerrado {
+    transform: rotate(90deg) !important;
+    margin: 0 !important;
+  }
+}
+
+.icono-animado {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+.icono-animado::before,
+.icono-animado::after {
+  content: '';
+  position: absolute;
+  background-color: white;
+  border-radius: 2px;
+  top: 50%;
+  left: 50%;
+  transition: transform 0.3s ease;
+}
+
+.icono-animado::before {
+  width: 12px;
+  height: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.icono-animado::after {
+  width: 2px;
+  height: 12px;
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.boton-toggle-medio.abierto .icono-animado::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.calculadora-datos {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px;
+  height: fit-content;
+  overflow: visible;
+  transition: padding 0.3s ease;
+}
+
+.calculadora-layout.colapsado .calculadora-datos {
+  padding: 0px;
+  border: none;
+  opacity: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.etiqueta {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.selector-archivo {
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.panel-controles-excel {
+  margin-top: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Banner de bienvenida — modo claro */
+.banner-bienvenida {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+  border-radius: 5px;
+  color: #0f172a;
+  border: 1px solid #93c5fd;
+}
+
+/* Banner de bienvenida — modo oscuro */
+html.dark .banner-bienvenida {
+  background: linear-gradient(135deg, #1e293b 0%, #263650 100%);
+  color: #bfdbfe;
+  border-color: #334155;
+}
+
+.container_operaciones {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  margin-bottom: 15px;
+}
+
+.container_dataset {
+  margin-bottom: 15px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.info_vista {
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--text-muted);
+}
+
+.container_intervalos {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.container_select {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.container_cal_input {
+  width: 100%;
+  margin-top: 5px;
+}
+
+.container_cal_percentil {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.container_cal_percentil label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.container_cal_percentil input {
+  width: 100%;
+  padding: 5px;
+}
+
+.container_cal_percentil small {
+  color: var(--text-muted);
+}
+
+.container_tendencia_posicion {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.container_tendencia_posicion label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.container_tendencia_posicion input {
+  width: 100%;
+  padding: 5px;
+}
+
+.button_calcular {
+  padding: 10px 35px;
+  margin-top: 10px;
+  /* El ancho se controla ahora desde el componente con fit-content */
+}
+
+.info_cargando {
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.button_resultados {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+.button_resultados_manual {
+  width: 100%;
+  padding: 8px;
+  background: #6b7280;
+}
+
+.frecuencias {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.tendencias {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 5px;
+}
+
+.container_tablas_academica {
+  overflow-x: auto;
+  margin-bottom: 30px;
+}
+
+.tabla-academica {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Times New Roman", serif;
+  font-size: 1.1em;
+  margin-top: 10px;
+}
+
+.tabla-academica th,
+.tabla-academica td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  text-align: center;
+  color: var(--text-main);
+}
+
+.tabla-academica th {
+  background-color: var(--header-bg);
+  font-weight: bold;
+}
+
+/* ======================================================= */
+/* MAGIA RESPONSIVA PARA EL LAYOUT PRINCIPAL (CELULARES)   */
+/* ======================================================= */
+@media (max-width: 900px) {
+  .calculadora-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .boton-toggle-medio {
+    /* Posicionar el botón naranja centrado en la parte superior */
+    position: absolute;
+    left: 50%;
+    right: auto;
+    top: -15px;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+
+  .boton-toggle-medio:hover {
+    transform: translateX(-50%) scale(1.1);
+  }
+
+  .calculadora-layout.colapsado .boton-toggle-medio {
+    left: 50%;
+    right: auto;
+    top: -20px;
+    /* Al colapsar, lo dejamos centrado un poco más arriba */
+  }
+
+  .calculadora-layout.colapsado .calculadora-datos {
+    display: none;
+    /* Oculta completamente el panel de parámetros al colapsar en móvil */
+  }
+}
+
+@media (max-width: 768px) {
+  .tabla-academica {
+    font-size: 0.85em;
+  }
+
+  .tabla-academica th,
+  .tabla-academica td {
+    padding: 4px 2px;
+    font-size: 0.85em;
+  }
+
+  .container_tablas_academica {
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .frecuencias {
+    padding: 10px;
+  }
+
+  .frecuencias h3 {
+    font-size: 1.1rem;
+  }
+}

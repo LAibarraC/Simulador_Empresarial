@@ -1,0 +1,161 @@
+.page-container {
+    padding: 15px;
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.titulo_archivos {
+    border-bottom: 0px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+/* 🆕 Quitamos fondo, padding y borde para eliminar la "caja doble" de arriba */
+.upload-section {
+    margin-bottom: 30px;
+}
+
+.upload-section_container {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    border-bottom: 0px solid var(--border-color);
+}
+
+.button_upload_1,
+.button_upload_2 {
+    cursor: pointer;
+    border: none;
+    font-size: 0.8rem;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.container_excelUploader {
+    position: relative;
+    z-index: 10;
+}
+
+/* Encabezado de la página */
+.archivos-header {
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.archivos-titulo {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 1.6rem;
+}
+
+.archivos-subtitulo {
+    margin: 5px 0 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ========================================================
+   ESCRITORIO: Las columnas van lado a lado
+   ======================================================== */
+
+.files-layout {
+    display: flex;
+    flex-direction: row;
+    /* Escritorio: lado a lado */
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    align-items: flex-start;
+}
+
+.archivos-col-izq {
+    flex: 0 0 35%;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-sizing: border-box;
+}
+
+.archivos-col-der {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    min-height: 600px;
+    max-height: 800px;
+    box-sizing: border-box;
+}
+
+/* 🆕 Quitamos el borde punteado y centramos el texto */
+.container_reader_archivo {
+    padding: 40px;
+    color: var(--text-muted);
+    text-align: center;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* ========================================================
+   MÓVIL: Las columnas se apilan una debajo de la otra
+   ======================================================== */
+@media (max-width: 900px) {
+    .page-container {
+        padding: 0px;
+        /* Menos padding en celular */
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Encabezado más compacto en móvil */
+    .archivos-header {
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+    }
+
+    .archivos-titulo {
+        font-size: 1rem;
+        /* Título reducido en móvil */
+    }
+
+    .archivos-subtitulo {
+        font-size: 0.75rem;
+        /* Subtítulo reducido en móvil */
+    }
+
+    .files-layout {
+        flex-direction: column !important;
+        gap: 10px;
+    }
+
+    .archivos-col-izq {
+        width: 100% !important;
+        flex: none !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .archivos-col-der {
+        width: 100% !important;
+        flex: none !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        min-height: 300px;
+        max-height: none;
+        padding: 12px;
+        /* Menos padding interno en celular */
+    }
+
+    .upload-section_container {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
