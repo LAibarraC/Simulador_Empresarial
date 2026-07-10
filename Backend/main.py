@@ -25,7 +25,7 @@ origins = [
     "https://proyecto-shc-170.vercel.app", # Enlace limpio Vercel
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
     "https://backend-shc170.onrender.com",
-    "https://simulador-empresarial-swart.vercel.app",
+    "https://simulador-empresarial-swart.vercel.app", #por las dudas
 ]
 
 app.add_middleware(
