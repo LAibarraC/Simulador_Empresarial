@@ -1,4 +1,4 @@
-from database import engine
+from config.database import engine
 import models
 
 print("Conectando a MySQL para crear tablas faltantes...")

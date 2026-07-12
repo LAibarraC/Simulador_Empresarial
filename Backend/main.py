@@ -5,7 +5,7 @@ load_dotenv() # Cargar variables de entorno desde .env
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, archivos, calculos, historial, grupos, notificaciones
-from database import engine
+from config.database import engine
 import models
 
 # Crear tablas automáticamente si no existen (como la de notificaciones)
@@ -77,7 +77,7 @@ async def visitas():
 async def health_check():
     try:
         from sqlalchemy import text
-        from database import SessionLocal
+        from config.database import SessionLocal
         db = SessionLocal()
         try:
             db.execute(text("SELECT 1"))

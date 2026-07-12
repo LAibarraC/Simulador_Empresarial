@@ -1,4 +1,4 @@
-import database
+import config.database as database
 import models
 from sqlalchemy import or_
 

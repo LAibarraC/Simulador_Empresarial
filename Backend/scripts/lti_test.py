@@ -2,6 +2,8 @@
 from fastapi import FastAPI, Form
 from fastapi.responses import RedirectResponse
 
+app = FastAPI()
+
 @app.post("/lti/launch")
 async def lti_launch(
     user_id: str = Form(...), 

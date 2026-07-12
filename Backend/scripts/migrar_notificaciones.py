@@ -1,5 +1,5 @@
 import sys
-from database import engine
+from config.database import engine
 from sqlalchemy import text
 
 print("Iniciando migración del sistema de notificaciones...")

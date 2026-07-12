@@ -1,4 +1,4 @@
-from database import SessionLocal, engine
+from config.database import SessionLocal, engine
 from models import Usuario, Base
 
 # ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA! 

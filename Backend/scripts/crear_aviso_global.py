@@ -1,4 +1,4 @@
-import database
+import config.database as database
 import models
 
 print("Creando aviso global en la base de datos activa...")
