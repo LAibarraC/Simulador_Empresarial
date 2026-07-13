@@ -1,18 +1,19 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import or_, func
-from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy import or_, func, update
+from fastapi import HTTPException
 import models
-
 from validators.notificaciones import NotificacionCrear
 
-def crear_notificacion_db(db: Session, datos: NotificacionCrear, current_user: models.Usuario):
+async def crear_notificacion_db(db: AsyncSession, datos: NotificacionCrear, current_user: models.Usuario):
     # Lógica de permisos
     if datos.tipo == "sistema" and current_user.rol != "Administrador":
         raise HTTPException(status_code=403, detail="Solo los administradores pueden crear notificaciones globales de sistema")
     
     # Validar usuario si es personal
     if datos.tipo != "sistema" and datos.usuario_id:
-        usuario = db.query(models.Usuario).filter(models.Usuario.id == datos.usuario_id).first()
+        result = await db.execute(select(models.Usuario).filter(models.Usuario.id == datos.usuario_id))
+        usuario = result.scalars().first()
         if not usuario:
             raise HTTPException(status_code=404, detail="El usuario destino no existe")
             
@@ -23,8 +24,8 @@ def crear_notificacion_db(db: Session, datos: NotificacionCrear, current_user: m
         leido=False
     )
     db.add(nueva_notificacion)
-    db.commit()
-    db.refresh(nueva_notificacion)
+    await db.commit()
+    await db.refresh(nueva_notificacion)
     
     return {
         "id": nueva_notificacion.id,
@@ -35,13 +36,16 @@ def crear_notificacion_db(db: Session, datos: NotificacionCrear, current_user: m
     }
 
 
-def obtener_notificaciones_db(db: Session, current_user: models.Usuario):
-    notificaciones = db.query(models.Notificacion).filter(
-        or_(
-            models.Notificacion.usuario_id == current_user.id,
-            models.Notificacion.tipo == "sistema"
-        )
-    ).order_by(models.Notificacion.fecha_creacion.desc()).all()
+async def obtener_notificaciones_db(db: AsyncSession, current_user: models.Usuario):
+    result = await db.execute(
+        select(models.Notificacion).filter(
+            or_(
+                models.Notificacion.usuario_id == current_user.id,
+                models.Notificacion.tipo == "sistema"
+            )
+        ).order_by(models.Notificacion.fecha_creacion.desc())
+    )
+    notificaciones = result.scalars().all()
     
     res = []
     for n in notificaciones:
@@ -57,8 +61,9 @@ def obtener_notificaciones_db(db: Session, current_user: models.Usuario):
     return res
 
 
-def marcar_como_leida_db(db: Session, notificacion_id: int, current_user: models.Usuario):
-    notif = db.query(models.Notificacion).filter(models.Notificacion.id == notificacion_id).first()
+async def marcar_como_leida_db(db: AsyncSession, notificacion_id: int, current_user: models.Usuario):
+    result = await db.execute(select(models.Notificacion).filter(models.Notificacion.id == notificacion_id))
+    notif = result.scalars().first()
     if not notif:
         raise HTTPException(status_code=404, detail="Notificación no encontrada")
         
@@ -71,26 +76,26 @@ def marcar_como_leida_db(db: Session, notificacion_id: int, current_user: models
     else:
         notif.leido = True
         
-    db.commit()
+    await db.commit()
     return {"message": "Notificación marcada como leída"}
 
-def marcar_todas_como_leidas_db(db: Session, current_user: models.Usuario):
+async def marcar_todas_como_leidas_db(db: AsyncSession, current_user: models.Usuario):
     # Marcar personales
-    db.query(models.Notificacion).filter(
-        models.Notificacion.usuario_id == current_user.id,
-        models.Notificacion.tipo != "sistema",
-        models.Notificacion.leido == False
-    ).update({models.Notificacion.leido: True}, synchronize_session=False)
+    await db.execute(
+        update(models.Notificacion).where(
+            models.Notificacion.usuario_id == current_user.id,
+            models.Notificacion.tipo != "sistema",
+            models.Notificacion.leido == False
+        ).values(leido=True)
+    )
     
     # Marcar globales
-    max_global_id = db.query(func.max(models.Notificacion.id)).filter(
-        models.Notificacion.tipo == "sistema"
-    ).scalar()
+    result = await db.execute(select(func.max(models.Notificacion.id)).filter(models.Notificacion.tipo == "sistema"))
+    max_global_id = result.scalar()
     
     if max_global_id:
         ultimo_id = current_user.ultimo_aviso_global_id or 0
         current_user.ultimo_aviso_global_id = max(ultimo_id, max_global_id)
         
-    db.commit()
+    await db.commit()
     return {"message": "Todas las notificaciones fueron marcadas como leídas"}
-

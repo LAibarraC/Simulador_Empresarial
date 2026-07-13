@@ -1,17 +1,29 @@
 import os
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
-load_dotenv() # Cargar variables de entorno desde .env
+load_dotenv()  # Cargar variables de entorno desde .env
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth, archivos, calculos, historial, grupos, notificaciones
-from config.database import engine
+from config.database import async_engine, get_db
 import models
 
-# Crear tablas automáticamente si no existen (como la de notificaciones)
-models.Base.metadata.create_all(bind=engine)
+# --- Lifespan: crea tablas al arrancar usando el motor asíncrono (asyncmy) ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with async_engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.create_all)
+    yield
 
-app = FastAPI()
+_is_production = os.getenv("ENVIRONMENT") == "production"
+app = FastAPI(
+    lifespan=lifespan,
+    docs_url=None if _is_production else "/docs",
+    redoc_url=None if _is_production else "/redoc",
+    openapi_url=None if _is_production else "/openapi.json",
+)
 
 # Configuración de CORS
 origins = [
@@ -74,15 +86,10 @@ async def visitas():
     return {"visitas": count}
 
 @app.get("/health")
-async def health_check():
+async def health_check(db: AsyncSession = Depends(get_db)):
     try:
         from sqlalchemy import text
-        from config.database import SessionLocal
-        db = SessionLocal()
-        try:
-            db.execute(text("SELECT 1"))
-        finally:
-            db.close()
+        await db.execute(text("SELECT 1"))
         return {"status": "OK"}
     except Exception as e:
         return {"status": "error", "message": "Database connection failed"}

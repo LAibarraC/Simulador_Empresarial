@@ -2,7 +2,7 @@ import config.database as database
 import models
 
 print("Creando aviso global en la base de datos activa...")
-db = database.SessionLocal()
+db = database.SyncSessionLocal()
 try:
     aviso = models.Notificacion(
         tipo="sistema",

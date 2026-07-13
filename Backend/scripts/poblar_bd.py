@@ -1,4 +1,4 @@
-from config.database import SessionLocal, engine
+from config.database import SyncSessionLocal, engine
 from models import Usuario, Base
 
 # ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA! 
@@ -6,7 +6,7 @@ from models import Usuario, Base
 Base.metadata.create_all(bind=engine)
 
 # Abrimos la conexión a MySQL
-db = SessionLocal()
+db = SyncSessionLocal()
 
 # Definimos los 3 usuarios que necesitas
 usuarios_iniciales = [

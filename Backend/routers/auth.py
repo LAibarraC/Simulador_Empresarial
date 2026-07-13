@@ -1,7 +1,7 @@
 import urllib.parse
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import RedirectResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.database import get_db
 import models
@@ -47,16 +47,16 @@ async def obtener_fecha_limite():
     return {"fecha_limite": FECHA_LIMITE_MATRICULACION}
 
 @router.post("/verificar_email")
-async def verificar_email(req: VerificarEmailRequest, db: Session = Depends(get_db)):
-    return verificar_email_logic(req, db)
+async def verificar_email(req: VerificarEmailRequest, db: AsyncSession = Depends(get_db)):
+    return await verificar_email_logic(req, db)
 
 @router.post("/registrar_usuario")
-async def registrar_usuario(usuario: UsuarioRegistro, db: Session = Depends(get_db)):
-    return registrar_usuario_logic(usuario, db)
+async def registrar_usuario(usuario: UsuarioRegistro, db: AsyncSession = Depends(get_db)):
+    return await registrar_usuario_logic(usuario, db)
 
 @router.post("/login_local")
-async def login_local(credentials: UsuarioLogin, db: Session = Depends(get_db)):
-    return login_local_logic(credentials, db)
+async def login_local(credentials: UsuarioLogin, db: AsyncSession = Depends(get_db)):
+    return await login_local_logic(credentials, db)
 
 @router.get("/me")
 async def read_users_me(current_user: models.Usuario = Depends(get_current_user)):
@@ -74,41 +74,41 @@ async def test_docente_only(current_user: models.Usuario = Depends(require_role(
     return {"message": f"Acceso concedido al docente {current_user.nombre}."}
 
 @router.post("/api/auth/forgot-password")
-async def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
-    return forgot_password_logic(data, db)
+async def forgot_password(data: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
+    return await forgot_password_logic(data, db)
 
 @router.post("/api/auth/reset-password")
-async def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
-    return reset_password_logic(data, db)
+async def reset_password(data: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
+    return await reset_password_logic(data, db)
 
 @router.post("/recuperar_password")
-async def recuperar_password(data: RecuperarPassword, db: Session = Depends(get_db)):
-    return recuperar_password_logic(data, db)
+async def recuperar_password(data: RecuperarPassword, db: AsyncSession = Depends(get_db)):
+    return await recuperar_password_logic(data, db)
 
 @router.post("/resetear_password")
-async def resetear_password(data: ResetearPassword, db: Session = Depends(get_db)):
-    return resetear_password_logic(data, db)
+async def resetear_password(data: ResetearPassword, db: AsyncSession = Depends(get_db)):
+    return await resetear_password_logic(data, db)
 
 @router.put("/cambiar_password_perfil")
-async def cambiar_password_perfil(data: CambiarPasswordPerfil, db: Session = Depends(get_db)):
-    return cambiar_password_perfil_logic(data, db)
+async def cambiar_password_perfil(data: CambiarPasswordPerfil, db: AsyncSession = Depends(get_db)):
+    return await cambiar_password_perfil_logic(data, db)
 
 @router.post("/eliminar_cuenta")
-async def eliminar_cuenta(datos: UsuarioLogin, db: Session = Depends(get_db)):
-    return eliminar_cuenta_logic(datos, db)
+async def eliminar_cuenta(datos: UsuarioLogin, db: AsyncSession = Depends(get_db)):
+    return await eliminar_cuenta_logic(datos, db)
 
 @router.put("/cambiar_rol")
-async def cambiar_rol(datos: CambiarRol, db: Session = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
-    return cambiar_rol_logic(datos, db)
+async def cambiar_rol(datos: CambiarRol, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
+    return await cambiar_rol_logic(datos, db)
 
 @router.put("/cambiar_estado")
-async def cambiar_estado(datos: CambiarEstado, db: Session = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
-    return cambiar_estado_logic(datos, db, current_user.id)
+async def cambiar_estado(datos: CambiarEstado, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
+    return await cambiar_estado_logic(datos, db, current_user.id)
 
 @router.delete("/eliminar_usuario/{email}")
-async def admin_eliminar_usuario(email: str, db: Session = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
-    return admin_eliminar_usuario_logic(email, db, current_user.id)
+async def admin_eliminar_usuario(email: str, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
+    return await admin_eliminar_usuario_logic(email, db, current_user.id)
 
 @router.get("/usuarios")
-async def obtener_usuarios(db: Session = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
-    return obtener_usuarios_logic(db)
+async def obtener_usuarios(db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(require_role("Administrador"))):
+    return await obtener_usuarios_logic(db)

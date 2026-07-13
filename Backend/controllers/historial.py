@@ -1,10 +1,11 @@
 import json
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from fastapi.responses import JSONResponse
 import models
 from validators.historial import RegistroHistorial
 
-def guardar_historial_db(db: Session, registro: RegistroHistorial, current_user: models.Usuario):
+async def guardar_historial_db(db: AsyncSession, registro: RegistroHistorial, current_user: models.Usuario):
     try:
         snapshot_str = json.dumps(registro.snapshot) if registro.snapshot else "{}"
         
@@ -17,8 +18,8 @@ def guardar_historial_db(db: Session, registro: RegistroHistorial, current_user:
         )
         
         db.add(nuevo_registro)
-        db.commit()
-        db.refresh(nuevo_registro)
+        await db.commit()
+        await db.refresh(nuevo_registro)
         
         return {
             "message": "Historial guardado con éxito",
@@ -34,11 +35,14 @@ def guardar_historial_db(db: Session, registro: RegistroHistorial, current_user:
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-def obtener_historial_db(db: Session, current_user: models.Usuario):
+async def obtener_historial_db(db: AsyncSession, current_user: models.Usuario):
     try:
-        registros = db.query(models.HistorialCalculo).filter(
-            models.HistorialCalculo.usuario_id == current_user.id
-        ).order_by(models.HistorialCalculo.fecha_creacion.desc()).all()
+        result = await db.execute(
+            select(models.HistorialCalculo)
+            .filter(models.HistorialCalculo.usuario_id == current_user.id)
+            .order_by(models.HistorialCalculo.fecha_creacion.desc())
+        )
+        registros = result.scalars().all()
         
         historial = []
         for reg in registros:
@@ -60,18 +64,19 @@ def obtener_historial_db(db: Session, current_user: models.Usuario):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-def eliminar_historial_db(db: Session, registro_id: int, current_user: models.Usuario):
+async def eliminar_historial_db(db: AsyncSession, registro_id: int, current_user: models.Usuario):
     try:
-        registro = db.query(models.HistorialCalculo).filter(
-            models.HistorialCalculo.id == registro_id,
-            models.HistorialCalculo.usuario_id == current_user.id
-        ).first()
+        result = await db.execute(
+            select(models.HistorialCalculo)
+            .filter(models.HistorialCalculo.id == registro_id, models.HistorialCalculo.usuario_id == current_user.id)
+        )
+        registro = result.scalars().first()
         
         if not registro:
             return JSONResponse(status_code=404, content={"error": "Historial no encontrado o no pertenece al usuario actual"})
             
-        db.delete(registro)
-        db.commit()
+        await db.delete(registro)
+        await db.commit()
         
         return {"message": "Registro eliminado con éxito"}
     except Exception as e:

@@ -2,7 +2,8 @@ import os
 import jwt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from dotenv import load_dotenv
 
 from config.database import get_db
@@ -15,7 +16,7 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 security = HTTPBearer()
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: AsyncSession = Depends(get_db)):
     token = credentials.credentials
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -30,7 +31,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.PyJWTError:
         raise credentials_exception
         
-    user = db.query(models.Usuario).filter(models.Usuario.email == email).first()
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == email))
+    user = result.scalars().first()
     if user is None:
         raise credentials_exception
         

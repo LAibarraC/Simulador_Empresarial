@@ -7,7 +7,9 @@ import unicodedata
 import re
 import pandas as pd
 from fastapi import UploadFile, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy import delete
 
 import models
 from validators.archivos import (
@@ -30,13 +32,15 @@ def sanitizar_nombre_carpeta(nombre: str) -> str:
     res = nombre_con_guiones.strip('_').lower()
     return res if res else "desconocido"
 
-def obtener_ruta_carpeta(autor: str, visibilidad: str, curso: str, db: Session) -> str:
+async def obtener_ruta_carpeta(autor: str, visibilidad: str, curso: str, db: AsyncSession) -> str:
     if visibilidad == "privado" and curso:
         clase_id = int(curso) if str(curso).isdigit() else None
         if clase_id:
-            clase = db.query(models.Clase).filter(models.Clase.id == clase_id).first()
+            result = await db.execute(select(models.Clase).filter(models.Clase.id == clase_id))
+            clase = result.scalars().first()
         else:
-            clase = db.query(models.Clase).filter(models.Clase.nombre == curso).first()
+            result = await db.execute(select(models.Clase).filter(models.Clase.nombre == curso))
+            clase = result.scalars().first()
         
         if clase:
             nombre_sanitizado = sanitizar_nombre_carpeta(clase.nombre)
@@ -46,7 +50,8 @@ def obtener_ruta_carpeta(autor: str, visibilidad: str, curso: str, db: Session) 
             carpeta_nombre = nombre_sanitizado
         return os.path.join(EXCEL_FOLDER, "_cursos", carpeta_nombre)
     else:
-        user = db.query(models.Usuario).filter(models.Usuario.nombre == autor).first()
+        result = await db.execute(select(models.Usuario).filter(models.Usuario.nombre == autor))
+        user = result.scalars().first()
         if user:
             nombre_sanitizado = sanitizar_nombre_carpeta(user.nombre)
             carpeta_nombre = f"{nombre_sanitizado}_{user.id}"
@@ -55,20 +60,21 @@ def obtener_ruta_carpeta(autor: str, visibilidad: str, curso: str, db: Session) 
             carpeta_nombre = nombre_sanitizado
         return os.path.join(EXCEL_FOLDER, carpeta_nombre)
 
-
-def upload_file_logic(file: UploadFile, autor: str, visibilidad: str, curso: str, db: Session):
+async def upload_file_logic(file: UploadFile, autor: str, visibilidad: str, curso: str, db: AsyncSession):
     clase_id = None
     if visibilidad == "privado" and curso:
         clase_id = int(curso) if str(curso).isdigit() else None
         if clase_id:
-            clase = db.query(models.Clase).filter(models.Clase.id == clase_id).first()
+            result = await db.execute(select(models.Clase).filter(models.Clase.id == clase_id))
+            clase = result.scalars().first()
         else:
-            clase = db.query(models.Clase).filter(models.Clase.nombre == curso).first()
+            result = await db.execute(select(models.Clase).filter(models.Clase.nombre == curso))
+            clase = result.scalars().first()
         if not clase:
             return {"error": "Clase no encontrada"}
         clase_id = clase.id
 
-    target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+    target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
     os.makedirs(target_folder, exist_ok=True)
     file_path = os.path.join(target_folder, file.filename)
     
@@ -76,13 +82,15 @@ def upload_file_logic(file: UploadFile, autor: str, visibilidad: str, curso: str
         shutil.copyfileobj(file.file, buffer)
 
     if clase_id:
-        user = db.query(models.Usuario).filter(models.Usuario.nombre == autor).first()
+        result = await db.execute(select(models.Usuario).filter(models.Usuario.nombre == autor))
+        user = result.scalars().first()
         user_id = user.id if user else 1
         
-        existente = db.query(models.Archivo).filter(
+        result = await db.execute(select(models.Archivo).filter(
             models.Archivo.nombre_original == file.filename,
             models.Archivo.clase_id == clase_id
-        ).first()
+        ))
+        existente = result.scalars().first()
         if not existente:
             nuevo_archivo = models.Archivo(
                 nombre_original=file.filename,
@@ -91,21 +99,22 @@ def upload_file_logic(file: UploadFile, autor: str, visibilidad: str, curso: str
                 usuario_id=user_id
             )
             db.add(nuevo_archivo)
-            db.commit()
+            await db.commit()
 
     return {"message": f"Archivo subido correctamente a {target_folder}"}
 
-
-def list_files_logic(autor: str, visibilidad: str, curso: str, db: Session):
+async def list_files_logic(autor: str, visibilidad: str, curso: str, db: AsyncSession):
     files_list = []
     if visibilidad == "privado" and curso:
         clase_id = int(curso) if str(curso).isdigit() else None
         if not clase_id:
-            clase = db.query(models.Clase).filter(models.Clase.nombre == curso).first()
+            result = await db.execute(select(models.Clase).filter(models.Clase.nombre == curso))
+            clase = result.scalars().first()
             if clase:
                 clase_id = clase.id
         if clase_id:
-            archivos = db.query(models.Archivo).filter(models.Archivo.clase_id == clase_id).all()
+            result = await db.execute(select(models.Archivo).filter(models.Archivo.clase_id == clase_id))
+            archivos = result.scalars().all()
             for arc in archivos:
                 files_list.append({
                     "filename": arc.nombre_original,
@@ -114,7 +123,7 @@ def list_files_logic(autor: str, visibilidad: str, curso: str, db: Session):
                 })
             return {"files": files_list}
 
-    target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+    target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
     if os.path.exists(target_folder):
         for fname in os.listdir(target_folder):
             if fname.endswith(".xlsx") or fname.endswith(".xls"):
@@ -125,10 +134,9 @@ def list_files_logic(autor: str, visibilidad: str, curso: str, db: Session):
                 })
     return {"files": files_list}
 
-
-def view_excel_logic(filename: str, hoja: int, autor: str, curso: str, db: Session):
+async def view_excel_logic(filename: str, hoja: int, autor: str, curso: str, db: AsyncSession):
     visibilidad = "privado" if curso else "personal"
-    target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+    target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
     file_path = os.path.join(target_folder, filename)
         
     if not os.path.exists(file_path):
@@ -147,10 +155,9 @@ def view_excel_logic(filename: str, hoja: int, autor: str, curso: str, db: Sessi
     except Exception as e:
         return {"error": f"Error al leer el Excel: {str(e)}"}
 
-
-def get_sheets_logic(filename: str, autor: str, curso: str, db: Session):
+async def get_sheets_logic(filename: str, autor: str, curso: str, db: AsyncSession):
     visibilidad = "privado" if curso else "personal"
-    target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+    target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
     file_path = os.path.join(target_folder, filename)
 
     if not os.path.exists(file_path):
@@ -162,28 +169,27 @@ def get_sheets_logic(filename: str, autor: str, curso: str, db: Session):
     except Exception as e:
         return {"error": f"Error al leer hojas: {str(e)}"}
 
-
-def get_download_file_path(filename: str, autor: str, curso: str, db: Session) -> str:
+async def get_download_file_path(filename: str, autor: str, curso: str, db: AsyncSession) -> str:
     visibilidad = "privado" if curso else "personal"
-    target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+    target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
     file_path = os.path.join(target_folder, filename)
 
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
     return file_path
 
-
-def delete_file_logic(filename: str, autor: str, curso: str, db: Session):
+async def delete_file_logic(filename: str, autor: str, curso: str, db: AsyncSession):
     clase_id = None
     if curso:
         clase_id = int(curso) if str(curso).isdigit() else None
         if not clase_id:
-            clase = db.query(models.Clase).filter(models.Clase.nombre == curso).first()
+            result = await db.execute(select(models.Clase).filter(models.Clase.nombre == curso))
+            clase = result.scalars().first()
             if clase:
                 clase_id = clase.id
 
     visibilidad = "privado" if curso else "personal"
-    target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+    target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
     file_path = os.path.join(target_folder, filename)
 
     if not os.path.exists(file_path):
@@ -198,11 +204,11 @@ def delete_file_logic(filename: str, autor: str, curso: str, db: Session):
                 os.remove(meta_path)
             
             if clase_id:
-                db.query(models.Archivo).filter(
+                await db.execute(delete(models.Archivo).filter(
                     models.Archivo.nombre_original == filename,
                     models.Archivo.clase_id == clase_id
-                ).delete()
-                db.commit()
+                ))
+                await db.commit()
 
             return {"message": f"Archivo {filename} eliminado correctamente"}
         except PermissionError:
@@ -212,8 +218,7 @@ def delete_file_logic(filename: str, autor: str, curso: str, db: Session):
 
     raise HTTPException(status_code=500, detail="Archivo en uso. Intente de nuevo.")
 
-
-def save_table_hojas_logic(body: SaveTableHojasRequest, db: Session):
+async def save_table_hojas_logic(body: SaveTableHojasRequest, db: AsyncSession):
     try:
         nombre = body.nombre
         autor  = body.autor
@@ -222,7 +227,7 @@ def save_table_hojas_logic(body: SaveTableHojasRequest, db: Session):
         if not hojas:
             return {"error": "No se recibieron hojas para guardar"}
 
-        user_folder = obtener_ruta_carpeta(autor, "personal", None, db)
+        user_folder = await obtener_ruta_carpeta(autor, "personal", None, db)
         os.makedirs(user_folder, exist_ok=True)
 
         filepath = os.path.join(user_folder, f"{nombre}.xlsx")
@@ -233,7 +238,6 @@ def save_table_hojas_logic(body: SaveTableHojasRequest, db: Session):
 
         with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
             for hoja_data in hojas:
-                # Al pasarlo por Pydantic, convertimos el objeto interno a dict
                 hoja = hoja_data.dict() if hasattr(hoja_data, "dict") else hoja_data
                 nombre_hoja = hoja.get("nombre", "Hoja")[:31]
                 datos       = hoja.get("datos", [])
@@ -257,8 +261,7 @@ def save_table_hojas_logic(body: SaveTableHojasRequest, db: Session):
     except Exception as e:
         return {"error": str(e)}
 
-
-def create_table_logic(nombre: str, num_columnas: int, num_filas: int, autor: str, db: Session):
+async def create_table_logic(nombre: str, num_columnas: int, num_filas: int, autor: str, db: AsyncSession):
     if not nombre:
         existing_files = [f for f in os.listdir(EXCEL_FOLDER) if f.endswith(".xlsx")]
         nombre = f"Ejemplo {len(existing_files)+1}"
@@ -268,7 +271,7 @@ def create_table_logic(nombre: str, num_columnas: int, num_filas: int, autor: st
     filename = f"{nombre}.xlsx"
     
     if autor:
-        user_folder = obtener_ruta_carpeta(autor, "personal", None, db)
+        user_folder = await obtener_ruta_carpeta(autor, "personal", None, db)
         os.makedirs(user_folder, exist_ok=True)
         file_path = os.path.join(user_folder, filename)
     else:
@@ -277,8 +280,7 @@ def create_table_logic(nombre: str, num_columnas: int, num_filas: int, autor: st
     df.to_excel(file_path, index=False, header=False)
     return {"message": "Tabla creada correctamente", "filename": filename}
 
-
-def save_table_logic(body: SaveTableRequest, db: Session):
+async def save_table_logic(body: SaveTableRequest, db: AsyncSession):
     try:
         nombre = body.nombre
         tabla = body.tabla
@@ -288,7 +290,7 @@ def save_table_logic(body: SaveTableRequest, db: Session):
             return {"error": "No se recibieron datos para la tabla"}
 
         df = pd.DataFrame(tabla)
-        user_folder = obtener_ruta_carpeta(autor, "personal", None, db)
+        user_folder = await obtener_ruta_carpeta(autor, "personal", None, db)
         os.makedirs(user_folder, exist_ok=True)
 
         filepath = os.path.join(user_folder, f"{nombre}.xlsx")
@@ -308,8 +310,7 @@ def save_table_logic(body: SaveTableRequest, db: Session):
     except Exception as e:
         return {"error": str(e)}
 
-
-def update_excel_logic(body: UpdateExcelRequest, db: Session):
+async def update_excel_logic(body: UpdateExcelRequest, db: AsyncSession):
     try:
         filename = body.filename
         hoja_index = body.hoja_index
@@ -319,7 +320,7 @@ def update_excel_logic(body: UpdateExcelRequest, db: Session):
         estrategia_guardado = body.estrategia_guardado
 
         visibilidad = "privado" if curso else "personal"
-        target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+        target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
         file_path = os.path.join(target_folder, filename)
 
         if not os.path.exists(file_path):
@@ -336,7 +337,6 @@ def update_excel_logic(body: UpdateExcelRequest, db: Session):
         if estrategia_guardado == "new_column":
             df_original = pd.read_excel(file_path, sheet_name=nombre_hoja)
             
-            # Formateamos ambas para que no den fallos por valores vacíos/nulos
             df_original_comp = df_original.fillna("")
             df_nuevo_comp = df_nuevo.fillna("")
             
@@ -383,8 +383,7 @@ def update_excel_logic(body: UpdateExcelRequest, db: Session):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-def add_edit_sheet_logic(body: AddEditSheetRequest, db: Session):
+async def add_edit_sheet_logic(body: AddEditSheetRequest, db: AsyncSession):
     try:
         filename = body.filename
         datos = body.datos
@@ -392,7 +391,7 @@ def add_edit_sheet_logic(body: AddEditSheetRequest, db: Session):
         curso = body.curso
 
         visibilidad = "privado" if curso else "personal"
-        target_folder = obtener_ruta_carpeta(autor, visibilidad, curso, db)
+        target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
         file_path = os.path.join(target_folder, filename)
 
         if not os.path.exists(file_path):

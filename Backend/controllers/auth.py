@@ -4,13 +4,14 @@ import hashlib
 import bcrypt
 import jwt
 import urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import asyncio
 from dotenv import load_dotenv
 
 from fastapi import HTTPException, status, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from config.database import get_db
 import models
@@ -25,9 +26,12 @@ load_dotenv()
 FECHA_LIMITE_MATRICULACION = "2026-06-30"
 recovery_tokens = {}
 
-SECRET_KEY = os.getenv("SECRET_KEY", "943e8bb8ef8f8a846174a7d77b4d18ea65bf6b1424e6a066cf8b22a613589b3f")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY no está definida en las variables de entorno. Configúrala en el archivo .env")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 # --- UTILIDADES DE SEGURIDAD ---
 
@@ -56,15 +60,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 def create_reset_token(email: str) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode = {"sub": email, "exp": expire, "purpose": "password_reset"}
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -81,14 +85,16 @@ def verify_reset_token(token: str) -> str | None:
 
 # --- LÓGICA DE CONTROLADORES ---
 
-def verificar_email_logic(req: VerificarEmailRequest, db: Session):
-    usuario_existente = db.query(models.Usuario).filter(models.Usuario.email == req.email).first()
+async def verificar_email_logic(req: VerificarEmailRequest, db: AsyncSession):
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == req.email))
+    usuario_existente = result.scalars().first()
     return {"existe": True} if usuario_existente else {"existe": False}
 
-def registrar_usuario_logic(usuario: UsuarioRegistro, db: Session):
+async def registrar_usuario_logic(usuario: UsuarioRegistro, db: AsyncSession):
     try:
         password_plana = usuario.password[:72]
-        usuario_existente = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
+        result = await db.execute(select(models.Usuario).filter(models.Usuario.email == usuario.email))
+        usuario_existente = result.scalars().first()
         
         if usuario_existente:
             return JSONResponse(status_code=400, content={"error": "Este correo electrónico ya está registrado."})
@@ -100,15 +106,16 @@ def registrar_usuario_logic(usuario: UsuarioRegistro, db: Session):
         )
         
         db.add(nuevo_usuario)
-        db.commit()
-        db.refresh(nuevo_usuario)
+        await db.commit()
+        await db.refresh(nuevo_usuario)
         
         return {"message": "Usuario registrado con éxito"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno al registrar usuario: {str(e)}")
 
-def login_local_logic(credentials: UsuarioLogin, db: Session):
-    user_info = db.query(models.Usuario).filter(models.Usuario.email == credentials.email).first()
+async def login_local_logic(credentials: UsuarioLogin, db: AsyncSession):
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == credentials.email))
+    user_info = result.scalars().first()
     
     if not user_info or not verify_password(credentials.password, user_info.password):
         return JSONResponse(status_code=401, content={"error": "Correo o contraseña incorrectos"})
@@ -124,12 +131,13 @@ def login_local_logic(credentials: UsuarioLogin, db: Session):
         "institucion": user_info.institucion
     }
 
-def forgot_password_logic(data: ForgotPasswordRequest, db: Session):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == data.email).first()
+async def forgot_password_logic(data: ForgotPasswordRequest, db: AsyncSession):
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == data.email))
+    usuario = result.scalars().first()
     
     if usuario:
         token = create_reset_token(usuario.email)
-        reset_link = f"http://localhost:5173/reset-password?token={token}"
+        reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
         
         email_sender = os.getenv("EMAIL_SENDER")
         email_password = os.getenv("EMAIL_PASSWORD")
@@ -167,82 +175,100 @@ def forgot_password_logic(data: ForgotPasswordRequest, db: Session):
                 """
                 msg.attach(MIMEText(html, "html"))
                 
-                with smtplib.SMTP(smtp_server, smtp_port) as server:
-                    server.starttls()
-                    server.login(email_sender, email_password)
-                    server.sendmail(email_sender, usuario.email, msg.as_string())
+                # SMTP en un thread separado para no bloquear el event loop
+                def _send_email():
+                    with smtplib.SMTP(smtp_server, smtp_port) as server:
+                        server.starttls()
+                        server.login(email_sender, email_password)
+                        server.sendmail(email_sender, usuario.email, msg.as_string())
+                
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(None, _send_email)
             except Exception as e:
                 raise HTTPException(status_code=500, detail="Error interno al procesar el envio de correo.")
                 
     return {"message": "Si el correo está registrado, recibirás un enlace en tu bandeja de entrada"}
 
-def reset_password_logic(data: ResetPasswordRequest, db: Session):
+async def reset_password_logic(data: ResetPasswordRequest, db: AsyncSession):
     email = verify_reset_token(data.token)
     if not email:
         raise HTTPException(status_code=400, detail="El token de recuperacion es invalido o ha expirado.")
         
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == email).first()
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == email))
+    usuario = result.scalars().first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado.")
         
     usuario.password = get_password_hash(data.nueva_contrasena)
-    db.commit()
+    await db.commit()
     return {"message": "Contrasena restablecida exitosamente."}
 
-def recuperar_password_logic(data: RecuperarPassword, db: Session):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == data.email).first()
+async def recuperar_password_logic(data: RecuperarPassword, db: AsyncSession):
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == data.email))
+    usuario = result.scalars().first()
     if not usuario:
         return JSONResponse(status_code=404, content={"error": "No existe ningún usuario registrado con este correo."})
     
     token = str(random.randint(100000, 999999))
-    recovery_tokens[data.email] = token
+    expiry = datetime.now(timezone.utc) + timedelta(minutes=15)
+    recovery_tokens[data.email] = (token, expiry)  # Guardamos el token con su fecha de expiración
     return {"message": "Token de recuperación generado con éxito.", "token": token}
 
-def resetear_password_logic(data: ResetearPassword, db: Session):
-    token_valido = recovery_tokens.get(data.email)
-    if not token_valido or token_valido != data.token:
+async def resetear_password_logic(data: ResetearPassword, db: AsyncSession):
+    entry = recovery_tokens.get(data.email)
+    if not entry:
+        return JSONResponse(status_code=400, content={"error": "Token de recuperación inválido o vencido."})
+    token_valido, expiry = entry
+    if token_valido != data.token or datetime.now(timezone.utc) > expiry:
+        recovery_tokens.pop(data.email, None)  # Limpiar token inválido/expirado
         return JSONResponse(status_code=400, content={"error": "Token de recuperación inválido o vencido."})
     
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == data.email).first()
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == data.email))
+    usuario = result.scalars().first()
     if not usuario:
         return JSONResponse(status_code=404, content={"error": "Usuario no encontrado."})
     
     usuario.password = get_password_hash(data.nuevo_password)
-    db.commit()
+    await db.commit()
     recovery_tokens.pop(data.email, None)
     return {"message": "Contraseña restablecida correctamente."}
 
-def cambiar_password_perfil_logic(data: CambiarPasswordPerfil, db: Session):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == data.email).first()
+async def cambiar_password_perfil_logic(data: CambiarPasswordPerfil, db: AsyncSession):
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == data.email))
+    usuario = result.scalars().first()
     if not usuario or not verify_password(data.password_actual, usuario.password):
         return JSONResponse(status_code=400, content={"error": "La contraseña actual es incorrecta."})
     
     usuario.password = get_password_hash(data.password_nuevo)
-    db.commit()
+    await db.commit()
     return {"message": "Contraseña cambiada exitosamente."}
 
-def eliminar_cuenta_logic(datos: UsuarioLogin, db: Session):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == datos.email).first()
+async def eliminar_cuenta_logic(datos: UsuarioLogin, db: AsyncSession):
+    from sqlalchemy import delete
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == datos.email))
+    usuario = result.scalars().first()
     if not usuario or not verify_password(datos.password, usuario.password):
         return JSONResponse(status_code=401, content={"error": "Contraseña de confirmación incorrecta"})
     
-    db.query(models.Inscripcion).filter(models.Inscripcion.estudiante_id == usuario.id).delete(synchronize_session=False)
-    db.query(models.HistorialCalculo).filter(models.HistorialCalculo.usuario_id == usuario.id).delete(synchronize_session=False)
-    db.query(models.Archivo).filter(models.Archivo.usuario_id == usuario.id).delete(synchronize_session=False)
+    await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.estudiante_id == usuario.id))
+    await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.usuario_id == usuario.id))
+    await db.execute(delete(models.Archivo).filter(models.Archivo.usuario_id == usuario.id))
     
-    clases_docente = db.query(models.Clase).filter(models.Clase.docente_id == usuario.id).all()
+    result = await db.execute(select(models.Clase).filter(models.Clase.docente_id == usuario.id))
+    clases_docente = result.scalars().all()
     for clase in clases_docente:
-        db.query(models.Inscripcion).filter(models.Inscripcion.clase_id == clase.id).delete(synchronize_session=False)
-        db.query(models.Archivo).filter(models.Archivo.clase_id == clase.id).delete(synchronize_session=False)
-        db.query(models.HistorialCalculo).filter(models.HistorialCalculo.clase_id == clase.id).delete(synchronize_session=False)
-        db.delete(clase)
+        await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.clase_id == clase.id))
+        await db.execute(delete(models.Archivo).filter(models.Archivo.clase_id == clase.id))
+        await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.clase_id == clase.id))
+        await db.delete(clase)
         
-    db.delete(usuario)
-    db.commit()
+    await db.delete(usuario)
+    await db.commit()
     return {"message": "Cuenta eliminada con éxito"}
 
-def cambiar_rol_logic(datos: CambiarRol, db: Session):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == datos.email).first()
+async def cambiar_rol_logic(datos: CambiarRol, db: AsyncSession):
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == datos.email))
+    usuario = result.scalars().first()
     if not usuario:
         return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
     
@@ -256,11 +282,12 @@ def cambiar_rol_logic(datos: CambiarRol, db: Session):
         leido=False
     )
     db.add(nueva_notificacion)
-    db.commit()
+    await db.commit()
     return {"message": f"El rol del usuario ha sido actualizado a {datos.nuevo_rol}"}
 
-def cambiar_estado_logic(datos: CambiarEstado, db: Session, current_user_id: int):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == datos.email).first()
+async def cambiar_estado_logic(datos: CambiarEstado, db: AsyncSession, current_user_id: int):
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == datos.email))
+    usuario = result.scalars().first()
     if not usuario:
         return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
         
@@ -268,34 +295,38 @@ def cambiar_estado_logic(datos: CambiarEstado, db: Session, current_user_id: int
         return JSONResponse(status_code=400, content={"error": "No puedes suspender tu propia cuenta"})
         
     usuario.activo = datos.activo
-    db.commit()
+    await db.commit()
     return {"message": f"El usuario ha sido {'activado' if datos.activo else 'suspendido'} con éxito"}
 
-def admin_eliminar_usuario_logic(email: str, db: Session, current_user_id: int):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == email).first()
+async def admin_eliminar_usuario_logic(email: str, db: AsyncSession, current_user_id: int):
+    from sqlalchemy import delete
+    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == email))
+    usuario = result.scalars().first()
     if not usuario:
         return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
         
     if usuario.id == current_user_id:
         return JSONResponse(status_code=400, content={"error": "No puedes eliminar tu propia cuenta"})
         
-    db.query(models.Inscripcion).filter(models.Inscripcion.estudiante_id == usuario.id).delete(synchronize_session=False)
-    db.query(models.HistorialCalculo).filter(models.HistorialCalculo.usuario_id == usuario.id).delete(synchronize_session=False)
-    db.query(models.Archivo).filter(models.Archivo.usuario_id == usuario.id).delete(synchronize_session=False)
+    await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.estudiante_id == usuario.id))
+    await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.usuario_id == usuario.id))
+    await db.execute(delete(models.Archivo).filter(models.Archivo.usuario_id == usuario.id))
     
-    clases_docente = db.query(models.Clase).filter(models.Clase.docente_id == usuario.id).all()
+    result = await db.execute(select(models.Clase).filter(models.Clase.docente_id == usuario.id))
+    clases_docente = result.scalars().all()
     for clase in clases_docente:
-        db.query(models.Inscripcion).filter(models.Inscripcion.clase_id == clase.id).delete(synchronize_session=False)
-        db.query(models.Archivo).filter(models.Archivo.clase_id == clase.id).delete(synchronize_session=False)
-        db.query(models.HistorialCalculo).filter(models.HistorialCalculo.clase_id == clase.id).delete(synchronize_session=False)
-        db.delete(clase)
+        await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.clase_id == clase.id))
+        await db.execute(delete(models.Archivo).filter(models.Archivo.clase_id == clase.id))
+        await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.clase_id == clase.id))
+        await db.delete(clase)
         
-    db.delete(usuario)
-    db.commit()
+    await db.delete(usuario)
+    await db.commit()
     return {"message": "Usuario eliminado con éxito"}
 
-def obtener_usuarios_logic(db: Session):
-    usuarios = db.query(models.Usuario).all()
+async def obtener_usuarios_logic(db: AsyncSession):
+    result = await db.execute(select(models.Usuario))
+    usuarios = result.scalars().all()
     return [{
         "id": u.id, "email": u.email, "nombre": u.nombre, "rol": u.rol, 
         "perfil": u.perfil, "institucion": u.institucion, "activo": u.activo,

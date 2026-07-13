@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, UploadFile, Form, Query, Depends
 from fastapi.responses import FileResponse, JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.database import get_db
 
@@ -34,21 +34,21 @@ async def upload_file(
     autor: str = Form(...),
     visibilidad: str = Form("personal"), 
     curso: str = Form(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    resultado = upload_file_logic(file, autor, visibilidad, curso, db)
+    resultado = await upload_file_logic(file, autor, visibilidad, curso, db)
     if "error" in resultado:
         return JSONResponse(status_code=404 if resultado["error"] == "Clase no encontrada" else 400, content=resultado)
     return resultado
 
 @router.get("/files")
-def list_files(
+async def list_files(
     autor: str = Query(None), 
     visibilidad: str = Query("personal"), 
     curso: str = Query(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    return list_files_logic(autor, visibilidad, curso, db)
+    return await list_files_logic(autor, visibilidad, curso, db)
 
 @router.get("/view/{filename}")
 async def view_excel(
@@ -56,9 +56,9 @@ async def view_excel(
     hoja: int = 0, 
     autor: str = Query(None), 
     curso: str = Query(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    resultado = view_excel_logic(filename, hoja, autor, curso, db)
+    resultado = await view_excel_logic(filename, hoja, autor, curso, db)
     if isinstance(resultado, dict) and "error" in resultado:
         return JSONResponse(status_code=400, content=resultado)
     return JSONResponse(content=resultado)
@@ -68,19 +68,19 @@ async def get_sheets(
     filename: str, 
     autor: str = Query(None), 
     curso: str = Query(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    return get_sheets_logic(filename, autor, curso, db)
+    return await get_sheets_logic(filename, autor, curso, db)
 
 @router.get("/files/{filename}")
 async def download_file(
     filename: str, 
     autor: str = Query(None), 
     curso: str = Query(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     # Obtenemos la ruta limpia del controlador
-    file_path = get_download_file_path(filename, autor, curso, db)
+    file_path = await get_download_file_path(filename, autor, curso, db)
     return FileResponse(
         path=file_path,
         filename=filename,
@@ -92,14 +92,14 @@ async def delete_file(
     filename: str, 
     autor: str = Query(...), 
     curso: str = Query(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    return delete_file_logic(filename, autor, curso, db)
+    return await delete_file_logic(filename, autor, curso, db)
 
 
 @router.post("/save_table_hojas")
-async def save_table_hojas(body: SaveTableHojasRequest, db: Session = Depends(get_db)):
-    return save_table_hojas_logic(body, db)
+async def save_table_hojas(body: SaveTableHojasRequest, db: AsyncSession = Depends(get_db)):
+    return await save_table_hojas_logic(body, db)
 
 @router.post("/create_table")
 async def create_table(
@@ -107,18 +107,18 @@ async def create_table(
     num_columnas: int = 1, 
     num_filas: int = 1, 
     autor: str = Query(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    return create_table_logic(nombre, num_columnas, num_filas, autor, db)
+    return await create_table_logic(nombre, num_columnas, num_filas, autor, db)
 
 @router.post("/save_table")
-async def save_table(body: SaveTableRequest, db: Session = Depends(get_db)):
-    return save_table_logic(body, db)
+async def save_table(body: SaveTableRequest, db: AsyncSession = Depends(get_db)):
+    return await save_table_logic(body, db)
 
 @router.post("/update_excel")
-async def update_excel(body: UpdateExcelRequest, db: Session = Depends(get_db)):
-    return update_excel_logic(body, db)
+async def update_excel(body: UpdateExcelRequest, db: AsyncSession = Depends(get_db)):
+    return await update_excel_logic(body, db)
 
 @router.post("/add_edit_sheet")
-async def add_edit_sheet(body: AddEditSheetRequest, db: Session = Depends(get_db)):
-    return add_edit_sheet_logic(body, db)
+async def add_edit_sheet(body: AddEditSheetRequest, db: AsyncSession = Depends(get_db)):
+    return await add_edit_sheet_logic(body, db)
