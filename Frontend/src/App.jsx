@@ -1,6 +1,6 @@
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Menu from "./ui/Menu";
-import Pie_pagina from "./ui/Pie_pagina"; 
+import Pie_pagina from "./ui/Pie_pagina";
 import { useState, useEffect } from "react";
 import { sileo, Toaster } from "sileo";
 
@@ -14,27 +14,25 @@ import Registro from "./Features/auth/Registro";
 import Perfil from "./Features/auth/Perfil";
 import ForgotPassword from "./Features/auth/ForgotPassword";
 import ResetPassword from "./Features/auth/ResetPassword";
-import Admin from "./Features/Admin/Admin"; 
+import Admin from "./Features/Admin/Admin";
 import GestionDocente from "./Features/User/docentes/GestionDocente";
 
 import SelectorRol from './ui/SelectorRol';
 
-// 👇 1. IMPORTAMOS EL DATAPROVIDER DE LA CARPETA EXCEL
-import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModuleContext } from "./components/Gestion_Datos/DataContext"; 
+import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModuleContext } from "./components/Gestion_Datos/DataContext";
 
 import LtiTester from "./pages/LtiTester";
 import Historial from "./Features/History/Historial";
 import Grupos from './Features/grupos/Grupos';
 import api from "./services/api";
 
-import "./App.css"; 
+import "./App.css";
 
 function App() {
-  // 🆕 1. Cambiamos el estado para que guarde los datos del usuario (null = nadie logueado)
+
   const [usuario, setUsuario] = useState(null);
   const [cargandoSesion, setCargandoSesion] = useState(true);
 
-  // Intentar restaurar sesión desde localStorage al montar el componente (F5)
   useEffect(() => {
     const restaurarSesion = async () => {
       const token = localStorage.getItem("token");
@@ -80,39 +78,39 @@ function App() {
               <div style={{ position: 'fixed', zIndex: 99999, inset: 0, pointerEvents: 'none' }}>
                 <Toaster position="bottom-right" />
               </div>
-              
+
               {/* Menú de navegación unificado */}
-             {/* Menú de navegación unificado */}
+              {/* Menú de navegación unificado */}
               {isAuth && (
                 <header style={{ width: '100%' }}>
                   {/* Le pasamos la variable 'usuario' como prop al componente Menu */}
-                  <Menu usuario={usuario} setUsuario={setUsuario} /> 
+                  <Menu usuario={usuario} setUsuario={setUsuario} />
                 </header>
               )}
 
-             {/* Contenido que cambia según la ruta */}
+              {/* Contenido que cambia según la ruta */}
               <div className="content">
                 <Routes>
                   {!isAuth ? (
                     <>
                       {/* 🆕 3. Pasamos setUsuario a tus puertas de acceso en lugar de setIsAuth */}
                       <Route path="/login" element={<Login onLogin={setUsuario} />} />
-                      
+
                       {/* 🆕 NUEVO: Añadimos la ruta del Registro aquí */}
                       <Route path="/registro" element={<Registro onLogin={setUsuario} />} />
 
                       <Route path="/forgot-password" element={<ForgotPassword />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
-                      
+
                       <Route path="/lti-tester" element={<LtiTester onLogin={setUsuario} />} />
-                      
+
                       <Route path="*" element={<Navigate to="/login" />} />
                     </>
                   ) : (
                     <>
                       <Route path="/" element={<Inicio />} />
                       <Route path="/archivos" element={<Archivos usuario={usuario} />} />
-                       <Route path="/calculadora" element={
+                      <Route path="/calculadora" element={
                         <ActiveModuleContext.Provider value="calculadora">
                           <Calculadora />
                         </ActiveModuleContext.Provider>
@@ -123,10 +121,10 @@ function App() {
 
                       <Route path="/lti-tester" element={<Navigate to="/" />} />
                       <Route path="/login" element={<Navigate to="/" />} />
-                      
+
                       {/* 🆕 NUEVO: Si ya inició sesión y trata de registrarse, lo mandamos al inicio */}
                       <Route path="/registro" element={<Navigate to="/" />} />
-                      
+
                       <Route path="/MAT251" element={
                         <ActiveModuleContext.Provider value="mat251">
                           <MAT251 usuario={usuario} />
@@ -140,7 +138,7 @@ function App() {
                   )}
                 </Routes>
               </div>
-              
+
               {isAuth && <Pie_pagina />}
 
             </div>

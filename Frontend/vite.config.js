@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+    },
     fs: {
       // Esto permite que Vite sirva las fuentes de KaTeX desde node_modules
       allow: ['..'] 

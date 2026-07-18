@@ -4,6 +4,7 @@ import logoCarrera from "../../assets/images/Logo-Adm.png";
 import { api } from "../../services/api.js";
 import { alerta } from '../../utils/Notificaciones.jsx';
 import '../../styles/ui/Login.css';
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 // 🆕 Importamos tu componente original (Ajusta la ruta si tu carpeta se llama distinto)
 import OscuroClaro from "../../ui/oscuro_claro.jsx";
@@ -172,6 +173,40 @@ export default function Login({ onLogin }) {
                 Ingresar
               </button>
             </form>
+
+            {/* --- SEPARADOR Y BOTÓN DE GOOGLE --- */}
+            <div style={{ display: 'flex', alignItems: 'center', margin: '15px 0' }}>
+              <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color, #ccc)' }}></div>
+              <span style={{ margin: '0 10px', color: 'var(--text-muted, #777)', fontSize: '0.8rem' }}>O continuar con</span>
+              <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color, #ccc)' }}></div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    try {
+                      // Llamada al backend con el token de Google
+                      const data = await api.loginGoogle(credentialResponse.credential);
+                      if (data.token) {
+                        localStorage.setItem("token", data.token);
+                      }
+                      onLogin(data);
+                      alerta.success("Acceso concedido", `Bienvenido, ${data.nombre}`);
+                    } catch (err) {
+                      alerta.error("Error de conexión", err.message || "No se pudo iniciar sesión en el servidor");
+                    }
+                  }}
+                  onError={() => {
+                    alerta.error("Error", "No se pudo iniciar sesión con Google");
+                  }}
+                  text="signin_with"
+                  shape="rectangular"
+                  theme="outline"
+                />
+              </GoogleOAuthProvider>
+            </div>
+            {/* ----------------------------------- */}
 
 
 

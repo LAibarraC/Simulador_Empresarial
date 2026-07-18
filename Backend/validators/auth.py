@@ -39,3 +39,6 @@ class CambiarRol(BaseModel):
 class CambiarEstado(BaseModel):
     email: str
     activo: bool
+
+class GoogleLoginRequest(BaseModel):
+    token: str

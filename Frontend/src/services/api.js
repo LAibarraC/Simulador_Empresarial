@@ -1,10 +1,6 @@
 /* const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; */
-//Base url de Render
-/* const BASE_URL = "https://api-admin-shc170.onrender.com"; */
 
 /*uvicorn main:app --reload*/
-
-/*cambios*/
 
 export const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -478,6 +474,17 @@ guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto) => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error al eliminar el usuario");
+    return data;
+  },
+
+  loginGoogle: async (token) => {
+    const res = await fetch(`${BASE_URL}/login_google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Error al iniciar sesión con Google");
     return data;
   },
 

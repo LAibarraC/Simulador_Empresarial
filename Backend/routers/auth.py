@@ -12,14 +12,15 @@ from controllers.auth import (
     verificar_email_logic, registrar_usuario_logic, login_local_logic,
     forgot_password_logic, reset_password_logic, recuperar_password_logic,
     resetear_password_logic, cambiar_password_perfil_logic, eliminar_cuenta_logic,
-    cambiar_rol_logic, cambiar_estado_logic, admin_eliminar_usuario_logic, obtener_usuarios_logic
+    cambiar_rol_logic, cambiar_estado_logic, admin_eliminar_usuario_logic, obtener_usuarios_logic,
+    login_google_logic
 )
 
 # Importamos de nuestro validador
 from validators.auth import (
     VerificarEmailRequest, UsuarioRegistro, UsuarioLogin, ForgotPasswordRequest, 
     ResetPasswordRequest, RecuperarPassword, ResetearPassword, CambiarPasswordPerfil, 
-    CambiarRol, CambiarEstado
+    CambiarRol, CambiarEstado, GoogleLoginRequest
 )
 
 from middlewares.auth import get_current_user, require_role
@@ -57,6 +58,10 @@ async def registrar_usuario(usuario: UsuarioRegistro, db: AsyncSession = Depends
 @router.post("/login_local")
 async def login_local(credentials: UsuarioLogin, db: AsyncSession = Depends(get_db)):
     return await login_local_logic(credentials, db)
+
+@router.post("/login_google")
+async def login_google(credentials: GoogleLoginRequest, db: AsyncSession = Depends(get_db)):
+    return await login_google_logic(credentials, db)
 
 @router.get("/me")
 async def read_users_me(current_user: models.Usuario = Depends(get_current_user)):

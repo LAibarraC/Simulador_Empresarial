@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { alerta } from "../../utils/Notificaciones.jsx";
 import logoCarrera from "../../assets/images/Logo-Adm.png";
 import OscuroClaro from "../../ui/oscuro_claro.jsx";
+import { IconoCorreo } from "../../ui/iconos.jsx";
 import "../../styles/ui/Login.css";
 
 export default function ForgotPassword() {
@@ -12,7 +13,7 @@ export default function ForgotPassword() {
 
   // Expresión regular robusta para validar formato de correo electrónico
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   // Si está vacío, no se marca como inválido inmediatamente para evitar mostrar rojo de entrada
   const isEmailValid = email === "" || emailRegex.test(email);
   const canSubmit = email !== "" && emailRegex.test(email);
@@ -26,13 +27,13 @@ export default function ForgotPassword() {
       const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       console.log(`[ForgotPassword] Iniciando recuperación para: ${email}`);
       console.log(`[ForgotPassword] POST URL: ${BASE_URL}/api/auth/forgot-password`);
-      
+
       const res = await fetch(`${BASE_URL}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      
+
       if (res.ok) {
         setSuccess(true);
         alerta.success("Solicitud enviada", "Si el correo está registrado, recibirás un enlace de recuperación.");
@@ -66,7 +67,7 @@ export default function ForgotPassword() {
         {success ? (
           <div style={{ textAlign: "center", marginTop: "10px" }}>
             <p style={{ color: "var(--text-main)", fontSize: "0.95rem", lineHeight: "1.5" }}>
-              Si el correo está registrado, recibirás un enlace en tu bandeja de entrada.
+              Si el correo está registrado, recibirás un enlace en tu bandeja de entrada. Por favor, revisa también tu carpeta de Spam o Correo No Deseado por si acaso.
             </p>
             <div style={{ marginTop: "25px" }}>
               <Link to="/login" style={{ color: "var(--accent-color)", fontWeight: "bold", textDecoration: "none" }}>
@@ -80,25 +81,35 @@ export default function ForgotPassword() {
               Introduce tu correo electrónico y te enviaremos un enlace seguro para restablecer tu contraseña.
             </p>
 
-            <div style={{ textAlign: "left" }}>
-              <label className="etiqueta" style={{ color: "var(--text-main)" }}>Correo Electrónico</label>
+            <div className="floating-input-group is-email" style={{ textAlign: 'left', height: '50px' }}>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="correo@ejemplo.com"
-                style={{
+                placeholder=" "
+                required
+                style={{ 
+                  flex: 1, 
+                  minWidth: 0, 
+                  height: "100%", 
+                  margin: 0, 
+                  padding: "0 40px 0 14px", 
+                  boxSizing: "border-box",
                   borderColor: !isEmailValid ? "#dc2626" : "var(--border-color)",
                   outline: "none"
                 }}
-                required
               />
-              {!isEmailValid && (
-                <span style={{ color: "#dc2626", fontSize: "0.8rem", marginTop: "5px", display: "block", fontWeight: "bold" }}>
-                  Por favor, introduce un correo electrónico válido.
-                </span>
-              )}
+              <label className="etiqueta">Correo Electrónico</label>
+              <fieldset className="notch"><legend><span>Correo Electrónico</span></legend></fieldset>
+              <div className="icono-email" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-35%)', color: 'white', display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 2 }}>
+                <IconoCorreo />
+              </div>
             </div>
+            {!isEmailValid && (
+              <span style={{ color: "#dc2626", fontSize: "0.8rem", marginTop: "-10px", display: "block", fontWeight: "bold", textAlign: "left" }}>
+                Por favor, introduce un correo electrónico válido.
+              </span>
+            )}
 
             <button
               type="submit"

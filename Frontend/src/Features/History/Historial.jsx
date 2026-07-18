@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useData } from "../../components/Gestion_Datos/DataContext";
 import { api } from "../../services/api";
 import { alerta } from "../../utils/Notificaciones";
+import Skeleton from "../../ui/Skeleton";
 
 import { useNavigate } from "react-router-dom";
 import "../../styles/pages/Historial.css";
@@ -103,6 +104,8 @@ export default function Historial() {
   const cargarHistorial = async () => {
     if (!usuario) return;
     try {
+      // Retraso artificial de 2 segundos para ver el Skeleton (¡Bórralo luego!)
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const data = await api.obtenerHistorial(usuario.nombre);
       setRegistros(data.historial || []);
     } catch (error) {
@@ -168,7 +171,42 @@ export default function Historial() {
       </div>
 
       {cargando ? (
-        <p className="text-muted">Cargando registros...</p>
+        <div className="historial-container">
+          <table className="historial-tabla">
+            <thead>
+              <tr>
+                <th>Fecha / Hora</th>
+                <th>Tipo de Cálculo</th>
+                <th>Archivo Fuente</th>
+                <th style={{ textAlign: "center" }}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[1, 2, 3, 4].map(i => (
+                <tr key={i} className="historial-fila" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td className="historial-celda">
+                    <div className="fecha-col">
+                      <Skeleton height="18px" width="100px" style={{ marginBottom: '5px' }} />
+                      <Skeleton height="12px" width="70px" />
+                    </div>
+                  </td>
+                  <td className="historial-celda">
+                    <Skeleton height="24px" width="180px" borderRadius="12px" />
+                  </td>
+                  <td className="historial-celda">
+                    <Skeleton height="16px" width="120px" />
+                  </td>
+                  <td className="historial-celda">
+                    <div className="acciones-container" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                      <Skeleton height="32px" width="80px" borderRadius="6px" />
+                      <Skeleton height="32px" width="80px" borderRadius="6px" />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : registros.length === 0 ? (
         <div className="container_reader_archivo">
           <p>No tienes cálculos guardados todavía.</p>
@@ -203,7 +241,7 @@ export default function Historial() {
                   </td>
 
                   <td className="historial-celda" data-label="Acciones">
-                    <div className="acciones-container">
+                    <div className="acciones-container" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                       <button
                         className="btn-reabrir tour-btn-reabrir"
                         onClick={() => {

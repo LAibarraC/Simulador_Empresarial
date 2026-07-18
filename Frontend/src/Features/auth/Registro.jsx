@@ -5,7 +5,7 @@ import { alerta } from '../../utils/Notificaciones.jsx';
 import '../../styles/ui/Login.css'; // Aseguramos que cargue los estilos de la tarjeta
 
 // Importamos el componente de modo oscuro
-import OscuroClaro from "../../ui/oscuro_claro.jsx"; 
+import OscuroClaro from "../../ui/oscuro_claro.jsx";
 import { BASE_URL, api } from "../../services/api.js";
 import { IconoCorreo, IconoCheck, IconoX, IconoMostrar, IconoOcultar } from "../../ui/iconos.jsx";
 
@@ -18,17 +18,17 @@ export default function Registro({ onLogin }) {
   const [confirmPass, setConfirmPass] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const isPasswordMatch = pass === confirmPass;
-  
+
   const hasMinLength = pass.length >= 6;
   const hasUpperCase = /[A-Z]/.test(pass);
   const hasLowerCase = /[a-z]/.test(pass);
   const hasNumber = /[0-9]/.test(pass);
   const isPasswordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber;
-  
+
   const showPasswordError = pass.length > 0 && !isPasswordValid;
 
   const nextStep = async () => {
@@ -48,7 +48,7 @@ export default function Registro({ onLogin }) {
         alerta.error("Correo inválido", "Por favor, ingresa un correo electrónico válido.");
         return;
       }
-      
+
       // Verificación con el backend para saber si el correo ya existe
       try {
         const respuesta = await api.verificarEmail(email.trim());
@@ -70,18 +70,18 @@ export default function Registro({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Si no está en el paso 3, el botón Siguiente manejará el avance
     if (step !== 3) {
       nextStep();
       return;
     }
-    
+
     if (!isPasswordValid) {
       alerta.error("Contraseña débil", "La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número.");
       return;
     }
-    
+
     if (pass !== confirmPass) {
       alerta.error("Error", "Las contraseñas no coinciden.");
       return;
@@ -147,7 +147,7 @@ export default function Registro({ onLogin }) {
   };
 
   const getStepTitle = () => {
-    switch(step) {
+    switch (step) {
       case 1: return "Datos Personales";
       case 2: return "Contacto";
       case 3: return "Seguridad";
@@ -157,7 +157,7 @@ export default function Registro({ onLogin }) {
 
   return (
     <div className="login-container" style={{ padding: '20px', position: 'relative' }}>
-      
+
       {/* Botón en la esquina superior izquierda */}
       <div className="login-theme-toggle" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 1000 }}>
         <OscuroClaro />
@@ -168,14 +168,14 @@ export default function Registro({ onLogin }) {
           <img src={logoCarrera} alt="Logo" style={{ width: '150px', height: 'auto' }} />
           <h3 style={{ marginTop: '15px', color: 'var(--text-main)' }}>Registro de Usuario</h3>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '30px' }}>Crea tu cuenta para acceder al sistema.</p>
-          
+
           {/* Stepper UI */}
           <div className="stepper-wrapper">
             <div className={`stepper-item ${step >= 1 ? 'completed' : ''} ${step === 1 ? 'active' : ''}`}>
               <div className="step-counter">1</div>
               <div className="step-name">Datos</div>
             </div>
-            
+
             <div className={`step-line ${step >= 2 ? 'completed' : ''}`}></div>
 
             <div className={`stepper-item ${step >= 2 ? 'completed' : ''} ${step === 2 ? 'active' : ''}`}>
@@ -193,29 +193,29 @@ export default function Registro({ onLogin }) {
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          
+
           {/* PASO 1 */}
           {step === 1 && (
             <div className="form-row-responsive step-animation">
               <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, height: '50px' }}>
-                <input 
-                  type="text" 
-                  value={nombres} 
-                  onChange={(e) => setNombres(e.target.value)} 
-                  placeholder="Ej. Juan Carlos" 
-                  style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 14px", boxSizing: "border-box" }} 
+                <input
+                  type="text"
+                  value={nombres}
+                  onChange={(e) => setNombres(e.target.value)}
+                  placeholder="Ej. Juan Carlos"
+                  style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 14px", boxSizing: "border-box" }}
                   required={step === 1}
                 />
                 <label className="etiqueta">Nombres</label>
                 <fieldset className="notch"><legend><span>Nombres</span></legend></fieldset>
               </div>
               <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, height: '50px' }}>
-                <input 
-                  type="text" 
-                  value={apellidos} 
-                  onChange={(e) => setApellidos(e.target.value)} 
-                  placeholder="Ej. Pérez Gómez" 
-                  style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 14px", boxSizing: "border-box" }} 
+                <input
+                  type="text"
+                  value={apellidos}
+                  onChange={(e) => setApellidos(e.target.value)}
+                  placeholder="Ej. Pérez Gómez"
+                  style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 14px", boxSizing: "border-box" }}
                   required={step === 1}
                 />
                 <label className="etiqueta">Apellidos</label>
@@ -227,12 +227,12 @@ export default function Registro({ onLogin }) {
           {/* PASO 2 */}
           {step === 2 && (
             <div className="floating-input-group always-floating is-email step-animation" style={{ textAlign: 'left', height: '50px' }}>
-              <input 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                placeholder="correo@ejemplo.com" 
-                style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 40px 0 14px", boxSizing: "border-box" }} 
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="correo@ejemplo.com"
+                style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 40px 0 14px", boxSizing: "border-box" }}
                 required={step === 2}
               />
               <label className="etiqueta">Correo Electrónico</label>
@@ -248,14 +248,14 @@ export default function Registro({ onLogin }) {
             <div className="form-row-responsive step-animation" style={{ alignItems: 'flex-start' }}>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div className="floating-input-group always-floating" style={{ textAlign: 'left', height: '50px' }}>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    value={pass} 
-                    onChange={(e) => setPass(e.target.value)} 
-                    placeholder="Usa letras y números" 
-                    style={{ 
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={pass}
+                    onChange={(e) => setPass(e.target.value)}
+                    placeholder="Usa letras y números"
+                    style={{
                       flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 40px 0 14px", boxSizing: "border-box"
-                    }} 
+                    }}
                     required={step === 3}
                   />
                   <label className="etiqueta">Contraseña</label>
@@ -282,7 +282,7 @@ export default function Registro({ onLogin }) {
                   </button>
                   <fieldset className="notch" style={showPasswordError ? { borderColor: '#dc2626' } : {}}><legend><span>Contraseña</span></legend></fieldset>
                 </div>
-                
+
                 {/* Checklist de requisitos de contraseña - Solo visible cuando se empieza a escribir */}
                 {pass.length > 0 && (
                   <div style={{ marginTop: '10px', textAlign: 'left', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -311,14 +311,14 @@ export default function Registro({ onLogin }) {
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div className="floating-input-group always-floating" style={{ textAlign: 'left', height: '50px' }}>
-                  <input 
-                    type={showConfirmPassword ? "text" : "password"} 
-                    value={confirmPass} 
-                    onChange={(e) => setConfirmPass(e.target.value)} 
-                    placeholder="Repite la contraseña" 
-                    style={{ 
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPass}
+                    onChange={(e) => setConfirmPass(e.target.value)}
+                    placeholder="Repite la contraseña"
+                    style={{
                       flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 40px 0 14px", boxSizing: "border-box"
-                    }} 
+                    }}
                     required={step === 3}
                   />
                   <label className="etiqueta">Confirmar Contraseña</label>
@@ -357,18 +357,18 @@ export default function Registro({ onLogin }) {
           {/* BOTONES DE NAVEGACIÓN */}
           <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
             {step > 1 && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={prevStep}
                 className="btn-auth"
-                style={{ 
-                  backgroundColor: 'transparent', 
-                  padding: '12px', 
-                  fontSize: '1rem', 
-                  color: 'var(--text-main)', 
-                  border: '1px solid var(--border-color)', 
-                  cursor: 'pointer', 
-                  borderRadius: '5px', 
+                style={{
+                  backgroundColor: 'transparent',
+                  padding: '12px',
+                  fontSize: '1rem',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-color)',
+                  cursor: 'pointer',
+                  borderRadius: '5px',
                   fontWeight: 'bold',
                   flex: 1
                 }}
@@ -376,18 +376,18 @@ export default function Registro({ onLogin }) {
                 Atrás
               </button>
             )}
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               className="btn-auth"
-              style={{ 
-                backgroundColor: 'var(--accent-color)', 
-                padding: '12px', 
-                fontSize: '1rem', 
-                color: 'white', 
-                border: 'none', 
-                cursor: 'pointer', 
-                borderRadius: '5px', 
+              style={{
+                backgroundColor: 'var(--accent-color)',
+                padding: '12px',
+                fontSize: '1rem',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '5px',
                 fontWeight: 'bold',
                 flex: 2
               }}

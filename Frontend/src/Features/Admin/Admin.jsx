@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { alerta } from '../../utils/Notificaciones';
-
+import { IconoBuscar, IconoEscudo, IconoAlerta } from '../../ui/iconos';
+import Skeleton from '../../ui/Skeleton';
 export default function Admin() {
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -18,6 +19,8 @@ export default function Admin() {
   const cargarUsuarios = async () => {
     try {
       setCargando(true);
+      // Retraso artificial de 2 segundos para ver el Skeleton (¡Bórralo luego!)
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const data = await api.obtenerUsuarios();
       setUsuarios(data);
     } catch (error) {
@@ -90,7 +93,7 @@ export default function Admin() {
 
         {/* Buscador */}
         <div className="admin-search-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '6px 15px', borderRadius: '30px', border: '1px solid var(--border-color)', minWidth: '280px', flex: '1', maxWidth: '380px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-          <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>🔍</span>
+          <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
           <input 
             type="text" 
             placeholder="Buscar por nombre o correo..." 
@@ -114,9 +117,38 @@ export default function Admin() {
         }}
       >
         {cargando ? (
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <div style={{ width: '40px', height: '40px', border: '4px solid var(--border-color)', borderTop: '4px solid var(--accent-color)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }} />
-            <p style={{ color: 'var(--text-muted)' }}>Cargando usuarios...</p>
+          <div style={{ padding: '10px 0' }}>
+            {/* Cabecera de tabla fantasma */}
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px' }}>
+              <div style={{ flex: '1.5' }}><Skeleton height="15px" width="60%" /></div>
+              <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
+              <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
+              <div style={{ flex: '1' }}><Skeleton height="15px" width="60%" /></div>
+              <div style={{ flex: '1.5' }}><Skeleton height="15px" width="70%" /></div>
+            </div>
+            
+            {/* 5 filas de datos fantasma */}
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '15px', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
+                 <div style={{ flex: '1.5', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                   <Skeleton height="18px" width="80%" />
+                   <Skeleton height="14px" width="50%" />
+                 </div>
+                 <div style={{ flex: '1' }}>
+                   <Skeleton height="32px" width="90%" borderRadius="6px" />
+                 </div>
+                 <div style={{ flex: '1' }}>
+                   <Skeleton height="24px" width="70%" borderRadius="12px" />
+                 </div>
+                 <div style={{ flex: '1' }}>
+                   <Skeleton height="14px" width="50%" />
+                 </div>
+                 <div style={{ flex: '1.5', display: 'flex', gap: '10px' }}>
+                   <Skeleton height="30px" width="45%" borderRadius="6px" />
+                   <Skeleton height="30px" width="45%" borderRadius="6px" />
+                 </div>
+              </div>
+            ))}
           </div>
         ) : usuariosFiltrados.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
@@ -245,7 +277,9 @@ export default function Admin() {
                             </button>
                           </>
                         ) : (
-                          <span style={{ fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Protegido 🛡️</span>
+                          <span style={{ fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            Protegido <IconoEscudo width="14" height="14" style={{ color: '#10b981' }} />
+                          </span>
                         )}
                       </div>
                     </td>
@@ -273,7 +307,7 @@ export default function Admin() {
             }}
           >
             <h3 style={{ margin: '0 0 15px 0', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              ⚠️ Confirmar Eliminación Permanente
+              <IconoAlerta width="24" height="24" /> Confirmar Eliminación Permanente
             </h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', marginBottom: '20px' }}>
               Estás a punto de eliminar al usuario <strong>{usuarioAEliminar.nombre}</strong> ({usuarioAEliminar.email}). Esto borrará permanentemente su cuenta, archivos, historial de cálculos e inscripciones. Esta acción no se puede deshacer.

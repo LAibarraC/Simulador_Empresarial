@@ -10,7 +10,7 @@ import { IconoCandado } from "./iconos";
 export default function Menu({ usuario, setUsuario }) {
   const [isOpen, setIsOpen] = useState(false);
   // Nuevo estado para controlar cuándo se abre el submenú (útil para móviles)
-  const [dropdownOpen, setDropdownOpen] = useState(false); 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [gruposDropdownOpen, setGruposDropdownOpen] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const perfilRef = useRef(null);
@@ -19,7 +19,7 @@ export default function Menu({ usuario, setUsuario }) {
   const [notificaciones, setNotificaciones] = useState([]);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const notifRef = useRef(null);
-  
+
   // Refs para cerrar el menú móvil (hamburguesa)
   const mobileMenuRef = useRef(null);
   const hamburgerRef = useRef(null);
@@ -47,7 +47,7 @@ export default function Menu({ usuario, setUsuario }) {
     e.stopPropagation(); // Evitar que el dropdown se cierre
     try {
       await api.marcarNotificacionLeida(id);
-      setNotificaciones(prev => 
+      setNotificaciones(prev =>
         prev.map(n => n.id === id ? { ...n, leido: true } : n)
       );
     } catch (error) {
@@ -59,7 +59,7 @@ export default function Menu({ usuario, setUsuario }) {
     e.stopPropagation(); // Evitar que el dropdown se cierre
     try {
       await api.marcarTodasLeidas();
-      setNotificaciones(prev => 
+      setNotificaciones(prev =>
         prev.map(n => ({ ...n, leido: true }))
       );
       alerta.exito("Leídas", "Todas las notificaciones marcadas como leídas");
@@ -83,7 +83,7 @@ export default function Menu({ usuario, setUsuario }) {
         setGruposDropdownOpen(false);
       }
       if (
-        mobileMenuRef.current && 
+        mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target) &&
         hamburgerRef.current &&
         !hamburgerRef.current.contains(event.target)
@@ -95,14 +95,14 @@ export default function Menu({ usuario, setUsuario }) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);  
+  }, []);
 
   const closeMenu = () => {
     setIsOpen(false);
     setDropdownOpen(false); // Cerramos también el submenú
     setGruposDropdownOpen(false);
   };
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const navLinksRef = useRef(null);
@@ -153,18 +153,18 @@ export default function Menu({ usuario, setUsuario }) {
 
   return (
     <nav className="main-navbar">
-      
+
       <div className="nav-brand">
-       <img src={escudoAdmin} alt="Escudo Administración" className="nav-logo" />
+        <img src={escudoAdmin} alt="Escudo Administración" className="nav-logo" />
       </div>
 
       <div className={`nav-menu ${isOpen ? "active" : ""}`} ref={mobileMenuRef}>
         <ul className="nav-links" ref={navLinksRef}>
           <li><NavLink to="/" end onClick={closeMenu}>Inicio</NavLink></li>
           <li><NavLink to="/archivos" onClick={closeMenu}>Archivos</NavLink></li>
-          
+
           {/* EL CONTENEDOR DESPLEGABLE */}
-          <li 
+          <li
             className="nav-item dropdown-container"
             onClick={() => {
               setDropdownOpen(!dropdownOpen);
@@ -174,13 +174,13 @@ export default function Menu({ usuario, setUsuario }) {
             {/* El título "Calculadora" se marca como activo si estamos en esas rutas */}
             <span className={`nav-link-dropdown ${isCalculadoraActive ? 'active' : ''}`}>
               Calculadora
-              <svg 
-                className={`chevron-icon ${dropdownOpen ? 'open' : ''}`} 
-                width="16" height="16" viewBox="0 0 24 24" 
-                fill="none" stroke="currentColor" strokeWidth="3.5" 
+              <svg
+                className={`chevron-icon ${dropdownOpen ? 'open' : ''}`}
+                width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" strokeWidth="3.5"
                 strokeLinecap="round" strokeLinejoin="round"
               >
-                <path d="m6 9 6 6 6-6"/>
+                <path d="m6 9 6 6 6-6" />
               </svg>
             </span>
 
@@ -191,16 +191,16 @@ export default function Menu({ usuario, setUsuario }) {
                 </NavLink>
               </li>
               <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
-                  <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
-                    Estadística Matemática
-                  </NavLink>
+                <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
+                  Estadística Matemática
+                </NavLink>
               </li>
             </ul>
           </li>
 
           <li><NavLink to="/historial" onClick={closeMenu}>Historial</NavLink></li>
           {usuario && (usuario.rol === "Docente" || usuario.rol === "Administrador") ? (
-            <li 
+            <li
               className="nav-item dropdown-container"
               onClick={() => {
                 setGruposDropdownOpen(!gruposDropdownOpen);
@@ -209,13 +209,13 @@ export default function Menu({ usuario, setUsuario }) {
             >
               <span className={`nav-link-dropdown ${isGruposActive ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
                 Grupos
-                <svg 
-                  className={`chevron-icon ${gruposDropdownOpen ? 'open' : ''}`} 
-                  width="16" height="16" viewBox="0 0 24 24" 
-                  fill="none" stroke="currentColor" strokeWidth="3.5" 
+                <svg
+                  className={`chevron-icon ${gruposDropdownOpen ? 'open' : ''}`}
+                  width="16" height="16" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" strokeWidth="3.5"
                   strokeLinecap="round" strokeLinejoin="round"
                 >
-                  <path d="m6 9 6 6 6-6"/>
+                  <path d="m6 9 6 6 6-6" />
                 </svg>
               </span>
 
@@ -239,8 +239,8 @@ export default function Menu({ usuario, setUsuario }) {
           {usuario && usuario.rol === "Administrador" && (
             <li><NavLink to="/admin" onClick={closeMenu}>Admin</NavLink></li>
           )}
-         
-         <span className="nav-underline" style={underlineStyle} />
+
+          <span className="nav-underline" style={underlineStyle} />
         </ul>
 
         <div className="nav-menu-mobile-extra mobile-only">
@@ -255,11 +255,11 @@ export default function Menu({ usuario, setUsuario }) {
 
         {usuario && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            
+
             {/* CAMPANA DE NOTIFICACIONES */}
             <div className="notificaciones-container" ref={notifRef}>
-              <button 
-                className="bell-btn" 
+              <button
+                className="bell-btn"
                 onClick={() => {
                   setNotifDropdownOpen(!notifDropdownOpen);
                   if (!notifDropdownOpen) {
@@ -270,8 +270,8 @@ export default function Menu({ usuario, setUsuario }) {
                 title="Notificaciones"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
                 {noLeidasCount > 0 && (
                   <span className="notif-badge">{noLeidasCount}</span>
@@ -293,8 +293,8 @@ export default function Menu({ usuario, setUsuario }) {
                       <div className="notif-empty">No tienes notificaciones</div>
                     ) : (
                       notificaciones.map(n => (
-                        <li 
-                          key={n.id} 
+                        <li
+                          key={n.id}
                           className={`notif-item ${!n.leido ? 'unread' : ''}`}
                           onClick={(e) => !n.leido && handleMarcarLeida(n.id, e)}
                         >
@@ -315,8 +315,8 @@ export default function Menu({ usuario, setUsuario }) {
 
             {/* PERFIL USUARIO */}
             <div className="relative" ref={perfilRef}>
-              <div 
-                className="perfil-usuario-menu" 
+              <div
+                className="perfil-usuario-menu"
                 title={`${usuario.nombre} - ${usuario.rol}`}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -334,7 +334,7 @@ export default function Menu({ usuario, setUsuario }) {
                   {usuario.nombre?.split(' ')[0] || 'Usuario'}
                 </span>
               </div>
-              
+
               {/* Submenú desplegable al hacer clic */}
               {menuAbierto && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 z-50">
@@ -349,7 +349,7 @@ export default function Menu({ usuario, setUsuario }) {
                   >
                     Mi Perfil
                   </div>
-                  
+
                   {usuario.rol === "Administrador" && (
                     <div
                       onClick={() => {
@@ -385,9 +385,9 @@ export default function Menu({ usuario, setUsuario }) {
         )}
       </div>
 
-      <button 
+      <button
         ref={hamburgerRef}
-        className={`hamburger-menu ${isOpen ? "open" : ""}`} 
+        className={`hamburger-menu ${isOpen ? "open" : ""}`}
         onClick={() => {
           setIsOpen(!isOpen);
           if (!isOpen) {

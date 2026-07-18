@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { alerta } from '../../utils/Notificaciones';
 import { api } from "../../services/api";
 import '../../styles/pages/Perfil.css';
+import Skeleton from '../../ui/Skeleton';
 
 export default function Perfil({ usuario, setUsuario }) {
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ export default function Perfil({ usuario, setUsuario }) {
   const cargarDatosPerfil = async () => {
     try {
       setCargandoDatos(true);
+      // Retraso artificial de 2 segundos para ver el Skeleton (¡Bórralo luego!)
+      await new Promise(resolve => setTimeout(resolve, 1000));
       // Cargar historial de cálculos
       const histData = await api.obtenerHistorial(usuario.nombre);
       setHistorial(histData.historial || []);
@@ -162,13 +165,13 @@ export default function Perfil({ usuario, setUsuario }) {
             <div className="perfil-stats">
                 <div className="perfil-stat-box">
                     <h4 className="perfil-stat-value">
-                      {cargandoDatos ? '...' : historial.length}
+                      {cargandoDatos ? <Skeleton height="28px" width="40px" style={{ margin: '0 auto' }} /> : historial.length}
                     </h4>
                     <p className="perfil-stat-label">Cálculos Guardados</p>
                 </div>
                 <div className="perfil-stat-box">
                     <h4 className="perfil-stat-value">
-                      {cargandoDatos ? '...' : archivosCount}
+                      {cargandoDatos ? <Skeleton height="28px" width="40px" style={{ margin: '0 auto' }} /> : archivosCount}
                     </h4>
                     <p className="perfil-stat-label">Archivos Excel</p>
                 </div>
@@ -207,7 +210,38 @@ export default function Perfil({ usuario, setUsuario }) {
         </h3>
 
         {cargandoDatos ? (
-          <p className="perfil-text-info">Cargando registros del historial...</p>
+          <div className="perfil-table-container">
+            <table className="perfil-table">
+              <thead>
+                <tr className="perfil-table-header-row">
+                  <th className="perfil-th">Fecha / Hora</th>
+                  <th className="perfil-th">Tipo de Cálculo</th>
+                  <th className="perfil-th">Archivo Fuente</th>
+                  <th className="perfil-th-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[1, 2, 3].map(i => (
+                  <tr key={i} className="perfil-table-row">
+                    <td className="perfil-td">
+                      <div className="perfil-date-cell">
+                        <Skeleton height="16px" width="100px" style={{ marginBottom: '4px' }} />
+                        <Skeleton height="12px" width="70px" />
+                      </div>
+                    </td>
+                    <td className="perfil-td"><Skeleton height="22px" width="180px" borderRadius="12px" /></td>
+                    <td className="perfil-td-muted"><Skeleton height="14px" width="120px" /></td>
+                    <td className="perfil-td-center">
+                      <div className="perfil-table-actions">
+                        <Skeleton height="28px" width="70px" borderRadius="4px" />
+                        <Skeleton height="28px" width="70px" borderRadius="4px" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : historial.length === 0 ? (
           <p className="perfil-text-info-center">
             No tienes cálculos guardados todavía. Realiza un análisis en la calculadora para guardarlo.

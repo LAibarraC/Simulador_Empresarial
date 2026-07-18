@@ -7,7 +7,11 @@ import urllib.parse
 from datetime import datetime, timedelta, timezone
 import asyncio
 from dotenv import load_dotenv
-
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
+import concurrent.futures
 from fastapi import HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,8 +22,11 @@ import models
 from validators.auth import (
     UsuarioRegistro, UsuarioLogin, RecuperarPassword, ResetearPassword,
     CambiarPasswordPerfil, ForgotPasswordRequest, ResetPasswordRequest,
-    CambiarRol, CambiarEstado, VerificarEmailRequest
+    CambiarRol, CambiarEstado, VerificarEmailRequest, GoogleLoginRequest
 )
+
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 load_dotenv()
 
@@ -83,6 +90,60 @@ def verify_reset_token(token: str) -> str | None:
 
 # Los middlewares get_current_user y require_role se han movido a middlewares/auth.py
 
+# --- LÓGICA DE CORREOS SMTP ---
+def _send_email_sync(to_email: str, subject: str, html_content: str, logo_path: str = None):
+    sender_email = os.getenv("EMAIL_SENDER")
+    sender_password = os.getenv("EMAIL_PASSWORD")
+    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+
+    if not sender_email or not sender_password:
+        print("Falta configuración SMTP en .env")
+        return False
+
+    msg = MIMEMultipart('related')
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    
+    msg_alt = MIMEMultipart('alternative')
+    msg.attach(msg_alt)
+    msg_alt.attach(MIMEText(html_content, 'html'))
+    
+    if logo_path and os.path.exists(logo_path):
+        try:
+            with open(logo_path, 'rb') as f:
+                img_data = f.read()
+            
+            ext = os.path.splitext(logo_path)[1].lower()
+            if ext == '.svg':
+                img = MIMEImage(img_data, _subtype='svg+xml')
+            else:
+                img = MIMEImage(img_data)
+                
+            img.add_header('Content-ID', '<logo_carrera>')
+            img.add_header('Content-Disposition', 'inline')
+            msg.attach(img)
+        except Exception as e:
+            print(f"Error adjuntando logo: {e}")
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+        return True
+    except Exception as e:
+        print(f"Error enviando correo SMTP: {e}")
+        return False
+
+async def send_email_async(to_email: str, subject: str, html_content: str, logo_path: str = None):
+    loop = asyncio.get_running_loop()
+    with concurrent.futures.ThreadPoolExecutor() as pool:
+        result = await loop.run_in_executor(pool, _send_email_sync, to_email, subject, html_content, logo_path)
+    return result
+
 # --- LÓGICA DE CONTROLADORES ---
 
 async def verificar_email_logic(req: VerificarEmailRequest, db: AsyncSession):
@@ -109,6 +170,35 @@ async def registrar_usuario_logic(usuario: UsuarioRegistro, db: AsyncSession):
         await db.commit()
         await db.refresh(nuevo_usuario)
         
+        # Enviar correo de activación
+        asunto = "Activación de cuenta - Simulador Empresarial"
+        logo_path = os.path.join(os.path.dirname(__file__), "..", "public", "images", "Logo-Adm.svg")
+        
+        cuerpo = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <div style="text-align: center; margin-bottom: 20px; background-color: #FF7000; padding: 20px; border-radius: 8px;">
+                    <img src="cid:logo_carrera" alt="Administración de Empresas" style="max-width: 250px; height: auto;" />
+                </div>
+                <h2>¡Bienvenido al Simulador Empresarial, {usuario.nombre}!</h2>
+                <p>Tu cuenta ha sido registrada exitosamente con el correo <strong>{usuario.email}</strong>.</p>
+                <p>Te enviamos este mensaje para confirmar que tu correo está activo. A partir de ahora podrás usar este correo para recuperar tu contraseña si la olvidas.</p>
+                <p>Saludos,<br>El equipo del Simulador Empresarial</p>
+            </body>
+        </html>
+        """
+        await send_email_async(usuario.email, asunto, cuerpo, logo_path)
+        
+        # Crear notificación en el sistema
+        notif_activacion = models.Notificacion(
+            tipo="sistema",
+            mensaje="Se ha enviado un mensaje de confirmación a tu correo electrónico. Por favor, revísalo para asegurar que podrás recuperar tu contraseña en el futuro.",
+            usuario_id=nuevo_usuario.id,
+            leido=False
+        )
+        db.add(notif_activacion)
+        await db.commit()
+        
         return {"message": "Usuario registrado con éxito"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno al registrar usuario: {str(e)}")
@@ -131,61 +221,90 @@ async def login_local_logic(credentials: UsuarioLogin, db: AsyncSession):
         "institucion": user_info.institucion
     }
 
+async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
+    try:
+        # Client ID desde el entorno
+        CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+        if not CLIENT_ID:
+            raise ValueError("GOOGLE_CLIENT_ID no configurado en el servidor")
+        
+        # Validar el token (id_token) con Google
+        idinfo = id_token.verify_oauth2_token(req.token, requests.Request(), CLIENT_ID)
+        
+        email = idinfo['email']
+        nombre = idinfo.get('name', 'Usuario Google')
+        result = await db.execute(select(models.Usuario).filter(models.Usuario.email == email))
+        user_info = result.scalars().first()
+
+        # Si no existe, lo creamos
+        if not user_info:
+            password_hasheada = get_password_hash(os.urandom(24).hex()) # Contraseña aleatoria (login con google)
+            user_info = models.Usuario(
+                email=email,
+                nombre=nombre,
+                password=password_hasheada,
+                rol="Estudiante",
+                perfil="Estudiante",
+                institucion=""
+            )
+            db.add(user_info)
+            await db.commit()
+            await db.refresh(user_info)
+        
+        if not getattr(user_info, "activo", True):
+            return JSONResponse(status_code=403, content={"error": "Cuenta suspendida"})
+            
+        access_token = create_access_token(data={"id": user_info.id, "email": user_info.email, "rol": user_info.rol})
+        
+        return {
+            "token": access_token, "id": user_info.email, "nombre": user_info.nombre,
+            "rol": user_info.rol, "email": user_info.email, "perfil": user_info.perfil,
+            "institucion": user_info.institucion
+        }
+
+    except ValueError as e:
+        # Invalid token
+        return JSONResponse(status_code=401, content={"error": f"Token de Google inválido: {str(e)}"})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"Error interno en login de Google: {str(e)}"})
+
 async def forgot_password_logic(data: ForgotPasswordRequest, db: AsyncSession):
     result = await db.execute(select(models.Usuario).filter(models.Usuario.email == data.email))
     usuario = result.scalars().first()
     
     if usuario:
         token = create_reset_token(usuario.email)
-        reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+        # Se añade /#/ porque el frontend usa HashRouter
+        reset_link = f"{FRONTEND_URL}/#/reset-password?token={token}"
         
-        email_sender = os.getenv("EMAIL_SENDER")
-        email_password = os.getenv("EMAIL_PASSWORD")
-        smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-        smtp_port = int(os.getenv("SMTP_PORT", "587"))
-        
-        if email_sender and email_password:
-            import smtplib
-            from email.mime.text import MIMEText
-            from email.mime.multipart import MIMEMultipart
-            try:
-                msg = MIMEMultipart("alternative")
-                msg["Subject"] = "Recuperacion de Contrasena - Software Estadistico"
-                msg["From"] = email_sender
-                msg["To"] = usuario.email
-                
-                html = f"""
-                <html>
-                  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f6f9; padding: 20px;">
-                    <div style="max-width: 600px; margin: 0 auto; padding: 30px; background-color: white; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                      <h2 style="color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 15px; margin-top: 0;">Restablecer Contrasena</h2>
-                      <p>Hola, <strong>{usuario.nombre}</strong>:</p>
-                      <p>Has solicitado restablecer tu contraseña para acceder a nuestro Software Estadístico.</p>
-                      <p>Por favor, haz clic en el botón de abajo para restablecer tus credenciales. Este enlace expirará en <strong>15 minutos</strong> por tu seguridad.</p>
-                      <div style="text-align: center; margin: 35px 0;">
-                        <a href="{reset_link}" style="background-color: #3498db; color: white; padding: 14px 28px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(52,152,219,0.2);">Restablecer Contrasena</a>
-                      </div>
-                      <p>Si el botón de arriba no funciona, puedes copiar y pegar el siguiente enlace en tu navegador:</p>
-                      <p style="word-break: break-all; color: #3498db;"><a href="{reset_link}" style="color: #3498db; text-decoration: none;">{reset_link}</a></p>
-                      <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;" />
-                      <p style="font-size: 0.85em; color: #7f8c8d; text-align: center; margin-bottom: 0;">Si tu no has solicitado este cambio, por favor ignora este correo electronico de forma segura.</p>
-                    </div>
-                  </body>
-                </html>
-                """
-                msg.attach(MIMEText(html, "html"))
-                
-                # SMTP en un thread separado para no bloquear el event loop
-                def _send_email():
-                    with smtplib.SMTP(smtp_server, smtp_port) as server:
-                        server.starttls()
-                        server.login(email_sender, email_password)
-                        server.sendmail(email_sender, usuario.email, msg.as_string())
-                
-                loop = asyncio.get_running_loop()
-                await loop.run_in_executor(None, _send_email)
-            except Exception as e:
-                raise HTTPException(status_code=500, detail="Error interno al procesar el envio de correo.")
+        asunto = "Recuperacion de Contrasena - Software Estadistico"
+        logo_path = os.path.join(os.path.dirname(__file__), "..", "public", "images", "Logo-Adm.svg")
+        html = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 30px; background-color: white; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+              <div style="text-align: center; margin-bottom: 20px; background-color: #FF7000; padding: 20px; border-radius: 8px;">
+                <img src="cid:logo_carrera" alt="Administración de Empresas" style="max-width: 250px; height: auto;" />
+              </div>
+              <h2 style="color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 15px; margin-top: 0;">Restablecer Contraseña</h2>
+              <p>Hola, <strong>{usuario.nombre}</strong>:</p>
+              <p>Has solicitado restablecer tu contraseña para acceder a nuestro Simulador Empresarial.</p>
+              <p>Por favor, haz clic en el botón de abajo para restablecer tus credenciales. Este enlace expirará en <strong>15 minutos</strong> por tu seguridad.</p>
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="{reset_link}" style="background-color: #3498db; color: white; padding: 14px 28px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(52,152,219,0.2);">Restablecer Contraseña</a>
+              </div>
+              <p>Si el botón de arriba no funciona, puedes copiar y pegar el siguiente enlace en tu navegador:</p>
+              <p style="word-break: break-all; color: #3498db;"><a href="{reset_link}" style="color: #3498db; text-decoration: none;">{reset_link}</a></p>
+              <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;" />
+              <p style="font-size: 0.85em; color: #7f8c8d; text-align: center; margin-bottom: 0;">Si tú no has solicitado este cambio, por favor ignora este correo electrónico de forma segura.</p>
+            </div>
+          </body>
+        </html>
+        """
+        success = await send_email_async(usuario.email, asunto, html, logo_path)
+        if not success:
+            raise HTTPException(status_code=500, detail="Error interno al enviar el correo de recuperación.")
+
                 
     return {"message": "Si el correo está registrado, recibirás un enlace en tu bandeja de entrada"}
 
@@ -311,6 +430,7 @@ async def admin_eliminar_usuario_logic(email: str, db: AsyncSession, current_use
     await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.estudiante_id == usuario.id))
     await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.usuario_id == usuario.id))
     await db.execute(delete(models.Archivo).filter(models.Archivo.usuario_id == usuario.id))
+    await db.execute(delete(models.Notificacion).filter(models.Notificacion.usuario_id == usuario.id))
     
     result = await db.execute(select(models.Clase).filter(models.Clase.docente_id == usuario.id))
     clases_docente = result.scalars().all()
