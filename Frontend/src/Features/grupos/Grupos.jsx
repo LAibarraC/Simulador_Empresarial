@@ -364,7 +364,12 @@ export default function Grupos() {
 
   // El botón Gestionar curso abre el Centro de Control del Curso.
   const handleOpenGestionar = (curso) => {
-    setCursoParaGestionar(curso);
+    setCursoParaGestionar({ ...curso, seccionInicial: "general" });
+    setMostrarCentroControl(true);
+  };
+
+  const handleOpenAccesoQR = (curso) => {
+    setCursoParaGestionar({ ...curso, seccionInicial: "qr" });
     setMostrarCentroControl(true);
   };
 
@@ -661,14 +666,26 @@ export default function Grupos() {
                     <div key={curso.id} style={{ background: "var(--bg-card, white)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-color, #eee)", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
                       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
                         <h3 style={{ margin: 0, color: "var(--text-main, #333)", lineHeight: 1.3, overflowWrap: "anywhere" }}>{curso.nombre}</h3>
-                        {qrHabilitado && (
-                          <span
-                            title="Código QR habilitado"
-                            aria-label="Código QR habilitado"
-                            style={{ flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "30px", height: "30px", borderRadius: "8px", color: "var(--accent-color)", background: "color-mix(in srgb, var(--accent-color) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-color) 28%, transparent)" }}
-                          >
-                            <IconoQr width="17" height="17" />
-                          </span>
+                        {puedeGestionar && (
+                          qrHabilitado ? (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAccesoQR(curso)}
+                              title="Abrir acceso y código QR"
+                              aria-label={`Abrir acceso y código QR de ${curso.nombre}`}
+                              style={{ flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "30px", height: "30px", padding: 0, borderRadius: "8px", color: "var(--accent-color)", background: "color-mix(in srgb, var(--accent-color) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-color) 28%, transparent)", cursor: "pointer" }}
+                            >
+                              <IconoQr width="17" height="17" />
+                            </button>
+                          ) : (
+                            <span
+                              title="Código QR deshabilitado"
+                              aria-label="Código QR deshabilitado"
+                              style={{ flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "30px", height: "30px", borderRadius: "8px", color: "var(--text-muted)", background: "var(--bg-main)", border: "1px solid var(--border-color)" }}
+                            >
+                              <IconoQr width="17" height="17" />
+                            </span>
+                          )
                         )}
                       </div>
                       <p style={{ margin: "0 0 5px 0", color: "var(--text-muted, #666)" }}>
@@ -1121,6 +1138,7 @@ export default function Grupos() {
         <CentroControlCurso
           curso={cursoParaGestionar}
           qrActivo={obtenerQRActivoDeClase(cursoParaGestionar.id)}
+          seccionInicial={cursoParaGestionar.seccionInicial || "general"}
           onClose={async () => {
             setMostrarCentroControl(false);
             setCursoParaGestionar(null);
