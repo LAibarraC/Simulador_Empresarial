@@ -111,18 +111,44 @@ async def upload_file_logic(file: UploadFile, autor: str, visibilidad: str, curs
 
 async def list_files_logic(autor: str, visibilidad: str, curso: str, db: AsyncSession):
     files_list = []
-    if visibilidad == "privado" and curso:
+    if curso:
         clase_id = int(curso) if str(curso).isdigit() else None
         if not clase_id:
             result = await db.execute(select(models.Clase).filter(models.Clase.nombre == curso))
             clase = result.scalars().first()
             if clase:
                 clase_id = clase.id
+        
         if clase_id:
             result = await db.execute(select(models.Archivo).filter(models.Archivo.clase_id == clase_id))
             archivos = result.scalars().all()
-            for arc in archivos:
+            archivos_dict = {arc.nombre_original: arc for arc in archivos}
+
+            # Sincronizar con la carpeta física en caso de archivos existentes en disco
+            target_folder = await obtener_ruta_carpeta(autor, "privado", str(clase_id), db)
+            if os.path.exists(target_folder):
+                for fname in os.listdir(target_folder):
+                    if (fname.endswith(".xlsx") or fname.endswith(".xls")) and fname not in archivos_dict:
+                        fpath = os.path.join(target_folder, fname).replace("\\", "/")
+                        fsize = os.path.getsize(os.path.join(target_folder, fname))
+                        nuevo_arc = models.Archivo(
+                            nombre_original=fname,
+                            ruta_servidor=fpath,
+                            clase_id=clase_id,
+                            usuario_id=1,
+                            size_bytes=fsize
+                        )
+                        db.add(nuevo_arc)
+                        try:
+                            await db.commit()
+                            await db.refresh(nuevo_arc)
+                            archivos_dict[fname] = nuevo_arc
+                        except Exception as e:
+                            await db.rollback()
+
+            for arc in archivos_dict.values():
                 files_list.append({
+                    "id": arc.id,
                     "filename": arc.nombre_original,
                     "autor": autor,
                     "es_curso": True

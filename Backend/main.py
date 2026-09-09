@@ -6,7 +6,7 @@ load_dotenv()  # Cargar variables de entorno desde .env
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
-from routers import auth, archivos, calculos, historial, grupos, notificaciones, qr as qr_router
+from routers import auth, archivos, calculos, historial, grupos, notificaciones, tareas, qr as qr_router
 from config.database import async_engine, get_db
 import models
 
@@ -59,6 +59,7 @@ app.include_router(calculos.router)
 app.include_router(historial.router)
 app.include_router(grupos.router)
 app.include_router(notificaciones.router)
+app.include_router(tareas.router)
 # 🆕 Router de QR para matriculación por código
 # Las rutas internas del router ya están declaradas con el prefijo "/api/qr/...",
 # por lo que se registra sin prefix para evitar duplicarlo.

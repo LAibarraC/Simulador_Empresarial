@@ -42,7 +42,11 @@ export default function SelectorRol() {
   };
 
   // Rutas que sabemos que tienen el botón de "Guía Rápida" en la esquina inferior izquierda
+<<<<<<< HEAD
   const rutasConGuia = ['/archivos', '/historial', '/grupos','/gestion-docente', '/calculadora','/admin'];
+=======
+  const rutasConGuia = ['/archivos', '/historial', '/grupos', '/calculadora', '/tareas'];
+>>>>>>> ibarra/main
   const tieneGuia = rutasConGuia.some(ruta => location.pathname.startsWith(ruta));
   const bottomPosition = tieneGuia ? '70px' : '20px';
 

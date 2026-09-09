@@ -25,24 +25,27 @@ const StatLabel = ({ formulaKey, formulaLatex, align = "center" }) => {
 export default function TablasUnidimensionales({
   resultado, calculo, formatearCelda, filtroFractil, setFiltroFractil, modoImpresion = false
 }) {
-  // 🚀 NUEVO ESTADO: Controla qué columnas ve el usuario
-  const [vistaDatos, setVistaDatos] = useState("individuales");
+  // Controla qué columnas ve el usuario: "ambos" | "individuales" | "agrupados"
+  const [vistaDatos, setVistaDatos] = useState("ambos");
 
   if (!resultado) return null;
   if (resultado.tipo === "bivariada" || resultado.tipo === "bivariada_avanzada") return null;
 
-  // 🚀 COMPONENTE REUTILIZABLE: Los Radio Buttons
+  // COMPONENTE REUTILIZABLE: Los Radio Buttons de Selección de Vista
   const SelectorVista = () => {
-    // Si estamos imprimiendo en PDF, ocultamos los botones
     if (modoImpresion) return null;
 
     return (
       <div style={{
-        marginBottom: "20px", padding: "12px 15px", backgroundColor: "var(--bg-card)",
+        marginBottom: "15px", padding: "10px 14px", backgroundColor: "var(--bg-card)",
         borderRadius: "8px", border: "1px solid var(--border-color)",
-        display: "flex", gap: "25px", alignItems: "center", flexWrap: "wrap"
+        display: "flex", gap: "20px", alignItems: "center", flexWrap: "wrap", fontSize: "0.85rem"
       }}>
         <strong style={{ margin: 0, color: "var(--primary-color)" }}>Modo de Visualización:</strong>
+        <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: vistaDatos === "ambos" ? "bold" : "normal" }}>
+          <input type="radio" name="vistaDatos" value="ambos" checked={vistaDatos === "ambos"} onChange={() => setVistaDatos("ambos")} />
+          Ambos (Completo)
+        </label>
         <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: vistaDatos === "individuales" ? "bold" : "normal" }}>
           <input type="radio" name="vistaDatos" value="individuales" checked={vistaDatos === "individuales"} onChange={() => setVistaDatos("individuales")} />
           Datos Individuales
@@ -59,6 +62,11 @@ export default function TablasUnidimensionales({
   // --- CASO 1: TENDENCIA Y POSICIÓN (Tema 3) ---
   // =========================================================
   if (resultado.tipo === "tendencia_y_posicion") {
+    const fractilActual = filtroFractil || "Todos";
+    const filasPosicion = (fractilActual === "Todos")
+      ? (resultado.posicion || [])
+      : (resultado.posicion || []).filter(r => (r.Medida || r.Tipo) === fractilActual);
+
     return (
       <div className="contenedor-tendencia-posicion">
 
@@ -71,10 +79,10 @@ export default function TablasUnidimensionales({
             onClick={() => {
               const datosExport = resultado.tendencia.map(row => {
                 const res = { Medida: row["Medida"].split(" (")[0] };
-                if (vistaDatos === "individuales") {
+                if (vistaDatos === "individuales" || vistaDatos === "ambos") {
                   res["Datos Individuales"] = row["D. Individuales"];
                 }
-                if (vistaDatos === "agrupados") {
+                if (vistaDatos === "agrupados" || vistaDatos === "ambos") {
                   res["Datos Agrupados"] = row["D. Agrupados"];
                 }
                 return res;
@@ -88,14 +96,13 @@ export default function TablasUnidimensionales({
             Copiar Tabla
           </button>
         </div>
-        {/* 🚀 Colchón de 70px para evitar que el tooltip active el scroll */}
-        <div className="container_tablas_academica" style={{ overflowX: "auto", overflowY: "hidden", paddingBottom: "70px" }}>
+        <div className="container_tablas_academica" style={{ overflowX: "auto", width: "100%", paddingBottom: "12px" }}>
           <table className="tabla-academica">
             <thead>
               <tr>
                 <th>Medida</th>
-                {vistaDatos === "individuales" && <th>D. Individuales</th>}
-                {vistaDatos === "agrupados" && <th>D. Agrupados</th>}
+                {(vistaDatos === "individuales" || vistaDatos === "ambos") && <th>D. Individuales</th>}
+                {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <th>D. Agrupados</th>}
               </tr>
             </thead>
             <tbody>
@@ -105,15 +112,14 @@ export default function TablasUnidimensionales({
                   <tr key={i}>
                     <td style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold" }}>
                       {nombreLimpio}
-                      {/* 🚀 Lógica corregida con paréntesis para que no se dupliquen */}
                       {row["Medida"].includes("(x̄)") && <StatLabel formulaKey="x̄" formulaLatex="\bar{x}" align="left" />}
                       {row["Medida"].includes("(Me)") && <StatLabel formulaKey="Me" align="left" />}
                       {row["Medida"].includes("(Mo)") && <StatLabel formulaKey="Mo" align="left" />}
                       {row["Medida"].includes("(G)") && <StatLabel formulaKey="G" align="left" />}
                       {row["Medida"].includes("(H)") && <StatLabel formulaKey="H" align="left" />}
                     </td>
-                    {vistaDatos === "individuales" && <td>{formatearCelda(row["D. Individuales"])}</td>}
-                    {vistaDatos === "agrupados" && <td>{formatearCelda(row["D. Agrupados"])}</td>}
+                    {(vistaDatos === "individuales" || vistaDatos === "ambos") && <td>{formatearCelda(row["D. Individuales"])}</td>}
+                    {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <td>{formatearCelda(row["D. Agrupados"])}</td>}
                   </tr>
                 );
               })}
@@ -127,21 +133,20 @@ export default function TablasUnidimensionales({
             <button
               data-html2canvas-ignore="true"
               onClick={() => {
-                const datosFiltrados = resultado.posicion.filter(r => (r.Medida || r.Tipo) === filtroFractil);
-                const datosExport = datosFiltrados.map(row => {
+                const datosExport = filasPosicion.map(row => {
                   const res = {
                     Medida: row.Medida || row.Tipo,
                     Símbolo: row.Símbolo
                   };
-                  if (vistaDatos === "individuales") {
+                  if (vistaDatos === "individuales" || vistaDatos === "ambos") {
                     res["Datos Individuales"] = row["D. Individuales"];
                   }
-                  if (vistaDatos === "agrupados") {
+                  if (vistaDatos === "agrupados" || vistaDatos === "ambos") {
                     res["Datos Agrupados"] = row["D. Agrupados"];
                   }
                   return res;
                 });
-                copiarTablaAExcel(datosExport, `medidas_de_posicion_${filtroFractil.toLowerCase()}es`);
+                copiarTablaAExcel(datosExport, `medidas_de_posicion_${fractilActual.toLowerCase()}`);
               }}
               className="btn-icon"
               style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
@@ -169,8 +174,8 @@ export default function TablasUnidimensionales({
                         <tr>
                           <th>Medida</th>
                           <th>Símbolo</th>
-                          {vistaDatos === "individuales" && <th>D. Individuales</th>}
-                          {vistaDatos === "agrupados" && <th>D. Agrupados</th>}
+                          {(vistaDatos === "individuales" || vistaDatos === "ambos") && <th>D. Individuales</th>}
+                          {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <th>D. Agrupados</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -178,8 +183,8 @@ export default function TablasUnidimensionales({
                           <tr key={i}>
                             <td>{row.Medida || row.Tipo}</td>
                             <td style={{ fontWeight: "bold" }}>{row.Símbolo}</td>
-                            {vistaDatos === "individuales" && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Individuales"])}</td>}
-                            {vistaDatos === "agrupados" && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Agrupados"])}</td>}
+                            {(vistaDatos === "individuales" || vistaDatos === "ambos") && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Individuales"])}</td>}
+                            {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Agrupados"])}</td>}
                           </tr>
                         ))}
                       </tbody>
@@ -191,39 +196,40 @@ export default function TablasUnidimensionales({
           </div>
         ) : (
           <>
-            <div className="container_subtendencia" style={{ marginBottom: "15px" }}>
-              {["Cuartil", "Decil", "Percentil"].map((tipo) => (
+            <div className="container_subtendencia" style={{ marginBottom: "15px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {["Todos", "Cuartil", "Decil", "Percentil"].map((tipo) => (
                 <button
                   key={tipo}
-                  onClick={() => setFiltroFractil(tipo)}
+                  type="button"
+                  onClick={() => setFiltroFractil && setFiltroFractil(tipo)}
                   className="button_subtendencia"
                   style={{
-                    backgroundColor: filtroFractil === tipo ? "var(--accent-color)" : "var(--bg-card)",
-                    color: filtroFractil === tipo ? "#fff" : "inherit",
-                    marginRight: "10px", padding: "8px 15px", border: "1px solid var(--border-color)",
-                    borderRadius: "4px", cursor: "pointer", fontWeight: filtroFractil === tipo ? "bold" : "normal"
+                    backgroundColor: fractilActual === tipo ? "var(--accent-color)" : "var(--bg-card)",
+                    color: fractilActual === tipo ? "#fff" : "inherit",
+                    padding: "6px 14px", border: "1px solid var(--border-color)",
+                    borderRadius: "6px", cursor: "pointer", fontWeight: fractilActual === tipo ? "bold" : "normal",
+                    fontSize: "0.82rem"
                   }}
                 >
-                  {tipo}es
+                  {tipo === "Todos" ? "Todos los Fractiles" : `${tipo}es`}
                 </button>
               ))}
             </div>
-            {/* 🚀 Colchón de 70px aplicado a Medidas de Posición */}
-            <div style={{ overflowX: "auto", overflowY: "hidden", paddingBottom: "70px" }}>
+            <div style={{ overflowX: "auto", width: "100%", paddingBottom: "12px" }}>
               <table className="tabla-academica">
                 <thead>
                   <tr>
                     <th>Medida</th>
                     <th>Símbolo</th>
-                    {vistaDatos === "individuales" && <th>D. Individuales</th>}
-                    {vistaDatos === "agrupados" && <th>D. Agrupados</th>}
+                    {(vistaDatos === "individuales" || vistaDatos === "ambos") && <th>D. Individuales</th>}
+                    {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <th>D. Agrupados</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {resultado.posicion.filter(r => (r.Medida || r.Tipo) === filtroFractil).map((row, i) => {
-                    const claveDiccionario = row.Tipo === "Cuartil" ? "Q_k" : row.Tipo === "Decil" ? "D_k" : "P_k";
-                    const letra = row.Símbolo[0];
-                    const numero = row.Símbolo.substring(1);
+                  {filasPosicion.map((row, i) => {
+                    const claveDiccionario = (row.Tipo || row.Medida) === "Cuartil" ? "Q_k" : (row.Tipo || row.Medida) === "Decil" ? "D_k" : "P_k";
+                    const letra = (row.Símbolo && row.Símbolo[0]) || "Q";
+                    const numero = (row.Símbolo && row.Símbolo.substring(1)) || "1";
 
                     return (
                       <tr key={i}>
@@ -231,8 +237,8 @@ export default function TablasUnidimensionales({
                         <td style={{ fontWeight: "bold" }}>
                           <StatLabel formulaKey={claveDiccionario} formulaLatex={`${letra}_{${numero}}`} align="left" />
                         </td>
-                        {vistaDatos === "individuales" && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Individuales"])}</td>}
-                        {vistaDatos === "agrupados" && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Agrupados"])}</td>}
+                        {(vistaDatos === "individuales" || vistaDatos === "ambos") && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Individuales"])}</td>}
+                        {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Agrupados"])}</td>}
                       </tr>
                     );
                   })}
@@ -264,10 +270,10 @@ export default function TablasUnidimensionales({
                   Estadígrafo: row["Estadígrafo"],
                   Sigla: row["Sigla"]
                 };
-                if (vistaDatos === "individuales") {
+                if (vistaDatos === "individuales" || vistaDatos === "ambos") {
                   res["Datos Individuales"] = row["D. Individuales"];
                 }
-                if (vistaDatos === "agrupados") {
+                if (vistaDatos === "agrupados" || vistaDatos === "ambos") {
                   res["Datos Agrupados"] = row["D. Agrupados"];
                 }
                 return res;
@@ -281,15 +287,14 @@ export default function TablasUnidimensionales({
             Copiar Tabla
           </button>
         </div>
-        {/* 🚀 Colchón de 70px aplicado a Medidas de Dispersión */}
-        <div style={{ overflowX: "auto", overflowY: "hidden", marginBottom: "30px", paddingBottom: "70px" }}>
+        <div style={{ overflowX: "auto", width: "100%", marginBottom: "20px", paddingBottom: "12px" }}>
           <table className="tabla-academica">
             <thead>
               <tr>
                 <th>Estadígrafo</th>
                 <th>Sigla</th>
-                {vistaDatos === "individuales" && <th>D. Individuales</th>}
-                {vistaDatos === "agrupados" && <th>D. Agrupados</th>}
+                {(vistaDatos === "individuales" || vistaDatos === "ambos") && <th>D. Individuales</th>}
+                {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <th>D. Agrupados</th>}
               </tr>
             </thead>
             <tbody>
@@ -297,8 +302,8 @@ export default function TablasUnidimensionales({
                 <tr key={i}>
                   <td>{row["Estadígrafo"]}</td>
                   <td style={{ fontWeight: "bold" }}><StatLabel formulaKey={row["Sigla"]} /></td>
-                  {vistaDatos === "individuales" && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Individuales"])}</td>}
-                  {vistaDatos === "agrupados" && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Agrupados"])}</td>}
+                  {(vistaDatos === "individuales" || vistaDatos === "ambos") && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Individuales"])}</td>}
+                  {(vistaDatos === "agrupados" || vistaDatos === "ambos") && <td style={{ fontFamily: "monospace", fontSize: "1.1em" }}>{formatearCelda(row["D. Agrupados"])}</td>}
                 </tr>
               ))}
             </tbody>
@@ -329,8 +334,7 @@ export default function TablasUnidimensionales({
             Copiar Tabla
           </button>
         </div>
-        {/* 🚀 Colchón de 70px aplicado a Medidas de Forma */}
-        <div style={{ overflowX: "auto", overflowY: "hidden", paddingBottom: "70px" }}>
+        <div style={{ overflowX: "auto", width: "100%", paddingBottom: "12px" }}>
           <table className="tabla-academica">
             <thead>
               <tr>
@@ -378,7 +382,7 @@ export default function TablasUnidimensionales({
           </button>
         </div>
 
-        <div style={{ overflowX: "auto", paddingBottom: "70px" }}>
+        <div style={{ overflowX: "auto", width: "100%", paddingBottom: "12px" }}>
           <table className="tabla-academica">
             <thead>
               <tr>

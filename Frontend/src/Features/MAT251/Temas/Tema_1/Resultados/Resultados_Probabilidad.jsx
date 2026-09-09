@@ -7,6 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
+import { DadoSVG, MonedaSVG, CartaSVG } from './Experimentos';
 
 export default function ResultadosProbabilidad({
     statsDatos, abrirEditor, valoresUnicos, statsEventos, setModalEvento,
@@ -24,6 +25,21 @@ export default function ResultadosProbabilidad({
     const [simulacionActiva, setSimulacionActiva] = useState(false);
     const [datosSimulacion, setDatosSimulacion] = useState([]);
     const [resultadoFrecuentista, setResultadoFrecuentista] = useState(null);
+
+    // Estados para la Simulación Clásica
+    const [experimentoClasico, setExperimentoClasico] = useState('');
+    const [eventoClasico, setEventoClasico] = useState('');
+    const [iteracionesClasica, setIteracionesClasica] = useState(100);
+    const [resSimulacionClasica, setResSimulacionClasica] = useState(null);
+    const [historialSimClasica, setHistorialSimClasica] = useState([]);
+    const [simulacionEnCurso, setSimulacionEnCurso] = useState(false);
+    const [simulacionPausada, setSimulacionPausada] = useState(false);
+    const [velocidadSimulacion, setVelocidadSimulacion] = useState('1x');
+    const [progresoSimulacion, setProgresoSimulacion] = useState({ intentoActual: 0, exitosActuales: 0, ultimoResultado: null, animando: false });
+    const simRef = useRef(null);
+    const isPausadoRef = useRef(false);
+    const resumeRef = useRef(null);
+    const velocidadRef = useRef('1x');
 
     const [ordenWidgets, setOrdenWidgets] = useState(['w-frecuentista']);
     const sensors = useSensors(
@@ -43,6 +59,17 @@ export default function ResultadosProbabilidad({
         }
     };
 
+    const detenerSimulacion = () => {
+        if (simRef.current) clearTimeout(simRef.current);
+        setSimulacionEnCurso(false);
+        setSimulacionPausada(false);
+        isPausadoRef.current = false;
+        setProgresoSimulacion({ intentoActual: 0, exitosActuales: 0, ultimoResultado: null, animando: false });
+        setResSimulacionClasica(null);
+        setHistorialSimClasica([]);
+    };
+
+
     useEffect(() => {
         const handler = (e) => {
             if (dropdownColRef.current && !dropdownColRef.current.contains(e.target)) {
@@ -50,8 +77,13 @@ export default function ResultadosProbabilidad({
             }
         };
         document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
+        return () => {
+            document.removeEventListener('mousedown', handler);
+            if (simRef.current) clearTimeout(simRef.current);
+        };
     }, []);
+
+
 
     const InlineMath = ({ math }) => (
         <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
@@ -180,9 +212,203 @@ export default function ResultadosProbabilidad({
         setSimulacionActiva(true);
     };
 
+    const handleEjecutarSimulacionClasica = () => {
+        if (!experimentoClasico || !eventoClasico) {
+            alert("Selecciona un experimento y un evento de interés.");
+            return;
+        }
+
+        const N = parseInt(iteracionesClasica) || 100;
+        let pTeorica = 0;
+        let casosFavorables = 0;
+        let totalPosibles = 0;
+
+        if (experimentoClasico === 'moneda') {
+            totalPosibles = 2;
+            casosFavorables = 1;
+        } else if (experimentoClasico === 'dado') {
+            totalPosibles = 6;
+            if (eventoClasico === 'par' || eventoClasico === 'impar') casosFavorables = 3;
+            else casosFavorables = 1;
+        } else if (experimentoClasico === 'baraja') {
+            totalPosibles = 52;
+            if (eventoClasico === 'roja' || eventoClasico === 'negra') casosFavorables = 26;
+            else if (['corazones', 'diamantes', 'treboles', 'espadas'].includes(eventoClasico)) casosFavorables = 13;
+            else if (['as', 'rey', 'reina', 'jota'].includes(eventoClasico)) casosFavorables = 4;
+            else casosFavorables = 1; 
+        }
+        pTeorica = casosFavorables / totalPosibles;
+
+        setSimulacionEnCurso(true);
+        setSimulacionPausada(false);
+        isPausadoRef.current = false;
+        resumeRef.current = null;
+        setHistorialSimClasica([]);
+        setResSimulacionClasica(null);
+        setProgresoSimulacion({ intentoActual: 0, exitosActuales: 0, ultimoResultado: null, animando: true });
+
+        const history = [];
+        let exitosAcumulados = 0;
+        let iteracionActual = 0;
+
+        const calcularPaso = () => {
+            let esExito = false;
+            let resVisible = null;
+            
+            if (experimentoClasico === 'moneda') {
+                const res = Math.random() < 0.5 ? 'cara' : 'cruz';
+                esExito = (res === eventoClasico);
+                resVisible = res;
+            } else if (experimentoClasico === 'dado') {
+                const res = Math.floor(Math.random() * 6) + 1;
+                if (eventoClasico === 'par') esExito = (res % 2 === 0);
+                else if (eventoClasico === 'impar') esExito = (res % 2 !== 0);
+                else esExito = (res.toString() === eventoClasico);
+                resVisible = res;
+            } else if (experimentoClasico === 'baraja') {
+                const carta = Math.floor(Math.random() * 52) + 1;
+                let palo = '';
+                if (carta <= 13) palo = 'corazones';
+                else if (carta <= 26) palo = 'diamantes';
+                else if (carta <= 39) palo = 'treboles';
+                else palo = 'espadas';
+                
+                const valor = ((carta - 1) % 13) + 1;
+                
+                if (eventoClasico === 'roja') esExito = (palo === 'corazones' || palo === 'diamantes');
+                else if (eventoClasico === 'negra') esExito = (palo === 'treboles' || palo === 'espadas');
+                else if (eventoClasico === palo) esExito = true;
+                else if (eventoClasico === 'as' && valor === 1) esExito = true;
+                else if (eventoClasico === 'jota' && valor === 11) esExito = true;
+                else if (eventoClasico === 'reina' && valor === 12) esExito = true;
+                else if (eventoClasico === 'rey' && valor === 13) esExito = true;
+                
+                let valorStr = valor.toString();
+                if (valor === 1) valorStr = 'A';
+                if (valor === 11) valorStr = 'J';
+                if (valor === 12) valorStr = 'Q';
+                if (valor === 13) valorStr = 'K';
+                resVisible = `${valorStr} de ${palo}`;
+            }
+
+            if (esExito) exitosAcumulados++;
+            return { esExito, resVisible };
+        };
+
+        const simularLoop = () => {
+            if (isPausadoRef.current) return;
+            
+            const v = velocidadRef.current;
+            let target = iteracionActual + 1;
+            let delay = 1000;
+            let isMax = false;
+
+            if (v === '1x') delay = 1000;
+            else if (v === '2x') delay = 500;
+            else if (v === '4x') delay = 250;
+            else if (v === 'MAX') {
+                const chunkSize = Math.max(1, Math.floor(N / 50));
+                target = Math.min(N, iteracionActual + chunkSize);
+                delay = 16;
+                isMax = true;
+            }
+
+            let ultimoRes = null;
+            const stepHist = Math.max(1, Math.floor(N / 100)); 
+
+            for (; iteracionActual < target; iteracionActual++) {
+                const { resVisible } = calcularPaso();
+                ultimoRes = resVisible;
+                
+                if (!isMax || (iteracionActual + 1) === N || (iteracionActual + 1) % stepHist === 0) {
+                    history.push({
+                        intento: iteracionActual + 1,
+                        empirica: exitosAcumulados / (iteracionActual + 1),
+                        teorica: pTeorica
+                    });
+                }
+            }
+            
+            setHistorialSimClasica([...history]);
+            
+            if (isMax) {
+                setProgresoSimulacion({
+                    intentoActual: iteracionActual,
+                    exitosActuales: exitosAcumulados,
+                    ultimoResultado: ultimoRes,
+                    animando: true
+                });
+            } else {
+                setProgresoSimulacion({
+                    intentoActual: iteracionActual,
+                    exitosActuales: exitosAcumulados,
+                    ultimoResultado: 'girando...',
+                    animando: true
+                });
+
+                setTimeout(() => {
+                    if (isPausadoRef.current) return;
+                    setProgresoSimulacion(prev => ({
+                        ...prev,
+                        ultimoResultado: ultimoRes,
+                        animando: false
+                    }));
+                }, delay * 0.5);
+            }
+
+            const currentProbSimulada = iteracionActual > 0 ? exitosAcumulados / iteracionActual : 0;
+            const currentMargenError = pTeorica > 0 ? Math.abs((pTeorica - currentProbSimulada) / pTeorica) * 100 : 0;
+            
+            setResSimulacionClasica({
+                teorica: pTeorica,
+                exitos: exitosAcumulados,
+                repeticiones: iteracionActual,
+                simulada: currentProbSimulada,
+                error: currentMargenError
+            });
+            
+            if (iteracionActual >= N) {
+                finalizarSimulacion();
+            } else {
+                simRef.current = setTimeout(simularLoop, delay); 
+            }
+        };
+        resumeRef.current = simularLoop;
+        simularLoop();
+
+        const finalizarSimulacion = () => {
+            setSimulacionEnCurso(false);
+            setSimulacionPausada(false);
+            isPausadoRef.current = false;
+            setProgresoSimulacion(prev => ({ ...prev, animando: false }));
+            
+            const probSimulada = exitosAcumulados / N;
+            const margenError = pTeorica > 0 ? Math.abs((pTeorica - probSimulada) / pTeorica) * 100 : 0;
+
+            setResSimulacionClasica({
+                teorica: pTeorica,
+                exitos: exitosAcumulados,
+                repeticiones: N,
+                simulada: probSimulada,
+                error: margenError
+            });
+        };
+    };
+
     // Renderizar KaTeX localmente para modo manual y modo matriz
     useEffect(() => {
         if (formulaProbRef.current) {
+            if (tipo === 'clasica' && inputMode === 'simulacion' && resSimulacionClasica) {
+                const { teorica, exitos, repeticiones, simulada } = resSimulacionClasica;
+                const latex = `\\begin{aligned} P(\\text{Teórica}) &\\approx ${teorica.toFixed(4)} \\\\ P(\\text{Simulada}) &= \\dfrac{${exitos}}{${repeticiones}} = ${simulada.toFixed(4)} \\end{aligned}`;
+                try {
+                    katex.render(latex, formulaProbRef.current, { throwOnError: false, displayMode: true });
+                } catch (e) {
+                    console.error("Error al renderizar KaTeX:", e);
+                }
+                return;
+            }
+
             if (isFrec && resultadoFrecuentista && inputMode === 'simulacion') {
                 const latex = `P(E)=\\dfrac{f}{N}=\\dfrac{${resultadoFrecuentista.f}}{${resultadoFrecuentista.N}}=${resultadoFrecuentista.probDecimal}`;
                 try {
@@ -246,11 +472,17 @@ export default function ResultadosProbabilidad({
                     >
                         Análisis de Matriz
                     </button>
-                    {isFrec && (
+                    {(isFrec || tipo === 'clasica') && (
                         <button
                             type="button"
                             className={`btn-tema1-borde ${inputMode === 'simulacion' ? 'active' : ''}`}
-                            onClick={() => setInputMode('simulacion')}
+                            onClick={() => {
+                                setInputMode('simulacion');
+                                if (tipo === 'clasica' && setColProbClasica) {
+                                    setColProbClasica('');
+                                    if(setEventoFavorable) setEventoFavorable([]);
+                                }
+                            }}
                             style={{
                                 padding: '6px 16px',
                                 borderRadius: '6px',
@@ -346,6 +578,234 @@ export default function ResultadosProbabilidad({
                             <div style={{ color: '#ef4444', fontSize: FS.xs, fontWeight: 600, marginTop: '-5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <IconoAlerta width="14" height="14" />
                                 {errorManual}
+                            </div>
+                        )}
+                    </div>
+                ) : inputMode === 'simulacion' && tipo === 'clasica' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '5px' }}>
+                        <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 700, color: 'var(--primary-color)' }}>Configuración de Simulación</h4>
+                        <div className="panel-inputs" style={{ display: 'flex', flexWrap: 'wrap', gap: '25px', marginTop: 0, marginBottom: '5px', background: 'var(--bg-input)', padding: '20px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
+                                <label style={{ ...labelStyle, marginBottom: 0 }}>Experimento</label>
+                                <select 
+                                    value={experimentoClasico} 
+                                    onChange={(e) => {
+                                        detenerSimulacion();
+                                        setExperimentoClasico(e.target.value);
+                                        setEventoClasico('');
+                                    }}
+                                    style={{ padding: '8px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-color)', fontSize: FS.sm, outline: 'none', fontFamily: FONT, width: '100%' }}
+                                >
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="moneda">Lanzar Moneda</option>
+                                    <option value="dado">Lanzar Dado de 6 caras</option>
+                                    <option value="baraja">Sacar Carta (Baraja 52)</option>
+                                </select>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
+                                <label style={{ ...labelStyle, marginBottom: 0 }}>Evento de Interés</label>
+                                <select 
+                                    value={eventoClasico} 
+                                    onChange={(e) => {
+                                        detenerSimulacion();
+                                        setEventoClasico(e.target.value);
+                                    }}
+                                    disabled={!experimentoClasico}
+                                    style={{ padding: '8px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-color)', fontSize: FS.sm, outline: 'none', fontFamily: FONT, width: '100%', opacity: !experimentoClasico ? 0.6 : 1 }}
+                                >
+                                    <option value="">-- Seleccionar --</option>
+                                    {experimentoClasico === 'moneda' && (
+                                        <>
+                                            <option value="cara">Cara</option>
+                                            <option value="cruz">Cruz</option>
+                                        </>
+                                    )}
+                                    {experimentoClasico === 'dado' && (
+                                        <>
+                                            <option value="1">Sacar 1</option>
+                                            <option value="2">Sacar 2</option>
+                                            <option value="3">Sacar 3</option>
+                                            <option value="4">Sacar 4</option>
+                                            <option value="5">Sacar 5</option>
+                                            <option value="6">Sacar 6</option>
+                                            <option value="par">Número Par (2, 4, 6)</option>
+                                            <option value="impar">Número Impar (1, 3, 5)</option>
+                                        </>
+                                    )}
+                                    {experimentoClasico === 'baraja' && (
+                                        <>
+                                            <option value="roja">Carta Roja (Corazones o Diamantes)</option>
+                                            <option value="negra">Carta Negra (Tréboles o Espadas)</option>
+                                            <option value="corazones">Corazones</option>
+                                            <option value="diamantes">Diamantes</option>
+                                            <option value="treboles">Tréboles</option>
+                                            <option value="espadas">Espadas</option>
+                                            <option value="as">Un As</option>
+                                            <option value="rey">Un Rey (K)</option>
+                                            <option value="reina">Una Reina (Q)</option>
+                                            <option value="jota">Una Jota (J)</option>
+                                        </>
+                                    )}
+                                </select>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '150px' }}>
+                                <label style={{ ...labelStyle, marginBottom: 0 }}>Repeticiones (N)</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={iteracionesClasica}
+                                    onChange={(e) => {
+                                        detenerSimulacion();
+                                        setIteracionesClasica(e.target.value);
+                                    }}
+                                    style={{ padding: '8px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-color)', fontSize: FS.sm, outline: 'none', fontFamily: FONT, width: '100%', boxSizing: 'border-box' }}
+                                />
+                            </div>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-5px', marginBottom: '0px' }}>
+                            <button
+                                type="button"
+                                onClick={handleEjecutarSimulacionClasica}
+                                disabled={simulacionEnCurso}
+                                className="button_calcular"
+                                style={{ width: 'fit-content', padding: '8px 35px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: simulacionEnCurso ? 0.6 : 1, cursor: simulacionEnCurso ? 'not-allowed' : 'pointer' }}
+                            >
+                                {simulacionEnCurso ? 'SIMULANDO...' : 'INICIAR SIMULACIÓN'}
+                            </button>
+                        </div>
+
+                        {(simulacionEnCurso || progresoSimulacion.intentoActual > 0) && (
+                            <div style={{ marginTop: '5px', padding: '20px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '0', position: 'relative', overflow: 'hidden' }}>
+                                <style>{`
+                                    @keyframes anim-spin { 100% { transform: rotate(360deg); } }
+                                    @keyframes anim-flip { 100% { transform: rotateY(360deg); } }
+                                `}</style>
+                                
+                                {/* Progress Bar */}
+                                <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${Math.min(100, (progresoSimulacion.intentoActual / Math.max(1, parseInt(iteracionesClasica) || 1)) * 100)}%`, transition: 'width 0.1s linear' }} />
+                                
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                                    
+                                    {/* Left Side: Probabilidad Teórica */}
+                                    <div style={{ width: '150px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <span style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-muted)' }}>Lanz. {progresoSimulacion.intentoActual} / {parseInt(iteracionesClasica) || 100}</span>
+                                        {resSimulacionClasica && (
+                                            <div style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                                                <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>PROB. TEÓRICA</p>
+                                                <p style={{ margin: '5px 0 0', fontSize: '1.2rem', color: 'var(--primary-color)', fontWeight: 900 }}>{(resSimulacionClasica.teorica * 100).toFixed(2)}%</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Center: Controls, Icon, Result, Exitos */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', flexGrow: 1 }}>
+                                        
+                                        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                            {/* Speed Controls */}
+                                            <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-input)', padding: '3px', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
+                                                {['1x', '2x', '4x', 'MAX'].map(vel => (
+                                                    <button
+                                                        key={vel}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setVelocidadSimulacion(vel);
+                                                            velocidadRef.current = vel;
+                                                        }}
+                                                        style={{
+                                                            background: velocidadSimulacion === vel ? 'var(--primary-color)' : 'transparent',
+                                                            color: velocidadSimulacion === vel ? '#fff' : 'var(--text-muted)',
+                                                            border: 'none', borderRadius: '15px', padding: '2px 8px', cursor: 'pointer', fontSize: '0.65rem',
+                                                            fontWeight: 800, transition: 'all 0.2s', boxShadow: velocidadSimulacion === vel ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                                                        }}
+                                                    >
+                                                        {vel}
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {simulacionEnCurso && (
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (simulacionPausada) {
+                                                            isPausadoRef.current = false;
+                                                            setSimulacionPausada(false);
+                                                            if (resumeRef.current) resumeRef.current();
+                                                        } else {
+                                                            isPausadoRef.current = true;
+                                                            setSimulacionPausada(true);
+                                                            if (simRef.current) clearTimeout(simRef.current);
+                                                        }
+                                                    }}
+                                                    style={{ 
+                                                        background: simulacionPausada ? '#10b981' : 'var(--text-muted)', 
+                                                        color: '#fff', border: 'none', borderRadius: '15px', 
+                                                        padding: '4px 12px', cursor: 'pointer', fontSize: FS.xs,
+                                                        fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px',
+                                                        transition: 'background 0.2s', minWidth: '105px', justifyContent: 'center'
+                                                    }}
+                                                >
+                                                    {simulacionPausada ? '▶ CONTINUAR' : '⏸ PAUSAR'}
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div style={{ 
+                                            width: experimentoClasico === 'baraja' ? '100px' : '80px', 
+                                            height: experimentoClasico === 'baraja' ? '140px' : '80px', 
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                            background: 'transparent',
+                                            animation: (progresoSimulacion.animando && !simulacionPausada) ? (experimentoClasico === 'dado' ? 'anim-spin 0.3s linear infinite' : 'anim-flip 0.3s linear infinite') : 'none',
+                                            transition: 'transform 0.2s'
+                                        }}>
+                                            {(!progresoSimulacion.animando || simulacionPausada) && progresoSimulacion.ultimoResultado && progresoSimulacion.ultimoResultado !== 'girando...' ? (
+                                                experimentoClasico === 'dado' ? (
+                                                    <div style={{ width: '80%', height: '80%' }}><DadoSVG valor={progresoSimulacion.ultimoResultado} /></div>
+                                                ) : experimentoClasico === 'moneda' ? (
+                                                    <div style={{ width: '80%', height: '80%' }}><MonedaSVG valor={progresoSimulacion.ultimoResultado} /></div>
+                                                ) : (
+                                                    <div style={{ width: '80%', height: '80%' }}><CartaSVG valor={progresoSimulacion.ultimoResultado} /></div>
+                                                )
+                                            ) : (
+                                                experimentoClasico === 'dado' ? <div style={{ width: '80%', height: '80%' }}><DadoSVG valor={6} /></div> : 
+                                                experimentoClasico === 'moneda' ? <div style={{ width: '80%', height: '80%' }}><MonedaSVG valor={'cara'} /></div> : (
+                                                    <div style={{ width: '80%', height: '80%' }}><CartaSVG valor={null} /></div>
+                                                )
+                                            )}
+                                        </div>
+                                        
+                                        {/* Last Result */}
+                                        <div style={{ fontSize: FS.md, fontWeight: 800, color: 'var(--text-color)', minHeight: '24px', textAlign: 'center' }}>
+                                            {progresoSimulacion.ultimoResultado ? (
+                                                progresoSimulacion.ultimoResultado === 'girando...' ? 'Girando...' : 
+                                                simulacionEnCurso ? `Resultado: ${progresoSimulacion.ultimoResultado}` : `Último resultado: ${progresoSimulacion.ultimoResultado}`
+                                            ) : 'Preparando...'}
+                                        </div>
+
+                                        {/* Exitos (Centro Inferior) */}
+                                        {resSimulacionClasica && (
+                                            <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                                                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 800 }}>ÉXITOS OBTENIDOS</p>
+                                                <p style={{ margin: '5px 0 0', fontSize: '1.3rem', color: 'var(--primary-color)', fontWeight: 900 }}>{resSimulacionClasica.exitos}</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Right Side: Probabilidad Simulada */}
+                                    <div style={{ width: '150px', display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'flex-end' }}>
+                                        <span style={{ fontSize: FS.sm, fontWeight: 700, opacity: 0 }}>Placeholder</span>
+                                        {resSimulacionClasica && (
+                                            <div style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', width: '100%' }}>
+                                                <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>PROB. SIMULADA</p>
+                                                <p style={{ margin: '5px 0 0', fontSize: '1.2rem', color: 'var(--primary-color)', fontWeight: 900 }}>{(resSimulacionClasica.simulada * 100).toFixed(2)}%</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                </div>
                             </div>
                         )}
                     </div>
@@ -470,7 +930,10 @@ export default function ResultadosProbabilidad({
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexGrow: 1 }}>
                                             <button
                                                 className="btn-tema1-borde active"
-                                                onClick={() => setModalCondicion(true)}
+                                                onClick={() => {
+                                                    detenerSimulacion();
+                                                    setModalCondicion(true);
+                                                }}
                                                 style={{
                                                     width: 'fit-content',
                                                     alignSelf: 'center',
@@ -532,7 +995,10 @@ export default function ResultadosProbabilidad({
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexGrow: 1 }}>
                                         <button
                                             className="btn-tema1-borde active"
-                                            onClick={() => setModalEvento(true)}
+                                            onClick={() => {
+                                                detenerSimulacion();
+                                                setModalEvento(true);
+                                            }}
                                             style={{
                                                 width: 'fit-content',
                                                 alignSelf: 'center',
@@ -592,7 +1058,10 @@ export default function ResultadosProbabilidad({
                                     type="number"
                                     min="1"
                                     value={iteracionesN}
-                                    onChange={(e) => setIteracionesN(e.target.value)}
+                                    onChange={(e) => {
+                                        detenerSimulacion();
+                                        setIteracionesN(e.target.value);
+                                    }}
                                     style={{
                                         padding: '8px 12px',
                                         borderRadius: RADIUS,
@@ -642,44 +1111,72 @@ export default function ResultadosProbabilidad({
                 )}
 
                 {/* Resultado Math*/}
-                {(activeRes || (isFrec && resultadoFrecuentista && inputMode === 'simulacion')) && (
+                {(activeRes || (isFrec && resultadoFrecuentista && inputMode === 'simulacion') || (tipo === 'clasica' && historialSimClasica.length > 0 && inputMode === 'simulacion')) && (
                     <>
-                        <div ref={formulaProbRef} style={{ overflowX: 'auto' }} />
-                        <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
-                            {isFrec && resultadoFrecuentista && inputMode === 'simulacion' ? (
-                                <>
-                                    <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                        <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Evento A</p>
-                                        <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.evento}</p>
+                        {inputMode !== 'simulacion' && (
+                            <div ref={formulaProbRef} style={{ overflowX: 'auto' }} />
+                        )}
+                        {(inputMode !== 'simulacion' || (isFrec && resultadoFrecuentista && inputMode === 'simulacion')) && (
+                            <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
+                                {isFrec && resultadoFrecuentista && inputMode === 'simulacion' ? (
+                                    <>
+                                        <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Evento A</p>
+                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.evento}</p>
+                                        </div>
+                                        <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Frecuencia Empírica f</p>
+                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.f}</p>
+                                        </div>
+                                        <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Simulaciones N</p>
+                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.N}</p>
+                                        </div>
+                                        <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Porcentaje Empírico</p>
+                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.probPorcentaje}%</p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    [
+                                        ...(inputMode !== 'manual' ? [{ label: <>{(isCond || isFrec) ? 'Evento' : 'Eventos'} <InlineMath math={(isCond || isFrec) ? "A" : "E"} /></>, val: eventoFavorable.join(', ') }] : []),
+                                        { label: <>{labels.tarjetaNumerador.text} <InlineMath math={labels.tarjetaNumerador.math} /></>, val: activeRes?.casosFavorables },
+                                        { label: <>{labels.tarjetaDenominador.text} <InlineMath math={labels.tarjetaDenominador.math} /></>, val: activeRes?.casosTotales },
+                                        ...(tipo === 'clasica' ? [] : [{ label: 'Decimal', val: activeRes?.probabilidadDecimal }]),
+                                        { label: 'Porcentaje', val: `${activeRes?.probabilidadPorcentaje}%` },
+                                    ].map(({ label, val }, i) => (
+                                        <div key={i} style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>{label}</p>
+                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{val}</p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+
+                        {tipo === 'clasica' && historialSimClasica.length > 0 && inputMode === 'simulacion' && (
+                            <div style={{ marginTop: '10px' }}>
+                                <MarcoWidgetMAT251 titulo="Convergencia de la Probabilidad (Ley de los Grandes Números)" anchoCompleto={true} alto="400px">
+                                    <div style={{ width: '100%', height: '100%', minWidth: 0, padding: '15px' }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={historialSimClasica} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                                                <XAxis dataKey="intento" stroke="var(--text-muted)" fontSize={12} />
+                                                <YAxis domain={[0, 1]} stroke="var(--text-muted)" fontSize={12} />
+                                                <Tooltip
+                                                    contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', color: 'var(--text-color)' }}
+                                                    itemStyle={{ color: 'var(--primary-color)' }}
+                                                    formatter={(value) => value.toFixed(4)}
+                                                />
+                                                <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--text-color)' }} />
+                                                <ReferenceLine y={historialSimClasica[0]?.teorica} stroke="#10b981" strokeDasharray="5 5" label={{ position: 'top', value: 'Prob. Teórica', fill: '#10b981', fontSize: 12 }} />
+                                                <Line type="monotone" dataKey="empirica" name="Prob. Simulada" stroke="var(--primary-color)" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
                                     </div>
-                                    <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                        <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Frecuencia Empírica f</p>
-                                        <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.f}</p>
-                                    </div>
-                                    <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                        <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Simulaciones N</p>
-                                        <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.N}</p>
-                                    </div>
-                                    <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                        <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Porcentaje Empírico</p>
-                                        <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.probPorcentaje}%</p>
-                                    </div>
-                                </>
-                            ) : (
-                                [
-                                    ...(inputMode !== 'manual' ? [{ label: <>{(isCond || isFrec) ? 'Evento' : 'Eventos'} <InlineMath math={(isCond || isFrec) ? "A" : "E"} /></>, val: eventoFavorable.join(', ') }] : []),
-                                    { label: <>{labels.tarjetaNumerador.text} <InlineMath math={labels.tarjetaNumerador.math} /></>, val: activeRes?.casosFavorables },
-                                    { label: <>{labels.tarjetaDenominador.text} <InlineMath math={labels.tarjetaDenominador.math} /></>, val: activeRes?.casosTotales },
-                                    ...(tipo === 'clasica' ? [] : [{ label: 'Decimal', val: activeRes?.probabilidadDecimal }]),
-                                    { label: 'Porcentaje', val: `${activeRes?.probabilidadPorcentaje}%` },
-                                ].map(({ label, val }, i) => (
-                                    <div key={i} style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                        <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>{label}</p>
-                                        <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{val}</p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                                </MarcoWidgetMAT251>
+                            </div>
+                        )}
 
                         {isFrec && simulacionActiva && datosSimulacion.length > 0 && inputMode === 'simulacion' && (
                             <div style={{ marginTop: '20px' }}>
