@@ -40,7 +40,8 @@ export default function PanelResultados({
   tablasDesarrolloReporte,
   setTablasDesarrolloReporte,
   modelosVisibles,
-  setModelosVisibles
+  setModelosVisibles,
+  tareaYaEntregada = false
 }) {
 
   useEffect(() => {
@@ -165,19 +166,21 @@ export default function PanelResultados({
               <IconoPDF /> Exportar PDF
             </button>
 
-            <button
-              onClick={handleGuardarResultado}
-              className="btn-icon btn-save-calculo"
-              style={{
-                backgroundColor: "var(--primary-color, #f97316)", color: "white", padding: "11px 22px",
-                borderRadius: "8px", cursor: "pointer", fontWeight: "bold", border: "none",
-                display: "inline-flex", alignItems: "center", gap: "8px",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                transition: "all 0.2s ease"
-              }}
-            >
-              <IconoGuardar /> Guardar Cálculo
-            </button>
+            {!tareaYaEntregada && (
+              <button
+                onClick={handleGuardarResultado}
+                className="btn-icon btn-save-calculo"
+                style={{
+                  backgroundColor: "var(--primary-color, #f97316)", color: "white", padding: "11px 22px",
+                  borderRadius: "8px", cursor: "pointer", fontWeight: "bold", border: "none",
+                  display: "inline-flex", alignItems: "center", gap: "8px",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                <IconoGuardar /> Guardar Cálculo
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -194,6 +194,18 @@ export default function ListaTareas({ curso, onClose }) {
                     const entrega = entregas[tarea.id];
                     const entregado = !!entrega;
                     const fechaLimiteVencida = Boolean(tarea.fecha_limite && new Date(tarea.fecha_limite) < new Date());
+
+                    let entregaArchivo = "";
+                    if (entrega?.datos_respuesta) {
+                      try {
+                        const d = typeof entrega.datos_respuesta === "string" ? JSON.parse(entrega.datos_respuesta) : entrega.datos_respuesta;
+                        if (d?.archivo_base && d.archivo_base !== "Sin archivo") {
+                          entregaArchivo = d.archivo_base;
+                        }
+                      } catch (e) {}
+                    }
+                    const nombreArchivoMostrar = tarea.archivo_nombre || entregaArchivo || "";
+
                     return (
                         <div key={tarea.id} style={{ background: "var(--bg-main)", padding: "16px", borderRadius: "10px", border: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "15px", flexWrap: "wrap" }}>
                             <div style={{ flex: 1, minWidth: "260px" }}>
@@ -234,6 +246,11 @@ export default function ListaTareas({ curso, onClose }) {
                                     {tarea.fecha_limite && (
                                       <span style={{ display: "flex", alignItems: "center", gap: "4px", color: fechaLimiteVencida ? "#dc2626" : "var(--text-muted)", fontWeight: fechaLimiteVencida ? "600" : "normal" }}>
                                         <Calendar size={13} /> {fechaLimiteVencida ? "Venció:" : "Límite:"} {new Date(tarea.fecha_limite).toLocaleString('es-ES')}
+                                      </span>
+                                    )}
+                                    {nombreArchivoMostrar && (
+                                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#27ae60", fontWeight: "500" }}>
+                                        <FileSpreadsheet size={13} /> Archivo: {nombreArchivoMostrar}
                                       </span>
                                     )}
                                     {!esDocente && entregado && (

@@ -622,6 +622,17 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
               tarea.fecha_limite && new Date(tarea.fecha_limite) < new Date()
             );
 
+            let entregaArchivo = "";
+            if (entrega?.datos_respuesta) {
+              try {
+                const d = typeof entrega.datos_respuesta === "string" ? JSON.parse(entrega.datos_respuesta) : entrega.datos_respuesta;
+                if (d?.archivo_base && d.archivo_base !== "Sin archivo") {
+                  entregaArchivo = d.archivo_base;
+                }
+              } catch (e) {}
+            }
+            const nombreArchivoMostrar = tarea.archivo_nombre || entregaArchivo || "";
+
             return (
               <div 
                 key={tarea.id} 
@@ -746,9 +757,9 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                         <Calendar size={14} /> Fecha límite: {new Date(tarea.fecha_limite).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
                       </span>
                     )}
-                    {tarea.archivo_nombre && (
+                    {nombreArchivoMostrar && (
                       <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#27ae60", fontWeight: "500" }}>
-                        <FileSpreadsheet size={14} /> Archivo: {tarea.archivo_nombre}
+                        <FileSpreadsheet size={14} /> Archivo: {nombreArchivoMostrar}
                       </span>
                     )}
                   </div>

@@ -31,6 +31,11 @@ export default function Calculadora() {
     selectedCourse
   );
 
+  const tareaEntregada = Boolean(
+    paramsReabrir.tareaEntregada ||
+    paramsReabrir.soloLectura
+  );
+
   return (
     <div className="contenedor-principal-sistema">
 
@@ -39,7 +44,8 @@ export default function Calculadora() {
         <Calculos stats={stats} paramsReabrir={paramsReabrir} />
       </div>
 
-      <div className="flotante-lateral-datos">
+      {!tareaEntregada && (
+        <div className="flotante-lateral-datos">
         <button
           id="tour-btn-gestion"
           className="btn-flotante-datos"
@@ -87,7 +93,8 @@ export default function Calculadora() {
           </svg>
           <span className="texto-flotante">CREAR TABLA</span>
         </button>
-      </div>
+        </div>
+      )}
 
       {mostrarDatos && (
         <div className="modal-overlay-datos">

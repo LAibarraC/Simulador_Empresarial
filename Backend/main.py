@@ -15,6 +15,11 @@ import models
 async def lifespan(app: FastAPI):
     async with async_engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE tareas ADD COLUMN archivo_nombre_fijo VARCHAR(255) NULL"))
+        except Exception:
+            pass
     yield
 
 _is_production = os.getenv("ENVIRONMENT") == "production"

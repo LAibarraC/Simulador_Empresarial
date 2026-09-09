@@ -647,7 +647,9 @@ export default function Calculos() {
         setDatosHistorial(null);
       } else if (archivoReabrir) {
         setSelectedFile(archivoReabrir);
-        setDatosHistorial(null);
+        if (snapshot?.datosSnapshot) {
+          setDatosHistorial(snapshot.datosSnapshot);
+        }
       }
       if (calculoReabrir) {
         setCalculo(calculoReabrir);
@@ -873,10 +875,25 @@ export default function Calculos() {
 
       const textoEjercicios = tareaObj?.ejercicios_seleccionados || tareaContexto?.ejercicios_seleccionados || "Todos los temas";
       const parsed = parseEjerciciosAsignadosCalc(textoEjercicios);
-      const archivoReq = tareaObj?.archivo_nombre || "";
+      
+      let entregaBaseFile = "";
+      if (entregaTarea?.datos_respuesta) {
+        try {
+          const p = JSON.parse(entregaTarea.datos_respuesta);
+          entregaBaseFile = p.archivo_base || "";
+        } catch (e) {}
+      }
 
-      if (tareaObj?.archivo_nombre && !selectedFile && !location.state?.sinArchivo) {
-        setSelectedFile(tareaObj.archivo_nombre);
+      const archivoDeHist = (hist || []).find(r => {
+        const snap = parseSnapshotDataCalc(r.snapshot);
+        const recTareaId = snap?.tarea_id || snap?.configuracion?.tarea_id || r.tarea_id;
+        return recTareaId && String(recTareaId) === String(activeTareaId);
+      })?.archivo_origen;
+
+      const archivoReq = tareaObj?.archivo_nombre || entregaBaseFile || archivoDeHist || "";
+
+      if ((tareaObj?.archivo_nombre || archivoReq) && !selectedFile && !location.state?.sinArchivo) {
+        setSelectedFile(tareaObj?.archivo_nombre || archivoReq);
       }
 
       if (parsed && parsed.length > 0) {
@@ -902,6 +919,10 @@ export default function Calculos() {
   }, [cargarEstadoTarea]);
 
   const handleEnviarTareaDesdeCalculadora = async () => {
+    if (tareaYaEntregada) {
+      alerta.advertencia("Tarea ya entregada", "Esta tarea ya ha sido entregada y no se pueden realizar nuevas entregas.");
+      return;
+    }
     const activeTareaId = tareaContexto?.id || tareaContexto?.tareaId;
     if (!activeTareaId) return;
 
@@ -963,6 +984,10 @@ export default function Calculos() {
 
   const handleGuardarResultado = async () => {
     if (!usuario) return;
+    if (tareaYaEntregada) {
+      alerta.advertencia("Tarea Entregada", "Los cálculos de esta tarea están congelados en modo solo lectura porque ya ha sido entregada.");
+      return;
+    }
     try {
       const activeTareaId = tareaContexto?.id || tareaContexto?.tareaId || null;
       const activeTareaTitulo = tareaContexto?.titulo || tareaContexto?.tareaTitulo || null;
@@ -1000,13 +1025,14 @@ export default function Calculos() {
   const temasCompletadosTarea = temasTareaEstado.filter(t => t.realizado).length;
   const todosTemasCompletados = totalTemasTarea > 0 && temasCompletadosTarea === totalTemasTarea;
   const porcentajeProgresoTarea = totalTemasTarea > 0 ? Math.round((temasCompletadosTarea / totalTemasTarea) * 100) : 0;
-  const tareaYaEntregada = Boolean(entregaTarea);
+  const tareaYaEntregada = Boolean(entregaTarea) || Boolean(location.state?.tareaEntregada) || Boolean(location.state?.soloLectura) || Boolean(tareaContexto?.tareaEntregada);
 
   const esIntervalo = calculo === "distribucion_intervalos";
   const esUnidimensional = ["frecuencias_completas", "distribucion_intervalos", "estadistica_descriptiva", "tendencia_central", "medidas_posicion", "tendencia_y_posicion", "variabilidad_y_forma"].includes(calculo);
   const esBivariada = ["distribucion_bivariada", "distribucion_bivariada_avanzada"].includes(calculo);
 
   const handleGridChange = (newRows, { indexes, column }) => {
+    if (tareaYaEntregada) return;
     indexes.forEach((index) => {
       handleChangeDato(index, column.key, newRows[index][column.key]);
     });
@@ -1047,9 +1073,9 @@ export default function Calculos() {
           {/* Lado izquierdo: Título y descripción limpia */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
             <span style={{ 
-              background: "rgba(59, 130, 246, 0.2)", 
-              border: "1px solid rgba(59, 130, 246, 0.45)", 
-              color: "#60a5fa", 
+              background: tareaYaEntregada ? "rgba(39, 174, 96, 0.2)" : "rgba(59, 130, 246, 0.2)", 
+              border: tareaYaEntregada ? "1px solid rgba(39, 174, 96, 0.45)" : "1px solid rgba(59, 130, 246, 0.45)", 
+              color: tareaYaEntregada ? "#2ecc71" : "#60a5fa", 
               padding: "4px 10px", 
               borderRadius: "8px", 
               fontSize: "0.75rem", 
@@ -1059,18 +1085,20 @@ export default function Calculos() {
               gap: "6px",
               letterSpacing: "0.3px"
             }}>
-              <BookOpenCheck size={15} /> Modo Tarea
+              {tareaYaEntregada ? <><CheckCircle2 size={15} /> Tarea Entregada (Solo Lectura)</> : <><BookOpenCheck size={15} /> Modo Tarea</>}
             </span>
 
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Resolviendo para:</span>
+              <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
+                {tareaYaEntregada ? "Cálculo entregado para:" : "Resolviendo para:"}
+              </span>
               <span style={{ color: "#ffffff", fontWeight: "700", fontSize: "0.92rem" }}>
                 {tareaContexto.titulo || tareaContexto.tareaTitulo}
               </span>
             </div>
 
-            <span style={{ fontSize: "0.76rem", color: "#94a3b8", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              • Los cálculos guardados se vincularán únicamente a esta tarea
+            <span style={{ fontSize: "0.76rem", color: tareaYaEntregada ? "#a7f3d0" : "#94a3b8", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              • {tareaYaEntregada ? "Esta tarea ya ha sido entregada. Los cálculos se encuentran en modo solo lectura." : "Los cálculos guardados se vincularán únicamente a esta tarea"}
             </span>
           </div>
 
@@ -1177,31 +1205,6 @@ export default function Calculos() {
       )}
 
       <div className={`calculadora-layout ${panelAbierto ? "" : "colapsado"}`} style={{ position: "relative" }}>
-        {datosHistorial && (
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, zIndex: 50, background: "#f59e0b", color: "#fff",
-            padding: "8px 15px", display: "flex", justifyContent: "space-between", alignItems: "center",
-            fontWeight: "bold", fontSize: "0.9rem", boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
-          }}>
-            <span>⏱️ Viendo cálculo del historial (Modo Congelado).</span>
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <button
-                onClick={salirModoHistorialManual}
-                style={{ background: "#b45309", border: "none", color: "white", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
-                title="Volver a conectarse con el servidor para usar otros datos"
-              >
-                Volver a Calculadora Normal
-              </button>
-              <button
-                onClick={salirModoHistorialManual}
-                style={{ background: "transparent", border: "none", color: "white", fontSize: "1.2rem", cursor: "pointer", padding: "0 5px" }}
-                title="Cerrar vista de historial"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
 
         <PanelConfiguracion
           panelAbierto={panelAbierto} setPanelAbierto={setPanelAbierto}
@@ -1235,6 +1238,7 @@ export default function Calculos() {
           mostrarCalculadora={mostrarCalculadora} setMostrarCalculadora={setMostrarCalculadora}
           handleActualizarColumna={handleActualizarColumna}
           handleCrearColumna={handleCrearColumna}
+          tareaYaEntregada={tareaYaEntregada}
         />
 
         <PanelResultados
@@ -1250,6 +1254,7 @@ export default function Calculos() {
           setTablasDesarrolloReporte={setTablasDesarrolloReporte}
           modelosVisibles={modelosVisibles}
           setModelosVisibles={setModelosVisibles}
+          tareaYaEntregada={tareaYaEntregada}
         />
 
         <ReportePDF

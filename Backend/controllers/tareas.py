@@ -7,12 +7,20 @@ from validators.tareas import TareaCreate, EntregaTareaCreate
 from datetime import datetime
 
 async def crear_tarea(db: AsyncSession, tarea: TareaCreate, docente_id: int):
+    nombre_fijo = None
+    if tarea.archivo_id:
+        res_arc = await db.execute(select(models.Archivo).filter(models.Archivo.id == tarea.archivo_id))
+        arc_obj = res_arc.scalars().first()
+        if arc_obj:
+            nombre_fijo = arc_obj.nombre_original
+
     db_tarea = Tarea(
         titulo=tarea.titulo,
         descripcion=tarea.descripcion,
         clase_id=tarea.clase_id,
         docente_id=docente_id,
         archivo_id=tarea.archivo_id,
+        archivo_nombre_fijo=nombre_fijo,
         ejercicios_seleccionados=tarea.ejercicios_seleccionados,
         fecha_limite=tarea.fecha_limite
     )
