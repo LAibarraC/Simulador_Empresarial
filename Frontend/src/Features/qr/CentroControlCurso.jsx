@@ -41,6 +41,7 @@ export default function CentroControlCurso({
   onClose,
   onDesactivar,
   onCursoActualizado,
+  seccionInicial = "general",
 }) {
   // ────────────── Estados ──────────────
   const [generando, setGenerando] = useState(false);
@@ -51,7 +52,7 @@ export default function CentroControlCurso({
     curso?.codigo_acceso || curso?.codigo || null
   );
   const [guardandoCurso, setGuardandoCurso] = useState(false);
-  const [seccionActiva, setSeccionActiva] = useState("general");
+  const [seccionActiva, setSeccionActiva] = useState(seccionInicial);
   const [reseteandoCurso, setReseteandoCurso] = useState(false);
   const [actualizandoFecha, setActualizandoFecha] = useState(false);
   const [matriculaCerrada, setMatriculaCerrada] = useState(
