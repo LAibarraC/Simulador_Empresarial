@@ -197,7 +197,7 @@ export default function TablasBivariantes({ resultado, formatearCelda }) {
           <IconoCopiar /> Copiar Tabla
         </button>
       </div>
-      <div style={{ overflowX: "auto", overflowY: "hidden", paddingBottom: "100px", marginBottom: "-100px" }}>
+      <div style={{ overflowX: "auto", width: "100%", paddingBottom: "12px" }}>
         <table className="tabla-academica">
           <thead>
             <tr>

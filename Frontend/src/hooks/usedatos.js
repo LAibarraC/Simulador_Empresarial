@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { generarColorAleatorio } from '../utils/excelHelpers';
 
@@ -12,6 +12,14 @@ export const useSimuladorLogic = (usuario) => {
   const [rowData, setRowData] = useState([]);
   const [variables, setVariables] = useState([]);
   const [limiteFilas, setLimiteFilas] = useState(50);
+
+  useEffect(() => {
+    setWorkbook(null);
+    setSheetNames([]);
+    setCurrentSheet("");
+    setRowData([]);
+    setVariables([]);
+  }, [usuario?.id, usuario?.email]);
 
   const cargarHoja = useCallback((wb, sheetName, limite = limiteFilas) => {
     if (!wb) return;

@@ -380,7 +380,7 @@ export default function PanelConfiguracion({
                 >
                   <option value="">-- Selecciona un curso --</option>
                   {misCursos.map((c) => (
-                    <option key={c.id} value={c.id}>
+                    <option key={c.id} value={String(c.id)}>
                       {c.nombre}
                     </option>
                   ))}

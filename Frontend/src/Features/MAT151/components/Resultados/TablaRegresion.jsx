@@ -167,7 +167,7 @@ export default function TablaRegresion({
             </button>
           )}
         </div>
-        <div style={{ overflow: "visible" }}>
+        <div style={{ overflowX: "auto", width: "100%", paddingBottom: "8px" }}>
           <table className="tabla-academica" style={{ width: "100%", textAlign: "center" }}>
             <thead>
               <tr>
@@ -300,7 +300,7 @@ export default function TablaRegresion({
                     </button>
                   )}
                 </div>
-                <div style={{ overflowX: "auto", overflowY: "hidden" }}>
+                <div style={{ overflowX: "auto", width: "100%", paddingBottom: "12px" }}>
                   <table className="tabla-academica" style={{ width: "100%", textAlign: "center", fontSize: "0.85em" }}>
                     <thead>
                       <tr>

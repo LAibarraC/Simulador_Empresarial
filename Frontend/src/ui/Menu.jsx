@@ -8,6 +8,7 @@
   import { IconoCandado } from "./iconos";
 
   export default function Menu({ usuario, setUsuario }) {
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     // Nuevo estado para controlar cuándo se abre el submenú (útil para móviles)
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -103,7 +104,6 @@
       setGruposDropdownOpen(false);
     };
 
-    const navigate = useNavigate();
     const location = useLocation();
     const navLinksRef = useRef(null);
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
@@ -186,7 +186,7 @@
 
               <ul className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
                 <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
-                  <NavLink to="/calculadora" onClick={closeMenu} className="dropdown-item">
+                  <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
                     Estadística General
                   </NavLink>
                 </li>
@@ -240,6 +240,8 @@
             ) : (
               <li><NavLink to="/grupos" onClick={closeMenu}>Grupos</NavLink></li>
             )}
+
+            <li><NavLink to="/tareas" onClick={closeMenu}>Tareas</NavLink></li>
 
             {usuario && usuario.rol === "Administrador" && (
               <li><NavLink to="/admin" onClick={closeMenu}>Admin</NavLink></li>
@@ -301,14 +303,24 @@
                           <li
                             key={n.id}
                             className={`notif-item ${!n.leido ? 'unread' : ''}`}
-                            onClick={(e) => !n.leido && handleMarcarLeida(n.id, e)}
+                            onClick={(e) => {
+                              if (!n.leido) handleMarcarLeida(n.id, e);
+                              if (n.tipo === 'tarea' || (n.mensaje && n.mensaje.toLowerCase().includes('tarea'))) {
+                                setNotifDropdownOpen(false);
+                                navigate('/tareas');
+                              }
+                            }}
+                            style={{ cursor: 'pointer' }}
                           >
                             <span className="notif-item-msg">{n.mensaje}</span>
                             <div className="notif-item-meta">
-                              <span className={`notif-badge-type ${n.tipo === 'sistema' ? 'sistema' : 'personal'}`}>
-                                {n.tipo === 'sistema' ? 'Sistema' : 'Personal'}
+                              <span 
+                                className={`notif-badge-type ${n.tipo === 'sistema' ? 'sistema' : n.tipo === 'tarea' ? 'tarea' : 'personal'}`}
+                                style={n.tipo === 'tarea' ? { background: 'rgba(59, 130, 246, 0.15)', color: 'var(--primary-color)', border: '1px solid rgba(59, 130, 246, 0.3)' } : {}}
+                              >
+                                {n.tipo === 'sistema' ? 'Sistema' : n.tipo === 'tarea' ? 'Tarea' : 'Personal'}
                               </span>
-                              <span>{n.fecha_creacion.split(' ')[0]}</span>
+                              <span>{n.fecha_creacion ? n.fecha_creacion.split(' ')[0] : ''}</span>
                             </div>
                           </li>
                         ))

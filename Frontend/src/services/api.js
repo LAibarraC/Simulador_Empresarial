@@ -186,10 +186,15 @@ export const api = {
 
   // --- OBTENER LISTA DE ARCHIVOS ---
   obtenerArchivos: async (autor, visibilidad = "personal", curso = "") => {
-    let url = `${BASE_URL}/files?autor=${encodeURIComponent(autor)}&visibilidad=${visibilidad}`;
+    const token = localStorage.getItem("token");
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    let url = `${BASE_URL}/files?autor=${encodeURIComponent(autor || "")}&visibilidad=${visibilidad}`;
     if (curso) url += `&curso=${encodeURIComponent(curso)}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, { headers });
     if (!response.ok) throw new Error("Error al obtener archivos");
     return response.json();
   },
@@ -346,9 +351,14 @@ export const api = {
 
   guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto) => {
     try {
+      const token = localStorage.getItem("token");
+      const headers = { 
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {})
+      };
       const res = await fetch(`${BASE_URL}/guardar_historial`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           autor: autor,
           calculo: calculo,
@@ -369,8 +379,11 @@ export const api = {
 
   obtenerHistorial: async (autor) => {
     try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
       const res = await fetch(
-        `${BASE_URL}/obtener_historial?autor=${encodeURIComponent(autor)}`,
+        `${BASE_URL}/obtener_historial?autor=${encodeURIComponent(autor || "")}`,
+        { headers }
       );
       if (!res.ok)
         throw new Error("Error al obtener el historial del servidor");
@@ -383,9 +396,11 @@ export const api = {
 
   eliminarHistorial: async (registro_id, autor) => {
     try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
       const res = await fetch(
-        `${BASE_URL}/eliminar_historial/${registro_id}?autor=${encodeURIComponent(autor)}`,
-        { method: "DELETE" },
+        `${BASE_URL}/eliminar_historial/${registro_id}?autor=${encodeURIComponent(autor || "")}`,
+        { method: "DELETE", headers },
       );
       if (!res.ok) throw new Error("Error al eliminar el registro");
       return await res.json();
@@ -698,6 +713,20 @@ export const api = {
       console.error("Error en api.obtenerEstadisticasDocente:", error);
       throw error;
     }
+  },
+
+  eliminarTarea: async (tareaId) => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/tareas/${tareaId}`, {
+      method: "DELETE",
+      headers: headers
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al eliminar la tarea");
+    return data;
   },
 };
 
