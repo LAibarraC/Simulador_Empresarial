@@ -26,6 +26,7 @@ import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModule
 import LtiTester from "./pages/LtiTester";
 import Historial from "./Features/History/Historial";
 import Grupos from './Features/grupos/Grupos';
+import Tareas from './Features/grupos/Tareas';
 import GenerarQR from "./Features/qr/GenerarQR";
 import Matricular from "./Features/qr/Matricular";
 import api from "./services/api";
@@ -132,6 +133,7 @@ function App() {
                       <Route path="/historial" element={<Historial />} />
                       <Route path="/grupos" element={<Grupos />} />
                       <Route path="/mis-cursos" element={<Grupos />} />
+                      <Route path="/tareas" element={<Tareas />} />
                       <Route path="/matricular/:token" element={<Matricular />} />
 
                       <Route path="/lti-tester" element={<Navigate to="/" />} />

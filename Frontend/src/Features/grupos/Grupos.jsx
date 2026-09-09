@@ -611,251 +611,251 @@ export default function Grupos() {
       {/* VISTA DEL DOCENTE / ADMINISTRADOR         */}
       {/* ========================================= */}
       {(esDocente || esAdmin) && (
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
-            <h2 id="tour-titulo-cursos" style={{ color: "var(--primary-color)", margin: 0, fontSize: "clamp(1.1rem, 3vw, 1.5rem)" }}>
-              {esAdmin ? "Todos los Cursos del Sistema (Vista Global)" : "Mis Cursos Creados"}
-            </h2>
-            <button
-              id="tour-btn-crear-curso"
-              onClick={() => setMostrarModal(true)}
-              style={{ background: "var(--accent-color)", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", transition: "background 0.3s", textAlign: "center" }}
-            >
-              + Crear Nuevo Curso
-            </button>
-          </div>
-
-          {/* BUSCADOR DOCENTE */}
-          {(listaBase.length > 0 || searchTerm !== "") && (
-            <div style={{ marginBottom: "20px" }}>
-              <input
-                type="text"
-                placeholder="Buscar curso por nombre o código..."
-                value={searchTerm}
-                onChange={handleSearch}
-                style={{ width: "100%", padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-input)", color: "var(--text-main)", outline: "none", fontSize: "0.95rem" }}
-              />
-            </div>
-          )}
-
-          {/* ESTADO VACÍO Y LISTA */}
-          {filteredCursos.length === 0 && searchTerm !== "" ? (
-            <div style={{ padding: "30px", textAlign: "center", background: "var(--bg-main)", borderRadius: "8px", color: "var(--text-muted)" }}>
-              No se encontraron cursos que coincidan con "{searchTerm}".
-            </div>
-          ) : (
-            <>
-              <div id="tour-lista-cursos" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
-                {currentCursos.map((curso) => {
-                  const puedeGestionar = esAdmin || curso.docente_email === correoUsuario;
-                  const qrDeCurso = obtenerQRActivoDeClase(curso.id);
-                  const fechaVencida = Boolean(
-                    curso.fecha_limite_matriculacion &&
-                    curso.fecha_limite_matriculacion < new Date().toISOString().slice(0, 10)
-                  );
-                  const matriculaCerrada = curso.activa === false || fechaVencida;
-                  const qrHabilitado = !matriculaCerrada && Boolean(
-                    (curso.codigo || curso.codigo_acceso) && qrDeCurso && qrDeCurso.activo !== false
-                  );
-                  return (
-                    <div key={curso.id} style={{ background: "var(--bg-card, white)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-color, #eee)", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
-                        <h3 style={{ margin: 0, color: "var(--text-main, #333)", lineHeight: 1.3, overflowWrap: "anywhere" }}>{curso.nombre}</h3>
-                        {qrHabilitado && (
-                          <span
-                            title="Código QR habilitado"
-                            aria-label="Código QR habilitado"
-                            style={{ flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "30px", height: "30px", borderRadius: "8px", color: "var(--accent-color)", background: "color-mix(in srgb, var(--accent-color) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-color) 28%, transparent)" }}
-                          >
-                            <IconoQr width="17" height="17" />
-                          </span>
-                        )}
-                      </div>
-                      <p style={{ margin: "0 0 5px 0", color: "var(--text-muted, #666)" }}>
-                        <strong>Código de Matriculación:</strong>{" "}
-                        <span
-                          className="tour-curso-codigo"
-                          style={{
-                            color: matriculaCerrada ? "#dc2626" : "var(--accent-color)",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {curso.codigo || curso.codigo_acceso || "Sin código"}
-                        </span>
-                      </p>
-                      {curso.fecha_limite_matriculacion && (
-                        <p style={{ margin: "5px 0 0 0", color: "var(--text-muted)", fontSize: "0.9rem" }}>
-                          <strong>Límite de Matrícula:</strong> {curso.fecha_limite_matriculacion}
-                        </p>
-                      )}
-                      {curso.docente_nombre && (
-                        <p style={{ margin: "5px 0 0 0", color: "var(--text-muted)", fontSize: "0.9rem" }}>
-                          <strong>Docente:</strong> {curso.docente_nombre}
-                        </p>
-                      )}
-                      <div style={{ display: "flex", gap: "10px", marginTop: "15px", flexWrap: "wrap" }}>
-                        {puedeGestionar && (
-                          <button
-                            onClick={() => handleOpenGestionar(curso)}
-                            className="tour-curso-gestionar"
-                            onMouseEnter={() => setHoveredCursoId(curso.id)}
-                            onMouseLeave={() => setHoveredCursoId(null)}
-                            style={{
-                              flex: 1, padding: "8px", background: hoveredCursoId === curso.id ? "#374151" : "#4b5563", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", color: "#ffffff", transition: "background-color 0.2s"
-                            }}
-                          >
-                            Gestionar curso
-                          </button>
-                        )}
-                        <button
-                          onClick={() => navigate("/archivos", { state: { cursoIdSeleccionado: curso.id } })}
-                          className="tour-curso-subir"
-                          style={{ flex: 1, padding: "8px", background: "var(--primary-color)", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
-                        >
-                          Subir Material
-                        </button>
-                      </div>
-
-                      {puedeGestionar && (
-                        <button
-                          onClick={() => handleOpenEliminar(curso)}
-                          className="tour-curso-eliminar"
-                          style={{ width: "100%", padding: "8px", marginTop: "10px", background: "rgba(220, 38, 38, 0.1)", border: "1px solid rgba(220, 38, 38, 0.3)", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", color: "#dc2626", transition: "all 0.2s" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "#dc2626"; e.currentTarget.style.color = "#ffffff"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(220, 38, 38, 0.1)"; e.currentTarget.style.color = "#dc2626"; }}
-                        >
-                          Eliminar Curso
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
+                <h2 id="tour-titulo-cursos" style={{ color: "var(--primary-color)", margin: 0, fontSize: "clamp(1.1rem, 3vw, 1.5rem)" }}>
+                  {esAdmin ? "Todos los Cursos del Sistema (Vista Global)" : "Mis Cursos Creados"}
+                </h2>
+                <button
+                  id="tour-btn-crear-curso"
+                  onClick={() => setMostrarModal(true)}
+                  style={{ background: "var(--accent-color)", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", transition: "background 0.3s", textAlign: "center" }}
+                >
+                  + Crear Nuevo Curso
+                </button>
               </div>
 
-              <ControlesPaginacion />
-            </>
-          )}
-        </div>
-      )}
+              {/* BUSCADOR DOCENTE */}
+              {(listaBase.length > 0 || searchTerm !== "") && (
+                <div style={{ marginBottom: "20px" }}>
+                  <input
+                    type="text"
+                    placeholder="Buscar curso por nombre o código..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    style={{ width: "100%", padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-input)", color: "var(--text-main)", outline: "none", fontSize: "0.95rem" }}
+                  />
+                </div>
+              )}
 
-      {/* ========================================= */}
-      {/* VISTA DEL ESTUDIANTE                      */}
-      {/* ========================================= */}
-      {esEstudiante && (
-        <div>
-          <div id="tour-clases-activas" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
-            <h2 style={{ color: "#27ae60", margin: 0, fontSize: "clamp(1.1rem, 3vw, 1.5rem)" }}>Mis Clases Activas</h2>
-            <button
-              id="tour-matriculacion-seccion"
-              onClick={() => setMostrarModalMatricular(true)}
-              style={{ background: "#27ae60", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", transition: "background 0.3s", textAlign: "center" }}
-            >
-              + Matricularse
-            </button>
-          </div>
+              {/* ESTADO VACÍO Y LISTA */}
+              {filteredCursos.length === 0 && searchTerm !== "" ? (
+                <div style={{ padding: "30px", textAlign: "center", background: "var(--bg-main)", borderRadius: "8px", color: "var(--text-muted)" }}>
+                  No se encontraron cursos que coincidan con "{searchTerm}".
+                </div>
+              ) : (
+                <>
+                  <div id="tour-lista-cursos" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
+                    {currentCursos.map((curso) => {
+                      const puedeGestionar = esAdmin || curso.docente_email === correoUsuario;
+                      const qrDeCurso = obtenerQRActivoDeClase(curso.id);
+                      const fechaVencida = Boolean(
+                        curso.fecha_limite_matriculacion &&
+                        curso.fecha_limite_matriculacion < new Date().toISOString().slice(0, 10)
+                      );
+                      const matriculaCerrada = curso.activa === false || fechaVencida;
+                      const qrHabilitado = !matriculaCerrada && Boolean(
+                        (curso.codigo || curso.codigo_acceso) && qrDeCurso && qrDeCurso.activo !== false
+                      );
+                      return (
+                        <div key={curso.id} style={{ background: "var(--bg-card, white)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-color, #eee)", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
+                          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
+                            <h3 style={{ margin: 0, color: "var(--text-main, #333)", lineHeight: 1.3, overflowWrap: "anywhere" }}>{curso.nombre}</h3>
+                            {qrHabilitado && (
+                              <span
+                                title="Código QR habilitado"
+                                aria-label="Código QR habilitado"
+                                style={{ flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "30px", height: "30px", borderRadius: "8px", color: "var(--accent-color)", background: "color-mix(in srgb, var(--accent-color) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-color) 28%, transparent)" }}
+                              >
+                                <IconoQr width="17" height="17" />
+                              </span>
+                            )}
+                          </div>
+                          <p style={{ margin: "0 0 5px 0", color: "var(--text-muted, #666)" }}>
+                            <strong>Código de Matriculación:</strong>{" "}
+                            <span
+                              className="tour-curso-codigo"
+                              style={{
+                                color: matriculaCerrada ? "#dc2626" : "var(--accent-color)",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {curso.codigo || curso.codigo_acceso || "Sin código"}
+                            </span>
+                          </p>
+                          {curso.fecha_limite_matriculacion && (
+                            <p style={{ margin: "5px 0 0 0", color: "var(--text-muted)", fontSize: "0.9rem" }}>
+                              <strong>Límite de Matrícula:</strong> {curso.fecha_limite_matriculacion}
+                            </p>
+                          )}
+                          {curso.docente_nombre && (
+                            <p style={{ margin: "5px 0 0 0", color: "var(--text-muted)", fontSize: "0.9rem" }}>
+                              <strong>Docente:</strong> {curso.docente_nombre}
+                            </p>
+                          )}
+                          <div style={{ display: "flex", gap: "10px", marginTop: "15px", flexWrap: "wrap" }}>
+                            {puedeGestionar && (
+                              <button
+                                onClick={() => handleOpenGestionar(curso)}
+                                className="tour-curso-gestionar"
+                                onMouseEnter={() => setHoveredCursoId(curso.id)}
+                                onMouseLeave={() => setHoveredCursoId(null)}
+                                style={{
+                                  flex: 1, padding: "8px", background: hoveredCursoId === curso.id ? "#374151" : "#4b5563", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", color: "#ffffff", transition: "background-color 0.2s"
+                                }}
+                              >
+                                Gestionar curso
+                              </button>
+                            )}
+                            <button
+                              onClick={() => navigate("/archivos", { state: { cursoIdSeleccionado: curso.id } })}
+                              className="tour-curso-subir"
+                              style={{ flex: 1, padding: "8px", background: "var(--primary-color)", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
+                            >
+                              Subir Material
+                            </button>
+                          </div>
 
-          {/* BUSCADOR ESTUDIANTE */}
-          {(listaBase.length > 0 || searchTerm !== "") && (
-            <div style={{ marginBottom: "20px" }}>
-              <input
-                type="text"
-                placeholder="Buscar materia por nombre..."
-                value={searchTerm}
-                onChange={handleSearch}
-                style={{ width: "100%", padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-input)", color: "var(--text-main)", outline: "none", fontSize: "0.95rem" }}
-              />
-            </div>
-          )}
-
-          {listaBase.length === 0 ? (
-            <div style={{ padding: "30px", textAlign: "center", background: "var(--bg-main)", borderRadius: "8px", color: "var(--text-muted)" }}>
-              Aún no estás inscrito en ninguna materia. ¡Haz clic en "+ Matricularse" para empezar!
-            </div>
-          ) : filteredCursos.length === 0 ? (
-            <div style={{ padding: "30px", textAlign: "center", background: "var(--bg-main)", borderRadius: "8px", color: "var(--text-muted)" }}>
-              No se encontraron materias que coincidan con "{searchTerm}".
-            </div>
-          ) : (
-            <>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
-                {currentCursos.map((curso) => (
-                  <div key={curso.id} style={{ background: "var(--bg-card, white)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-color, #eee)", borderTop: "4px solid #27ae60" }}>
-                    <h3 style={{ margin: "0 0 10px 0", color: "var(--text-main, #333)" }}>{curso.nombre}</h3>
-
-                    {/* INFORMACIÓN ADICIONAL DEL CURSO */}
-                    <div style={{ marginBottom: "10px", fontSize: "0.9rem", color: "var(--text-muted, #666)" }}>
-                      {curso.codigo && (
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Código:</strong> {curso.codigo}
-                        </p>
-                      )}
-                      {curso.docente_nombre && (
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Docente:</strong> {curso.docente_nombre}
-                        </p>
-                      )}
-                      {curso.fecha_limite_matriculacion && (
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Límite de matrícula:</strong> {curso.fecha_limite_matriculacion}
-                        </p>
-                      )}
-                      {curso.fecha_inscripcion && (
-                        <p style={{ margin: "4px 0" }}>
-                          <strong>Inscrito el:</strong> {curso.fecha_inscripcion}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* BOTONES LADO A LADO */}
-                    <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-                      <button
-                        onClick={() => navigate("/archivos", { state: { cursoIdSeleccionado: curso.id } })}
-                        className="tour-ir-material"
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          background: "transparent",
-                          border: "1px solid #27ae60",
-                          color: "#27ae60",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontWeight: "bold",
-                          transition: "all 0.3s"
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#27ae60"; e.currentTarget.style.color = "white"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#27ae60"; }}
-                      >
-                        Ir a Material
-                      </button>
-
-                      <button
-                        onClick={() => handleOpenDesmatricular(curso)}
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          background: "rgba(220, 38, 38, 0.1)",
-                          border: "1px solid #dc2626",
-                          color: "#dc2626",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontWeight: "bold",
-                          transition: "all 0.3s"
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#dc2626"; e.currentTarget.style.color = "#ffffff"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(220, 38, 38, 0.1)"; e.currentTarget.style.color = "#dc2626"; }}
-                      >
-                        Desmatricular
-                      </button>
-                    </div>
+                          {puedeGestionar && (
+                            <button
+                              onClick={() => handleOpenEliminar(curso)}
+                              className="tour-curso-eliminar"
+                              style={{ width: "100%", padding: "8px", marginTop: "10px", background: "rgba(220, 38, 38, 0.1)", border: "1px solid rgba(220, 38, 38, 0.3)", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", color: "#dc2626", transition: "all 0.2s" }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = "#dc2626"; e.currentTarget.style.color = "#ffffff"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(220, 38, 38, 0.1)"; e.currentTarget.style.color = "#dc2626"; }}
+                            >
+                              Eliminar Curso
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+
+                  <ControlesPaginacion />
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ========================================= */}
+          {/* VISTA DEL ESTUDIANTE                      */}
+          {/* ========================================= */}
+          {esEstudiante && (
+            <div>
+              <div id="tour-clases-activas" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
+                <h2 style={{ color: "#27ae60", margin: 0, fontSize: "clamp(1.1rem, 3vw, 1.5rem)" }}>Mis Clases Activas</h2>
+                <button
+                  id="tour-matriculacion-seccion"
+                  onClick={() => setMostrarModalMatricular(true)}
+                  style={{ background: "#27ae60", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", transition: "background 0.3s", textAlign: "center" }}
+                >
+                  + Matricularse
+                </button>
               </div>
 
-              <ControlesPaginacion />
-            </>
+              {/* BUSCADOR ESTUDIANTE */}
+              {(listaBase.length > 0 || searchTerm !== "") && (
+                <div style={{ marginBottom: "20px" }}>
+                  <input
+                    type="text"
+                    placeholder="Buscar materia por nombre..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    style={{ width: "100%", padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-input)", color: "var(--text-main)", outline: "none", fontSize: "0.95rem" }}
+                  />
+                </div>
+              )}
+
+              {listaBase.length === 0 ? (
+                <div style={{ padding: "30px", textAlign: "center", background: "var(--bg-main)", borderRadius: "8px", color: "var(--text-muted)" }}>
+                  Aún no estás inscrito en ninguna materia. ¡Haz clic en "+ Matricularse" para empezar!
+                </div>
+              ) : filteredCursos.length === 0 ? (
+                <div style={{ padding: "30px", textAlign: "center", background: "var(--bg-main)", borderRadius: "8px", color: "var(--text-muted)" }}>
+                  No se encontraron materias que coincidan con "{searchTerm}".
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
+                    {currentCursos.map((curso) => (
+                      <div key={curso.id} style={{ background: "var(--bg-card, white)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-color, #eee)", borderTop: "4px solid #27ae60" }}>
+                        <h3 style={{ margin: "0 0 10px 0", color: "var(--text-main, #333)" }}>{curso.nombre}</h3>
+
+                        {/* INFORMACIÓN ADICIONAL DEL CURSO */}
+                        <div style={{ marginBottom: "10px", fontSize: "0.9rem", color: "var(--text-muted, #666)" }}>
+                          {curso.codigo && (
+                            <p style={{ margin: "4px 0" }}>
+                              <strong>Código:</strong> {curso.codigo}
+                            </p>
+                          )}
+                          {curso.docente_nombre && (
+                            <p style={{ margin: "4px 0" }}>
+                              <strong>Docente:</strong> {curso.docente_nombre}
+                            </p>
+                          )}
+                          {curso.fecha_limite_matriculacion && (
+                            <p style={{ margin: "4px 0" }}>
+                              <strong>Límite de matrícula:</strong> {curso.fecha_limite_matriculacion}
+                            </p>
+                          )}
+                          {curso.fecha_inscripcion && (
+                            <p style={{ margin: "4px 0" }}>
+                              <strong>Inscrito el:</strong> {curso.fecha_inscripcion}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* BOTONES LADO A LADO */}
+                        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+                          <button
+                            onClick={() => navigate("/archivos", { state: { cursoIdSeleccionado: curso.id } })}
+                            className="tour-ir-material"
+                            style={{
+                              flex: 1,
+                              padding: "10px",
+                              background: "transparent",
+                              border: "1px solid #27ae60",
+                              color: "#27ae60",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              transition: "all 0.3s"
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "#27ae60"; e.currentTarget.style.color = "white"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#27ae60"; }}
+                          >
+                            Ir a Material
+                          </button>
+
+                          <button
+                            onClick={() => handleOpenDesmatricular(curso)}
+                            style={{
+                              flex: 1,
+                              padding: "10px",
+                              background: "rgba(220, 38, 38, 0.1)",
+                              border: "1px solid #dc2626",
+                              color: "#dc2626",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              transition: "all 0.3s"
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "#dc2626"; e.currentTarget.style.color = "#ffffff"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(220, 38, 38, 0.1)"; e.currentTarget.style.color = "#dc2626"; }}
+                          >
+                            Desmatricular
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <ControlesPaginacion />
+                </>
+              )}
+            </div>
           )}
-        </div>
-      )}
 
       {/* ========================================= */}
       {/* NUEVO MODAL: MATRICULARSE (ESTUDIANTE)    */}

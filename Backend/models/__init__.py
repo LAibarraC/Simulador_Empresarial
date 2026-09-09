@@ -6,6 +6,7 @@ from .historial_calculo import HistorialCalculo
 from .notificacion import Notificacion
 from config.database import Base
 from .clase_qr import ClaseQR
+from .tarea import Tarea, EntregaTarea
 
 # De esta manera, cuando hagas 'from models import Usuario' en tu aplicación,
 # Python sabrá dónde encontrar la clase.

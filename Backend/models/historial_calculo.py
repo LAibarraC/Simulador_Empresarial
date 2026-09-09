@@ -14,9 +14,9 @@ class HistorialCalculo(Base):
     nombre_trabajo = Column(String(150), nullable=False)  # Título que el usuario le da a su cálculo
     fecha_creacion = Column(DateTime, default=func.now())
     
-    # 📝 Guardamos configuraciones (columnas seleccionadas) y los resultados (medias, tablas, etc.) como texto estructurado (JSON string)
-    parametros_json = Column(Text, nullable=False)
-    resultados_json = Column(Text, nullable=False)
+    # 📝 Guardamos configuraciones (columnas seleccionadas) y los resultados (medias, tablas, etc.) como texto estructurado (JSON string de gran capacidad)
+    parametros_json = Column(Text(length=4294967295), nullable=False)
+    resultados_json = Column(Text(length=4294967295), nullable=False)
     
     # Relaciones
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)  # Quién ejecutó el cálculo

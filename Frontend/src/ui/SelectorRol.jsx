@@ -42,7 +42,7 @@ export default function SelectorRol() {
   };
 
   // Rutas que sabemos que tienen el botón de "Guía Rápida" en la esquina inferior izquierda
-  const rutasConGuia = ['/archivos', '/historial', '/grupos', '/calculadora'];
+  const rutasConGuia = ['/archivos', '/historial', '/grupos', '/calculadora', '/tareas'];
   const tieneGuia = rutasConGuia.some(ruta => location.pathname.startsWith(ruta));
   const bottomPosition = tieneGuia ? '90px' : '20px';
 
