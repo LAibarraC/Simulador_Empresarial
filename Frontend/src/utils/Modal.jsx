@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import "../styles/utils/Modal.css";
 
-export default function Modal({ isOpen, onClose, title, children}) {
+export default function Modal({ isOpen, onClose, title, maxWidth, children }) {
     // Truco pro: Bloquear el scroll de la página de fondo cuando el modal se abre
     useEffect(() => {
         if (isOpen) {
@@ -34,6 +34,7 @@ export default function Modal({ isOpen, onClose, title, children}) {
             <div
                 // CONTENEDOR DEL MODAL (La caja blanca)
                 className="container_modal"
+                style={maxWidth ? { maxWidth } : undefined}
                 onClick={(e) => e.stopPropagation()} // Evita que al hacer clic ADENTRO se cierre
             >
                 {/* HEADER */}

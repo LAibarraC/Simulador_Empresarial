@@ -32,27 +32,15 @@ export default function Historial() {
   const iniciarTour = () => {
     const tourSteps = [
       {
-        element: '#tour-historial-titulo',
+        element: '#tour-historial-tabla',
         popover: {
           title: 'Historial de Cálculos',
-          description: '¡Bienvenido! Aquí se guardan de forma permanente y segura tus trabajos anteriores para que no pierdas tu progreso.',
-          side: "bottom",
+          description: '¡Bienvenido! Aquí verás el registro detallado con fecha, hora, el tipo de análisis y el archivo Excel de origen para cada cálculo guardado.',
+          side: "top",
           align: 'start'
         }
       }
     ];
-
-    if (document.querySelector('#tour-historial-tabla')) {
-      tourSteps.push({
-        element: '#tour-historial-tabla',
-        popover: {
-          title: 'Listado de Trabajos',
-          description: 'Aquí verás el registro detallado con fecha, hora, el tipo de análisis y el archivo Excel de origen para cada cálculo guardado.',
-          side: "top",
-          align: 'start'
-        }
-      });
-    }
 
     if (document.querySelector('.tour-tipo-calculo')) {
       tourSteps.push({
@@ -251,21 +239,20 @@ export default function Historial() {
           pointerEvents: "none"
         }}
       />
-      <button
-        onClick={iniciarTour}
-        className="guia-rapida-flotante"
-        style={{
-          bottom: '20px',
-          zIndex: 10000
-        }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-          <line x1="12" y1="17" x2="12.01" y2="17" />
-        </svg>
-        <span className="guia-rapida-flotante-texto">Guía Rápida</span>
-      </button>
+      {/* CABECERA CON BOTÓN DE TOUR */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 3vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
+          <button
+            onClick={iniciarTour}
+            className="guia-rapida-flotante"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <span className="guia-rapida-flotante-texto">Guía Rápida</span>
+          </button>
+      </div>
 
 
       {cargando ? (
@@ -406,46 +393,27 @@ export default function Historial() {
         isOpen={isModalOpen}
         onClose={cancelarEliminacion}
         title="Confirmar eliminación"
+        maxWidth="400px"
       >
-        <p style={{ color: 'var(--text-main)', fontSize: '1rem', marginBottom: '20px' }}>
-          ¿Estás seguro de que deseas eliminar este cálculo de tu historial? Esta acción no se puede deshacer.
-        </p>
+        <div className="modal_viewer">
+          <p>
+            ¿Estás seguro de que deseas eliminar permanentemente este cálculo de tu historial?
+          </p>
+        </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <div className="modal_viewer_button">
           <button
             onClick={cancelarEliminacion}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              background: 'transparent',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            className="modal_viewer_button_si"
           >
             Cancelar
           </button>
 
           <button
             onClick={confirmarEliminacion}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: 'none',
-              background: '#ef4444',
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+            className="modal_viewer_button_no"
           >
-            Sí, eliminar
+            Eliminar
           </button>
         </div>
       </Modal>

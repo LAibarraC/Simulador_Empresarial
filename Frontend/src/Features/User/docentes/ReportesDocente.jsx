@@ -634,14 +634,10 @@ export default function ReportesDocente({ usuario }) {
         <p>No se pudieron obtener las estadísticas de tus grupos en este momento.</p>
         <button
           onClick={() => cargarEstadisticas()}
+          className="btn-azul"
           style={{
             marginTop: '15px',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--accent-color)',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer'
+            padding: '8px 18px',
           }}
         >
           Reintentar
@@ -783,44 +779,6 @@ export default function ReportesDocente({ usuario }) {
         boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          {/* Título y Subtítulo con Icono Profesional */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.28)',
-              flexShrink: 0
-            }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-                <line x1="2" y1="20" x2="22" y2="20" />
-              </svg>
-            </div>
-            <div>
-              <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                Estadísticas y Reportes Docente
-              </h3>
-              <p style={{ margin: '3px 0 0 0', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7, flexShrink: 0 }}>
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
-                {clase_seleccionada
-                  ? `Métricas del grupo: ${clase_seleccionada.nombre} (Código: ${clase_seleccionada.codigo})`
-                  : 'Métricas consolidadas de todas tus materias y grupos asignados'}
-              </p>
-            </div>
-          </div>
-
           {/* Selector de Grupo / Clase con Icono y Estilo Profesional */}
           <div style={{
             display: 'flex',
@@ -897,21 +855,9 @@ export default function ReportesDocente({ usuario }) {
           <button
             onClick={exportarExcel}
             disabled={exportando}
-            className="doc-btn-interactive"
+            className="btn-verde"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#107c41',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '9px 15px',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              cursor: exportando ? 'not-allowed' : 'pointer',
-              opacity: exportando ? 0.7 : 1,
-              boxShadow: '0 2px 6px rgba(16,124,65,0.2)'
+              padding: '8px 16px',
             }}
             title="Exportar reporte completo en Excel con formato profesional"
           >
@@ -926,21 +872,9 @@ export default function ReportesDocente({ usuario }) {
           <button
             onClick={exportarPDF}
             disabled={exportando}
-            className="doc-btn-interactive"
+            className="btn-rojo"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#e11d48',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '9px 15px',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              cursor: exportando ? 'not-allowed' : 'pointer',
-              opacity: exportando ? 0.7 : 1,
-              boxShadow: '0 2px 6px rgba(225,29,72,0.2)'
+              padding: '8px 16px',
             }}
             title="Exportar informe en formato PDF"
           >

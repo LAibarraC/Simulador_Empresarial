@@ -38,8 +38,8 @@
 
 .btn-hamburguesa-simple span {
     display: block;
-    width: 100%;      
-    height: 4px;      
+    width: 100%;
+    height: 4px;
     border: 2px solid var(--text-variable);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -68,23 +68,35 @@
     width: 24px;
     height: 24px;
 }
+
 .btn-hamburguesa-simple.abierto span {
-    width: 10px;     
+    width: 10px;
     height: 10px;
 }
 
-.btn-hamburguesa-simple.abierto span:nth-child(1) { grid-area: 1 / 1; }
-.btn-hamburguesa-simple.abierto span:nth-child(2) { grid-area: 1 / 2; }
-.btn-hamburguesa-simple.abierto span:nth-child(3) { grid-area: 2 / 2; }
-.btn-hamburguesa-simple.abierto span:nth-child(4) { grid-area: 2 / 1; }
-  
+.btn-hamburguesa-simple.abierto span:nth-child(1) {
+    grid-area: 1 / 1;
+}
+
+.btn-hamburguesa-simple.abierto span:nth-child(2) {
+    grid-area: 1 / 2;
+}
+
+.btn-hamburguesa-simple.abierto span:nth-child(3) {
+    grid-area: 2 / 2;
+}
+
+.btn-hamburguesa-simple.abierto span:nth-child(4) {
+    grid-area: 2 / 1;
+}
+
 .menu-desplegable-pro {
     position: absolute;
     top: 0px;
     left: 30px;
     background: var(--bg-body);
     border: 2px solid var(--text-muted);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     width: 200px;
     border-radius: 4px;
     padding: 8px;
@@ -99,7 +111,7 @@
 }
 
 .contenido-real {
-    padding: 70px 40px 40px 40px; 
+    padding: 70px 40px 40px 40px;
 }
 
 .vacio-mensaje {
@@ -145,7 +157,8 @@
 .interfaz-conteo {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centra todo el bloque */
+    align-items: center;
+    /* Centra todo el bloque */
     gap: 25px;
     margin: 20px 0;
 }
@@ -238,23 +251,30 @@
 .interfaz-probabilidad {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Manda todo a la izquierda */
+    align-items: flex-start;
+    /* Manda todo a la izquierda */
     gap: 25px;
-    width: 100%; /* Toma el ancho disponible */
+    width: 100%;
+    /* Toma el ancho disponible */
     margin: 0 auto 30px auto;
 }
 
 .grupo-entrada {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Asegura que la etiqueta y el input empiecen desde la izquierda */
+    align-items: flex-start;
+    /* Asegura que la etiqueta y el input empiecen desde la izquierda */
     gap: 10px;
-    width: 100%; /* Hace que el grupo ocupe todo el ancho disponible del contenedor */
+    width: 100%;
+    /* Hace que el grupo ocupe todo el ancho disponible del contenedor */
 }
 
-.grupo-entrada textarea, .grupo-entrada input {
-    width: 100%; /* Expande los campos de texto de lado a lado */
-    box-sizing: border-box; /* Evita que el padding rompa el ancho total */
+.grupo-entrada textarea,
+.grupo-entrada input {
+    width: 100%;
+    /* Expande los campos de texto de lado a lado */
+    box-sizing: border-box;
+    /* Evita que el padding rompa el ancho total */
     padding: 12px;
     border: 2px solid var(--text-muted);
     border-radius: 8px;
@@ -281,7 +301,8 @@
 
 .selector-tarjetas {
     padding: 12px;
-    border: 2px solid #2563eb; /* Borde azul para destacar que es importante */
+    border: 2px solid #2563eb;
+    /* Borde azul para destacar que es importante */
     border-radius: 8px;
     background: #f8fafc;
     color: var(--text-variable);
@@ -306,7 +327,8 @@
     display: flex;
     align-items: center;
     gap: 15px;
-    flex-wrap: wrap; /* Por si la pantalla es pequeña */
+    flex-wrap: wrap;
+    /* Por si la pantalla es pequeña */
 }
 
 .btn-abrir-modal {
@@ -421,10 +443,10 @@
 /* --- CONTENEDOR DE 2 COLUMNAS PARA LOS DATOS --- */
 .contenedor-datos-doble {
     display: grid;
-    grid-template-columns: 1fr 1fr; 
-    gap: 30px; 
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
     width: 100%;
-    background: var(--bg-body); 
+    background: var(--bg-body);
     padding: 20px;
     border-radius: 10px;
     border: 1px solid var(--text-muted);
@@ -432,11 +454,12 @@
 
 @media (max-width: 800px) {
     .contenedor-datos-doble {
-        grid-template-columns: 1fr; 
+        grid-template-columns: 1fr;
     }
 }
 
-.columna-variable, .columna-editor {
+.columna-variable,
+.columna-editor {
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -477,7 +500,7 @@
     border: 2px solid var(--text-muted);
     border-radius: 8px;
     resize: vertical;
-    font-family: 'Courier New', Courier, monospace; 
+    font-family: 'Courier New', Courier, monospace;
     font-size: 0.95rem;
     background: #ffffff;
     color: var(--text-variable);
@@ -520,7 +543,8 @@
 
 .btn-abrir-excel {
     padding: 8px 15px;
-    background-color: #10b981; /* Verde tipo Excel */
+    background-color: #10b981;
+    /* Verde tipo Excel */
     color: white;
     border: none;
     border-radius: 5px;
@@ -536,7 +560,8 @@
 
 /* --- ESTILOS ESPECÍFICOS DEL MODAL EXCEL --- */
 .modal-ancho {
-    width: 600px !important; /* Más ancho para que el grid se vea bien */
+    width: 600px !important;
+    /* Más ancho para que el grid se vea bien */
     max-width: 95% !important;
 }
 
@@ -564,7 +589,8 @@
 }
 
 .contenedor-grid {
-    height: 350px; /* Altura fija para que haga scroll interno si hay muchos datos */
+    height: 350px;
+    /* Altura fija para que haga scroll interno si hay muchos datos */
     border: 1px solid #cbd5e1;
     border-radius: 5px;
     overflow: hidden;

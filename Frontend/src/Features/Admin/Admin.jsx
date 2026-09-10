@@ -11,15 +11,15 @@ import "driver.js/dist/driver.css";
 
 // Icono SVG de Ajustes/Filtro
 const IconoAjustes = ({ width = 14, height = 14, style = {} }) => (
-  <svg 
-    width={width} 
-    height={height} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+  <svg
+    width={width}
+    height={height}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     style={style}
   >
     <line x1="4" y1="21" x2="4" y2="14" />
@@ -210,15 +210,15 @@ export default function Admin() {
   // --- LÓGICA DE FILTRADO Y PAGINACIÓN ---
   const usuariosFiltrados = usuarios
     .filter(u => {
-      const coincideBusquedaGeneral = 
+      const coincideBusquedaGeneral =
         u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
         u.email.toLowerCase().includes(busqueda.toLowerCase());
 
       const coincideRol = filtroRol === 'TODOS' || u.rol === filtroRol;
 
-      const coincideEstado = 
-        filtroEstado === 'TODOS' || 
-        (filtroEstado === 'ACTIVO' && u.activo) || 
+      const coincideEstado =
+        filtroEstado === 'TODOS' ||
+        (filtroEstado === 'ACTIVO' && u.activo) ||
         (filtroEstado === 'SUSPENDIDO' && !u.activo);
 
       return coincideBusquedaGeneral && coincideRol && coincideEstado;
@@ -371,11 +371,11 @@ export default function Admin() {
       {/* CABECERA */}
       <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 4vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
         <div className="admin-title-container" id="tour-admin-titulo">
-          <h2 style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', margin: '0 0 5px 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h2 className="titulo-seccion-unificado">
             Panel de Administración
           </h2>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 'clamp(0.85rem, 3vw, 0.95rem)' }}>
-            {pestanaActiva === 'usuarios' 
+          <p className="descripcion-seccion-unificada">
+            {pestanaActiva === 'usuarios'
               ? 'Administra roles, suspende cuentas y elimina registros de forma centralizada.'
               : 'Visualiza métricas clave, gráficos de actividad y reportes generales del sistema.'}
           </p>
@@ -458,339 +458,313 @@ export default function Admin() {
           {/* CONTENIDO PRINCIPAL */}
           <div
             className="grafico-card"
-        style={{
-          borderRadius: '12px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
-          backgroundColor: 'var(--bg-card)',
-          padding: '25px',
-          border: '1px solid var(--border-color)'
-        }}
-      >
-        {cargando ? (
-          <div style={{ padding: '10px 0' }}>
-            {/* Cabecera de tabla fantasma */}
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px' }}>
-              <div style={{ flex: '1.5' }}><Skeleton height="15px" width="60%" /></div>
-              <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
-              <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
-              <div style={{ flex: '1' }}><Skeleton height="15px" width="60%" /></div>
-              <div style={{ flex: '1.5' }}><Skeleton height="15px" width="70%" /></div>
-            </div>
-
-            {/* 5 filas de datos fantasma */}
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '15px', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
-                <div style={{ flex: '1.5', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <Skeleton height="18px" width="80%" />
-                  <Skeleton height="14px" width="50%" />
-                </div>
-                <div style={{ flex: '1' }}>
-                  <Skeleton height="32px" width="90%" borderRadius="6px" />
-                </div>
-                <div style={{ flex: '1' }}>
-                  <Skeleton height="24px" width="70%" borderRadius="12px" />
-                </div>
-                <div style={{ flex: '1' }}>
-                  <Skeleton height="14px" width="50%" />
-                </div>
-                <div style={{ flex: '1.5', display: 'flex', gap: '10px' }}>
-                  <Skeleton height="30px" width="45%" borderRadius="6px" />
-                  <Skeleton height="30px" width="45%" borderRadius="6px" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div 
-            style={{ 
-              overflowX: 'auto', 
-              // Esto asegura que haya espacio hacia abajo para el menú sin cortarse
-              paddingBottom: menuFiltroAbierto ? '160px' : '10px',
-              transition: 'padding-bottom 0.3s ease'
-            }} 
-            id="tour-admin-tabla"
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+              backgroundColor: 'var(--bg-card)',
+              padding: '25px',
+              border: '1px solid var(--border-color)'
+            }}
           >
-            <table className="tabla-responsive tabla-responsiva-panel" style={{ width: '100%', borderCollapse: 'collapse', borderSpacing: 0, textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  
-                  {/* COLUMNA: NOMBRE / CORREO */}
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>
-                    Nombre / Correo
-                  </th>
+            {cargando ? (
+              <div style={{ padding: '10px 0' }}>
+                {/* Cabecera de tabla fantasma */}
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px' }}>
+                  <div style={{ flex: '1.5' }}><Skeleton height="15px" width="60%" /></div>
+                  <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
+                  <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
+                  <div style={{ flex: '1' }}><Skeleton height="15px" width="60%" /></div>
+                  <div style={{ flex: '1.5' }}><Skeleton height="15px" width="70%" /></div>
+                </div>
 
-                  {/* COLUMNA: ROL */}
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>Rol</span>
-                      <button 
-                        style={btnAjustesStyle(filtroRol !== 'TODOS')} 
-                        onClick={() => toggleMenu('rol')} 
-                        title="Filtrar por rol"
-                      >
-                        <IconoAjustes />
-                      </button>
+                {/* 5 filas de datos fantasma */}
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '15px', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
+                    <div style={{ flex: '1.5', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <Skeleton height="18px" width="80%" />
+                      <Skeleton height="14px" width="50%" />
                     </div>
-
-                    {menuFiltroAbierto === 'rol' && (
-                      <div ref={menuRef} style={getPopoverStyle('rol')}>
-                        {[
-                          { label: 'Todos', value: 'TODOS' },
-                          { label: 'Estudiante', value: 'Estudiante' },
-                          { label: 'Docente', value: 'Docente' },
-                          { label: 'Administrador', value: 'Administrador' }
-                        ].map(opcion => (
-                          <button
-                            key={opcion.value}
-                            onClick={() => {
-                              setFiltroRol(opcion.value);
-                              setCurrentPage(1);
-                              setMenuFiltroAbierto(null);
-                            }}
-                            style={btnOpcionStyle(filtroRol === opcion.value)}
-                            onMouseEnter={(e) => {
-                              if (filtroRol !== opcion.value) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)';
-                            }}
-                            onMouseLeave={(e) => {
-                              if (filtroRol !== opcion.value) e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
-                          >
-                            {opcion.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </th>
-
-                  {/* COLUMNA: ESTADO */}
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>Estado</span>
-                      <button 
-                        style={btnAjustesStyle(filtroEstado !== 'TODOS')} 
-                        onClick={() => toggleMenu('estado')} 
-                        title="Filtrar por estado"
-                      >
-                        <IconoAjustes />
-                      </button>
+                    <div style={{ flex: '1' }}>
+                      <Skeleton height="32px" width="90%" borderRadius="6px" />
                     </div>
-
-                    {menuFiltroAbierto === 'estado' && (
-                      <div ref={menuRef} style={getPopoverStyle('estado')}>
-                        {[
-                          { label: 'Todos', value: 'TODOS' },
-                          { label: 'Activos', value: 'ACTIVO' },
-                          { label: 'Suspendidos', value: 'SUSPENDIDO' }
-                        ].map(opcion => (
-                          <button
-                            key={opcion.value}
-                            onClick={() => {
-                              setFiltroEstado(opcion.value);
-                              setCurrentPage(1);
-                              setMenuFiltroAbierto(null);
-                            }}
-                            style={btnOpcionStyle(filtroEstado === opcion.value)}
-                            onMouseEnter={(e) => {
-                              if (filtroEstado !== opcion.value) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)';
-                            }}
-                            onMouseLeave={(e) => {
-                              if (filtroEstado !== opcion.value) e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
-                          >
-                            {opcion.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </th>
-
-                  {/* COLUMNA: REGISTRO */}
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>Registro</span>
-                      <button 
-                        style={btnAjustesStyle(ordenFecha !== 'ninguno')} 
-                        onClick={() => toggleMenu('registro')} 
-                        title="Ordenar por fecha"
-                      >
-                        <IconoAjustes />
-                      </button>
+                    <div style={{ flex: '1' }}>
+                      <Skeleton height="24px" width="70%" borderRadius="12px" />
                     </div>
+                    <div style={{ flex: '1' }}>
+                      <Skeleton height="14px" width="50%" />
+                    </div>
+                    <div style={{ flex: '1.5', display: 'flex', gap: '10px' }}>
+                      <Skeleton height="30px" width="45%" borderRadius="6px" />
+                      <Skeleton height="30px" width="45%" borderRadius="6px" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                style={{
+                  overflowX: 'auto',
+                  // Esto asegura que haya espacio hacia abajo para el menú sin cortarse
+                  paddingBottom: menuFiltroAbierto ? '160px' : '10px',
+                  transition: 'padding-bottom 0.3s ease'
+                }}
+                id="tour-admin-tabla"
+              >
+                <table className="tabla-responsive tabla-responsiva-panel" style={{ width: '100%', borderCollapse: 'collapse', borderSpacing: 0, textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
 
-                    {menuFiltroAbierto === 'registro' && (
-                      <div ref={menuRef} style={getPopoverStyle('registro')}>
-                        {[
-                          { label: 'Sin orden', value: 'ninguno' },
-                          { label: 'Más recientes primero', value: 'desc' },
-                          { label: 'Más antiguos primero', value: 'asc' }
-                        ].map(opcion => (
+                      {/* COLUMNA: NOMBRE / CORREO */}
+                      <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>
+                        Nombre / Correo
+                      </th>
+
+                      {/* COLUMNA: ROL */}
+                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>Rol</span>
                           <button
-                            key={opcion.value}
-                            onClick={() => {
-                              setOrdenFecha(opcion.value);
-                              setCurrentPage(1);
-                              setMenuFiltroAbierto(null);
-                            }}
-                            style={btnOpcionStyle(ordenFecha === opcion.value)}
-                            onMouseEnter={(e) => {
-                              if (ordenFecha !== opcion.value) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)';
-                            }}
-                            onMouseLeave={(e) => {
-                              if (ordenFecha !== opcion.value) e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
+                            style={btnAjustesStyle(filtroRol !== 'TODOS')}
+                            onClick={() => toggleMenu('rol')}
+                            title="Filtrar por rol"
                           >
-                            {opcion.label}
+                            <IconoAjustes />
                           </button>
-                        ))}
-                      </div>
-                    )}
-                  </th>
-
-                  {/* COLUMNA: ACCIONES */}
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold', textAlign: 'center' }}>
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {usuariosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-                      No se encontraron usuarios registrados con los filtros aplicados.
-                    </td>
-                  </tr>
-                ) : (
-                  usuariosPaginados.map((u, index) => (
-                    <tr
-                      key={u.email}
-                      style={{
-                        borderBottom: '1px solid var(--border-color)',
-                        backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)'}
-                    >
-                      <td data-label="Nombre / Correo" style={{ padding: '15px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '100%' }}>
-                          <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{u.nombre}</div>
-                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{u.email}</div>
                         </div>
-                      </td>
-                      <td data-label="Rol" style={{ padding: '15px' }}>
-                        <select
-                          className="tour-admin-rol"
-                          value={u.rol}
-                          onChange={(e) => handleCambiarRol(u.email, e.target.value)}
-                          disabled={u.rol === "Administrador"}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-color)',
-                            backgroundColor: u.rol === 'Administrador' ? 'rgba(239, 68, 68, 0.1)' : (u.rol === 'Docente' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)'),
-                            color: u.rol === 'Administrador' ? '#ef4444' : (u.rol === 'Docente' ? '#10b981' : '#3b82f6'),
-                            fontWeight: 'bold',
-                            cursor: u.rol === 'Administrador' ? 'not-allowed' : 'pointer',
-                            outline: 'none',
-                            fontSize: '0.85rem'
-                          }}
-                        >
-                          <option value="Estudiante" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Estudiante</option>
-                          <option value="Docente" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Docente</option>
-                          <option value="Administrador" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Administrador</option>
-                        </select>
-                      </td>
-                      <td data-label="Estado" style={{ padding: '15px' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '4px 10px',
-                            borderRadius: '12px',
-                            fontSize: '0.8rem',
-                            fontWeight: 'bold',
-                            backgroundColor: u.activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                            color: u.activo ? '#10b981' : '#ef4444'
-                          }}
-                        >
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: u.activo ? '#10b981' : '#ef4444' }}></span>
-                          {u.activo ? 'Activo' : 'Suspendido'}
-                        </span>
-                      </td>
-                      <td data-label="Registro" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        {u.fecha_creacion ? u.fecha_creacion.split(' ')[0] : 'N/A'}
-                      </td>
-                      <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                          {u.rol !== 'Administrador' ? (
-                            <>
+
+                        {menuFiltroAbierto === 'rol' && (
+                          <div ref={menuRef} style={getPopoverStyle('rol')}>
+                            {[
+                              { label: 'Todos', value: 'TODOS' },
+                              { label: 'Estudiante', value: 'Estudiante' },
+                              { label: 'Docente', value: 'Docente' },
+                              { label: 'Administrador', value: 'Administrador' }
+                            ].map(opcion => (
                               <button
-                                className="tour-admin-estado"
-                                onClick={() => handleCambiarEstado(u.email, !u.activo)}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderRadius: '6px',
-                                  border: '1px solid ' + (u.activo ? '#f59e0b' : '#10b981'),
-                                  background: 'transparent',
-                                  color: u.activo ? '#f59e0b' : '#10b981',
-                                  cursor: 'pointer',
-                                  fontSize: '0.8rem',
-                                  fontWeight: 'bold',
-                                  transition: 'all 0.2s'
+                                key={opcion.value}
+                                onClick={() => {
+                                  setFiltroRol(opcion.value);
+                                  setCurrentPage(1);
+                                  setMenuFiltroAbierto(null);
                                 }}
+                                style={btnOpcionStyle(filtroRol === opcion.value)}
                                 onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = u.activo ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+                                  if (filtroRol !== opcion.value) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)';
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                  if (filtroRol !== opcion.value) e.currentTarget.style.backgroundColor = 'transparent';
                                 }}
                               >
-                                {u.activo ? 'Suspender' : 'Activar'}
+                                {opcion.label}
                               </button>
+                            ))}
+                          </div>
+                        )}
+                      </th>
+
+                      {/* COLUMNA: ESTADO */}
+                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>Estado</span>
+                          <button
+                            style={btnAjustesStyle(filtroEstado !== 'TODOS')}
+                            onClick={() => toggleMenu('estado')}
+                            title="Filtrar por estado"
+                          >
+                            <IconoAjustes />
+                          </button>
+                        </div>
+
+                        {menuFiltroAbierto === 'estado' && (
+                          <div ref={menuRef} style={getPopoverStyle('estado')}>
+                            {[
+                              { label: 'Todos', value: 'TODOS' },
+                              { label: 'Activos', value: 'ACTIVO' },
+                              { label: 'Suspendidos', value: 'SUSPENDIDO' }
+                            ].map(opcion => (
                               <button
-                                className="tour-admin-eliminar"
-                                onClick={() => setUsuarioAEliminar(u)}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderRadius: '6px',
-                                  border: '1px solid #ef4444',
-                                  background: 'transparent',
-                                  color: '#ef4444',
-                                  cursor: 'pointer',
-                                  fontSize: '0.8rem',
-                                  fontWeight: 'bold',
-                                  transition: 'all 0.2s'
+                                key={opcion.value}
+                                onClick={() => {
+                                  setFiltroEstado(opcion.value);
+                                  setCurrentPage(1);
+                                  setMenuFiltroAbierto(null);
                                 }}
+                                style={btnOpcionStyle(filtroEstado === opcion.value)}
                                 onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                                  if (filtroEstado !== opcion.value) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)';
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                  if (filtroEstado !== opcion.value) e.currentTarget.style.backgroundColor = 'transparent';
                                 }}
                               >
-                                Eliminar
+                                {opcion.label}
                               </button>
-                            </>
-                          ) : (
-                            <span style={{ fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              Protegido <IconoEscudo width="14" height="14" style={{ color: '#10b981' }} />
-                            </span>
-                          )}
+                            ))}
+                          </div>
+                        )}
+                      </th>
+
+                      {/* COLUMNA: REGISTRO */}
+                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>Registro</span>
+                          <button
+                            style={btnAjustesStyle(ordenFecha !== 'ninguno')}
+                            onClick={() => toggleMenu('registro')}
+                            title="Ordenar por fecha"
+                          >
+                            <IconoAjustes />
+                          </button>
                         </div>
-                      </td>
+
+                        {menuFiltroAbierto === 'registro' && (
+                          <div ref={menuRef} style={getPopoverStyle('registro')}>
+                            {[
+                              { label: 'Sin orden', value: 'ninguno' },
+                              { label: 'Más recientes primero', value: 'desc' },
+                              { label: 'Más antiguos primero', value: 'asc' }
+                            ].map(opcion => (
+                              <button
+                                key={opcion.value}
+                                onClick={() => {
+                                  setOrdenFecha(opcion.value);
+                                  setCurrentPage(1);
+                                  setMenuFiltroAbierto(null);
+                                }}
+                                style={btnOpcionStyle(ordenFecha === opcion.value)}
+                                onMouseEnter={(e) => {
+                                  if (ordenFecha !== opcion.value) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (ordenFecha !== opcion.value) e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                              >
+                                {opcion.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </th>
+
+                      {/* COLUMNA: ACCIONES */}
+                      <th style={{ padding: '12px 15px', fontWeight: 'bold', textAlign: 'center' }}>
+                        Acciones
+                      </th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {usuariosFiltrados.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                          No se encontraron usuarios registrados con los filtros aplicados.
+                        </td>
+                      </tr>
+                    ) : (
+                      usuariosPaginados.map((u, index) => (
+                        <tr
+                          key={u.email}
+                          style={{
+                            borderBottom: '1px solid var(--border-color)',
+                            backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)'}
+                        >
+                          <td data-label="Nombre / Correo" style={{ padding: '15px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '100%' }}>
+                              <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{u.nombre}</div>
+                              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                            </div>
+                          </td>
+                          <td data-label="Rol" style={{ padding: '15px' }}>
+                            <select
+                              className="tour-admin-rol"
+                              value={u.rol}
+                              onChange={(e) => handleCambiarRol(u.email, e.target.value)}
+                              disabled={u.rol === "Administrador"}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-color)',
+                                backgroundColor: u.rol === 'Administrador' ? 'rgba(239, 68, 68, 0.1)' : (u.rol === 'Docente' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)'),
+                                color: u.rol === 'Administrador' ? '#ef4444' : (u.rol === 'Docente' ? '#10b981' : '#3b82f6'),
+                                fontWeight: 'bold',
+                                cursor: u.rol === 'Administrador' ? 'not-allowed' : 'pointer',
+                                outline: 'none',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              <option value="Estudiante" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Estudiante</option>
+                              <option value="Docente" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Docente</option>
+                              <option value="Administrador" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Administrador</option>
+                            </select>
+                          </td>
+                          <td data-label="Estado" style={{ padding: '15px' }}>
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '4px 10px',
+                                borderRadius: '12px',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                backgroundColor: u.activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                color: u.activo ? '#10b981' : '#ef4444'
+                              }}
+                            >
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: u.activo ? '#10b981' : '#ef4444' }}></span>
+                              {u.activo ? 'Activo' : 'Suspendido'}
+                            </span>
+                          </td>
+                          <td data-label="Registro" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                            {u.fecha_creacion ? u.fecha_creacion.split(' ')[0] : 'N/A'}
+                          </td>
+                          <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                              {u.rol !== 'Administrador' ? (
+                                <>
+                                  <button
+                                    className={u.activo ? "btn-amarillo tour-admin-estado" : "btn-azul tour-admin-estado"}
+                                    onClick={() => handleCambiarEstado(u.email, !u.activo)}
+                                    style={{
+                                      padding: '6px 12px',
+                                      fontSize: '0.8rem',
+                                    }}
+                                  >
+                                    {u.activo ? 'Suspender' : 'Activar'}
+                                  </button>
+                                  <button
+                                    className="btn-rojo tour-admin-eliminar"
+                                    onClick={() => setUsuarioAEliminar(u)}
+                                    style={{
+                                      padding: '6px 12px',
+                                      fontSize: '0.8rem',
+                                    }}
+                                  >
+                                    Eliminar
+                                  </button>
+                                </>
+                              ) : (
+                                <span style={{ fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                  Protegido <IconoEscudo width="14" height="14" style={{ color: '#10b981' }} />
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <ControlesPaginacion />
-    </>
-  )}
+          <ControlesPaginacion />
+        </>
+      )}
 
       {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       {usuarioAEliminar && (
@@ -836,13 +810,13 @@ export default function Admin() {
                     setUsuarioAEliminar(null);
                     setConfirmarNombre('');
                   }}
-                  style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', cursor: 'pointer', fontWeight: 'bold' }}
+                  className="btn-amarillo"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', backgroundColor: '#ef4444', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                  className="btn-rojo"
                 >
                   Confirmar Borrado
                 </button>

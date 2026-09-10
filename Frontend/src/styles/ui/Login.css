@@ -17,7 +17,8 @@
    ========================================= */
 .login-theme-toggle .theme-toggle-btn {
   background-color: rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.25);
+  border: 2px solid #ffffff !important;
+  border-color: #ffffff !important;
 }
 
 .login-theme-toggle .theme-toggle-thumb {
@@ -27,7 +28,8 @@
 /* Modo oscuro: vuelve al estilo original de App.css */
 html.dark .login-theme-toggle .theme-toggle-btn {
   background-color: #333333;
-  border-color: #555555;
+  border: 2px solid #ffffff !important;
+  border-color: #ffffff !important;
 }
 
 html.dark .login-theme-toggle .theme-toggle-thumb {
@@ -61,29 +63,125 @@ html.dark .login-theme-toggle .theme-toggle-thumb {
   }
 }
 
-/* 🆕 Animaciones para los botones principales */
-.btn-auth {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, filter 0.2s ease !important;
+/* =========================================
+   BOTONES DENTRO DE LOGIN / REGISTRO / FORGOT
+   ========================================= */
+.login-card .btn-auth {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  cursor: pointer !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease !important;
 }
 
-.btn-auth:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.05);
+.login-card .btn-auth:active:not(:disabled) {
+  transform: translateY(1px) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) !important;
 }
 
-.btn-auth:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+/* Modo Normal (Fondo Naranja de la Tarjeta) */
+.login-card .btn-amarillo {
+  background-color: #ffffff !important;
+  color: #b45309 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* 🆕 Cuando el modo oscuro se activa, sobrescribimos el fondo de la tarjeta */
+.login-card .btn-amarillo:hover:not(:disabled) {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fef3c7 !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22) !important;
+  transform: translateY(-2px) !important;
+}
+
+.login-card .btn-rojo {
+  background-color: #ffffff !important;
+  color: #ef4444 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+}
+
+.login-card .btn-rojo:hover:not(:disabled) {
+  background-color: #fee2e2 !important;
+  color: #dc2626 !important;
+  border-color: #fee2e2 !important;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.25) !important;
+  transform: translateY(-2px) !important;
+}
+
+.login-card .btn-secundario,
+.login-card .btn-gris {
+  background-color: #ffffff !important;
+  color: #475569 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+}
+
+.login-card .btn-secundario:hover:not(:disabled),
+.login-card .btn-gris:hover:not(:disabled) {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+  border-color: #f1f5f9 !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Modo Oscuro (Fondo Oscuro de la Tarjeta) */
 html.dark .login-card {
   background: var(--bg-card);
-  /* Usa el fondo oscuro de tu App.css */
   border: 1px solid var(--accent-color);
-  /* Mantenemos un toque naranja sutil en el borde */
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+html.dark .login-card .btn-amarillo {
+  background-color: transparent !important;
+  color: var(--accent-color) !important;
+  border: 1px solid var(--accent-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .login-card .btn-amarillo:hover:not(:disabled) {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+html.dark .login-card .btn-rojo {
+  background-color: transparent !important;
+  color: #ef4444 !important;
+  border: 1px solid #ef4444 !important;
+  box-shadow: none !important;
+}
+
+html.dark .login-card .btn-rojo:hover:not(:disabled) {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+html.dark .login-card .btn-secundario,
+html.dark .login-card .btn-gris {
+  background-color: transparent !important;
+  color: #94a3b8 !important;
+  border: 1px solid #475569 !important;
+  box-shadow: none !important;
+}
+
+html.dark .login-card .btn-secundario:hover:not(:disabled),
+html.dark .login-card .btn-gris:hover:not(:disabled) {
+  background-color: #475569 !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-2px) !important;
 }
 
 .login-card input:not(.floating-input-group input) {
@@ -348,11 +446,11 @@ html.dark .floating-input-group.always-floating label.etiqueta {
   z-index: 2;
 }
 
-/* Círculo verde cuando está activo o completado */
+/* Círculo azul cuando está activo o completado */
 .stepper-item.completed .step-counter,
 .stepper-item.active .step-counter {
-  background-color: #22c55e;
-  border-color: #22c55e;
+  background-color: var(--primary-color, #2563eb);
+  border-color: var(--primary-color, #2563eb);
   color: white;
 }
 
@@ -385,7 +483,7 @@ html.dark .floating-input-group.always-floating label.etiqueta {
   position: relative;
 }
 
-/* El relleno verde animado */
+/* El relleno azul animado */
 .step-line::after {
   content: '';
   position: absolute;
@@ -393,7 +491,7 @@ html.dark .floating-input-group.always-floating label.etiqueta {
   left: 0;
   height: 100%;
   width: 0%;
-  background-color: #22c55e;
+  background-color: var(--primary-color, #2563eb);
   transition: width 0.5s ease-in-out;
   /* Animación fluida de izquierda a derecha */
 }

@@ -603,22 +603,11 @@ function TarjetaEjercicioDocente({ tema, indice, tarea, entregaActual, respuesta
           <button
             onClick={() => reabrirEnCalculadora(tema)}
             title="Abrir este ejercicio en la Calculadora interactiva"
+            className="btn-amarillo"
             style={{
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-color)",
-              color: "var(--accent-color)",
               padding: "4px 10px",
-              borderRadius: "8px",
-              fontSize: "0.76rem",
-              fontWeight: "700",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-              transition: "all 0.2s ease"
+              fontSize: "0.76rem"
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--accent-color)"; e.currentTarget.style.color = "white"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-card)"; e.currentTarget.style.color = "var(--accent-color)"; }}
           >
             <Calculator size={13} /> Calculadora
           </button>
@@ -1616,20 +1605,10 @@ export default function ModalEntregasDocente({ tarea, onClose }) {
                         <button
                           type="button"
                           onClick={() => setEditandoId(entregaActual.id)}
+                          className="btn-amarillo"
                           style={{
-                            padding: "10px 22px",
-                            background: "#3b82f6",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            fontWeight: "700",
+                            padding: "8px 20px",
                             fontSize: "0.88rem",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            boxShadow: "0 2px 8px rgba(59, 130, 246, 0.25)",
-                            transition: "all 0.2s ease"
                           }}
                         >
                           <Edit3 size={16} /> Editar Nota
@@ -1639,20 +1618,10 @@ export default function ModalEntregasDocente({ tarea, onClose }) {
                           type="button"
                           onClick={() => handleGuardarCalificacion(entregaActual.id)}
                           disabled={guardandoId === entregaActual.id}
+                          className="btn-azul"
                           style={{
-                            padding: "10px 22px",
-                            background: "#27ae60",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "6px",
-                            cursor: guardandoId === entregaActual.id ? "not-allowed" : "pointer",
-                            fontWeight: "700",
+                            padding: "8px 20px",
                             fontSize: "0.88rem",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            boxShadow: "0 2px 8px rgba(39, 174, 96, 0.25)",
-                            transition: "all 0.2s ease"
                           }}
                         >
                           <Save size={16} /> {guardandoId === entregaActual.id ? "Guardando..." : (tieneNotaRegistrada ? "Guardar Cambios" : "Registrar Nota")}

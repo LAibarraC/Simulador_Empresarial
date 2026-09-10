@@ -387,29 +387,13 @@ export default function Archivos({ usuario }) {
                 borderRadius: "8px",
                 padding: "5px",
                 border: "1px solid var(--border-color)",
-                marginBottom: "15px"
+                marginBottom: "15px",
+                gap: "6px",
               }}
             >
               <button
                 onClick={() => setTabActiva("personales")}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  background:
-                    tabActiva === "personales"
-                      ? "var(--accent-color)"
-                      : "transparent",
-                  color:
-                    tabActiva === "personales" ? "white" : "var(--text-muted)",
-                }}
+                className={`tab-archivo-btn ${tabActiva === "personales" ? "active" : ""}`}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -419,23 +403,7 @@ export default function Archivos({ usuario }) {
               </button>
               <button
                 onClick={() => setTabActiva("cursos")}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  background:
-                    tabActiva === "cursos"
-                      ? "var(--primary-color)"
-                      : "transparent",
-                  color: tabActiva === "cursos" ? "white" : "var(--text-muted)",
-                }}
+                className={`tab-archivo-btn ${tabActiva === "cursos" ? "active" : ""}`}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />

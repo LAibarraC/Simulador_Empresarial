@@ -189,9 +189,9 @@ export default function TablasBivariantes({ resultado, formatearCelda }) {
           Tabla de Frecuencias Conjuntas y Marginales
         </h5>
         <button
-          className="btn-icon"
+          className="btn-verde"
           onClick={() => copiarTablaAExcel(resultado.matrizPura, "bivariada")}
-          style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+          style={{ padding: '6px 14px', fontSize: '0.82rem' }}
           title="Copiar datos puros para Excel"
         >
           <IconoCopiar /> Copiar Tabla
@@ -269,16 +269,12 @@ export default function TablasBivariantes({ resultado, formatearCelda }) {
         <div style={{ marginTop: "20px" }}>
           <button
             onClick={() => setMostrarDesarrollo(!mostrarDesarrollo)}
+            className="btn-amarillo"
             style={{
               width: "100%",
-              padding: "12px",
-              backgroundColor: "var(--primary-color)",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              marginBottom: "20px"
+              padding: "10px",
+              marginBottom: "20px",
+              fontWeight: "bold"
             }}
           >
             {mostrarDesarrollo ? "Ocultar Tabla de Desarrollo" : "Ver Tabla de Desarrollo Matemático"}
@@ -297,9 +293,9 @@ export default function TablasBivariantes({ resultado, formatearCelda }) {
                   Tabla de Desarrollo Auxiliar (Cálculo de Sumatorias)
                 </h4>
                 <button
-                  className="btn-icon"
+                  className="btn-verde"
                   onClick={copiarDesarrolloAExcel}
-                  style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+                  style={{ padding: '6px 14px', fontSize: '0.82rem' }}
                   title="Copiar tabla de desarrollo para Excel"
                 >
                   <IconoCopiar /> Copiar Tabla

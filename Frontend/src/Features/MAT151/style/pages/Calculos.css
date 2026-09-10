@@ -106,12 +106,12 @@
   gap: 8px;
   border: none;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-icon:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
   filter: brightness(1.1);
 }
 
@@ -248,8 +248,28 @@
 
 .button_calcular {
   width: 100%;
-  padding: 10px;
-  margin-Top: 10px;
+  padding: 10px 16px;
+  margin-top: 15px;
+  background-color: transparent !important;
+  color: var(--accent-color, #d97706) !important;
+  border: 1px solid var(--accent-color, #d97706) !important;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.button_calcular:hover:not(:disabled) {
+  background-color: var(--accent-color, #d97706) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color, #d97706) !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+  transform: translateY(-1px);
 }
 
 .info_cargando {
@@ -326,14 +346,41 @@
 
 .container_subtendencia {
   display: flex;
-  gap: 5px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .button_subtendencia {
-  padding: 5px 15px;
+  padding: 6px 14px;
   cursor: pointer;
-  border-Radius: 4px;
-  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  border: 1px solid var(--accent-color, #d97706) !important;
+  background-color: transparent !important;
+  color: var(--accent-color, #d97706) !important;
+  font-weight: 600;
+  font-size: 0.82rem;
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.button_subtendencia.active {
+  background-color: var(--accent-color, #d97706) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color, #d97706) !important;
+  font-weight: bold;
+}
+
+.button_subtendencia:hover:not(:disabled) {
+  background-color: var(--accent-color, #d97706) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color, #d97706) !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+  transform: translateY(-1px);
 }
 
 .contenedor-variabilidad-forma h4 {
@@ -405,26 +452,26 @@ body.dark-mode .logo-espera {
 
 /* Estilos para la tabla de historial */
 .tabla-historial-container {
-    margin-top: 20px;
-    background-color: var(--bg-card);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-    box-shadow: var(--shadow-soft);
+  margin-top: 20px;
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
 .fila-historial:hover {
-    background-color: rgba(255, 255, 255, 0.03);
-    transition: background 0.2s;
+  background-color: rgba(255, 255, 255, 0.03);
+  transition: background 0.2s;
 }
 
 .badge-calculo {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    background-color: rgba(var(--accent-color-rgb), 0.1);
-    color: var(--accent-color);
-    font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background-color: rgba(var(--accent-color-rgb), 0.1);
+  color: var(--accent-color);
+  font-weight: bold;
 }
 
 /* =========================================
@@ -450,14 +497,14 @@ body.dark-mode .logo-espera {
   max-width: 220px;
   text-align: center;
   z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   font-weight: normal;
   font-size: 0.95rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  
+
   /* Animación suave */
   opacity: 0;
   visibility: hidden;
@@ -480,6 +527,7 @@ body.dark-mode .logo-espera {
   left: 50%;
   transform: translateX(-50%);
 }
+
 .tooltip-center::after {
   content: "";
   position: absolute;
@@ -495,11 +543,13 @@ body.dark-mode .logo-espera {
 .tooltip-left {
   left: 0;
 }
+
 .tooltip-left::after {
   content: "";
   position: absolute;
   bottom: 100%;
-  left: 15px; /* Triángulo anclado a la izquierda */
+  left: 15px;
+  /* Triángulo anclado a la izquierda */
   border-width: 6px;
   border-style: solid;
   border-color: transparent transparent #2c3e50 transparent;
@@ -509,11 +559,13 @@ body.dark-mode .logo-espera {
 .tooltip-right {
   right: 0;
 }
+
 .tooltip-right::after {
   content: "";
   position: absolute;
   bottom: 100%;
-  right: 15px; /* Triángulo anclado a la derecha */
+  right: 15px;
+  /* Triángulo anclado a la derecha */
   border-width: 6px;
   border-style: solid;
   border-color: transparent transparent #2c3e50 transparent;
@@ -531,7 +583,8 @@ body.dark-mode .logo-espera {
 }
 
 .input-percentil {
-  -moz-appearance: number-input !important; /* Para Firefox */
+  -moz-appearance: number-input !important;
+  /* Para Firefox */
 }
 
 /* =========================================
@@ -576,7 +629,8 @@ body.dark-mode .logo-espera {
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
-  color: #6b7280; /* gris neutro visible en modo claro y oscuro */
+  color: #6b7280;
+  /* gris neutro visible en modo claro y oscuro */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -592,13 +646,15 @@ body.dark-mode .logo-espera {
 }
 
 .col-btn-blue:hover {
-  color: #3b82f6; /* azul visible en ambos modos */
+  color: #3b82f6;
+  /* azul visible en ambos modos */
 }
 
 .col-btn-green:hover {
-  color: #10b981; /* verde esmeralda */
+  color: #10b981;
+  /* verde esmeralda */
 }
 
 .col-btn-minimal:active {
   transform: scale(0.92);
-}
+}

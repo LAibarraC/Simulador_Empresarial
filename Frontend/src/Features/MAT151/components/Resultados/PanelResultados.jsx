@@ -151,16 +151,17 @@ export default function PanelResultados({
           />
 
           {/* BARRA DE ACCIONES FINAL */}
-          <div className="barra-acciones-final" id="tour-acciones-finales" style={{ display: "flex", gap: "12px", marginTop: "25px" }}>
+          <div className="barra-acciones-final" id="tour-acciones-finales" style={{ display: "flex", gap: "12px", marginTop: "25px", flexWrap: "wrap" }}>
             <button
               onClick={() => generarPDFReporte("reporte-formal-pdf", `Reporte_${calculo}`)}
-              className="btn-icon btn-export-pdf"
+              className="btn-rojo"
               style={{
-                backgroundColor: "var(--accent-red, #dc3545)", color: "white", padding: "11px 22px",
-                borderRadius: "8px", cursor: "pointer", fontWeight: "bold", border: "none",
-                display: "inline-flex", alignItems: "center", gap: "8px",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                transition: "all 0.2s ease"
+                padding: "9px 20px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "0.88rem",
+                fontWeight: 600
               }}
             >
               <IconoPDF /> Exportar PDF
@@ -169,13 +170,14 @@ export default function PanelResultados({
             {!tareaYaEntregada && (
               <button
                 onClick={handleGuardarResultado}
-                className="btn-icon btn-save-calculo"
+                className="btn-azul"
                 style={{
-                  backgroundColor: "var(--primary-color, #f97316)", color: "white", padding: "11px 22px",
-                  borderRadius: "8px", cursor: "pointer", fontWeight: "bold", border: "none",
-                  display: "inline-flex", alignItems: "center", gap: "8px",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.2s ease"
+                  padding: "9px 20px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "0.88rem",
+                  fontWeight: 600
                 }}
               >
                 <IconoGuardar /> Guardar Cálculo

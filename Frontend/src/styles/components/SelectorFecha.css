@@ -51,7 +51,8 @@
 
 /* Triángulo/Flecha del desplegable */
 .react-datepicker__triangle {
-  display: none; /* Se oculta para un acabado limpio y moderno */
+  display: none;
+  /* Se oculta para un acabado limpio y moderno */
 }
 
 /* Encabezado (Mes, año y días de la semana) */

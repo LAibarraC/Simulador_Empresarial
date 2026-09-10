@@ -89,8 +89,8 @@ export default function TablasUnidimensionales({
               });
               copiarTablaAExcel(datosExport, "tendencia_central");
             }}
-            className="btn-icon"
-            style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+            className="btn-verde"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
             title="Copiar datos puros para Excel"
           >
             Copiar Tabla
@@ -148,8 +148,8 @@ export default function TablasUnidimensionales({
                 });
                 copiarTablaAExcel(datosExport, `medidas_de_posicion_${fractilActual.toLowerCase()}`);
               }}
-              className="btn-icon"
-              style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+              className="btn-verde"
+              style={{ padding: '6px 14px', fontSize: '0.82rem' }}
               title="Copiar datos puros para Excel"
             >
               Copiar Tabla
@@ -202,14 +202,7 @@ export default function TablasUnidimensionales({
                   key={tipo}
                   type="button"
                   onClick={() => setFiltroFractil && setFiltroFractil(tipo)}
-                  className="button_subtendencia"
-                  style={{
-                    backgroundColor: fractilActual === tipo ? "var(--accent-color)" : "var(--bg-card)",
-                    color: fractilActual === tipo ? "#fff" : "inherit",
-                    padding: "6px 14px", border: "1px solid var(--border-color)",
-                    borderRadius: "6px", cursor: "pointer", fontWeight: fractilActual === tipo ? "bold" : "normal",
-                    fontSize: "0.82rem"
-                  }}
+                  className={`button_subtendencia ${fractilActual === tipo ? "active" : ""}`}
                 >
                   {tipo === "Todos" ? "Todos los Fractiles" : `${tipo}es`}
                 </button>
@@ -280,8 +273,8 @@ export default function TablasUnidimensionales({
               });
               copiarTablaAExcel(datosExport, "medidas_de_dispersion");
             }}
-            className="btn-icon"
-            style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+            className="btn-verde"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
             title="Copiar datos puros para Excel"
           >
             Copiar Tabla
@@ -327,8 +320,8 @@ export default function TablasUnidimensionales({
               });
               copiarTablaAExcel(datosExport, "medidas_de_forma");
             }}
-            className="btn-icon"
-            style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+            className="btn-verde"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
             title="Copiar datos puros para Excel"
           >
             Copiar Tabla
@@ -374,8 +367,8 @@ export default function TablasUnidimensionales({
       <div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
           <button
-            data-html2canvas-ignore="true" onClick={() => copiarTablaAExcel(resultado, calculo)} className="btn-icon"
-            style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+            data-html2canvas-ignore="true" onClick={() => copiarTablaAExcel(resultado, calculo)} className="btn-verde"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
             title="Copiar datos puros para Excel"
           >
             <IconoCopiar /> Copiar Tabla

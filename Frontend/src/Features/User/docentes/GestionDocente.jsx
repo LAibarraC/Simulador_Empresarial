@@ -88,18 +88,9 @@ export default function GestionDocente({ usuario }) {
   const iniciarTour = () => {
     const tourSteps = [
       {
-        element: '#tour-gestion-titulo',
-        popover: {
-          title: 'Gestión de Alumnos',
-          description: 'Aquí puedes visualizar y administrar la lista de todos los estudiantes inscritos en tus materias.',
-          side: "bottom",
-          align: 'start'
-        }
-      },
-      {
         element: '#tour-gestion-buscador',
         popover: {
-          title: 'Buscador Rápido',
+          title: 'Gestión y Búsqueda de Alumnos',
           description: 'Escribe aquí el nombre o correo del alumno para encontrarlo instantáneamente en cualquiera de tus cursos.',
           side: "bottom",
           align: 'start'
@@ -362,18 +353,10 @@ export default function GestionDocente({ usuario }) {
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: 'clamp(15px, 3vw, 25px) auto', padding: '0 20px', position: 'relative' }}>
+    <div className="page-container" style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative' }}>
       
       {/* CABECERA CON BOTÓN DE TOUR */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 3vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
-        <div id="tour-gestion-titulo">
-          <h2 style={{ fontSize: 'clamp(1.3rem, 4vw, 1.8rem)', margin: '0 0 5px 0', color: 'var(--text-main)' }}>
-            Gestión de Alumnos
-          </h2>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 'clamp(0.85rem, 3vw, 0.95rem)' }}>
-            Visualiza a todos los estudiantes inscritos en tus materias y reasígnalos fácilmente.
-          </p>
-        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
           
           {/* Botón de Guía Rápida */}
@@ -396,32 +379,34 @@ export default function GestionDocente({ usuario }) {
       </div>
 
       {/* BUSCADOR */}
-      <div id="tour-gestion-buscador" style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '8px 15px', borderRadius: '30px', border: '1px solid var(--border-color)', marginBottom: "20px", boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-        <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
-        <input
-          type="text"
-          placeholder="Buscar estudiante por nombre o correo..."
-          value={searchTerm}
-          onChange={handleSearch}
-          style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', width: '100%', fontSize: '0.95rem' }}
-        />
+      <div id="tour-gestion-buscador" style={{ marginBottom: "20px" }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '10px 15px', borderRadius: '8px', border: '1px solid var(--border-color)', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+          <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
+          <input
+            type="text"
+            placeholder="Buscar estudiante por nombre o correo..."
+            value={searchTerm}
+            onChange={handleSearch}
+            style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', width: '100%', fontSize: '0.95rem' }}
+          />
+        </div>
       </div>
 
       {/* CONTENIDO PRINCIPAL DE TABLA */}
-      <div className="grafico-card" style={{ borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', backgroundColor: 'var(--bg-card)', padding: '25px', border: '1px solid var(--border-color)' }}>
-        {cargandoDatos ? (
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <div style={{ width: '40px', height: '40px', border: '4px solid var(--border-color)', borderTop: '4px solid var(--accent-color)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }} />
-            <p style={{ color: 'var(--text-muted)' }}>Cargando información de estudiantes y cursos...</p>
-          </div>
-        ) : (
-          <div id="tour-gestion-tabla" style={{ overflowX: 'auto', paddingBottom: menuFiltroAbierto ? '160px' : '10px', transition: 'padding-bottom 0.3s ease' }}>
-            <table className="tabla-responsive tabla-responsiva-panel" style={{ width: '100%', borderCollapse: 'collapse', borderSpacing: 0, textAlign: 'left' }}>
+      {cargandoDatos ? (
+        <div className="historial-container" style={{ textAlign: 'center', padding: '40px 0', borderRadius: '10px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+          <div style={{ width: '40px', height: '40px', border: '4px solid var(--border-color)', borderTop: '4px solid var(--accent-color)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }} />
+          <p style={{ color: 'var(--text-muted)' }}>Cargando información de estudiantes y cursos...</p>
+        </div>
+      ) : (
+        <div className="historial-container" id="tour-gestion-tabla" style={{ borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto', paddingBottom: menuFiltroAbierto ? '160px' : '0px', transition: 'padding-bottom 0.3s ease' }}>
+            <table className="historial-tabla tabla-responsive tabla-responsiva-panel" style={{ width: '100%', borderCollapse: 'collapse', borderSpacing: 0, textAlign: 'left' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>Nombre del Estudiante</th>
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>Correo Electrónico</th>
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
+                <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <th style={{ padding: '15px', fontWeight: '600' }}>Nombre del Estudiante</th>
+                  <th style={{ padding: '15px', fontWeight: '600' }}>Correo Electrónico</th>
+                  <th style={{ padding: '15px', fontWeight: '600', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Materias</span>
                       <button style={btnAjustesStyle(filtroCurso !== 'TODOS')} onClick={() => toggleMenu('curso')} title="Filtrar por curso">
@@ -441,7 +426,7 @@ export default function GestionDocente({ usuario }) {
                       </div>
                     )}
                   </th>
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
+                  <th style={{ padding: '15px', fontWeight: '600', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Último Registro</span>
                       <button style={btnAjustesStyle(ordenFecha !== 'ninguno')} onClick={() => toggleMenu('registro')} title="Ordenar por fecha">
@@ -462,7 +447,7 @@ export default function GestionDocente({ usuario }) {
                       </div>
                     )}
                   </th>
-                  <th style={{ padding: '12px 15px', fontWeight: 'bold', textAlign: 'center' }}>Acciones</th>
+                  <th style={{ padding: '15px', fontWeight: '600', textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -476,6 +461,7 @@ export default function GestionDocente({ usuario }) {
                   currentEstudiantes.map((est, index) => (
                     <tr 
                       key={est.id} 
+                      className="historial-fila"
                       style={{ 
                         borderBottom: '1px solid var(--border-color)', 
                         backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)',
@@ -502,20 +488,13 @@ export default function GestionDocente({ usuario }) {
                         <button
                           onClick={() => setModalGestionEstudiante(est)}
                           title="Gestionar materias"
+                          className="btn-azul"
                           style={{
                             padding: '8px',
                             borderRadius: '50%',
-                            border: 'none',
-                            background: 'var(--bg-input, #f3f4f6)',
-                            color: 'var(--text-main)',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s'
+                            minWidth: '34px',
+                            minHeight: '34px'
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = '#e5e7eb'; e.currentTarget.style.color = '#3b82f6'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input, #f3f4f6)'; e.currentTarget.style.color = 'var(--text-main)'; }}
                         >
                           <IconoConfig />
                         </button>
@@ -526,9 +505,9 @@ export default function GestionDocente({ usuario }) {
               </tbody>
             </table>
           </div>
-        )}
-        <ControlesPaginacion />
-      </div>
+        </div>
+      )}
+      <ControlesPaginacion />
 
       {/* MODAL DE GESTIÓN DE MATERIAS DEL ESTUDIANTE (ESTILO TABLA LIMPIA) */}
       {modalGestionEstudiante && (
@@ -600,25 +579,10 @@ export default function GestionDocente({ usuario }) {
                         <button
                           onClick={() => solicitarEliminacionEstudiante(modalGestionEstudiante.id, modalGestionEstudiante.nombre, ci.claseId, ci.claseNombre)}
                           title="Desmatricular de la materia"
+                          className="btn-rojo"
                           style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: 'none',
-                            color: '#ef4444',
-                            cursor: 'pointer',
                             padding: '8px 12px',
-                            borderRadius: '6px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#ef4444';
-                            e.currentTarget.style.color = '#fff';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                            e.currentTarget.style.color = '#ef4444';
+                            borderRadius: '6px'
                           }}
                         >
                           <IconoTrash />
@@ -646,36 +610,16 @@ export default function GestionDocente({ usuario }) {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
           <button 
             onClick={cancelarEliminacion}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              background: 'transparent',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            className="btn-amarillo"
+            style={{ padding: '8px 16px' }}
           >
             Cancelar
           </button>
           
           <button 
             onClick={confirmarEliminacion}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: 'none',
-              background: '#ef4444',
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+            className="btn-rojo"
+            style={{ padding: '8px 16px' }}
           >
             Sí, desmatricular
           </button>

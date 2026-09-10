@@ -250,12 +250,15 @@ export default function Perfil({ usuario, setUsuario }) {
       <div className="perfil-card-secondary">
         <h3 className="perfil-section-title">
           <span>Mi Historial de Cálculos Recientes</span>
-          <button
+          <span
             onClick={() => navigate('/historial')}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/historial'); }}
+            role="button"
+            tabIndex={0}
             className="btn-perfil-link"
           >
             Ver Historial Completo
-          </button>
+          </span>
         </h3>
 
         {cargandoDatos ? (
@@ -266,7 +269,6 @@ export default function Perfil({ usuario, setUsuario }) {
                   <th className="perfil-th">Fecha / Hora</th>
                   <th className="perfil-th">Tipo de Cálculo</th>
                   <th className="perfil-th">Archivo Fuente</th>
-                  <th className="perfil-th-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -280,12 +282,6 @@ export default function Perfil({ usuario, setUsuario }) {
                     </td>
                     <td className="perfil-td"><Skeleton height="22px" width="180px" borderRadius="12px" /></td>
                     <td className="perfil-td-muted"><Skeleton height="14px" width="120px" /></td>
-                    <td className="perfil-td-center">
-                      <div className="perfil-table-actions">
-                        <Skeleton height="28px" width="70px" borderRadius="4px" />
-                        <Skeleton height="28px" width="70px" borderRadius="4px" />
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -303,7 +299,6 @@ export default function Perfil({ usuario, setUsuario }) {
                   <th className="perfil-th">Fecha / Hora</th>
                   <th className="perfil-th">Tipo de Cálculo</th>
                   <th className="perfil-th">Archivo Fuente</th>
-                  <th className="perfil-th-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -322,32 +317,6 @@ export default function Perfil({ usuario, setUsuario }) {
                     </td>
                     <td className="perfil-td-muted" data-label="Archivo Fuente">
                       {reg.archivo_origen}
-                    </td>
-                    <td className="perfil-td-center" data-label="Acciones">
-                      <div className="perfil-table-actions">
-                        <button
-                          onClick={() => {
-                            const datosBrutos = reg.snapshot || reg.resultados_json;
-                            const snapshotListo = typeof datosBrutos === "string" ? JSON.parse(datosBrutos) : datosBrutos;
-                            navigate("/calculadora", {
-                              state: {
-                                archivoReabrir: reg.archivo_origen,
-                                calculoReabrir: reg.calculo,
-                                snapshot: snapshotListo,
-                              },
-                            });
-                          }}
-                          className="btn-reabrir"
-                        >
-                          Reabrir
-                        </button>
-                        <button
-                          onClick={() => handleEliminarHistorial(reg.id)}
-                          className="btn-eliminar-registro"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))}
@@ -428,10 +397,10 @@ export default function Perfil({ usuario, setUsuario }) {
 
       {/* SECCIÓN DE DARSE DE BAJA */}
       <div className="grafico-card perfil-card-danger">
-        <h3 className="perfil-danger-title">
+        <h3 className="perfil-danger-title titulo-danger" style={{ color: "#ef4444" }}>
           Zona de Peligro: Darse de Baja
         </h3>
-        <p className="perfil-danger-desc">
+        <p className="perfil-danger-desc texto-danger" style={{ color: "#ef4444" }}>
           Al darse de baja, se eliminará tu cuenta y todos tus datos (archivos guardados, historial de cálculos, clases) de forma permanente del sistema. Esta acción no se puede deshacer.
         </p>
 

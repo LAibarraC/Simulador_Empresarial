@@ -120,9 +120,14 @@ export default function ListaTareas({ curso, onClose }) {
 
   const handleEliminarTarea = async (tarea) => {
     const confirmado = await alerta.confirmar({
-      titulo: "Eliminar Tarea",
-      mensaje: `¿Estás seguro de que deseas eliminar la tarea «${tarea.titulo}»? Se eliminarán también todas las entregas y notas asociadas. Esta acción no se puede deshacer.`,
-      textoConfirmar: "Sí, eliminar tarea",
+      titulo: "Confirmar eliminación",
+      mensaje: (
+        <>
+          ¿Estás seguro de que deseas eliminar permanentemente la tarea <br />
+          <strong>"{tarea.titulo}"</strong>?
+        </>
+      ),
+      textoConfirmar: "Eliminar",
       textoCancelar: "Cancelar",
       variant: "danger",
     });
@@ -172,7 +177,8 @@ export default function ListaTareas({ curso, onClose }) {
         {esDocente && (
             <button 
                 onClick={() => setMostrarModalAsignar(true)} 
-                style={{ marginBottom: "20px", padding: "10px 18px", background: "var(--accent-color)", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", fontSize: "0.92rem", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
+                className="btn-amarillo"
+                style={{ marginBottom: "20px" }}>
                 <Plus size={18} /> Asignar Nueva Tarea
             </button>
         )}
@@ -244,27 +250,27 @@ export default function ListaTareas({ curso, onClose }) {
                                 })()}
                                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", fontSize: "0.82rem", color: "var(--text-muted)" }}>
                                     {tarea.fecha_limite && (
-                                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: fechaLimiteVencida ? "#dc2626" : "var(--text-muted)", fontWeight: fechaLimiteVencida ? "600" : "normal" }}>
+                                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: fechaLimiteVencida ? "#ef4444" : "var(--text-muted)", fontWeight: fechaLimiteVencida ? "600" : "normal" }}>
                                         <Calendar size={13} /> {fechaLimiteVencida ? "Venció:" : "Límite:"} {new Date(tarea.fecha_limite).toLocaleString('es-ES')}
                                       </span>
                                     )}
                                     {nombreArchivoMostrar && (
-                                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#27ae60", fontWeight: "500" }}>
+                                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#10b981", fontWeight: "500" }}>
                                         <FileSpreadsheet size={13} /> Archivo: {nombreArchivoMostrar}
                                       </span>
                                     )}
                                     {!esDocente && entregado && (
-                                      <span style={{ background: "rgba(39, 174, 96, 0.15)", color: "#27ae60", padding: "2px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      <span style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10b981", padding: "2px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
                                         <CheckCircle2 size={13} /> Entregado {entrega?.calificacion !== null && entrega?.calificacion !== undefined ? `• Nota: ${entrega.calificacion}/100` : ''}
                                       </span>
                                     )}
                                     {!esDocente && !entregado && fechaLimiteVencida && (
-                                      <span style={{ background: "rgba(231, 76, 60, 0.15)", color: "#e74c3c", padding: "2px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      <span style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", padding: "2px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
                                         <AlertCircle size={13} /> Vencida
                                       </span>
                                     )}
                                     {!esDocente && !entregado && !fechaLimiteVencida && (
-                                      <span style={{ background: "rgba(243, 156, 18, 0.15)", color: "#d97706", padding: "2px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      <span style={{ background: "rgba(245, 158, 11, 0.15)", color: "var(--accent-color)", padding: "2px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
                                         <Clock size={13} /> Pendiente
                                       </span>
                                     )}
@@ -274,19 +280,9 @@ export default function ListaTareas({ curso, onClose }) {
                                 {!esDocente && !entregado && (
                                     <button 
                                         onClick={() => setTareaSeleccionada(tarea)}
+                                        className={fechaLimiteVencida ? "btn-rojo" : "btn-azul"}
                                         style={{ 
                                           padding: "8px 16px", 
-                                          background: fechaLimiteVencida ? "rgba(220, 38, 38, 0.1)" : "#27ae60", 
-                                          color: fechaLimiteVencida ? "#dc2626" : "white", 
-                                          border: fechaLimiteVencida ? "1px solid rgba(220, 38, 38, 0.3)" : "none", 
-                                          borderRadius: "6px", 
-                                          cursor: "pointer", 
-                                          fontWeight: "bold", 
-                                          display: "flex", 
-                                          alignItems: "center", 
-                                          gap: "6px", 
-                                          fontSize: "0.88rem", 
-                                          boxShadow: fechaLimiteVencida ? "none" : "0 2px 4px rgba(0,0,0,0.1)" 
                                         }}>
                                         {fechaLimiteVencida ? <AlertCircle size={14} /> : <Play size={14} />}
                                         {fechaLimiteVencida ? "Vencida (Ver)" : "Realizar Tarea"}
@@ -295,7 +291,8 @@ export default function ListaTareas({ curso, onClose }) {
                                 {!esDocente && entregado && (
                                     <button 
                                         onClick={() => setTareaSeleccionada(tarea)}
-                                        style={{ padding: "8px 16px", background: "var(--bg-card)", color: "#27ae60", border: "1px solid #27ae60", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "6px", fontSize: "0.88rem" }}>
+                                        className="btn-azul"
+                                        style={{ padding: "8px 16px" }}>
                                         <Eye size={14} /> Ver Entrega
                                     </button>
                                 )}
@@ -303,14 +300,16 @@ export default function ListaTareas({ curso, onClose }) {
                                     <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                                         <button 
                                             onClick={() => setTareaParaEntregas(tarea)}
-                                            style={{ padding: "8px 14px", background: "var(--bg-card)", color: "var(--accent-color)", border: "1px solid var(--accent-color)", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem" }}>
+                                            className="btn-amarillo"
+                                            style={{ padding: "8px 14px" }}>
                                             <Users size={14} /> Ver Entregas
                                         </button>
 
                                         <button 
                                             onClick={() => handleEliminarTarea(tarea)}
                                             title="Eliminar tarea definitivamente"
-                                            style={{ padding: "8px 12px", background: "rgba(220, 38, 38, 0.08)", color: "#dc2626", border: "1px solid rgba(220, 38, 38, 0.25)", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "5px", fontSize: "0.85rem" }}>
+                                            className="btn-rojo"
+                                            style={{ padding: "8px 12px" }}>
                                             <Trash2 size={14} /> Eliminar
                                         </button>
                                     </div>

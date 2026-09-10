@@ -70,12 +70,56 @@
 }
 
 .archivos-col-izq {
-    flex: 0 0 35%;
-    min-width: 280px;
+    flex: 0 0 38%;
+    min-width: 320px;
     display: flex;
     flex-direction: column;
     gap: 15px;
     box-sizing: border-box;
+}
+
+/* Pestañas Mi Espacio y Mis Cursos */
+.tab-archivo-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid transparent !important;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: transparent !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: all 0.2s ease;
+}
+
+/* Al pasar el ratón (hover) cuando NO está seleccionado: NO se pinta de azul ni de amarillo */
+.tab-archivo-btn:hover:not(.active) {
+    background-color: rgba(128, 128, 128, 0.1) !important;
+    color: var(--text-main) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* SOLO se pinta de amarillo si está seleccionado */
+.tab-archivo-btn.active,
+.tab-archivo-btn.active:hover {
+    background-color: var(--accent-color, #d97706) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color, #d97706) !important;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25) !important;
+    transform: none !important;
+}
+
+.toggle-panel-btn:hover {
+    background-color: var(--accent-color, #d97706) !important;
+    border-color: var(--accent-color, #d97706) !important;
 }
 
 .archivos-col-der {
