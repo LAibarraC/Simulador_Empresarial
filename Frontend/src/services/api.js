@@ -312,7 +312,15 @@ export const api = {
       let url = `${BASE_URL}/files/${encodeURIComponent(filename)}?autor=${encodeURIComponent(autor)}`;
       if (curso) url += `&curso=${encodeURIComponent(curso)}`;
       const res = await fetch(url, { method: "DELETE" });
-      if (!res.ok) throw new Error("Error al eliminar el archivo");
+      if (!res.ok) {
+        let detalle = "Error al eliminar el archivo";
+        try {
+          const errData = await res.json();
+          if (errData.detail) detalle = errData.detail;
+          else if (errData.error) detalle = errData.error;
+        } catch (e) {}
+        throw new Error(detalle);
+      }
       return true;
     } catch (error) {
       console.error("Error en api.eliminarArchivo:", error);

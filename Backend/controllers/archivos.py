@@ -224,45 +224,96 @@ async def delete_file_logic(filename: str, autor: str, curso: str, db: AsyncSess
     target_folder = await obtener_ruta_carpeta(autor, visibilidad, curso, db)
     file_path = os.path.join(target_folder, filename)
 
-    if not os.path.exists(file_path):
+    # 1. Buscar registros en la BD
+    result_user = await db.execute(select(models.Usuario).filter(models.Usuario.nombre == autor))
+    user = result_user.scalars().first()
+    user_id = user.id if user else None
+
+    archivos_query = select(models.Archivo)
+    if clase_id:
+        archivos_query = archivos_query.filter(
+            models.Archivo.nombre_original == filename,
+            models.Archivo.clase_id == clase_id
+        )
+    else:
+        if user_id:
+            archivos_query = archivos_query.filter(
+                models.Archivo.nombre_original == filename,
+                models.Archivo.usuario_id == user_id,
+                models.Archivo.clase_id == None
+            )
+        else:
+            archivos_query = archivos_query.filter(
+                models.Archivo.nombre_original == filename,
+                models.Archivo.clase_id == None
+            )
+
+    result_arc = await db.execute(archivos_query)
+    archivos_db = result_arc.scalars().all()
+    archivo_ids = [arc.id for arc in archivos_db]
+
+    # Verificar si el archivo existe en BD o en disco
+    candidatos_rutas = {file_path}
+    for arc in archivos_db:
+        if arc.ruta_servidor:
+            candidatos_rutas.add(arc.ruta_servidor.replace("/", os.sep).replace("\\", os.sep))
+    if clase_id:
+        candidatos_rutas.add(os.path.join(EXCEL_FOLDER, "_cursos", str(clase_id), filename))
+
+    rutas_existentes = [p for p in candidatos_rutas if os.path.exists(p)]
+
+    if not archivo_ids and not rutas_existentes:
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
 
-    gc.collect()
-    for _ in range(3):
-        try:
-            os.remove(file_path)
-            meta_path = file_path + ".meta"
-            if os.path.exists(meta_path):
-                os.remove(meta_path)
-            
-            # --- NUEVA LÓGICA DE ELIMINACIÓN EN BD ---
-            result = await db.execute(select(models.Usuario).filter(models.Usuario.nombre == autor))
-            user = result.scalars().first()
-            user_id = user.id if user else 1
-
-            if clase_id:
-                # Borrar archivo de curso
-                await db.execute(delete(models.Archivo).filter(
-                    models.Archivo.nombre_original == filename,
-                    models.Archivo.clase_id == clase_id
-                ))
-            else:
-                # Borrar archivo personal
-                await db.execute(delete(models.Archivo).filter(
-                    models.Archivo.nombre_original == filename,
-                    models.Archivo.usuario_id == user_id,
-                    models.Archivo.clase_id == None
-                ))
+    # 2. Desvincular de claves foráneas antes de borrar
+    try:
+        if archivo_ids:
+            # Tareas: fijar el nombre original antes de desvincular
+            await db.execute(
+                update(models.Tarea)
+                .where(models.Tarea.archivo_id.in_(archivo_ids))
+                .values(archivo_nombre_fijo=filename, archivo_id=None)
+            )
+            # Entregas de Tareas
+            await db.execute(
+                update(models.EntregaTarea)
+                .where(models.EntregaTarea.archivo_entrega_id.in_(archivo_ids))
+                .values(archivo_entrega_id=None)
+            )
+            # Historial de Cálculos
+            await db.execute(
+                update(models.HistorialCalculo)
+                .where(models.HistorialCalculo.archivo_id.in_(archivo_ids))
+                .values(archivo_id=None)
+            )
+            # Borrar registros de Archivo
+            await db.execute(
+                delete(models.Archivo).where(models.Archivo.id.in_(archivo_ids))
+            )
             await db.commit()
-            # ------------------------------------------
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al eliminar registro de base de datos: {str(e)}")
 
-            return {"message": f"Archivo {filename} eliminado correctamente"}
-        except PermissionError:
-            time.sleep(0.3)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+    # 3. Eliminar archivos físicos en disco
+    gc.collect()
+    for ruta in rutas_existentes:
+        for _ in range(3):
+            try:
+                if os.path.exists(ruta):
+                    os.remove(ruta)
+                meta_path = ruta + ".meta"
+                if os.path.exists(meta_path):
+                    os.remove(meta_path)
+                break
+            except PermissionError:
+                gc.collect()
+                time.sleep(0.3)
+            except Exception as e:
+                print(f"Error al eliminar archivo físico {ruta}: {e}")
+                break
 
-    raise HTTPException(status_code=500, detail="Archivo en uso. Intente de nuevo.")
+    return {"message": f"Archivo {filename} eliminado correctamente"}
 
 async def save_table_hojas_logic(body: SaveTableHojasRequest, db: AsyncSession):
     try:

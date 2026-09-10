@@ -99,7 +99,7 @@ export default function ExcelContent({ filename, autor, curso = "", onSheetChang
     const fetchHojas = async () => {
       try {
         const json = await api.obtenerHojas(filename, nombreAutor, curso);
-        if (json.sheets && json.sheets.length > 0) {
+        if (json && json.sheets && json.sheets.length > 0) {
           setSheets(json.sheets);
           if (pendingSheetToSelect) {
             const idx = json.sheets.indexOf(pendingSheetToSelect);
@@ -115,11 +115,14 @@ export default function ExcelContent({ filename, autor, curso = "", onSheetChang
             }
           }
         } else {
-          setError("El archivo no tiene hojas visibles.");
+          if (mostrarTabla) {
+            setError(json?.error || "El archivo no tiene hojas visibles.");
+          }
         }
       } catch (err) {
-        console.error(err);
-        setError("Error al conectar con el servidor.");
+        if (mostrarTabla) {
+          setError("Error al conectar con el servidor.");
+        }
       }
     };
 

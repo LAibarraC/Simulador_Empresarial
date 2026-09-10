@@ -270,7 +270,13 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
   }, [entregaExistente]);
 
   const parsed = parseEjerciciosAsignados(tarea.ejercicios_seleccionados);
-  const archivoReq = nombreArchivo || tarea.archivo_nombre || "";
+  const archivoDeHistorial = (historialUsuario || []).find(r => {
+    const snap = parseSnapshotData(r.snapshot);
+    const recTareaId = snap?.tarea_id || snap?.configuracion?.tarea_id || r.tarea_id;
+    return recTareaId && String(recTareaId) === String(tarea.id);
+  })?.archivo_origen;
+
+  const archivoReq = nombreArchivo || tarea.archivo_nombre || datosRespuestaParsed?.archivo_base || archivoDeHistorial || "";
 
   const temasConEstado = (parsed?.temas || []).map(t => {
     if (datosRespuestaParsed?.temas_completados) {
@@ -370,10 +376,12 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
 
   const irACalculadora = () => {
     if (onClose) onClose();
+    const tareaEntregada = Boolean(entregaExistente);
     sessionStorage.setItem("tarea_contexto_calculadora", JSON.stringify({
       tareaId: tarea.id,
       tareaTitulo: tarea.titulo,
-      claseId: tarea.clase_id
+      claseId: tarea.clase_id,
+      tareaEntregada
     }));
 
     const primerTemaPendiente = temasConEstado.find(t => !t.realizado) || temasConEstado[0];
@@ -389,13 +397,16 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
         origenArchivos: "curso",
         cursoSeleccionado: String(tarea.clase_id),
         tareaId: tarea.id,
-        tareaTitulo: tarea.titulo
+        tareaTitulo: tarea.titulo,
+        tareaEntregada,
+        soloLectura: tareaEntregada
       }
     });
   };
 
   const reabrirEjercicio = (tema) => {
     if (onClose) onClose();
+    const tareaEntregada = Boolean(entregaExistente);
     const tieneArchivoDocente = Boolean(tarea.archivo_id || archivoReq);
     const archivoFinal = tema.calculoGuardado?.archivo_origen || (tieneArchivoDocente ? archivoReq : "");
     const datosBrutos = tema.calculoGuardado?.snapshot;
@@ -404,7 +415,8 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
     sessionStorage.setItem("tarea_contexto_calculadora", JSON.stringify({
       tareaId: tarea.id,
       tareaTitulo: tarea.titulo,
-      claseId: tarea.clase_id
+      claseId: tarea.clase_id,
+      tareaEntregada
     }));
 
     navigate("/calculadora", {
@@ -417,7 +429,9 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
         origenArchivos: "curso",
         cursoSeleccionado: String(tarea.clase_id),
         tareaId: tarea.id,
-        tareaTitulo: tarea.titulo
+        tareaTitulo: tarea.titulo,
+        tareaEntregada,
+        soloLectura: tareaEntregada
       }
     });
   };
@@ -600,7 +614,7 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
             </div>
           )}
 
-          {tarea.archivo_id && (
+          {(tarea.archivo_id || archivoReq) && (
             <div style={{ 
               display: "flex", 
               justifyContent: "space-between", 

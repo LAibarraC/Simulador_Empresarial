@@ -13,6 +13,7 @@ class Tarea(Base):
     clase_id = Column(Integer, ForeignKey("clases.id"), nullable=False)
     docente_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     archivo_id = Column(Integer, ForeignKey("archivos.id"), nullable=True)
+    archivo_nombre_fijo = Column(String(255), nullable=True)
     ejercicios_seleccionados = Column(Text(length=4294967295), nullable=True) # JSON guardado como string
     fecha_limite = Column(DateTime, nullable=True)
     fecha_creacion = Column(DateTime, default=func.now())
@@ -21,7 +22,9 @@ class Tarea(Base):
 
     @property
     def archivo_nombre(self):
-        return self.archivo.nombre_original if self.archivo else None
+        if self.archivo and self.archivo.nombre_original:
+            return self.archivo.nombre_original
+        return getattr(self, "archivo_nombre_fijo", None)
 
 class EntregaTarea(Base):
     __tablename__ = "entregas_tareas"

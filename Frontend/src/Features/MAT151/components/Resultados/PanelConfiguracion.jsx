@@ -53,7 +53,8 @@ export default function PanelConfiguracion({
   ejecutarCalculo, modoCreacion, setModoCreacion,
   mostrarCalculadora, setMostrarCalculadora,
   handleActualizarColumna,
-  handleCrearColumna
+  handleCrearColumna,
+  tareaYaEntregada = false
 }) {
   const containerRef = React.useRef(null);
   const [containerWidth, setContainerWidth] = React.useState(284);
@@ -104,8 +105,8 @@ export default function PanelConfiguracion({
         rdgColumns.push({
           key: uniqueKey,
           name: nombreInterno ? `${name} - ${nombreInterno}` : name,
-          renderEditCell: textEditor,
-          editable: true,
+          renderEditCell: tareaYaEntregada ? undefined : textEditor,
+          editable: !tareaYaEntregada,
           resizable: true,
           cellClass: cssClass,
         });
@@ -196,6 +197,7 @@ export default function PanelConfiguracion({
 
   // Manejador intermedio para traducir las actualizaciones de celdas al formato original de Excel
   const handleMappedGridChange = (newRows, changeData) => {
+    if (tareaYaEntregada) return;
     const { indexes, column } = changeData;
     const realKey = column.key.split("__")[0];
     
@@ -283,6 +285,14 @@ export default function PanelConfiguracion({
 
         {panelAbierto && (
           <>
+            <div style={{
+              pointerEvents: tareaYaEntregada ? "none" : "auto",
+              opacity: tareaYaEntregada ? 0.9 : 1,
+              userSelect: tareaYaEntregada ? "none" : "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px"
+            }}>
             {/* Selector de origen de archivos (Personal vs Cursos) */}
             <div
               id="tour-origen-datos"
@@ -405,6 +415,11 @@ export default function PanelConfiguracion({
                     ? (cursoSeleccionado ? "-- Selecciona un archivo de este curso --" : "-- Selecciona un curso primero --") 
                     : "-- Selecciona un archivo personal --"}
                 </option>
+                {selectedFile && !files.some(f => f.filename === selectedFile) && (
+                  <option value={selectedFile}>
+                    {selectedFile}
+                  </option>
+                )}
                 {files.map((file) => (
                   <option key={file.filename} value={file.filename}>
                     {file.filename}
@@ -420,9 +435,18 @@ export default function PanelConfiguracion({
               mostrarTabla={false}
               onSheetChange={setSelectedSheet}
             />
+            </div>
 
             {columns.length > 0 || variables.length > 0 ? (
               <div style={{ background: "var(--bg-card)", padding: "15px", borderRadius: "8px", border: "1px solid var(--border-color)", display: "flex", flexDirection: "column", gap: "15px" }}>
+                <div style={{
+                  pointerEvents: tareaYaEntregada ? "none" : "auto",
+                  opacity: tareaYaEntregada ? 0.9 : 1,
+                  userSelect: tareaYaEntregada ? "none" : "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px"
+                }}>
                 <div id="tour-seleccion-operacion">
                   <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Operación:</label>
                   <select
@@ -837,70 +861,75 @@ export default function PanelConfiguracion({
                     )}
                   </div>
                 )}
+                </div>
 
                 {mostrarTabla && cantidadFilasVistaPrevia > 0 && (
                   <div id="tour-tabla-grid" ref={containerRef} className="container_dataset" style={{ marginTop: "10px", width: "100%" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                      <p className="info_vista" style={{ margin: 0 }}>Vista Previa (Doble clic para editar):</p>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        {/* Botón 1 (Actualizar Columna) */}
-                        <div className="col-btn-container">
-                          <button
-                            type="button"
-                            onClick={() => setMostrarActualizarCol(true)}
-                            className="col-btn-minimal col-btn-blue"
-                            title="Actualizar columna actual"
-                            style={{ color: '#6b7280' }}
-                          >
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              style={{ width: '20px', height: '20px', display: 'block', flexShrink: 0 }}
+                      <p className="info_vista" style={{ margin: 0 }}>
+                        {tareaYaEntregada ? "Vista Previa (Solo Lectura):" : "Vista Previa (Doble clic para editar):"}
+                      </p>
+                      {!tareaYaEntregada && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          {/* Botón 1 (Actualizar Columna) */}
+                          <div className="col-btn-container">
+                            <button
+                              type="button"
+                              onClick={() => setMostrarActualizarCol(true)}
+                              className="col-btn-minimal col-btn-blue"
+                              title="Actualizar columna actual"
+                              style={{ color: '#6b7280' }}
                             >
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                          </button>
-                          <div className="col-btn-tooltip">
-                            Actualizar columna actual
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{ width: '20px', height: '20px', display: 'block', flexShrink: 0 }}
+                              >
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                            </button>
+                            <div className="col-btn-tooltip">
+                              Actualizar columna actual
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Botón 2 (Crear Nueva Columna) */}
-                        <div className="col-btn-container">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setNombreNuevaColumna("");
-                              setIsOpenNuevaColumna(true);
-                            }}
-                            className="col-btn-minimal col-btn-green"
-                            title="Crear nueva columna"
-                            style={{ color: '#6b7280' }}
-                          >
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              style={{ width: '20px', height: '20px', display: 'block', flexShrink: 0 }}
+                          {/* Botón 2 (Crear Nueva Columna) */}
+                          <div className="col-btn-container">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNombreNuevaColumna("");
+                                setIsOpenNuevaColumna(true);
+                              }}
+                              className="col-btn-minimal col-btn-green"
+                              title="Crear nueva columna"
+                              style={{ color: '#6b7280' }}
                             >
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="12" y1="8" x2="12" y2="16" />
-                              <line x1="8" y1="12" x2="16" y2="12" />
-                            </svg>
-                          </button>
-                          <div className="col-btn-tooltip">
-                            Crear nueva columna
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{ width: '20px', height: '20px', display: 'block', flexShrink: 0 }}
+                              >
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="16" />
+                                <line x1="8" y1="12" x2="16" y2="12" />
+                              </svg>
+                            </button>
+                            <div className="col-btn-tooltip">
+                              Crear nueva columna
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                     <DataGrid
                       columns={rdgColumns}
@@ -912,7 +941,11 @@ export default function PanelConfiguracion({
                   </div>
                 )}
 
-                <button id="tour-btn-calcular" onClick={ejecutarCalculo} className="button_calcular" style={{ marginTop: "15px" }}>CALCULAR</button>
+                {!tareaYaEntregada && (
+                  <button id="tour-btn-calcular" onClick={ejecutarCalculo} className="button_calcular" style={{ marginTop: "15px" }}>
+                    CALCULAR
+                  </button>
+                )}
               </div>
             ) : (
               <p className="info_cargando">Cargando datos o selecciona un archivo...</p>
