@@ -2,22 +2,26 @@ import { sileo, Toaster } from "sileo";
 import { confirmarComoPromise } from "./ConfirmHost";
 
 
-const estilosBase = { title: "texto-blanco", description: "texto-gris" };
+const estilosExito = { title: "toast-titulo-exito", description: "toast-descripcion" };
+const estilosError = { title: "toast-titulo-error", description: "toast-descripcion" };
+const estilosAdvertencia = { title: "toast-titulo-advertencia", description: "toast-descripcion" };
+const estilosInfo = { title: "toast-titulo-info", description: "toast-descripcion" };
+
 export const alerta = {
   exito: (titulo, descripcion) => {
     sileo.success({
       title: titulo,
       description: descripcion,
       fill: "#171717",
-      styles: estilosBase
+      styles: estilosExito
     });
   },
   error: (titulo, descripcion) => {
     sileo.error({
       title: titulo,
       description: descripcion,
-      fill: "#474444",
-      styles: estilosBase
+      fill: "#171717",
+      styles: estilosError
     });
   },
   advertencia: (titulo, descripcion) => {
@@ -25,7 +29,7 @@ export const alerta = {
       title: titulo,
       description: descripcion,
       fill: "#171717",
-      styles: estilosBase
+      styles: estilosAdvertencia
     });
   },
   warning: (titulo, descripcion) => {
@@ -33,7 +37,7 @@ export const alerta = {
       title: titulo,
       description: descripcion,
       fill: "#171717",
-      styles: estilosBase
+      styles: estilosAdvertencia
     });
   },
   success: (titulo, descripcion) => {
@@ -41,7 +45,7 @@ export const alerta = {
       title: titulo,
       description: descripcion,
       fill: "#171717",
-      styles: estilosBase
+      styles: estilosExito
     });
   },
   info: (titulo, descripcion) => {
@@ -49,22 +53,22 @@ export const alerta = {
       sileo.info({
         title: titulo,
         description: descripcion,
-        fill: "#1e293b",
-        styles: estilosBase
+        fill: "#171717",
+        styles: estilosInfo
       });
     } else if (sileo && typeof sileo.show === 'function') {
       sileo.show({
         title: titulo,
         description: descripcion,
-        fill: "#1e293b",
-        styles: estilosBase
+        fill: "#171717",
+        styles: estilosInfo
       });
     } else {
       sileo.success({
         title: titulo,
         description: descripcion,
-        fill: "#1e293b",
-        styles: estilosBase
+        fill: "#171717",
+        styles: estilosInfo
       });
     }
   },

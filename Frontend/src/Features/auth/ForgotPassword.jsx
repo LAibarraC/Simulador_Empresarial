@@ -71,11 +71,6 @@ export default function ForgotPassword() {
             <p style={{ color: "var(--text-main)", fontSize: "0.95rem", lineHeight: "1.5" }}>
               Si el correo está registrado, recibirás un enlace en tu bandeja de entrada. Por favor, revisa también tu carpeta de Spam o Correo No Deseado por si acaso.
             </p>
-            <div style={{ marginTop: "25px" }}>
-              <Link to="/login" style={{ color: "var(--accent-color)", fontWeight: "bold", textDecoration: "none" }}>
-                Volver al inicio de sesión
-              </Link>
-            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -116,29 +111,19 @@ export default function ForgotPassword() {
             <button
               type="submit"
               disabled={loading || !canSubmit}
+              className="btn-auth btn-amarillo"
               style={{
-                backgroundColor: loading || !canSubmit ? "var(--border-color)" : "var(--accent-color)",
-                cursor: loading || !canSubmit ? "not-allowed" : "pointer",
+                width: '100%',
                 padding: "12px",
                 fontSize: "1rem",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
+                borderRadius: "6px",
                 fontWeight: "bold",
-                transition: "background-color 0.2s"
+                cursor: loading || !canSubmit ? "not-allowed" : "pointer",
+                opacity: loading || !canSubmit ? 0.6 : 1,
               }}
             >
               {loading ? "Enviando..." : "Enviar Enlace"}
             </button>
-
-            <div style={{ textAlign: "center", fontSize: "0.9rem", marginTop: "5px" }}>
-              <p style={{ color: "var(--text-main)" }}>
-                ¿Recordaste tu contraseña?{" "}
-                <Link to="/login" style={{ color: "var(--accent-color)", fontWeight: "bold", textDecoration: "none" }}>
-                  Inicia sesión aquí
-                </Link>
-              </p>
-            </div>
           </form>
         )}
       </div>

@@ -11,7 +11,7 @@
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .tema2-title {
@@ -130,16 +130,19 @@
     gap: 15px;
     align-items: center;
 }
+
 .tema2-flex-between {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
 .tema2-flex-wrap {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
 }
+
 .tema2-flex-col {
     display: flex;
     flex-direction: column;
@@ -152,11 +155,13 @@
     margin: 0 0 15px 0;
     font-size: 1rem;
 }
+
 .tema2-h5 {
     color: #334155;
     margin: 10px 0 10px 0;
     font-size: 0.95rem;
 }
+
 .tema2-muted-text {
     color: #64748b;
     font-size: 0.85rem;
@@ -170,12 +175,14 @@
     border-radius: 8px;
     border: 1px solid #e2e8f0;
 }
+
 .tema2-panel-blue {
     background: #eff6ff;
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #bfdbfe;
 }
+
 .tema2-math-dev {
     background: #f8fafc;
     padding: 20px 40px;
@@ -184,6 +191,7 @@
     max-width: 800px;
     margin: 0 auto;
 }
+
 .tema2-math-step {
     background: #ffffff;
     padding: 15px;
@@ -191,6 +199,7 @@
     border: 1px dashed #cbd5e1;
     margin-top: 10px;
 }
+
 .tema2-final-result {
     font-size: 1.25rem;
     font-weight: bold;

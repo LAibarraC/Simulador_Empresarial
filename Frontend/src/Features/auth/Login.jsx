@@ -189,16 +189,14 @@ export default function Login({ onLogin }) {
 
               <button
                 type="submit"
-                className="btn-auth"
+                className="btn-auth btn-amarillo"
                 style={{
-                  backgroundColor: 'var(--accent-color)',
+                  width: '100%',
                   padding: '12px',
                   fontSize: '1rem',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer',
-                  borderRadius: '5px',
-                  fontWeight: 'bold'
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
                 }}
               >
                 Ingresar
@@ -276,15 +274,13 @@ export default function Login({ onLogin }) {
                 </div>
               </div>
 
-              <button type="submit" className="btn-auth" style={{
-                backgroundColor: 'var(--accent-color)',
+              <button type="submit" className="btn-auth btn-amarillo" style={{
+                width: '100%',
                 padding: '12px',
                 fontSize: '1rem',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-                borderRadius: '5px',
-                fontWeight: 'bold'
+                borderRadius: '6px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
               }}>
                 Obtener Código
               </button>
@@ -292,8 +288,10 @@ export default function Login({ onLogin }) {
 
             <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>
               <button
+                type="button"
                 onClick={() => setVista("login")}
-                style={{ background: 'none', border: 'none', color: 'var(--accent-color)', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem' }}
+                className="btn-rojo"
+                style={{ padding: '8px 16px', fontSize: '0.88rem' }}
               >
                 Volver al inicio de sesión
               </button>
@@ -344,15 +342,13 @@ export default function Login({ onLogin }) {
                 <fieldset className="notch"><legend><span>Confirmar Nueva Contraseña</span></legend></fieldset>
               </div>
 
-              <button type="submit" className="btn-auth" style={{
-                backgroundColor: 'var(--accent-color)',
+              <button type="submit" className="btn-auth btn-amarillo" style={{
+                width: '100%',
                 padding: '12px',
                 fontSize: '1rem',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-                borderRadius: '5px',
+                borderRadius: '6px',
                 fontWeight: 'bold',
+                cursor: 'pointer',
                 marginTop: '10px'
               }}>
                 Cambiar Contraseña

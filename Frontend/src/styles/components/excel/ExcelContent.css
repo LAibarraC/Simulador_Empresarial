@@ -12,7 +12,7 @@
     border-Radius: 8px;
     color: #ef4444;
     text-Align: center;
-} 
+}
 
 .container_content {
     padding: 15px;
@@ -73,13 +73,23 @@
 }
 
 .container_cabecera_botones button {
-    background-Color: var(--accent-color);
-    color: white;
-    padding: 5px 15px;
-    border-Radius: 6px;
-    border: none;
+    background-color: transparent;
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 6px 14px;
+    border-radius: 6px;
     cursor: pointer;
-    font-Weight: bold;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.container_cabecera_botones button:hover:not(:disabled) {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    transform: translateY(-1px);
 }
 
 .container_edicion {
@@ -156,21 +166,22 @@
     align-Items: center;
     justify-Content: center;
 }
-.container_vacio p{
-    font-Style: italic", color: "var(--text-muted);
+
+.container_vacio p {
+    font-Style: italic", color: " var(--text-muted);
 }
 
 /* Centrado premium de celdas y cabeceras en react-data-grid */
 .personalizado .rdg-cell {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
 }
 
 .personalizado .rdg-header-cell {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
 }

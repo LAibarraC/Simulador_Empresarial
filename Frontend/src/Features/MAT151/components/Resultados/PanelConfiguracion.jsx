@@ -302,7 +302,8 @@ export default function PanelConfiguracion({
                 borderRadius: "8px",
                 padding: "5px",
                 border: "1px solid var(--border-color)",
-                marginBottom: "15px"
+                marginBottom: "15px",
+                gap: "6px",
               }}
             >
               <button
@@ -313,26 +314,7 @@ export default function PanelConfiguracion({
                   setSelectedFile(""); // Limpiar archivo seleccionado
                   setModoCreacion(false);
                 }}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  fontSize: "0.85rem",
-                  transition: "all 0.3s ease",
-                  background:
-                    origenArchivos === "personal"
-                      ? "var(--accent-color)"
-                      : "transparent",
-                  color:
-                    origenArchivos === "personal" ? "white" : "var(--text-muted)",
-                }}
+                className={`tab-archivo-btn ${origenArchivos === "personal" ? "active" : ""}`}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -347,26 +329,7 @@ export default function PanelConfiguracion({
                   setSelectedFile(""); // Limpiar archivo seleccionado
                   setModoCreacion(false);
                 }}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  fontSize: "0.85rem",
-                  transition: "all 0.3s ease",
-                  background:
-                    origenArchivos === "curso"
-                      ? "var(--primary-color)"
-                      : "transparent",
-                  color:
-                    origenArchivos === "curso" ? "white" : "var(--text-muted)",
-                }}
+                className={`tab-archivo-btn ${origenArchivos === "curso" ? "active" : ""}`}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -826,6 +789,7 @@ export default function PanelConfiguracion({
                               const actual = p === "" ? 50 : p;
                               return actual > 1 ? actual - 1 : 1;
                             })}
+                            className="btn-stepper-percentil"
                             style={{ padding: "6px 12px", border: "none", background: "rgba(0,0,0,0.05)", color: "var(--text-main)", cursor: "pointer", fontWeight: "bold", borderRight: "1px solid var(--border-color)", fontSize: "1.1rem" }}
                           >
                             −
@@ -852,6 +816,7 @@ export default function PanelConfiguracion({
                               const actual = p === "" ? 50 : p;
                               return actual < 99 ? actual + 1 : 99;
                             })}
+                            className="btn-stepper-percentil"
                             style={{ padding: "6px 12px", border: "none", background: "rgba(0,0,0,0.05)", color: "var(--text-main)", cursor: "pointer", fontWeight: "bold", borderLeft: "1px solid var(--border-color)", fontSize: "1.1rem" }}
                           >
                             +
@@ -942,7 +907,7 @@ export default function PanelConfiguracion({
                 )}
 
                 {!tareaYaEntregada && (
-                  <button id="tour-btn-calcular" onClick={ejecutarCalculo} className="button_calcular" style={{ marginTop: "15px" }}>
+                  <button id="tour-btn-calcular" onClick={ejecutarCalculo} className="button_calcular btn-amarillo" style={{ marginTop: "15px" }}>
                     CALCULAR
                   </button>
                 )}

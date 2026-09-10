@@ -579,16 +579,13 @@ export default function Registro({ onLogin }) {
                 type="button"
                 onClick={prevStep}
                 disabled={cargando}
-                className="btn-auth"
+                className="btn-auth btn-secundario btn-gris"
                 style={{
-                  backgroundColor: 'transparent',
                   padding: '12px',
                   fontSize: '1rem',
-                  color: 'var(--text-main)',
-                  border: '1px solid var(--border-color)',
                   cursor: cargando ? 'not-allowed' : 'pointer',
                   opacity: cargando ? 0.6 : 1,
-                  borderRadius: '5px',
+                  borderRadius: '6px',
                   fontWeight: 'bold',
                   flex: 1
                 }}
@@ -600,16 +597,13 @@ export default function Registro({ onLogin }) {
             <button
               type="submit"
               disabled={cargando}
-              className="btn-auth"
+              className="btn-auth btn-amarillo"
               style={{
-                backgroundColor: 'var(--accent-color)',
                 padding: '12px',
                 fontSize: '1rem',
-                color: 'white',
-                border: 'none',
                 cursor: cargando ? 'not-allowed' : 'pointer',
                 opacity: cargando ? 0.7 : 1,
-                borderRadius: '5px',
+                borderRadius: '6px',
                 fontWeight: 'bold',
                 flex: 2
               }}

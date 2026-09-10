@@ -26,14 +26,83 @@ html.dark {
   --bg-nav: #000000;
   /* Negro en modo oscuro */
   --bg-input: #2a2a2a;
-  --text-main: #f5f5f5;
-  --text-muted: #a0a0a0;
-  --text-nav: #e0e0e0;
+  --text-main: #ffffff;
+  --text-muted: #e2e8f0;
+  --text-nav: #ffffff;
   --border-color: #444444;
   --primary-color: #3b82f6;
   --header-bg: #333333;
   --accent-color: #f59e0b;
   --text-variable: white;
+}
+
+/* ==========================================================================
+   ESTANDARIZACIÓN GLOBAL DE TÍTULOS Y DESCRIPCIONES (MISMO TAMAÑO Y COLOR BLANCO EN MODO OSCURO)
+   ========================================================================== */
+.titulo-seccion-unificado,
+.page-header-title,
+.historial-titulo,
+.archivos-titulo,
+.admin-title,
+.perfil-title {
+  font-size: 1.55rem !important;
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+  margin: 0 0 4px 0 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em;
+}
+
+.descripcion-seccion-unificada,
+.page-header-subtitle,
+.historial-usuario,
+.archivos-subtitulo,
+.admin-subtitle,
+.perfil-subtitle {
+  font-size: 0.88rem !important;
+  font-weight: 400 !important;
+  color: var(--text-muted) !important;
+  margin: 0 !important;
+  line-height: 1.45 !important;
+}
+
+html.dark .titulo-seccion-unificado,
+html.dark .page-header-title,
+html.dark .historial-titulo,
+html.dark .archivos-titulo,
+html.dark .admin-title,
+html.dark .perfil-title,
+html.dark h1:not(.titulo-danger):not(.perfil-danger-title),
+html.dark h2:not(.titulo-danger):not(.perfil-danger-title),
+html.dark h3:not(.titulo-danger):not(.perfil-danger-title),
+html.dark h4:not(.titulo-danger):not(.perfil-danger-title) {
+  color: #ffffff !important;
+}
+
+/* Títulos y textos de zona de peligro (siempre rojos) */
+.titulo-danger,
+.texto-danger,
+html.dark .titulo-danger,
+html.dark .texto-danger,
+.zona-peligro-titulo,
+.zona-peligro-texto,
+.perfil-danger-title,
+.perfil-danger-desc,
+html.dark .perfil-danger-title,
+html.dark .perfil-danger-desc {
+  color: #ef4444 !important;
+}
+
+html.dark .descripcion-seccion-unificada,
+html.dark .page-header-subtitle,
+html.dark .historial-usuario,
+html.dark .archivos-subtitulo,
+html.dark .admin-subtitle,
+html.dark .perfil-subtitle,
+html.dark .text-muted:not(.texto-danger):not(.zona-peligro-texto):not(.perfil-danger-desc),
+html.dark p.subtitulo:not(.texto-danger):not(.zona-peligro-texto):not(.perfil-danger-desc) {
+  color: #ffffff !important;
+  opacity: 0.9 !important;
 }
 
 /* ========================================= */
@@ -129,20 +198,372 @@ select option {
   }
 }
 
-button {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 0.6em 1.2em;
-  border-radius: 5px;
+/* ==========================================================================
+   SISTEMA DE BOTONES UNIFICADO (OUTLINE EN REPOSO -> RELLENO EN HOVER)
+   Colores del sistema: Amarillo (Accent), Azul (Primary), Rojo (Danger), Verde (Excel/Success)
+   ========================================================================== */
+
+/* 1. Estilos estructurales base para cualquier botón */
+button,
+.btn {
+  background-color: transparent;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
   cursor: pointer;
-  font-weight: bold;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-family: inherit;
-  transition: filter 0.2s;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
-button:hover {
-  filter: brightness(1.1);
+button:active:not(:disabled),
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled,
+.btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 2. BOTÓN AZUL (Primario / Reabrir / Subir / Descargar / Base por defecto) */
+.btn-primary,
+.btn-azul,
+.btn-outline-primary,
+.btn-outline-azul,
+.btn-reabrir,
+.container_button_download,
+.btn-upload,
+.btn-nueva-var {
+  background-color: transparent !important;
+  border: 1px solid var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-azul:hover:not(:disabled),
+.btn-outline-primary:hover:not(:disabled),
+.btn-outline-azul:hover:not(:disabled),
+.btn-reabrir:hover:not(:disabled),
+.container_button_download:hover:not(:disabled),
+.btn-upload:hover:not(:disabled),
+.btn-nueva-var:hover:not(:disabled) {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+/* Botón base sin clase específica (solo cuando no tiene clases de color específicas) */
+button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]) {
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):hover:not(:disabled) {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+
+/* 3. BOTÓN AMARILLO (Acento / Crear / Ver / Destacado / Calcular / Warning) */
+.btn-accent,
+.btn-amarillo,
+.btn-outline-accent,
+.btn-outline-amarillo,
+.btn-crear,
+.btn-warning,
+.button_calcular,
+.container_button_1,
+.btn-perfil-back,
+.btn-submit-perfil,
+.btn-cancel-confirm,
+.btn-stepper-percentil,
+.modal_viewer_button_si {
+  background-color: transparent !important;
+  border: 1px solid var(--accent-color) !important;
+  color: var(--accent-color) !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.btn-accent:hover:not(:disabled),
+.btn-amarillo:hover:not(:disabled),
+.btn-outline-accent:hover:not(:disabled),
+.btn-outline-amarillo:hover:not(:disabled),
+.btn-crear:hover:not(:disabled),
+.btn-warning:hover:not(:disabled),
+.button_calcular:hover:not(:disabled),
+.container_button_1:hover:not(:disabled),
+.btn-perfil-back:hover:not(:disabled),
+.btn-submit-perfil:hover:not(:disabled),
+.btn-cancel-confirm:hover:not(:disabled),
+.btn-stepper-percentil:hover:not(:disabled),
+.modal_viewer_button_si:hover:not(:disabled) {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+/* Fractiles (Cuartiles, Deciles, Percentiles, Todos los Fractiles) */
+.button_subtendencia {
+  background-color: transparent !important;
+  border: 1px solid var(--accent-color) !important;
+  color: var(--accent-color) !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.button_subtendencia.active {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color) !important;
+  font-weight: bold;
+}
+
+.button_subtendencia:hover:not(:disabled) {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+/* Pestañas Mi Espacio y Mis Cursos (Archivos y Calculadora) */
+.tab-archivo-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid transparent !important;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: transparent !important;
+  color: var(--text-muted) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: all 0.2s ease;
+}
+
+.tab-archivo-btn:hover:not(.active) {
+  background-color: rgba(128, 128, 128, 0.1) !important;
+  color: var(--text-main) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.tab-archivo-btn.active,
+.tab-archivo-btn.active:hover {
+  background-color: var(--accent-color, #d97706) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color, #d97706) !important;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25) !important;
+  transform: none !important;
+}
+
+/* Enlaces estilo botón dentro de Perfil */
+.btn-perfil-link {
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--accent-color, #d97706) !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.btn-perfil-link:hover {
+  background-color: transparent !important;
+  border: none !important;
+  color: #f59e0b !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: brightness(1.25) !important;
+  text-decoration: underline !important;
+}
+
+/* Pestañas Centro de Control de Curso (Ajustes y Acceso y código QR) */
+.tab-centro-control {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  border-radius: 0 !important;
+  color: var(--text-muted) !important;
+  border-bottom: 3px solid transparent !important;
+}
+
+.tab-centro-control:hover:not(:disabled) {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  color: #f59e0b !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.tab-centro-control.active {
+  color: #f59e0b !important;
+  border-bottom: 3px solid #f59e0b !important;
+}
+
+/* 4. BOTÓN ROJO (Peligro / Eliminar / Desmatricular / Cancelar / Delete / Logout) */
+.btn-danger,
+.btn-rojo,
+.btn-outline-danger,
+.btn-outline-rojo,
+.btn-eliminar,
+.btn-cancelar,
+.btn-delete,
+.container_button_2,
+.btn-eliminar-registro,
+.btn-danger-perfil,
+.btn-danger-confirm,
+.btn-perfil-logout,
+.modal_viewer_button_no {
+  background-color: transparent !important;
+  border: 1px solid #ef4444 !important;
+  color: #ef4444 !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.btn-danger:hover:not(:disabled),
+.btn-rojo:hover:not(:disabled),
+.btn-outline-danger:hover:not(:disabled),
+.btn-outline-rojo:hover:not(:disabled),
+.btn-eliminar:hover:not(:disabled),
+.btn-cancelar:hover:not(:disabled),
+.btn-delete:hover:not(:disabled),
+.container_button_2:hover:not(:disabled),
+.btn-eliminar-registro:hover:not(:disabled),
+.btn-danger-perfil:hover:not(:disabled),
+.btn-danger-confirm:hover:not(:disabled),
+.btn-perfil-logout:hover:not(:disabled),
+.modal_viewer_button_no:hover:not(:disabled) {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+/* 5. BOTÓN VERDE / EXCEL (Exportar Excel / Acciones Éxito) */
+.btn-verde,
+.btn-green,
+.btn-excel,
+.btn-outline-excel,
+.btn-outline-verde,
+.btn-outline-success,
+.btn-success {
+  background-color: transparent !important;
+  border: 1px solid #10b981 !important;
+  color: #10b981 !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.btn-verde:hover:not(:disabled),
+.btn-green:hover:not(:disabled),
+.btn-excel:hover:not(:disabled),
+.btn-outline-excel:hover:not(:disabled),
+.btn-outline-verde:hover:not(:disabled),
+.btn-outline-success:hover:not(:disabled),
+.btn-success:hover:not(:disabled) {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+/* 6. BOTÓN GRIS / SECUNDARIO (Atrás, Cancelar neutro, Acciones secundarias) */
+.btn-secundario,
+.btn-secondary,
+.btn-gris,
+.btn-outline-gris,
+.btn-outline-secundario {
+  background-color: transparent !important;
+  border: 1px solid var(--border-color, #64748b) !important;
+  color: var(--text-muted, #64748b) !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.btn-secundario:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.btn-gris:hover:not(:disabled),
+.btn-outline-gris:hover:not(:disabled),
+.btn-outline-secundario:hover:not(:disabled) {
+  background-color: #64748b !important;
+  color: #ffffff !important;
+  border-color: #64748b !important;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25) !important;
+  transform: translateY(-1px);
 }
 
 /* SCROLLBAR PERSONALIZADO */
@@ -169,18 +590,22 @@ button:hover {
 .thin-scrollbar {
   scrollbar-width: thin;
 }
+
 .thin-scrollbar::-webkit-scrollbar {
   height: 6px;
   width: 6px;
 }
+
 .thin-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .thin-scrollbar::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 6px;
   border: none;
 }
+
 .thin-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a0a0a0;
 }
@@ -288,13 +713,81 @@ html.dark .rdg {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Toaster Fix */
+/* Toaster Fix & Custom Toast Styling */
 [data-sileo-toaster],
+[data-sileo-viewport],
 [class*="sileo"],
 [class*="toaster"],
 [class*="toast-container"] {
   z-index: 99999 !important;
   position: fixed !important;
+}
+
+/* Notificaciones Toast (Sileo): sin marco azul, sin hover azul, letras blancas */
+button[data-sileo-toast],
+[data-sileo-toast] {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+button[data-sileo-toast]:hover,
+button[data-sileo-toast]:focus,
+button[data-sileo-toast]:active,
+[data-sileo-toast]:hover,
+[data-sileo-toast]:focus,
+[data-sileo-toast]:active {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+/* Colores del título según el tipo de notificación */
+[data-sileo-toast][data-state="success"] [data-sileo-title],
+[data-sileo-toast][data-state="action"] [data-sileo-title],
+[data-sileo-title][data-state="success"],
+.toast-titulo-exito {
+  color: #22c55e !important; /* Verde para éxito */
+  font-weight: 700 !important;
+}
+
+[data-sileo-toast][data-state="error"] [data-sileo-title],
+[data-sileo-title][data-state="error"],
+.toast-titulo-error {
+  color: #ef4444 !important; /* Rojo para falla */
+  font-weight: 700 !important;
+}
+
+[data-sileo-toast][data-state="warning"] [data-sileo-title],
+[data-sileo-title][data-state="warning"],
+.toast-titulo-advertencia {
+  color: #fbbf24 !important; /* Amarillo para advertencia */
+  font-weight: 700 !important;
+}
+
+[data-sileo-toast][data-state="info"] [data-sileo-title],
+[data-sileo-title][data-state="info"],
+.toast-titulo-info {
+  color: #38bdf8 !important; /* Celeste para info */
+  font-weight: 700 !important;
+}
+
+/* Descripción siempre de color blanco */
+[data-sileo-toast] [data-sileo-description],
+[data-sileo-description],
+[data-sileo-viewport] [data-sileo-description],
+.toast-descripcion,
+.texto-blanco,
+.texto-gris {
+  color: #ffffff !important;
+  opacity: 0.95 !important;
+}
+
+[data-sileo-toast] * {
+  border-color: transparent !important;
 }
 
 /* Animaciones globales */
@@ -328,7 +821,7 @@ html.dark .pie-logo-siglos {
   width: 80px;
   height: 32px;
   background-color: rgba(255, 255, 255, 0.2);
-  border: 2px solid white;
+  border: 2px solid #ffffff !important;
   border-radius: 30px;
   position: relative;
   cursor: pointer;
@@ -342,7 +835,8 @@ html.dark .pie-logo-siglos {
 
 .theme-toggle-btn.dark {
   background-color: #333333;
-  border-color: #555555;
+  border: 2px solid #ffffff !important;
+  border-color: #ffffff !important;
 }
 
 .theme-toggle-thumb {
@@ -410,7 +904,7 @@ html.dark .pie-logo-siglos {
   padding: 0;
   background-color: var(--accent-color, #d97706);
   color: white;
-  border: none;
+  border: none !important;
   border-radius: 50px;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -433,6 +927,7 @@ html.dark .pie-logo-siglos {
   width: 146px;
   padding: 0 16px;
   gap: 8px;
+  border: none !important;
   border-radius: 30px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
   filter: brightness(1.05);
@@ -447,11 +942,19 @@ html.dark .pie-logo-siglos {
   flex-shrink: 0;
   width: 20px;
   height: 20px;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.guia-rapida-flotante svg * {
+  stroke: #ffffff !important;
 }
 
 .guia-rapida-flotante:hover svg {
   transform: rotate(360deg);
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 .guia-rapida-flotante:active {
@@ -604,7 +1107,8 @@ html.dark .pie-logo-siglos {
    para no interferir con el menú cuando hay sesión iniciada */
 
 .guest-actions {
-  position: fixed; /* Lo fijamos a la pantalla */
+  position: fixed;
+  /* Lo fijamos a la pantalla */
   top: 15px;
   right: 15px;
   z-index: 1000;
@@ -643,6 +1147,7 @@ html.dark .pie-logo-siglos {
     right: 10px;
     padding: 4px 6px;
   }
+
   .login-link {
     padding: 6px 14px;
     font-size: 0.85rem;

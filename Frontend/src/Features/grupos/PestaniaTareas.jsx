@@ -153,9 +153,14 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
 
   const handleEliminarTarea = async (tarea) => {
     const confirmado = await alerta.confirmar({
-      titulo: "Eliminar Tarea",
-      mensaje: `¿Estás seguro de que deseas eliminar la tarea «${tarea.titulo}»? Se eliminarán todas las entregas y calificaciones vinculadas. Esta acción no se puede deshacer.`,
-      textoConfirmar: "Sí, eliminar tarea",
+      titulo: "Confirmar eliminación",
+      mensaje: (
+        <>
+          ¿Estás seguro de que deseas eliminar permanentemente la tarea <br />
+          <strong>"{tarea.titulo}"</strong>?
+        </>
+      ),
+      textoConfirmar: "Eliminar",
       textoCancelar: "Cancelar",
       variant: "danger",
     });
@@ -270,100 +275,32 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
   const temaAccent = esDocente ? "var(--accent-color)" : "#27ae60";
 
   return (
-    <div style={{ width: "100%", boxSizing: "border-box" }}>
-      {/* BARRA SUPERIOR DE ACCIONES Y TÍTULO */}
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        marginBottom: "20px", 
-        flexWrap: "wrap", 
-        gap: "15px" 
-      }}>
-        <div>
-          <h2 style={{ color: temaColor, margin: 0, fontSize: "clamp(1.2rem, 3vw, 1.55rem)", display: "flex", alignItems: "center", gap: "8px" }}>
-            <ClipboardList size={26} />
-            {esDocente ? "Gestión de Tareas y Evaluaciones" : "Mis Tareas y Evaluaciones"}
-          </h2>
-          <p style={{ margin: "4px 0 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
-            {esDocente 
-              ? "Asigna prácticas de Estadística General a tus cursos y califica las entregas de tus alumnos."
-              : "Consulta tus prácticas pendientes, resuélvelas con los datos del curso y revisa tus calificaciones."}
-          </p>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-          <button
-            onClick={cargarTodasLasTareas}
-            title="Recargar tareas"
-            style={{
-              padding: "9px 12px",
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "6px",
-              cursor: "pointer",
-              color: "var(--text-main)",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              fontSize: "0.88rem",
-              fontWeight: "600",
-              transition: "all 0.2s"
-            }}
-          >
-            <RefreshCw size={15} className={cargando ? "spin" : ""} />
-            Actualizar
-          </button>
-
-          {esDocente && cursos.length > 0 && (
-            <button
-              onClick={handleAbrirAsignarTarea}
-              style={{
-                background: "var(--accent-color)",
-                color: "white",
-                padding: "10px 18px",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "bold",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "0.92rem",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                transition: "opacity 0.2s"
-              }}
-            >
-              <Plus size={18} /> Asignar Nueva Tarea
-            </button>
-          )}
-        </div>
-      </div>
-
+    <div style={{ position: "relative", zIndex: 1 }}>
       {/* METRICAS RÁPIDAS PARA ESTUDIANTE */}
       {!esDocente && contadoresEstudiante && contadoresEstudiante.total > 0 && (
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: "12px",
+          gap: "14px",
           marginBottom: "20px"
         }}>
           {/* Total Tareas */}
           <div style={{
             background: "var(--bg-card)",
             padding: "14px 18px",
-            borderRadius: "8px",
+            borderRadius: "10px",
             border: "1px solid var(--border-color)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.02)"
           }}>
             <div>
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>Total Tareas</div>
               <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "var(--text-main)" }}>{contadoresEstudiante.total}</div>
             </div>
-            <div style={{ background: "rgba(59, 130, 246, 0.1)", color: "var(--primary-color)", padding: "10px", borderRadius: "8px" }}>
-              <ClipboardList size={22} />
+            <div style={{ background: "rgba(59, 130, 246, 0.1)", color: "var(--primary-color)", padding: "9px", borderRadius: "8px" }}>
+              <ClipboardList size={20} />
             </div>
           </div>
 
@@ -371,18 +308,19 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
           <div style={{
             background: "var(--bg-card)",
             padding: "14px 18px",
-            borderRadius: "8px",
+            borderRadius: "10px",
             border: "1px solid var(--border-color)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.02)"
           }}>
             <div>
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>Pendientes</div>
-              <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#d97706" }}>{contadoresEstudiante.pendientes}</div>
+              <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "var(--accent-color)" }}>{contadoresEstudiante.pendientes}</div>
             </div>
-            <div style={{ background: "rgba(243, 156, 18, 0.12)", color: "#d97706", padding: "10px", borderRadius: "8px" }}>
-              <Clock size={22} />
+            <div style={{ background: "rgba(245, 158, 11, 0.12)", color: "var(--accent-color)", padding: "9px", borderRadius: "8px" }}>
+              <Clock size={20} />
             </div>
           </div>
 
@@ -390,18 +328,19 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
           <div style={{
             background: "var(--bg-card)",
             padding: "14px 18px",
-            borderRadius: "8px",
+            borderRadius: "10px",
             border: "1px solid var(--border-color)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.02)"
           }}>
             <div>
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>Entregadas</div>
-              <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#27ae60" }}>{contadoresEstudiante.entregadas}</div>
+              <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#10b981" }}>{contadoresEstudiante.entregadas}</div>
             </div>
-            <div style={{ background: "rgba(39, 174, 96, 0.12)", color: "#27ae60", padding: "10px", borderRadius: "8px" }}>
-              <CheckCircle2 size={22} />
+            <div style={{ background: "rgba(16, 185, 129, 0.12)", color: "#10b981", padding: "9px", borderRadius: "8px" }}>
+              <CheckCircle2 size={20} />
             </div>
           </div>
 
@@ -409,75 +348,94 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
           <div style={{
             background: "var(--bg-card)",
             padding: "14px 18px",
-            borderRadius: "8px",
+            borderRadius: "10px",
             border: "1px solid var(--border-color)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.02)"
           }}>
             <div>
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>Vencidas</div>
-              <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#dc2626" }}>{contadoresEstudiante.vencidas}</div>
+              <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#ef4444" }}>{contadoresEstudiante.vencidas}</div>
             </div>
-            <div style={{ background: "rgba(220, 38, 38, 0.12)", color: "#dc2626", padding: "10px", borderRadius: "8px" }}>
-              <AlertCircle size={22} />
+            <div style={{ background: "rgba(239, 68, 68, 0.12)", color: "#ef4444", padding: "9px", borderRadius: "8px" }}>
+              <AlertCircle size={20} />
             </div>
           </div>
         </div>
       )}
 
-      {/* BARRA DE FILTROS Y BÚSQUEDA */}
+      {/* BARRA DE HERRAMIENTAS Y FILTROS UNIFICADA */}
       <div style={{
-        background: "var(--bg-card)",
-        padding: "16px",
-        borderRadius: "10px",
-        border: "1px solid var(--border-color)",
-        marginBottom: "20px",
         display: "flex",
-        flexDirection: "column",
-        gap: "12px"
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "12px",
+        marginBottom: "22px",
+        flexWrap: "wrap",
       }}>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          flexWrap: "wrap"
-        }}>
-          {/* BUSCADOR */}
-          <div style={{ flex: "1 1 240px", position: "relative" }}>
-            <Search size={17} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-            <input
-              type="text"
-              placeholder="Buscar por título, tema o curso..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
+        {/* BUSCADOR */}
+        <div style={{ flex: "1 1 240px", maxWidth: esDocente ? "400px" : "320px", position: "relative" }}>
+          <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+          <input
+            type="text"
+            placeholder="Buscar por título, tema o curso..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px 32px 8px 36px",
+              borderRadius: "8px",
+              border: "1px solid var(--border-color)",
+              background: "var(--bg-input)",
+              color: "var(--text-main)",
+              fontSize: "0.9rem",
+              outline: "none",
+              boxSizing: "border-box"
+            }}
+          />
+          {busqueda && (
+            <button
+              type="button"
+              onClick={() => setBusqueda("")}
               style={{
-                width: "100%",
-                padding: "9px 12px 9px 36px",
-                borderRadius: "6px",
-                border: "1px solid var(--border-color)",
-                background: "var(--bg-input)",
-                color: "var(--text-main)",
-                fontSize: "0.9rem",
-                boxSizing: "border-box"
+                position: "absolute",
+                right: "8px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "transparent",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                fontSize: "0.85rem",
               }}
-            />
-          </div>
+              title="Limpiar búsqueda"
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
-          {/* SELECTOR DE CURSO */}
-          <div style={{ flex: "0 0 auto", minWidth: "200px" }}>
+        {/* SELECTOR DE CURSO */}
+        {cursos.length > 0 && (
+          <div style={{ flex: "0 0 auto", minWidth: "180px" }}>
             <select
               value={cursoFiltro}
               onChange={(e) => setCursoFiltro(e.target.value)}
               style={{
                 width: "100%",
-                padding: "9px 12px",
-                borderRadius: "6px",
+                padding: "8px 12px",
+                borderRadius: "8px",
                 border: "1px solid var(--border-color)",
                 background: "var(--bg-input)",
                 color: "var(--text-main)",
-                fontSize: "0.9rem",
-                cursor: "pointer"
+                fontSize: "0.88rem",
+                cursor: "pointer",
+                outline: "none"
               }}
             >
               <option value="todos">Todos los Cursos</option>
@@ -488,74 +446,92 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
               ))}
             </select>
           </div>
+        )}
 
-          {/* FILTRO DE ESTADO PARA ESTUDIANTE */}
-          {!esDocente && (
-            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
-              <span style={{ fontSize: "0.88rem", fontWeight: "600", color: "var(--text-muted)", marginRight: "4px" }}>
-                Estado:
-              </span>
-              <button
-                onClick={() => setFiltroEstado("todos")}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "20px",
-                  border: "1px solid var(--border-color)",
-                  background: filtroEstado === "todos" ? "#27ae60" : "transparent",
-                  color: filtroEstado === "todos" ? "#ffffff" : "var(--text-main)",
-                  fontSize: "0.82rem",
-                  fontWeight: "600",
-                  cursor: "pointer"
-                }}
-              >
-                Todas
-              </button>
-              <button
-                onClick={() => setFiltroEstado("pendientes")}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "20px",
-                  border: "1px solid var(--border-color)",
-                  background: filtroEstado === "pendientes" ? "#d97706" : "transparent",
-                  color: filtroEstado === "pendientes" ? "#ffffff" : "var(--text-main)",
-                  fontSize: "0.82rem",
-                  fontWeight: "600",
-                  cursor: "pointer"
-                }}
-              >
-                Pendientes
-              </button>
-              <button
-                onClick={() => setFiltroEstado("entregadas")}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "20px",
-                  border: "1px solid var(--border-color)",
-                  background: filtroEstado === "entregadas" ? "#27ae60" : "transparent",
-                  color: filtroEstado === "entregadas" ? "#ffffff" : "var(--text-main)",
-                  fontSize: "0.82rem",
-                  fontWeight: "600",
-                  cursor: "pointer"
-                }}
-              >
-                Entregadas
-              </button>
-              <button
-                onClick={() => setFiltroEstado("vencidas")}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "20px",
-                  border: "1px solid var(--border-color)",
-                  background: filtroEstado === "vencidas" ? "#dc2626" : "transparent",
-                  color: filtroEstado === "vencidas" ? "#ffffff" : "var(--text-main)",
-                  fontSize: "0.82rem",
-                  fontWeight: "600",
-                  cursor: "pointer"
-                }}
-              >
-                Vencidas
-              </button>
-            </div>
+        {/* FILTRO DE ESTADO PARA ESTUDIANTE */}
+        {!esDocente && (
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
+            <button
+              onClick={() => setFiltroEstado("todos")}
+              className={filtroEstado === "todos" ? "btn-azul" : "btn-azul"}
+              style={{
+                padding: "5px 12px",
+                borderRadius: "20px",
+                fontSize: "0.82rem",
+                backgroundColor: filtroEstado === "todos" ? "var(--primary-color)" : "transparent",
+                color: filtroEstado === "todos" ? "#ffffff" : "var(--primary-color)",
+              }}
+            >
+              Todas
+            </button>
+            <button
+              onClick={() => setFiltroEstado("pendientes")}
+              className="btn-amarillo"
+              style={{
+                padding: "5px 12px",
+                borderRadius: "20px",
+                fontSize: "0.82rem",
+                backgroundColor: filtroEstado === "pendientes" ? "var(--accent-color)" : "transparent",
+                color: filtroEstado === "pendientes" ? "#ffffff" : "var(--accent-color)",
+              }}
+            >
+              Pendientes
+            </button>
+            <button
+              onClick={() => setFiltroEstado("entregadas")}
+              className="btn-verde"
+              style={{
+                padding: "5px 12px",
+                borderRadius: "20px",
+                fontSize: "0.82rem",
+                backgroundColor: filtroEstado === "entregadas" ? "#10b981" : "transparent",
+                color: filtroEstado === "entregadas" ? "#ffffff" : "#10b981",
+              }}
+            >
+              Entregadas
+            </button>
+            <button
+              onClick={() => setFiltroEstado("vencidas")}
+              className="btn-rojo"
+              style={{
+                padding: "5px 12px",
+                borderRadius: "20px",
+                fontSize: "0.82rem",
+                backgroundColor: filtroEstado === "vencidas" ? "#ef4444" : "transparent",
+                color: filtroEstado === "vencidas" ? "#ffffff" : "#ef4444",
+              }}
+            >
+              Vencidas
+            </button>
+          </div>
+        )}
+
+        {/* BOTONES DE ACCIÓN DERECHA */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "auto", flexWrap: "wrap" }}>
+          <button
+            onClick={cargarTodasLasTareas}
+            title="Recargar tareas"
+            className="btn-azul"
+            style={{
+              padding: "7px 12px",
+              fontSize: "0.85rem",
+            }}
+          >
+            <RefreshCw size={14} className={cargando ? "spin" : ""} />
+            Actualizar
+          </button>
+
+          {esDocente && cursos.length > 0 && (
+            <button
+              onClick={handleAbrirAsignarTarea}
+              className="btn-amarillo"
+              style={{
+                padding: "7px 16px",
+                fontSize: "0.85rem",
+              }}
+            >
+              <Plus size={16} /> Asignar Tarea
+            </button>
           )}
         </div>
       </div>
@@ -592,18 +568,10 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
           {esDocente && (
             <button
               onClick={handleAbrirAsignarTarea}
+              className="btn-amarillo"
               style={{
                 marginTop: "16px",
-                background: "var(--accent-color)",
-                color: "white",
-                padding: "9px 18px",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "bold",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px"
+                padding: "8px 18px",
               }}
             >
               <Plus size={16} /> Asignar Tarea Ahora
@@ -650,10 +618,10 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                   borderLeft: esDocente 
                     ? "4px solid var(--primary-color)" 
                     : entregado 
-                      ? "4px solid #27ae60" 
+                      ? "4px solid #10b981" 
                       : fechaLimiteVencida 
-                        ? "4px solid #dc2626" 
-                        : "4px solid #d97706"
+                        ? "4px solid #ef4444" 
+                        : "4px solid var(--accent-color)"
                 }}
               >
                 <div style={{ flex: "1 1 300px" }}>
@@ -677,8 +645,8 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
 
                     {!esDocente && entregado && (
                       <span style={{
-                        background: "rgba(39, 174, 96, 0.15)",
-                        color: "#27ae60",
+                        background: "rgba(16, 185, 129, 0.15)",
+                        color: "#10b981",
                         padding: "3px 10px",
                         borderRadius: "12px",
                         fontSize: "0.78rem",
@@ -694,8 +662,8 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
 
                     {!esDocente && !entregado && (
                       <span style={{
-                        background: fechaLimiteVencida ? "rgba(220, 38, 38, 0.12)" : "rgba(243, 156, 18, 0.15)",
-                        color: fechaLimiteVencida ? "#dc2626" : "#d97706",
+                        background: fechaLimiteVencida ? "rgba(239, 68, 68, 0.12)" : "rgba(245, 158, 11, 0.15)",
+                        color: fechaLimiteVencida ? "#ef4444" : "var(--accent-color)",
                         padding: "3px 10px",
                         borderRadius: "12px",
                         fontSize: "0.78rem",
@@ -753,12 +721,12 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                   {/* METADATOS: FECHA Y ARCHIVO */}
                   <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap", fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "8px" }}>
                     {tarea.fecha_limite && (
-                      <span style={{ display: "flex", alignItems: "center", gap: "5px", color: fechaLimiteVencida ? "#dc2626" : "var(--text-muted)", fontWeight: fechaLimiteVencida ? "600" : "normal" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "5px", color: fechaLimiteVencida ? "#ef4444" : "var(--text-muted)", fontWeight: fechaLimiteVencida ? "600" : "normal" }}>
                         <Calendar size={14} /> Fecha límite: {new Date(tarea.fecha_limite).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
                       </span>
                     )}
                     {nombreArchivoMostrar && (
-                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#27ae60", fontWeight: "500" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#10b981", fontWeight: "500" }}>
                         <FileSpreadsheet size={14} /> Archivo: {nombreArchivoMostrar}
                       </span>
                     )}
@@ -771,22 +739,10 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                     <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                       <button 
                         onClick={() => setTareaParaEntregas(tarea)}
+                        className="btn-amarillo"
                         style={{ 
-                          padding: "9px 18px", 
-                          background: "var(--bg-main)", 
-                          color: "var(--accent-color)", 
-                          border: "1px solid var(--accent-color)", 
-                          borderRadius: "6px", 
-                          cursor: "pointer", 
-                          fontWeight: "bold", 
-                          display: "flex", 
-                          alignItems: "center", 
-                          gap: "6px", 
-                          fontSize: "0.9rem",
-                          transition: "all 0.2s"
+                          padding: "8px 16px",
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "var(--accent-color)"; e.currentTarget.style.color = "white"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-main)"; e.currentTarget.style.color = "var(--accent-color)"; }}
                       >
                         <Users size={16} /> Ver Entregas
                       </button>
@@ -794,22 +750,10 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                       <button 
                         onClick={() => handleEliminarTarea(tarea)}
                         title="Eliminar tarea definitivamente"
+                        className="btn-rojo"
                         style={{ 
-                          padding: "9px 14px", 
-                          background: "rgba(220, 38, 38, 0.08)", 
-                          color: "#dc2626", 
-                          border: "1px solid rgba(220, 38, 38, 0.25)", 
-                          borderRadius: "6px", 
-                          cursor: "pointer", 
-                          fontWeight: "bold", 
-                          display: "flex", 
-                          alignItems: "center", 
-                          gap: "6px", 
-                          fontSize: "0.9rem",
-                          transition: "all 0.2s"
+                          padding: "8px 14px",
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#dc2626"; e.currentTarget.style.color = "white"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(220, 38, 38, 0.08)"; e.currentTarget.style.color = "#dc2626"; }}
                       >
                         <Trash2 size={16} /> Eliminar
                       </button>
@@ -819,20 +763,9 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                       {!entregado ? (
                         <button 
                           onClick={() => setTareaSeleccionadaEstudiante(tarea)}
+                          className={fechaLimiteVencida ? "btn-rojo" : "btn-azul"}
                           style={{ 
-                            padding: "9px 18px", 
-                            background: fechaLimiteVencida ? "rgba(220, 38, 38, 0.1)" : "#27ae60", 
-                            color: fechaLimiteVencida ? "#dc2626" : "white", 
-                            border: fechaLimiteVencida ? "1px solid rgba(220, 38, 38, 0.3)" : "none", 
-                            borderRadius: "6px", 
-                            cursor: "pointer", 
-                            fontWeight: "bold", 
-                            display: "flex", 
-                            alignItems: "center", 
-                            gap: "6px", 
-                            fontSize: "0.9rem", 
-                            boxShadow: fechaLimiteVencida ? "none" : "0 2px 6px rgba(39, 174, 96, 0.25)",
-                            transition: "all 0.2s"
+                            padding: "8px 16px",
                           }}
                         >
                           {fechaLimiteVencida ? <AlertCircle size={15} /> : <Play size={15} />}
@@ -841,22 +774,10 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                       ) : (
                         <button 
                           onClick={() => setTareaSeleccionadaEstudiante(tarea)}
+                          className="btn-azul"
                           style={{ 
-                            padding: "9px 18px", 
-                            background: "var(--bg-main)", 
-                            color: "#27ae60", 
-                            border: "1px solid #27ae60", 
-                            borderRadius: "6px", 
-                            cursor: "pointer", 
-                            fontWeight: "bold", 
-                            display: "flex", 
-                            alignItems: "center", 
-                            gap: "6px", 
-                            fontSize: "0.9rem",
-                            transition: "all 0.2s"
+                            padding: "8px 16px",
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "#27ae60"; e.currentTarget.style.color = "white"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-main)"; e.currentTarget.style.color = "#27ae60"; }}
                         >
                           <Eye size={15} /> Ver Mi Entrega
                         </button>

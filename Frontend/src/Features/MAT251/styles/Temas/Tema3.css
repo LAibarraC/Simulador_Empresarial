@@ -38,7 +38,8 @@
     color: var(--text-muted, #475569);
 }
 
-.tema3-input, .tema3-select {
+.tema3-input,
+.tema3-select {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid var(--border-color, #cbd5e1);
@@ -49,7 +50,8 @@
     color: var(--text-color, #000000);
 }
 
-.tema3-input:focus, .tema3-select:focus {
+.tema3-input:focus,
+.tema3-select:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);

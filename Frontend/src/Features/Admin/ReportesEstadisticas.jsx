@@ -140,14 +140,14 @@ export default function ReportesEstadisticas() {
       // Sección KPI Tarjetas
       const kpiItems = [
         { colStart: 'B', colEnd: 'C', titulo: 'TOTAL USUARIOS', valor: estadisticas.kpis.total_usuarios, sub: `${estadisticas.kpis.usuarios_activos} Activos • ${estadisticas.kpis.usuarios_suspendidos} Susp.`, color: 'FF3B82F6', bg: 'FFEFF6FF' },
-        { colStart: 'D', colEnd: 'E', titulo: 'ESTUDIANTES', valor: estadisticas.kpis.total_estudiantes, sub: `${estadisticas.kpis.total_usuarios > 0 ? Math.round((estadisticas.kpis.total_estudiantes/estadisticas.kpis.total_usuarios)*100) : 0}% de los registrados`, color: 'FF06B6D4', bg: 'FFF0F9FF' },
+        { colStart: 'D', colEnd: 'E', titulo: 'ESTUDIANTES', valor: estadisticas.kpis.total_estudiantes, sub: `${estadisticas.kpis.total_usuarios > 0 ? Math.round((estadisticas.kpis.total_estudiantes / estadisticas.kpis.total_usuarios) * 100) : 0}% de los registrados`, color: 'FF06B6D4', bg: 'FFF0F9FF' },
         { colStart: 'F', colEnd: 'G', titulo: 'DOCENTES', valor: estadisticas.kpis.total_docentes, sub: `${estadisticas.kpis.total_clases} Clases activas`, color: 'FF10B981', bg: 'FFECFDF5' },
       ];
 
       const kpiItems2 = [
         { colStart: 'B', colEnd: 'C', titulo: 'ADMINISTRADORES', valor: estadisticas.kpis.total_administradores, sub: 'Control total de la plataforma', color: 'FFF59E0B', bg: 'FFFFFBEB' },
         { colStart: 'D', colEnd: 'E', titulo: 'SIMULACIONES / ANÁLISIS', valor: estadisticas.kpis.total_calculos, sub: `${estadisticas.kpis.total_inscripciones} Inscritos en ${estadisticas.kpis.total_clases} clases`, color: 'FF8B5CF6', bg: 'FFF5F3FF' },
-        { colStart: 'F', colEnd: 'G', titulo: 'USO DE MEMORIA', valor: estadisticas.kpis.total_mb >= 1024 ? `${(estadisticas.kpis.total_mb/1024).toFixed(2)} GB` : `${estadisticas.kpis.total_mb} MB`, sub: `${estadisticas.kpis.total_archivos} Archivos almacenados`, color: 'FFEC4899', bg: 'FFFDF2F8' },
+        { colStart: 'F', colEnd: 'G', titulo: 'USO DE MEMORIA', valor: estadisticas.kpis.total_mb >= 1024 ? `${(estadisticas.kpis.total_mb / 1024).toFixed(2)} GB` : `${estadisticas.kpis.total_mb} MB`, sub: `${estadisticas.kpis.total_archivos} Archivos almacenados`, color: 'FFEC4899', bg: 'FFFDF2F8' },
       ];
 
       const renderKpiRow = (items, startRow) => {
@@ -607,15 +607,16 @@ export default function ReportesEstadisticas() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Período:</span>
-          <div style={{ display: 'flex', gap: '5px', backgroundColor: 'var(--bg-input, #f3f4f6)', padding: '3px', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', gap: '5px', backgroundColor: 'var(--bg-input)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
             <button
               onClick={() => setPeriodoFiltro('todo')}
+              className={periodoFiltro === 'todo' ? 'btn-amarillo' : ''}
               style={{
                 padding: '6px 12px',
-                border: 'none',
+                border: periodoFiltro === 'todo' ? '1px solid var(--accent-color)' : '1px solid transparent',
                 borderRadius: '6px',
                 fontSize: '0.8rem',
-                fontWeight: 'bold',
+                fontWeight: '600',
                 cursor: 'pointer',
                 backgroundColor: periodoFiltro === 'todo' ? 'var(--accent-color)' : 'transparent',
                 color: periodoFiltro === 'todo' ? 'white' : 'var(--text-muted)',
@@ -626,12 +627,13 @@ export default function ReportesEstadisticas() {
             </button>
             <button
               onClick={() => setPeriodoFiltro('30d')}
+              className={periodoFiltro === '30d' ? 'btn-amarillo' : ''}
               style={{
                 padding: '6px 12px',
-                border: 'none',
+                border: periodoFiltro === '30d' ? '1px solid var(--accent-color)' : '1px solid transparent',
                 borderRadius: '6px',
                 fontSize: '0.8rem',
-                fontWeight: 'bold',
+                fontWeight: '600',
                 cursor: 'pointer',
                 backgroundColor: periodoFiltro === '30d' ? 'var(--accent-color)' : 'transparent',
                 color: periodoFiltro === '30d' ? 'white' : 'var(--text-muted)',
@@ -642,12 +644,13 @@ export default function ReportesEstadisticas() {
             </button>
             <button
               onClick={() => setPeriodoFiltro('7d')}
+              className={periodoFiltro === '7d' ? 'btn-amarillo' : ''}
               style={{
                 padding: '6px 12px',
-                border: 'none',
+                border: periodoFiltro === '7d' ? '1px solid var(--accent-color)' : '1px solid transparent',
                 borderRadius: '6px',
                 fontSize: '0.8rem',
-                fontWeight: 'bold',
+                fontWeight: '600',
                 cursor: 'pointer',
                 backgroundColor: periodoFiltro === '7d' ? 'var(--accent-color)' : 'transparent',
                 color: periodoFiltro === '7d' ? 'white' : 'var(--text-muted)',
@@ -663,19 +666,8 @@ export default function ReportesEstadisticas() {
           <button
             onClick={cargarEstadisticas}
             title="Refrescar Estadísticas"
-            style={{
-              padding: '8px 14px',
-              backgroundColor: 'var(--bg-input, #f3f4f6)',
-              color: 'var(--text-main)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
+            className="btn-azul"
+            style={{ padding: '8px 14px' }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M23 4v6h-6M1 20v-6h6" />
@@ -686,20 +678,8 @@ export default function ReportesEstadisticas() {
 
           <button
             onClick={exportarExcel}
-            style={{
-              padding: '8px 14px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)'
-            }}
+            className="btn-verde"
+            style={{ padding: '8px 14px' }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -714,21 +694,8 @@ export default function ReportesEstadisticas() {
           <button
             onClick={exportarPDF}
             disabled={exportando}
-            style={{
-              padding: '8px 14px',
-              backgroundColor: 'var(--accent-color, #f97316)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: exportando ? 'not-allowed' : 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              opacity: exportando ? 0.7 : 1,
-              boxShadow: '0 2px 6px rgba(249, 115, 22, 0.3)'
-            }}
+            className="btn-rojo"
+            style={{ padding: '8px 14px' }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

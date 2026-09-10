@@ -32,7 +32,7 @@ export default function TablaIndices({ resultado }) {
             </h4>
           </div>
           <button
-            className="btn-icon"
+            className="btn-verde"
             onClick={() => {
               if (esSimple) {
                 const datosExport = resultado.detalles.map((fila) => {
@@ -82,7 +82,7 @@ export default function TablaIndices({ resultado }) {
                 copiarTablaAExcel(datosExport, "indices_compuestos_ponderados");
               }
             }}
-            style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
             title="Copiar tabla para Excel"
           >
             <IconoCopiar /> Copiar Tabla
@@ -226,7 +226,7 @@ export default function TablaIndices({ resultado }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
           <h4 style={{ margin: 0, color: "var(--primary-color)" }}>Serie de Índices (Eslabones y Cambio de Base)</h4>
           <button
-            className="btn-icon"
+            className="btn-verde"
             onClick={() => {
               const datosExport = resultado.datos.map((fila) => {
                 const row = {};
@@ -241,7 +241,7 @@ export default function TablaIndices({ resultado }) {
               });
               copiarTablaAExcel(datosExport, "operaciones_serie_indices");
             }}
-            style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
             title="Copiar tabla para Excel"
           >
             <IconoCopiar /> Copiar Tabla
@@ -284,7 +284,7 @@ export default function TablaIndices({ resultado }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
           <h4 style={{ margin: 0, color: "var(--primary-color)" }}>Análisis Financiero y Deflación</h4>
           <button
-            className="btn-icon"
+            className="btn-verde"
             onClick={() => {
               const datosExport = resultado.datos.map((fila) => {
                 const row = {};
@@ -301,7 +301,7 @@ export default function TablaIndices({ resultado }) {
               });
               copiarTablaAExcel(datosExport, "deflacion_salarial_y_poder_adquisitivo");
             }}
-            style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
             title="Copiar tabla para Excel"
           >
             <IconoCopiar /> Copiar Tabla

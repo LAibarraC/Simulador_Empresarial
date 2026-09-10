@@ -363,10 +363,10 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
           </div>
 
           <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-            <button type="button" onClick={onClose} style={{ padding: "10px 16px", background: "var(--bg-main)", color: "var(--text-main)", border: "1px solid var(--border-color)", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "6px" }}>
+            <button type="button" onClick={onClose} className="btn-rojo" style={{ padding: "8px 16px" }}>
               <X size={16} /> Cancelar
             </button>
-            <button type="submit" disabled={procesando} style={{ padding: "10px 22px", background: "var(--accent-color)", color: "white", border: "none", borderRadius: "6px", cursor: procesando ? "not-allowed" : "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "6px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
+            <button type="submit" disabled={procesando} className="btn-azul" style={{ padding: "8px 20px" }}>
               <Send size={16} /> {procesando ? "Asignando..." : "Asignar Tarea"}
             </button>
           </div>

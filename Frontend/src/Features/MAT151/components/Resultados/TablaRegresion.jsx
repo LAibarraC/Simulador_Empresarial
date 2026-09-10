@@ -150,7 +150,7 @@ export default function TablaRegresion({
           </h4>
           {!modoImpresion && (
             <button
-              className="btn-icon"
+              className="btn-verde"
               onClick={() => {
                 const datosComparativa = resultado.comparativa.map((m, idx) => ({
                   "Modelo": m.tipoModelo.charAt(0).toUpperCase() + m.tipoModelo.slice(1) + (idx === 0 ? " ⭐" : ""),
@@ -160,7 +160,7 @@ export default function TablaRegresion({
                 }));
                 copiarTablaAExcel(datosComparativa, "comparativa_modelos_regresion");
               }}
-              style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+              style={{ padding: '6px 14px', fontSize: '0.82rem' }}
               title="Copiar tabla comparativa para Excel"
             >
               Copiar Tabla
@@ -207,7 +207,8 @@ export default function TablaRegresion({
         <div style={{ marginTop: "30px" }}>
           <button
             onClick={() => setMostrarTablasCalculo(!mostrarTablasCalculo)}
-            style={{ width: "100%", padding: "12px", backgroundColor: "var(--primary-color)", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
+            className="btn-amarillo"
+            style={{ width: "100%", padding: "10px", fontWeight: "bold" }}
           >
             {mostrarTablasCalculo ? "Ocultar Tablas de Desarrollo" : "Ver Desarrollo Matemático Paso a Paso"}
           </button>
@@ -257,7 +258,7 @@ export default function TablaRegresion({
 
                   {!modoImpresion && (
                     <button
-                      className="btn-icon"
+                      className="btn-verde"
                       onClick={() => {
                         const datosExcel = m.tablaCalculos.filas.map((f, i) => {
                           const row = {
@@ -293,7 +294,7 @@ export default function TablaRegresion({
 
                         copiarTablaAExcel(datosExcel, `desarrollo_regresion_${m.tipoModelo}`);
                       }}
-                      style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+                      style={{ padding: '6px 14px', fontSize: '0.82rem' }}
                       title="Copiar tabla de desarrollo para Excel"
                     >
                       Copiar Tabla

@@ -534,16 +534,14 @@ export default function CentroControlCurso({
               key={id}
               type="button"
               onClick={() => setSeccionActiva(id)}
+              className={`tab-centro-control ${seccionActiva === id ? "active" : ""}`}
               style={{
                 padding: "11px 8px",
                 border: "none",
-                borderBottom: `3px solid ${seccionActiva === id ? "var(--accent-color)" : "transparent"
-                  }`,
-                background: "transparent",
-                color: seccionActiva === id ? "var(--accent-color)" : "var(--text-muted)",
                 cursor: "pointer",
                 fontWeight: "bold",
                 fontSize: "0.88rem",
+                transition: "all 0.2s ease",
               }}
             >
               {etiqueta}
@@ -554,14 +552,6 @@ export default function CentroControlCurso({
         {/* Contenido del Modal */}
         <div style={{ padding: "20px" }}>
           {seccionActiva === "general" ? (
-            /* ════════════════════════════════════════════════════════════════
-               PESTAÑA: AJUSTES (ORDEN DESCENDENTE)
-               1. Nombre de la Materia (Input + Guardar Cambios)
-               2. Fecha Límite de Matriculación (DatePicker + Guardar Fecha)
-               3. Código de acceso (Visualización + Botón Generar nuevo código)
-               4. Estado de Matriculación (Switch / Toggle Cerrar / Abrir)
-               5. Zona de peligro (Botón Resetear Integrantes)
-               ════════════════════════════════════════════════════════════════ */
             <section
               aria-labelledby="seccion-general"
               style={{ display: "flex", flexDirection: "column", gap: "16px" }}
@@ -629,15 +619,8 @@ export default function CentroControlCurso({
                     type="button"
                     onClick={handleGuardarCurso}
                     disabled={guardandoCurso || actualizandoFecha}
+                    className="btn-azul"
                     style={{
-                      padding: "9px 16px",
-                      background: guardandoCurso ? "#9ca3af" : "var(--accent-color)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: guardandoCurso ? "not-allowed" : "pointer",
-                      fontWeight: "bold",
-                      fontSize: "0.88rem",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -684,15 +667,8 @@ export default function CentroControlCurso({
                     type="button"
                     onClick={handleCambiarFecha}
                     disabled={actualizandoFecha}
+                    className="btn-azul"
                     style={{
-                      padding: "9px 16px",
-                      background: actualizandoFecha ? "#9ca3af" : "var(--primary-color)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: actualizandoFecha ? "not-allowed" : "pointer",
-                      fontWeight: "bold",
-                      fontSize: "0.88rem",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -769,15 +745,8 @@ export default function CentroControlCurso({
                   type="button"
                   onClick={handleGenerarNuevo}
                   disabled={desactivando}
+                  className="btn-amarillo"
                   style={{
-                    padding: "9px 14px",
-                    background: desactivando ? "#9ca3af" : "var(--accent-color)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: desactivando ? "not-allowed" : "pointer",
-                    fontWeight: "bold",
-                    fontSize: "0.88rem",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "6px",
@@ -794,7 +763,7 @@ export default function CentroControlCurso({
                 </button>
               </div>
 
-              {/* 4. Estado de Matriculación (NUEVO: Switch / Toggle Cerrar / Abrir Matrícula) */}
+              {/* 4. Estado de Matriculación */}
               <div
                 style={{
                   background: "var(--bg-input, #f9fafb)",
@@ -886,9 +855,10 @@ export default function CentroControlCurso({
                 }}
               >
                 <h3
+                  className="titulo-danger zona-peligro-titulo"
                   style={{
                     margin: "0 0 4px",
-                    color: "#dc2626",
+                    color: "#ef4444",
                     fontSize: "0.95rem",
                     display: "flex",
                     alignItems: "center",
@@ -898,9 +868,10 @@ export default function CentroControlCurso({
                   ⚠️ Zona de peligro
                 </h3>
                 <p
+                  className="texto-danger zona-peligro-texto"
                   style={{
                     margin: "0 0 12px",
-                    color: "var(--text-muted)",
+                    color: "#ef4444",
                     fontSize: "0.85rem",
                     lineHeight: 1.4,
                   }}
@@ -911,16 +882,7 @@ export default function CentroControlCurso({
                   type="button"
                   onClick={handleResetearCurso}
                   disabled={reseteandoCurso}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: "6px",
-                    border: "1px solid rgba(220, 38, 38, 0.45)",
-                    background: reseteandoCurso ? "#9ca3af" : "transparent",
-                    color: reseteandoCurso ? "white" : "#dc2626",
-                    cursor: reseteandoCurso ? "not-allowed" : "pointer",
-                    fontWeight: "bold",
-                    fontSize: "0.85rem",
-                  }}
+                  className="btn-rojo"
                 >
                   {reseteandoCurso ? "Eliminando integrantes…" : "Resetear Integrantes"}
                 </button>
@@ -1017,15 +979,8 @@ export default function CentroControlCurso({
                         type="button"
                         onClick={handleCopiarCodigo}
                         disabled={!codigoAcceso}
+                        className="btn-amarillo"
                         style={{
-                          padding: "7px 14px",
-                          background: "var(--bg-card)",
-                          color: "var(--text-main)",
-                          border: "1px solid var(--border-color)",
-                          borderRadius: "6px",
-                          cursor: !codigoAcceso ? "not-allowed" : "pointer",
-                          fontWeight: "bold",
-                          fontSize: "0.85rem",
                           display: "inline-flex",
                           alignItems: "center",
                           gap: "6px",
@@ -1046,17 +1001,9 @@ export default function CentroControlCurso({
                         matriculaCerrada || fechaVencida ? handleCambiarEstado : handleGenerar
                       }
                       disabled={generando || desactivando}
+                      className={matriculaCerrada || fechaVencida ? "btn-amarillo" : "btn-azul"}
                       style={{
                         width: "100%",
-                        padding: "12px 18px",
-                        background:
-                          generando || desactivando ? "#9ca3af" : "var(--accent-color)",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: generando || desactivando ? "not-allowed" : "pointer",
-                        fontWeight: "bold",
-                        fontSize: "1rem",
                         marginTop: "12px",
                       }}
                     >
@@ -1132,15 +1079,8 @@ export default function CentroControlCurso({
                       type="button"
                       onClick={handleCopiarCodigo}
                       disabled={!codigoAcceso}
+                      className="btn-amarillo"
                       style={{
-                        padding: "7px 14px",
-                        background: "var(--bg-card)",
-                        color: "var(--text-main)",
-                        border: "1px solid var(--border-color)",
-                        borderRadius: "6px",
-                        cursor: !codigoAcceso ? "not-allowed" : "pointer",
-                        fontWeight: "bold",
-                        fontSize: "0.85rem",
                         display: "inline-flex",
                         alignItems: "center",
                         gap: "6px",
@@ -1255,15 +1195,8 @@ export default function CentroControlCurso({
                     <button
                       type="button"
                       onClick={handleDescargar}
+                      className="btn-azul"
                       style={{
-                        padding: "10px 14px",
-                        background: "var(--primary-color)",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        fontSize: "0.9rem",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1275,15 +1208,8 @@ export default function CentroControlCurso({
                     <button
                       type="button"
                       onClick={handleCopiarEnlace}
+                      className="btn-amarillo"
                       style={{
-                        padding: "10px 14px",
-                        background: "var(--bg-card)",
-                        color: "var(--text-main)",
-                        border: "1px solid var(--border-color)",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        fontSize: "0.9rem",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",

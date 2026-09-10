@@ -773,19 +773,10 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
                             type="button"
                             onClick={() => reabrirEjercicio(t)}
                             title="Ir a realizar este cálculo en la Calculadora"
+                            className="btn-outline-azul"
                             style={{
-                              background: "rgba(16, 185, 129, 0.12)",
-                              border: "1px solid rgba(16, 185, 129, 0.3)",
-                              color: "#059669",
-                              padding: "3px 8px",
-                              borderRadius: "6px",
-                              fontSize: "0.74rem",
-                              fontWeight: "700",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              transition: "all 0.2s"
+                              padding: "4px 10px",
+                              fontSize: "0.76rem"
                             }}
                           >
                             <Calculator size={13} /> Resolver
@@ -797,19 +788,10 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
                             type="button"
                             onClick={() => reabrirEjercicio(t)}
                             title="Reabrir este ejercicio en la Calculadora"
+                            className="btn-outline-amarillo"
                             style={{
-                              background: "rgba(59, 130, 246, 0.12)",
-                              border: "1px solid rgba(59, 130, 246, 0.3)",
-                              color: "var(--primary-color)",
-                              padding: "3px 8px",
-                              borderRadius: "6px",
-                              fontSize: "0.74rem",
-                              fontWeight: "700",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              transition: "all 0.2s"
+                              padding: "4px 10px",
+                              fontSize: "0.76rem"
                             }}
                           >
                             <Calculator size={13} /> Reabrir
@@ -882,7 +864,8 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
             <button 
               type="button" 
               onClick={onClose} 
-              style={{ padding: "9px 18px", background: "var(--bg-card)", color: "var(--text-main)", border: "1px solid var(--border-color)", borderRadius: "6px", cursor: "pointer", fontWeight: "600", fontSize: "0.85rem" }}
+              className="btn-outline-rojo"
+              style={{ padding: "8px 16px" }}
             >
               Cerrar
             </button>
@@ -911,7 +894,8 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
             <button 
               type="button"
               onClick={onClose} 
-              style={{ padding: "8px 18px", background: "#27ae60", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "700", fontSize: "0.88rem" }}
+              className="btn-outline-verde"
+              style={{ padding: "8px 18px" }}
             >
               Cerrar Ventana
             </button>
@@ -934,7 +918,8 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
               <button 
                 type="button" 
                 onClick={onClose} 
-                style={{ padding: "10px 16px", background: "var(--bg-card)", color: "var(--text-main)", border: "1px solid var(--border-color)", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "0.88rem" }}
+                className="btn-rojo"
+                style={{ padding: "8px 16px" }}
               >
                 <X size={15} /> Cancelar
               </button>
@@ -942,20 +927,8 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
                 type="button" 
                 onClick={handleEnviarTarea} 
                 disabled={procesando} 
-                style={{ 
-                  padding: "10px 22px", 
-                  background: "linear-gradient(135deg, #27ae60, #2ecc71)", 
-                  color: "white", 
-                  border: "none", 
-                  borderRadius: "6px", 
-                  cursor: procesando ? "not-allowed" : "pointer", 
-                  fontWeight: "700", 
-                  display: "inline-flex", 
-                  alignItems: "center", 
-                  gap: "8px", 
-                  fontSize: "0.92rem", 
-                  boxShadow: "0 3px 10px rgba(39, 174, 96, 0.35)" 
-                }}
+                className="btn-azul"
+                style={{ padding: "8px 20px" }}
               >
                 <Send size={16} /> {procesando ? "Enviando Tarea..." : "Enviar Tarea con Resultados"}
               </button>
@@ -963,7 +936,7 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
           </div>
         ) : (
           <div style={{ 
-            background: "var(--bg-main)", 
+            background: "var(--bg-card)", 
             border: "1px solid var(--border-color)", 
             padding: "16px", 
             borderRadius: "10px", 
@@ -974,7 +947,7 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
             flexWrap: "wrap" 
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "240px" }}>
-              <AlertCircle size={22} style={{ color: "#f39c12", flexShrink: 0 }} />
+              <AlertCircle size={22} style={{ color: "var(--accent-color)", flexShrink: 0 }} />
               <div>
                 <div style={{ color: "var(--text-main)", fontWeight: "700", fontSize: "0.88rem" }}>
                   Faltan temas por resolver ({totalTemas - temasCompletados} restantes)
@@ -989,27 +962,16 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
               <button 
                 type="button" 
                 onClick={onClose} 
-                style={{ padding: "8px 14px", background: "var(--bg-card)", color: "var(--text-main)", border: "1px solid var(--border-color)", borderRadius: "6px", cursor: "pointer", fontWeight: "600", fontSize: "0.84rem" }}
+                className="btn-rojo"
+                style={{ padding: "8px 14px" }}
               >
                 Cerrar
               </button>
               <button 
                 type="button" 
                 onClick={irACalculadora}
-                style={{ 
-                  padding: "8px 16px", 
-                  background: "#27ae60", 
-                  color: "white", 
-                  border: "none", 
-                  borderRadius: "6px", 
-                  cursor: "pointer", 
-                  fontWeight: "700", 
-                  display: "inline-flex", 
-                  alignItems: "center", 
-                  gap: "6px", 
-                  fontSize: "0.84rem", 
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)" 
-                }}
+                className="btn-azul"
+                style={{ padding: "8px 16px" }}
               >
                 <ExternalLink size={14} /> Ir a Calculadora
               </button>

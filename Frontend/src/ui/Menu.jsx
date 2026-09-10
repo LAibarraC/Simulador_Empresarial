@@ -160,24 +160,51 @@
 
         <div className={`nav-menu ${isOpen ? "active" : ""}`} ref={mobileMenuRef}>
           <ul className="nav-links" ref={navLinksRef}>
-            <li><NavLink to="/" end onClick={closeMenu}>Inicio</NavLink></li>
-            <li><NavLink to="/archivos" onClick={closeMenu}>Archivos</NavLink></li>
+            <li>
+              <NavLink to="/" end onClick={closeMenu} className="nav-link-item">
+                <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <span>Inicio</span>
+              </NavLink>
+            </li>
 
-            {/* EL CONTENEDOR DESPLEGABLE */}
+            <li>
+              <NavLink to="/archivos" onClick={closeMenu} className="nav-link-item">
+                <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>Archivos</span>
+              </NavLink>
+            </li>
+
+            {/* EL CONTENEDOR DESPLEGABLE CALCULADORA */}
             <li
               className="nav-item dropdown-container"
               onClick={() => {
                 setDropdownOpen(!dropdownOpen);
                 if (!dropdownOpen) setGruposDropdownOpen(false);
-              }} // Abrir solo con clic y cerrar el otro
+              }}
             >
-              {/* El título "Calculadora" se marca como activo si estamos en esas rutas */}
               <span className={`nav-link-dropdown ${isCalculadoraActive ? 'active' : ''}`}>
-                Calculadora
+                <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+                  <line x1="8" y1="6" x2="16" y2="6" />
+                  <line x1="16" y1="14" x2="16" y2="18" />
+                  <path d="M16 10h.01" />
+                  <path d="M12 10h.01" />
+                  <path d="M8 10h.01" />
+                  <path d="M12 14h.01" />
+                  <path d="M8 14h.01" />
+                  <path d="M12 18h.01" />
+                  <path d="M8 18h.01" />
+                </svg>
+                <span>Calculadora</span>
                 <svg
                   className={`chevron-icon ${dropdownOpen ? 'open' : ''}`}
-                  width="16" height="16" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" strokeWidth="3.5"
+                  width="15" height="15" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" strokeWidth="3"
                   strokeLinecap="round" strokeLinejoin="round"
                 >
                   <path d="m6 9 6 6 6-6" />
@@ -187,18 +214,37 @@
               <ul className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
                 <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
                   <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'text-bottom' }}>
+                      <line x1="18" y1="20" x2="18" y2="10" />
+                      <line x1="12" y1="20" x2="12" y2="4" />
+                      <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
                     Estadística General
                   </NavLink>
                 </li>
                 <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
                   <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'text-bottom' }}>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M8 12h8" />
+                      <path d="M12 8v8" />
+                    </svg>
                     Estadística Matemática
                   </NavLink>
                 </li>
               </ul>
             </li>
 
-            <li><NavLink to="/historial" onClick={closeMenu}>Historial</NavLink></li>
+            <li>
+              <NavLink to="/historial" onClick={closeMenu} className="nav-link-item">
+                <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>Historial</span>
+              </NavLink>
+            </li>
+
             {usuario && (usuario.rol === "Docente" || usuario.rol === "Administrador") ? (
               <li
                 className="nav-item dropdown-container"
@@ -208,11 +254,17 @@
                 }}
               >
                 <span className={`nav-link-dropdown ${isGruposActive ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
-                  Grupos
+                  <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  <span>Grupos</span>
                   <svg
                     className={`chevron-icon ${gruposDropdownOpen ? 'open' : ''}`}
-                    width="16" height="16" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="3.5"
+                    width="15" height="15" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" strokeWidth="3"
                     strokeLinecap="round" strokeLinejoin="round"
                   >
                     <path d="m6 9 6 6 6-6" />
@@ -222,29 +274,73 @@
                 <ul className={`dropdown-menu ${gruposDropdownOpen ? 'show' : ''}`}>
                   <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
                     <NavLink to="/grupos" onClick={closeMenu} className="dropdown-item">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'text-bottom' }}>
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                      </svg>
                       Gestión Grupos
                     </NavLink>
                   </li>
                   <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
                     <NavLink to="/gestion-docente" onClick={closeMenu} className="dropdown-item">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'text-bottom' }}>
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <polyline points="16 11 18 13 22 9" />
+                      </svg>
                       Gestión Alumnos
-                    </NavLink>
-                  </li>
-                  <li className="dropdown-li" style={{ transitionDelay: '0.15s' }}>
-                    <NavLink to="/reportes-docente" onClick={closeMenu} className="dropdown-item">
-                      Estadísticas y Reportes
                     </NavLink>
                   </li>
                 </ul>
               </li>
             ) : (
-              <li><NavLink to="/grupos" onClick={closeMenu}>Grupos</NavLink></li>
+              <li>
+                <NavLink to="/grupos" onClick={closeMenu} className="nav-link-item">
+                  <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  <span>Grupos</span>
+                </NavLink>
+              </li>
             )}
 
-            <li><NavLink to="/tareas" onClick={closeMenu}>Tareas</NavLink></li>
+            <li>
+              <NavLink to="/tareas" onClick={closeMenu} className="nav-link-item">
+                <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+                <span>Tareas</span>
+              </NavLink>
+            </li>
+
+            {usuario && (usuario.rol === "Docente" || usuario.rol === "Administrador") && (
+              <li>
+                <NavLink to="/reportes-docente" onClick={closeMenu} className="nav-link-item">
+                  <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
+                    <path d="M3 20h18" />
+                  </svg>
+                  <span>Estadísticas</span>
+                </NavLink>
+              </li>
+            )}
 
             {usuario && usuario.rol === "Administrador" && (
-              <li><NavLink to="/admin" onClick={closeMenu}>Admin</NavLink></li>
+              <li>
+                <NavLink to="/admin" onClick={closeMenu} className="nav-link-item">
+                  <svg className="nav-item-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <span>Admin</span>
+                </NavLink>
+              </li>
             )}
 
             <span className="nav-underline" style={underlineStyle} />

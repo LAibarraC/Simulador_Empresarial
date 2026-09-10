@@ -226,15 +226,10 @@ export default function EscanerQR({
           type="button"
           onClick={detener}
           aria-label="Cerrar cámara"
+          className="btn-rojo"
           style={{
-            background: "transparent",
-            border: "1px solid var(--border-color)",
-            color: "var(--text-muted)",
-            borderRadius: "5px",
             padding: "4px 10px",
             fontSize: "0.8rem",
-            cursor: "pointer",
-            fontWeight: "bold",
             display: "inline-flex",
             alignItems: "center",
             gap: "4px",
@@ -279,21 +274,14 @@ export default function EscanerQR({
         />
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()} // Ajusta 'fileInputRef' al nombre de tu ref si usas uno
+          onClick={() => fileInputRef.current?.click()}
           disabled={procesandoArchivo}
+          className="btn-azul"
           style={{
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "8px",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            border: "1px solid var(--border-color)",
-            background: "var(--bg-input, #f8fafc)",
-            color: "var(--text-main, #1e293b)",
-            cursor: procesandoArchivo ? "not-allowed" : "pointer",
-            fontWeight: "bold",
-            fontSize: "0.875rem",
           }}
         >
           <svg

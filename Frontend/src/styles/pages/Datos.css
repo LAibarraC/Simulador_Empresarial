@@ -359,7 +359,7 @@
   padding: 10px;
   gap: 10px;
   width: 100%;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 .upload-box {
@@ -444,10 +444,10 @@
 }
 
 .column-divider {
-    width: 1px;
-    margin: 10px 0;
-    flex-shrink: 0;
-    display: block;
+  width: 1px;
+  margin: 10px 0;
+  flex-shrink: 0;
+  display: block;
 }
 
 @media (max-width: 768px) {
@@ -467,12 +467,15 @@
   }
 
   .upload-container {
-    flex-direction: column; /* Se ponen uno debajo del otro */
-    gap: 15px; /* Damos un poco de espacio extra */
+    flex-direction: column;
+    /* Se ponen uno debajo del otro */
+    gap: 15px;
+    /* Damos un poco de espacio extra */
   }
 
   .column-divider {
-    display: none; /* Ocultamos la línea vertical */
+    display: none;
+    /* Ocultamos la línea vertical */
   }
 
   .upload-column {

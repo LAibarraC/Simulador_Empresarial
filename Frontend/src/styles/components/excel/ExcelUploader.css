@@ -32,14 +32,21 @@
 
 .container_uploader_file label {
     cursor: pointer;
-    padding: 5px 10px;
-    background-Color: var(--bg-input, transparent);
-    color: var(--text-main);
-    border-Radius: 5px;
-    border: 1px solid var(--border-color);
-    transition: opacity 0.2s;
-    font-Size: 0.8em;
-    font-Weight: bold;
+    padding: 6px 14px;
+    background-color: transparent;
+    color: #10b981;
+    border-radius: 6px;
+    border: 1px solid #10b981;
+    transition: all 0.2s ease;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.container_uploader_file label:hover {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    transform: translateY(-1px);
 }
 
 .container_uploader_file span {
@@ -57,13 +64,20 @@
 
 .container_uploader_button button {
     padding: 6px 15px;
-    background-Color: var(--accent-color, #2563eb);
-    color: white;
-    border: none;
-    border-Radius: 5px;
-    font-Weight: bold;
-    font-Size: 0.8em;
+    background-color: transparent;
+    color: #10b981;
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85em;
     cursor: pointer;
-    box-Shadow: 0 4px 6px -1px rgba(0,0,0, 0.2);
-    transition: transform 0.1s, opacity 0.2s;
+    transition: all 0.2s ease;
+}
+
+.container_uploader_button button:hover:not(:disabled) {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    transform: translateY(-1px);
 }

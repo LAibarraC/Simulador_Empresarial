@@ -33,9 +33,9 @@ export default function TablaSeriesTiempo({ resultado }) {
       {/* 2. TABLA CRONOLÓGICA */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
         <button
-          className="btn-icon"
+          className="btn-verde"
           onClick={() => copiarTablaAExcel(resultado.datos, "series_tiempo")}
-          style={{ backgroundColor: '#107c41', color: 'white', padding: '6px 14px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+          style={{ padding: '6px 14px', fontSize: '0.82rem' }}
           title="Copiar datos puros para Excel"
         >
           <IconoCopiar /> Copiar Tabla

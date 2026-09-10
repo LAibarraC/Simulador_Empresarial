@@ -75,13 +75,9 @@ export default function GraficoRegresion({ resultado, isMaximized = false, model
       <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '20px', marginBottom: '10px' }}>
         <button
           onClick={() => setMostrarLeyenda(!mostrarLeyenda)}
+          className="btn-amarillo"
           style={{
             padding: '5px 12px',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-color)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '4px',
-            cursor: 'pointer',
             fontSize: '0.85em',
             fontWeight: 'bold'
           }}
