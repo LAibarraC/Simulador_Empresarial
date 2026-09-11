@@ -783,8 +783,8 @@ export default function Principal() {
                                     { num: '02', titulo: 'Variables aleatorias', ops: 2, activo: true },
                                     { num: '03', titulo: 'Distribuciones discretas y continuas importantes', ops: 2, activo: true },
                                     { num: '04', titulo: 'Distribuciones en el muestreo estadístico', ops: 1, activo: true },
-                                    { num: '05', titulo: 'Pruebas de hipótesis paramétricas y no paramétricas', ops: 0, activo: true },
-                                    { num: '06', titulo: 'Estimación e inferencia estadística', ops: 0, activo: false },
+                                    { num: '05', titulo: 'Estimación e inferencia estadística', ops: 2, activo: true }, 
+                                    { num: '06', titulo: 'Pruebas de hipótesis paramétricas y no paramétricas', ops: 2, activo: true },
                                 ].map(t => (
                                     <div key={t.num} style={{
                                         padding: '12px 14px',

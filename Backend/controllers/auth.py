@@ -229,7 +229,8 @@ async def login_local_logic(credentials: UsuarioLogin, db: AsyncSession):
     return {
         "token": access_token, "id": user_info.email, "nombre": user_info.nombre,
         "rol": user_info.rol, "email": user_info.email, "perfil": user_info.perfil,
-        "institucion": user_info.institucion, "requiere_rol": requiere_rol
+        "institucion": user_info.institucion, "requiere_rol": requiere_rol,
+        "foto_perfil": getattr(user_info, 'foto_perfil', None)
     }
 
 async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
@@ -247,6 +248,8 @@ async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
         result = await db.execute(select(models.Usuario).filter(models.Usuario.email == email))
         user_info = result.scalars().first()
 
+        foto_perfil_url = idinfo.get('picture', None)
+        
         es_nuevo = False
         # Si no existe, lo creamos con rol Pendiente para que elija su rol
         if not user_info:
@@ -258,11 +261,18 @@ async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
                 password=password_hasheada,
                 rol="Pendiente",
                 perfil="Pendiente",
-                institucion=""
+                institucion="",
+                foto_perfil=foto_perfil_url
             )
             db.add(user_info)
             await db.commit()
             await db.refresh(user_info)
+        else:
+            # Si existe pero no tiene foto o cambió, la actualizamos
+            if foto_perfil_url and getattr(user_info, 'foto_perfil', None) != foto_perfil_url:
+                user_info.foto_perfil = foto_perfil_url
+                await db.commit()
+                await db.refresh(user_info)
         
         if not getattr(user_info, "activo", True):
             return JSONResponse(status_code=403, content={"error": "Cuenta suspendida"})
@@ -273,7 +283,8 @@ async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
         return {
             "token": access_token, "id": user_info.email, "nombre": user_info.nombre,
             "rol": user_info.rol, "email": user_info.email, "perfil": user_info.perfil,
-            "institucion": user_info.institucion, "requiere_rol": requiere_rol, "es_nuevo": es_nuevo
+            "institucion": user_info.institucion, "requiere_rol": requiere_rol, "es_nuevo": es_nuevo,
+            "foto_perfil": getattr(user_info, 'foto_perfil', None)
         }
 
     except ValueError as e:
@@ -436,7 +447,8 @@ async def asignar_rol_inicial_logic(datos: AsignarRolInicial, current_user: mode
         "email": current_user.email,
         "perfil": current_user.perfil,
         "institucion": current_user.institucion,
-        "requiere_rol": False
+        "requiere_rol": False,
+        "foto_perfil": getattr(current_user, 'foto_perfil', None)
     }
 
 async def cambiar_estado_logic(datos: CambiarEstado, db: AsyncSession, current_user_id: int):

@@ -152,6 +152,40 @@
   transform: scale(1.08);
 }
 
+.staggered-menu-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Líneas centradas */
+  gap: 4px; /* Mayor espaciado para líneas más gruesas */
+  width: 18px;
+  justify-content: center;
+}
+
+.staggered-menu-icon .bar {
+  width: 18px;
+  height: 3px; /* Líneas un poquito más gruesas */
+  background-color: currentColor;
+  border-radius: 3px;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-origin: center;
+}
+
+.staggered-menu-icon .bar:nth-child(2) {
+  width: 11px; /* Más corta para dar el efecto escalonado centrado */
+}
+
+.staggered-menu-icon.open .bar:nth-child(1) {
+  width: 11px;
+}
+
+.staggered-menu-icon.open .bar:nth-child(2) {
+  width: 18px;
+}
+
+.staggered-menu-icon.open .bar:nth-child(3) {
+  width: 11px;
+}
+
 .chevron-icon {
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   margin-left: 1px;
@@ -262,6 +296,12 @@
 }
 
 
+
+/* Ocultar elementos móviles en escritorio por defecto */
+.nav-menu-mobile-extra,
+.mobile-only {
+  display: none !important;
+}
 
 /* =========================================
    5. MÓVILES (HAMBURGUESA)
@@ -390,6 +430,7 @@
   .nav-links {
     flex-direction: column;
     width: 100%;
+    align-items: stretch; /* Sobrescribir el center del escritorio para alinear a la izquierda */
     text-align: left; /* Alineación a la izquierda profesional */
     gap: 0; /* Sin gap para que los hover se toquen */
   }
@@ -509,10 +550,6 @@
   .user-name-text {
     display: none;
   }
-}
-.nav-menu-mobile-extra,
-.mobile-only {
-  display: none;
 }
 
 /* =========================================

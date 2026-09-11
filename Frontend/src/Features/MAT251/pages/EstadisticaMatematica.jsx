@@ -195,49 +195,7 @@ export default function Pantalla() {
             Este módulo se encuentra en fase de desarrollo. Estará disponible próximamente.
           </p>
 
-          {/* Contador de Tiempo */}
-          <div 
-            className="restricted-countdown"
-            style={{ 
-              display: "flex", 
-              gap: "10px", 
-              justifyContent: "center", 
-              width: "100%",
-              marginBottom: "25px"
-            }}
-          >
-            {[
-              { label: "Días", value: timeLeft.days },
-              { label: "Horas", value: timeLeft.hours },
-              { label: "Min.", value: timeLeft.minutes },
-              { label: "Seg.", value: timeLeft.seconds }
-            ].map((unit, idx) => (
-              <div 
-                key={idx}
-                className="countdown-unit"
-                style={{
-                  flex: 1,
-                  padding: "10px 5px",
-                  borderRadius: "12px",
-                  backgroundColor: "var(--bg-main)",
-                  border: "1px solid var(--border-color)",
-                  minWidth: "65px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center"
-                }}
-              >
-                <span className="countdown-value" style={{ fontSize: "1.3rem", fontWeight: "700", color: "var(--accent-color, #f39c12)" }}>
-                  {unit.value.toString().padStart(2, "0")}
-                </span>
-                <span className="countdown-label" style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", marginTop: "2px", fontWeight: "600" }}>
-                  {unit.label}
-                </span>
-              </div>
-            ))}
-          </div>
 
-          <hr style={{ width: "100%", border: "0", borderTop: "1px solid var(--border-color)", margin: "0 0 25px 0" }} />
 
           <div className="restricted-buttons" style={{ display: "flex", gap: "12px", width: "100%" }}>
             <button

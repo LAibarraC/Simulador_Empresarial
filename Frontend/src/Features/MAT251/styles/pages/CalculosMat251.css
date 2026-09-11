@@ -46,6 +46,17 @@
   transform: translateY(-50%) translateX(-50%) scale(1.1);
 }
 
+.boton-toggle-medio:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.boton-toggle-medio:active {
+  outline: none;
+  box-shadow: none;
+  transform: translateY(-50%) translateX(-50%) scale(0.95) !important;
+}
+
 .calculadora-layout.colapsado .boton-toggle-medio {
   left: 20px;
 }

@@ -47,7 +47,8 @@ origins = [
     "http://10.250.54.12:5173",
     "http://10.250.50.52:5173",
     "http://10.250.55.72:5173",
-]
+    "http://10.0.2.2:5173",
+]                               
 
 app.add_middleware(
     CORSMiddleware,

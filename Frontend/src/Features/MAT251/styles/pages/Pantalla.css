@@ -166,7 +166,6 @@
 
 .menu-flotante-radial.abierto .fab-main {
   transform: rotate(45deg);
-  background-color: #333;
 }
 
 .fab-item {
@@ -175,10 +174,10 @@
   right: 5px;
   width: 40px;
   height: 40px;
-  background-color: #444;
+  background-color: var(--primary-color, #2563eb); /* Azul vibrante */
   color: white;
   border-radius: 50%;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 5px; /* Added 5px padding as requested */
   cursor: pointer;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
@@ -202,7 +201,10 @@
 }
 
 /* Animaciones del menú radial al abrirse (Arco hacia la izquierda) */
-/* Botón 1: Arriba-Izquierda */
+/* Botón 1: Arriba-Izquierda (Gestión de Datos) */
+.fab-item.item-1 {
+  background-color: #10b981; /* Verde esmeralda */
+}
 .menu-flotante-radial.abierto .item-1 {
   transform: translate(-45px, -55px);
   opacity: 1;
@@ -210,7 +212,10 @@
   transition-delay: 0.1s;
 }
 
-/* Botón 2: Izquierda (Centro) */
+/* Botón 2: Izquierda (Creación de Tablas) */
+.fab-item.item-2 {
+  background-color: #8b5cf6; /* Violeta/Púrpura */
+}
 .menu-flotante-radial.abierto .item-2 {
   transform: translate(-70px, 0px);
   opacity: 1;

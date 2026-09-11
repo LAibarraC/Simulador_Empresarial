@@ -15,3 +15,4 @@ class Usuario(Base):
     activo = Column(Boolean, default=True, nullable=False)
     ultimo_aviso_global_id = Column(Integer, default=0, nullable=False)
     fecha_creacion = Column(DateTime, default=func.now())
+    foto_perfil = Column(String(500), nullable=True) # URL de la foto (Google u otros)

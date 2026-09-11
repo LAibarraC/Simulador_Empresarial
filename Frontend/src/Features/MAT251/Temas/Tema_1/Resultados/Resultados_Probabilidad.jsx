@@ -8,6 +8,10 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { DadoSVG, MonedaSVG, CartaSVG } from './Experimentos';
+import * as XLSX from 'xlsx';
+import { api } from '../../../../../services/api';
+import { alerta } from '../../../../../utils/Notificaciones';
+import { obtenerProbabilidadTeorica, simularUnPaso } from '../../../Matematicas/logica_Tema1';
 
 export default function ResultadosProbabilidad({
     statsDatos, abrirEditor, valoresUnicos, statsEventos, setModalEvento,
@@ -32,6 +36,9 @@ export default function ResultadosProbabilidad({
     const [iteracionesClasica, setIteracionesClasica] = useState(100);
     const [resSimulacionClasica, setResSimulacionClasica] = useState(null);
     const [historialSimClasica, setHistorialSimClasica] = useState([]);
+    const [historialSimulacionMoneda, setHistorialSimulacionMoneda] = useState([]);
+    const [mostrarTablaMoneda, setMostrarTablaMoneda] = useState(false);
+    const [isRenderingTabla, setIsRenderingTabla] = useState(false);
     const [simulacionEnCurso, setSimulacionEnCurso] = useState(false);
     const [simulacionPausada, setSimulacionPausada] = useState(false);
     const [velocidadSimulacion, setVelocidadSimulacion] = useState('1x');
@@ -67,6 +74,8 @@ export default function ResultadosProbabilidad({
         setProgresoSimulacion({ intentoActual: 0, exitosActuales: 0, ultimoResultado: null, animando: false });
         setResSimulacionClasica(null);
         setHistorialSimClasica([]);
+        setHistorialSimulacionMoneda([]);
+        setMostrarTablaMoneda(false);
     };
 
 
@@ -219,31 +228,14 @@ export default function ResultadosProbabilidad({
         }
 
         const N = parseInt(iteracionesClasica) || 100;
-        let pTeorica = 0;
-        let casosFavorables = 0;
-        let totalPosibles = 0;
-
-        if (experimentoClasico === 'moneda') {
-            totalPosibles = 2;
-            casosFavorables = 1;
-        } else if (experimentoClasico === 'dado') {
-            totalPosibles = 6;
-            if (eventoClasico === 'par' || eventoClasico === 'impar') casosFavorables = 3;
-            else casosFavorables = 1;
-        } else if (experimentoClasico === 'baraja') {
-            totalPosibles = 52;
-            if (eventoClasico === 'roja' || eventoClasico === 'negra') casosFavorables = 26;
-            else if (['corazones', 'diamantes', 'treboles', 'espadas'].includes(eventoClasico)) casosFavorables = 13;
-            else if (['as', 'rey', 'reina', 'jota'].includes(eventoClasico)) casosFavorables = 4;
-            else casosFavorables = 1; 
-        }
-        pTeorica = casosFavorables / totalPosibles;
+        const { casosFavorables, totalPosibles, pTeorica } = obtenerProbabilidadTeorica(experimentoClasico, eventoClasico);
 
         setSimulacionEnCurso(true);
         setSimulacionPausada(false);
         isPausadoRef.current = false;
         resumeRef.current = null;
         setHistorialSimClasica([]);
+        setHistorialSimulacionMoneda([]);
         setResSimulacionClasica(null);
         setProgresoSimulacion({ intentoActual: 0, exitosActuales: 0, ultimoResultado: null, animando: true });
 
@@ -252,45 +244,7 @@ export default function ResultadosProbabilidad({
         let iteracionActual = 0;
 
         const calcularPaso = () => {
-            let esExito = false;
-            let resVisible = null;
-            
-            if (experimentoClasico === 'moneda') {
-                const res = Math.random() < 0.5 ? 'cara' : 'cruz';
-                esExito = (res === eventoClasico);
-                resVisible = res;
-            } else if (experimentoClasico === 'dado') {
-                const res = Math.floor(Math.random() * 6) + 1;
-                if (eventoClasico === 'par') esExito = (res % 2 === 0);
-                else if (eventoClasico === 'impar') esExito = (res % 2 !== 0);
-                else esExito = (res.toString() === eventoClasico);
-                resVisible = res;
-            } else if (experimentoClasico === 'baraja') {
-                const carta = Math.floor(Math.random() * 52) + 1;
-                let palo = '';
-                if (carta <= 13) palo = 'corazones';
-                else if (carta <= 26) palo = 'diamantes';
-                else if (carta <= 39) palo = 'treboles';
-                else palo = 'espadas';
-                
-                const valor = ((carta - 1) % 13) + 1;
-                
-                if (eventoClasico === 'roja') esExito = (palo === 'corazones' || palo === 'diamantes');
-                else if (eventoClasico === 'negra') esExito = (palo === 'treboles' || palo === 'espadas');
-                else if (eventoClasico === palo) esExito = true;
-                else if (eventoClasico === 'as' && valor === 1) esExito = true;
-                else if (eventoClasico === 'jota' && valor === 11) esExito = true;
-                else if (eventoClasico === 'reina' && valor === 12) esExito = true;
-                else if (eventoClasico === 'rey' && valor === 13) esExito = true;
-                
-                let valorStr = valor.toString();
-                if (valor === 1) valorStr = 'A';
-                if (valor === 11) valorStr = 'J';
-                if (valor === 12) valorStr = 'Q';
-                if (valor === 13) valorStr = 'K';
-                resVisible = `${valorStr} de ${palo}`;
-            }
-
+            const { esExito, resVisible } = simularUnPaso(experimentoClasico, eventoClasico);
             if (esExito) exitosAcumulados++;
             return { esExito, resVisible };
         };
@@ -315,9 +269,10 @@ export default function ResultadosProbabilidad({
 
             let ultimoRes = null;
             const stepHist = Math.max(1, Math.floor(N / 100)); 
+            const historyMonedaLocal = [];
 
             for (; iteracionActual < target; iteracionActual++) {
-                const { resVisible } = calcularPaso();
+                const { esExito, resVisible } = calcularPaso();
                 ultimoRes = resVisible;
                 
                 if (!isMax || (iteracionActual + 1) === N || (iteracionActual + 1) % stepHist === 0) {
@@ -327,9 +282,22 @@ export default function ResultadosProbabilidad({
                         teorica: pTeorica
                     });
                 }
+                
+                if (experimentoClasico === 'moneda' || experimentoClasico === 'dado' || experimentoClasico === 'baraja') {
+                    historyMonedaLocal.push({
+                        intento: iteracionActual + 1,
+                        resultadoObtenido: resVisible,
+                        esExito: esExito,
+                        exitosAcumulados: exitosAcumulados,
+                        probabilidadAcumulada: exitosAcumulados / (iteracionActual + 1)
+                    });
+                }
             }
             
             setHistorialSimClasica([...history]);
+            if ((experimentoClasico === 'moneda' || experimentoClasico === 'dado' || experimentoClasico === 'baraja') && historyMonedaLocal.length > 0) {
+                setHistorialSimulacionMoneda(prev => [...prev, ...historyMonedaLocal]);
+            }
             
             if (isMax) {
                 setProgresoSimulacion({
@@ -636,7 +604,7 @@ export default function ResultadosProbabilidad({
                                     {experimentoClasico === 'baraja' && (
                                         <>
                                             <option value="roja">Carta Roja (Corazones o Diamantes)</option>
-                                            <option value="negra">Carta Negra (Tréboles o Espadas)</option>
+                                            <option value="negra">Carta Negra (Tréboles o Picas)</option>
                                             <option value="corazones">Corazones</option>
                                             <option value="diamantes">Diamantes</option>
                                             <option value="treboles">Tréboles</option>
@@ -691,7 +659,7 @@ export default function ResultadosProbabilidad({
                                     
                                     {/* Left Side: Probabilidad Teórica */}
                                     <div style={{ width: '150px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                        <span style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-muted)' }}>Lanz. {progresoSimulacion.intentoActual} / {parseInt(iteracionesClasica) || 100}</span>
+                                        <span style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-muted)' }}>Lanzamiento: {progresoSimulacion.intentoActual} / {parseInt(iteracionesClasica) || 100}</span>
                                         {resSimulacionClasica && (
                                             <div style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                                                 <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>PROB. TEÓRICA</p>
@@ -806,6 +774,30 @@ export default function ResultadosProbabilidad({
                                     </div>
                                     
                                 </div>
+
+                                {/* Nuevas métricas empíricas */}
+                                {resSimulacionClasica && (
+                                    <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+                                        <div style={{ background: 'var(--bg-input)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><span style={{ textTransform: 'uppercase' }}>Esperanza Empírica</span> <InlineMath math="E(X)" /></p>
+                                            <p style={{ margin: '5px 0 0', fontSize: '1.1rem', color: 'var(--text-color)', fontWeight: 800 }}>
+                                                {resSimulacionClasica.simulada.toFixed(4)}
+                                            </p>
+                                        </div>
+                                        <div style={{ background: 'var(--bg-input)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><span style={{ textTransform: 'uppercase' }}>Varianza Empírica</span> <InlineMath math="V(X)" /></p>
+                                            <p style={{ margin: '5px 0 0', fontSize: '1.1rem', color: 'var(--text-color)', fontWeight: 800 }}>
+                                                {(resSimulacionClasica.simulada * (1 - resSimulacionClasica.simulada)).toFixed(4)}
+                                            </p>
+                                        </div>
+                                        <div style={{ background: 'var(--bg-input)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                                            <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><span style={{ textTransform: 'uppercase' }}>Desviación Estándar</span> <InlineMath math={'\\sigma'} /></p>
+                                            <p style={{ margin: '5px 0 0', fontSize: '1.1rem', color: 'var(--text-color)', fontWeight: 800 }}>
+                                                {Math.sqrt(resSimulacionClasica.simulada * (1 - resSimulacionClasica.simulada)).toFixed(4)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -1175,6 +1167,127 @@ export default function ResultadosProbabilidad({
                                         </ResponsiveContainer>
                                     </div>
                                 </MarcoWidgetMAT251>
+                            </div>
+                        )}
+
+                        {tipo === 'clasica' && historialSimulacionMoneda.length > 0 && inputMode === 'simulacion' && (experimentoClasico === 'moneda' || experimentoClasico === 'dado' || experimentoClasico === 'baraja') && (
+                            <div style={{ marginTop: '15px' }}>
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => {
+                                            if (!mostrarTablaMoneda) {
+                                                setIsRenderingTabla(true);
+                                                setMostrarTablaMoneda(true);
+                                                setTimeout(() => setIsRenderingTabla(false), 50);
+                                            } else {
+                                                setMostrarTablaMoneda(false);
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '8px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 600,
+                                            background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-color)', cursor: 'pointer'
+                                        }}
+                                    >
+                                        {mostrarTablaMoneda ? 'Ocultar Datos de Simulación' : 'Ver Datos de Simulación'}
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (!historialSimulacionMoneda || historialSimulacionMoneda.length === 0) return;
+                                            try {
+                                                const worksheet = XLSX.utils.json_to_sheet(historialSimulacionMoneda.map(h => ({
+                                                    "Lanzamiento": h.intento,
+                                                    "Resultado": h.resultadoObtenido,
+                                                    "¿Es Éxito?": h.esExito ? "Sí" : "No",
+                                                    "Éxitos Acumulados": h.exitosAcumulados,
+                                                    "Prob. Simulada": h.probabilidadAcumulada.toFixed(4)
+                                                })));
+                                                const workbook = XLSX.utils.book_new();
+                                                const nombreExp = experimentoClasico.charAt(0).toUpperCase() + experimentoClasico.slice(1);
+                                                XLSX.utils.book_append_sheet(workbook, worksheet, `Simulación ${nombreExp}`);
+                                                const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                                                const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                                                const fileObj = new File([blob], `Historial_Simulacion_${nombreExp}_${new Date().getTime()}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                                                
+                                                const usuarioGuardado = localStorage.getItem('usuario');
+                                                const autor = usuarioGuardado ? JSON.parse(usuarioGuardado).nombre : 'Estudiante';
+                                                
+                                                const formData = new FormData();
+                                                formData.append("file", fileObj);
+                                                formData.append("autor", autor);
+                                                formData.append("visibilidad", "personal");
+                                                
+                                                await api.subirArchivo(formData);
+                                                alerta.success("¡Guardado exitoso!", "El archivo de simulación se ha guardado en tu Espacio Personal.");
+                                            } catch (error) {
+                                                console.error("Error al guardar en el espacio personal:", error);
+                                                alerta.error("Error", "No se pudo guardar el archivo en tu Espacio Personal.");
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '8px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 600,
+                                            background: '#3b82f6', border: 'none', color: '#fff', cursor: 'pointer'
+                                        }}
+                                    >
+                                        Guardar en Mi Espacio
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (!historialSimulacionMoneda || historialSimulacionMoneda.length === 0) return;
+                                            const worksheet = XLSX.utils.json_to_sheet(historialSimulacionMoneda.map(h => ({
+                                                "Lanzamiento": h.intento,
+                                                "Resultado": h.resultadoObtenido,
+                                                "¿Es Éxito?": h.esExito ? "Sí" : "No",
+                                                "Éxitos Acumulados": h.exitosAcumulados,
+                                                "Prob. Simulada": h.probabilidadAcumulada.toFixed(4)
+                                            })));
+                                            const workbook = XLSX.utils.book_new();
+                                            const nombreExp = experimentoClasico.charAt(0).toUpperCase() + experimentoClasico.slice(1);
+                                            XLSX.utils.book_append_sheet(workbook, worksheet, `Simulación ${nombreExp}`);
+                                            XLSX.writeFile(workbook, `Historial_Simulacion_${nombreExp}.xlsx`);
+                                        }}
+                                        style={{
+                                            padding: '8px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 600,
+                                            background: '#10b981', border: 'none', color: '#fff', cursor: 'pointer'
+                                        }}
+                                    >
+                                        Descargar Datos (.xlsx)
+                                    </button>
+                                </div>
+                                
+                                {mostrarTablaMoneda && (
+                                    <div style={{ marginTop: '15px', maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
+                                        {isRenderingTabla ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+                                                <div style={{ width: '30px', height: '30px', border: '3px solid var(--border-color)', borderTop: '3px solid var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                                                <p style={{ marginTop: '10px', fontSize: FS.sm, color: 'var(--text-muted)' }}>Cargando datos de la simulación...</p>
+                                                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                                            </div>
+                                        ) : (
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm, color: 'var(--text-color)' }}>
+                                            <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 1, boxShadow: '0 1px 0 var(--border-color)' }}>
+                                                <tr>
+                                                    <th style={{ padding: '10px', fontWeight: 700 }}># Lanzamiento</th>
+                                                    <th style={{ padding: '10px', fontWeight: 700 }}>Resultado</th>
+                                                    <th style={{ padding: '10px', fontWeight: 700 }}>¿Es Éxito?</th>
+                                                    <th style={{ padding: '10px', fontWeight: 700 }}>Éxitos Acumulados</th>
+                                                    <th style={{ padding: '10px', fontWeight: 700 }}>Prob. Simulada</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {historialSimulacionMoneda.map((h, i) => (
+                                                    <tr key={i} style={{ borderBottom: '1px solid var(--border-color)', background: i % 2 === 0 ? 'var(--bg-input)' : 'transparent' }}>
+                                                        <td style={{ padding: '8px' }}>{h.intento}</td>
+                                                        <td style={{ padding: '8px', textTransform: 'capitalize' }}>{h.resultadoObtenido}</td>
+                                                        <td style={{ padding: '8px', color: h.esExito ? '#10b981' : 'var(--text-muted)' }}>{h.esExito ? 'Sí' : 'No'}</td>
+                                                        <td style={{ padding: '8px' }}>{h.exitosAcumulados}</td>
+                                                        <td style={{ padding: '8px', fontWeight: 600 }}>{h.probabilidadAcumulada.toFixed(4)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
 

@@ -144,7 +144,10 @@ export const api = {
 
   // --- OBTENER PERFIL ACTUAL (JWT) ---
   obtenerPerfilActual: async () => {
-    const res = await fetch(`${BASE_URL}/me`);
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/me`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
     if (!res.ok) throw new Error("Sesión inválida o expirada");
     return await res.json();
   },

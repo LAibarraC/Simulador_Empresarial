@@ -693,7 +693,7 @@ export default function Grupos() {
             id="tour-btn-crear-curso"
             onClick={() => setMostrarModal(true)}
             className="btn-amarillo"
-            style={{ padding: "8px 18px", textAlign: "center", flexShrink: 0 }}
+            style={{ padding: "8px 18px", textAlign: "center", flexShrink: 0, marginLeft: "auto" }}
           >
             + Crear Nuevo Curso
           </button>
@@ -704,7 +704,7 @@ export default function Grupos() {
             id="tour-matriculacion-seccion"
             onClick={() => setMostrarModalMatricular(true)}
             className="btn-amarillo"
-            style={{ padding: "8px 18px", textAlign: "center", flexShrink: 0 }}
+            style={{ padding: "8px 18px", textAlign: "center", flexShrink: 0, marginLeft: "auto" }}
           >
             + Matricularse
           </button>

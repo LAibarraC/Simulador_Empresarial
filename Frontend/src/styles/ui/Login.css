@@ -449,8 +449,8 @@ html.dark .floating-input-group.always-floating label.etiqueta {
 /* Círculo azul cuando está activo o completado */
 .stepper-item.completed .step-counter,
 .stepper-item.active .step-counter {
-  background-color: var(--primary-color, #2563eb);
-  border-color: var(--primary-color, #2563eb);
+  background-color: #22c55e;
+  border-color: #22c55e;
   color: white;
 }
 
@@ -491,7 +491,7 @@ html.dark .floating-input-group.always-floating label.etiqueta {
   left: 0;
   height: 100%;
   width: 0%;
-  background-color: var(--primary-color, #2563eb);
+  background-color: #22c55e;
   transition: width 0.5s ease-in-out;
   /* Animación fluida de izquierda a derecha */
 }

@@ -149,8 +149,17 @@ export default function Perfil({ usuario, setUsuario }) {
 
         <div className="perfil-card-body">
 
-          <div className="perfil-avatar">
-            {getIniciales(usuario.nombre)}
+          <div className="perfil-avatar" style={usuario.foto_perfil ? { padding: 0, backgroundColor: 'transparent', border: 'none' } : {}}>
+            {usuario.foto_perfil ? (
+              <img 
+                src={usuario.foto_perfil} 
+                alt="Perfil" 
+                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} 
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              getIniciales(usuario.nombre)
+            )}
           </div>
 
           <h2 className="perfil-name">

@@ -43,13 +43,17 @@ export const OPERACIONES = [
   },
   {
     tema: 'Tema 5',
-    titulo: 'Pruebas de hipótesis paramétricas y no paramétricas',
-    operaciones: [],
+    titulo: 'Estimación e inferencia estadística',
+    operaciones: [
+      { value: 'Estimacion_puntual', label: 'Estimacion Puntual' },
+      { value: 'Estimacion_intervalos', label: 'Estimacion por Intervalos' }],
   },
   {
     tema: 'Tema 6',
-    titulo: 'Estimación e inferencia estadística',
-    operaciones: [],
+    titulo: 'Pruebas de hipótesis paramétricas y no paramétricas',
+    operaciones: [
+      { value: 'Hipotesis_parametricas', label: 'Hipótesis Parametricas' },
+      { value: 'Hipotesis_noparametricas', label: 'Hipótesis No Parametricas' }],
   },
 ];
 

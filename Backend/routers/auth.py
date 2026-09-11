@@ -72,7 +72,8 @@ async def read_users_me(current_user: models.Usuario = Depends(get_current_user)
         "email": current_user.email,
         "perfil": current_user.perfil,
         "institucion": current_user.institucion,
-        "requiere_rol": current_user.rol == "Pendiente" or not current_user.rol
+        "requiere_rol": current_user.rol == "Pendiente" or not current_user.rol,
+        "foto_perfil": getattr(current_user, 'foto_perfil', None)
     }
 
 @router.post("/asignar_rol_inicial")

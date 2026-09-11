@@ -270,12 +270,12 @@ button:disabled,
 }
 
 /* Botón base sin clase específica (solo cuando no tiene clases de color específicas) */
-button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]) {
+button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):not(.theme-toggle-btn):not(.boton-toggle-medio):not([class*="fab-"]) {
   border: 1px solid var(--primary-color);
   color: var(--primary-color);
 }
 
-button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):hover:not(:disabled) {
+button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):not(.theme-toggle-btn):not(.boton-toggle-medio):not([class*="fab-"]):hover:not(:disabled) {
   background-color: var(--primary-color) !important;
   color: #ffffff !important;
   border-color: var(--primary-color) !important;

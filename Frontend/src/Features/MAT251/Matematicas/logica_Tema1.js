@@ -760,3 +760,66 @@ export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, p
         calculosFinales: calculosFinales
     };
 };
+
+export const obtenerProbabilidadTeorica = (experimentoClasico, eventoClasico) => {
+    let casosFavorables = 0;
+    let totalPosibles = 0;
+
+    if (experimentoClasico === 'moneda') {
+        totalPosibles = 2;
+        casosFavorables = 1;
+    } else if (experimentoClasico === 'dado') {
+        totalPosibles = 6;
+        if (eventoClasico === 'par' || eventoClasico === 'impar') casosFavorables = 3;
+        else casosFavorables = 1;
+    } else if (experimentoClasico === 'baraja') {
+        totalPosibles = 52;
+        if (eventoClasico === 'roja' || eventoClasico === 'negra') casosFavorables = 26;
+        else if (['corazones', 'diamantes', 'treboles', 'espadas'].includes(eventoClasico)) casosFavorables = 13;
+        else if (['as', 'rey', 'reina', 'jota'].includes(eventoClasico)) casosFavorables = 4;
+        else casosFavorables = 1; 
+    }
+
+    return {
+        casosFavorables,
+        totalPosibles,
+        pTeorica: casosFavorables / totalPosibles
+    };
+};
+
+export const simularUnPaso = (experimentoClasico, eventoClasico) => {
+    let esExito = false;
+    let resVisible = null;
+    
+    if (experimentoClasico === 'moneda') {
+        const res = Math.random() < 0.5 ? 'cara' : 'cruz';
+        esExito = (res === eventoClasico);
+        resVisible = res;
+    } else if (experimentoClasico === 'dado') {
+        const res = Math.floor(Math.random() * 6) + 1;
+        if (eventoClasico === 'par') esExito = (res % 2 === 0);
+        else if (eventoClasico === 'impar') esExito = (res % 2 !== 0);
+        else esExito = (res.toString() === eventoClasico);
+        resVisible = res;
+    } else if (experimentoClasico === 'baraja') {
+        const palos = ['Corazones', 'Diamantes', 'Tréboles', 'Picas'];
+        const valores = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const paloRandom = palos[Math.floor(Math.random() * palos.length)];
+        const valorRandom = valores[Math.floor(Math.random() * valores.length)];
+        
+        if (eventoClasico === 'roja') esExito = (paloRandom === 'Corazones' || paloRandom === 'Diamantes');
+        else if (eventoClasico === 'negra') esExito = (paloRandom === 'Tréboles' || paloRandom === 'Picas');
+        else if (eventoClasico === 'as') esExito = (valorRandom === 'A');
+        else if (eventoClasico === 'rey') esExito = (valorRandom === 'K');
+        else if (eventoClasico === 'reina') esExito = (valorRandom === 'Q');
+        else if (eventoClasico === 'jota') esExito = (valorRandom === 'J');
+        else if (eventoClasico === 'corazones') esExito = (paloRandom === 'Corazones');
+        else if (eventoClasico === 'diamantes') esExito = (paloRandom === 'Diamantes');
+        else if (eventoClasico === 'treboles') esExito = (paloRandom === 'Tréboles');
+        else if (eventoClasico === 'espadas') esExito = (paloRandom === 'Picas');
+        
+        resVisible = `${valorRandom} de ${paloRandom}`;
+    }
+
+    return { esExito, resVisible };
+};
