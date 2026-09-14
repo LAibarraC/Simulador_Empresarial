@@ -176,7 +176,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
                     <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
                         <label style={labelStyle}>Tipo de Muestreo:</label>
-                        <div className="t3-responsive-inputs-container" style={{ margin: '0 auto', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', minHeight: '36px', boxSizing: 'border-box', gap: '4px' }}>
+                        <div style={{ display: 'flex', margin: '0 auto', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', minHeight: '36px', boxSizing: 'border-box', gap: '4px' }}>
                             <button
                                 type="button"
                                 className={`btn-mat251-modo ${conReemplazo ? 'active' : ''}`}
