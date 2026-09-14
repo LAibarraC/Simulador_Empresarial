@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
 import { IconoCalculadora } from '../../../../../ui/iconos';
+import { generarDistribucionProporcion, calcularProbabilidadProporcion } from '../../../Matematicas/Logica_Tema4';
 
-// Aproximación polinómica para la CDF de una distribución Normal Estándar
 function cdfNormal(x) {
     const t = 1 / (1 + 0.2316419 * Math.abs(x));
     const d = 0.3989422804 * Math.exp(-x * x / 2);
@@ -108,98 +108,38 @@ export default function Controles_Proporcion({ onCalcular }) {
     const [valorX2, setValorX2] = useState('');
 
     const generarDistribucion = () => {
-        const p = parseFloat(pPoblacional);
-        const n = parseFloat(tamanoMuestra);
-        const N = parseFloat(tamanoPoblacion);
-
-        if (isNaN(p) || isNaN(n) || p <= 0 || p >= 1 || n <= 0) {
-            alert("Por favor, ingrese valores válidos. La proporción 'p' debe estar entre 0 y 1 exclusivo, y 'n' > 0.");
-            return;
-        }
-        if (tipoPoblacion === 'finita' && (isNaN(N) || N <= n)) {
-            alert("Para población finita, N debe ser mayor que n.");
+        const result = generarDistribucionProporcion(pPoblacional, tamanoMuestra, tamanoPoblacion, tipoPoblacion);
+        if (result.error) {
+            alert(result.error);
             return;
         }
 
-        const q = 1 - p;
-        let varianza = (p * q) / n;
-        let esFinita = tipoPoblacion === 'finita';
-        let factorStr = '';
-
-        if (esFinita) {
-            const factor = (N - n) / (N - 1);
-            varianza = varianza * factor;
-            factorStr = `\\cdot \\left( \\frac{${N} - ${n}}{${N} - 1} \\right)`;
-        }
-
-        const se = Math.sqrt(varianza);
-
-        setDatosParciales({ 
-            p, q, n, N, se, varianza, esFinita, factorStr 
-        });
+        setDatosParciales(result.datosParciales);
         setDistribucionGenerada(true);
         setCondicion('');
         setValorX1('');
         setValorX2('');
-        onCalcular({ p, se }); 
+        onCalcular(result.onCalcularData); 
     };
 
     const calcularProbabilidad = () => {
-        if (!condicion) {
-            alert('Por favor selecciona una condición.');
+        const result = calcularProbabilidadProporcion(datosParciales, condicion, parseFloat(valorX1), parseFloat(valorX2));
+        if (result.error) {
+            alert(result.error);
             return;
-        }
-
-        const x1 = parseFloat(valorX1);
-        const x2 = parseFloat(valorX2);
-
-        if ((condicion === 'menor_que' || condicion === 'mayor_que') && isNaN(x1)) {
-            alert('Ingresa un valor válido para la condición.');
-            return;
-        }
-        if (condicion === 'entre' && (isNaN(x1) || isNaN(x2))) {
-            alert('Ingresa ambos valores para el rango.');
-            return;
-        }
-
-        const { p, se, factorStr } = datosParciales;
-
-        let probFinal = 0;
-        let strDesarrollo = '';
-        const z1 = (x1 - p) / se;
-        
-        let denomStr = `\\sqrt{${Number(datosParciales.varianza.toFixed(6)).toString().replace('.', ',')}}`;
-        const pStr = Number(p.toFixed(5)).toString().replace('.', ',');
-        const x1Str = Number(x1.toFixed(5)).toString().replace('.', ',');
-        const x2Str = !isNaN(x2) ? Number(x2.toFixed(5)).toString().replace('.', ',') : '';
-        const z1Str = Number(z1.toFixed(2)).toString().replace('.', ',');
-
-        if (condicion === 'menor_que') {
-            probFinal = cdfNormal(z1);
-            strDesarrollo = `\\begin{aligned} P(\\hat{p} < ${x1Str}) &= P\\left( Z < \\frac{${x1Str} - ${pStr}}{${denomStr}} \\right) \\\\ &= P(Z < ${z1Str}) \\\\ &= ${Number(probFinal.toFixed(4)).toString().replace('.', ',')} \\end{aligned}`;
-        } else if (condicion === 'mayor_que') {
-            probFinal = 1 - cdfNormal(z1);
-            strDesarrollo = `\\begin{aligned} P(\\hat{p} > ${x1Str}) &= P\\left( Z > \\frac{${x1Str} - ${pStr}}{${denomStr}} \\right) \\\\ &= P(Z > ${z1Str}) \\\\ &= 1 - P(Z < ${z1Str}) = ${Number(probFinal.toFixed(4)).toString().replace('.', ',')} \\end{aligned}`;
-        } else if (condicion === 'entre') {
-            let z2 = (x2 - p) / se;
-            let probZ2 = cdfNormal(z2);
-            let probZ1 = cdfNormal(z1);
-            probFinal = probZ2 - probZ1;
-            const z2Str = Number(z2.toFixed(2)).toString().replace('.', ',');
-            strDesarrollo = `\\begin{aligned} P(${x1Str} < \\hat{p} < ${x2Str}) &= P\\left( \\frac{${x1Str} - ${pStr}}{${denomStr}} < Z < \\frac{${x2Str} - ${pStr}}{${denomStr}} \\right) \\\\ &= P(${z1Str} < Z < ${z2Str}) \\\\ &= P(Z < ${z2Str}) - P(Z < ${z1Str}) = ${Number(probFinal.toFixed(4)).toString().replace('.', ',')} \\end{aligned}`;
         }
 
         onCalcular({
             ...datosParciales,
-            strDesarrollo,
-            probFinal,
-            x1,
-            x2,
-            condicion
+            strDesarrollo: result.strDesarrollo,
+            probFinal: result.probFinal,
+            x1: result.x1,
+            x2: result.x2,
+            condicion: result.condicion
         });
     };
 
-    const resetDistribucion = () => {
+        const resetDistribucion = () => {
         setDistribucionGenerada(false);
         setDatosParciales(null);
         setCondicion('');
@@ -210,27 +150,31 @@ export default function Controles_Proporcion({ onCalcular }) {
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
-            <div style={{ marginBottom: '20px', marginTop: '10px' }}>
+            <div style={{ marginBottom: '15px', marginTop: '5px', textAlign: 'center' }}>
                 <span style={labelStyle}>Tipo de Población</span>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                <div style={{ display: 'flex', width: 'fit-content', margin: '0 auto', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', height: '36px', boxSizing: 'border-box', marginTop: '5px' }}>
                     <button
+                        type="button"
+                        className={`btn-mat251-modo ${tipoPoblacion === 'infinita' ? 'active' : ''}`}
                         onClick={() => { setTipoPoblacion('infinita'); resetDistribucion(); }}
-                        style={{ flex: 1, padding: '5px', borderRadius: RADIUS, border: `1px solid ${tipoPoblacion === 'infinita' ? 'var(--primary-color)' : 'var(--border-color)'}`, background: tipoPoblacion === 'infinita' ? 'rgba(0,123,255,0.1)' : 'transparent', color: tipoPoblacion === 'infinita' ? 'var(--primary-color)' : 'var(--text-main)', cursor: 'pointer', fontWeight: tipoPoblacion === 'infinita' ? 'bold' : 'normal' }}
+                        style={{ width: '150px' }}
                     >
                         Infinita
                     </button>
                     <button
+                        type="button"
+                        className={`btn-mat251-modo ${tipoPoblacion === 'finita' ? 'active' : ''}`}
                         onClick={() => { setTipoPoblacion('finita'); resetDistribucion(); }}
-                        style={{ flex: 1, padding: '5px', borderRadius: RADIUS, border: `1px solid ${tipoPoblacion === 'finita' ? 'var(--primary-color)' : 'var(--border-color)'}`, background: tipoPoblacion === 'finita' ? 'rgba(0,123,255,0.1)' : 'transparent', color: tipoPoblacion === 'finita' ? 'var(--primary-color)' : 'var(--text-main)', cursor: 'pointer', fontWeight: tipoPoblacion === 'finita' ? 'bold' : 'normal' }}
+                        style={{ width: '150px' }}
                     >
                         Finita
                     </button>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: tipoPoblacion === 'finita' ? '1fr 1fr 1fr' : '1fr 1fr', gap: '10px' }}>
-                <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, minWidth: '45px' }}><Latex formula="p =" /></label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '5px', flex: '1 1 140px' }}>
+                    <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, minWidth: '35px', textAlign: 'right' }}><Latex formula="p =" /></label>
                     <input
                         type="number"
                         placeholder="Prop. Pob."
@@ -240,8 +184,8 @@ export default function Controles_Proporcion({ onCalcular }) {
                     />
                 </div>
                 
-                <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, minWidth: '45px' }}><Latex formula="n =" /></label>
+                <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '5px', flex: '1 1 140px' }}>
+                    <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, minWidth: '35px', textAlign: 'right' }}><Latex formula="n =" /></label>
                     <input
                         type="number"
                         placeholder="Muestra"
@@ -252,8 +196,8 @@ export default function Controles_Proporcion({ onCalcular }) {
                 </div>
 
                 {tipoPoblacion === 'finita' && (
-                    <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0 }}><Latex formula="N =" /></label>
+                    <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '5px', flex: '1 1 140px' }}>
+                        <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, minWidth: '35px', textAlign: 'right' }}><Latex formula="N =" /></label>
                         <input
                             type="number"
                             placeholder="Población"
@@ -264,18 +208,13 @@ export default function Controles_Proporcion({ onCalcular }) {
                     </div>
                 )}
             </div>
-
-            <button
-                onClick={generarDistribucion}
-                style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-            >
-                Calcular
-            </button>
+            <button onClick={generarDistribucion} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: 'auto', padding: '5px 14px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            >CALCULAR</button>
 
             {distribucionGenerada && (
-                <div style={{ marginTop: '20px', animation: 'fadeIn 0.5s ease-out' }}>
+                <div style={{ marginTop: '10px', animation: 'fadeIn 0.5s ease-out' }}>
                     <div style={{ background: 'var(--bg-app)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                        <div className="thin-scrollbar formula-responsive" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', overflowX: 'auto', paddingBottom: '5px' }}>
                             <Latex formula={`E(\\hat{p}) = p = ${Number(datosParciales.p.toFixed(5)).toString().replace('.', ',')}`} />
                             <Latex formula={`Var(\\hat{p}) = \\frac{pq}{n} = \\frac{${Number(datosParciales.p.toFixed(5)).toString().replace('.', ',')} * ${Number(datosParciales.q.toFixed(5)).toString().replace('.', ',')}}{${datosParciales.n}} ${datosParciales.factorStr ? datosParciales.factorStr : ''} = ${datosParciales.factorStr ? '' : `\\frac{${Number((datosParciales.p * datosParciales.q).toFixed(6)).toString().replace('.', ',')}}{${datosParciales.n}} = `}${Number(datosParciales.varianza.toFixed(6)).toString().replace('.', ',')}`} />
                             <Latex formula={`\\hat{p} \\underset{n=${datosParciales.n}}{\\longrightarrow} N(${Number(datosParciales.p.toFixed(5)).toString().replace('.', ',')} ; ${Number(datosParciales.varianza.toFixed(6)).toString().replace('.', ',')})`} />
@@ -341,12 +280,10 @@ export default function Controles_Proporcion({ onCalcular }) {
                     </div>
 
                     {condicion && (
-                        <button
-                            onClick={calcularProbabilidad}
-                            style={{ width: 'fit-content', margin: '15px auto 0', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                        >
-                            Graficar
-                        </button>
+                        <button onClick={calcularProbabilidad} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: 'auto', padding: '5px 14px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    >
+                        GRAFICAR
+                    </button>
                     )}
                 </div>
             )}

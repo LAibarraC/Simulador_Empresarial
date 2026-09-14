@@ -499,6 +499,33 @@ button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_butto
   transform: translateY(-1px);
 }
 
+/* Variante compacta para botones icono (basura, limpiar, etc.) */
+.btn-delete-sm {
+  background-color: transparent !important;
+  border: 1px solid #ef4444 !important;
+  color: #ef4444 !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.btn-delete-sm:hover:not(:disabled) {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25) !important;
+  transform: translateY(-1px);
+}
+
 /* 5. BOTÓN VERDE / EXCEL (Exportar Excel / Acciones Éxito) */
 .btn-verde,
 .btn-green,

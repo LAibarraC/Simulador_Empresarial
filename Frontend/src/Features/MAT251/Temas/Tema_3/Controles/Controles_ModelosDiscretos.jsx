@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../../styles/Temas/Tema3.css';
 import { calcularDistribucionModelo, generarDatosGrafico } from '../../../Matematicas/logica_Tema3';
+import ModalAlerta from '../../../ui/ModalAlerta';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
@@ -40,7 +41,7 @@ export default function Controles_ModelosDiscretos({
     const [nArriba, setNArriba] = useState('');
     const [muestraN, setMuestraN] = useState('');
 
-    const [error, setError] = useState('');
+    const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
 
     useEffect(() => {
         // Limpiar todo cuando se cambia entre 'manual' y 'matriz'
@@ -59,7 +60,7 @@ export default function Controles_ModelosDiscretos({
         setColumnaSeleccionada(0);
         setValorExito('');
         setStatsEstimados(null);
-        setError('');
+        setAlerta({ isOpen: false, mensaje: '' });
         
         if (onCalcular) {
             onCalcular(null);
@@ -88,7 +89,7 @@ export default function Controles_ModelosDiscretos({
         setColumnaSeleccionada(0);
         setValorExito('');
         setStatsEstimados(null);
-        setError('');
+        setAlerta({ isOpen: false, mensaje: '' });
 
         // Clear graph and results
         if (onCalcular) {
@@ -124,7 +125,7 @@ export default function Controles_ModelosDiscretos({
     // Estimar desde datos
     const estimarDesdeDatos = () => {
         if (datosColumna.length === 0) {
-            setError('No hay datos válidos en la columna.');
+            setAlerta({ isOpen: true, mensaje: 'No hay datos válidos en la columna.' });
             return;
         }
 
@@ -140,7 +141,7 @@ export default function Controles_ModelosDiscretos({
                 // ESCENARIO B: Datos Cuantitativos
                 const n_lote = parseInt(nArriba);
                 if (isNaN(n_lote) || n_lote <= 0) {
-                    setError('Por favor, ingresa el Tamaño del ensayo (n) mayor a 0 antes de estimar.');
+                    setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el Tamaño del ensayo ({renderLatex('n')}) mayor a 0 antes de estimar.</span>});
                     return;
                 }
 
@@ -150,7 +151,7 @@ export default function Controles_ModelosDiscretos({
                 p = promedio / n_lote;
 
                 if (p > 1) {
-                    setError('Error: La probabilidad calculada es mayor a 1. El Tamaño del ensayo (n) ingresado es demasiado pequeño para estos datos.');
+                    setAlerta({ isOpen: true, mensaje: <span>Error: La probabilidad calculada es mayor a 1. El Tamaño del ensayo ({renderLatex('n')}) ingresado es demasiado pequeño para estos datos.</span>});
                     return;
                 }
 
@@ -163,8 +164,14 @@ export default function Controles_ModelosDiscretos({
                 setParamN_bin(n_lote.toString());
             } else {
                 // ESCENARIO A: Datos Cualitativos
+                const n_lote = parseInt(nArriba);
+                if (isNaN(n_lote) || n_lote <= 0) {
+                    setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el Tamaño del ensayo ({renderLatex('n')}) mayor a 0 antes de estimar.</span>});
+                    return;
+                }
+
                 if (!valorExito) {
-                    setError('Debe seleccionar qué valor representa el "Éxito".');
+                    setAlerta({ isOpen: true, mensaje: 'Debe seleccionar qué valor representa el "Éxito".' });
                     return;
                 }
                 const conteoExito = datosColumna.filter(v => v === valorExito).length;
@@ -175,6 +182,8 @@ export default function Controles_ModelosDiscretos({
                     exitos: conteoExito,
                     p: p
                 });
+
+                setParamN_bin(n_lote.toString());
             }
 
             setParamP_bin(p.toFixed(4));
@@ -182,17 +191,17 @@ export default function Controles_ModelosDiscretos({
             if (modelo === 'Hipergeometrica') {
                 const n_muestra = parseInt(muestraN);
                 if (isNaN(n_muestra) || n_muestra <= 0) {
-                    setError('Por favor, ingresa la Muestra a extraer (n) mayor a 0 antes de estimar.');
+                    setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa la Muestra a extraer ({renderLatex('n')}) mayor a 0 antes de estimar.</span>});
                     return;
                 }
                 if (n_muestra > totalDatos) {
-                    setError(`La muestra "n" (${n_muestra}) no puede ser mayor que la población total "N" (${totalDatos}).`);
+                    setAlerta({ isOpen: true, mensaje: <span>La muestra &quot;{renderLatex('n')}&quot; ({n_muestra}) no puede ser mayor que la población total &quot;{renderLatex('N')}&quot; ({totalDatos}).</span>});
                     return;
                 }
             }
 
             if (!valorExito) {
-                setError('Debe seleccionar qué valor representa el "Éxito".');
+                setAlerta({ isOpen: true, mensaje: 'Debe seleccionar qué valor representa el "Éxito".' });
                 return;
             }
             const conteoExito = datosColumna.filter(v => v === valorExito).length;
@@ -216,7 +225,7 @@ export default function Controles_ModelosDiscretos({
         } else if (modelo === 'Poisson') {
             const numeros = datosColumna.map(v => parseFloat(v)).filter(v => !isNaN(v));
             if (numeros.length === 0) {
-                setError('Para Poisson se requieren datos numéricos.');
+                setAlerta({ isOpen: true, mensaje: 'Para Poisson se requieren datos numéricos.' });
                 return;
             }
             const sum = numeros.reduce((acc, curr) => acc + curr, 0);
@@ -229,11 +238,11 @@ export default function Controles_ModelosDiscretos({
             });
             setParamLambda(media.toFixed(2));
         }
-        setError('');
+        setAlerta({ isOpen: false, mensaje: '' });
     };
 
-    const manejarCalculo = () => {
-        setError('');
+    const manejarCalculo = (isGraficarOnly = false) => {
+        setAlerta({ isOpen: false, mensaje: '' });
 
         // Parsear parámetros
         let params = {};
@@ -241,25 +250,25 @@ export default function Controles_ModelosDiscretos({
         if (modelo === 'Binomial') {
             const n = parseInt(paramN_bin);
             const p = parseFloat(paramP_bin);
-            if (isNaN(n) || n <= 0) return setError('En Binomial, "n" debe ser entero positivo.');
-            if (isNaN(p) || p < 0 || p > 1) return setError('En Binomial, "p" debe estar entre 0 y 1.');
+            if (isNaN(n) || n <= 0) return setAlerta({ isOpen: true, mensaje: <span>En Binomial, &quot;{renderLatex('n')}&quot; debe ser entero positivo.</span> });
+            if (isNaN(p) || p < 0 || p > 1) return setAlerta({ isOpen: true, mensaje: <span>En Binomial, &quot;{renderLatex('p')}&quot; debe estar entre 0 y 1.</span> });
             params = { n, p };
         } else if (modelo === 'Poisson') {
             const lambda = parseFloat(paramLambda);
-            if (isNaN(lambda) || lambda <= 0) return setError('En Poisson, lambda (λ) debe ser mayor a 0.');
+            if (isNaN(lambda) || lambda <= 0) return setAlerta({ isOpen: true, mensaje: <span>En Poisson, lambda ({renderLatex('\\lambda')}) debe ser mayor a 0.</span>});
             params = { lambda };
         } else if (modelo === 'Hipergeometrica') {
             const N = parseInt(paramN_hip);
             const K = parseInt(paramK_hip);
             const n = parseInt(paramn_hip);
-            if (isNaN(n) || n <= 0) return setError('Por favor, ingresa un tamaño de muestra (n) mayor a 0 para generar la gráfica.');
-            if (isNaN(N) || N <= 0) return setError('N (población) debe ser entero positivo.');
-            if (isNaN(K) || K < 0 || K > N) return setError('K (éxitos) debe estar entre 0 y N.');
-            if (n <= 0 || K < 0 || N <= 0 || n > N || K > N) return setError('Parámetros Hipergeométrica inválidos. n, K <= N, etc.');
+            if (isNaN(n) || n <= 0) return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa un tamaño de muestra ({renderLatex('n')}) mayor a 0 para generar la gráfica.</span>});
+            if (isNaN(N) || N <= 0) return setAlerta({ isOpen: true, mensaje: <span>{renderLatex('N')} (población) debe ser entero positivo.</span>});
+            if (isNaN(K) || K < 0 || K > N) return setAlerta({ isOpen: true, mensaje: <span>{renderLatex('K')} (éxitos) debe estar entre 0 y {renderLatex('N')}.</span>});
+            if (n <= 0 || K < 0 || N <= 0 || n > N || K > N) return setAlerta({ isOpen: true, mensaje: <span>Parámetros Hipergeométrica inválidos. {renderLatex('n, K \\leq N')}, etc.</span> });
             params = { N, K, n };
         } else if (modelo === 'Bernoulli') {
             const p = parseFloat(paramP_ber);
-            if (isNaN(p) || p < 0 || p > 1) return setError('La probabilidad p debe estar entre 0 y 1.');
+            if (isNaN(p) || p < 0 || p > 1) return setAlerta({ isOpen: true, mensaje: <span>La probabilidad {renderLatex('p')} debe estar entre 0 y 1.</span> });
             params = { p };
         }
 
@@ -268,12 +277,15 @@ export default function Controles_ModelosDiscretos({
         let condicionVisual = null;
         if (valorX !== '') {
             let x = parseInt(valorX);
-            if (isNaN(x) || x < 0) return setError('El valor objetivo "x" debe ser un entero no negativo.');
+            if (isNaN(x) || x < 0) return setAlerta({ isOpen: true, mensaje: <span>El valor objetivo &quot;{renderLatex('x')}&quot; debe ser un entero no negativo.</span> });
 
             let b = 0;
             if (tipoCondicion.includes('intervalo')) {
+                if (valorB === '') {
+                    return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el <strong>Límite Superior {renderLatex('b')}</strong> para el intervalo de búsqueda.</span> });
+                }
                 b = parseInt(valorB);
-                if (isNaN(b) || b <= x) return setError('El límite superior del intervalo debe ser mayor que el límite inferior.');
+                if (isNaN(b) || b <= x) return setAlerta({ isOpen: true, mensaje: 'El límite superior del intervalo debe ser mayor que el límite inferior.' });
             }
 
             condicionVisual = { tipo: tipoCondicion, valorX: x, valorB: b };
@@ -283,7 +295,7 @@ export default function Controles_ModelosDiscretos({
             switch (tipoCondicion) {
                 case 'menor_estricto':
                     x = x - 1;
-                    if (x < 0) return setError('Al evaluar P(X < x), el límite inclusivo (x-1) es negativo. La probabilidad es 0.');
+                    if (x < 0) return setAlerta({ isOpen: true, mensaje: <span>Al evaluar {renderLatex('P(X < x)')}, el límite inclusivo ({renderLatex('x-1')}) es negativo. La probabilidad es 0.</span>});
                     tipoAjustado = 'menor_igual';
                     break;
                 case 'mayor_estricto':
@@ -293,7 +305,7 @@ export default function Controles_ModelosDiscretos({
                 case 'intervalo_estricto':
                     x = x + 1;
                     b = b - 1;
-                    if (b < x) return setError('El intervalo estricto ingresado no contiene ningún número entero válido.');
+                    if (b < x) return setAlerta({ isOpen: true, mensaje: 'El intervalo estricto ingresado no contiene ningún número entero válido.' });
                     tipoAjustado = 'intervalo';
                     break;
                 default:
@@ -301,12 +313,16 @@ export default function Controles_ModelosDiscretos({
             }
 
             // Validar límites de x según modelo
-            if (modelo === 'Binomial' && x > params.n) return setError(`"x" ajustado no puede ser mayor que n (${params.n}).`);
+            if (modelo === 'Binomial' && x > params.n) return setAlerta({ isOpen: true, mensaje: <span>&quot;{renderLatex('x')}&quot; ajustado no puede ser mayor que {renderLatex('n')} ({params.n}).</span>});
             if (modelo === 'Hipergeometrica' && x > Math.min(params.K, params.n)) {
-                return setError(`"x" ajustado no puede ser mayor que el mínimo entre K y n (${Math.min(params.K, params.n)}).`);
+                return setAlerta({ isOpen: true, mensaje: <span>&quot;{renderLatex('x')}&quot; ajustado no puede ser mayor que el mínimo entre {renderLatex('K')} y {renderLatex('n')} ({Math.min(params.K, params.n)}).</span>});
             }
 
             condicionCalculo = { tipo: tipoAjustado, valorX: x, valorB: b };
+        } else {
+            if (isGraficarOnly !== true) {
+                return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el <strong>Número de éxitos {renderLatex('x')}</strong> para la Condición de Búsqueda.</span> });
+            }
         }
 
         // Calcular
@@ -355,8 +371,8 @@ export default function Controles_ModelosDiscretos({
                                 type="number" className="tema3-input" min="1"
                                 value={paramN_bin} onChange={e => setParamN_bin(e.target.value)}
                                 placeholder="Ej. 10"
-                                disabled={readOnlyParams && !(datosColumna.length > 0 && isNaN(parseFloat(datosColumna[0])))}
-                                style={{ ...(readOnlyParams && !(datosColumna.length > 0 && isNaN(parseFloat(datosColumna[0])))) ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
+                                disabled={readOnlyParams}
+                                style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
                             />
                         </div>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -393,45 +409,47 @@ export default function Controles_ModelosDiscretos({
                 )}
                 {modelo === 'Hipergeometrica' && (
                     <>
-                        <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('N')}</label>
-                            <input
-                                type="number" className="tema3-input" min="1"
-                                value={paramN_hip} onChange={e => setParamN_hip(e.target.value)}
-                                placeholder="0"
-                                disabled={readOnlyParams}
-                                style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
-                            />
-                        </div>
-                        <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('N_1')}</label>
-                            <input
-                                type="number" className="tema3-input" min="0"
-                                value={paramK_hip} onChange={e => setParamK_hip(e.target.value)}
-                                placeholder="0"
-                                disabled={readOnlyParams}
-                                style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
-                            />
-                        </div>
-                        <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('N_2')}</label>
-                            <input
-                                type="number" className="tema3-input"
-                                value={(paramN_hip !== '' && paramK_hip !== '') ? Math.max(0, parseInt(paramN_hip) - parseInt(paramK_hip)) : ''}
-                                readOnly
-                                disabled
-                                placeholder="N - N₁"
-                                style={{ ...disabledStyle, padding: '6px 10px', fontSize: '0.85rem', flex: 1, backgroundColor: 'var(--bg-input, #e2e8f0)', color: 'var(--text-muted, #64748b)' }}
-                            />
-                        </div>
-                        <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('n')}</label>
-                            <input
-                                type="number" className="tema3-input" min="1"
-                                value={paramn_hip} onChange={e => setParamn_hip(e.target.value)}
-                                placeholder="0"
-                                style={{ padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
-                            />
+                        <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('N')}</label>
+                                <input
+                                    type="number" className="tema3-input" min="1"
+                                    value={paramN_hip} onChange={e => setParamN_hip(e.target.value)}
+                                    placeholder="0"
+                                    disabled={readOnlyParams}
+                                    style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
+                                />
+                            </div>
+                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('N_1')}</label>
+                                <input
+                                    type="number" className="tema3-input" min="0"
+                                    value={paramK_hip} onChange={e => setParamK_hip(e.target.value)}
+                                    placeholder="0"
+                                    disabled={readOnlyParams}
+                                    style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
+                                />
+                            </div>
+                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('N_2')}</label>
+                                <input
+                                    type="number" className="tema3-input"
+                                    value={(paramN_hip !== '' && paramK_hip !== '') ? Math.max(0, parseInt(paramN_hip) - parseInt(paramK_hip)) : ''}
+                                    readOnly
+                                    disabled
+                                    placeholder="N - N₁"
+                                    style={{ ...disabledStyle, padding: '6px 10px', fontSize: '0.85rem', flex: 1, backgroundColor: 'var(--bg-input, #e2e8f0)', color: 'var(--text-muted, #64748b)' }}
+                                />
+                            </div>
+                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <label className="tema3-label" style={{ fontSize: '1rem', marginBottom: '0', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '35px' }}>{renderLatex('n')}</label>
+                                <input
+                                    type="number" className="tema3-input" min="1"
+                                    value={paramn_hip} onChange={e => setParamn_hip(e.target.value)}
+                                    placeholder="0"
+                                    style={{ padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
+                                />
+                            </div>
                         </div>
                         <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', marginTop: '15px', color: 'var(--text-main, #334155)', background: 'var(--bg-input, #f8fafc)', padding: '12px', borderRadius: '8px', border: '1px dashed var(--border-color, #cbd5e1)', width: '100%', boxSizing: 'border-box' }}>
                             {renderLatex(`P(X=x) = \\frac{\\binom{${paramK_hip || 'N_1'}}{x} \\binom{${(paramN_hip !== '' && paramK_hip !== '') ? Math.max(0, parseInt(paramN_hip) - parseInt(paramK_hip)) : 'N_2'}}{${paramn_hip || 'n'}-x}}{\\binom{${paramN_hip || 'N'}}{${paramn_hip || 'n'}}}`)}
@@ -459,21 +477,9 @@ export default function Controles_ModelosDiscretos({
                         <button
                             key={tipo.id}
                             type="button"
-                            className={modelo === tipo.id ? 'btn-tema3-active' : ''}
+                            className={`btn-mat251-modo ${modelo === tipo.id ? 'active' : ''}`}
                             onClick={() => handleCambiarModelo(tipo.id)}
-                            style={{
-                                flex: 1,
-                                padding: '8px 16px',
-                                borderRadius: '6px',
-                                fontSize: '0.85rem',
-                                fontWeight: 600,
-                                border: 'none',
-                                cursor: 'pointer',
-                                background: modelo === tipo.id ? '#3b82f6' : 'transparent',
-                                color: modelo === tipo.id ? '#fff' : 'var(--text-muted, #64748b)',
-                                transition: 'all 0.2s ease',
-                                boxShadow: modelo === tipo.id ? '0 2px 4px rgba(13, 110, 253, 0.3)' : 'none'
-                            }}
+                            style={{ flex: 1 }}
                         >
                             {tipo.label}
                         </button>
@@ -483,39 +489,17 @@ export default function Controles_ModelosDiscretos({
                 <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                     <button
                         type="button"
-                        className={modo === 'matriz' ? 'btn-tema3-active' : ''}
-                        onClick={() => { setModo('matriz'); setError(''); }}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: modo === 'matriz' ? '#3b82f6' : 'transparent',
-                            color: modo === 'matriz' ? '#fff' : 'var(--text-muted, #64748b)',
-                            transition: 'all 0.2s ease',
-                            boxShadow: modo === 'matriz' ? '0 2px 4px rgba(13, 110, 253, 0.3)' : 'none'
-                        }}
+                        className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
+                        onClick={() => { setModo('matriz'); setAlerta({ isOpen: false, mensaje: '' }); }}
+                        style={{ flex: 1 }}
                     >
                         Análisis de Matriz
                     </button>
                     <button
                         type="button"
-                        className={modo === 'manual' ? 'btn-tema3-active' : ''}
-                        onClick={() => { setModo('manual'); setError(''); }}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: modo === 'manual' ? '#3b82f6' : 'transparent',
-                            color: modo === 'manual' ? '#fff' : 'var(--text-muted, #64748b)',
-                            transition: 'all 0.2s ease',
-                            boxShadow: modo === 'manual' ? '0 2px 4px rgba(13, 110, 253, 0.3)' : 'none'
-                        }}
+                        className={`btn-mat251-modo ${modo === 'manual' ? 'active' : ''}`}
+                        onClick={() => { setModo('manual'); setAlerta({ isOpen: false, mensaje: '' }); }}
+                        style={{ flex: 1 }}
                     >
                         Modo Manual
                     </button>
@@ -524,40 +508,30 @@ export default function Controles_ModelosDiscretos({
 
             <div className="tema3-card">
 
-                {error && (
-                    <div style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #f87171', padding: '10px', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '15px' }}>
-                        <strong>Error: </strong> {error}
-                    </div>
-                )}
+
 
                 {modo === 'matriz' && (
                     <div style={{ marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card, #fff)', padding: '12px 15px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card, #fff)', padding: '15px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '15px' }}>
                             <div>
-                                <div style={{ color: 'var(--text-main, #334155)', fontSize: '1rem', fontWeight: 600, marginBottom: '4px' }}>Conjunto de Datos:</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted, #64748b)' }}>
-                                    Cargados: <strong style={{ color: 'var(--text-main, #334155)' }}>{statsDatos ? statsDatos.cargados : 0}</strong> &nbsp;
-                                    Agregados: <strong style={{ color: 'var(--text-main, #334155)' }}>{statsDatos ? statsDatos.agregados : 0}</strong> &nbsp;
-                                    Total: <strong style={{ color: 'var(--text-main, #334155)' }}>{statsDatos ? statsDatos.total : 0}</strong>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary-color)', margin: 0 }}>Datos:</span>
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
+                                    <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Cargados: <strong style={{ color: 'var(--primary-color)' }}>{statsDatos ? statsDatos.cargados : 0}</strong>
+                                    </small>
+                                    <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.agregados : 0}</strong>
+                                    </small>
+                                    <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Total: <strong>{statsDatos ? statsDatos.total : 0}</strong>
+                                    </small>
                                 </div>
                             </div>
                             <button
                                 type="button"
                                 onClick={abrirEditor}
-                                className="btn-tema3-active"
-                                style={{
-                                    borderRadius: '6px',
-                                    fontSize: '0.85rem',
-                                    padding: '6px 12px',
-                                    background: '#3b82f6',
-                                    color: 'white',
-                                    border: '1px solid transparent',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    fontWeight: 600
-                                }}
+                                className="btn-primary btn-icon"
+                                style={{ borderRadius: '8px', fontSize: '0.85rem', padding: '5px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 Editar Datos
@@ -565,8 +539,8 @@ export default function Controles_ModelosDiscretos({
                         </div>
                         {columnasDisponibles.length > 0 ? (
                             <>
-                                <div style={{ display: 'flex', gap: '15px' }}>
-                                    <div className="tema3-form-group" style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'flex-end' }}>
+                                    <div className="tema3-form-group" style={{ flex: '1 1 180px' }}>
                                         <label className="tema3-label">Columna:</label>
                                         <select
                                             className="tema3-select"
@@ -581,8 +555,8 @@ export default function Controles_ModelosDiscretos({
 
                                     {(modelo === 'Hipergeometrica' || modelo === 'Bernoulli') && (
                                         <>
-                                            <div className="tema3-form-group" style={{ flex: 1 }}>
-                                                <label className="tema3-label">Valor a evaluar (x):</label>
+                                            <div className="tema3-form-group" style={{ flex: '1 1 180px' }}>
+                                                <label className="tema3-label">Valor a evaluar ({renderLatex('x')}):</label>
                                                 <select
                                                     className="tema3-select"
                                                     value={valorExito}
@@ -595,7 +569,7 @@ export default function Controles_ModelosDiscretos({
                                                 </select>
                                             </div>
                                             {modelo === 'Hipergeometrica' && (
-                                                <div className="tema3-form-group" style={{ flex: 1 }}>
+                                                <div className="tema3-form-group" style={{ flex: '1 1 180px' }}>
                                                     <label className="tema3-label">Muestra a extraer {renderLatex('(n)')}:</label>
                                                     <input
                                                         type="number"
@@ -612,9 +586,9 @@ export default function Controles_ModelosDiscretos({
 
                                     {modelo === 'Binomial' && (
                                         <>
-                                            {datosColumna.length > 0 && isNaN(parseFloat(datosColumna[0])) ? (
-                                                <div className="tema3-form-group" style={{ flex: 1 }}>
-                                                    <label className="tema3-label">Valor a evaluar (x):</label>
+                                            {datosColumna.length > 0 && isNaN(parseFloat(datosColumna[0])) && (
+                                                <div className="tema3-form-group" style={{ flex: '1 1 180px' }}>
+                                                    <label className="tema3-label">Valor a evaluar ({renderLatex('x')}):</label>
                                                     <select
                                                         className="tema3-select"
                                                         value={valorExito}
@@ -626,24 +600,27 @@ export default function Controles_ModelosDiscretos({
                                                         ))}
                                                     </select>
                                                 </div>
-                                            ) : (
-                                                <div className="tema3-form-group" style={{ flex: 1 }}>
-                                                    <label className="tema3-label">Tamaño del ensayo / Lote {renderLatex('(n)')}:</label>
-                                                    <input
-                                                        type="number"
-                                                        className="tema3-input"
-                                                        value={nArriba}
-                                                        onChange={e => { setNArriba(e.target.value); setStatsEstimados(null); }}
-                                                        placeholder="Ej. 10"
-                                                        min="1"
-                                                    />
-                                                </div>
                                             )}
+                                            <div className="tema3-form-group" style={{ flex: '1 1 180px' }}>
+                                                <label className="tema3-label">Tamaño del ensayo / Lote {renderLatex('(n)')}:</label>
+                                                <input
+                                                    type="number"
+                                                    className="tema3-input"
+                                                    value={nArriba}
+                                                    onChange={e => { setNArriba(e.target.value); setStatsEstimados(null); }}
+                                                    placeholder="Ej. 10"
+                                                    min="1"
+                                                />
+                                            </div>
                                         </>
                                     )}
                                 </div>
 
-                                <button className="tema3-btn btn-tema3-active" onClick={estimarDesdeDatos} style={{ marginBottom: '10px', width: 'auto', margin: '0 auto', display: 'block', padding: '8px 16px' }}>
+                                <button 
+                                    className="button_calcular" 
+                                    onClick={estimarDesdeDatos} 
+                                    style={{ marginBottom: '10px', width: 'fit-content', margin: '0 auto', display: 'block', padding: '5px 15px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                                >
                                     Estimar Parámetros
                                 </button>
 
@@ -690,7 +667,11 @@ export default function Controles_ModelosDiscretos({
                         {renderParametrosManuales()}
 
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                            <button className="tema3-btn btn-tema3-active" onClick={manejarCalculo} style={{ width: 'auto', padding: '6px 30px', fontSize: '0.95rem' }}>
+                            <button 
+                                className="button_calcular" 
+                                onClick={() => manejarCalculo(true)} 
+                                style={{ width: 'fit-content', padding: '5px 15px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                            >
                                 Graficar
                             </button>
                         </div>
@@ -703,8 +684,8 @@ export default function Controles_ModelosDiscretos({
 
                 <h4 style={{ color: 'var(--text-main, #334155)', fontSize: '0.85rem', margin: '0 0 10px 0' }}>Condición de Búsqueda</h4>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'flex-end', marginBottom: '25px' }}>
-                    <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '15px', alignItems: 'end', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>Operador lógico</label>
                         <CustomSelect
                             value={tipoCondicion}
@@ -721,7 +702,7 @@ export default function Controles_ModelosDiscretos({
                         />
                     </div>
 
-                    <div style={{ flex: '1 1 150px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
                         <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>{tipoCondicion.includes('intervalo') ? <>Límite Inferior {renderLatex('a')}</> : <>Número de éxitos {renderLatex('x')}</>}</label>
                         <input
                             type="number" className="tema3-input" min="0"
@@ -739,7 +720,7 @@ export default function Controles_ModelosDiscretos({
                     </div>
 
                     {tipoCondicion.includes('intervalo') && (
-                        <div style={{ flex: '1 1 150px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
                             <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>Límite Superior {renderLatex('b')}</label>
                             <input
                                 type="number" className="tema3-input" min="0"
@@ -751,8 +732,12 @@ export default function Controles_ModelosDiscretos({
                     )}
                 </div>
                 
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                    <button className="tema3-btn btn-tema3-active" onClick={manejarCalculo} style={{ width: 'auto', padding: '6px 30px', fontSize: '0.95rem' }}>
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'center'}}>
+                    <button 
+                        className="button_calcular" 
+                        onClick={() => manejarCalculo(false)} 
+                        style={{ width: 'fit-content', padding: '5px 15px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                    >
                         Calcular
                     </button>
                 </div>
@@ -765,6 +750,11 @@ export default function Controles_ModelosDiscretos({
                         {children}
                     </div>
                 </div>
+            <ModalAlerta 
+                isOpen={alerta.isOpen} 
+                mensaje={alerta.mensaje} 
+                onClose={() => setAlerta({ ...alerta, isOpen: false })} 
+            />
         </div>
     );
 }

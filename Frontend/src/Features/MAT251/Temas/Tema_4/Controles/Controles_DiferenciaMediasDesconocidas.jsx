@@ -3,6 +3,7 @@ import { jStat } from 'jstat';
 import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
 import { IconoCalculadora } from '../../../../../ui/iconos';
+import { calcularParametrosDiferenciaMediasDesconocidas, calcularProbabilidadDiferenciaMediasDesconocidas } from '../../../Matematicas/Logica_Tema4';
 
 const CustomSelect = ({ value, onChange, options }) => {
     const [isOpen, setIsOpen] = React.useState(false);
@@ -334,12 +335,16 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                 </div>
             </div>
 
-            <button
-                onClick={calcular}
-                style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            <button onClick={calcular} className="button_calcular btn-icon"
+                style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
             >
-                Graficar
+                GRAFICAR
             </button>
         </div>
     );
 }
+
+
+
+
+

@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
 import { IconoCalculadora, IconoVariables } from '../../../../../ui/iconos';
 import { calcularReglaAdicion } from '../../../Matematicas/logica_Tema1';
+import ModalAlerta from '../../../ui/ModalAlerta';
 
 export default function ControlesReglaAdicion({ 
     setModalVars, varSeleccionada, filas,
@@ -9,6 +10,7 @@ export default function ControlesReglaAdicion({
     colB, setColB, valB, setValB,
     setResultado, setError
 }) {
+    const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
 
     // Extraer valores únicos para A y B
     const valoresUnicosA = useMemo(() => {
@@ -29,12 +31,27 @@ export default function ControlesReglaAdicion({
 
     const calcular = () => {
         if (!varSeleccionada) {
-            setError("Importa una Matriz de Excel primero."); 
+            setAlerta({ isOpen: true, mensaje: "Importa o selecciona una Matriz de Excel primero." });
             setResultado(null);
             return;
         }
-        if (!colA || !valA || !colB || !valB) {
-            setError("Selecciona las columnas y los valores para ambos eventos (A y B)."); 
+        if (!colA) {
+            setAlerta({ isOpen: true, mensaje: "Selecciona la Variable Evento (A) antes de calcular." });
+            setResultado(null);
+            return;
+        }
+        if (!valA) {
+            setAlerta({ isOpen: true, mensaje: "Selecciona el Valor (Éxito) para el Evento A antes de calcular." });
+            setResultado(null);
+            return;
+        }
+        if (!colB) {
+            setAlerta({ isOpen: true, mensaje: "Selecciona la Variable Evento (B) antes de calcular." });
+            setResultado(null);
+            return;
+        }
+        if (!valB) {
+            setAlerta({ isOpen: true, mensaje: "Selecciona el Valor (Éxito) para el Evento B antes de calcular." });
             setResultado(null);
             return;
         }
@@ -134,13 +151,17 @@ export default function ControlesReglaAdicion({
 
             <button 
                 onClick={calcular} 
-                className="button_calcular btn-icon" 
-                style={{ width: 'fit-content', alignSelf: 'center', padding: '8px 35px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}
-                disabled={!varSeleccionada || !colA || !valA || !colB || !valB}
+                className="button_calcular" 
+                style={{ width: 'fit-content', alignSelf: 'center', padding: '5px 15px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}
             >
-                <IconoCalculadora />
                 CALCULAR
             </button>
+
+            <ModalAlerta 
+                isOpen={alerta.isOpen} 
+                mensaje={alerta.mensaje} 
+                onClose={() => setAlerta({ ...alerta, isOpen: false })} 
+            />
         </div>
     );
 }

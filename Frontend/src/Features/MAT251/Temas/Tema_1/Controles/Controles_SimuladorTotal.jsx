@@ -1,14 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
 import { IconoCalculadora, IconoVariables } from '../../../../ui/iconos';
+import ModalAlerta from '../../../ui/ModalAlerta';
 
 export default function ControlesSimuladorTotal({ 
     setModalVars, varSeleccionada, filas,
-    colCausa, setColCausa,
+    colCausa, setColCausa, 
     colEvento, setColEvento,
     valExito, setValExito,
     setRamas, setResultadoSimulador, setErrorSimulador 
 }) {
+    const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
 
     // Extraer valores únicos para el selector de "Éxito" del evento
     const valoresUnicosEvento = useMemo(() => {
@@ -25,12 +27,22 @@ export default function ControlesSimuladorTotal({
 
     const calcular = () => {
         if (!varSeleccionada) {
-            setErrorSimulador("Importa una Matriz de Excel primero."); 
+            setAlerta({ isOpen: true, mensaje: "Debes importar o seleccionar una Matriz de Excel primero." });
             setResultadoSimulador(null);
             return;
         }
-        if (!colCausa || !colEvento || !valExito) {
-            setErrorSimulador("Selecciona las columnas de Causa y Evento, así como el valor de éxito."); 
+        if (!colCausa) {
+            setAlerta({ isOpen: true, mensaje: "Debes seleccionar la Variable Causa (A_i) antes de calcular." });
+            setResultadoSimulador(null);
+            return;
+        }
+        if (!colEvento) {
+            setAlerta({ isOpen: true, mensaje: "Debes seleccionar la Variable Evento (B) antes de calcular." });
+            setResultadoSimulador(null);
+            return;
+        }
+        if (!valExito) {
+            setAlerta({ isOpen: true, mensaje: "Debes seleccionar el Valor de 'Éxito' en el evento antes de calcular." });
             setResultadoSimulador(null);
             return;
         }
@@ -39,7 +51,7 @@ export default function ControlesSimuladorTotal({
         const idxEvento = varSeleccionada.nombresColumnas.indexOf(colEvento);
         
         if (idxCausa === -1 || idxEvento === -1) {
-            setErrorSimulador("Columnas no encontradas en la matriz.");
+            setAlerta({ isOpen: true, mensaje: "Columnas no encontradas en la matriz." });
             setResultadoSimulador(null);
             return;
         }
@@ -52,7 +64,7 @@ export default function ControlesSimuladorTotal({
 
         const totalDatos = datosParseados.length;
         if (totalDatos === 0) {
-            setErrorSimulador("No hay datos válidos para procesar.");
+            setAlerta({ isOpen: true, mensaje: "No hay datos válidos para procesar." });
             setResultadoSimulador(null);
             return;
         }
@@ -184,13 +196,17 @@ export default function ControlesSimuladorTotal({
 
             <button 
                 onClick={calcular} 
-                className="button_calcular btn-icon" 
+                className="button_calcular" 
                 style={{ width: 'fit-content', alignSelf: 'center', padding: '8px 35px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}
-                disabled={!varSeleccionada || !colCausa || !colEvento || !valExito}
             >
-                <IconoCalculadora />
                 CALCULAR
             </button>
+
+            <ModalAlerta 
+                isOpen={alerta.isOpen} 
+                mensaje={alerta.mensaje} 
+                onClose={() => setAlerta({ ...alerta, isOpen: false })} 
+            />
         </div>
     );
 }

@@ -10,16 +10,16 @@ import { useCalculadoraExcel } from "../hooks/useCalculadoraExcel";
 import { useModuleData } from "../../../components/Gestion_Datos/DataContext";
 import { api, BASE_URL } from "../../../services/api";
 import { alerta } from "../../../utils/Notificaciones";
-import { 
-  BookOpenCheck, 
-  ArrowLeft, 
-  Send, 
-  CheckCircle2, 
-  Clock, 
-  Sparkles, 
-  FileSpreadsheet, 
-  Layers, 
-  AlertCircle 
+import {
+  BookOpenCheck,
+  ArrowLeft,
+  Send,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  FileSpreadsheet,
+  Layers,
+  AlertCircle
 } from 'lucide-react';
 
 // --- IMPORTS DE LOS PANELES MODULARES ---
@@ -241,22 +241,22 @@ export default function Calculos() {
         doneBtnText: 'Finalizar',
         progressText: '{{current}} de {{total}}',
         steps: [
-            {
-                element: '#tour-datos-archivos',
-                popover: { title: 'Archivos Subidos', description: 'Aquí puedes seleccionar cualquier archivo Excel que ya hayas subido anteriormente a la base de datos.', side: 'bottom', align: 'start' }
-            },
-            {
-                element: '#tour-datos-upload',
-                popover: { title: 'Subir Nuevos Datos', description: 'Si tienes un nuevo archivo Excel, puedes arrastrarlo aquí o hacer clic para subirlo y poder analizarlo.', side: 'bottom', align: 'start' }
-            },
-            {
-                element: '#tour-datos-variables',
-                popover: { title: 'Definir Variables', description: 'Una vez cargada tu tabla, aquí puedes definir y nombrar tus variables para que el sistema sepa qué columnas analizar.', side: 'right', align: 'start' }
-            },
-            {
-                element: '#tour-datos-tabla',
-                popover: { title: 'Vista de Tabla', description: 'Aquí verás los datos de tu Excel. Selecciona los rangos de celdas para asignarlos a las variables que creaste.', side: 'top', align: 'start' }
-            }
+          {
+            element: '#tour-datos-archivos',
+            popover: { title: 'Archivos Subidos', description: 'Aquí puedes seleccionar cualquier archivo Excel que ya hayas subido anteriormente a la base de datos.', side: 'bottom', align: 'start' }
+          },
+          {
+            element: '#tour-datos-upload',
+            popover: { title: 'Subir Nuevos Datos', description: 'Si tienes un nuevo archivo Excel, puedes arrastrarlo aquí o hacer clic para subirlo y poder analizarlo.', side: 'bottom', align: 'start' }
+          },
+          {
+            element: '#tour-datos-variables',
+            popover: { title: 'Definir Variables', description: 'Una vez cargada tu tabla, aquí puedes definir y nombrar tus variables para que el sistema sepa qué columnas analizar.', side: 'right', align: 'start' }
+          },
+          {
+            element: '#tour-datos-tabla',
+            popover: { title: 'Vista de Tabla', description: 'Aquí verás los datos de tu Excel. Selecciona los rangos de celdas para asignarlos a las variables que creaste.', side: 'top', align: 'start' }
+          }
         ]
       });
       driverObj.drive();
@@ -627,13 +627,13 @@ export default function Calculos() {
 
   useEffect(() => {
     if (location.state && !calculoPendiente.current) {
-      const { 
-        archivoReabrir, 
-        calculoReabrir, 
-        snapshot, 
+      const {
+        archivoReabrir,
+        calculoReabrir,
+        snapshot,
         sinArchivo,
-        origenArchivos: navOrigen, 
-        cursoSeleccionado: navCurso 
+        origenArchivos: navOrigen,
+        cursoSeleccionado: navCurso
       } = location.state;
 
       if (navOrigen) {
@@ -765,7 +765,7 @@ export default function Calculos() {
           setSelectedFile("");
         } else if (location.state?.archivoReabrir) {
           const targetName = location.state.archivoReabrir.toLowerCase().trim();
-          const match = data.files.find(f => 
+          const match = data.files.find(f =>
             (f.filename && f.filename.toLowerCase().trim() === targetName) ||
             (location.state.archivoSeleccionadoId && f.id === location.state.archivoSeleccionadoId)
           );
@@ -777,6 +777,9 @@ export default function Calculos() {
         } else if (!selectedFile && data.files.length > 0 && !location.state?.sinArchivo && !tareaContexto) {
           setSelectedFile(data.files[0].filename);
         }
+
+         //} else if (!selectedFile && data.files.length > 0 && !location.state?.sinArchivo && !tareaContexto) {
+          //setSelectedFile(data.files[0].filename);
       } else {
         setFiles([]);
       }
@@ -817,7 +820,7 @@ export default function Calculos() {
     try {
       const stored = sessionStorage.getItem("tarea_contexto_calculadora");
       if (stored) return JSON.parse(stored);
-    } catch (e) {}
+    } catch (e) { }
     return null;
   }, [location.state]);
 
@@ -875,13 +878,13 @@ export default function Calculos() {
 
       const textoEjercicios = tareaObj?.ejercicios_seleccionados || tareaContexto?.ejercicios_seleccionados || "Todos los temas";
       const parsed = parseEjerciciosAsignadosCalc(textoEjercicios);
-      
+
       let entregaBaseFile = "";
       if (entregaTarea?.datos_respuesta) {
         try {
           const p = JSON.parse(entregaTarea.datos_respuesta);
           entregaBaseFile = p.archivo_base || "";
-        } catch (e) {}
+        } catch (e) { }
       }
 
       const archivoDeHist = (hist || []).find(r => {
@@ -1076,16 +1079,16 @@ export default function Calculos() {
         }}>
           {/* Lado izquierdo: Título y descripción limpia */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-            <span style={{ 
-              background: tareaYaEntregada ? "rgba(39, 174, 96, 0.2)" : "rgba(59, 130, 246, 0.2)", 
-              border: tareaYaEntregada ? "1px solid rgba(39, 174, 96, 0.45)" : "1px solid rgba(59, 130, 246, 0.45)", 
-              color: tareaYaEntregada ? "#2ecc71" : "#60a5fa", 
-              padding: "4px 10px", 
-              borderRadius: "8px", 
-              fontSize: "0.75rem", 
-              fontWeight: "700", 
-              display: "inline-flex", 
-              alignItems: "center", 
+            <span style={{
+              background: tareaYaEntregada ? "rgba(39, 174, 96, 0.2)" : "rgba(59, 130, 246, 0.2)",
+              border: tareaYaEntregada ? "1px solid rgba(39, 174, 96, 0.45)" : "1px solid rgba(59, 130, 246, 0.45)",
+              color: tareaYaEntregada ? "#2ecc71" : "#60a5fa",
+              padding: "4px 10px",
+              borderRadius: "8px",
+              fontSize: "0.75rem",
+              fontWeight: "700",
+              display: "inline-flex",
+              alignItems: "center",
               gap: "6px",
               letterSpacing: "0.3px"
             }}>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
 import { IconoCalculadora } from '../../../../../ui/iconos';
+import { generarDistribucionStudent, calcularProbabilidadStudent } from '../../../Matematicas/Logica_Tema4';
 import { jStat } from 'jstat';
 
 const CustomSelect = ({ value, onChange, options }) => {
@@ -101,77 +102,37 @@ export default function Controles_Student({ onCalcular }) {
     };
 
     const generarDistribucion = () => {
-        const muPob = parseFloat(mu);
-        const sMuestral = parseFloat(s);
-        const tamMuestra = parseFloat(n);
-
-        if (isNaN(muPob) || isNaN(sMuestral) || isNaN(tamMuestra)) {
-            alert("Por favor, ingresa todos los valores numéricos.");
+        const result = generarDistribucionStudent(mu, s, n);
+        if (result.error) {
+            alert(result.error);
             return;
         }
 
-        if (sMuestral <= 0 || tamMuestra <= 1) {
-            alert("La desviación estándar debe ser > 0 y la muestra n > 1.");
-            return;
-        }
-
-        const v = tamMuestra - 1;
-        const se = sMuestral / Math.sqrt(tamMuestra);
-
-        setDatosParciales({ mu: muPob, s: sMuestral, n: tamMuestra, v, se });
+        const parciales = { ...result };
+        delete parciales.error;
+        
+        setDatosParciales(parciales);
         setDistribucionGenerada(true);
         setCondicion('');
         setValorX1('');
         setValorX2('');
-        onCalcular({ mu: muPob, s: sMuestral, n: tamMuestra, v, se }); 
+        onCalcular(parciales); 
     };
 
     const calcularProbabilidad = () => {
-        if (!condicion) {
-            alert('Por favor selecciona una condición.');
+        const result = calcularProbabilidadStudent(datosParciales, condicion, valorX1, valorX2);
+        if (result.error) {
+            if (result.error !== 'Faltan parámetros previos.') alert(result.error);
             return;
-        }
-
-        const x1 = parseFloat(valorX1);
-        const x2 = parseFloat(valorX2);
-
-        if ((condicion === 'menor_que' || condicion === 'mayor_que') && isNaN(x1)) {
-            alert('Ingresa un valor válido para la condición.');
-            return;
-        }
-        if (condicion === 'entre' && (isNaN(x1) || isNaN(x2))) {
-            alert('Ingresa ambos valores para el rango.');
-            return;
-        }
-
-        const { mu: muPob, s: sMuestral, n: tamMuestra, v, se } = datosParciales;
-
-        let probFinal = 0;
-        let strDesarrollo = '';
-
-        const t1 = (x1 - muPob) / se;
-
-        if (condicion === 'menor_que') {
-            probFinal = jStat.studentt.cdf(t1, v);
-            strDesarrollo = `\\begin{aligned} P(\\bar{X} \\le ${formatNumber(x1)}) &= P\\left( T \\le \\frac{(${formatNumber(x1)} - ${formatNumber(muPob)})\\sqrt{${tamMuestra}}}{${formatNumber(sMuestral)}} \\right) \\\\ &= P(T \\le ${formatNumber(t1, 3, 3)}) \\\\ &= ${formatNumber(probFinal, 4, 4)} \\end{aligned}`;
-        } else if (condicion === 'mayor_que') {
-            probFinal = 1 - jStat.studentt.cdf(t1, v);
-            strDesarrollo = `\\begin{aligned} P(\\bar{X} \\ge ${formatNumber(x1)}) &= P\\left( T \\ge \\frac{(${formatNumber(x1)} - ${formatNumber(muPob)})\\sqrt{${tamMuestra}}}{${formatNumber(sMuestral)}} \\right) \\\\ &= P(T \\ge ${formatNumber(t1, 3, 3)}) \\\\ &= 1 - P(T \\le ${formatNumber(t1, 3, 3)}) = ${formatNumber(probFinal, 4, 4)} \\end{aligned}`;
-        } else if (condicion === 'entre') {
-            let t2 = (x2 - muPob) / se;
-            let probT2 = jStat.studentt.cdf(t2, v);
-            let probT1 = jStat.studentt.cdf(t1, v);
-            probFinal = probT2 - probT1;
-            strDesarrollo = `\\begin{aligned} P(${formatNumber(x1)} \\le \\bar{X} \\le ${formatNumber(x2)}) &= P\\left( \\frac{(${formatNumber(x1)} - ${formatNumber(muPob)})\\sqrt{${tamMuestra}}}{${formatNumber(sMuestral)}} \\le T \\le \\frac{(${formatNumber(x2)} - ${formatNumber(muPob)})\\sqrt{${tamMuestra}}}{${formatNumber(sMuestral)}} \\right) \\\\ &= P(${formatNumber(t1, 3, 3)} \\le T \\le ${formatNumber(t2, 3, 3)}) \\\\ &= P(T \\le ${formatNumber(t2, 3, 3)}) - P(T \\le ${formatNumber(t1, 3, 3)}) = ${formatNumber(probFinal, 4, 4)} \\end{aligned}`;
         }
 
         onCalcular({
             ...datosParciales,
-            strDesarrollo,
-            probFinal,
-            x1,
-            x2,
-            condicion
+            strDesarrollo: result.strDesarrollo,
+            probFinal: result.probFinal,
+            x1: result.x1,
+            x2: result.x2,
+            condicion: result.condicion
         });
     };
 
@@ -186,55 +147,54 @@ export default function Controles_Student({ onCalcular }) {
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0 }}><Latex formula="\mu =" /></label>
-                    <input
-                        type="number"
-                        placeholder="Media Pob."
-                        value={mu}
-                        onChange={(e) => { setMu(e.target.value); resetDistribucion(); }}
-                        style={{ width: '100%', padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
-                    />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* Fila 1: μ y S */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '15px', marginTop: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, width: 'fit-content' }}><Latex formula="\mu =" /></label>
+                        <input
+                            type="number"
+                            placeholder="Media Pob."
+                            value={mu}
+                            onChange={(e) => { setMu(e.target.value); resetDistribucion(); }}
+                            style={{ flex: 1, padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none', minWidth: 0, boxSizing: 'border-box' }}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, width: 'fit-content' }}><Latex formula="S =" /></label>
+                        <input
+                            type="number"
+                            placeholder="Desv. Est. Muestral"
+                            value={s}
+                            onChange={(e) => { setS(e.target.value); resetDistribucion(); }}
+                            style={{ flex: 1, padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none', minWidth: 0, boxSizing: 'border-box' }}
+                        />
+                    </div>
                 </div>
-                
-                <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0 }}><Latex formula="S =" /></label>
-                    <input
-                        type="number"
-                        placeholder="Desv. Est. Muestral"
-                        value={s}
-                        onChange={(e) => { setS(e.target.value); resetDistribucion(); }}
-                        style={{ width: '100%', padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
-                    />
-                </div>
-
-                <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0 }}><Latex formula="n =" /></label>
-                    <input
-                        type="number"
-                        placeholder="Muestra"
-                        value={n}
-                        onChange={(e) => { setN(e.target.value); resetDistribucion(); }}
-                        style={{ width: '100%', padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
-                    />
+                {/* Fila 2: n centrado */}
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', width: '50%' }}>
+                        <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, width: 'fit-content' }}><Latex formula="n =" /></label>
+                        <input
+                            type="number"
+                            placeholder="Muestra"
+                            value={n}
+                            onChange={(e) => { setN(e.target.value); resetDistribucion(); }}
+                            style={{ flex: 1, padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none', minWidth: 0, boxSizing: 'border-box' }}
+                        />
+                    </div>
                 </div>
             </div>
 
-            <button
-                onClick={generarDistribucion}
-                style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-            >
-                Calcular
-            </button>
+            <button onClick={generarDistribucion} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '15px auto 0px', padding: '5px 14px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            >CALCULAR</button>
 
             {distribucionGenerada && (
-                <div style={{ marginTop: '20px', animation: 'fadeIn 0.5s ease-out' }}>
-                    <div style={{ background: 'var(--bg-app)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '20px' }}>
-                        <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-main)' }}>Parámetros t-Student</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <Latex formula={`v = n - 1 = ${datosParciales.n} - 1 = ${datosParciales.v}`} />
-                            <Latex formula={`E(\\bar{X}) = \\mu = ${formatNumber(datosParciales.mu)}`} />
+                <div style={{ marginTop: '15px', animation: 'fadeIn 0.5s ease-out' }}>
+                    <div style={{ background: 'var(--bg-app)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '20px' }}>
+                        <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-main)', textAlign: 'center' }}>Parámetros t-Student</h4>
+                        <div className="thin-scrollbar formula-responsive" style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflowX: 'auto', paddingBottom: '5px', alignItems: 'center' }}>
+                            <Latex formula={`\\begin{aligned} v &= n - 1 = ${datosParciales.n} - 1 = ${datosParciales.v} \\\\ E(\\bar{X}) &= \\mu = ${formatNumber(datosParciales.mu)} \\end{aligned}`} />
                         </div>
                     </div>
 
@@ -296,11 +256,9 @@ export default function Controles_Student({ onCalcular }) {
                     </div>
 
                     {condicion && (
-                        <button
-                            onClick={calcularProbabilidad}
-                            style={{ width: 'fit-content', margin: '15px auto 0', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                        <button onClick={calcularProbabilidad} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '0px auto 0', padding: '5px 15px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                         >
-                            Graficar
+                            GRAFICAR
                         </button>
                     )}
                 </div>
@@ -308,3 +266,10 @@ export default function Controles_Student({ onCalcular }) {
         </div>
     );
 }
+
+
+
+
+
+
+

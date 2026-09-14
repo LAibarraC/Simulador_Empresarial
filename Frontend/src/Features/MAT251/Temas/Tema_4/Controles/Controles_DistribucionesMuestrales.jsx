@@ -16,7 +16,7 @@ export default function Controles_DistribucionesMuestrales({ setResDistMuestrale
     };
 
     return (
-        <div style={{ ...cardStyle, marginBottom: '20px' }}>
+        <div style={{ ...cardStyle, border: 'none', marginBottom: '20px' }}>
             <h4 style={{ color: 'var(--primary-color)', margin: '0 0 15px 0', fontSize: FS.sm }}>
                 Distribuciones Muestrales
             </h4>
@@ -68,12 +68,16 @@ export default function Controles_DistribucionesMuestrales({ setResDistMuestrale
                 </div>
             </div>
 
-            <button 
-                onClick={ejecutar} 
-                style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            <button onClick={ejecutar} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
             >
-                Graficar
+                GRAFICAR
             </button>
         </div>
     );
 }
+
+
+
+
+
+

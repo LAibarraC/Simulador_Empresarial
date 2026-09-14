@@ -3,6 +3,7 @@ import { jStat } from 'jstat';
 import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
 import { IconoCalculadora } from '../../../../../ui/iconos';
+import { calcularParametrosRazonVarianzas, calcularProbabilidadRazonVarianzas } from '../../../Matematicas/Logica_Tema4';
 
 const CustomSelect = ({ value, onChange, options }) => {
     const [isOpen, React_useState] = React.useState(false);
@@ -106,82 +107,22 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
     };
 
     const calcularParametros = () => {
-        const vp1 = parseFloat(varPob1);
-        const nn1 = parseFloat(n1);
-        const vp2 = parseFloat(varPob2);
-        const nn2 = parseFloat(n2);
-
-        if (isNaN(vp1) || isNaN(nn1) || isNaN(vp2) || isNaN(nn2)) {
-            alert("Por favor, ingresa todos los valores numéricos para ambas poblaciones.");
+        const result = calcularParametrosRazonVarianzas(varPob1, n1, varPob2, n2);
+        if (result.error) {
+            alert(result.error);
             return;
         }
-
-        if (vp1 <= 0 || vp2 <= 0 || nn1 <= 1 || nn2 <= 1) {
-            alert("Las varianzas deben ser mayores a 0 y los tamaños de muestra mayores a 1.");
-            return;
-        }
-
-        const v1 = nn1 - 1;
-        const v2 = nn2 - 1;
-        const razonVarPob = vp2 / vp1; 
-
-        setParametrosPrevios({ vp1, nn1, vp2, nn2, v1, v2, razonVarPob });
+        setParametrosPrevios(result);
     };
 
     const calcular = () => {
-        if (!parametrosPrevios) return;
-
-        const { vp1, nn1, vp2, nn2, v1, v2, razonVarPob } = parametrosPrevios;
-
-        const x1 = parseFloat(valorX1);
-        const x2 = parseFloat(valorX2);
-
-        if ((condicion === 'menor_que' || condicion === 'mayor_que') && (isNaN(x1) || x1 < 0)) {
-            alert('Ingresa un valor válido y positivo para la condición a calcular.');
-            return;
-        }
-        if (condicion === 'entre' && (isNaN(x1) || isNaN(x2) || x1 < 0 || x2 < 0)) {
-            alert('Ingresa ambos valores positivos para el rango.');
+        const result = calcularProbabilidadRazonVarianzas(parametrosPrevios, condicion, valorX1, valorX2);
+        if (result.error) {
+            if (result.error !== 'Faltan parámetros previos.') alert(result.error);
             return;
         }
 
-        let probFinal = 0;
-        let strDesarrollo = '';
-        let statValue = 0; // The F value that corresponds to x1
-
-        if (condicion === 'menor_que') {
-            statValue = x1 * razonVarPob;
-            probFinal = jStat.centralF.cdf(statValue, v1, v2);
-            strDesarrollo = `\\begin{aligned} P\\left( \\frac{S_1^2}{S_2^2} < ${x1} \\right) &= P\\left( F < ${x1} \\cdot \\frac{${vp2}}{${vp1}} \\right) \\\\ &= P(F < ${statValue.toFixed(4)}) \\\\ &= ${probFinal.toFixed(4)} \\end{aligned}`;
-        } else if (condicion === 'mayor_que') {
-            statValue = x1 * razonVarPob;
-            probFinal = 1 - jStat.centralF.cdf(statValue, v1, v2);
-            strDesarrollo = `\\begin{aligned} P\\left( \\frac{S_1^2}{S_2^2} > ${x1} \\right) &= P\\left( F > ${x1} \\cdot \\frac{${vp2}}{${vp1}} \\right) \\\\ &= P(F > ${statValue.toFixed(4)}) \\\\ &= 1 - P(F < ${statValue.toFixed(4)}) \\\\ &= ${probFinal.toFixed(4)} \\end{aligned}`;
-        } else if (condicion === 'entre') {
-            const F1 = x1 * razonVarPob;
-            const F2 = x2 * razonVarPob;
-            statValue = F2; // We can use F2 as the statValue just for display, or show both
-            const probZ2 = jStat.centralF.cdf(F2, v1, v2);
-            const probZ1 = jStat.centralF.cdf(F1, v1, v2);
-            probFinal = Math.abs(probZ2 - probZ1);
-            strDesarrollo = `\\begin{aligned} P\\left( ${x1} < \\frac{S_1^2}{S_2^2} < ${x2} \\right) &= P\\left( ${x1} \\cdot \\frac{${vp2}}{${vp1}} < F < ${x2} \\cdot \\frac{${vp2}}{${vp1}} \\right) \\\\ &= P(${F1.toFixed(4)} < F < ${F2.toFixed(4)}) \\\\ &= P(F < ${F2.toFixed(4)}) - P(F < ${F1.toFixed(4)}) \\\\ &= ${probZ2.toFixed(4)} - ${probZ1.toFixed(4)} \\\\ &= ${probFinal.toFixed(4)} \\end{aligned}`;
-        }
-
-        const formulaLaTeX = `F = \\left( \\frac{S_1^2}{S_2^2} \\right) \\cdot \\left( \\frac{\\sigma_2^2}{\\sigma_1^2} \\right)`;
-
-        onCalcular({
-            vp1, nn1,
-            vp2, nn2,
-            v1, v2,
-            varPob1: vp1,
-            varPob2: vp2,
-            condicion,
-            x1, x2,
-            probFinal,
-            statValue,
-            formulaLaTeX,
-            strDesarrollo,
-        });
+        onCalcular(result);
     };
 
     return (
@@ -219,12 +160,8 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
             </div>
 
             {!parametrosPrevios ? (
-                <button
-                    onClick={calcularParametros}
-                    style={{ width: 'fit-content', margin: '20px auto 0', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                >
-                    Calcular
-                </button>
+                <button onClick={calcularParametros} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '20px auto 0', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                >CALCULAR</button>
             ) : (
                 <>
                     {/* Grados de Libertad */}
@@ -296,9 +233,7 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                         </div>
                     </div>
 
-                    <button
-                        onClick={calcular}
-                        style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    <button onClick={calcular} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                     >
                         Graficar
                     </button>
@@ -307,3 +242,10 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
         </div>
     );
 }
+
+
+
+
+
+
+

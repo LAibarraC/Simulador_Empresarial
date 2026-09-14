@@ -18,7 +18,7 @@ export default function Resultados_ProbabilidadMuestral({ resultados }) {
                     <>
                         <div style={{ background: 'var(--header-bg, #f3f4f6)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
                             <div style={{ marginBottom: '15px', color: 'var(--text-muted)', fontSize: FS.sm }}>Estandarización Z y Probabilidad</div>
-                            <div className="thin-scrollbar" style={{ overflowX: 'auto', paddingBottom: '10px' }}>
+                            <div className="thin-scrollbar formula-responsive" style={{ overflowX: 'auto', paddingBottom: '10px' }}>
                                 <Latex formula={resultados.strDesarrollo} />
                             </div>
                         </div>
@@ -27,9 +27,6 @@ export default function Resultados_ProbabilidadMuestral({ resultados }) {
                             <div style={{ marginBottom: '10px', color: 'var(--text-muted)', fontSize: FS.sm }}>PROBABILIDAD FINAL</div>
                             <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
                                 {(resultados.probFinal * 100).toFixed(2)}%
-                            </div>
-                            <div style={{ fontSize: FS.sm, color: 'var(--text-muted)', marginTop: '5px' }}>
-                                ( {resultados.probFinal.toFixed(4)} )
                             </div>
                         </div>
                     </>

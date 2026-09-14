@@ -3,6 +3,7 @@ import { jStat } from 'jstat';
 import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
 import { IconoCalculadora } from '../../../../../ui/iconos';
+import { generarDistribucionChiCuadrada, calcularProbabilidadChiCuadrada } from '../../../Matematicas/Logica_Tema4';
 
 const CustomSelect = ({ value, onChange, options }) => {
     const [isOpen, setIsOpen] = React.useState(false);
@@ -101,77 +102,35 @@ export default function Controles_ChiCuadrada({ onCalcular }) {
 
     // Paso 1: Generar Distribución
     const generarDistribucion = () => {
-        let valDispersion = parseFloat(varianzaPoblacional);
-        const varPob = tipoDispersion === 'varianza' ? valDispersion : (valDispersion * valDispersion);
-        const n = parseInt(tamañoMuestra);
-
-        if (isNaN(varPob) || varPob <= 0 || isNaN(n) || n <= 1) {
-            alert(`Por favor, completa correctamente los parámetros (${tipoDispersion === 'varianza' ? 'σ²' : 'σ'}, n). La medida de dispersión debe ser > 0 y la muestra n > 1.`);
+        const result = generarDistribucionChiCuadrada(varianzaPoblacional, tamañoMuestra, tipoDispersion);
+        if (result.error) {
+            alert(result.error);
             return;
         }
 
-        const k = n - 1; // Grados de libertad
-
-        const valDispStr = tipoDispersion === 'desviacion' ? `${formatLatexNum(valDispersion)}^2` : formatLatexNum(varPob);
-        const parametrosStr = `\\begin{gathered} v = n - 1 = ${n} - 1 = ${k} \\\\ E(S^2) = \\sigma^2 = ${valDispStr} \\end{gathered}`;
-
-        const parciales = { k, varPob, n, parametrosStr };
+        const parciales = { ...result };
+        delete parciales.error;
+        
         setDatosParciales(parciales);
         setDistribucionGenerada(true);
-        
         onCalcular(parciales);
     };
 
     // Paso 2: Calcular Probabilidad
     const calcularProbabilidad = () => {
-        if (!datosParciales) return;
-
-        const x1 = parseFloat(valorX1);
-        const x2 = parseFloat(valorX2);
-
-        if (!condicion) {
-            alert("Por favor, selecciona una condición a calcular.");
+        const result = calcularProbabilidadChiCuadrada(datosParciales, condicion, valorX1, valorX2);
+        if (result.error) {
+            if (result.error !== 'Faltan parámetros previos.') alert(result.error);
             return;
-        }
-
-        if (isNaN(x1) || x1 < 0) {
-            alert("Por favor, ingresa el valor objetivo correctamente. Debe ser ≥ 0.");
-            return;
-        }
-
-        if (condicion === 'entre' && (isNaN(x2) || x2 <= x1)) {
-            alert("Para la condición 'Entre', el Valor Límite Superior (S²_2) debe ser mayor que el Inferior (S²_1).");
-            return;
-        }
-
-        const { k, varPob, n, parametrosStr } = datosParciales;
-
-        // Cálculos Chi-Cuadrada
-        let chi1 = (k * x1) / varPob;
-        let strDesarrollo = '';
-        let probFinal = 0;
-
-        if (condicion === 'menor_que') {
-            probFinal = jStat.chisquare.cdf(chi1, k);
-            strDesarrollo = `\\begin{aligned} P(S^2 \\le ${formatLatexNum(x1)}) &= P\\left( \\chi^2 \\le \\frac{(n-1)S^2}{\\sigma^2} \\right) \\\\ &= P\\left( \\chi^2 \\le \\frac{(${n}-1)(${formatLatexNum(x1)})}{${formatLatexNum(varPob)}} \\right) \\\\ &= P(\\chi^2 \\le ${formatLatexNum(chi1)}) = ${formatLatexNum(probFinal)} \\end{aligned}`;
-        } else if (condicion === 'mayor_que') {
-            probFinal = 1 - jStat.chisquare.cdf(chi1, k);
-            strDesarrollo = `\\begin{aligned} P(S^2 \\ge ${formatLatexNum(x1)}) &= P\\left( \\chi^2 \\ge \\frac{(n-1)S^2}{\\sigma^2} \\right) \\\\ &= P\\left( \\chi^2 \\ge \\frac{(${n}-1)(${formatLatexNum(x1)})}{${formatLatexNum(varPob)}} \\right) \\\\ &= P(\\chi^2 \\ge ${formatLatexNum(chi1)}) \\\\ &= 1 - P(\\chi^2 \\le ${formatLatexNum(chi1)}) = ${formatLatexNum(probFinal)} \\end{aligned}`;
-        } else if (condicion === 'entre') {
-            let chi2 = (k * x2) / varPob;
-            let probChi2 = jStat.chisquare.cdf(chi2, k);
-            let probChi1 = jStat.chisquare.cdf(chi1, k);
-            probFinal = probChi2 - probChi1;
-            strDesarrollo = `\\begin{aligned} P(${formatLatexNum(x1)} \\le S^2 \\le ${formatLatexNum(x2)}) &= P\\left( \\frac{(${n}-1)(${formatLatexNum(x1)})}{${formatLatexNum(varPob)}} \\le \\chi^2 \\le \\frac{(${n}-1)(${formatLatexNum(x2)})}{${formatLatexNum(varPob)}} \\right) \\\\ &= P(${formatLatexNum(chi1)} \\le \\chi^2 \\le ${formatLatexNum(chi2)}) \\\\ &= P(\\chi^2 \\le ${formatLatexNum(chi2)}) - P(\\chi^2 \\le ${formatLatexNum(chi1)}) = ${formatLatexNum(probFinal)} \\end{aligned}`;
         }
 
         onCalcular({
             ...datosParciales,
-            strDesarrollo,
-            probFinal,
-            x1,
-            x2,
-            condicion
+            strDesarrollo: result.strDesarrollo,
+            probFinal: result.probFinal,
+            x1: result.x1,
+            x2: result.x2,
+            condicion: result.condicion
         });
     };
 
@@ -219,18 +178,14 @@ export default function Controles_ChiCuadrada({ onCalcular }) {
                 </div>
             </div>
 
-            <button
-                onClick={generarDistribucion}
-                style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-            >
-                Calcular
-            </button>
+            <button onClick={generarDistribucion} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: 'auto', padding: '4px 15px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            >CALCULAR</button>
 
             {distribucionGenerada && (
                 <>
-                    <div style={{ background: 'transparent', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', marginBottom: '20px' }}>
+                    <div style={{ background: 'transparent', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', marginBottom: '5px', marginTop: '10px'}}>
                         <div style={{ marginBottom: '15px', color: 'var(--text-muted)', fontSize: FS.sm }}>Parámetros de la Distribución</div>
-                        <div className="thin-scrollbar" style={{ overflowX: 'auto', paddingBottom: '10px' }}>
+                        <div className="thin-scrollbar formula-responsive" style={{ overflowX: 'auto', paddingBottom: '10px' }}>
                             <Latex formula={datosParciales.parametrosStr} />
                         </div>
                     </div>
@@ -294,14 +249,19 @@ export default function Controles_ChiCuadrada({ onCalcular }) {
                         )}
                     </div>
 
-                    <button
-                        onClick={calcularProbabilidad}
-                        style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    <button onClick={calcularProbabilidad} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '0 auto', padding: '5px 14px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                     >
-                        Graficar
+                        GRAFICAR
                     </button>
                 </>
             )}
         </div>
     );
 }
+
+
+
+
+
+
+

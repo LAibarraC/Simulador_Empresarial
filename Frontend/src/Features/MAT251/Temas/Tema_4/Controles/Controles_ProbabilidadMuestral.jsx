@@ -2,17 +2,9 @@ import React, { useState } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
 import { IconoCalculadora } from '../../../../../ui/iconos';
+import { generarDistribucionProbabilidadMuestral, calcularProbabilidadProbabilidadMuestral } from '../../../Matematicas/Logica_Tema4';
+import ModalAlerta from '../../../ui/ModalAlerta';
 
-// Aproximación polinómica para la CDF de una distribución Normal Estándar
-function cdfNormal(x) {
-    const t = 1 / (1 + 0.2316419 * Math.abs(x));
-    const d = 0.3989422804 * Math.exp(-x * x / 2);
-    let p = d * t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
-    if (x > 0) {
-        p = 1 - p;
-    }
-    return p;
-}
 
 const CustomSelect = ({ value, onChange, options }) => {
     const [isOpen, ReactSetIsOpen] = React.useState(false);
@@ -110,105 +102,41 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
     const [valorX1, setValorX1] = useState('');
     const [valorX2, setValorX2] = useState(''); // solo si 'entre'
 
+    const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
+
     // Lógica Matemática - Paso 1: Generar Distribución
     const generarDistribucion = () => {
-        const mu = parseFloat(mediaPoblacional);
-        let valDispersion = parseFloat(desviacion);
-        const varianzaInput = tipoDispersion === 'varianza' ? valDispersion : (valDispersion * valDispersion);
-        const n = parseFloat(tamañoMuestra);
-        const N = parseFloat(poblacionN);
-
-        if (isNaN(mu) || isNaN(varianzaInput) || varianzaInput <= 0 || isNaN(n) || n <= 0) {
-            alert(`Por favor, completa correctamente los parámetros (μ, ${tipoDispersion === 'varianza' ? 'σ²' : 'σ'}, n) con números válidos.`);
+        const result = generarDistribucionProbabilidadMuestral(mediaPoblacional, desviacion, tipoDispersion, tamañoMuestra, poblacionN, tipoPoblacion);
+        if (result.error) {
+            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
             return;
         }
 
-        if (tipoPoblacion === 'finita' && (isNaN(N) || N <= n)) {
-            alert("Para población finita, N debe ser mayor que el tamaño de muestra (n).");
-            return;
-        }
-
-        const sigma = Math.sqrt(varianzaInput); // Necesitamos sigma real para SE
-        let SE = 0;
-        let varianzaMuestralStr = '';
-
-        const formatLatexNum = (num) => {
-            return num.toLocaleString('es-ES', { maximumFractionDigits: 2 }).replace(',', '{,}');
-        };
-
-        const numeradorStr = tipoDispersion === 'desviacion' ? `${formatLatexNum(valDispersion)}^2` : formatLatexNum(varianzaInput);
-
-        if (tipoPoblacion === 'infinita') {
-            const varX = varianzaInput / n;
-            SE = Math.sqrt(varX);
-            varianzaMuestralStr = `\\begin{gathered} E(\\bar{X}) = \\mu = ${formatLatexNum(mu)} \\\\ Var(\\bar{X}) = \\frac{\\sigma^2}{n} = \\frac{${numeradorStr}}{${formatLatexNum(n)}} = ${formatLatexNum(varX)} \\\\ \\bar{X} \\sim N\\left(${formatLatexNum(mu)} ; ${formatLatexNum(varX)}\\right) \\end{gathered}`;
-        } else {
-            const factorCorreccion = (N - n) / (N - 1);
-            const varX = (varianzaInput / n) * factorCorreccion;
-            SE = Math.sqrt(varX);
-            varianzaMuestralStr = `\\begin{gathered} E(\\bar{X}) = \\mu = ${formatLatexNum(mu)} \\\\ Var(\\bar{X}) = \\frac{\\sigma^2}{n} \\left( \\frac{N-n}{N-1} \\right) = \\frac{${numeradorStr}}{${formatLatexNum(n)}} \\left( \\frac{${formatLatexNum(N)} - ${formatLatexNum(n)}}{${formatLatexNum(N)} - 1} \\right) = ${formatLatexNum(varX)} \\\\ \\bar{X} \\sim N\\left(${formatLatexNum(mu)} ; ${formatLatexNum(varX)}\\right) \\end{gathered}`;
-        }
-
-        const parciales = { SE, varianzaMuestralStr, mu, sigma, n, N, tipoPoblacion };
+        const parciales = { ...result };
+        delete parciales.error;
+        
         setDatosParciales(parciales);
         setDistribucionGenerada(true);
-        
-        // Llamar a onCalcular solo con los datos parciales para que la gráfica y los parámetros se muestren
         onCalcular(parciales);
     };
 
     // Lógica Matemática - Paso 2: Calcular Probabilidad
     const calcularProbabilidad = () => {
-        if (!datosParciales) return;
-
-        const x1 = parseFloat(valorX1);
-        const x2 = parseFloat(valorX2);
-
-        if (!condicion) {
-            alert("Por favor, selecciona una condición a calcular.");
+        const result = calcularProbabilidadProbabilidadMuestral(datosParciales, condicion, valorX1, valorX2);
+        if (result.error) {
+            if (result.error !== 'Faltan parámetros previos.') {
+                setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
+            }
             return;
-        }
-
-        if (isNaN(x1)) {
-            alert("Por favor, ingresa el valor objetivo (x) correctamente.");
-            return;
-        }
-
-        if (condicion === 'entre' && (isNaN(x2) || x2 <= x1)) {
-            alert("Para la condición 'Entre', el Valor Límite Superior (x2) debe ser mayor que el Inferior (x1).");
-            return;
-        }
-
-        const { SE, mu, sigma, n, tipoPoblacion } = datosParciales;
-
-        // Paso 2: Cálculo de Z y Probabilidad
-        let z1 = (x1 - mu) / SE;
-        let strDesarrollo = '';
-        let probFinal = 0;
-
-        let denomStr = tipoPoblacion === 'infinita' ? `${sigma}/\\sqrt{${n}}` : `${SE.toFixed(4)}`;
-
-        if (condicion === 'menor_que') {
-            probFinal = cdfNormal(z1);
-            strDesarrollo = `\\begin{aligned} P(\\bar{X} \\le ${x1}) &= P\\left( Z \\le \\frac{${x1} - ${mu}}{${denomStr}} \\right) \\\\ &= P(Z \\le ${z1.toFixed(4)}) = ${probFinal.toFixed(4)} \\end{aligned}`;
-        } else if (condicion === 'mayor_que') {
-            probFinal = 1 - cdfNormal(z1);
-            strDesarrollo = `\\begin{aligned} P(\\bar{X} \\ge ${x1}) &= P\\left( Z \\ge \\frac{${x1} - ${mu}}{${denomStr}} \\right) \\\\ &= P(Z \\ge ${z1.toFixed(4)}) \\\\ &= 1 - P(Z \\le ${z1.toFixed(4)}) = ${probFinal.toFixed(4)} \\end{aligned}`;
-        } else if (condicion === 'entre') {
-            let z2 = (x2 - mu) / SE;
-            let probZ2 = cdfNormal(z2);
-            let probZ1 = cdfNormal(z1);
-            probFinal = probZ2 - probZ1;
-            strDesarrollo = `\\begin{aligned} P(${x1} \\le \\bar{X} \\le ${x2}) &= P\\left( \\frac{${x1} - ${mu}}{${denomStr}} \\le Z \\le \\frac{${x2} - ${mu}}{${denomStr}} \\right) \\\\ &= P(${z1.toFixed(4)} \\le Z \\le ${z2.toFixed(4)}) \\\\ &= P(Z \\le ${z2.toFixed(4)}) - P(Z \\le ${z1.toFixed(4)}) = ${probFinal.toFixed(4)} \\end{aligned}`;
         }
 
         onCalcular({
             ...datosParciales,
-            strDesarrollo,
-            probFinal,
-            x1,
-            x2,
-            condicion
+            strDesarrollo: result.strDesarrollo,
+            probFinal: result.probFinal,
+            x1: result.x1,
+            x2: result.x2,
+            condicion: result.condicion
         });
     };
 
@@ -224,18 +152,22 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
             {/* Toggle Población */}
-            <div style={{ marginBottom: '20px', marginTop: '10px' }}>
-                <span style={labelStyle}>Tipo de Población</span>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+            <div style={{ marginBottom: '10px', marginTop: '5px', textAlign: 'center' }}>
+                <span style={{ ...labelStyle, marginBottom: '10px' }}>Tipo de Población</span>
+                <div style={{ display: 'flex', width: 'fit-content', margin: '0 auto', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', height: '36px', boxSizing: 'border-box', marginTop: '5px' }}>
                     <button
+                        type="button"
+                        className={`btn-mat251-modo ${tipoPoblacion === 'infinita' ? 'active' : ''}`}
                         onClick={() => { setTipoPoblacion('infinita'); resetDistribucion(); }}
-                        style={{ flex: 1, padding: '5px', borderRadius: RADIUS, border: `1px solid ${tipoPoblacion === 'infinita' ? 'var(--primary-color)' : 'var(--border-color)'}`, background: tipoPoblacion === 'infinita' ? 'rgba(0,123,255,0.1)' : 'transparent', color: tipoPoblacion === 'infinita' ? 'var(--primary-color)' : 'var(--text-main)', cursor: 'pointer', fontWeight: tipoPoblacion === 'infinita' ? 'bold' : 'normal' }}
+                        style={{ width: '150px' }}
                     >
                         Infinita
                     </button>
                     <button
+                        type="button"
+                        className={`btn-mat251-modo ${tipoPoblacion === 'finita' ? 'active' : ''}`}
                         onClick={() => { setTipoPoblacion('finita'); resetDistribucion(); }}
-                        style={{ flex: 1, padding: '5px', borderRadius: RADIUS, border: `1px solid ${tipoPoblacion === 'finita' ? 'var(--primary-color)' : 'var(--border-color)'}`, background: tipoPoblacion === 'finita' ? 'rgba(0,123,255,0.1)' : 'transparent', color: tipoPoblacion === 'finita' ? 'var(--primary-color)' : 'var(--text-main)', cursor: 'pointer', fontWeight: tipoPoblacion === 'finita' ? 'bold' : 'normal' }}
+                        style={{ width: '150px' }}
                     >
                         Finita
                     </button>
@@ -297,18 +229,14 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                 )}
             </div>
 
-            <button
-                onClick={generarDistribucion}
-                style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-            >
-                Calcular
-            </button>
+            <button onClick={generarDistribucion} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: 'auto', padding: '5px 15px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            >CALCULAR</button>
 
             {distribucionGenerada && (
                 <>
-                    <div style={{ background: 'transparent', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', marginBottom: '20px' }}>
-                        <div style={{ marginBottom: '15px', color: 'var(--text-muted)', fontSize: FS.sm }}>Parámetros de la Distribución Muestral</div>
-                        <div className="thin-scrollbar" style={{ overflowX: 'auto', paddingBottom: '10px' }}>
+                    <div style={{ background: 'transparent', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', marginTop: '10px' }}>
+                        <div style={{ marginBottom: '10px', color: 'var(--text-muted)', fontSize: FS.sm }}>Parámetros de la Distribución Muestral</div>
+                        <div className="thin-scrollbar formula-responsive" style={{ overflowX: 'auto', paddingBottom: '5px' }}>
                             <Latex formula={datosParciales.varianzaMuestralStr} />
                         </div>
                     </div>
@@ -372,14 +300,25 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                         )}
                     </div>
 
-                    <button
-                        onClick={calcularProbabilidad}
-                        style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    <button onClick={calcularProbabilidad} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '0 auto', padding: '5px 15px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                     >
-                        Graficar
+                        GRAFICAR
                     </button>
                 </>
             )}
+
+            <ModalAlerta
+                isOpen={alertaModal.isOpen}
+                onClose={() => setAlertaModal({ ...alertaModal, isOpen: false })}
+                mensaje={alertaModal.mensaje}
+                tipo={alertaModal.tipo}
+            />
         </div>
     );
 }
+
+
+
+
+
+

@@ -10,6 +10,7 @@ import '../styles/Temas/Tema1.css';
 
 // ── IMPORTACIONES DE LA NUEVA ESTRUCTURA ──
 import { FONT, FS, RADIUS, OPERACIONES, filaVacia, labelStyle } from '../Principal/Constantes';
+import ModalAlerta from '../ui/ModalAlerta';
 import ModalEditor, { textEditor } from '../Temas/Tema_1/Modales/Modal_Editor';
 import ModalEventos from '../Temas/Tema_1/Modales/Modal_Eventos_Modify';
 import ModalVariables from '../Temas/Tema_1/Modales/Modal_Variables';
@@ -24,38 +25,8 @@ import ResultadosReglaAdicion from '../Temas/Tema_1/Resultados/Resultados_ReglaA
 import ResultadosReglaMultiplicacion from '../Temas/Tema_1/Resultados/Resultados_ReglaMultiplicacion';
 import ResultadosMuestreo from '../Temas/Tema_1/Resultados/Resultados_Muestreo';
 import ResultadosEspacioContinuo from '../Temas/Tema_1/Resultados/Resultados_EspacioContinuo';
-import Resultados_DistribucionesMuestrales from '../Temas/Tema_4/Resultados/Resultados_DistribucionesMuestrales';
+import Gestor_CalculadoraMuestral from '../Temas/Tema_4/Controles/Gestor_CalculadoraMuestral';
 import CalculadoraTamanioMuestra from '../Temas/Tema_4/CalculadoraTamanioMuestra';
-import Controles_DiferenciaMediasDesconocidas from '../Temas/Tema_4/Controles/Controles_DiferenciaMediasDesconocidas';
-import Resultados_DiferenciaMediasDesconocidas from '../Temas/Tema_4/Resultados/Resultados_DiferenciaMediasDesconocidas';
-import Controles_RazonVarianzas from '../Temas/Tema_4/Controles/Controles_RazonVarianzas';
-import Resultados_RazonVarianzas from '../Temas/Tema_4/Resultados/Resultados_RazonVarianzas';
-import Controles_DiferenciaProporciones from '../Temas/Tema_4/Controles/Controles_DiferenciaProporciones';
-import Resultados_DiferenciaProporciones from '../Temas/Tema_4/Resultados/Resultados_DiferenciaProporciones';
-import GraficoDiferenciaProporciones from '../Graficas/Tema_4/GraficoDiferenciaProporciones';
-import Controles_ProbabilidadMuestral from '../Temas/Tema_4/Controles/Controles_ProbabilidadMuestral';
-import Resultados_ProbabilidadMuestral from '../Temas/Tema_4/Resultados/Resultados_ProbabilidadMuestral';
-import GraficoProbabilidadMuestral from '../Graficas/Tema_4/GraficoProbabilidadMuestral';
-
-import Controles_ChiCuadrada from '../Temas/Tema_4/Controles/Controles_ChiCuadrada';
-import Resultados_ChiCuadrada from '../Temas/Tema_4/Resultados/Resultados_ChiCuadrada';
-import GraficoChiCuadrada from '../Graficas/Tema_4/GraficoChiCuadrada';
-
-import Controles_Fisher from '../Temas/Tema_4/Controles/Controles_Fisher';
-import Resultados_Fisher from '../Temas/Tema_4/Resultados/Resultados_Fisher';
-import GraficoFisher from '../Graficas/Tema_4/GraficoFisher';
-
-import Controles_Proporcion from '../Temas/Tema_4/Controles/Controles_Proporcion';
-import Resultados_Proporcion from '../Temas/Tema_4/Resultados/Resultados_Proporcion';
-import GraficoProporcion from '../Graficas/Tema_4/GraficoProporcion';
-
-import Controles_DiferenciaMedias from '../Temas/Tema_4/Controles/Controles_DiferenciaMedias';
-import Resultados_DiferenciaMedias from '../Temas/Tema_4/Resultados/Resultados_DiferenciaMedias';
-import GraficoDiferenciaMedias from '../Graficas/Tema_4/GraficoDiferenciaMedias';
-
-import Controles_Student from '../Temas/Tema_4/Controles/Controles_Student';
-import Resultados_Student from '../Temas/Tema_4/Resultados/Resultados_Student';
-import GraficoStudent from '../Graficas/Tema_4/GraficoStudent';
 
 import Operacion from '../Temas/Tema_1/Controles/Operacion';
 import Controles_DistribucionDiscreta from '../Temas/Tema_2/Controles/Controles_DistribucionDiscreta';
@@ -78,93 +49,6 @@ import GraficoModelosContinuos from '../Graficas/Tema_3/GraficoModelosContinuos'
 import Resultados_ModelosContinuos from '../Temas/Tema_3/Resultados/Resultados_ModelosContinuos';
 import GraficoBastonesModelos from '../Graficas/Tema_3/GraficoBastonesModelos';
 import ModalProcedimientoModelos from '../Temas/Tema_3/Modales/ModalProcedimientoModelos';
-const OpcionesHerramienta = [
-    { id: 'normal', label: 'Distribución de la Media con varianza conocida' },
-    { id: 'chi', label: 'Distribución de la Varianza Muestral' },
-    { id: 'proporcion', label: 'Distribución de una Proporción' },
-    { id: 'dif_medias', label: 'Distribución de Diferencia de Medias muestrales con Varianzas conocidas' },
-    { id: 'student', label: 'Distribución de la Media con varianza desconocida' },
-    { id: 'dif_medias_desc', label: 'Distribución de la Diferencia de Medias Muestrales con Varianzas Desconocidas' },
-    { id: 'razon_varianzas', label: 'Distribución de la Razón de dos Varianzas Muestrales' },
-    { id: 'dif_proporciones', label: 'Distribución de la Diferencia entre dos Proporciones' }
-];
-///no jodas ia de mierdaa       
-function CustomSelectHerramienta({ value, onChange }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const selectRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (selectRef.current && !selectRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const selectedLabel = OpcionesHerramienta.find(o => o.id === value)?.label || '';
-
-    return (
-        <div ref={selectRef} style={{ position: 'relative', width: '100%' }}>
-            <div
-                onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '8px 12px',
-                    background: 'var(--bg-card)',
-                    border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                    borderRadius: RADIUS, cursor: 'pointer',
-                    boxShadow: isOpen ? '0 0 0 3px rgba(0,123,255,0.15)' : 'none',
-                    transition: 'all 0.2s ease',
-                    color: 'var(--text-color)',
-                    userSelect: 'none',
-                }}
-            >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)' }}>
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <line x1="3" y1="9" x2="21" y2="9" />
-                        <line x1="9" y1="21" x2="9" y2="9" />
-                    </svg>
-                    <span style={{ fontWeight: 500, fontSize: FS.sm }}>{selectedLabel}</span>
-                </div>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                    style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s ease', color: 'var(--text-muted)', flexShrink: 0 }}>
-                    <polyline points="6 9 12 15 18 9" />
-                </svg>
-            </div>
-
-            {isOpen && (
-                <div style={{
-                    position: 'absolute', top: '100%', left: 0, right: 0,
-                    marginTop: '4px', background: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)', borderRadius: RADIUS,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100,
-                    overflow: 'hidden'
-                }}>
-                    {OpcionesHerramienta.map(op => (
-                        <div
-                            key={op.id}
-                            onClick={() => { onChange(op.id); setIsOpen(false); }}
-                            style={{
-                                padding: '10px 12px', cursor: 'pointer',
-                                background: value === op.id ? 'var(--bg-app)' : 'transparent',
-                                color: value === op.id ? 'var(--primary-color)' : 'var(--text-color)',
-                                fontWeight: value === op.id ? 600 : 400,
-                                fontSize: FS.sm, transition: 'background 0.2s',
-                            }}
-                            onMouseEnter={(e) => { if (value !== op.id) e.currentTarget.style.background = 'var(--bg-app)'; }}
-                            onMouseLeave={(e) => { if (value !== op.id) e.currentTarget.style.background = 'transparent'; }}
-                        >
-                            {op.label}
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
 
 export default function Principal() {
     const { variables } = useMAT251Data();
@@ -173,8 +57,6 @@ export default function Principal() {
     const [panelAbierto, setPanelAbierto] = useState(true);
     const [operacion, setOperacion] = useState('');
     const [subTipoProbabilidad, setSubTipoProbabilidad] = useState('clasica');
-    const [distribucionActiva, setDistribucionActiva] = useState('normal');
-    const [modoMuestral, setModoMuestral] = useState('empirica');
     const [columnaParticion, setColumnaParticion] = useState(''); // Para probabilidad total
 
     // ── Conteo ───────────────────────────────────────────────────────────────────
@@ -273,6 +155,12 @@ export default function Principal() {
     const [resultadoUniforme, setResultadoUniforme] = useState(null);
     const [errorUniforme, setErrorUniforme] = useState('');
 
+    // Estado para el Modal de Alerta Global
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
+        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
+    };
+
     // Estados para Tema 2: Discreta y Continua
     const [datosDiscretos, setDatosDiscretos] = useState(null);
     const [datosContinuos, setDatosContinuos] = useState(null);
@@ -283,16 +171,7 @@ export default function Principal() {
     const [datosTema3Continuos, setDatosTema3Continuos] = useState(null);
     const [modalProcTema3, setModalProcTema3] = useState(false);
 
-    // Resultados Tema 4
-    const [datosProbMuestral, setDatosProbMuestral] = useState(null);
-    const [datosChiCuadrada, setDatosChiCuadrada] = useState(null);
-    const [datosFisher, setDatosFisher] = useState(null);
-    const [datosProporcion, setDatosProporcion] = useState(null);
-    const [datosDiferenciaMedias, setDatosDiferenciaMedias] = useState(null);
-    const [datosDifMediasDesc, setDatosDifMediasDesc] = useState(null);
-    const [datosRazonVarianzas, setDatosRazonVarianzas] = useState(null);
-    const [datosDiferenciaProporciones, setDatosDiferenciaProporciones] = useState(null);
-    const [datosStudent, setDatosStudent] = useState(null);
+    // Resultados Tema 4 delegados a Gestor_CalculadoraMuestral
 
     // ==========================================FUNCIONES //
 
@@ -551,11 +430,11 @@ export default function Principal() {
     const ejecutar = () => {
         if (operacion === 'conteo') {
             const res = calcularTecnicasConteo(n, r, finalElements);
-            if (res?.error) { alert(res.error); return; }
+            if (res?.error) { mostrarAlerta(res.error, 'Error de Cálculo', 'error'); return; }
             setResConteo({ ...res, n, r });
             setResProbabilidad(null);
         } else {
-            if (!inputDatos) { alert('Agrega datos al espacio muestral'); return; }
+            if (!inputDatos) { mostrarAlerta('Por favor, agrega datos al espacio muestral en la pestaña "Datos".', 'Faltan Datos', 'warning'); return; }
             let arr = inputDatos.split(',').map(d => d.trim()).filter(Boolean);
 
             // Si es probabilidad clásica o frecuentista y hay una columna seleccionada, extraemos solo esa columna
@@ -571,7 +450,7 @@ export default function Principal() {
 
             if (subTipoProbabilidad === 'condicional') {
                 const res = calcularProbabilidadCondicional(arr, eventoFavorable, eventoCondicion);
-                if (res?.error) { alert(res.error); return; }
+                if (res?.error) { mostrarAlerta(res.error, 'Error de Cálculo', 'error'); return; }
                 setResProbabilidad(res);
                 setResConteo(null);
             } else if (subTipoProbabilidad === 'total') {
@@ -696,7 +575,7 @@ export default function Principal() {
                         {operacion === 'probabilidad' && (
                             <div style={{ marginBottom: '15px' }}>
                                 <label style={{ ...labelStyle, fontSize: '1.1em', marginBottom: '8px' }}>Tipo de Probabilidad:</label>
-                                <div style={{ display: 'flex', gap: '5px', background: 'var(--bg-card)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: '5px', background: 'var(--bg-card)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                     {[
                                         { id: 'clasica', label: 'Clásica' },
                                         { id: 'frecuentista', label: 'Frecuentista' },
@@ -704,20 +583,9 @@ export default function Principal() {
                                     ].map(tipo => (
                                         <button
                                             key={tipo.id}
-                                            className={`btn-tema1-borde ${subTipoProbabilidad === tipo.id ? 'active' : ''}`}
+                                            className={`btn-mat251-modo ${subTipoProbabilidad === tipo.id ? 'active' : ''}`}
                                             onClick={() => setSubTipoProbabilidad(tipo.id)}
-                                            style={{
-                                                flex: 1,
-                                                padding: '8px 4px',
-                                                border: 'none',
-                                                borderRadius: RADIUS,
-                                                background: subTipoProbabilidad === tipo.id ? 'var(--primary-color)' : 'transparent',
-                                                color: subTipoProbabilidad === tipo.id ? 'white' : 'var(--text-color)',
-                                                fontWeight: subTipoProbabilidad === tipo.id ? 600 : 400,
-                                                cursor: 'pointer',
-                                                fontSize: FS.sm,
-                                                transition: 'all 0.2s ease'
-                                            }}
+                                            style={{ flex: 1, padding: '8px 4px' }}
                                         >
                                             {tipo.label}
                                         </button>
@@ -739,7 +607,7 @@ export default function Principal() {
                                 setTipoElementos={setTipoElementos}
                             />
                         )}
-                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || (operacion === 'distribuciones_muestrales' && modoMuestral === 'empirica') || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos' || operacion === 'modelos_continuos' || operacion === 'dist_discreta') && (
+                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos' || operacion === 'modelos_continuos' || operacion === 'dist_discreta') && (
                             <ControlesProbabilidad
                                 setModalVars={setModalVars}
                                 varSeleccionada={varSeleccionada}
@@ -758,9 +626,37 @@ export default function Principal() {
             <div className="calculadora-resultados" style={{ fontFamily: FONT }}>
                 <div className="frecuencias" style={{ borderRadius: RADIUS }}>
                     {operacion && (
-                        <h4 style={{ fontSize: FS.sx, fontFamily: FONT, fontWeight: 500, color: 'var(--primary-color)', margin: '0 0 20px 0', display: 'flex', alignItems: 'center' }}>
-                            Resultados: <span style={{ color: 'var(--text-main)', marginLeft: '6px' }}>{operacion === 'conteo' ? 'TÉCNICAS DE CONTEO' : operacion === 'simulador_total' ? 'PROBABILIDAD TOTAL' : operacion === 'regla_adicion' ? 'AXIOMAS Y REGLA DE LA ADICIÓN' : operacion === 'regla_multiplicacion' ? 'REGLA DE LA MULTIPLICACIÓN' : operacion === 'muestreo' ? 'INTRODUCCIÓN AL MUESTREO' : operacion === 'dist_uniforme' ? 'PROBABILIDAD EN ESPACIO CONTINUO' : operacion === 'dist_discreta' ? 'VARIABLES ALEATORIAS DISCRETAS' : operacion === 'dist_continua' ? 'CALCULADORA (BETA)' : operacion === 'dist_continua_v2' ? 'VARIABLE ALEATORIA CONTINUA' : operacion === 'modelos_discretos' ? 'DISTRIBUCIONES DISCRETAS' : operacion === 'modelos_continuos' ? 'DISTRIBUCIONES CONTINUAS' : operacion === 'distribuciones_muestrales' ? 'DISTRIBUCIONES MUESTRALES' : operacion === 'tamanio_muestra' ? 'CÁLCULO DE TAMAÑO DE MUESTRA' : operacion === 'probabilidad_muestral' ? 'PROBABILIDAD MUESTRAL' : (subTipoProbabilidad === 'clasica' ? 'PROBABILIDAD CLÁSICA' : subTipoProbabilidad === 'frecuentista' ? 'PROBABILIDAD FRECUENTISTA' : 'PROBABILIDAD CONDICIONAL')}</span>
-                        </h4>
+                        <div className="titulo-operacion-calculadora" style={{ display: 'flex', alignItems: 'center', gap: '5px', margin: '0 0 20px 0', fontFamily: FONT }}>
+                            <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>OPERACIÓN:</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+                                {operacion === 'conteo' ? 'Técnicas de Conteo'
+                                    : operacion === 'simulador_total' ? 'Probabilidad Total'
+                                    : operacion === 'regla_adicion' ? 'Regla de la Adición'
+                                    : operacion === 'regla_multiplicacion' ? 'Regla de la Multiplicación'
+                                    : operacion === 'muestreo' ? 'Introducción al Muestreo'
+                                    : operacion === 'dist_uniforme' ? 'Espacio Continuo'
+                                    : operacion === 'dist_discreta' ? 'Variables Aleatorias Discretas'
+                                    : operacion === 'dist_continua' ? 'Calculadora (Beta)'
+                                    : operacion === 'dist_continua_v2' ? 'Variable Aleatoria Continua'
+                                    : operacion === 'modelos_discretos' ? 'Distribuciones Discretas'
+                                    : operacion === 'modelos_continuos' ? 'Distribuciones Continuas'
+                                    : operacion === 'distribuciones_muestrales' ? 'Distribuciones Muestrales'
+                                    : operacion === 'tamanio_muestra' ? 'Tamaño de Muestra'
+                                    : operacion === 'probabilidad_muestral' ? 'Probabilidad Muestral'
+                                    : 'Cálculo de Probabilidad'}
+                            </span>
+                            {operacion === 'probabilidad' && (
+                                <>
+                                    <span style={{ color: 'var(--text-muted)' }}>–</span>
+                                    <span style={{ fontWeight: 600, color: 'var(--accent-color)' }}>
+                                        {subTipoProbabilidad === 'clasica' ? 'Probabilidad Clásica'
+                                            : subTipoProbabilidad === 'frecuentista' ? 'Probabilidad Frecuentista'
+                                            : subTipoProbabilidad === 'condicional' ? 'Probabilidad Condicional'
+                                            : 'Probabilidad Total'}
+                                    </span>
+                                </>
+                            )}
+                        </div>
                     )}
 
                     {/* RESULTADOS */}
@@ -934,137 +830,7 @@ export default function Principal() {
                             statsDatos={statsDatos} abrirEditor={abrirEditor}
                         />
                     ) : operacion === 'distribuciones_muestrales' ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <div style={{ display: 'flex', background: 'var(--bg-app)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                                <button
-                                    onClick={() => setModoMuestral('empirica')}
-                                    style={{
-                                        flex: 1, padding: '8px 12px', borderRadius: '4px', border: 'none',
-                                        background: modoMuestral === 'empirica' ? 'var(--primary-color)' : 'transparent',
-                                        color: modoMuestral === 'empirica' ? 'white' : 'var(--text-main)',
-                                        fontWeight: modoMuestral === 'empirica' ? 600 : 400,
-                                        fontSize: FS.sm,
-                                        cursor: 'pointer', transition: 'all 0.2s ease',
-                                        boxShadow: modoMuestral === 'empirica' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                                    }}
-                                >
-                                    Demostración Empírica
-                                </button>
-                                <button
-                                    onClick={() => setModoMuestral('calculadora')}
-                                    style={{
-                                        flex: 1, padding: '8px 12px', borderRadius: '4px', border: 'none',
-                                        background: modoMuestral === 'calculadora' ? 'var(--primary-color)' : 'transparent',
-                                        color: modoMuestral === 'calculadora' ? 'white' : 'var(--text-main)',
-                                        fontWeight: modoMuestral === 'calculadora' ? 600 : 400,
-                                        fontSize: FS.sm,
-                                        cursor: 'pointer', transition: 'all 0.2s ease',
-                                        boxShadow: modoMuestral === 'calculadora' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                                    }}
-                                >
-                                    Calculadora de Probabilidades
-                                </button>
-                            </div>
-                            {modoMuestral === 'empirica' ? (
-                                <Resultados_DistribucionesMuestrales varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} />
-                            ) : (
-                                <>
-                                    <CustomSelectHerramienta value={distribucionActiva} onChange={setDistribucionActiva} />
-                                    {distribucionActiva === 'normal' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_ProbabilidadMuestral onCalcular={setDatosProbMuestral} />
-                                            <div>
-                                                <GraficoProbabilidadMuestral resultados={datosProbMuestral} />
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_ProbabilidadMuestral resultados={datosProbMuestral} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : distribucionActiva === 'proporcion' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_Proporcion onCalcular={setDatosProporcion} />
-                                            <div>
-                                                <GraficoProporcion resultados={datosProporcion} />
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_Proporcion resultados={datosProporcion} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : distribucionActiva === 'dif_medias' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_DiferenciaMedias onCalcular={setDatosDiferenciaMedias} />
-                                            <div>
-                                                <GraficoDiferenciaMedias resultados={datosDiferenciaMedias} />
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_DiferenciaMedias resultados={datosDiferenciaMedias} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : distribucionActiva === 'student' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_Student onCalcular={setDatosStudent} />
-                                            <div>
-                                                <GraficoStudent resultados={datosStudent} />
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_Student resultados={datosStudent} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : distribucionActiva === 'chi' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_ChiCuadrada onCalcular={setDatosChiCuadrada} />
-                                            <div>
-                                                <GraficoChiCuadrada resultados={datosChiCuadrada} />
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_ChiCuadrada resultados={datosChiCuadrada} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : distribucionActiva === 'dif_medias_desc' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_DiferenciaMediasDesconocidas onCalcular={setDatosDifMediasDesc} />
-                                            <div>
-                                                {datosDifMediasDesc && (
-                                                    datosDifMediasDesc.escenario === 'grandes' ? (
-                                                        <GraficoDiferenciaMedias resultados={datosDifMediasDesc} />
-                                                    ) : (
-                                                        <GraficoStudent resultados={datosDifMediasDesc} />
-                                                    )
-                                                )}
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_DiferenciaMediasDesconocidas resultados={datosDifMediasDesc} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : distribucionActiva === 'razon_varianzas' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_RazonVarianzas onCalcular={setDatosRazonVarianzas} />
-                                            <div>
-                                                <GraficoFisher resultados={datosRazonVarianzas} />
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_RazonVarianzas resultados={datosRazonVarianzas} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : distribucionActiva === 'dif_proporciones' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch' }}>
-                                            <Controles_DiferenciaProporciones onCalcular={setDatosDiferenciaProporciones} />
-                                            <div>
-                                                <GraficoDiferenciaProporciones resultados={datosDiferenciaProporciones} />
-                                                <div style={{ marginTop: '20px' }}>
-                                                    <Resultados_DiferenciaProporciones resultados={datosDiferenciaProporciones} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div style={{ padding: '40px 20px', textAlign: 'center', background: 'var(--bg-card)', borderRadius: RADIUS, border: '1px solid var(--border-color)', margin: '20px' }}>
-                                            <h3 style={{ color: 'var(--primary-color)', fontSize: FS.lg, marginBottom: '10px' }}>Distribución</h3>
-                                            <p style={{ color: 'var(--text-muted)', fontSize: FS.md }}>Calculadora en construcción...</p>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                        <Gestor_CalculadoraMuestral varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} />
                     ) : operacion === 'tamanio_muestra' ? (
                         <CalculadoraTamanioMuestra />
                     ) : operacion === 'regla_multiplicacion' ? (
@@ -1112,6 +878,7 @@ export default function Principal() {
                             varSeleccionada={varSeleccionada}
                             colProbClasica={colProbClasica} setColProbClasica={setColProbClasica}
                             inputMode={inputModeProb} setInputMode={setInputModeProb}
+                            mostrarAlerta={mostrarAlerta}
                         />
                     )}
                 </div>
@@ -1143,7 +910,15 @@ export default function Principal() {
                     />
                 ) : null
             )}
+
+            {/* Modal de Alerta Global para MAT251 */}
+            <ModalAlerta 
+                isOpen={modalAlerta.isOpen}
+                onClose={() => setModalAlerta({ ...modalAlerta, isOpen: false })}
+                titulo={modalAlerta.titulo}
+                mensaje={modalAlerta.mensaje}
+                tipo={modalAlerta.tipo}
+            />
         </div>
     );
-
 }

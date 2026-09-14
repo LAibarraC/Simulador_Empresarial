@@ -1,5 +1,6 @@
 import React from 'react';
 import { FONT } from '../../Principal/Constantes';
+import katex from 'katex';
 
 export default function DiagramaVenn({ resultado }) {
     if (!resultado) return null;
@@ -16,9 +17,11 @@ export default function DiagramaVenn({ resultado }) {
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <svg viewBox="0 0 400 270" width="100%" height="100%" style={{ display: 'block', maxWidth: '700px', fontFamily: FONT, flex: 1, minHeight: 0 }}>
                 {/* LEYENDA SUPERIOR */}
-                <text x="200" y="30" textAnchor="middle" fontSize="16" fontWeight="bold" fill={unionStroke}>
-                    Área de la Unión: P(A U B) = {pAorB.toFixed(4)}
-                </text>
+                <foreignObject x="0" y="10" width="400" height="40">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style={{ textAlign: 'center', fontSize: '16px', fontWeight: 'bold', color: unionStroke }}>
+                        Área de la Unión: <span dangerouslySetInnerHTML={{ __html: katex.renderToString(`P(A \\cup B) = ${pAorB.toFixed(4)}`) }} />
+                    </div>
+                </foreignObject>
 
                 {/* MÁSCARA PARA RELLENO UNIFORME DE LA UNIÓN */}
                 <defs>
@@ -36,11 +39,19 @@ export default function DiagramaVenn({ resultado }) {
                 <circle cx="250" cy="160" r="95" fill="none" stroke={unionStroke} strokeWidth="2.5" />
 
                 {/* ETIQUETAS A */}
-                <text x="85" y="150" textAnchor="middle" fontSize="18" fontWeight="bold" fill={textColor}>A</text>
+                <foreignObject x="35" y="125" width="100" height="40">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style={{ textAlign: 'center', fontSize: '20px', fontWeight: 'bold', color: textColor }}>
+                        <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A') }} />
+                    </div>
+                </foreignObject>
                 <text x="85" y="172" textAnchor="middle" fontSize="14" fill={textColor}>{(pA - pAandB).toFixed(4)}</text>
                 
                 {/* ETIQUETAS B */}
-                <text x="315" y="150" textAnchor="middle" fontSize="18" fontWeight="bold" fill={textColor}>B</text>
+                <foreignObject x="265" y="125" width="100" height="40">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style={{ textAlign: 'center', fontSize: '20px', fontWeight: 'bold', color: textColor }}>
+                        <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B') }} />
+                    </div>
+                </foreignObject>
                 <text x="315" y="172" textAnchor="middle" fontSize="14" fill={textColor}>{(pB - pAandB).toFixed(4)}</text>
                 
                 {/* ETIQUETA INTERSECCIÓN (A ∩ B) */}
@@ -76,7 +87,7 @@ export default function DiagramaVenn({ resultado }) {
                         border: '1px solid var(--border-color, #e2e8f0)'
                     }}
                 >
-                    A: {nameA}
+                    <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A') }} />: {nameA}
                 </div>
                 <div 
                     title={`B: ${nameB}`}
@@ -93,7 +104,7 @@ export default function DiagramaVenn({ resultado }) {
                         border: '1px solid var(--border-color, #e2e8f0)'
                     }}
                 >
-                    B: {nameB}
+                    <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B') }} />: {nameB}
                 </div>
             </div>
         </div>

@@ -28,8 +28,8 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
 
     if (!hayResultado && !resConteo) {
         return (
-            <p style={{ color: 'var(--text-muted)', marginTop: '10px', fontSize: FS.base }}>
-                Configura los parámetros a la izquierda y presiona <strong>CALCULAR</strong>.
+            <p className="mensaje-instruccion-vacio" style={{ color: 'var(--text-muted)', marginTop: '10px' }}>
+                Configura los parámetros y presiona <strong>CALCULAR</strong>.
             </p>
         );
     }

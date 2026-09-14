@@ -26,8 +26,8 @@ const VariableCard = ({ v, currentSheet, actions }) => {
                     />
                     <button onClick={() => actions.assignName(v.id)}>Excel</button>
                 </div>
-                <button onClick={() => actions.delete(v.id)} className="btn-delete" title="Eliminar variable">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <button onClick={() => actions.delete(v.id)} className="btn-delete-sm" title="Eliminar variable">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
                     </svg>
                 </button>
@@ -59,8 +59,8 @@ const VariableCard = ({ v, currentSheet, actions }) => {
                 <button
                     onClick={() => actions.clear(v.id)}
                     title="Limpiar rango y datos"
-                    className='button_limpiar'>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    className='btn-delete-sm'>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
                         <line x1="10" y1="11" x2="10" y2="17"></line>
                         <line x1="14" y1="11" x2="14" y2="17"></line>

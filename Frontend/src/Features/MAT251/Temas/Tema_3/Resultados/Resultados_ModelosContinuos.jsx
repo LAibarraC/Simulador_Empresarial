@@ -369,6 +369,50 @@ export default function Resultados_ModelosContinuos({ resultados, modelo, condic
                 `\\sigma = \\sqrt{V(X)}`,
                 `\\sigma = \\sqrt{${(params.sigma ** 2).toFixed(2)}}`
             ];
+        } else if (modelo === 'NormalEstandar') {
+            formulasEsperanza = [`E(Z) = 0`];
+            formulasVarianza = [`V(Z) = 1`];
+            formulasDesviacion = [`\\sigma = 1`];
+        } else if (modelo === 'ChiCuadrado') {
+            formulasEsperanza = [
+                `E(X) = k`,
+                `E(X) = ${params.k}`
+            ];
+            formulasVarianza = [
+                `V(X) = 2k`,
+                `V(X) = 2(${params.k})`
+            ];
+            formulasDesviacion = [
+                `\\sigma = \\sqrt{V(X)}`,
+                `\\sigma = \\sqrt{${(2 * params.k).toFixed(2)}}`
+            ];
+        } else if (modelo === 'FFisher') {
+            if (params.v2 > 2) {
+                formulasEsperanza = [
+                    `E(X) = \\frac{v_2}{v_2 - 2}`,
+                    `E(X) = \\frac{${params.v2}}{${params.v2} - 2}`
+                ];
+            } else {
+                formulasEsperanza = [
+                    `E(X) = \\frac{v_2}{v_2 - 2}, \\quad v_2 > 2`,
+                    `\\text{No definido}`
+                ];
+            }
+            if (params.v2 > 4) {
+                formulasVarianza = [
+                    `V(X) = \\frac{2v_2^2(v_1 + v_2 - 2)}{v_1(v_2 - 2)^2(v_2 - 4)}`,
+                    `V(X) = \\frac{2(${params.v2})^2(${params.v1} + ${params.v2} - 2)}{${params.v1}(${params.v2} - 2)^2(${params.v2} - 4)}`
+                ];
+            } else {
+                formulasVarianza = [
+                    `V(X) = \\frac{2v_2^2(v_1 + v_2 - 2)}{v_1(v_2 - 2)^2(v_2 - 4)}, \\quad v_2 > 4`,
+                    `\\text{No definido}`
+                ];
+            }
+            formulasDesviacion = [
+                `\\sigma = \\sqrt{V(X)}`,
+                resultados.varianza !== undefined && typeof resultados.varianza === 'number' ? `\\sigma = \\sqrt{${(resultados.varianza).toFixed(2)}}` : `\\text{No definido}`
+            ];
         }
     }
 
@@ -415,53 +459,86 @@ export default function Resultados_ModelosContinuos({ resultados, modelo, condic
                 </div>
             )}
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
-                <div style={{ flex: 1, padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #cbd5e1)', textAlign: 'center' }}>
+            <div className="t3-stats-container">
+                <div className="t3-stats-card" style={{ padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>Esperanza {renderLatex('E(X)')}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>
+                            Esperanza{' '}
+                            {formulasEsperanza.length > 0 ? (
+                                <span className="t3-tooltip-wrap" style={{ borderBottom: '1px dashed #94a3b8', cursor: 'help', paddingBottom: '1px' }}>
+                                    {renderLatex('E(X)')}
+                                    <div className="t3-tooltip-box">
+                                        <div style={{ fontSize: '0.75rem', marginBottom: '4px', opacity: 0.9, fontWeight: 'normal' }}>Fórmula general:</div>
+                                        <div className="t3-tooltip-math">{renderLatex(formulasEsperanza[0])}</div>
+                                    </div>
+                                </span>
+                            ) : (
+                                renderLatex('E(X)')
+                            )}
+                        </div>
                     </div>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #213547)', fontWeight: 700 }}>
+                    {formulasEsperanza.length > 1 && (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-main, #0f172a)', marginTop: '6px', fontWeight: 500 }}>
+                            {renderLatex(formulasEsperanza[1])}
+                        </div>
+                    )}
+                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700, marginTop: '4px' }}>
                         {formatNum(resultados.esperanza)}
                     </div>
-                    {formulasEsperanza.length > 0 && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px', background: 'var(--bg-card, #ffffff)', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color, #cbd5e1)' }}>
-                            {formulasEsperanza.map((form, idx) => (
-                                <div key={idx} style={{ color: 'var(--text-main, #213547)', fontWeight: 500 }}>{renderLatex(form)}</div>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
-                <div style={{ flex: 1, padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #cbd5e1)', textAlign: 'center' }}>
+                <div className="t3-stats-card" style={{ padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>Varianza {renderLatex('V(X)')}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>
+                            Varianza{' '}
+                            {formulasVarianza.length > 0 ? (
+                                <span className="t3-tooltip-wrap" style={{ borderBottom: '1px dashed #94a3b8', cursor: 'help', paddingBottom: '1px' }}>
+                                    {renderLatex('V(X)')}
+                                    <div className="t3-tooltip-box">
+                                        <div style={{ fontSize: '0.75rem', marginBottom: '4px', opacity: 0.9, fontWeight: 'normal' }}>Fórmula general:</div>
+                                        <div className="t3-tooltip-math">{renderLatex(formulasVarianza[0])}</div>
+                                    </div>
+                                </span>
+                            ) : (
+                                renderLatex('V(X)')
+                            )}
+                        </div>
                     </div>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #213547)', fontWeight: 700 }}>
+                    {formulasVarianza.length > 1 && (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-main, #0f172a)', marginTop: '6px', fontWeight: 500 }}>
+                            {renderLatex(formulasVarianza[1])}
+                        </div>
+                    )}
+                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700, marginTop: '4px' }}>
                         {formatNum(resultados.varianza)}
                     </div>
-                    {formulasVarianza.length > 0 && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px', background: 'var(--bg-card, #ffffff)', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color, #cbd5e1)' }}>
-                            {formulasVarianza.map((form, idx) => (
-                                <div key={idx} style={{ color: 'var(--text-main, #213547)', fontWeight: 500 }}>{renderLatex(form)}</div>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
-                <div style={{ flex: 1, padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #cbd5e1)', textAlign: 'center' }}>
+                <div className="t3-stats-card" style={{ padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>Desviación {renderLatex('\\sigma')}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>
+                            Desviación{' '}
+                            {formulasDesviacion.length > 0 ? (
+                                <span className="t3-tooltip-wrap" style={{ borderBottom: '1px dashed #94a3b8', cursor: 'help', paddingBottom: '1px' }}>
+                                    {renderLatex('\\sigma')}
+                                    <div className="t3-tooltip-box">
+                                        <div style={{ fontSize: '0.75rem', marginBottom: '4px', opacity: 0.9, fontWeight: 'normal' }}>Fórmula general:</div>
+                                        <div className="t3-tooltip-math">{renderLatex(formulasDesviacion[0])}</div>
+                                    </div>
+                                </span>
+                            ) : (
+                                renderLatex('\\sigma')
+                            )}
+                        </div>
                     </div>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #213547)', fontWeight: 700 }}>
-                        {formatNum(resultados.desviacion !== undefined ? resultados.desviacion : Math.sqrt(resultados.varianza))}
-                    </div>
-                    {formulasDesviacion.length > 0 && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px', background: 'var(--bg-card, #ffffff)', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color, #cbd5e1)' }}>
-                            {formulasDesviacion.map((form, idx) => (
-                                <div key={idx} style={{ color: 'var(--text-main, #213547)', fontWeight: 500 }}>{renderLatex(form)}</div>
-                            ))}
+                    {formulasDesviacion.length > 1 && (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-main, #0f172a)', marginTop: '6px', fontWeight: 500 }}>
+                            {renderLatex(formulasDesviacion[1])}
                         </div>
                     )}
+                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700, marginTop: '4px' }}>
+                        {formatNum(resultados.desviacion !== undefined ? resultados.desviacion : Math.sqrt(resultados.varianza))}
+                    </div>
                 </div>
             </div>
         </div>

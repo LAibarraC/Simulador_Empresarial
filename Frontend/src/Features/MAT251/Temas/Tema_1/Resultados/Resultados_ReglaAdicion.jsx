@@ -5,25 +5,38 @@ import DiagramaVenn from '../../../Graficas/Tema_1/DiagramaVenn';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { IconoCalculadora, EditarDatos } from '../../../../../ui/iconos';
 import { calcularReglaAdicion } from '../../../Matematicas/logica_Tema1';
+import ModalAlerta from '../../../ui/ModalAlerta';
+
+const InlineMath = ({ math }) => (
+    <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+);
 
 const FormulaAdicion = ({ resultado }) => {
-    const formulaRef = useRef(null);
+    const formulaGeneralRef = useRef(null);
+    const formulaDesarrolloRef = useRef(null);
 
     useEffect(() => {
-        if (formulaRef.current && resultado) {
-            let formulaLatex = `\\begin{aligned}\n`;
-            formulaLatex += `P(A \\cup B) &= P(A) + P(B) - P(A \\cap B) \\\\\n`;
+        if (formulaGeneralRef.current && formulaDesarrolloRef.current && resultado) {
+            const latexG = `\\displaystyle P(A \\cup B) = P(A) + P(B) - P(A \\cap B)`;
+            katex.render(latexG, formulaGeneralRef.current, { throwOnError: false, displayMode: true });
+
+            let formulaLatex = `\\displaystyle \\begin{aligned}\n`;
             formulaLatex += `P(A \\cup B) &= ${resultado.pA.toFixed(4)} + ${resultado.pB.toFixed(4)} - ${resultado.pAandB.toFixed(4)} \\\\\n`;
             formulaLatex += `P(A \\cup B) &= \\mathbf{${resultado.pAorB.toFixed(4)}}\n`;
             formulaLatex += `\\end{aligned}`;
 
-            katex.render(formulaLatex, formulaRef.current, { throwOnError: false, displayMode: true });
+            katex.render(formulaLatex, formulaDesarrolloRef.current, { throwOnError: false, displayMode: false });
         }
     }, [resultado]);
 
     return (
-        <div style={{ overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '10px', borderRadius: RADIUS }}>
-            <div ref={formulaRef}></div>
+        <div className="katex-responsive-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: 'fit-content', overflowX: 'auto', marginBottom: '15px', padding: '10px 25px', background: 'var(--bg-card)', border: '1px dashed #9ca3af', borderRadius: RADIUS, textAlign: 'center' }}>
+                <div ref={formulaGeneralRef}></div>
+            </div>
+            <div style={{ width: '100%', overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '15px 25px', borderRadius: RADIUS, textAlign: 'left', fontSize: '0.9rem' }}>
+                <div ref={formulaDesarrolloRef}></div>
+            </div>
         </div>
     );
 };
@@ -36,6 +49,7 @@ export default function ResultadosReglaAdicion({
     error, setError,
     statsDatos, abrirEditor
 }) {
+    const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
     // Estado para el modo de entrada
     const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
 
@@ -79,12 +93,27 @@ export default function ResultadosReglaAdicion({
     const calcular = () => {
         if (inputMode === 'matriz') {
             if (!pseudoVar) {
-                setError("Importa una Matriz o agrega datos en el editor primero.");
+                setAlerta({ isOpen: true, mensaje: "Importa una Matriz o agrega datos en el editor primero." });
                 setResultado(null);
                 return;
             }
-            if (!colA || !valA || !colB || !valB) {
-                setError("Selecciona las columnas y los valores para ambos eventos (A y B).");
+            if (!colA) {
+                setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable Evento (<InlineMath math="A" />) antes de calcular.</span> });
+                setResultado(null);
+                return;
+            }
+            if (!valA) {
+                setAlerta({ isOpen: true, mensaje: <span>Selecciona el Valor (Éxito) para el Evento <InlineMath math="A" /> antes de calcular.</span> });
+                setResultado(null);
+                return;
+            }
+            if (!colB) {
+                setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable Evento (<InlineMath math="B" />) antes de calcular.</span> });
+                setResultado(null);
+                return;
+            }
+            if (!valB) {
+                setAlerta({ isOpen: true, mensaje: <span>Selecciona el Valor (Éxito) para el Evento <InlineMath math="B" /> antes de calcular.</span> });
                 setResultado(null);
                 return;
             }
@@ -104,19 +133,19 @@ export default function ResultadosReglaAdicion({
             const pAandB = parseFloat(manualPAndB);
 
             if (isNaN(pA) || isNaN(pB) || isNaN(pAandB)) {
-                setError("Todos los campos de probabilidad deben ser números válidos.");
+                setAlerta({ isOpen: true, mensaje: "Todos los campos de probabilidad deben ser números válidos." });
                 setResultado(null);
                 return;
             }
 
             if (pA < 0 || pA > 1 || pB < 0 || pB > 1 || pAandB < 0 || pAandB > 1) {
-                setError("Las probabilidades deben estar entre 0 y 1.");
+                setAlerta({ isOpen: true, mensaje: "Las probabilidades deben estar entre 0 y 1." });
                 setResultado(null);
                 return;
             }
 
             if (pAandB > pA || pAandB > pB) {
-                setError("La probabilidad de la intersección P(A ∩ B) no puede ser mayor que P(A) ni que P(B).");
+                setAlerta({ isOpen: true, mensaje: <span>La probabilidad de la intersección <InlineMath math="P(A \cap B)" /> no puede ser mayor que <InlineMath math="P(A)" /> ni que <InlineMath math="P(B)" />.</span> });
                 setResultado(null);
                 return;
             }
@@ -124,7 +153,7 @@ export default function ResultadosReglaAdicion({
             const pAorB = pA + pB - pAandB;
 
             if (pAorB > 1) {
-                setError("La probabilidad de la unión P(A ∪ B) calculada excede 1. Revisa tus datos.");
+                setAlerta({ isOpen: true, mensaje: <span>La probabilidad de la unión <InlineMath math="P(A \cup B)" /> calculada excede 1. Revisa tus datos.</span> });
                 setResultado(null);
                 return;
             }
@@ -168,37 +197,15 @@ export default function ResultadosReglaAdicion({
                 <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                     <button
                         type="button"
-                        className={`btn-tema1-borde ${inputMode === 'matriz' ? 'active' : ''}`}
+                        className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
                         onClick={() => setInputMode('matriz')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: FS.sm,
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: inputMode === 'matriz' ? 'var(--primary-color)' : 'transparent',
-                            color: inputMode === 'matriz' ? '#fff' : 'var(--text-muted)',
-                            transition: 'all 0.2s'
-                        }}
                     >
                         Análisis de Matriz
                     </button>
                     <button
                         type="button"
-                        className={`btn-tema1-borde ${inputMode === 'manual' ? 'active' : ''}`}
+                        className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
                         onClick={() => setInputMode('manual')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: FS.sm,
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: inputMode === 'manual' ? 'var(--primary-color)' : 'transparent',
-                            color: inputMode === 'manual' ? '#fff' : 'var(--text-muted)',
-                            transition: 'all 0.2s'
-                        }}
                     >
                         Modo Manual
                     </button>
@@ -228,14 +235,11 @@ export default function ResultadosReglaAdicion({
                             </div>
                             <button
                                 onClick={abrirEditor}
-                                className="btn-icon"
+                                className="btn-primary btn-icon"
                                 style={{
                                     borderRadius: RADIUS,
                                     fontSize: FS.sm,
-                                    padding: '6px 14px',
-                                    background: 'var(--primary-color)',
-                                    color: 'white',
-                                    border: 'none',
+                                    padding: '5px 14px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -318,11 +322,9 @@ export default function ResultadosReglaAdicion({
                                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                                     <button
                                         onClick={calcular}
-                                        className="button_calcular btn-icon"
-                                        style={{ padding: '8px 25px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
-                                        disabled={!pseudoVar || !colA || !valA || !colB || !valB}
+                                        className="button_calcular"
+                                        style={{ padding: '5px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
                                     >
-                                        <IconoCalculadora />
                                         CALCULAR
                                     </button>
                                 </div>
@@ -460,11 +462,9 @@ export default function ResultadosReglaAdicion({
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', width: '100%' }}>
                                 <button
                                     onClick={calcular}
-                                    className="button_calcular btn-icon"
-                                    style={{ padding: '8px 25px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
-                                    disabled={manualPA === '' || manualPB === '' || manualPAndB === ''}
+                                    className="button_calcular"
+                                    style={{ padding: '5px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
                                 >
-                                    <IconoCalculadora />
                                     CALCULAR
                                 </button>
                             </div>
@@ -488,7 +488,7 @@ export default function ResultadosReglaAdicion({
                         <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm }}>
                                 <thead>
-                                    <tr style={{ background: 'var(--bg-input)', borderBottom: '2px solid var(--border-color)' }}>
+                                    <tr className="table-header-responsive" style={{ background: 'var(--bg-input)', borderBottom: '2px solid var(--border-color)', whiteSpace: 'nowrap' }}>
                                         <th style={{ padding: '8px 6px' }}>Evento</th>
                                         {inputMode === 'matriz' && (
                                             <th style={{ padding: '8px 6px', color: 'var(--text-muted)', fontWeight: 500 }}>Frecuencia <span dangerouslySetInnerHTML={{ __html: katex.renderToString('(n)') }} /></th>
@@ -528,11 +528,11 @@ export default function ResultadosReglaAdicion({
                             Desarrollo Matemático: Axiomas y Propiedades (Unión de Eventos)
                         </h4>
                         <FormulaAdicion resultado={resultado} />
-                        <div style={{ marginTop: '15px', padding: '15px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                            <div style={{ fontSize: FS.lg, fontWeight: 'bold' }}>
+                        <div className="katex-responsive-container" style={{ marginTop: '10px', padding: '10px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                            <div style={{ fontWeight: 'bold', color: 'var(--primary-color)', fontSize: '1em' }}>
                                 <span dangerouslySetInnerHTML={{ __html: katex.renderToString(`P(A \\cup B) = ${resultado.pAorB.toFixed(4)}`) }} />
                             </div>
-                            <div style={{ fontSize: FS.sm, color: 'var(--text-main)', marginTop: '4px' }}>
+                            <div style={{ fontSize: '0.8em', color: 'var(--text-main)', marginTop: '4px' }}>
                                 ({(resultado.pAorB * 100).toFixed(2)}% probabilidad de A o B)
                             </div>
                         </div>
@@ -545,6 +545,12 @@ export default function ResultadosReglaAdicion({
                     </MarcoWidgetMAT251>
                 </>
             )}
+
+            <ModalAlerta 
+                isOpen={alerta.isOpen} 
+                mensaje={alerta.mensaje} 
+                onClose={() => setAlerta({ ...alerta, isOpen: false })} 
+            />
         </div>
     );
 }

@@ -155,7 +155,7 @@
 .staggered-menu-icon {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Líneas centradas */
+  align-items: flex-end; /* Alineado a la derecha como el icono móvil original */
   gap: 4px; /* Mayor espaciado para líneas más gruesas */
   width: 18px;
   justify-content: center;

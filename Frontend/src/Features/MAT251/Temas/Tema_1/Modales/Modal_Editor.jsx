@@ -112,37 +112,27 @@ export default function ModalEditor({ modalEditor, setModalEditor, filasTemp, se
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
                     <button
-                        className="btn-icon"
+                        className="btn-primary"
                         onClick={() => setFilasTemp([...filasTemp, filaVacia(filasTemp.length + 1)])}
-                        style={{ background: '#3b82f6', borderRadius: RADIUS, fontSize: '0.85rem', padding: '6px 12px' }}
+                        style={{ padding: '5px 14px', fontSize: '0.85rem' }}
                     >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         Añadir
                     </button>
 
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
-                            className="btn-icon"
+                            className="btn-danger"
                             onClick={() => setModalEditor(false)}
-                            style={{ background: '#ef4444', borderRadius: RADIUS, fontSize: '0.85rem', padding: '6px 12px' }}
+                            style={{ padding: '5px 14px', fontSize: '0.85rem' }}
                         >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             Cancelar
                         </button>
                         <button
-                            className="btn-icon"
+                            className="btn-verde"
                             onClick={guardarEditor}
                             disabled={!hayCambiosEditor}
-                            style={{
-                                background: hayCambiosEditor ? '#0b4420ff' : '#9ca3af',
-                                borderRadius: RADIUS,
-                                fontSize: '0.85rem',
-                                padding: '6px 14px',
-                                cursor: hayCambiosEditor ? 'pointer' : 'not-allowed',
-                                opacity: hayCambiosEditor ? 1 : 0.7
-                            }}
+                            style={{ padding: '5px 14px', fontSize: '0.85rem' }}
                         >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             Guardar
                         </button>
                     </div>

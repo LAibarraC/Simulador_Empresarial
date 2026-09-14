@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {
@@ -82,11 +82,11 @@ const SmartAnnotation = (props) => {
 export default function GraficoDiferenciaProporciones({ resultados }) {
     if (!resultados || resultados.p === undefined || resultados.se === undefined) return null;
 
-    // Usamos 'p' como la Esperanza (mu) y 'se' como el Error EstÃ¡ndar
+    // Usamos 'p' como la Esperanza (mu) y 'se' como el Error Estándar
     const { se: SE, p: mu, x1, x2, condicion, probFinal } = resultados;
     const tieneProbabilidad = probFinal !== undefined;
 
-    // GeneraciÃ³n de datos
+    // Generación de datos
     const { datosGrafico, customTicks, annotationData } = useMemo(() => {
         const datos = [];
         const numPoints = 200;
@@ -169,11 +169,11 @@ export default function GraficoDiferenciaProporciones({ resultados }) {
     }, [mu, SE, x1, x2, condicion, probFinal, tieneProbabilidad]);
 
     return (
-        <MarcoWidgetMAT251 titulo="GrÃ¡fica de Densidad f(x) [Diferencia de Medias]" anchoCompleto={true} alto="450px" id="grafico-diferencia-medias">
+        <MarcoWidgetMAT251 titulo="Gráfica de Densidad f(x) [Diferencia de Medias]" anchoCompleto={true} alto="450px" id="grafico-diferencia-medias">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={datosGrafico} margin={{ top: 45, right: 30, left: 0, bottom: 30 }}>
+                        <AreaChart data={datosGrafico} margin={{ top: 45, right: 30, left: 80, bottom: 30 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                             
                             <XAxis 
@@ -186,7 +186,7 @@ export default function GraficoDiferenciaProporciones({ resultados }) {
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickFormatter={(val) => Number.isInteger(val) ? val : val.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 3 })}
-                                label={{ value: 'Diferencia de Medias (XÌ„ - È²)', position: 'insideBottom', offset: -10, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={{ value: 'Diferencia de Medias (X̄ - Ȳ)', position: 'insideBottom', offset: -10, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
                             />
                             
                             <YAxis 
@@ -195,13 +195,13 @@ export default function GraficoDiferenciaProporciones({ resultados }) {
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickFormatter={(val) => val === 0 ? '0' : val.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
-                                label={{ value: 'Densidad f(XÌ„ - È²)', angle: -90, position: 'insideLeft', offset: 15, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={{ value: 'Densidad f(X̄ - Ȳ)', angle: -90, position: 'insideLeft', offset: 15, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
                             />
                             
                             <Tooltip 
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                                formatter={(value, name) => [value.toLocaleString('es-ES', { minimumFractionDigits: 5 }), name === 'y' ? 'f(XÌ„ - È²)' : 'Ãrea']}
-                                labelFormatter={(label) => `XÌ„ - È² = ${label.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 4 })}`}
+                                formatter={(value, name) => [value.toLocaleString('es-ES', { minimumFractionDigits: 5 }), name === 'y' ? 'f(X̄ - Ȳ)' : 'Área']}
+                                labelFormatter={(label) => `X̄ - Ȳ = ${label.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 4 })}`}
                             />
 
                             <Area 

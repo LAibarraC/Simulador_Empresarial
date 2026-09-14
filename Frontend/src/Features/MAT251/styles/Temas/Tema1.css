@@ -726,3 +726,79 @@
     border-color: #ff6e00;
     box-shadow: 0 0 0 2px rgba(255, 110, 0, 0.2);
 }
+
+/* =========================================
+   MEDIA QUERIES (RESPONSIVIDAD PARA TEMA 1)
+   ========================================= */
+
+/* Para Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .fila-controles {
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .panel-seleccion-variable {
+        justify-content: center;
+    }
+    
+    .acciones-editor {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+/* Para Celulares y pantallas pequeñas */
+@media (max-width: 600px) {
+    .fila-controles {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .panel-seleccion-variable {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-abrir-modal {
+        width: 100%;
+    }
+    
+    .acciones-principales {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .acciones-principales button {
+        width: 100%;
+    }
+    
+    .contenido-modal {
+        padding: 15px;
+    }
+    
+    .panel-inputs {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .panel-inputs input {
+        width: 100%;
+    }
+    
+    .cabecera-editor {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .acciones-modal-excel {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .acciones-modal-excel button {
+        width: 100%;
+    }
+}

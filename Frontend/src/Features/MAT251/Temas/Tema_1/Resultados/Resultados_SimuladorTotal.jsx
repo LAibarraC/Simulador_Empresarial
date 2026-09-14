@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
 import { IconoCalculadora, EditarDatos, IconoAlerta } from '../../../../../ui/iconos';
+import ModalAlerta from '../../../ui/ModalAlerta';
 import katex from 'katex';
 import ArbolProbabilidad from '../../../Graficas/Tema_1/ArbolProbabilidad';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
@@ -25,78 +26,96 @@ const InlineMath = ({ math }) => (
 );
 
 const FormulaMatematica = ({ resultado }) => {
-    const formulaRef = useRef(null);
+    const formulaGeneralRef = useRef(null);
+    const formulaDesarrolloRef = useRef(null);
 
     useEffect(() => {
-        if (formulaRef.current && resultado) {
-            let formulaLatex = `\\displaystyle \\begin{aligned}\n`;
-            // Fórmula principal (tamaño normal)
-            formulaLatex += `P(A) &= \\sum_{i=1}^{n} P(A B_i) = \\sum_{i=1}^{n} P(B_i)P(A|B_i) \\\\\n`;
+        if (formulaGeneralRef.current && formulaDesarrolloRef.current && resultado) {
+            // Fórmula principal
+            const latexGeneral = `\\displaystyle P(A) = \\sum_{i=1}^{n} P(A B_i) = \\sum_{i=1}^{n} P(B_i)P(A|B_i)`;
+            katex.render(latexGeneral, formulaGeneralRef.current, { throwOnError: false, displayMode: true });
 
-            // Cálculos (tamaño más pequeño)
+            // Cálculos
+            let latexDesarrollo = `\\displaystyle \\begin{aligned}\n`;
             let sumatoriaStr = resultado.desglose.map(r => `P(\\text{${r.nombre}}) \\cdot P(A|\\text{${r.nombre}})`).join(' + ');
-            formulaLatex += `\\footnotesize P(A) &\\footnotesize = ${sumatoriaStr} \\\\\n`;
+            latexDesarrollo += `P(A) &= ${sumatoriaStr} \\\\\n`;
 
             let valoresStr = resultado.desglose.map(r => `(${r.pA.toFixed(4)} \\cdot ${r.pB_A.toFixed(4)})`).join(' + ');
-            formulaLatex += `\\footnotesize P(A) &\\footnotesize = ${valoresStr} \\\\\n`;
+            latexDesarrollo += `P(A) &= ${valoresStr} \\\\\n`;
 
             let multsStr = resultado.desglose.map(r => `${r.mult.toFixed(4)}`).join(' + ');
-            formulaLatex += `\\footnotesize P(A) &\\footnotesize = ${multsStr} \\\\\n`;
+            latexDesarrollo += `P(A) &= ${multsStr} \\\\\n`;
 
-            formulaLatex += `\\footnotesize P(A) &\\footnotesize = \\mathbf{${resultado.probB.toFixed(4)}}\n`;
-            formulaLatex += `\\end{aligned}`;
+            latexDesarrollo += `P(A) &= \\mathbf{${resultado.probB.toFixed(4)}}\n`;
+            latexDesarrollo += `\\end{aligned}`;
 
-            katex.render(formulaLatex, formulaRef.current, { throwOnError: false, displayMode: false });
+            katex.render(latexDesarrollo, formulaDesarrolloRef.current, { throwOnError: false, displayMode: false });
         }
     }, [resultado]);
 
     return (
-        <div style={{ overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '15px', borderRadius: RADIUS, textAlign: 'left' }}>
-            <div ref={formulaRef}></div>
+        <div className="katex-responsive-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: 'fit-content', overflowX: 'auto', marginBottom: '15px', padding: '10px 25px', background: 'var(--bg-card)', border: '1px dashed #9ca3af', borderRadius: RADIUS, textAlign: 'center' }}>
+                <div ref={formulaGeneralRef}></div>
+            </div>
+            <div style={{ width: '100%', overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '15px 25px', borderRadius: RADIUS, textAlign: 'left', fontSize: '0.9rem' }}>
+                <div ref={formulaDesarrolloRef}></div>
+            </div>
         </div>
     );
 };
 
 const FormulaBayes = ({ resultado, ramasSeleccionadas }) => {
-    const formulaRef = useRef(null);
+    const formulaGeneralRef = useRef(null);
+    const formulaDesarrolloRef = useRef(null);
 
     useEffect(() => {
-        if (formulaRef.current && resultado && ramasSeleccionadas && ramasSeleccionadas.length > 0) {
-            let formulaLatex = `\\displaystyle \\begin{aligned}\n`;
+        if (formulaGeneralRef.current && formulaDesarrolloRef.current && resultado && ramasSeleccionadas && ramasSeleccionadas.length > 0) {
             
             const numRamas = ramasSeleccionadas.length;
             const names = ramasSeleccionadas.map(r => `\\text{${r.nombre}}`);
             const unionNames = names.join(' \\cup ');
+            const formatUnion = numRamas === 1 ? unionNames : `(${unionNames})`;
+            
+            let formulaLatex = `\\displaystyle \\begin{aligned}\n`;
             
             if (numRamas === 1) {
                 const r = ramasSeleccionadas[0];
-                formulaLatex += `P(${unionNames} | A) &= \\frac{P(${names[0]}) \\cdot P(A|${names[0]})}{P(A)} \\\\\n`;
-                formulaLatex += `\\footnotesize P(${unionNames} | A) &\\footnotesize = \\frac{${r.pA.toFixed(4)} \\cdot ${r.pB_A.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
-                formulaLatex += `\\footnotesize P(${unionNames} | A) &\\footnotesize = \\frac{${r.mult.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
+                const latexG = `\\displaystyle P(${unionNames} | A) = \\frac{P(${names[0]}) \\cdot P(A|${names[0]})}{P(A)}`;
+                katex.render(latexG, formulaGeneralRef.current, { throwOnError: false, displayMode: true });
+
+                formulaLatex += `P(${unionNames} | A) &= \\frac{${r.pA.toFixed(4)} \\cdot ${r.pB_A.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
+                formulaLatex += `P(${unionNames} | A) &= \\frac{${r.mult.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
             } else {
-                formulaLatex += `P((${unionNames}) | A) &= \\frac{${names.map(n => `P(${n})P(A|${n})`).join(' + ')}}{P(A)} \\\\\n`;
+                const latexG = `\\displaystyle P(${formatUnion} | A) = \\frac{\\sum P(B_i)P(A|B_i)}{P(A)}`;
+                katex.render(latexG, formulaGeneralRef.current, { throwOnError: false, displayMode: true });
+
                 const calcs = ramasSeleccionadas.map(r => `(${r.pA.toFixed(4)} \\cdot ${r.pB_A.toFixed(4)})`).join(' + ');
-                formulaLatex += `\\footnotesize P((${unionNames}) | A) &\\footnotesize = \\frac{${calcs}}{${resultado.probB.toFixed(4)}} \\\\\n`;
+                formulaLatex += `P(${formatUnion} | A) &= \\frac{${calcs}}{${resultado.probB.toFixed(4)}} \\\\\n`;
                 const mults = ramasSeleccionadas.map(r => r.mult.toFixed(4)).join(' + ');
-                formulaLatex += `\\footnotesize P((${unionNames}) | A) &\\footnotesize = \\frac{${mults}}{${resultado.probB.toFixed(4)}} \\\\\n`;
+                formulaLatex += `P(${formatUnion} | A) &= \\frac{${mults}}{${resultado.probB.toFixed(4)}} \\\\\n`;
                 const sumMults = ramasSeleccionadas.reduce((sum, r) => sum + r.mult, 0);
-                formulaLatex += `\\footnotesize P((${unionNames}) | A) &\\footnotesize = \\frac{${sumMults.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
+                formulaLatex += `P(${formatUnion} | A) &= \\frac{${sumMults.toFixed(4)}}{${resultado.probB.toFixed(4)}} \\\\\n`;
             }
             
             const sumMults = ramasSeleccionadas.reduce((sum, r) => sum + r.mult, 0);
             const bayesVal = resultado.probB > 0 ? (sumMults / resultado.probB) : 0;
-            const formatUnion = numRamas === 1 ? unionNames : `(${unionNames})`;
-            formulaLatex += `\\footnotesize P(${formatUnion} | A) &\\footnotesize = \\mathbf{${bayesVal.toFixed(4)}}\n`;
+            formulaLatex += `P(${formatUnion} | A) &= \\mathbf{${bayesVal.toFixed(4)}}\n`;
             
             formulaLatex += `\\end{aligned}`;
 
-            katex.render(formulaLatex, formulaRef.current, { throwOnError: false, displayMode: false });
+            katex.render(formulaLatex, formulaDesarrolloRef.current, { throwOnError: false, displayMode: false });
         }
     }, [resultado, ramasSeleccionadas]);
 
     return (
-        <div style={{ overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '15px', borderRadius: RADIUS, textAlign: 'left' }}>
-            <div ref={formulaRef}></div>
+        <div className="katex-responsive-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: 'fit-content', overflowX: 'auto', marginBottom: '15px', padding: '10px 25px', background: 'var(--bg-card)', border: '1px dashed #9ca3af', borderRadius: RADIUS, textAlign: 'center' }}>
+                <div ref={formulaGeneralRef}></div>
+            </div>
+            <div style={{ width: '100%', overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '15px 25px', borderRadius: RADIUS, textAlign: 'left', fontSize: '1.1em' }}>
+                <div ref={formulaDesarrolloRef}></div>
+            </div>
         </div>
     );
 };
@@ -248,6 +267,7 @@ export default function ResultadosSimuladorTotal({
     errorSimulador, setErrorSimulador,
     statsDatos, abrirEditor
 }) {
+    const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
     const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
     const [manualBranches, setManualBranches] = useState([
         { id: 1, name: 'Causa 1', pA: '', pBA: '' },
@@ -349,12 +369,22 @@ export default function ResultadosSimuladorTotal({
 
     const calcular = () => {
         if (!varSeleccionada) {
-            setErrorSimulador("Importa una Matriz de Excel primero.");
+            setAlerta({ isOpen: true, mensaje: "Debes importar o seleccionar una Matriz de Excel primero." });
             setResultadoSimulador(null);
             return;
         }
-        if (!colCausa || !colEvento || !valExito) {
-            setErrorSimulador("Selecciona las columnas de Causa y Evento, así como el valor de éxito.");
+        if (!colCausa) {
+            setAlerta({ isOpen: true, mensaje: <span>Debes seleccionar la Variable Causa (<InlineMath math="B_i" />) antes de calcular.</span> });
+            setResultadoSimulador(null);
+            return;
+        }
+        if (!colEvento) {
+            setAlerta({ isOpen: true, mensaje: <span>Debes seleccionar la Variable Evento (<InlineMath math="A" />) antes de calcular.</span> });
+            setResultadoSimulador(null);
+            return;
+        }
+        if (!valExito) {
+            setAlerta({ isOpen: true, mensaje: "Debes seleccionar el Valor de 'Éxito' en el evento antes de calcular." });
             setResultadoSimulador(null);
             return;
         }
@@ -387,37 +417,15 @@ export default function ResultadosSimuladorTotal({
                 <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                     <button
                         type="button"
-                        className={`btn-tema1-borde ${inputMode === 'matriz' ? 'active' : ''}`}
+                        className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
                         onClick={() => setInputMode('matriz')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: FS.sm,
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: inputMode === 'matriz' ? 'var(--primary-color)' : 'transparent',
-                            color: inputMode === 'matriz' ? '#fff' : 'var(--text-muted)',
-                            transition: 'all 0.2s'
-                        }}
                     >
                         Análisis de Matriz
                     </button>
                     <button
                         type="button"
-                        className={`btn-tema1-borde ${inputMode === 'manual' ? 'active' : ''}`}
+                        className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
                         onClick={() => setInputMode('manual')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: FS.sm,
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: inputMode === 'manual' ? 'var(--primary-color)' : 'transparent',
-                            color: inputMode === 'manual' ? '#fff' : 'var(--text-muted)',
-                            transition: 'all 0.2s'
-                        }}
                     >
                         Modo Manual
                     </button>
@@ -546,22 +554,20 @@ export default function ResultadosSimuladorTotal({
                             ))}
                         </div>
 
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', width: '100%' }}>
                             <button
                                 type="button"
                                 onClick={agregarRama}
+                                className="btn-primary"
                                 style={{
-                                    padding: '8px 16px',
-                                    background: 'var(--primary-color)',
-                                    color: 'white',
-                                    border: 'none',
+                                    padding: '5px 14px',
                                     borderRadius: RADIUS,
                                     cursor: 'pointer',
                                     fontSize: FS.sm,
                                     fontWeight: 700
                                 }}
                             >
-                                + Agregar nueva Causa (Rama)
+                                Agregar nueva Causa (Rama)
                             </button>
                         </div>
 
@@ -604,14 +610,11 @@ export default function ResultadosSimuladorTotal({
                             </div>
                             <button
                                 onClick={abrirEditor}
-                                className="btn-icon"
+                                className="btn-primary btn-icon"
                                 style={{
                                     borderRadius: RADIUS,
                                     fontSize: FS.sm,
-                                    padding: '6px 14px',
-                                    background: 'var(--primary-color)',
-                                    color: 'white',
-                                    border: 'none',
+                                    padding: '5px 14px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -663,14 +666,12 @@ export default function ResultadosSimuladorTotal({
                                     </div>
                                 )}
 
-                                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                                <div style={{ width: '100%', display: 'flex', justifyContent: 'center'}}>
                                     <button
                                         onClick={calcular}
-                                        className="button_calcular btn-icon"
-                                        style={{ padding: '8px 25px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content', flexShrink: 0 }}
-                                        disabled={!varSeleccionada || !colCausa || !colEvento || !valExito}
+                                        className="button_calcular"
+                                        style={{ padding: '5px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content', flexShrink: 0 }}
                                     >
-                                        <IconoCalculadora />
                                         CALCULAR
                                     </button>
                                 </div>
@@ -696,37 +697,54 @@ export default function ResultadosSimuladorTotal({
 
             {activeResultado && (
                 <>
-                    <div style={{ ...cardStyle, marginBottom: '20px' }}>
-                        <h4 style={{ color: 'var(--primary-color)', margin: '0 0 10px 0', fontSize: FS.sm }}>
+                    <div style={{ marginBottom: '20px' }}>
+                        <h3 style={{ color: 'var(--primary-color)', margin: '0 0 10px 0', fontSize: FS.md }}>
                             Desglose de la Matriz:
-                        </h4>
+                        </h3>
                         <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm }}>
                                 <thead>
-                                    <tr style={{ background: 'var(--bg-input)', borderBottom: '2px solid var(--border-color)' }}>
-                                        <th style={{ padding: '8px 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>Causa Única <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B_i') }} /></th>
-                                        {inputMode === 'matriz' && <th style={{ padding: '8px 6px', color: 'var(--text-muted)', fontWeight: 500 }}>Frecuencia <span dangerouslySetInnerHTML={{ __html: katex.renderToString('(n)') }} /></th>}
-                                        <th style={{ padding: '8px 6px' }}><span dangerouslySetInnerHTML={{ __html: katex.renderToString('P(B_i)') }} /></th>
-                                        {inputMode === 'matriz' && <th style={{ padding: '8px 6px', color: 'var(--text-muted)', fontWeight: 500 }}>Éxitos en <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B_i') }} /></th>}
-                                        <th style={{ padding: '8px 6px' }}><span dangerouslySetInnerHTML={{ __html: katex.renderToString('P(A|B_i)') }} /></th>
+                                    <tr className="table-header-responsive" style={{ background: 'var(--bg-input)', borderBottom: '2px solid var(--border-color)', whiteSpace: 'nowrap' }}>
+                                        <th style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
+                                            <span style={{ fontWeight: 600, marginRight: '6px' }}>Causa Única</span>
+                                            <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B_i') }} />
+                                        </th>
+                                        {inputMode === 'matriz' && (
+                                            <th style={{ padding: '12px 10px', verticalAlign: 'middle', color: 'var(--text-muted)', fontWeight: 500 }}>
+                                                <span style={{ fontWeight: 600, marginRight: '6px' }}>Frecuencia</span>
+                                                <span dangerouslySetInnerHTML={{ __html: katex.renderToString('(n)') }} />
+                                            </th>
+                                        )}
+                                        <th style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
+                                            <span dangerouslySetInnerHTML={{ __html: katex.renderToString('P(B_i)') }} />
+                                        </th>
+                                        {inputMode === 'matriz' && (
+                                            <th style={{ padding: '12px 10px', verticalAlign: 'middle', color: 'var(--text-muted)', fontWeight: 500 }}>
+                                                <span style={{ fontWeight: 600, marginRight: '6px' }}>Éxitos en</span>
+                                                <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B_i') }} />
+                                            </th>
+                                        )}
+                                        <th style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
+                                            <span dangerouslySetInnerHTML={{ __html: katex.renderToString('P(A|B_i)') }} />
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {activeRamas.map((rama, idx) => (
                                         <tr key={rama.id} style={{ borderBottom: idx < activeRamas.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
-                                            <td style={{ padding: '8px 6px', fontWeight: 600 }}>{rama.nombre}</td>
+                                            <td style={{ padding: '10px 8px', fontWeight: 600 }}>{rama.nombre}</td>
                                             {inputMode === 'matriz' && (
-                                                <td style={{ padding: '8px 6px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
+                                                <td style={{ padding: '10px 8px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
                                                     {rama.n_Ai} / {rama.totalDatos}
                                                 </td>
                                             )}
-                                            <td style={{ padding: '8px 6px', fontWeight: 'bold' }}>{rama.pA.toFixed(4)}</td>
+                                            <td style={{ padding: '10px 8px', fontWeight: 'bold' }}>{rama.pA.toFixed(4)}</td>
                                             {inputMode === 'matriz' && (
-                                                <td style={{ padding: '8px 6px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
+                                                <td style={{ padding: '10px 8px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
                                                     {rama.n_B_dado_Ai} / {rama.n_Ai}
                                                 </td>
                                             )}
-                                            <td style={{ padding: '8px 6px', fontWeight: 'bold' }}>{rama.pB_A.toFixed(4)}</td>
+                                            <td style={{ padding: '10px 8px', fontWeight: 'bold' }}>{rama.pB_A.toFixed(4)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -739,12 +757,12 @@ export default function ResultadosSimuladorTotal({
                             Desarrollo Matemático: Probabilidad Total
                         </h3>
                         <FormulaMatematica resultado={activeResultado} />
-                        <div style={{ marginTop: '15px', padding: '15px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                        <div className="katex-responsive-container" style={{ marginTop: '10px', padding: '10px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
                             <div 
-                                style={{ fontSize: FS.lg, fontWeight: 'bold', color: 'var(--primary-color)' }}
+                                style={{ fontWeight: 'bold', color: 'var(--primary-color)', fontSize: '1.1em' }}
                                 dangerouslySetInnerHTML={{ __html: katex.renderToString(`P(A) = ${activeResultado.probB.toFixed(4)}`) }}
                             />
-                            <div style={{ fontSize: FS.sm, color: 'var(--text-main)', marginTop: '4px' }}>
+                            <div style={{ fontSize: '0.8em', color: 'var(--text-main)', marginTop: '4px' }}>
                                 ({(activeResultado.probB * 100).toFixed(2)}% probabilidad)
                             </div>
                         </div>
@@ -756,7 +774,7 @@ export default function ResultadosSimuladorTotal({
                             Teorema de Bayes
                         </h3>
                         <div style={{ marginBottom: '15px' }}>
-                            <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600 }}>
+                            <label className="katex-responsive-container" style={{ fontFamily: FONT, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600 }}>
                                 ¿Cuál es la probabilidad de que la causa haya sido... <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B_k') }} />?
                             </label>
                             <div style={{ maxWidth: '400px' }}>
@@ -792,12 +810,12 @@ export default function ResultadosSimuladorTotal({
                                     const formatUnion = ramas.length === 1 ? names : `(${names})`;
                                     
                                     return (
-                                        <div style={{ marginTop: '15px', padding: '15px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                        <div className="katex-responsive-container" style={{ marginTop: '15px', padding: '15px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center', fontSize: '1.1em' }}>
                                             <div 
-                                                style={{ fontSize: FS.lg, fontWeight: 'bold', color: 'var(--primary-color)' }}
+                                                style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}
                                                 dangerouslySetInnerHTML={{ __html: katex.renderToString(`P(${formatUnion} | A) = ${bayesResult.toFixed(4)}`) }}
                                             />
-                                            <div style={{ fontSize: FS.sm, color: 'var(--text-main)', marginTop: '4px' }}>
+                                            <div style={{ fontSize: '0.85em', color: 'var(--text-main)', marginTop: '4px' }}>
                                                 ({(bayesResult * 100).toFixed(2)}% probabilidad)
                                             </div>
                                         </div>
@@ -813,7 +831,7 @@ export default function ResultadosSimuladorTotal({
                                 {ordenWidgets.map((id) => {
                                     if (id === 'w-arbol') {
                                         return (
-                                            <MarcoWidgetMAT251 key={id} id={id} titulo="Árbol de Probabilidad" anchoCompleto={true} alto={`${Math.max(400, activeRamas.length * 140) + 120}px`}>
+                                            <MarcoWidgetMAT251 key={id} id={id} titulo="Árbol de Probabilidad" anchoCompleto={true} alto={`${activeRamas.length * 120 + 160}px`}>
                                                 <div style={{ width: '100%', height: '100%', minWidth: 0 }}>
                                                     <ArbolProbabilidad resultado={activeResultado} ramas={activeRamas} causasBayes={causasBayes} />
                                                 </div>
@@ -827,6 +845,12 @@ export default function ResultadosSimuladorTotal({
                     </DndContext>
                 </>
             )}
+
+            <ModalAlerta 
+                isOpen={alerta.isOpen} 
+                mensaje={alerta.mensaje} 
+                onClose={() => setAlerta({ ...alerta, isOpen: false })} 
+            />
         </div>
     );
 }

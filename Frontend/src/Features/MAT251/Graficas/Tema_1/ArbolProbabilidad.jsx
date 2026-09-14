@@ -4,7 +4,7 @@ import { FONT, FS, RADIUS } from '../../Principal/Constantes';
 export default function ArbolProbabilidad({ resultado, ramas, causasBayes }) {
     if (!resultado || !ramas || ramas.length === 0) return null;
 
-    const height = Math.max(400, ramas.length * 140);
+    const height = ramas.length * 120 + 60;
     const rootX = 80, rootY = height / 2, nodeAX = 440, nodeBX = 740;
     const defaultHighlightColor = '#0ea5e9';
     const bayesHighlightColor = '#f97316';
@@ -139,7 +139,7 @@ export default function ArbolProbabilidad({ resultado, ramas, causasBayes }) {
                 {/* LEYENDA */}
                 {(() => {
                     const maxNodeY = (height / (ramas.length + 1)) * ramas.length;
-                    const legendY = maxNodeY + 85; // Se calcula 85px debajo de la última rama (la cual baja hasta +35px)
+                    const legendY = maxNodeY + 95; // Bajado para dar más respiro al texto
                     return (
                         <text x={width / 2} y={legendY} textAnchor="middle" fontSize="12" fill="var(--text-muted)">
                             <tspan fill={defaultHighlightColor} fontWeight="bold">■ </tspan>

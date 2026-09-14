@@ -16,7 +16,7 @@ export default function Resultados_ChiCuadrada({ resultados }) {
                     <div style={{ color: 'var(--text-muted)', fontSize: FS.sm, marginBottom: '15px' }}>
                         Cálculo y Probabilidad Chi-Cuadrada
                     </div>
-                    <div className="thin-scrollbar" style={{ overflowX: 'auto', paddingBottom: '10px' }}>
+                    <div className="thin-scrollbar formula-responsive" style={{ overflowX: 'auto', paddingBottom: '10px' }}>
                         <Latex formula={resultados.strDesarrollo} />
                     </div>
                 </div>
@@ -27,9 +27,6 @@ export default function Resultados_ChiCuadrada({ resultados }) {
                     </div>
                     <div style={{ color: 'var(--text-main)', fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>
                         {(resultados.probFinal * 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
-                    </div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: FS.sm, marginTop: '4px' }}>
-                        ( {resultados.probFinal.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} )
                     </div>
                 </div>
             </div>

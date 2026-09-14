@@ -134,8 +134,8 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
                 </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
-                <div style={{ flex: 1, padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
+            <div className="t3-stats-container" style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                <div className="t3-stats-card" style={{ padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>
                             Esperanza{' '}
@@ -148,17 +148,17 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
                             </span>
                         </div>
                     </div>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700 }}>
-                        {formatSmart(resultados.esperanza, 2)}
-                    </div>
                     {formulaEsperanza && (
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-main, #0f172a)', marginTop: '6px', fontWeight: 500 }}>
                             {renderLatex(formulaEsperanza)}
                         </div>
                     )}
+                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700 }}>
+                        {formatSmart(resultados.esperanza, 2)}
+                    </div>
                 </div>
 
-                <div style={{ flex: 1, padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
+                <div className="t3-stats-card" style={{ padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>
                             Varianza{' '}
@@ -171,17 +171,17 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
                             </span>
                         </div>
                     </div>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700 }}>
-                        {formatSmart(resultados.varianza, 2)}
-                    </div>
                     {formulaVarianza && (
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-main, #0f172a)', marginTop: '6px', fontWeight: 500 }}>
                             {renderLatex(formulaVarianza)}
                         </div>
                     )}
+                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700 }}>
+                        {formatSmart(resultados.varianza, 2)}
+                    </div>
                 </div>
 
-                <div style={{ flex: 1, padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
+                <div className="t3-stats-card" style={{ padding: '8px', background: 'var(--bg-input, #f8fafc)', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>
                             Desviación{' '}
@@ -194,14 +194,14 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
                             </span>
                         </div>
                     </div>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700 }}>
-                        {formatSmart(resultados.desviacion, 2)}
-                    </div>
                     {formulaDesviacion && (
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-main, #0f172a)', marginTop: '6px', fontWeight: 500 }}>
                             {renderLatex(formulaDesviacion)}
                         </div>
                     )}
+                    <div style={{ fontSize: '1rem', color: 'var(--text-main, #334155)', fontWeight: 700 }}>
+                        {formatSmart(resultados.desviacion, 2)}
+                    </div>
                 </div>
             </div>
         </div>

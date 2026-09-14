@@ -6,13 +6,20 @@ import ArbolProbabilidades from '../../../Graficas/Tema_1/ArbolProbabilidades';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { IconoCalculadora, EditarDatos } from '../../../../../ui/iconos';
 import { calcularReglaMultiplicacion } from '../../../Matematicas/logica_Tema1';
+import ModalAlerta from '../../../ui/ModalAlerta';
+
+const InlineMath = ({ math }) => (
+    <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+);
 
 const FormulaMultiplicacion = ({ resultado, modReemplazo, inputMode }) => {
-    const formulaRef = useRef(null);
+    const formulaGeneralRef = useRef(null);
+    const formulaDesarrolloRef = useRef(null);
 
     useEffect(() => {
-        if (formulaRef.current && resultado) {
-            let formulaLatex = `\\begin{aligned}\n`;
+        if (formulaGeneralRef.current && formulaDesarrolloRef.current && resultado) {
+            let latexGeneral = '';
+            let latexDesarrollo = `\\displaystyle \\begin{aligned}\n`;
             
             if (resultado.isManualDinamic) {
                 const events = resultado.events;
@@ -30,31 +37,38 @@ const FormulaMultiplicacion = ({ resultado, modReemplazo, inputMode }) => {
                     }).join(' \\times ');
                 }
                 
+                latexGeneral = `\\displaystyle P(${intersecString}) = ${rhsString}`;
+                
                 const probsString = events.map(e => e.prob.toFixed(4)).join(' \\times ');
                 
-                formulaLatex += `P(${intersecString}) &= ${rhsString} \\\\\n`;
-                formulaLatex += `P(${intersecString}) &= ${probsString} \\\\\n`;
-                formulaLatex += `P(${intersecString}) &= \\mathbf{${resultado.pAandB.toFixed(4)}}\n`;
+                latexDesarrollo += `P(${intersecString}) &= ${probsString} \\\\\n`;
+                latexDesarrollo += `P(${intersecString}) &= \\mathbf{${resultado.pAandB.toFixed(4)}}\n`;
                 
             } else {
                 if (modReemplazo === 'con_reemplazo') {
-                    formulaLatex += `P(A \\cap B) &= P(A) \\times P(B) \\\\\n`;
+                    latexGeneral = `\\displaystyle P(A \\cap B) = P(A) \\times P(B)`;
                 } else {
-                    formulaLatex += `P(A \\cap B) &= P(A) \\times P(B|A) \\\\\n`;
+                    latexGeneral = `\\displaystyle P(A \\cap B) = P(A) \\times P(B|A)`;
                 }
-                formulaLatex += `P(A \\cap B) &= ${resultado.pA.toFixed(4)} \\times ${resultado.pB.toFixed(4)} \\\\\n`;
-                formulaLatex += `P(A \\cap B) &= \\mathbf{${resultado.pAandB.toFixed(4)}}\n`;
+                latexDesarrollo += `P(A \\cap B) &= ${resultado.pA.toFixed(4)} \\times ${resultado.pB.toFixed(4)} \\\\\n`;
+                latexDesarrollo += `P(A \\cap B) &= \\mathbf{${resultado.pAandB.toFixed(4)}}\n`;
             }
             
-            formulaLatex += `\\end{aligned}`;
+            latexDesarrollo += `\\end{aligned}`;
 
-            katex.render(formulaLatex, formulaRef.current, { throwOnError: false, displayMode: true });
+            katex.render(latexGeneral, formulaGeneralRef.current, { throwOnError: false, displayMode: true });
+            katex.render(latexDesarrollo, formulaDesarrolloRef.current, { throwOnError: false, displayMode: false });
         }
     }, [resultado, modReemplazo, inputMode]);
 
     return (
-        <div style={{ overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '10px', borderRadius: RADIUS }}>
-            <div ref={formulaRef}></div>
+        <div className="katex-responsive-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: 'fit-content', overflowX: 'auto', marginBottom: '15px', padding: '10px 25px', background: 'var(--bg-card)', border: '1px dashed #9ca3af', borderRadius: RADIUS, textAlign: 'center' }}>
+                <div ref={formulaGeneralRef}></div>
+            </div>
+            <div style={{ width: '100%', overflowX: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '15px 25px', borderRadius: RADIUS, textAlign: 'left', fontSize: '0.9rem' }}>
+                <div ref={formulaDesarrolloRef}></div>
+            </div>
         </div>
     );
 };
@@ -68,6 +82,7 @@ export default function ResultadosReglaMultiplicacion({
     error, setError,
     statsDatos, abrirEditor
 }) {
+    const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
     const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
     const [manualEvents, setManualEvents] = useState([
         { id: 'e1', name: 'A', prob: '' },
@@ -112,7 +127,7 @@ export default function ResultadosReglaMultiplicacion({
 
             for (const e of parsedEvents) {
                 if (isNaN(e.prob) || e.prob < 0 || e.prob > 1) {
-                    setError("Todas las probabilidades deben ser valores numéricos entre 0 y 1.");
+                    setAlerta({ isOpen: true, mensaje: "Todas las probabilidades deben ser numéricas y estar entre 0 y 1." });
                     setResultado(null);
                     return;
                 }
@@ -136,12 +151,27 @@ export default function ResultadosReglaMultiplicacion({
         }
 
         if (!pseudoVar) {
-            setError("Importa una Matriz o agrega datos en el editor primero.");
+            setAlerta({ isOpen: true, mensaje: "Importa una Matriz o agrega datos en el editor primero." });
             setResultado(null);
             return;
         }
-        if (!colA || !valA || !colB || !valB) {
-            setError("Selecciona las columnas y las condiciones para ambas extracciones (A y B).");
+        if (!colA) {
+            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable de <InlineMath math="A" /> (Extracción 1) antes de calcular.</span> });
+            setResultado(null);
+            return;
+        }
+        if (!valA) {
+            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Condición de <InlineMath math="A" /> antes de calcular.</span> });
+            setResultado(null);
+            return;
+        }
+        if (!colB) {
+            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable de <InlineMath math="B" /> (Extracción 2) antes de calcular.</span> });
+            setResultado(null);
+            return;
+        }
+        if (!valB) {
+            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Condición de <InlineMath math="B" /> antes de calcular.</span> });
             setResultado(null);
             return;
         }
@@ -172,37 +202,15 @@ export default function ResultadosReglaMultiplicacion({
                 <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                     <button
                         type="button"
-                        className={`btn-tema1-borde ${inputMode === 'matriz' ? 'active' : ''}`}
+                        className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
                         onClick={() => setInputMode('matriz')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: FS.sm,
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: inputMode === 'matriz' ? 'var(--primary-color)' : 'transparent',
-                            color: inputMode === 'matriz' ? '#fff' : 'var(--text-muted)',
-                            transition: 'all 0.2s'
-                        }}
                     >
                         Análisis de Matriz
                     </button>
                     <button
                         type="button"
-                        className={`btn-tema1-borde ${inputMode === 'manual' ? 'active' : ''}`}
+                        className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
                         onClick={() => setInputMode('manual')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: FS.sm,
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: inputMode === 'manual' ? 'var(--primary-color)' : 'transparent',
-                            color: inputMode === 'manual' ? '#fff' : 'var(--text-muted)',
-                            transition: 'all 0.2s'
-                        }}
                     >
                         Modo Manual
                     </button>
@@ -296,21 +304,19 @@ export default function ResultadosReglaMultiplicacion({
                                     onClick={() => {
                                         setManualEvents([...manualEvents, { id: `e${Date.now()}`, name: '', prob: '' }]);
                                     }}
-                                    style={{ padding: '6px 15px', borderRadius: RADIUS, fontSize: FS.xs, fontWeight: 700, background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px dashed #3b82f6', cursor: 'pointer', width: 'fit-content', transition: 'all 0.2s' }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'}
+                                    className="btn-primary"
+                                    style={{ padding: '5px 14px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, cursor: 'pointer' }}
                                 >
-                                    + Agregar nueva Extracción
+                                    Agregar nueva Extracción
                                 </button>
                             </div>
 
                             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '5px' }}>
                                 <button
                                     onClick={calcular}
-                                    className="button_calcular btn-icon"
-                                    style={{ padding: '8px 30px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '38px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
+                                    className="button_calcular"
+                                    style={{ padding: '5px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '38px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
                                 >
-                                    <IconoCalculadora />
                                     CALCULAR
                                 </button>
                             </div>
@@ -335,8 +341,8 @@ export default function ResultadosReglaMultiplicacion({
                             </div>
                             <button
                                 onClick={abrirEditor}
-                                className="btn-icon"
-                                style={{ borderRadius: RADIUS, fontSize: FS.sm, padding: '6px 14px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                className="btn-primary btn-icon"
+                                style={{ borderRadius: RADIUS, fontSize: FS.sm, padding: '5px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <EditarDatos /> Editar Datos
                             </button>
@@ -427,11 +433,9 @@ export default function ResultadosReglaMultiplicacion({
                                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                                     <button
                                         onClick={calcular}
-                                        className="button_calcular btn-icon"
-                                        style={{ padding: '8px 30px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '38px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
-                                        disabled={!pseudoVar || !colA || !valA || !colB || !valB}
+                                        className="button_calcular"
+                                        style={{ padding: '5px 15px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '38px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', width: 'fit-content' }}
                                     >
-                                        <IconoCalculadora />
                                         CALCULAR
                                     </button>
                                 </div>
@@ -458,9 +462,9 @@ export default function ResultadosReglaMultiplicacion({
                             Desglose de Probabilidades Sucesivas:
                         </h4>
                         <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm }}>
+                            <table className="table-header-responsive" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm }}>
                                 <thead>
-                                    <tr style={{ background: 'var(--bg-input)', borderBottom: '2px solid var(--border-color)' }}>
+                                    <tr style={{ background: 'var(--bg-input)', borderBottom: '2px solid var(--border-color)', whiteSpace: 'nowrap' }}>
                                         <th style={{ padding: '8px 6px', width: inputMode === 'manual' ? '33.33%' : 'auto' }}>Paso</th>
                                         <th style={{ padding: '8px 6px', width: inputMode === 'manual' ? '33.33%' : 'auto' }}>Evento Extraído</th>
                                         {inputMode !== 'manual' && (
@@ -510,15 +514,15 @@ export default function ResultadosReglaMultiplicacion({
 
                     <div style={{ marginBottom: '20px' }}>
                         <MarcoWidgetMAT251 id="w-flow-linear" titulo="Flujo Lineal de Extracción" anchoCompleto={true} alto="auto">
-                            <div style={{ width: '100%', minWidth: 0, padding: '20px', overflowX: 'auto' }}>
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', minWidth: 0, padding: '20px', overflowX: 'auto' }}>
                                 <DiagramaFlujoSucesivo resultado={resultado} modReemplazo={modReemplazo} />
                             </div>
                         </MarcoWidgetMAT251>
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <MarcoWidgetMAT251 id="w-flow-tree" titulo="Árbol de Probabilidades Sucesivas" anchoCompleto={true} alto={`${altoArbol + 80}px`}>
-                            <div style={{ width: '100%', minWidth: 0, padding: '20px', overflowX: 'auto', overflowY: 'hidden' }}>
+                        <MarcoWidgetMAT251 id="w-flow-tree" titulo="Árbol de Probabilidades Sucesivas" anchoCompleto={true} alto="auto">
+                            <div style={{ width: '100%', minWidth: 0, padding: '20px', overflowX: 'hidden', overflowY: 'hidden' }}>
                                 <ArbolProbabilidades
                                     resultado={resultado}
                                     filas={filas}
@@ -533,6 +537,12 @@ export default function ResultadosReglaMultiplicacion({
                     </div>
                 </>
             )}
+
+            <ModalAlerta 
+                isOpen={alerta.isOpen} 
+                mensaje={alerta.mensaje} 
+                onClose={() => setAlerta({ ...alerta, isOpen: false })} 
+            />
         </div>
     );
 }

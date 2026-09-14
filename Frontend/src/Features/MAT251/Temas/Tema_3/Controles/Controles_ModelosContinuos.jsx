@@ -3,7 +3,8 @@ import '../../../styles/Temas/Tema3.css';
 import { calcularDistribucionContinua, generarDatosGraficoContinua } from '../../../Matematicas/logica_Tema3_continuas';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import { IconoMas, IconoBasura } from '../../../../../ui/iconos';
+import { IconoMas, IconoBasura, EditarDatos } from '../../../../../ui/iconos';
+import ModalAlerta from '../../../ui/ModalAlerta';
 
 export default function Controles_ModelosContinuos({
     varSeleccionada,
@@ -49,7 +50,7 @@ export default function Controles_ModelosContinuos({
     // Matriz
     const [columnaSeleccionada, setColumnaSeleccionada] = useState(0);
     const [statsEstimados, setStatsEstimados] = useState(null);
-    const [error, setError] = useState('');
+    const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
 
     useEffect(() => {
         setParamA('');
@@ -70,7 +71,7 @@ export default function Controles_ModelosContinuos({
         
         setColumnaSeleccionada(0);
         setStatsEstimados(null);
-        setError('');
+        setAlerta({ isOpen: false, mensaje: '' });
         
         if (onCalcular) onCalcular(null);
     }, [modo]);
@@ -93,11 +94,11 @@ export default function Controles_ModelosContinuos({
         
         setTipoCondicion('menor_igual');
         setValorX('');
-        setValorB_cond('');
+        setValorX2('');
         
         setColumnaSeleccionada(0);
         setStatsEstimados(null);
-        setError('');
+        setAlerta({ isOpen: false, mensaje: '' });
 
         if (onCalcular) onCalcular(null);
     };
@@ -125,7 +126,7 @@ export default function Controles_ModelosContinuos({
     // Estimar desde datos
     const estimarDesdeDatos = () => {
         if (datosColumna.length === 0) {
-            setError('No hay datos numéricos válidos en la columna.');
+            setAlerta({ isOpen: true, mensaje: 'No hay datos numéricos válidos en la columna.' });
             return;
         }
 
@@ -158,7 +159,7 @@ export default function Controles_ModelosContinuos({
         } else if (modelo === 'ChiCuadrado' || modelo === 'TStudent') {
             const num = datosColumna.length - 1;
             if (num <= 0) {
-                setError(`Se requieren al menos 2 datos para estimar los grados de libertad (n = total - 1).`);
+                setAlerta({ isOpen: true, mensaje: <span>Se requieren al menos 2 datos para estimar los grados de libertad ({renderLatex('n')} = total - 1).</span> });
                 return;
             }
             
@@ -170,43 +171,43 @@ export default function Controles_ModelosContinuos({
             if (modelo === 'ChiCuadrado') setParamK(num.toString());
             if (modelo === 'TStudent') setParamNStudent(num.toString());
         }
-        setError('');
+        setAlerta({ isOpen: false, mensaje: '' });
     };
 
-    const manejarCalculo = () => {
-        setError('');
+    const manejarCalculo = (isGraficarOnly = false) => {
+        setAlerta({ isOpen: false, mensaje: '' });
 
         let params = {};
 
         if (modelo === 'Uniforme') {
             const a = parseFloat(paramA);
             const b = parseFloat(paramB);
-            if (isNaN(a) || isNaN(b)) return setError('En Uniforme, "a" y "b" deben ser números válidos.');
-            if (a >= b) return setError('El parámetro "a" (mínimo) debe ser estrictamente menor que "b" (máximo).');
+            if (isNaN(a) || isNaN(b)) return setAlerta({ isOpen: true, mensaje: <span>En Uniforme, &quot;{renderLatex('a')}&quot; y &quot;{renderLatex('b')}&quot; deben ser números válidos.</span> });
+            if (a >= b) return setAlerta({ isOpen: true, mensaje: <span>El parámetro &quot;{renderLatex('a')}&quot; (mínimo) debe ser estrictamente menor que &quot;{renderLatex('b')}&quot; (máximo).</span> });
             params = { a, b };
         } else if (modelo === 'Normal') {
             const mu = parseFloat(paramMu);
             const sigma = parseFloat(paramSigma);
-            if (isNaN(mu) || isNaN(sigma)) return setError('En Normal, la media y desviación deben ser números válidos.');
-            if (sigma <= 0) return setError('La desviación estándar debe ser mayor a 0.');
+            if (isNaN(mu) || isNaN(sigma)) return setAlerta({ isOpen: true, mensaje: <span>En Normal, la media ({renderLatex('\\mu')}) y desviación ({renderLatex('\\sigma')}) deben ser números válidos.</span> });
+            if (sigma <= 0) return setAlerta({ isOpen: true, mensaje: <span>La desviación estándar ({renderLatex('\\sigma')}) debe ser mayor a 0.</span> });
             params = { mu, sigma };
         } else if (modelo === 'NormalEstandar') {
             params = { mu: 0, sigma: 1 };
         } else if (modelo === 'ChiCuadrado') {
             const k = parseInt(paramK, 10);
-            if (isNaN(k) || k <= 0) return setError('En Chi-cuadrado, los grados de libertad (k) deben ser un número entero mayor a 0.');
+            if (isNaN(k) || k <= 0) return setAlerta({ isOpen: true, mensaje: <span>En Chi-cuadrada, los grados de libertad ({renderLatex('k')}) deben ser un número entero mayor a 0.</span> });
             params = { k };
         } else if (modelo === 'FFisher') {
             const v1 = parseInt(paramV1, 10);
             const v2 = parseInt(paramV2, 10);
-            if (isNaN(v1) || v1 <= 0 || isNaN(v2) || v2 <= 0) return setError('En F de Fisher, los grados de libertad (v1 y v2) deben ser enteros mayores a 0.');
+            if (isNaN(v1) || v1 <= 0 || isNaN(v2) || v2 <= 0) return setAlerta({ isOpen: true, mensaje: <span>En F de Fisher, los grados de libertad ({renderLatex('v_1')} y {renderLatex('v_2')}) deben ser enteros mayores a 0.</span> });
             params = { v1, v2 };
         } else if (modelo === 'TStudent') {
             const n = parseInt(paramNStudent, 10);
-            if (isNaN(n) || n <= 0) return setError('En T de Student, los grados de libertad (n) deben ser un número entero mayor a 0.');
+            if (isNaN(n) || n <= 0) return setAlerta({ isOpen: true, mensaje: <span>En T de Student, los grados de libertad ({renderLatex('n')}) deben ser un número entero mayor a 0.</span> });
             params = { n };
         } else {
-            return setError('Este modelo continuo aún está en construcción.');
+            return setAlerta({ isOpen: true, mensaje: 'Este modelo continuo aún está en construcción.' });
         }
 
         let condicionCalculo = null;
@@ -214,26 +215,31 @@ export default function Controles_ModelosContinuos({
 
         if (tipoCondicion === 'suma_intervalos') {
             const hasValidInterval = intervals.some(i => i.min !== '' && i.max !== '');
-            if (!hasValidInterval) return setError('Ingresa al menos un intervalo válido.');
+            if (!hasValidInterval) return setAlerta({ isOpen: true, mensaje: 'Ingresa al menos un intervalo válido.' });
             condicionVisual = { tipo: tipoCondicion, intervals };
             condicionCalculo = { tipo: tipoCondicion, intervals };
         } else if (['inversa_menor', 'inversa_mayor', 'inversa_exterior', 'inversa_entre'].includes(tipoCondicion)) {
             let p = parseFloat(valorP);
-            if (isNaN(p) || p <= 0 || p >= 1) return setError('La probabilidad debe ser un número entre 0 y 1.');
+            if (isNaN(p) || p <= 0 || p >= 1) return setAlerta({ isOpen: true, mensaje: <span>La probabilidad ({renderLatex('P')}) debe ser un número entre 0 y 1.</span> });
             condicionVisual = { tipo: tipoCondicion, valP: p };
             condicionCalculo = { tipo: tipoCondicion, valP: p };
         } else if (valorX !== '') {
             let x = parseFloat(valorX);
-            if (isNaN(x)) return setError('El valor objetivo "x" debe ser numérico.');
+            if (isNaN(x)) return setAlerta({ isOpen: true, mensaje: <span>El valor objetivo &quot;{renderLatex('x')}&quot; debe ser numérico.</span> });
 
             let valB = '';
             if (['entre', 'exterior', 'intervalo'].includes(tipoCondicion)) {
                 valB = parseFloat(valorX2);
-                if (isNaN(valB) || valB <= x) return setError('El límite superior debe ser mayor que el límite inferior.');
+                if (isNaN(valB) || valB <= x) return setAlerta({ isOpen: true, mensaje: 'El límite superior debe ser mayor que el límite inferior.' });
             }
 
             condicionVisual = { tipo: tipoCondicion, valX: x, valX2: valB };
             condicionCalculo = { tipo: tipoCondicion, valX: x, valX2: valB };
+        }
+
+        // Validación de condición (Excepto cuando solo se quiere graficar o se está en modo matriz)
+        if (!isGraficarOnly && modo !== 'matriz' && !condicionCalculo && !condicionVisual) {
+            return setAlerta({ isOpen: true, mensaje: 'Por favor, ingresa una condición de búsqueda para calcular las probabilidades.' });
         }
 
         const resultados = calcularDistribucionContinua(modelo, params, condicionCalculo);
@@ -382,47 +388,33 @@ export default function Controles_ModelosContinuos({
 
         if (modelo === 'TStudent') {
             return (
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', flex: '1 1 250px' }}>
-                        <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '0', whiteSpace: 'nowrap', width: '130px', display: 'flex', alignItems: 'center' }}>Grados de lib. <span style={{ fontSize: '1.05rem', marginLeft: '6px', transform: 'translateY(-1px)' }}>{renderLatex('n')}</span></label>
-                            <input
-                                type="number" className="tema3-input" step="1" min="1"
-                                value={paramNStudent} onChange={e => setParamNStudent(e.target.value)}
-                                placeholder="Ej: 5"
-                                disabled={readOnlyParams}
-                                style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
-                            />
-                        </div>
-                    </div>
-                    <div style={{ flex: '1 1 300px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-main, #334155)', background: 'var(--bg-input, #f8fafc)', padding: '15px', borderRadius: '8px', border: '1px dashed var(--border-color, #cbd5e1)', fontSize: '1.1rem' }}>
-                        {renderLatex(`f(t) = \\frac{\\Gamma(\\frac{n+1}{2})}{\\Gamma(\\frac{n}{2})\\sqrt{n\\pi}}\\left(1+\\frac{t^2}{n}\\right)^{-\\frac{n+1}{2}} \\quad \\text{para } -\\infty < t < \\infty`)}
-                    </div>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '20px', color: '#64748b' }}>
+                    Esta distribución estará disponible próximamente.
                 </div>
             );
         }
 
         return (
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', flex: '1 1 250px' }}>
-                    <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '0', whiteSpace: 'nowrap', width: '100px', display: 'flex', alignItems: 'center' }}>Mínimo <span style={{ fontSize: '1.05rem', marginLeft: '6px', transform: 'translateY(-1px)' }}>{renderLatex('a')}</span></label>
+                <div className="t3-responsive-inputs-container">
+                    <div className="tema3-form-group t3-responsive-form-group">
+                        <label className="tema3-label t3-responsive-label">Mínimo <span style={{ fontSize: '1.05rem', marginLeft: '6px', transform: 'translateY(-1px)' }}>{renderLatex('a')}</span></label>
                         <input
                             type="number" className="tema3-input" step="any"
                             value={paramA} onChange={e => setParamA(e.target.value)}
                             placeholder="0.00"
                             disabled={readOnlyParams}
-                            style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
+                            style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1, width: '100%' }}
                         />
                     </div>
-                    <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '0', whiteSpace: 'nowrap', width: '100px', display: 'flex', alignItems: 'center' }}>Máximo <span style={{ fontSize: '1.05rem', marginLeft: '6px', transform: 'translateY(-1px)' }}>{renderLatex('b')}</span></label>
+                    <div className="tema3-form-group t3-responsive-form-group">
+                        <label className="tema3-label t3-responsive-label">Máximo <span style={{ fontSize: '1.05rem', marginLeft: '6px', transform: 'translateY(-1px)' }}>{renderLatex('b')}</span></label>
                         <input
                             type="number" className="tema3-input" step="any"
                             value={paramB} onChange={e => setParamB(e.target.value)}
                             placeholder="0.00"
                             disabled={readOnlyParams}
-                            style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1 }}
+                            style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 10px', fontSize: '0.85rem', flex: 1, width: '100%' }}
                         />
                     </div>
                 </div>
@@ -440,32 +432,21 @@ export default function Controles_ModelosContinuos({
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '15px', marginTop: '0px' }}>
 
                 {/* SELECTOR DE MODELO CONTINUO */}
-                <div style={{ display: 'flex', width: '100%', maxWidth: '750px', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
+                <div className="tema3-scrollable-tabs" style={{ display: 'flex', overflowX: 'auto', width: '100%', maxWidth: '850px', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                     {[
                         { id: 'Uniforme', label: 'Uniforme' },
                         { id: 'Normal', label: 'Normal' },
                         { id: 'NormalEstandar', label: 'Normal Estándar' },
                         { id: 'ChiCuadrado', label: 'Chi-cuadrada' },
-                        { id: 'FFisher', label: 'F de Fisher' }
+                        { id: 'FFisher', label: 'F de Fisher' },
+                        { id: 'TStudent', label: 'T de Student' }
                     ].map(tipo => (
                         <button
                             key={tipo.id}
                             type="button"
-                            className={modelo === tipo.id ? 'btn-tema3-active' : ''}
+                            className={`btn-mat251-modo ${modelo === tipo.id ? 'active' : ''}`}
                             onClick={() => handleCambiarModelo(tipo.id)}
-                            style={{
-                                flex: 1,
-                                padding: '8px 6px',
-                                borderRadius: '6px',
-                                fontSize: '0.85rem',
-                                fontWeight: 600,
-                                border: 'none',
-                                cursor: 'pointer',
-                                background: modelo === tipo.id ? '#3b82f6' : 'transparent',
-                                color: modelo === tipo.id ? '#fff' : 'var(--text-muted, #64748b)',
-                                transition: 'all 0.2s ease',
-                                boxShadow: modelo === tipo.id ? '0 2px 4px rgba(13, 110, 253, 0.3)' : 'none'
-                            }}
+                            style={{ flex: '1 0 140px', whiteSpace: 'nowrap' }}
                         >
                             {tipo.label}
                         </button>
@@ -476,37 +457,17 @@ export default function Controles_ModelosContinuos({
                     <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                     <button
                         type="button"
-                        className={modo === 'matriz' ? 'btn-tema3-active' : ''}
-                        onClick={() => { setModo('matriz'); setError(''); }}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: modo === 'matriz' ? '#3b82f6' : 'transparent',
-                            color: modo === 'matriz' ? '#fff' : 'var(--text-muted, #64748b)',
-                            transition: 'all 0.2s'
-                        }}
+                        className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
+                        onClick={() => { setModo('matriz'); setAlerta({ isOpen: false, mensaje: '' }); }}
+                        style={{ flex: 1 }}
                     >
                         Análisis de Matriz
                     </button>
                     <button
                         type="button"
-                        className={modo === 'manual' ? 'btn-tema3-active' : ''}
-                        onClick={() => { setModo('manual'); setError(''); }}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: modo === 'manual' ? '#3b82f6' : 'transparent',
-                            color: modo === 'manual' ? '#fff' : 'var(--text-muted, #64748b)',
-                            transition: 'all 0.2s'
-                        }}
+                        className={`btn-mat251-modo ${modo === 'manual' ? 'active' : ''}`}
+                        onClick={() => { setModo('manual'); setAlerta({ isOpen: false, mensaje: '' }); }}
+                        style={{ flex: 1 }}
                     >
                         Modo Manual
                     </button>
@@ -516,29 +477,44 @@ export default function Controles_ModelosContinuos({
 
             <div className="tema3-card">
 
-                {error && (
-                    <div style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #f87171', padding: '10px', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '15px' }}>
-                        <strong>Error: </strong> {error}
-                    </div>
-                )}
+
 
                 {modo === 'matriz' && (modelo === 'Uniforme' || modelo === 'Normal' || modelo === 'ChiCuadrado' || modelo === 'TStudent') && (
                     <div style={{ marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card, #fff)', padding: '12px 15px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', background: '#f8fafc', padding: '12px 15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                             <div>
-                                <div style={{ color: '#3b82f6', fontSize: '1rem', fontWeight: 600, marginBottom: '4px' }}>Conjunto de Datos:</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted, #64748b)' }}>
-                                    Cargados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.cargados : 0}</strong> &nbsp;
-                                    Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.agregados : 0}</strong> &nbsp;
-                                    Total: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.total : 0}</strong>
+                                <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#3b82f6', marginBottom: '4px', display: 'block' }}>Datos:</span>
+                                <div style={{ display: 'flex', gap: '15px' }}>
+                                    <small title="Datos cargados desde archivo o texto" style={{ color: '#64748b', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Cargados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.cargados : 0}</strong>
+                                    </small>
+                                    <small title="Datos ingresados manualmente" style={{ color: '#64748b', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.agregados : 0}</strong>
+                                    </small>
+                                    <small title="Total de datos válidos" style={{ color: '#64748b', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Total: <strong style={{ color: '#334155' }}>{statsDatos ? statsDatos.total : 0}</strong>
+                                    </small>
                                 </div>
                             </div>
                             <button
-                                className="btn-tema3-active"
+                                type="button"
                                 onClick={abrirEditor}
-                                style={{ padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)' }}
+                                className="btn btn-outline-primary"
+                                style={{
+                                    padding: '5px 14px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 600,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    background: 'transparent',
+                                    color: '#3b82f6',
+                                    border: '1px solid #3b82f6',
+                                    cursor: 'pointer'
+                                }}
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 Editar Datos
                             </button>
                         </div>
@@ -559,7 +535,7 @@ export default function Controles_ModelosContinuos({
                                     </div>
                                 </div>
 
-                                <button className="tema3-btn" onClick={estimarDesdeDatos} style={{ background: '#10b981', marginBottom: '10px', width: 'auto', margin: '0 auto', display: 'block', padding: '8px 16px' }}>
+                                <button className="button_calcular" onClick={estimarDesdeDatos} style={{ marginBottom: '10px', width: 'auto', margin: '0 auto', display: 'block', padding: '5px 15px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
                                     Estimar Parámetros
                                 </button>
 
@@ -608,72 +584,48 @@ export default function Controles_ModelosContinuos({
 
                 {renderParametrosManuales()}
 
-                {(modelo === 'Uniforme' || modelo === 'Normal' || modelo === 'NormalEstandar' || modelo === 'ChiCuadrado' || modelo === 'FFisher' || modelo === 'TStudent') && (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                        <button className="tema3-btn btn-tema3-active" onClick={manejarCalculo} style={{ padding: '8px 16px', fontSize: '0.9rem', width: 'auto' }}>
+                {(modelo === 'Uniforme' || modelo === 'Normal' || modelo === 'NormalEstandar' || modelo === 'ChiCuadrado' || modelo === 'FFisher') && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '5px' }}>
+                        <button className="button_calcular" onClick={() => manejarCalculo(true)} style={{ width: 'fit-content', padding: '5px 15px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
                             Graficar
                         </button>
                     </div>
                 )}
 
-                {children && (modelo === 'Uniforme' || modelo === 'Normal' || modelo === 'NormalEstandar' || modelo === 'ChiCuadrado' || modelo === 'TStudent' || modelo === 'FFisher') && (
+                {children && (modelo === 'Uniforme' || modelo === 'Normal' || modelo === 'NormalEstandar' || modelo === 'ChiCuadrado' || modelo === 'FFisher') && (
                     <>
                         <div style={{ borderTop: '1px solid var(--border-color, #e2e8f0)', margin: '15px 0' }}></div>
 
                         <h4 style={{ color: 'var(--text-main, #334155)', fontSize: '0.85rem', margin: '0 0 10px 0' }}>Condición de Probabilidad</h4>
 
                         {/* Toggle de Modo de Cálculo */}
-                        <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                            <div style={{ display: 'flex', width: '100%', maxWidth: '350px', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                             <button 
-                                className={calcMode === 'directa' ? 'btn-tema3-active' : ''}
+                                type="button"
+                                className={`btn-mat251-modo ${calcMode === 'directa' ? 'active' : ''}`}
                                 onClick={() => {
                                     setCalcMode('directa');
                                     setTipoCondicion('menor_igual');
                                     setValorX(''); setValorX2(''); setValorP('');
                                 }}
-                                style={{
-                                    padding: '6px 16px',
-                                    borderRadius: '6px',
-                                    fontSize: '0.85rem',
-                                    fontWeight: 600,
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    background: calcMode === 'directa' ? '#3b82f6' : 'transparent',
-                                    color: calcMode === 'directa' ? '#fff' : 'var(--text-muted, #64748b)',
-                                    transition: 'all 0.2s ease',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    minWidth: '150px'
-                                }}
+                                style={{ flex: 1 }}
                             >
                                 Calcular Probabilidad
                             </button>
                             <button 
-                                className={calcMode === 'inversa' ? 'btn-tema3-active' : ''}
+                                type="button"
+                                className={`btn-mat251-modo ${calcMode === 'inversa' ? 'active' : ''}`}
                                 onClick={() => {
                                     setCalcMode('inversa');
                                     setTipoCondicion('inversa_menor');
                                     setValorX(''); setValorX2(''); setValorP('');
                                 }}
-                                style={{
-                                    padding: '6px 16px',
-                                    borderRadius: '6px',
-                                    fontSize: '0.85rem',
-                                    fontWeight: 600,
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    background: calcMode === 'inversa' ? '#3b82f6' : 'transparent',
-                                    color: calcMode === 'inversa' ? '#fff' : 'var(--text-muted, #64748b)',
-                                    transition: 'all 0.2s ease',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    minWidth: '150px'
-                                }}
+                                style={{ flex: 1 }}
                             >
                                 Calcular Valor Inverso
                             </button>
+                        </div>
                         </div>
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'flex-end', marginBottom: '25px' }}>
@@ -733,7 +685,7 @@ export default function Controles_ModelosContinuos({
                             {/* Input para Inversas (Probabilidad) */}
                             {calcMode === 'inversa' && (
                                 <div style={{ flex: '1 1 0%', minWidth: '150px', display: 'flex', flexDirection: 'column' }}>
-                                    <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '6px', fontWeight: '600' }}>Probabilidad (p)</label>
+                                    <label className="tema3-label" style={{ fontSize: '0.8rem', marginBottom: '6px', fontWeight: '600' }}>Probabilidad ({renderLatex('p')})</label>
                                     <input
                                         type="number" step="0.01" min="0.0001" max="0.9999" className="tema3-input"
                                         value={valorP} onChange={e => setValorP(e.target.value)}
@@ -803,8 +755,8 @@ export default function Controles_ModelosContinuos({
                                                             {index + 1}
                                                         </td>
                                                         <td style={{ padding: '4px' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                                                                <span style={{ fontSize: '0.9rem', color: 'var(--text-main, #334155)' }}>{renderLatex(`x_{${index * 2 + 1}}`)} =</span>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', whiteSpace: 'nowrap' }}>
+                                                                <span style={{ fontSize: '0.9rem', color: 'var(--text-main, #334155)' }}>{renderLatex(`x_{${index * 2 + 1}} =`)}</span>
                                                                 <input
                                                                     type="number"
                                                                     value={inv.min}
@@ -820,8 +772,8 @@ export default function Controles_ModelosContinuos({
                                                             </div>
                                                         </td>
                                                         <td style={{ padding: '4px' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                                                                <span style={{ fontSize: '0.9rem', color: 'var(--text-main, #334155)' }}>{renderLatex(`x_{${index * 2 + 2}}`)} =</span>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', whiteSpace: 'nowrap' }}>
+                                                                <span style={{ fontSize: '0.9rem', color: 'var(--text-main, #334155)' }}>{renderLatex(`x_{${index * 2 + 2}} =`)}</span>
                                                                 <input
                                                                     type="number"
                                                                     value={inv.max}
@@ -858,17 +810,29 @@ export default function Controles_ModelosContinuos({
                                         </table>
                                     </div>
                                     <button
-                                        className="btn-tema3-active"
+                                        type="button"
                                         onClick={() => setIntervals([...intervals, { id: Date.now(), min: '', max: '' }])}
-                                        style={{ padding: '8px 12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: 'fit-content', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 auto' }}
+                                        style={{
+                                            padding: '6px 14px',
+                                            background: 'transparent',
+                                            color: '#3b82f6',
+                                            border: '1px solid #3b82f6',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontWeight: 600,
+                                            fontSize: '0.85rem',
+                                            width: 'fit-content',
+                                            margin: '0 auto',
+                                            display: 'block'
+                                        }}
                                     >
-                                        <IconoMas width="16" height="16" /> Agregar otro intervalo
+                                        Agregar otro intervalo
                                     </button>
                                 </div>
                             )}
 
-                            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
-                                <button className="tema3-btn btn-tema3-active" onClick={manejarCalculo} style={{ width: 'auto', padding: '6px 30px', fontSize: '0.95rem', fontWeight: 'bold' }}>
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                                <button className="button_calcular" onClick={() => manejarCalculo(false)} style={{ width: 'fit-content', padding: '5px 15px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
                                     Calcular
                                 </button>
                             </div>
@@ -881,6 +845,11 @@ export default function Controles_ModelosContinuos({
                     {children}
                 </div>
             </div>
+            <ModalAlerta
+                isOpen={alerta.isOpen}
+                mensaje={alerta.mensaje}
+                onClose={() => setAlerta({ ...alerta, isOpen: false })}
+            />
         </div>
     );
 }

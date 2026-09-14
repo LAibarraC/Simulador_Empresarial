@@ -16,9 +16,9 @@ export default function ControlesConteo({
                     <div key={label} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', gap: '10px' }}>
                         <label style={{ fontSize: FS.sm, fontFamily: FONT, width: '85px', flexShrink: 0, margin: 0 }}>{label}</label>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
-                            <button className="btn-icon" onClick={() => ajustar(setVal, val, '-')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>−</button>
+                            <button className="btn-primary" onClick={() => ajustar(setVal, val, '-')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>−</button>
                             <input type="number" value={val} onChange={(e) => setVal(e.target.value)} className="container_cal_input" style={{ textAlign: 'center', flex: 1, borderRadius: RADIUS, fontSize: FS.base }} />
-                            <button className="btn-icon" onClick={() => ajustar(setVal, val, '+')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>+</button>
+                            <button className="btn-primary" onClick={() => ajustar(setVal, val, '+')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>+</button>
                         </div>
                     </div>
                 ))}
@@ -75,8 +75,7 @@ export default function ControlesConteo({
                 </div>
             </div>
 
-            <button onClick={ejecutar} className="button_calcular btn-icon" style={{ width: 'fit-content', alignSelf: 'center', padding: '6px 20px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <IconoCalculadora />
+            <button onClick={ejecutar} className="button_calcular" style={{ width: 'fit-content', alignSelf: 'center', padding: '6px 20px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
                 CALCULAR
             </button>
         </>

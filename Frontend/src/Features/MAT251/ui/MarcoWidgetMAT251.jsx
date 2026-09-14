@@ -104,19 +104,7 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
           </div>
 
           <div className="widget-controles">
-            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-input, transparent)', borderRadius: '6px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
-                <button className="widget-btn" onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} title="Alejar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', padding: 0, border: 'none', borderRadius: 0 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', minWidth: '38px', color: 'var(--text-main)', userSelect: 'none', height: '24px', borderLeft: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)' }}>
-                    {Math.round(zoom * 100)}%
-                </div>
-                <button className="widget-btn" onClick={() => setZoom(z => Math.min(3, z + 0.25))} title="Acercar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', padding: 0, border: 'none', borderRadius: 0 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-            </div>
-            
-            <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', margin: '0 4px' }}></div>
+
 
             <button className="widget-btn" onClick={() => setIsMinimized(!isMinimized)} title={isMinimized ? "Mostrar" : "Ocultar"} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {isMinimized ? <IconoMostrar /> : <IconoOcultar />}
@@ -174,10 +162,8 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
         >
           {/* La Tarjeta Blanca Gigante */}
           <div
-            className="widget-grafico"
+            className="widget-grafico modal-grafico-gigante"
             style={{
-              width: '90%',
-              height: '90%',
               backgroundColor: 'var(--bg-card, #ffffff)',
               borderRadius: '12px',
               display: 'flex',
@@ -188,11 +174,11 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
             onClick={(e) => e.stopPropagation()} // Evita que se cierre si haces clic dentro del gráfico
           >
             {/* Header del Modal */}
-            <div className="widget-header" style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="widget-header modal-header-gigante" style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="widget-titulo-max" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <IconoArbol /> {titulo}
               </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div className="controles-modal-gigante" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-input, transparent)', borderRadius: '8px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
                   <button className="widget-btn" onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} title="Alejar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', padding: 0, border: 'none', borderRadius: 0, cursor: 'pointer' }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -219,7 +205,7 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
             {/* Cuerpo Gigante del Gráfico */}
             <div 
               ref={containerRefMax}
-              className="thin-scrollbar"
+              className="thin-scrollbar cuerpo-grafico-gigante"
               style={{ flex: 1, position: 'relative', padding: '20px', overflow: zoom > 1 ? 'auto' : 'hidden', cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
               onPointerDown={(e) => handlePointerDown(e, containerRefMax)}
               onPointerMove={(e) => handlePointerMove(e, containerRefMax)}
@@ -236,3 +222,4 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
     </>
   );
 }
+

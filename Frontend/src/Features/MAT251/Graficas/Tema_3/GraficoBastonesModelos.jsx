@@ -34,18 +34,40 @@ const CustomKatexLabel = (props) => {
     );
 };
 
+const CustomLabelX = ({ viewBox }) => {
+    if (!viewBox) return null;
+    return (
+        <text x={viewBox.x + viewBox.width / 2} y={viewBox.y + 40} fill="var(--text-main, #333333)" fontSize={14} fontWeight="bold" textAnchor="middle">
+            Valor (<tspan fontFamily="'KaTeX_Math', 'Times New Roman', serif" fontStyle="italic" fontSize={15}>x</tspan>)
+        </text>
+    );
+};
+
+const CustomLabelY = ({ viewBox }) => {
+    if (!viewBox) return null;
+    return (
+        <text x={viewBox.x + 20} y={viewBox.y + viewBox.height / 2} transform={`rotate(-90, ${viewBox.x + 20}, ${viewBox.y + viewBox.height / 2})`} fill="var(--text-main, #333333)" fontSize={14} fontWeight="bold" textAnchor="middle">
+            Probabilidad <tspan fontFamily="'KaTeX_Math', 'Times New Roman', serif" fontStyle="italic" fontSize={15}>P(x)</tspan>
+        </text>
+    );
+};
+
 const getOperador = (tipo) => {
     switch (tipo) {
-        case 'mayor_igual': return '\\boldsymbol{\\ge}';
-        case 'menor_igual': return '\\boldsymbol{\\le}';
-        case 'mayor_estricto': return '\\boldsymbol{>}';
-        case 'menor_estricto': return '\\boldsymbol{<}';
-        default: return '\\boldsymbol{=}';
+        case 'mayor_igual': return '\\ge';
+        case 'menor_igual': return '\\le';
+        case 'mayor_estricto': return '>';
+        case 'menor_estricto': return '<';
+        default: return '=';
     }
 };
 
 export default function GraficoBastonesModelos({ datos, condicion, resultados }) {
     if (!datos || datos.length === 0) return null;
+
+    const renderLatex = (str) => {
+        return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
+    };
 
     // Detectar si es el modelo de Bernoulli por la forma de sus datos
     const esBernoulli = datos.length === 2 && datos[0].x === 0 && datos[1].x === 1;
@@ -128,7 +150,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
     };
 
     return (
-        <MarcoWidgetMAT251 titulo="Gráfico de Bastones P(X = x)" anchoCompleto={true} alto="450px" id="grafico-bastones-tema3">
+        <MarcoWidgetMAT251 titulo={<>Gráfico de Bastones {renderLatex('P(X = x)')}</>} anchoCompleto={true} alto="450px" id="grafico-bastones-tema3">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden' }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -150,7 +172,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
                                 tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                label={{ value: 'Valor (x)', position: 'insideBottom', offset: -10, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<CustomLabelX />}
                             />
 
                             <YAxis
@@ -159,7 +181,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
                                 tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                label={{ value: 'Probabilidad P(x)', angle: -90, position: 'insideLeft', offset: 15, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<CustomLabelY />}
                             />
 
                             <Tooltip content={<CustomTooltip />} />
@@ -213,7 +235,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
                                         stroke="#f97316"
                                         strokeDasharray="4 4"
                                         strokeWidth={3}
-                                        label={<CustomKatexLabel value={condicion.tipo.includes('intervalo') ? `\\mathbf{X} \\boldsymbol{=} ${condicion.valorX}` : `\\mathbf{X} ${getOperador(condicion.tipo)} ${condicion.valorX}`} />}
+                                        label={<CustomKatexLabel value={condicion.tipo.includes('intervalo') ? `X = ${condicion.valorX}` : `X ${getOperador(condicion.tipo)} ${condicion.valorX}`} />}
                                     />
                                     {condicion.tipo.includes('intervalo') && condicion.valorB !== undefined && (
                                         <ReferenceLine

@@ -35,7 +35,7 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
 
     return (
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
-            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height={svgHeight} style={{ maxWidth: `${svgWidth}px`, fontFamily: FONT }}>
+            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height="auto" style={{ maxWidth: '100%', fontFamily: FONT }}>
                 <defs>
                     <marker id="arrow-active" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
                         <path d="M0,0 L0,6 L9,3 z" fill={activeColor} />
@@ -236,7 +236,7 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
 
     return (
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
-            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height={svgHeight} style={{ maxWidth: '900px', fontFamily: FONT }}>
+            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height="auto" style={{ maxWidth: '900px', fontFamily: FONT }}>
                 <defs>
                     <marker id="arrow-active-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
                         <path d="M0,0 L0,6 L9,3 z" fill={activeColor} />

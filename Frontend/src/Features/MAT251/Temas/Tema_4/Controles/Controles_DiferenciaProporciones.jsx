@@ -3,6 +3,7 @@ import { jStat } from 'jstat';
 import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
 import { IconoCalculadora } from '../../../../../ui/iconos';
+import { generarDistribucionDiferenciaProporciones, calcularProbabilidadDiferenciaProporciones } from '../../../Matematicas/Logica_Tema4';
 
 const CustomSelect = ({ value, onChange, options }) => {
     const [isOpen, React_useState] = React.useState(false);
@@ -106,94 +107,22 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
     };
 
     const calcularParametros = () => {
-        const prop1 = parseFloat(p1);
-        const num1 = parseFloat(n1);
-        const prop2 = parseFloat(p2);
-        const num2 = parseFloat(n2);
-
-        if (isNaN(prop1) || isNaN(num1) || isNaN(prop2) || isNaN(num2)) {
-            alert("Por favor, ingresa todos los valores numéricos para ambas muestras.");
+        const result = generarDistribucionDiferenciaProporciones(p1, n1, p2, n2);
+        if (result.error) {
+            alert(result.error);
             return;
         }
-
-        if (prop1 < 0 || prop1 > 1 || prop2 < 0 || prop2 > 1) {
-            alert("Las proporciones (p1, p2) deben estar entre 0 y 1.");
-            return;
-        }
-
-        if (num1 <= 0 || num2 <= 0) {
-            alert("Los tamaños de muestra deben ser mayores a 0.");
-            return;
-        }
-
-        const q1 = 1 - prop1;
-        const q2 = 1 - prop2;
-        
-        const esperanza = prop1 - prop2;
-        const var1 = (prop1 * q1) / num1;
-        const var2 = (prop2 * q2) / num2;
-        const varianza = var1 + var2;
-
-        setParametrosPrevios({ prop1, num1, q1, prop2, num2, q2, esperanza, varianza, var1, var2 });
+        setParametrosPrevios(result);
     };
 
     const calcular = () => {
-        if (!parametrosPrevios) return;
-
-        const { prop1, num1, q1, prop2, num2, q2, esperanza, varianza, var1, var2 } = parametrosPrevios;
-
-        const x1 = parseFloat(valorX1);
-        const x2 = parseFloat(valorX2);
-
-        if ((condicion === 'menor_que' || condicion === 'mayor_que') && isNaN(x1)) {
-            alert('Ingresa un valor válido para la condición a calcular.');
-            return;
-        }
-        if (condicion === 'entre' && (isNaN(x1) || isNaN(x2))) {
-            alert('Ingresa ambos valores para el rango.');
+        const result = calcularProbabilidadDiferenciaProporciones(parametrosPrevios, condicion, valorX1, valorX2);
+        if (result.error) {
+            if (result.error !== 'Faltan parámetros previos.') alert(result.error);
             return;
         }
 
-        const se = Math.sqrt(varianza);
-
-        let probFinal = 0;
-        let statValue = 0; 
-        let strDesarrollo = '';
-        const formulaLaTeX = `Z = \\frac{(\\hat{p}_1 - \\hat{p}_2) - (p_1 - p_2)}{\\sqrt{\\frac{p_1 q_1}{n_1} + \\frac{p_2 q_2}{n_2}}}`;
-
-        if (condicion === 'menor_que') {
-            statValue = (x1 - esperanza) / se;
-            probFinal = jStat.normal.cdf(statValue, 0, 1);
-            strDesarrollo = `\\begin{aligned} P(\\hat{p}_1 - \\hat{p}_2 < ${x1}) &= P\\left( Z < \\frac{${x1} - (${esperanza.toFixed(4)})}{\\sqrt{${var1.toFixed(6)} + ${var2.toFixed(6)}}} \\right) \\\\ &= P(Z < ${statValue.toFixed(4)}) \\\\ &= ${probFinal.toFixed(4)} \\end{aligned}`;
-        } else if (condicion === 'mayor_que') {
-            statValue = (x1 - esperanza) / se;
-            probFinal = 1 - jStat.normal.cdf(statValue, 0, 1);
-            strDesarrollo = `\\begin{aligned} P(\\hat{p}_1 - \\hat{p}_2 > ${x1}) &= P\\left( Z > \\frac{${x1} - (${esperanza.toFixed(4)})}{\\sqrt{${var1.toFixed(6)} + ${var2.toFixed(6)}}} \\right) \\\\ &= P(Z > ${statValue.toFixed(4)}) \\\\ &= 1 - P(Z < ${statValue.toFixed(4)}) \\\\ &= ${probFinal.toFixed(4)} \\end{aligned}`;
-        } else if (condicion === 'entre') {
-            const z1 = (x1 - esperanza) / se;
-            const z2 = (x2 - esperanza) / se;
-            statValue = z2; // For displaying the main target
-            const probZ2 = jStat.normal.cdf(z2, 0, 1);
-            const probZ1 = jStat.normal.cdf(z1, 0, 1);
-            probFinal = Math.abs(probZ2 - probZ1);
-            strDesarrollo = `\\begin{aligned} P(${x1} < \\hat{p}_1 - \\hat{p}_2 < ${x2}) &= P\\left( \\frac{${x1} - (${esperanza.toFixed(4)})}{\\sqrt{${varianza.toFixed(6)}}} < Z < \\frac{${x2} - (${esperanza.toFixed(4)})}{\\sqrt{${varianza.toFixed(6)}}} \\right) \\\\ &= P(${z1.toFixed(4)} < Z < ${z2.toFixed(4)}) \\\\ &= P(Z < ${z2.toFixed(4)}) - P(Z < ${z1.toFixed(4)}) \\\\ &= ${probZ2.toFixed(4)} - ${probZ1.toFixed(4)} \\\\ &= ${probFinal.toFixed(4)} \\end{aligned}`;
-        }
-
-        onCalcular({
-            prop1, num1, q1,
-            prop2, num2, q2,
-            esperanza,
-            varianza,
-            se,
-            condicion,
-            x1, x2,
-            probFinal,
-            statValue,
-            statType: 'Z',
-            formulaLaTeX,
-            strDesarrollo,
-            p: esperanza // Parameter for the Graph (mean of normal distribution)
-        });
+        onCalcular(result);
     };
 
     return (
@@ -231,12 +160,8 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
             </div>
 
             {!parametrosPrevios ? (
-                <button
-                    onClick={calcularParametros}
-                    style={{ width: 'fit-content', margin: '20px auto 0', padding: '10px 40px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                >
-                    Calcular
-                </button>
+                <button onClick={calcularParametros} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '20px auto 0', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                >CALCULAR</button>
             ) : (
                 <>
                     {/* Parámetros Calculados */}
@@ -309,9 +234,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                         </div>
                     </div>
 
-                    <button
-                        onClick={calcular}
-                        style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    <button onClick={calcular} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '0 auto', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                     >
                         Graficar
                     </button>
@@ -320,3 +243,10 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
         </div>
     );
 }
+
+
+
+
+
+
+

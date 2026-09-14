@@ -1,0 +1,126 @@
+/* Custom Select Herramienta */
+.tema4-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.tema4-select-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-color, #1e293b);
+    user-select: none;
+}
+
+.tema4-select-header.open {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.tema4-select-header-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tema4-select-icon-primary {
+    color: var(--primary-color, #3b82f6);
+}
+
+.tema4-select-text {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.tema4-select-chevron {
+    color: var(--text-muted, #64748b);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.tema4-select-chevron.open {
+    transform: rotate(180deg);
+}
+
+.tema4-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.tema4-select-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-color, #1e293b);
+    font-weight: 400;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.tema4-select-option:hover {
+    background: var(--bg-app, #f8fafc);
+}
+
+.tema4-select-option.selected {
+    background: var(--bg-app, #f8fafc);
+    color: var(--primary-color, #3b82f6);
+    font-weight: 600;
+}
+
+/* Calculadora Wrapper */
+.tema4-calculadora-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.tema4-calculadora-resultados {
+    margin-top: 20px;
+}
+
+.tema4-en-construccion {
+    padding: 40px 20px;
+    text-align: center;
+    background: var(--bg-card, #ffffff);
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    margin: 20px;
+}
+
+.tema4-en-construccion h3 {
+    color: var(--primary-color, #3b82f6);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.tema4-en-construccion p {
+    color: var(--text-muted, #64748b);
+    font-size: 1rem;
+}
+
+/* Responsive formulas */
+.formula-responsive {
+    font-size: 0.8rem;
+}
+
+@media (min-width: 768px) {
+    .formula-responsive {
+        font-size: 1rem;
+    }
+}

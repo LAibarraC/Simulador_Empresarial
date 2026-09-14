@@ -10,13 +10,45 @@ const CustomKatexLabel = (props) => {
     const { viewBox, value, offsetY = 0, offsetX = 0 } = props;
     if (!viewBox) return null;
     const { x, y } = viewBox;
-    
+
     return (
         <foreignObject x={x - 50 + offsetX} y={y - 30 + offsetY} width={100} height={30} style={{ overflow: 'visible' }}>
-            <div 
-                dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} 
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }} 
+            <div
+                dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }}
+                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}
             />
+        </foreignObject>
+    );
+};
+
+const XAxisKatexLabel = ({ viewBox, prefix, value }) => {
+    if (!viewBox) return null;
+    const { x, y, width, height } = viewBox;
+    const cx = x + width / 2;
+    const cy = y + height - 5;
+    return (
+        <foreignObject x={cx - 150} y={cy - 8} width={300} height={30} style={{ overflow: 'visible', pointerEvents: 'none' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-main, #333333)', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', gap: '3px' }}>
+                <span>{prefix}</span>
+                <span dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} />
+            </div>
+        </foreignObject>
+    );
+};
+
+const YAxisKatexLabel = ({ viewBox, prefix, value }) => {
+    if (!viewBox) return null;
+    const { x, y, height } = viewBox;
+    const cx = x + 5;
+    const cy = y + height / 2;
+    return (
+        <foreignObject x={cx - 90} y={cy - 100} width={200} height={200} style={{ overflow: 'visible', pointerEvents: 'none' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ transform: 'rotate(-90deg)', color: 'var(--text-main, #333333)', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <span>{prefix}</span>
+                    <span dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} />
+                </div>
+            </div>
         </foreignObject>
     );
 };
@@ -126,7 +158,7 @@ export default function GraficoDiferenciaMedias({ resultados }) {
         if (curSegment.length > 0) segments.push(curSegment);
 
         // Custom Ticks para el eje X
-        let ticks = [mu - 3*SE, mu - 2*SE, mu - SE, mu, mu + SE, mu + 2*SE, mu + 3*SE];
+        let ticks = [mu - 3 * SE, mu - 2 * SE, mu - SE, mu, mu + SE, mu + 2 * SE, mu + 3 * SE];
         if (tieneProbabilidad) {
             if (condicion === 'entre') {
                 ticks.push(x1, x2);
@@ -134,7 +166,7 @@ export default function GraficoDiferenciaMedias({ resultados }) {
                 ticks.push(x1);
             }
         }
-        
+
         ticks = [...new Set(ticks.map(t => Math.round(t * 1000) / 1000))].sort((a, b) => a - b);
 
         // Annotation Data
@@ -173,52 +205,52 @@ export default function GraficoDiferenciaMedias({ resultados }) {
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={datosGrafico} margin={{ top: 45, right: 30, left: 0, bottom: 30 }}>
+                        <AreaChart data={datosGrafico} margin={{ top: 40, right: 30, left: -5, bottom: 35 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            
-                            <XAxis 
-                                dataKey="x" 
-                                type="number" 
+
+                            <XAxis
+                                dataKey="x"
+                                type="number"
                                 domain={['dataMin', 'dataMax']}
                                 ticks={customTicks}
                                 padding={{ left: 20, right: 20 }}
                                 tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickFormatter={(val) => Number.isInteger(val) ? val : val.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 3 })}
-                                label={{ value: 'Diferencia de Medias (X̄ - Ȳ)', position: 'insideBottom', offset: -10, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                tickFormatter={(val) => Number.isInteger(val) ? val : val.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                                label={<XAxisKatexLabel prefix="Diferencia de Medias " value={"(\\bar{X} - \\bar{Y})"} />}
                             />
-                            
-                            <YAxis 
-                                padding={{ top: 30 }}
+
+                            <YAxis
+                                padding={{ top: 20 }}
                                 tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickFormatter={(val) => val === 0 ? '0' : val.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
-                                label={{ value: 'Densidad f(X̄ - Ȳ)', angle: -90, position: 'insideLeft', offset: 15, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<YAxisKatexLabel prefix="Densidad " value={"f(\\bar{X} - \\bar{Y})"} />}
                             />
-                            
-                            <Tooltip 
+
+                            <Tooltip
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
                                 formatter={(value, name) => [value.toLocaleString('es-ES', { minimumFractionDigits: 5 }), name === 'y' ? 'f(X̄ - Ȳ)' : 'Área']}
                                 labelFormatter={(label) => `X̄ - Ȳ = ${label.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 4 })}`}
                             />
 
-                            <Area 
-                                type="monotone" 
-                                dataKey="y" 
-                                stroke="#3b82f6" 
+                            <Area
+                                type="monotone"
+                                dataKey="y"
+                                stroke="#3b82f6"
                                 strokeWidth={3}
-                                fill="transparent" 
+                                fill="transparent"
                                 isAnimationActive={false}
                             />
 
                             {tieneProbabilidad && (
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="fillY" 
-                                    stroke="none" 
-                                    fill="rgba(59, 130, 246, 0.4)" 
+                                <Area
+                                    type="monotone"
+                                    dataKey="fillY"
+                                    stroke="none"
+                                    fill="rgba(59, 130, 246, 0.4)"
                                     isAnimationActive={false}
                                 />
                             )}
@@ -236,12 +268,12 @@ export default function GraficoDiferenciaMedias({ resultados }) {
 
                             {/* Anotaciones */}
                             {tieneProbabilidad && annotationData.map((ann, idx) => (
-                                <ReferenceDot 
-                                    key={idx} 
-                                    x={ann.x} 
-                                    y={ann.y} 
-                                    r={0} 
-                                    label={<SmartAnnotation value={ann.text} />} 
+                                <ReferenceDot
+                                    key={idx}
+                                    x={ann.x}
+                                    y={ann.y}
+                                    r={0}
+                                    label={<SmartAnnotation value={ann.text} />}
                                 />
                             ))}
 

@@ -182,7 +182,7 @@ export default function GraficoChiCuadrada({ resultados }) {
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={datosGrafico} margin={{ top: 45, right: 30, left: 0, bottom: 30 }}>
+                        <AreaChart data={datosGrafico} margin={{ top: 45, right: 30, left: 80, bottom: 30 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                             
                             <XAxis 
