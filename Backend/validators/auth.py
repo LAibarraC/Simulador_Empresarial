@@ -6,6 +6,9 @@ class UsuarioRegistro(BaseModel):
     email: str
     password: str
     rol: Optional[str] = "Estudiante"
+    ci: str
+    cu: Optional[str] = None
+
 
 class UsuarioLogin(BaseModel):
     email: str
@@ -47,3 +50,6 @@ class GoogleLoginRequest(BaseModel):
 
 class AsignarRolInicial(BaseModel):
     rol: str
+    ci: str
+    cu: Optional[str] = None
+

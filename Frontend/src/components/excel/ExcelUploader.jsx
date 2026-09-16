@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
+import { Upload } from 'lucide-react';
 import { alerta } from '../../utils/Notificaciones';
 
 import "../../styles/components/excel/ExcelUploader.css";
 
-export default function ExcelUploader({ onUpload }) {
+export default function ExcelUploader({ onUpload, compact = false }) {
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -37,13 +38,44 @@ export default function ExcelUploader({ onUpload }) {
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
       const extension = droppedFile.name.split('.').pop().toLowerCase();
-      if (extension === "xlsx" || extension === "xls") {
+      if (["xlsx", "xls", "csv"].includes(extension)) {
         setFile(droppedFile);
       } else {
-        alerta.warning("Por favor, sube solo archivos de Excel (.xlsx, .xls)");
+        alerta.warning("Por favor, sube solo archivos de Excel o CSV (.xlsx, .xls, .csv)");
       }
     }
   };
+
+  if (compact) {
+    return (
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        title="También puedes arrastrar y soltar un archivo aquí"
+        className={`excel-uploader-compact${isDragging ? ' is-dragging' : ''}`}
+      >
+        <input
+          id="fileInputCompact"
+          type="file"
+          accept=".xlsx, .xls, .csv"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+        <label htmlFor="fileInputCompact" className="excel-uploader-compact-button">
+          <Upload size={17} strokeWidth={2.2} aria-hidden="true" />
+          Cargar credenciales
+        </label>
+        {file && (
+          <>
+            <span title={file.name} className="excel-uploader-compact-file">{file.name}</span>
+            <button type="button" className="btn-azul excel-uploader-compact-submit" onClick={handleSubmit}>Subir</button>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -61,7 +93,7 @@ export default function ExcelUploader({ onUpload }) {
       <input
         id="fileInput"
         type="file"
-        accept=".xlsx, .xls"
+        accept=".xlsx, .xls, .csv"
         ref={fileInputRef}
         style={{ display: "none" }}
         onChange={(e) => setFile(e.target.files[0])}

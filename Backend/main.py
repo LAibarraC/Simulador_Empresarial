@@ -6,7 +6,7 @@ load_dotenv()  # Cargar variables de entorno desde .env
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
-from routers import auth, archivos, calculos, historial, grupos, notificaciones, tareas, qr as qr_router
+from routers import auth, archivos, calculos, historial, grupos, notificaciones, tareas, qr as qr_router, admin_credenciales
 from config.database import async_engine, get_db
 import models
 
@@ -18,6 +18,16 @@ async def lifespan(app: FastAPI):
         try:
             from sqlalchemy import text
             await conn.execute(text("ALTER TABLE tareas ADD COLUMN archivo_nombre_fijo VARCHAR(255) NULL"))
+        except Exception:
+            pass
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE credenciales_autorizadas ADD COLUMN fecha_carga DATETIME NULL"))
+        except Exception:
+            pass
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("UPDATE credenciales_autorizadas SET fecha_carga = CURRENT_TIMESTAMP WHERE fecha_carga IS NULL"))
         except Exception:
             pass
     yield
@@ -70,6 +80,7 @@ app.include_router(tareas.router)
 # Las rutas internas del router ya están declaradas con el prefijo "/api/qr/...",
 # por lo que se registra sin prefix para evitar duplicarlo.
 app.include_router(qr_router.router)
+app.include_router(admin_credenciales.router)
 
 # Utilidades globales del núcleo
 VISITAS_FILE = "visitas.txt"

@@ -551,7 +551,7 @@ export const api = {
     return data;
   },
 
-  asignarRolInicial: async (rol) => {
+  asignarRolInicial: async (payload) => {
     const token = localStorage.getItem("token");
     const headers = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -559,10 +559,71 @@ export const api = {
     const res = await fetch(`${BASE_URL}/asignar_rol_inicial`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ rol }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error al asignar rol inicial");
+    return data;
+  },
+
+  cargarCredenciales: async (file) => {
+    const token = localStorage.getItem("token");
+    const headers = {}; // No Content-Type for FormData
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${BASE_URL}/cargar_credenciales`, {
+      method: "POST",
+      headers: headers,
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al cargar credenciales");
+    return data;
+  },
+
+  crearCredencial: async (credencial) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/credenciales`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(credencial),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al crear credencial");
+    return data;
+  },
+
+  obtenerCredenciales: async () => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/credenciales`, {
+      method: "GET",
+      headers: headers,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al obtener credenciales");
+    return data;
+  },
+
+  eliminarCredencial: async (ci) => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/credenciales/${encodeURIComponent(ci)}`, {
+      method: "DELETE",
+      headers: headers,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al eliminar la credencial");
     return data;
   },
 

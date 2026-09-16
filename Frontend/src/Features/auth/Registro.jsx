@@ -11,6 +11,8 @@ export default function Registro({ onLogin }) {
   const [step, setStep] = useState(1);
   const [nombres, setNombres] = useState("");
   const [apellidos, setApellidos] = useState("");
+  const [ci, setCi] = useState("");
+  const [cu, setCu] = useState("");
   const [rol, setRol] = useState("");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -38,8 +40,12 @@ export default function Registro({ onLogin }) {
         return;
       }
     } else if (step === 2) {
-      if (!nombres.trim() || !apellidos.trim()) {
-        alerta.error("Datos incompletos", "Por favor, ingresa tus nombres y apellidos.");
+      if (!nombres.trim() || !apellidos.trim() || !ci.trim()) {
+        alerta.error("Datos incompletos", "Por favor, ingresa tus nombres, apellidos y CI.");
+        return;
+      }
+      if (rol === 'estudiante' && !cu.trim()) {
+        alerta.error("Datos incompletos", "Por favor, ingresa tu Carnet Universitario (CU).");
         return;
       }
     } else if (step === 3) {
@@ -101,7 +107,9 @@ export default function Registro({ onLogin }) {
           nombre: `${String(nombres).trim()} ${String(apellidos).trim()}`,
           email: String(email).trim(),
           password: String(pass),
-          rol: rol
+          rol: rol,
+          ci: String(ci).trim(),
+          cu: rol === 'estudiante' ? String(cu).trim() : null
         };
 
         const response = await fetch(`${BASE_URL}/registrar_usuario`, {
@@ -121,10 +129,11 @@ export default function Registro({ onLogin }) {
               onLogin(data);
             }
             alerta.success("Cuenta creada", "Te has registrado e iniciado sesión automáticamente.");
-            navigate("/"); 
+            navigate("/");
           } catch (error) {
-            alerta.success("Cuenta creada", "Tu cuenta ha sido registrada exitosamente. Por favor, inicia sesión.");
-            navigate("/login"); 
+            // Si el registro fue exitoso pero el auto-login falló, seguimos informando éxito
+            alerta.success("Cuenta creada", "Tu cuenta ha sido registrada exitosamente. Por favor, inicia sesión manualmente.");
+            navigate("/login");
           }
         } else {
           let msgError = "No se pudo registrar.";
@@ -415,30 +424,56 @@ export default function Registro({ onLogin }) {
 
           {/* PASO 2: DATOS PERSONALES */}
           {step === 2 && (
-            <div className="form-row-responsive step-animation">
-              <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, height: '50px' }}>
-                <input
-                  type="text"
-                  value={nombres}
-                  onChange={(e) => setNombres(e.target.value)}
-                  placeholder="Ej. Juan Carlos"
-                  style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 14px", boxSizing: "border-box" }}
-                  required={step === 2}
-                />
-                <label className="etiqueta">Nombres</label>
-                <fieldset className="notch"><legend><span>Nombres</span></legend></fieldset>
+            <div className="step-animation" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="form-row-responsive">
+                <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
+                  <input
+                    type="text"
+                    value={nombres}
+                    onChange={(e) => setNombres(e.target.value)}
+                    placeholder="Ej. Juan Carlos"
+                    required={step === 2}
+                  />
+                  <label className="etiqueta">Nombres</label>
+                  <fieldset className="notch"><legend><span>Nombres</span></legend></fieldset>
+                </div>
+                <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
+                  <input
+                    type="text"
+                    value={apellidos}
+                    onChange={(e) => setApellidos(e.target.value)}
+                    placeholder="Ej. Pérez Gómez"
+                    required={step === 2}
+                  />
+                  <label className="etiqueta">Apellidos</label>
+                  <fieldset className="notch"><legend><span>Apellidos</span></legend></fieldset>
+                </div>
               </div>
-              <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, height: '50px' }}>
-                <input
-                  type="text"
-                  value={apellidos}
-                  onChange={(e) => setApellidos(e.target.value)}
-                  placeholder="Ej. Pérez Gómez"
-                  style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 14px", boxSizing: "border-box" }}
-                  required={step === 2}
-                />
-                <label className="etiqueta">Apellidos</label>
-                <fieldset className="notch"><legend><span>Apellidos</span></legend></fieldset>
+              <div className="form-row-responsive">
+                <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
+                  <input
+                    type="text"
+                    value={ci}
+                    onChange={(e) => setCi(e.target.value)}
+                    placeholder="Carnet de Identidad"
+                    required={step === 2}
+                  />
+                  <label className="etiqueta">CI</label>
+                  <fieldset className="notch"><legend><span>CI</span></legend></fieldset>
+                </div>
+                {rol === 'estudiante' && (
+                  <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
+                    <input
+                      type="text"
+                      value={cu}
+                      onChange={(e) => setCu(e.target.value)}
+                      placeholder="Carnet Universitario"
+                      required={step === 2}
+                    />
+                    <label className="etiqueta">CU</label>
+                    <fieldset className="notch"><legend><span>CU</span></legend></fieldset>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -465,16 +500,13 @@ export default function Registro({ onLogin }) {
           {/* PASO 4: SEGURIDAD */}
           {step === 4 && (
             <div className="form-row-responsive step-animation" style={{ alignItems: 'flex-start' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div className="floating-input-group always-floating" style={{ textAlign: 'left', height: '50px' }}>
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div className="floating-input-group always-floating" style={{ textAlign: 'left' }}>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={pass}
                     onChange={(e) => setPass(e.target.value)}
                     placeholder="Usa letras y números"
-                    style={{
-                      flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 40px 0 14px", boxSizing: "border-box"
-                    }}
                     required={step === 4}
                   />
                   <label className="etiqueta">Contraseña</label>
@@ -528,16 +560,13 @@ export default function Registro({ onLogin }) {
                   </div>
                 )}
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div className="floating-input-group always-floating" style={{ textAlign: 'left', height: '50px' }}>
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div className="floating-input-group always-floating" style={{ textAlign: 'left' }}>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPass}
                     onChange={(e) => setConfirmPass(e.target.value)}
                     placeholder="Repite la contraseña"
-                    style={{
-                      flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 40px 0 14px", boxSizing: "border-box"
-                    }}
                     required={step === 4}
                   />
                   <label className="etiqueta">Confirmar Contraseña</label>

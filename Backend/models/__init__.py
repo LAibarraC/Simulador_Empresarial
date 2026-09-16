@@ -1,4 +1,4 @@
-from .usuarios import Usuario
+from .usuarios import Usuario, CredencialAutorizada
 from .asignatura import Clase
 from .inscripcion import Inscripcion
 from .archivo import Archivo

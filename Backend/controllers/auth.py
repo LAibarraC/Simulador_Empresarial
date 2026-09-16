@@ -19,6 +19,7 @@ from sqlalchemy.future import select
 
 from config.database import get_db
 import models
+from utils.security import security
 from validators.auth import (
     UsuarioRegistro, UsuarioLogin, RecuperarPassword, ResetearPassword,
     CambiarPasswordPerfil, ForgotPasswordRequest, ResetPasswordRequest,
@@ -157,21 +158,56 @@ async def registrar_usuario_logic(usuario: UsuarioRegistro, db: AsyncSession):
         password_plana = usuario.password[:72]
         result = await db.execute(select(models.Usuario).filter(models.Usuario.email == usuario.email))
         usuario_existente = result.scalars().first()
-        
+
         if usuario_existente:
             return JSONResponse(status_code=400, content={"error": "Este correo electrónico ya está registrado."})
-        
-        password_hasheada = get_password_hash(password_plana)
+
+        # --- VALIDACIÓN DE CREDENCIALES AUTORIZADAS ---
+        # Para Docentes: Validar CI
+        # Para Estudiantes: Validar CU y CI
         rol_final = "Docente" if usuario.rol and usuario.rol.strip().lower() == "docente" else "Estudiante"
+
+        if rol_final == "Docente":
+            ci_hash = security.generate_blind_index(usuario.ci)
+            cred_filter = select(models.CredencialAutorizada).filter(
+                models.CredencialAutorizada.ci_hash == ci_hash,
+                models.CredencialAutorizada.rol == "Docente"
+            )
+        else: # Estudiante
+            ci_hash = security.generate_blind_index(usuario.ci)
+            cu_hash = security.generate_blind_index(usuario.cu)
+            cred_filter = select(models.CredencialAutorizada).filter(
+                models.CredencialAutorizada.ci_hash == ci_hash,
+                models.CredencialAutorizada.cu_hash == cu_hash,
+                models.CredencialAutorizada.rol == "Estudiante"
+            )
+
+        cred_result = await db.execute(cred_filter)
+        credencial = cred_result.scalars().first()
+
+        if not credencial:
+            return JSONResponse(status_code=403, content={"error": "Tus credenciales no están autorizadas para el registro."})
+
+        if credencial.registrado:
+            return JSONResponse(status_code=403, content={"error": "Estas credenciales ya han sido utilizadas para crear una cuenta."})
+
+        # ----------------------------------------------
+
+        password_hasheada = get_password_hash(password_plana)
         nuevo_usuario = models.Usuario(
             email=usuario.email, nombre=usuario.nombre, password=password_hasheada,
             rol=rol_final, perfil=rol_final, institucion=""
         )
-        
+
         db.add(nuevo_usuario)
-        await db.commit()
-        await db.refresh(nuevo_usuario)
-        
+        # Usamos flush para obtener el ID del usuario sin cerrar la transacción
+        await db.flush()
+
+        # Marcar credencial como utilizada
+        credencial.registrado = True
+        credencial.usuario_id = nuevo_usuario.id
+        db.add(credencial)
+
         # Crear notificación en el sistema
         notif_activacion = models.Notificacion(
             tipo="sistema",
@@ -180,12 +216,15 @@ async def registrar_usuario_logic(usuario: UsuarioRegistro, db: AsyncSession):
             leido=False
         )
         db.add(notif_activacion)
+
+        # Un solo commit atómico para todas las operaciones
         await db.commit()
+        await db.refresh(nuevo_usuario)
 
         # Enviar correo de activación en segundo plano (no bloqueante)
         asunto = "Activación de cuenta - Simulador Empresarial"
         logo_path = os.path.join(os.path.dirname(__file__), "..", "public", "images", "Logo-Adm.svg")
-        
+
         cuerpo = f"""
         <html>
             <body style="font-family: Arial, sans-serif; color: #333;">
@@ -199,7 +238,7 @@ async def registrar_usuario_logic(usuario: UsuarioRegistro, db: AsyncSession):
             </body>
         </html>
         """
-        
+
         # Función auxiliar segura para enviar correo en background
         async def _enviar_correo_background():
             try:
@@ -208,7 +247,7 @@ async def registrar_usuario_logic(usuario: UsuarioRegistro, db: AsyncSession):
                 print(f"Advertencia: No se pudo enviar correo de bienvenida a {usuario.email}: {email_err}")
 
         asyncio.create_task(_enviar_correo_background())
-        
+
         return {"message": "Usuario registrado con éxito"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno al registrar usuario: {str(e)}")
@@ -433,11 +472,44 @@ async def cambiar_rol_logic(datos: CambiarRol, db: AsyncSession):
 
 async def asignar_rol_inicial_logic(datos: AsignarRolInicial, current_user: models.Usuario, db: AsyncSession):
     rol_final = "Docente" if datos.rol and datos.rol.strip().lower() == "docente" else "Estudiante"
+
+    # --- VALIDACIÓN DE CREDENCIALES AUTORIZADAS ---
+    if rol_final == "Docente":
+        ci_hash = security.generate_blind_index(datos.ci)
+        cred_filter = select(models.CredencialAutorizada).filter(
+            models.CredencialAutorizada.ci_hash == ci_hash,
+            models.CredencialAutorizada.rol == "Docente"
+        )
+    else: # Estudiante
+        ci_hash = security.generate_blind_index(datos.ci)
+        cu_hash = security.generate_blind_index(datos.cu)
+        cred_filter = select(models.CredencialAutorizada).filter(
+            models.CredencialAutorizada.ci_hash == ci_hash,
+            models.CredencialAutorizada.cu_hash == cu_hash,
+            models.CredencialAutorizada.rol == "Estudiante"
+        )
+
+    cred_result = await db.execute(cred_filter)
+    credencial = cred_result.scalars().first()
+
+    if not credencial:
+        return JSONResponse(status_code=403, content={"error": "Tus credenciales no están autorizadas para asignar este rol."})
+
+    if credencial.registrado:
+        return JSONResponse(status_code=403, content={"error": "Estas credenciales ya han sido utilizadas para crear una cuenta."})
+    # ----------------------------------------------
+
     current_user.rol = rol_final
     current_user.perfil = rol_final
+
+    # Marcar credencial como utilizada
+    credencial.registrado = True
+    credencial.usuario_id = current_user.id
+    db.add(credencial)
+
     await db.commit()
     await db.refresh(current_user)
-    
+
     access_token = create_access_token(data={"id": current_user.id, "email": current_user.email, "rol": current_user.rol})
     return {
         "token": access_token,

@@ -81,3 +81,288 @@
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     transform: translateY(-1px);
 }
+
+/* Acciones compactas de gestión de credenciales */
+.excel-uploader-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-height: 40px;
+    padding: 2px;
+    border: 1px dashed var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-card);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.excel-uploader-compact.is-dragging {
+    border-color: var(--accent-color);
+    background: var(--bg-hover, transparent);
+}
+
+.excel-uploader-compact-button,
+.credencial-accion-manual-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    min-height: 22px;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Mismo tratamiento visual que "Explorar archivos" */
+.excel-uploader-compact-button {
+    background: transparent !important;
+    color: #10b981 !important;
+    border: 1px solid #10b981 !important;
+}
+
+.excel-uploader-compact-button:hover {
+    background: #10b981 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.excel-uploader-compact-file {
+    max-width: 160px;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.excel-uploader-compact-submit {
+    padding: 8px 12px;
+    min-height: 22px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.credenciales-acciones {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+    .credenciales-acciones {
+        justify-content: flex-start;
+    }
+
+}
+
+.credencial-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(5px);
+}
+
+.credencial-modal {
+    width: min(100%, 560px);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--bg-card);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+    animation: credencial-modal-in 0.22s ease-out;
+}
+
+.credencial-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 26px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.11), transparent 70%);
+}
+
+.credencial-modal-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.credencial-modal-icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    place-items: center;
+    border-radius: 13px;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.14);
+}
+
+.credencial-modal h3 {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 1.2rem;
+}
+
+.credencial-modal-header p {
+    margin: 5px 0 0;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.credencial-modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none !important;
+    border-radius: 8px;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #64748b;
+    background: transparent !important;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.credencial-modal-close:hover,
+.credencial-modal-close:focus,
+.credencial-modal-close:active,
+.credencial-modal-close:focus-visible {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #ef4444;
+    background: #f1f5f9 !important;
+}
+
+.credencial-form {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    padding: 24px 26px 26px;
+}
+
+.credencial-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.credencial-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    color: var(--text-main);
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.credencial-field span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.credencial-field span svg {
+    color: #10b981;
+}
+
+.credencial-field small {
+    margin-left: 3px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 400;
+}
+
+.credencial-field input,
+.credencial-field select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    color: var(--text-main);
+    background: var(--bg-main);
+    font: inherit;
+    font-weight: 400;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.credencial-field input:focus,
+.credencial-field select:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.13);
+}
+
+.credencial-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 4px;
+    padding-top: 17px;
+    border-top: 1px solid var(--border-color);
+}
+
+.credencial-modal-footer > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.credencial-modal-footer > span svg {
+    color: #10b981;
+}
+
+.credencial-modal-footer > div {
+    display: flex;
+    gap: 10px;
+}
+
+.credencial-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+@keyframes credencial-modal-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 560px) {
+    .credencial-modal-header,
+    .credencial-form {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .credencial-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .credencial-modal-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .credencial-modal-footer > div {
+        justify-content: flex-end;
+    }
+}
