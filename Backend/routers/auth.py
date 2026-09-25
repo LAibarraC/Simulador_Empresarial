@@ -13,14 +13,15 @@ from controllers.auth import (
     forgot_password_logic, reset_password_logic, recuperar_password_logic,
     resetear_password_logic, cambiar_password_perfil_logic, eliminar_cuenta_logic,
     cambiar_rol_logic, cambiar_estado_logic, admin_eliminar_usuario_logic, obtener_usuarios_logic,
-    login_google_logic, asignar_rol_inicial_logic, obtener_estadisticas_admin_logic
+    login_google_logic, configurar_precuenta_logic, vincular_google_logic,
+    asignar_rol_inicial_logic, obtener_estadisticas_admin_logic
 )
 
 # Importamos de nuestro validador
 from validators.auth import (
     VerificarEmailRequest, UsuarioRegistro, UsuarioLogin, ForgotPasswordRequest, 
     ResetPasswordRequest, RecuperarPassword, ResetearPassword, CambiarPasswordPerfil, 
-    CambiarRol, CambiarEstado, GoogleLoginRequest, AsignarRolInicial
+    CambiarRol, CambiarEstado, GoogleLoginRequest, ConfigurarPrecuenta, AsignarRolInicial
 )
 
 from middlewares.auth import get_current_user, require_role
@@ -73,8 +74,17 @@ async def read_users_me(current_user: models.Usuario = Depends(get_current_user)
         "perfil": current_user.perfil,
         "institucion": current_user.institucion,
         "requiere_rol": current_user.rol == "Pendiente" or not current_user.rol,
+        "requiere_configuracion": getattr(current_user, "must_change_password", False),
         "foto_perfil": getattr(current_user, 'foto_perfil', None)
     }
+
+@router.put("/configurar_precuenta")
+async def configurar_precuenta(datos: ConfigurarPrecuenta, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
+    return await configurar_precuenta_logic(datos, current_user, db)
+
+@router.post("/vincular_google")
+async def vincular_google(datos: GoogleLoginRequest, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
+    return await vincular_google_logic(datos.token, current_user, db)
 
 @router.post("/asignar_rol_inicial")
 async def asignar_rol_inicial(datos: AsignarRolInicial, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):

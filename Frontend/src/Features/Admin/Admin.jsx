@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../services/api';
 import { alerta } from '../../utils/Notificaciones';
 import { IconoBuscar, IconoEscudo, IconoAlerta } from '../../ui/iconos';
-import { BadgeCheck, CreditCard, GraduationCap, IdCard, Save, UserPlus, UserRound, X } from 'lucide-react';
+import { BadgeCheck, Check, Copy, Download, FileSpreadsheet, FolderOpen, GraduationCap, KeyRound, Mail, RefreshCw, Save, Upload, UserPlus, UserRound, X } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import Skeleton from '../../ui/Skeleton';
 import ReportesEstadisticas from './ReportesEstadisticas';
 import ExcelUploader from '../../components/excel/ExcelUploader';
@@ -12,6 +13,49 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 
 // Icono SVG de Ajustes/Filtro
+const generarContrasenaSugerida = () => {
+  const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+  return Array.from({ length: 12 }, () => caracteres[Math.floor(Math.random() * caracteres.length)]).join('');
+};
+
+const generarCorreoSugerido = (nombre, apellido) => {
+  const normalizarParte = (parte) => parte
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .join('.');
+  const nombreNormalizado = normalizarParte(nombre);
+  const apellidoNormalizado = normalizarParte(apellido);
+  if (!nombreNormalizado || !apellidoNormalizado) return '';
+  return `${apellidoNormalizado}.${nombreNormalizado}@usfx.bo`;
+};
+
+const normalizarEncabezado = (valor) => String(valor ?? '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .trim();
+
+const detectarFilaEncabezado = (filas) => {
+  const grupos = {
+    ci: ['ci', 'carnet', 'cedula', 'id', 'identidad', 'dni'],
+    cu: ['cu', 'universitario', 'carnet universitario'],
+    nombre: ['nombre', 'nombres', 'apellido', 'apellidos', 'nombre completo', 'persona'],
+  };
+  let mejor = { indice: -1, puntaje: 0 };
+  filas.slice(0, 10).forEach((fila, indice) => {
+    const celdas = fila.map(normalizarEncabezado);
+    const puntaje = Object.values(grupos).reduce((total, opciones) => (
+      total + (opciones.some(opcion => celdas.some(celda => celda === opcion || celda.includes(opcion))) ? 1 : 0)
+    ), 0);
+    if (puntaje > mejor.puntaje) mejor = { indice, puntaje };
+  });
+  return mejor;
+};
+
 const IconoAjustes = ({ width = 14, height = 14, style = {} }) => (
   <svg
     width={width}
@@ -51,8 +95,16 @@ export default function Admin() {
   const [filtroEstadoCred, setFiltroEstadoCred] = useState('TODOS');
   const [ordenFechaCarga, setOrdenFechaCarga] = useState('ninguno');
   const [mostrarModalCred, setMostrarModalCred] = useState(false);
-  const [guardandoCred, setGuardandoCred] = useState(false);
-  const [nuevaCredencial, setNuevaCredencial] = useState({ ci: '', cu: '', nombre: '', rol: 'Estudiante' });
+  const [mostrarModalCarga, setMostrarModalCarga] = useState(false);
+  const [archivoCredenciales, setArchivoCredenciales] = useState(null);
+  const [filasPrevisualizacion, setFilasPrevisualizacion] = useState([]);
+  const [filaEncabezadoDetectada, setFilaEncabezadoDetectada] = useState(null);
+  const [arrastrandoArchivo, setArrastrandoArchivo] = useState(false);
+  const inputCargaRef = useRef(null);
+  const [correoEditado, setCorreoEditado] = useState(false);
+  const [contrasenaCopiada, setContrasenaCopiada] = useState(false);
+  const [invitacionCopiada, setInvitacionCopiada] = useState(false);
+  const [nuevaCredencial, setNuevaCredencial] = useState({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida() });
   const credItemsPerPage = 5;
 
   // Estados para filtros por columna (Usuarios)
@@ -158,23 +210,106 @@ export default function Admin() {
   const handleCrearCredencial = async (e) => {
     e.preventDefault();
     try {
-      setGuardandoCred(true);
       await api.crearCredencial({
-        ...nuevaCredencial,
-        ci: nuevaCredencial.ci.trim(),
-        cu: nuevaCredencial.cu.trim() || null,
-        nombre: nuevaCredencial.nombre.trim(),
+        nombre: `${nuevaCredencial.nombre.trim()} ${nuevaCredencial.apellido.trim()}`.trim(),
+        email: nuevaCredencial.email.trim(),
+        password: nuevaCredencial.password,
+        rol: 'Docente',
       });
-      alerta.exito("Credencial creada", "La credencial quedó disponible para registro.");
+      alerta.exito('Pre-cuenta creada', 'El docente ya puede iniciar sesión con estas credenciales.');
       setMostrarModalCred(false);
-      setNuevaCredencial({ ci: '', cu: '', nombre: '', rol: 'Estudiante' });
-      setCurrentCredPage(1);
-      await cargarCredencialesLista();
+      setInvitacionCopiada(false);
+      setNuevaCredencial({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida() });
     } catch (error) {
-      alerta.error("Error", error.message || "No se pudo crear la credencial");
-    } finally {
-      setGuardandoCred(false);
+      alerta.error('Error', error.message || 'No se pudo crear el acceso docente');
     }
+  };
+
+  const abrirModalCredencial = () => {
+    setNuevaCredencial({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida() });
+    setCorreoEditado(false);
+    setContrasenaCopiada(false);
+    setInvitacionCopiada(false);
+    setMostrarModalCred(true);
+  };
+
+  const copiarInvitacion = async () => {
+    const nombreCompleto = `${nuevaCredencial.nombre.trim()} ${nuevaCredencial.apellido.trim()}`.trim();
+    const mensaje = `Estimado/a ${nombreCompleto}:\n\nSe ha creado su acceso docente al sistema.\n\nUsuario: ${nuevaCredencial.email.trim()}\nContraseña temporal: ${nuevaCredencial.password}\n\nPor seguridad, cambie su contraseña al ingresar por primera vez.`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(mensaje);
+      } else {
+        const campoTemporal = document.createElement('textarea');
+        campoTemporal.value = mensaje;
+        document.body.appendChild(campoTemporal);
+        campoTemporal.select();
+        document.execCommand('copy');
+        campoTemporal.remove();
+      }
+      setInvitacionCopiada(true);
+      alerta.exito('Invitación copiada al portapapeles', 'La invitación está lista para compartir.');
+    } catch {
+      alerta.error('No se pudo copiar', 'Copia la invitación manualmente.');
+    }
+  };
+
+  const copiarContrasena = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(nuevaCredencial.password);
+      } else {
+        const campoTemporal = document.createElement('textarea');
+        campoTemporal.value = nuevaCredencial.password;
+        document.body.appendChild(campoTemporal);
+        campoTemporal.select();
+        document.execCommand('copy');
+        campoTemporal.remove();
+      }
+      setContrasenaCopiada(true);
+      setTimeout(() => setContrasenaCopiada(false), 1800);
+    } catch {
+      alerta.error('No se pudo copiar', 'Copia la contraseña manualmente.');
+    }
+  };
+
+  const prepararArchivoCredenciales = async (file) => {
+    if (!file) return;
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (!['xlsx', 'xls', 'csv'].includes(extension)) {
+      alerta.warning('Formato no válido', 'Selecciona un archivo .xlsx, .xls o .csv.');
+      return;
+    }
+    try {
+      const buffer = await file.arrayBuffer();
+      const libro = XLSX.read(buffer, { type: 'array' });
+      const hoja = libro.Sheets[libro.SheetNames[0]];
+      const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '' });
+      const encabezado = detectarFilaEncabezado(filas);
+      if (encabezado.indice < 0) {
+        alerta.error('Encabezados no encontrados', 'No se encontraron CI, CU o Nombre en las primeras 10 filas.');
+        return;
+      }
+      setArchivoCredenciales(file);
+      setFilaEncabezadoDetectada(encabezado.indice + 1);
+      setFilasPrevisualizacion(filas.slice(encabezado.indice, encabezado.indice + 6));
+    } catch {
+      alerta.error('No se pudo leer el archivo', 'Verifica que el archivo tenga un formato válido.');
+    }
+  };
+
+  const cerrarModalCarga = () => {
+    setMostrarModalCarga(false);
+    setArchivoCredenciales(null);
+    setFilasPrevisualizacion([]);
+    setFilaEncabezadoDetectada(null);
+    if (inputCargaRef.current) inputCargaRef.current.value = '';
+  };
+
+  const confirmarCargaCredenciales = async () => {
+    if (!archivoCredenciales) return;
+    await handleCargaCredenciales(archivoCredenciales);
+    cerrarModalCarga();
   };
 
   const handleCargaCredenciales = async (file) => {
@@ -189,21 +324,6 @@ export default function Admin() {
     } catch (error) {
       alerta.error("Error en la carga", error.message || "No se pudieron cargar las credenciales.");
     }
-  };
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setArchivoCarga(file);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
   };
 
   const usuariosFiltrados = usuarios
@@ -467,10 +587,10 @@ export default function Admin() {
                 <span style={{ display: 'block', marginTop: '5px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Administra las credenciales disponibles para el ingreso al sistema.</span>
               </div>
               <div className="credenciales-acciones">
-                <ExcelUploader compact onUpload={handleCargaCredenciales} />
-                <button className="btn-azul credencial-accion-manual-button" onClick={() => setMostrarModalCred(true)}>
+                <ExcelUploader onClick={() => setMostrarModalCarga(true)} />
+                <button className="btn-azul credencial-accion-manual-button" onClick={abrirModalCredencial}>
                   <UserPlus size={17} strokeWidth={2.2} aria-hidden="true" />
-                  Agregar credencial
+                  Crear acceso docente
                 </button>
               </div>
             </div>
@@ -706,47 +826,137 @@ export default function Admin() {
       )}
     </div>
 
+    {mostrarModalCarga && (
+      <div className="credencial-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) cerrarModalCarga(); }}>
+        <div className="credencial-modal carga-masiva-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-carga-masiva">
+          <div className="credencial-modal-header">
+            <div className="credencial-modal-title-wrap">
+              <div className="credencial-modal-icon"><FileSpreadsheet size={24} aria-hidden="true" /></div>
+              <div><h3 id="titulo-carga-masiva">Cargar credenciales masivas</h3><p>Importa varias credenciales desde un archivo.</p></div>
+            </div>
+            <button type="button" onClick={cerrarModalCarga} className="credencial-modal-close" aria-label="Cerrar"><X size={20} /></button>
+          </div>
+          <div className="credencial-form">
+            <div className="carga-masiva-ayuda">
+              <strong>Asegúrate de que tu archivo incluya estas columnas:</strong>
+              <span>CI, CU, NOMBRE COMPLETO</span>
+              <div className="carga-masiva-enlaces">
+                <a href={`data:text/csv;charset=utf-8,${encodeURIComponent('CI,CU,NOMBRE COMPLETO\\n')}`} download="formato_credenciales.csv"><Download size={15} /> Descargar formato de ejemplo .csv</a>
+                <a href="/archivos"><FolderOpen size={15} /> Ver archivos guardados en el sistema</a>
+              </div>
+            </div>
+            <input ref={inputCargaRef} type="file" accept=".xlsx,.xls,.csv" hidden onChange={(e) => prepararArchivoCredenciales(e.target.files?.[0])} />
+            <button type="button" className={`btn-carga-masiva-dropzone carga-masiva-dropzone${arrastrandoArchivo ? ' is-dragging' : ''}`} onClick={() => inputCargaRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setArrastrandoArchivo(true); }}
+              onDragLeave={() => setArrastrandoArchivo(false)}
+              onDrop={(e) => { e.preventDefault(); setArrastrandoArchivo(false); prepararArchivoCredenciales(e.dataTransfer.files?.[0]); }}>
+              <Upload size={28} /><strong>{archivoCredenciales ? archivoCredenciales.name : 'Arrastra tu archivo aquí o haz clic para seleccionarlo'}</strong>
+              <span>Formatos admitidos: .csv, .xls y .xlsx</span>
+            </button>
+            {filasPrevisualizacion.length > 0 && (
+              <div className="carga-masiva-preview"><strong>Vista previa · Encabezados detectados en la fila {filaEncabezadoDetectada}{filasPrevisualizacion.length > 1 ? ` · ${filasPrevisualizacion.length - 1} filas mostradas` : ''}</strong>
+                <div><table><tbody>{filasPrevisualizacion.map((fila, i) => <tr key={i}>{fila.map((celda, j) => <td key={j}>{String(celda)}</td>)}</tr>)}</tbody></table></div>
+              </div>
+            )}
+            <div className="credencial-modal-footer"><span><BadgeCheck size={15} /> Revisa los datos antes de confirmar</span>
+              <div><button type="button" onClick={cerrarModalCarga} className="btn-amarillo">Cancelar</button><button type="button" className="btn-azul credencial-submit" onClick={confirmarCargaCredenciales} disabled={!archivoCredenciales}><Upload size={16} /> Confirmar carga</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
     {mostrarModalCred && (
       <div className="credencial-modal-overlay">
-        <div className="credencial-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-agregar-credencial">
+        <div className="credencial-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-crear-acceso-docente">
           <div className="credencial-modal-header">
             <div className="credencial-modal-title-wrap">
               <div className="credencial-modal-icon"><UserRound size={24} aria-hidden="true" /></div>
               <div>
-                <h3 id="titulo-agregar-credencial">Agregar credencial</h3>
-                <p>Completa los datos para habilitar un nuevo acceso.</p>
+                <h3 id="titulo-crear-acceso-docente">Crear acceso docente</h3>
+                <p>Completa los datos para crear el acceso del docente.</p>
               </div>
             </div>
             <button type="button" onClick={() => setMostrarModalCred(false)} className="credencial-modal-close" aria-label="Cerrar"><X size={20} /></button>
           </div>
 
           <form onSubmit={handleCrearCredencial} className="credencial-form">
-            <div className="credencial-form-grid">
-              <label className="credencial-field">
-                <span><IdCard size={16} /> CI</span>
-                <input type="text" value={nuevaCredencial.ci} onChange={(e) => setNuevaCredencial(prev => ({ ...prev, ci: e.target.value }))} placeholder="Número de CI" required />
-              </label>
-              <label className="credencial-field">
-                <span><CreditCard size={16} /> CU <small>Opcional</small></span>
-                <input type="text" value={nuevaCredencial.cu} onChange={(e) => setNuevaCredencial(prev => ({ ...prev, cu: e.target.value }))} placeholder="Número de CU" />
-              </label>
-            </div>
-            <label className="credencial-field">
-              <span><UserRound size={16} /> Nombre completo</span>
-              <input type="text" value={nuevaCredencial.nombre} onChange={(e) => setNuevaCredencial(prev => ({ ...prev, nombre: e.target.value }))} placeholder="Nombre y apellidos" required />
-            </label>
             <label className="credencial-field">
               <span><GraduationCap size={16} /> Rol</span>
-              <select value={nuevaCredencial.rol} onChange={(e) => setNuevaCredencial(prev => ({ ...prev, rol: e.target.value }))}>
-                <option value="Estudiante">Estudiante</option>
-                <option value="Docente">Docente</option>
-                <option value="Docente Sustituto">Docente Sustituto</option>
-              </select>
+              <input type="text" value="Docente" readOnly />
+            </label>
+            <label className="credencial-field">
+              <span><UserRound size={16} /> Nombre</span>
+              <input
+                type="text"
+                value={nuevaCredencial.nombre}
+                onChange={(e) => {
+                  const nombre = e.target.value;
+                  setInvitacionCopiada(false);
+                  setNuevaCredencial(prev => ({ ...prev, nombre, email: correoEditado ? prev.email : generarCorreoSugerido(nombre, prev.apellido) }));
+                }}
+                placeholder="Nombre"
+                required
+              />
+            </label>
+            <label className="credencial-field">
+              <span><UserRound size={16} /> Apellido</span>
+              <input
+                type="text"
+                value={nuevaCredencial.apellido}
+                onChange={(e) => {
+                  const apellido = e.target.value;
+                  setInvitacionCopiada(false);
+                  setNuevaCredencial(prev => ({ ...prev, apellido, email: correoEditado ? prev.email : generarCorreoSugerido(prev.nombre, apellido) }));
+                }}
+                placeholder="Apellido"
+                required
+              />
+            </label>
+            <label className="credencial-field">
+              <span><Mail size={16} /> Correo electrónico <small>Sugerido automáticamente</small></span>
+              <input
+                type="text"
+                value={nuevaCredencial.email}
+                onChange={(e) => {
+                  setCorreoEditado(true);
+                  setInvitacionCopiada(false);
+                  setNuevaCredencial(prev => ({ ...prev, email: e.target.value }));
+                }}
+                placeholder="correo@ejemplo.com"
+                required
+              />
+            </label>
+            <label className="credencial-field">
+              <span><KeyRound size={16} /> Contraseña <small>Sugerida automáticamente</small></span>
+              <div className="credencial-password-wrap">
+                <input
+                  type="text"
+                  value={nuevaCredencial.password}
+                  onChange={(e) => {
+                    setContrasenaCopiada(false);
+                    setInvitacionCopiada(false);
+                    setNuevaCredencial(prev => ({ ...prev, password: e.target.value }));
+                  }}
+                  placeholder="Contraseña"
+                  required
+                />
+                <div className="credencial-password-actions">
+                  <button type="button" className="btn-credencial-password-action credencial-password-action" onClick={copiarContrasena} title="Copiar contraseña" aria-label="Copiar contraseña">
+                    {contrasenaCopiada ? <Check size={16} /> : <Copy size={16} />}
+                    <span>{contrasenaCopiada ? 'Copiada' : 'Copiar'}</span>
+                  </button>
+                  <button type="button" className="btn-credencial-password-action credencial-password-action credencial-password-action--generate" onClick={() => { setContrasenaCopiada(false); setInvitacionCopiada(false); setNuevaCredencial(prev => ({ ...prev, password: generarContrasenaSugerida() })); }} title="Generar otra contraseña" aria-label="Generar otra contraseña">
+                    <RefreshCw size={16} />
+                  </button>
+                </div>
+              </div>
             </label>
             <div className="credencial-modal-footer">
-              <span><BadgeCheck size={15} /> Datos verificados por el administrador</span>
+              <span><BadgeCheck size={15} /> Se creará el acceso del docente</span>
               <div>
-                <button type="submit" className="btn-azul credencial-submit" disabled={guardandoCred}><Save size={16} /> {guardandoCred ? 'Guardando...' : 'Guardar'}</button>
+                <button type="button" className="btn-credencial-password-action credencial-password-action" onClick={copiarInvitacion} disabled={!nuevaCredencial.nombre.trim() || !nuevaCredencial.apellido.trim() || !nuevaCredencial.email.trim() || !nuevaCredencial.password}><Copy size={16} /> Copiar invitación</button>
+                <button type="submit" className="btn-azul credencial-submit" disabled={!invitacionCopiada}><Save size={16} /> Crear acceso</button>
               </div>
             </div>
           </form>

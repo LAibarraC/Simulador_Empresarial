@@ -1,0 +1,29 @@
+.precuenta-modal-overlay { position: fixed; inset: 0; z-index: 12000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(15, 23, 42, .68); backdrop-filter: blur(5px); }
+.precuenta-modal { width: min(100%, 430px); box-sizing: border-box; padding: 30px; border-radius: 12px; text-align: center; }
+.precuenta-logo { display: block; width: 150px; height: auto; margin: 0 auto 15px; }
+.precuenta-modal h2 { margin: 15px 0 0; color: var(--text-main); font-size: 1.15rem; }
+.precuenta-modal-description { margin: 8px 0 30px; color: var(--text-muted); font-size: .9rem; line-height: 1.5; }
+.precuenta-form { display: flex; flex-direction: column; gap: 15px; text-align: left; }
+.precuenta-confirm-button { margin-top: 5px; }
+.precuenta-password-checklist { margin-top: -8px; display: flex; flex-direction: column; gap: 5px; text-align: left; font-size: .8rem; }
+.precuenta-password-checklist span { display: flex; align-items: center; gap: 5px; transition: color .3s; }
+.precuenta-password-checklist .is-valid { color: #22c55e; }
+.precuenta-password-checklist .is-invalid { color: #dc2626; }
+.precuenta-confirm-button, .precuenta-google-confirm { width: 100%; margin-top: 3px; padding: 11px; border: 0; border-radius: 7px; font-weight: 700; cursor: pointer; }
+.precuenta-confirm-button:disabled { cursor: not-allowed; opacity: .55; }
+.precuenta-separator { display: flex; align-items: center; gap: 10px; margin: 21px 0 15px; color: rgba(255, 255, 255, .88); font-size: .78rem; }
+.precuenta-separator::before, .precuenta-separator::after { content: ""; height: 1px; flex: 1; background: rgba(255, 255, 255, .45); }
+.precuenta-google { display: flex; justify-content: center; min-height: 40px; }
+.precuenta-modal-note { display: block; margin-top: 17px; color: rgba(255, 255, 255, .78); font-size: .72rem; }
+
+html.dark .precuenta-modal { background: var(--bg-card); border: 1px solid var(--accent-color); }
+html.dark .precuenta-modal h2, html.dark .precuenta-field { color: var(--text-main); }
+html.dark .precuenta-modal-description, html.dark .precuenta-separator, html.dark .precuenta-modal-note { color: var(--text-muted); }
+html.dark .precuenta-field span svg { color: var(--accent-color); }
+html.dark .precuenta-field input { border-color: var(--border-color); color: var(--text-main); background: transparent; }
+html.dark .precuenta-field input::placeholder { color: var(--text-muted); }
+html.dark .precuenta-separator::before, html.dark .precuenta-separator::after { background: var(--border-color); }
+.precuenta-google.disabled { pointer-events: none; opacity: .42; filter: grayscale(1); }
+.precuenta-google-confirm { color: white; background: #4285f4; }
+.precuenta-modal-note { display: block; margin-top: 17px; color: var(--text-muted); font-size: .72rem; }
+@media (max-width: 480px) { .precuenta-modal { padding: 25px 20px; } }

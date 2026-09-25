@@ -1,4 +1,5 @@
 from datetime import datetime
+import unicodedata
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -7,6 +8,7 @@ from fastapi import HTTPException, status
 import models
 import io
 from utils.security import security
+from controllers.auth import get_password_hash
 
 
 def clean_id(val):
@@ -42,6 +44,35 @@ async def obtener_credenciales_logic(db: AsyncSession):
         return lista_descifrada
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener credenciales: {str(e)}")
+
+async def crear_precuenta_docente_logic(nombre: str, email: str, password: str, db: AsyncSession):
+    nombre = nombre.strip()
+    email = email.strip().lower()
+    if not nombre or not email or not password:
+        raise HTTPException(status_code=400, detail="Nombre, correo y contraseña son obligatorios")
+
+    existente = await db.execute(select(models.Usuario).filter(models.Usuario.email == email))
+    if existente.scalars().first():
+        raise HTTPException(status_code=409, detail="Ya existe un usuario con ese correo")
+
+    usuario = models.Usuario(
+        nombre=nombre,
+        email=email,
+        password=get_password_hash(password),
+        rol="Docente",
+        perfil="Docente",
+        institucion="",
+        must_change_password=True,
+    )
+    db.add(usuario)
+    try:
+        await db.commit()
+        await db.refresh(usuario)
+        return {"message": "Pre-cuenta docente creada correctamente", "id": usuario.id}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al crear la pre-cuenta: {str(e)}")
+
 
 async def crear_credencial_logic(ci: str, cu: str | None, nombre: str, rol: str, db: AsyncSession):
     ci_plain = clean_id(ci)[:20]
@@ -105,23 +136,48 @@ async def eliminar_credencial_logic(ci: str, db: AsyncSession):
 
 async def cargar_credenciales_logic(file_content: bytes, filename: str, db: AsyncSession):
     try:
-        # Determinar si es CSV o Excel
-        if filename.endswith('.csv'):
+        # Leer todas las filas para detectar encabezados aunque no estén en la primera.
+        if filename.lower().endswith('.csv'):
             try:
                 content_str = file_content.decode('utf-8', errors='ignore')
                 delimiter = ';' if content_str.count(';') > content_str.count(',') else ','
-                df = pd.read_csv(io.BytesIO(file_content), sep=delimiter)
+                df_raw = pd.read_csv(io.BytesIO(file_content), sep=delimiter, header=None, dtype=str)
             except Exception:
-                df = pd.read_csv(io.BytesIO(file_content))
-        elif filename.endswith('.xlsx'):
-            df = pd.read_excel(io.BytesIO(file_content), engine='openpyxl')
-        elif filename.endswith('.xls'):
-            df = pd.read_excel(io.BytesIO(file_content), engine='xlrd')
+                df_raw = pd.read_csv(io.BytesIO(file_content), header=None, dtype=str)
+        elif filename.lower().endswith('.xlsx'):
+            df_raw = pd.read_excel(io.BytesIO(file_content), engine='openpyxl', header=None, dtype=str)
+        elif filename.lower().endswith('.xls'):
+            df_raw = pd.read_excel(io.BytesIO(file_content), engine='xlrd', header=None, dtype=str)
         else:
             raise HTTPException(status_code=400, detail="Formato de archivo no soportado. Use .csv, .xlsx o .xls")
 
-        # Limpiar nombres de columnas
-        df.columns = [str(c).strip() for c in df.columns]
+        cols_required = {
+            "ci": ["ci", "carnet", "cedula", "id", "identidad", "dni"],
+            "cu": ["cu", "universitario", "carnet universitario"],
+            "nombre_completo": ["nombre", "nombres", "apellido", "apellidos", "nombre completo", "persona"]
+        }
+
+        def normalize_header(value):
+            value = "" if pd.isna(value) else str(value).strip().lower()
+            return "".join(c for c in unicodedata.normalize("NFD", value) if unicodedata.category(c) != "Mn")
+
+        def header_score(row):
+            headers = [normalize_header(value) for value in row.tolist()]
+            score = 0
+            for options in cols_required.values():
+                if any(any(option == header or option in header for option in options) for header in headers):
+                    score += 1
+            return score
+
+        max_header_rows = min(10, len(df_raw))
+        header_candidates = [(header_score(df_raw.iloc[index]), index) for index in range(max_header_rows)]
+        header_score_value, header_index = max(header_candidates, key=lambda candidate: (candidate[0], -candidate[1])) if header_candidates else (0, 0)
+        if header_score_value == 0:
+            raise HTTPException(status_code=400, detail="No se encontraron encabezados CI, CU o Nombre en las primeras 10 filas")
+
+        df = df_raw.iloc[header_index + 1:].copy()
+        df.columns = [str(value).strip() if not pd.isna(value) else f"columna_{index}" for index, value in enumerate(df_raw.iloc[header_index].tolist())]
+        df = df.reset_index(drop=True)
 
         # Helper para limpiar IDs (evita que 12345 se convierta en "12345.0")
         def clean_id(val):
@@ -131,32 +187,16 @@ async def cargar_credenciales_logic(file_content: bytes, filename: str, db: Asyn
             except:
                 return str(val).strip()
 
-        # Mapeo de columnas (palabras clave para búsqueda flexible)
-        cols_required = {
-            "ci": ["CI", "Carnet", "Cédula", "ID", "Identidad", "DNI"],
-            "cu": ["CU", "Universitario", "Carnet Universitario"],
-            "nombre_completo": ["Nombre", "Apellido", "Nombres", "Apellidos", "Completo", "Persona"]
-        }
-
         def find_column(options):
-            cols_lower = [c.lower() for c in df.columns]
-            for opt in options:
-                opt_lower = opt.lower()
-                if opt_lower in cols_lower:
-                    return df.columns[cols_lower.index(opt_lower)]
-            for opt in options:
-                opt_lower = opt.lower()
-                for idx, col in enumerate(cols_lower):
-                    if opt_lower in col:
-                        return df.columns[idx]
-            for opt in options:
-                opt_lower = opt.lower()
-                for idx, col in enumerate(cols_lower):
-                    if col in opt_lower and len(col) > 2:
-                        return df.columns[idx]
+            columns = [(column, normalize_header(column)) for column in df.columns]
+            normalized_options = [normalize_header(option) for option in options]
+            for option in normalized_options:
+                for column, normalized_column in columns:
+                    if option == normalized_column or option in normalized_column:
+                        return column
             return None
 
-        mapping = {k: find_column(v) for k, v in cols_required.items()}
+        mapping = {key: find_column(options) for key, options in cols_required.items()}
 
         if mapping["ci"] is None:
             cols_detected = ", ".join(list(df.columns))

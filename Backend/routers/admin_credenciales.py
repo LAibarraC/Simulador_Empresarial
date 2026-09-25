@@ -3,15 +3,15 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from config.database import get_db
-from controllers.admin_credenciales import cargar_credenciales_logic, obtener_credenciales_logic, crear_credencial_logic, eliminar_credencial_logic
+from controllers.admin_credenciales import cargar_credenciales_logic, obtener_credenciales_logic, crear_credencial_logic, eliminar_credencial_logic, crear_precuenta_docente_logic
 from middlewares.auth import require_role
 
 
 class CredencialCrear(BaseModel):
-    ci: str = Field(..., min_length=1, max_length=50)
-    cu: Optional[str] = Field(default=None, max_length=50)
-    nombre: str = Field(..., min_length=1, max_length=255)
-    rol: Literal["Estudiante", "Docente", "Docente Sustituto"]
+    nombre: str = Field(..., min_length=1, max_length=100)
+    email: str = Field(..., min_length=3, max_length=100)
+    password: str = Field(..., min_length=1, max_length=100)
+    rol: Literal["Docente"] = "Docente"
 
 router = APIRouter()
 
@@ -21,7 +21,7 @@ async def obtener_credenciales(db: AsyncSession = Depends(get_db)):
 
 @router.post("/credenciales", dependencies=[Depends(require_role("Administrador"))])
 async def crear_credencial(datos: CredencialCrear, db: AsyncSession = Depends(get_db)):
-    return await crear_credencial_logic(datos.ci, datos.cu, datos.nombre, datos.rol, db)
+    return await crear_precuenta_docente_logic(datos.nombre, datos.email, datos.password, db)
 
 
 @router.delete("/credenciales/{ci}", dependencies=[Depends(require_role("Administrador"))])

@@ -19,6 +19,7 @@ import ReportesDocente from "./Features/User/docentes/ReportesDocente";
 
 import SelectorRol from './ui/SelectorRol';
 import ModalSeleccionRolInicial from './ui/ModalSeleccionRolInicial';
+import ModalConfigPrecuenta from './ui/ModalConfigPrecuenta';
 import OscuroClaro from "./ui/oscuro_claro";
 
 import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModuleContext } from "./components/Gestion_Datos/DataContext";
@@ -116,6 +117,9 @@ function App() {
       <CalculadoraDataProvider usuario={usuario}>
         <MAT251DataProvider usuario={usuario}>
           <HashRouter>
+            {usuario?.requiere_configuracion && (
+              <ModalConfigPrecuenta onActualizado={setUsuario} />
+            )}
             {usuario && (usuario.requiere_rol || usuario.rol === 'Pendiente' || !usuario.rol) && (
               <ModalSeleccionRolInicial 
                 usuario={usuario} 

@@ -551,6 +551,30 @@ export const api = {
     return data;
   },
 
+  configurarPrecuenta: async (payload) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/configurar_precuenta`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "No se pudo configurar la cuenta");
+    return data;
+  },
+
+  vincularGoogle: async (tokenGoogle) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/vincular_google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ token: tokenGoogle }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "No se pudo vincular Google");
+    return data;
+  },
+
   asignarRolInicial: async (payload) => {
     const token = localStorage.getItem("token");
     const headers = { "Content-Type": "application/json" };

@@ -24,7 +24,7 @@ from validators.auth import (
     UsuarioRegistro, UsuarioLogin, RecuperarPassword, ResetearPassword,
     CambiarPasswordPerfil, ForgotPasswordRequest, ResetPasswordRequest,
     CambiarRol, CambiarEstado, VerificarEmailRequest, GoogleLoginRequest,
-    AsignarRolInicial
+    AsignarRolInicial, ConfigurarPrecuenta
 )
 
 from google.oauth2 import id_token
@@ -269,8 +269,63 @@ async def login_local_logic(credentials: UsuarioLogin, db: AsyncSession):
         "token": access_token, "id": user_info.email, "nombre": user_info.nombre,
         "rol": user_info.rol, "email": user_info.email, "perfil": user_info.perfil,
         "institucion": user_info.institucion, "requiere_rol": requiere_rol,
+        "requiere_configuracion": getattr(user_info, "must_change_password", False),
         "foto_perfil": getattr(user_info, 'foto_perfil', None)
     }
+
+async def configurar_precuenta_logic(datos: ConfigurarPrecuenta, usuario: models.Usuario, db: AsyncSession):
+    password = datos.password
+    if not password:
+        raise HTTPException(status_code=400, detail="La contraseña es obligatoria")
+    if (
+        len(password) < 8
+        or not any(c.isupper() for c in password)
+        or not any(c.islower() for c in password)
+        or not any(c.isdigit() for c in password)
+        or not any(not c.isalnum() for c in password)
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo"
+        )
+
+    usuario.password = get_password_hash(password)
+    usuario.must_change_password = False
+    await db.commit()
+    await db.refresh(usuario)
+    token = create_access_token(data={"id": usuario.id, "email": usuario.email, "rol": usuario.rol})
+    return {"token": token, "id": usuario.email, "nombre": usuario.nombre, "rol": usuario.rol,
+            "email": usuario.email, "perfil": usuario.perfil, "institucion": usuario.institucion,
+            "requiere_configuracion": False, "foto_perfil": getattr(usuario, "foto_perfil", None)}
+
+async def vincular_google_logic(token_google: str, usuario: models.Usuario, db: AsyncSession):
+    try:
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        idinfo = id_token.verify_oauth2_token(token_google, requests.Request(), client_id)
+        google_email = idinfo["email"].strip().lower()
+        if google_email != usuario.email.strip().lower():
+            raise HTTPException(
+                status_code=403,
+                detail="Debes elegir en Google la misma cuenta con la que se registró este acceso docente"
+            )
+        foto_perfil = idinfo.get("picture", usuario.foto_perfil)
+        usuario.foto_perfil = foto_perfil
+        usuario.must_change_password = False
+        usuario_id = usuario.id
+        usuario_email = usuario.email
+        usuario_nombre = usuario.nombre
+        usuario_rol = usuario.rol
+        usuario_perfil = usuario.perfil
+        usuario_institucion = usuario.institucion
+        await db.commit()
+        nuevo_token = create_access_token(data={"id": usuario_id, "email": usuario_email, "rol": usuario_rol})
+        return {"token": nuevo_token, "id": usuario_email, "nombre": usuario_nombre, "rol": usuario_rol,
+                "email": usuario_email, "perfil": usuario_perfil, "institucion": usuario_institucion,
+                "requiere_configuracion": False, "foto_perfil": foto_perfil}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Token de Google inválido: {str(e)}")
 
 async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
     try:
@@ -323,6 +378,7 @@ async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
             "token": access_token, "id": user_info.email, "nombre": user_info.nombre,
             "rol": user_info.rol, "email": user_info.email, "perfil": user_info.perfil,
             "institucion": user_info.institucion, "requiere_rol": requiere_rol, "es_nuevo": es_nuevo,
+            "requiere_configuracion": getattr(user_info, "must_change_password", False),
             "foto_perfil": getattr(user_info, 'foto_perfil', None)
         }
 

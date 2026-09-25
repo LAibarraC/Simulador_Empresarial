@@ -16,6 +16,7 @@ class Usuario(Base):
     ultimo_aviso_global_id = Column(Integer, default=0, nullable=False)
     fecha_creacion = Column(DateTime, default=func.now())
     foto_perfil = Column(String(500), nullable=True) # URL de la foto (Google u otros)
+    must_change_password = Column(Boolean, default=False, nullable=False)
 
 class CredencialAutorizada(Base):
     __tablename__ = "credenciales_autorizadas"

@@ -48,6 +48,9 @@ class CambiarEstado(BaseModel):
 class GoogleLoginRequest(BaseModel):
     token: str
 
+class ConfigurarPrecuenta(BaseModel):
+    password: str
+
 class AsignarRolInicial(BaseModel):
     rol: str
     ci: str

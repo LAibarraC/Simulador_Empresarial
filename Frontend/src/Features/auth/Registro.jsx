@@ -13,7 +13,7 @@ export default function Registro({ onLogin }) {
   const [apellidos, setApellidos] = useState("");
   const [ci, setCi] = useState("");
   const [cu, setCu] = useState("");
-  const [rol, setRol] = useState("");
+  const rol = "estudiante";
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
@@ -35,11 +35,6 @@ export default function Registro({ onLogin }) {
 
   const nextStep = async () => {
     if (step === 1) {
-      if (!rol) {
-        alerta.error("Selecciona un rol", "Por favor, selecciona si eres Estudiante o Docente para continuar.");
-        return;
-      }
-    } else if (step === 2) {
       if (!nombres.trim() || !apellidos.trim() || !ci.trim()) {
         alerta.error("Datos incompletos", "Por favor, ingresa tus nombres, apellidos y CI.");
         return;
@@ -48,7 +43,7 @@ export default function Registro({ onLogin }) {
         alerta.error("Datos incompletos", "Por favor, ingresa tu Carnet Universitario (CU).");
         return;
       }
-    } else if (step === 3) {
+    } else if (step === 2) {
       if (!email.trim()) {
         alerta.error("Datos incompletos", "Por favor, ingresa tu correo electrónico.");
         return;
@@ -85,7 +80,7 @@ export default function Registro({ onLogin }) {
     if (cargando) return;
 
     // Si no está en el paso 4, el botón Siguiente manejará el avance
-    if (step !== 4) {
+    if (step !== 3) {
       nextStep();
       return;
     }
@@ -100,7 +95,7 @@ export default function Registro({ onLogin }) {
       return;
     }
 
-    if (nombres && apellidos && email && pass && rol) {
+    if (nombres && apellidos && email && pass) {
       setCargando(true);
       try {
         const payload = {
@@ -168,10 +163,9 @@ export default function Registro({ onLogin }) {
 
   const getStepTitle = () => {
     switch (step) {
-      case 1: return "Rol de Usuario";
-      case 2: return "Datos Personales";
-      case 3: return "Contacto";
-      case 4: return "Seguridad";
+      case 1: return "Datos Personales";
+      case 2: return "Contacto";
+      case 3: return "Seguridad";
       default: return "";
     }
   };
@@ -192,31 +186,20 @@ export default function Registro({ onLogin }) {
           <h3 style={{ marginTop: '15px', color: 'var(--text-main)' }}>Registro de Usuario</h3>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '30px' }}>Crea tu cuenta para acceder al sistema.</p>
 
-          {/* Stepper UI (4 Pasos) */}
+          {/* Stepper UI (3 Pasos) */}
           <div className="stepper-wrapper">
             <div className={`stepper-item ${step >= 1 ? 'completed' : ''} ${step === 1 ? 'active' : ''}`}>
               <div className="step-counter">1</div>
-              <div className="step-name">Rol</div>
-            </div>
-
-            <div className={`step-line ${step >= 2 ? 'completed' : ''}`}></div>
-
-            <div className={`stepper-item ${step >= 2 ? 'completed' : ''} ${step === 2 ? 'active' : ''}`}>
-              <div className="step-counter">2</div>
               <div className="step-name">Datos</div>
             </div>
-
-            <div className={`step-line ${step >= 3 ? 'completed' : ''}`}></div>
-
-            <div className={`stepper-item ${step >= 3 ? 'completed' : ''} ${step === 3 ? 'active' : ''}`}>
-              <div className="step-counter">3</div>
+            <div className={`step-line ${step >= 2 ? 'completed' : ''}`}></div>
+            <div className={`stepper-item ${step >= 2 ? 'completed' : ''} ${step === 2 ? 'active' : ''}`}>
+              <div className="step-counter">2</div>
               <div className="step-name">Contacto</div>
             </div>
-
-            <div className={`step-line ${step >= 4 ? 'completed' : ''}`}></div>
-
-            <div className={`stepper-item ${step >= 4 ? 'completed' : ''} ${step === 4 ? 'active' : ''}`}>
-              <div className="step-counter">4</div>
+            <div className={`step-line ${step >= 3 ? 'completed' : ''}`}></div>
+            <div className={`stepper-item ${step >= 3 ? 'completed' : ''} ${step === 3 ? 'active' : ''}`}>
+              <div className="step-counter">3</div>
               <div className="step-name">Seguridad</div>
             </div>
           </div>
@@ -224,206 +207,8 @@ export default function Registro({ onLogin }) {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
 
-          {/* PASO 1: SELECCIÓN DE ROL */}
+          {/* PASO 1: DATOS PERSONALES */}
           {step === 1 && (
-            <div className="step-animation" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ textAlign: 'left', marginBottom: '4px' }}>
-                <label style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>
-                  ¿Cuál es tu rol? <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Selecciona cómo utilizarás la plataforma para configurar tu cuenta.
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '5px' }}>
-                {/* Opción Estudiante */}
-                <div
-                  onClick={() => setRol('estudiante')}
-                  style={{
-                    position: 'relative',
-                    padding: '20px 12px',
-                    borderRadius: '12px',
-                    border: rol === 'estudiante' ? '2px solid var(--accent-color)' : '1px solid var(--border-color)',
-                    backgroundColor: rol === 'estudiante' ? 'rgba(255, 112, 0, 0.12)' : 'rgba(128, 128, 128, 0.05)',
-                    boxShadow: rol === 'estudiante' ? '0 0 15px rgba(255, 112, 0, 0.25)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s ease',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                    userSelect: 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (rol !== 'estudiante') {
-                      e.currentTarget.style.borderColor = 'var(--accent-color)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (rol !== 'estudiante') {
-                      e.currentTarget.style.borderColor = 'var(--border-color)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }
-                  }}
-                >
-                  {/* Badge indicador */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    border: rol === 'estudiante' ? 'none' : '1.5px solid var(--border-color)',
-                    backgroundColor: rol === 'estudiante' ? 'var(--accent-color)' : 'transparent',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    transition: 'all 0.2s ease'
-                  }}>
-                    {rol === 'estudiante' && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </div>
-
-                  {/* Icono */}
-                  <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '12px',
-                    backgroundColor: rol === 'estudiante' ? 'var(--accent-color)' : 'rgba(128, 128, 128, 0.12)',
-                    color: rol === 'estudiante' ? 'white' : 'var(--text-main)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '10px',
-                    transition: 'all 0.25s ease'
-                  }}>
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                      <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                    </svg>
-                  </div>
-
-                  <span style={{
-                    fontWeight: '700',
-                    fontSize: '1.05rem',
-                    color: rol === 'estudiante' ? 'var(--accent-color)' : 'var(--text-main)',
-                    marginBottom: '4px'
-                  }}>
-                    Estudiante
-                  </span>
-                  <span style={{
-                    fontSize: '0.78rem',
-                    color: 'var(--text-muted, #888)',
-                    lineHeight: '1.3'
-                  }}>
-                    Aprende y compite en simulaciones
-                  </span>
-                </div>
-
-                {/* Opción Docente */}
-                <div
-                  onClick={() => setRol('docente')}
-                  style={{
-                    position: 'relative',
-                    padding: '20px 12px',
-                    borderRadius: '12px',
-                    border: rol === 'docente' ? '2px solid var(--accent-color)' : '1px solid var(--border-color)',
-                    backgroundColor: rol === 'docente' ? 'rgba(255, 112, 0, 0.12)' : 'rgba(128, 128, 128, 0.05)',
-                    boxShadow: rol === 'docente' ? '0 0 15px rgba(255, 112, 0, 0.25)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s ease',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                    userSelect: 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (rol !== 'docente') {
-                      e.currentTarget.style.borderColor = 'var(--accent-color)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (rol !== 'docente') {
-                      e.currentTarget.style.borderColor = 'var(--border-color)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }
-                  }}
-                >
-                  {/* Badge indicador */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    border: rol === 'docente' ? 'none' : '1.5px solid var(--border-color)',
-                    backgroundColor: rol === 'docente' ? 'var(--accent-color)' : 'transparent',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    transition: 'all 0.2s ease'
-                  }}>
-                    {rol === 'docente' && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </div>
-
-                  {/* Icono */}
-                  <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '12px',
-                    backgroundColor: rol === 'docente' ? 'var(--accent-color)' : 'rgba(128, 128, 128, 0.12)',
-                    color: rol === 'docente' ? 'white' : 'var(--text-main)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '10px',
-                    transition: 'all 0.25s ease'
-                  }}>
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z" />
-                      <path d="M6 6h10" />
-                      <path d="M6 10h10" />
-                      <path d="M6 14h6" />
-                    </svg>
-                  </div>
-
-                  <span style={{
-                    fontWeight: '700',
-                    fontSize: '1.05rem',
-                    color: rol === 'docente' ? 'var(--accent-color)' : 'var(--text-main)',
-                    marginBottom: '4px'
-                  }}>
-                    Docente
-                  </span>
-                  <span style={{
-                    fontSize: '0.78rem',
-                    color: 'var(--text-muted, #888)',
-                    lineHeight: '1.3'
-                  }}>
-                    Crea clases y gestiona grupos
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* PASO 2: DATOS PERSONALES */}
-          {step === 2 && (
             <div className="step-animation" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div className="form-row-responsive">
                 <div className="floating-input-group always-floating" style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
@@ -432,7 +217,7 @@ export default function Registro({ onLogin }) {
                     value={nombres}
                     onChange={(e) => setNombres(e.target.value)}
                     placeholder="Ej. Juan Carlos"
-                    required={step === 2}
+                    required={step === 1}
                   />
                   <label className="etiqueta">Nombres</label>
                   <fieldset className="notch"><legend><span>Nombres</span></legend></fieldset>
@@ -443,7 +228,7 @@ export default function Registro({ onLogin }) {
                     value={apellidos}
                     onChange={(e) => setApellidos(e.target.value)}
                     placeholder="Ej. Pérez Gómez"
-                    required={step === 2}
+                    required={step === 1}
                   />
                   <label className="etiqueta">Apellidos</label>
                   <fieldset className="notch"><legend><span>Apellidos</span></legend></fieldset>
@@ -456,7 +241,7 @@ export default function Registro({ onLogin }) {
                     value={ci}
                     onChange={(e) => setCi(e.target.value)}
                     placeholder="Carnet de Identidad"
-                    required={step === 2}
+                    required={step === 1}
                   />
                   <label className="etiqueta">CI</label>
                   <fieldset className="notch"><legend><span>CI</span></legend></fieldset>
@@ -468,7 +253,7 @@ export default function Registro({ onLogin }) {
                       value={cu}
                       onChange={(e) => setCu(e.target.value)}
                       placeholder="Carnet Universitario"
-                      required={step === 2}
+                      required={step === 1}
                     />
                     <label className="etiqueta">CU</label>
                     <fieldset className="notch"><legend><span>CU</span></legend></fieldset>
@@ -478,8 +263,8 @@ export default function Registro({ onLogin }) {
             </div>
           )}
 
-          {/* PASO 3: CONTACTO */}
-          {step === 3 && (
+          {/* PASO 2: CONTACTO */}
+          {step === 2 && (
             <div className="floating-input-group always-floating is-email step-animation" style={{ textAlign: 'left', height: '50px' }}>
               <input
                 type="email"
@@ -487,7 +272,7 @@ export default function Registro({ onLogin }) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="correo@ejemplo.com"
                 style={{ flex: 1, minWidth: 0, height: "100%", margin: 0, padding: "0 40px 0 14px", boxSizing: "border-box" }}
-                required={step === 3}
+                required={step === 2}
               />
               <label className="etiqueta">Correo Electrónico</label>
               <fieldset className="notch"><legend><span>Correo Electrónico</span></legend></fieldset>
@@ -497,8 +282,8 @@ export default function Registro({ onLogin }) {
             </div>
           )}
 
-          {/* PASO 4: SEGURIDAD */}
-          {step === 4 && (
+          {/* PASO 3: SEGURIDAD */}
+          {step === 3 && (
             <div className="form-row-responsive step-animation" style={{ alignItems: 'flex-start' }}>
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                 <div className="floating-input-group always-floating" style={{ textAlign: 'left' }}>
@@ -507,7 +292,7 @@ export default function Registro({ onLogin }) {
                     value={pass}
                     onChange={(e) => setPass(e.target.value)}
                     placeholder="Usa letras y números"
-                    required={step === 4}
+                    required={step === 3}
                   />
                   <label className="etiqueta">Contraseña</label>
                   <button
@@ -567,7 +352,7 @@ export default function Registro({ onLogin }) {
                     value={confirmPass}
                     onChange={(e) => setConfirmPass(e.target.value)}
                     placeholder="Repite la contraseña"
-                    required={step === 4}
+                    required={step === 3}
                   />
                   <label className="etiqueta">Confirmar Contraseña</label>
                   <button
@@ -638,7 +423,7 @@ export default function Registro({ onLogin }) {
                 flex: 2
               }}
             >
-              {cargando ? 'Creando cuenta...' : (step === 4 ? 'Crear Cuenta' : 'Siguiente')}
+              {cargando ? 'Creando cuenta...' : (step === 3 ? 'Crear Cuenta' : 'Siguiente')}
             </button>
           </div>
         </form>
