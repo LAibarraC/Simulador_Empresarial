@@ -1,7 +1,7 @@
   import { useState, useEffect, useRef } from "react";
   import { NavLink, useNavigate, useLocation } from "react-router-dom";
   import OscuroClaro from "./oscuro_claro.jsx";
-  import escudoAdmin from "../assets/images/Logo-Adm.png";
+  import logoSiCE from "../assets/images/Logo-SiCE.png";
   import '../styles/ui/Menu.css';
   import { alerta } from "../utils/Notificaciones";
   import { api } from "../services/api";
@@ -164,7 +164,7 @@
       <nav className="main-navbar">
 
         <div className="nav-brand">
-          <img src={escudoAdmin} alt="Escudo Administración" className="nav-logo" />
+          <img src={logoSiCE} alt="Logo SiCE" className="nav-logo" />
         </div>
 
         <div className={`nav-menu ${isOpen ? "active" : ""}`} ref={mobileMenuRef}>

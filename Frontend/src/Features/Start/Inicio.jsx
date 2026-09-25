@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import escudoAdmin from "../../assets/images/Logo-Adm.png";
+import logoSiCEInicio from "../../assets/images/Logo-SiCE-Inicio.png";
 import imagenInicio1 from "../../assets/images/imagen de inicio 1.jpg";
 import imagenInicio2 from "../../assets/images/imagen de inicio 2.jpg";
 import "../../styles/ui/Inicio.css";
@@ -14,7 +14,7 @@ import {
 const INTERVALO_MS = 4000;
 
 export default function Inicio() {
-  const imagenes = [escudoAdmin, imagenInicio1, imagenInicio2];
+  const imagenes = [logoSiCEInicio, imagenInicio1, imagenInicio2];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState("next");
   const [isPaused, setIsPaused] = useState(false);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import logoCarrera from "../../assets/images/Logo-Adm.png";
+import logoSiCE from "../../assets/images/Logo-SiCE.png";
 import { alerta } from '../../utils/Notificaciones.jsx';
 import '../../styles/ui/Login.css'; // Aseguramos que cargue los estilos de la tarjeta
 
@@ -182,7 +182,7 @@ export default function Registro({ onLogin }) {
       {/* Botón de tema removido, ahora se maneja globalmente en App.jsx */}
       <div className="login-card" style={{ maxWidth: '500px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <img src={logoCarrera} alt="Logo" style={{ width: '150px', height: 'auto' }} />
+          <img src={logoSiCE} alt="Logo SiCE" style={{ width: '150px', height: 'auto' }} />
           <h3 style={{ marginTop: '15px', color: 'var(--text-main)' }}>Registro de Usuario</h3>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '30px' }}>Crea tu cuenta para acceder al sistema.</p>
 

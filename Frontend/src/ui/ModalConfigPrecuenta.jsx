@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logoCarrera from "../assets/images/Logo-Adm.png";
+import logoSiCE from "../assets/images/Logo-SiCE.png";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { api } from "../services/api.js";
 import { alerta } from "../utils/Notificaciones.jsx";
@@ -56,7 +56,7 @@ export default function ModalConfigPrecuenta({ onActualizado }) {
   return (
     <div className="precuenta-modal-overlay">
       <div className="precuenta-modal login-card" role="dialog" aria-modal="true" aria-labelledby="titulo-configurar-precuenta">
-        <img className="precuenta-logo" src={logoCarrera} alt="Logo Administración de Empresas" />
+        <img className="precuenta-logo" src={logoSiCE} alt="Logo SiCE" />
         <h2 id="titulo-configurar-precuenta">Configura tu cuenta</h2>
         <p className="precuenta-modal-description">Es tu primer inicio. El correo asignado por la administración se mantendrá sin cambios. Actualiza tu contraseña o vincula tu cuenta de Google para continuar.</p>
 

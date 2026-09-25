@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api } from "../services/api";
 import { alerta } from "../utils/Notificaciones";
-import logoCarrera from "../assets/images/Logo-Adm.png";
+import logoSiCE from "../assets/images/Logo-SiCE.png";
 import "../styles/ui/Login.css";
 
 export default function ModalSeleccionRolInicial({ usuario, onRolAsignado }) {
@@ -32,7 +32,7 @@ export default function ModalSeleccionRolInicial({ usuario, onRolAsignado }) {
   return (
     <div className="precuenta-modal-overlay" style={{ zIndex: 9999999 }}>
       <div className="precuenta-modal login-card" role="dialog" aria-modal="true" aria-labelledby="titulo-datos-estudiante">
-        <img className="precuenta-logo" src={logoCarrera} alt="Logo Administración de Empresas" />
+        <img className="precuenta-logo" src={logoSiCE} alt="Logo SiCE" />
         <h2 id="titulo-datos-estudiante">¡Bienvenido, {usuario?.nombre || "Usuario"}!</h2>
         <p className="precuenta-modal-description">Para completar tu registro como estudiante, ingresa tus datos académicos.</p>
 

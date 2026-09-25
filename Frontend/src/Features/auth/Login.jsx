@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logoCarrera from "../../assets/images/Logo-Adm.png";
+import logoSiCE from "../../assets/images/Logo-SiCE.png";
 import { api } from "../../services/api.js";
 import { alerta } from '../../utils/Notificaciones.jsx';
 import '../../styles/ui/Login.css';
@@ -81,9 +81,9 @@ export default function Login({ onLogin }) {
       <div className="login-card">
         <div style={{ textAlign: 'center', marginBottom: '35px', marginTop: '5px' }}>
           <img
-            src={logoCarrera}
-            alt="Logo Administración de Empresas"
-            style={{ width: '200px', height: 'auto' }}
+            src={logoSiCE}
+            alt="Logo SiCE"
+            style={{ width: '150px', height: 'auto' }}
           />
         </div>
 
