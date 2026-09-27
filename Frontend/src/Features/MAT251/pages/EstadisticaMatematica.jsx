@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Datos from "../../../pages/Datos";
 import { useCalculadoraExcel } from "../../MAT151/hooks/useCalculadoraExcel";
-import { useData } from "../../../components/Gestion_Datos/DataContext";
+import { useData } from "../../../components/gestion_datos/DataContext";
 import Principal from '../Principal/Principal';
 import "../styles/pages/Pantalla.css";
 import "../styles/pages/CalculosMat251.css";

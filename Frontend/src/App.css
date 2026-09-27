@@ -121,9 +121,17 @@ body {
   min-height: 100vh;
 }
 
-/* Transición suave para todos los fondos y textos principales cuando cambia el tema */
-body *, .app-main, .login-card, .guest-header, input, select {
-  transition: background-color 0.6s cubic-bezier(0.22, 1, 0.36, 1), color 0.6s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+/* Transición suave para contenedores principales al cambiar de tema (evitando body * para no causar lag) */
+.app-main,
+.login-card,
+.guest-header,
+input,
+select,
+.card-unificada,
+.tarjeta-estadistica,
+.navbar,
+.sidebar {
+  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 a {
@@ -782,28 +790,32 @@ button[data-sileo-toast]:active,
 [data-sileo-toast][data-state="action"] [data-sileo-title],
 [data-sileo-title][data-state="success"],
 .toast-titulo-exito {
-  color: #22c55e !important; /* Verde para éxito */
+  color: #22c55e !important;
+  /* Verde para éxito */
   font-weight: 700 !important;
 }
 
 [data-sileo-toast][data-state="error"] [data-sileo-title],
 [data-sileo-title][data-state="error"],
 .toast-titulo-error {
-  color: #ef4444 !important; /* Rojo para falla */
+  color: #ef4444 !important;
+  /* Rojo para falla */
   font-weight: 700 !important;
 }
 
 [data-sileo-toast][data-state="warning"] [data-sileo-title],
 [data-sileo-title][data-state="warning"],
 .toast-titulo-advertencia {
-  color: #fbbf24 !important; /* Amarillo para advertencia */
+  color: #fbbf24 !important;
+  /* Amarillo para advertencia */
   font-weight: 700 !important;
 }
 
 [data-sileo-toast][data-state="info"] [data-sileo-title],
 [data-sileo-title][data-state="info"],
 .toast-titulo-info {
-  color: #38bdf8 !important; /* Celeste para info */
+  color: #38bdf8 !important;
+  /* Celeste para info */
   font-weight: 700 !important;
 }
 
@@ -912,6 +924,7 @@ html.dark .pie-logo-siglos {
     transform: rotate(-180deg) scale(0.2);
     opacity: 0;
   }
+
   100% {
     transform: rotate(0deg) scale(1);
     opacity: 1;
@@ -1182,5 +1195,50 @@ html.dark .pie-logo-siglos {
   .login-link {
     padding: 6px 14px;
     font-size: 0.85rem;
+  }
+}
+
+/* Added for btn-editar hover in Tema 2 */
+[data-theme='dark'] .btn-editar-hover:hover,
+.dark .btn-editar-hover:hover,
+[data-bs-theme='dark'] .btn-editar-hover:hover,
+.btn-editar-hover:hover {
+  background: var(--accent-color) !important;
+  color: white !important;
+}
+
+
+/* --- Grid de Resultados Tema 2 --- */
+.resultados-grid-continua {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.resultados-grid-continua .desviacion-card {
+  width: 100%;
+}
+
+@media (max-width: 850px) {
+  .resultados-grid-continua {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .resultados-grid-continua .desviacion-card {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 7.5px);
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .resultados-grid-continua {
+    grid-template-columns: 1fr;
+  }
+
+  .resultados-grid-continua .desviacion-card {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }

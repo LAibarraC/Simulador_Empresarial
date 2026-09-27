@@ -11,83 +11,27 @@ db = SyncSessionLocal()
 # Definimos los 3 usuarios que necesitas
 usuarios_iniciales = [
     Usuario(
-        email="admin@usfx.bo", 
-        nombre="Diego (Administrador)", 
+        email="alberto@usfx.bo", 
+        nombre="alberto", 
         password="123", 
         rol="Administrador", 
         perfil="Administrador", 
         institucion="USFX"
     ),
     Usuario(
-        email="jose@usfx.bo", 
-        nombre="Jose Veliz", 
+        email="diego@usfx.bo", 
+        nombre="diego", 
         password="123", 
-        rol="Docente", 
-        perfil="Docente", 
+        rol="Administrador", 
+        perfil="Administrador", 
         institucion="USFX"
     ),
     Usuario(
     email="ulises@usfx.bo",
     nombre="Ulises Mancilla",
     password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
-    institucion="USFX"
-),
-Usuario(
-    email="jesus@usfx.bo",
-    nombre="Jesus Avila",
-    password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
-    institucion="USFX"
-),
-Usuario(
-    email="diego@usfx.bo",
-    nombre="Diego Flores",
-    password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
-    institucion="USFX"
-),
-Usuario(
-    email="luis@usfx.bo",
-    nombre="Luis Vargas",
-    password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
-    institucion="USFX"
-),
-Usuario(
-    email="carlos@usfx.bo",
-    nombre="Carlos Perez",
-    password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
-    institucion="USFX"
-),
-Usuario(
-    email="miguel@usfx.bo",
-    nombre="Miguel Rojas",
-    password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
-    institucion="USFX"
-),
-Usuario(
-    email="ana@usfx.bo",
-    nombre="Ana Lopez",
-    password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
-    institucion="USFX"
-),
-Usuario(
-    email="maria@usfx.bo",
-    nombre="Maria Garcia",
-    password="123",
-    rol="Estudiante",
-    perfil="Estudiante",
+    rol="Administrador",
+    perfil="Administrador",
     institucion="USFX"
 ),
 ]

@@ -4,34 +4,34 @@ import Pie_pagina from "./ui/Pie_pagina";
 import { useState, useEffect } from "react";
 import { sileo, Toaster } from "sileo";
 
-import Inicio from "./Features/Start/Inicio";
-import Archivos from "./Features/Archives/Archivos";
-import Calculadora from "./Features/MAT151/pages/Calculadora";
-import Login from "./Features/auth/Login";
-import MAT251 from "./Features/MAT251/pages/EstadisticaMatematica";
-import Registro from "./Features/auth/Registro";
-import Perfil from "./Features/auth/Perfil";
-import ForgotPassword from "./Features/auth/ForgotPassword";
-import ResetPassword from "./Features/auth/ResetPassword";
-import Admin from "./Features/Admin/Admin";
-import GestionDocente from "./Features/User/docentes/GestionDocente";
-import ReportesDocente from "./Features/User/docentes/ReportesDocente";
+import Inicio from "./features/start/Inicio";
+import Archivos from "./features/archives/Archivos";
+import Calculadora from "./features/MAT151/pages/Calculadora";
+import Login from "./features/auth/Login";
+import MAT251 from "./features/MAT251/pages/EstadisticaMatematica";
+import Registro from "./features/auth/Registro";
+import Perfil from "./features/auth/Perfil";
+import ForgotPassword from "./features/auth/ForgotPassword";
+import ResetPassword from "./features/auth/ResetPassword";
+import Admin from "./features/admin/Admin";
+import GestionDocente from "./features/user/docentes/GestionDocente";
+import ReportesDocente from "./features/user/docentes/ReportesDocente";
 
 import SelectorRol from './ui/SelectorRol';
 import ModalSeleccionRolInicial from './ui/ModalSeleccionRolInicial';
 import ModalConfigPrecuenta from './ui/ModalConfigPrecuenta';
 import OscuroClaro from "./ui/oscuro_claro";
 
-import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModuleContext } from "./components/Gestion_Datos/DataContext";
+import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModuleContext } from "./components/gestion_datos/DataContext";
 
 import LtiTester from "./pages/LtiTester";
-import Historial from "./Features/History/Historial";
-import Grupos from './Features/grupos/Grupos';
-import Tareas from './Features/grupos/Tareas';
-import GenerarQR from "./Features/qr/GenerarQR";
-import Matricular from "./Features/qr/Matricular";
+import Historial from "./features/history/Historial";
+import Grupos from './features/grupos/Grupos';
+import Tareas from './features/grupos/Tareas';
+import GenerarQR from "./features/qr/GenerarQR";
+import Matricular from "./features/qr/Matricular";
 import api from "./services/api";
-
+ 
 import "./App.css";
 import ConfirmHost from "./utils/ConfirmHost";
 
@@ -49,7 +49,7 @@ const ConditionalGuestHeader = ({ isAuth, usuario, setUsuario }) => {
   const hideLinkPaths = ['/registro', '/forgot-password', '/reset-password'];
   const isHideLink = hideLinkPaths.includes(location.pathname);
   const isLogin = location.pathname === '/login';
-  
+
   if (isAuth) {
     return (
       <header className="guest-header">
@@ -121,9 +121,9 @@ function App() {
               <ModalConfigPrecuenta onActualizado={setUsuario} />
             )}
             {usuario && (usuario.requiere_rol || usuario.rol === 'Pendiente' || !usuario.rol) && (
-              <ModalSeleccionRolInicial 
-                usuario={usuario} 
-                onRolAsignado={(usuarioActualizado) => setUsuario(usuarioActualizado)} 
+              <ModalSeleccionRolInicial
+                usuario={usuario}
+                onRolAsignado={(usuarioActualizado) => setUsuario(usuarioActualizado)}
               />
             )}
             <SelectorRol />
@@ -131,7 +131,7 @@ function App() {
               <div style={{ position: 'fixed', zIndex: 99999, inset: 0, pointerEvents: 'none' }}>
                 <Toaster position="bottom-right" />
               </div>
-              
+
               <ConfirmHost />
 
               {/* 🆕 CONTROLES FLOTANTES MODERNOS PARA INVITADOS */}

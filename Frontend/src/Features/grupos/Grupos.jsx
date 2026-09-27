@@ -4,7 +4,7 @@ import { es } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/components/SelectorFecha.css";
 import { useNavigate } from "react-router-dom";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 import { alerta } from "../../utils/Notificaciones";
 import api, { BASE_URL } from "../../services/api";
 import qrApi from "../../services/qrApi";

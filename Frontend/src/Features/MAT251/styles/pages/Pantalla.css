@@ -402,3 +402,30 @@
   border-color: var(--accent-color);
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
 }
+
+.btn-mat251-confianza {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent !important;
+  background-color: transparent !important;
+  color: var(--text-muted) !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  font-size: 0.85em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.btn-mat251-confianza:hover:not(.active) {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+  color: var(--primary-color) !important;
+  border: 1px solid transparent !important;
+}
+
+.btn-mat251-confianza.active {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--primary-color) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+}

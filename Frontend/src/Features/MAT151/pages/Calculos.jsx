@@ -7,7 +7,7 @@ import "driver.js/dist/driver.css";
 
 // --- IMPORTS DE SERVICIOS Y CONTEXTO ---
 import { useCalculadoraExcel } from "../hooks/useCalculadoraExcel";
-import { useModuleData } from "../../../components/Gestion_Datos/DataContext";
+import { useModuleData } from "../../../components/gestion_datos/DataContext";
 import { api, BASE_URL } from "../../../services/api";
 import { alerta } from "../../../utils/Notificaciones";
 import {

@@ -23,7 +23,7 @@ export const OPERACIONES = [
     titulo: 'Variables aleatorias',
     operaciones: [
       { value: 'dist_discreta', label: 'Variables Aleatorias Discretas' },
-      { value: 'dist_continua_v2', label: 'Variable Aleatoria Continua' },
+      { value: 'dist_continua', label: 'Calculadora de Funciones Continuas' },
     ],
   },
   {

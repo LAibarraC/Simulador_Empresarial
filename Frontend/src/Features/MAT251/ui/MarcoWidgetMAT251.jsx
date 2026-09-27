@@ -156,7 +156,7 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '30px'
+            padding: '20px'
           }}
           onClick={() => setIsMaximized(false)} // Clic afuera cierra el gráfico
         >

@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { alerta } from "../../utils/Notificaciones";
 import { BASE_URL, api } from "../../services/api";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 
 const TOPIC_CALCULATION_MAPPINGS = {
   "tema 2": ["frecuencias_completas", "distribucion_intervalos", "tabla_frecuencias", "distribucion_de_frecuencias"],

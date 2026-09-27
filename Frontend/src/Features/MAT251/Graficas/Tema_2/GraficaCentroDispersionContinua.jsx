@@ -125,8 +125,8 @@ const CustomTooltip = ({ active, payload }) => {
     const d = payload[0]?.payload;
     if (!d) return null;
     return (
-        <div style={{ background: 'white', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '8px', fontFamily: FONT, fontSize: FS.sm, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', minWidth: '140px' }}>
-            <p style={{ margin: 0, fontWeight: 700, color: '#1e293b', borderBottom: '1px solid #f1f5f9', paddingBottom: '5px', marginBottom: '5px' }}>
+        <div style={{ background: 'var(--bg-card, white)', padding: '10px 14px', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '8px', fontFamily: FONT, fontSize: FS.sm, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', minWidth: '140px', color: 'var(--text-main, #1e293b)' }}>
+            <p style={{ margin: 0, fontWeight: 700, borderBottom: '1px solid var(--border-color, #f1f5f9)', paddingBottom: '5px', marginBottom: '5px' }}>
                 x = {typeof d.x === 'number' ? d.x.toFixed(3) : d.x}
             </p>
             {d.fx !== null && d.fx !== undefined && (
@@ -223,7 +223,7 @@ export default function GraficaCentroDispersionContinua({ datos }) {
 
                 {/* ── Tabs ── */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-                    <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '3px', borderRadius: '8px', border: '1px solid #e2e8f0', gap: '2px' }}>
+                    <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', gap: '2px' }}>
                         {TABS.map(tab => (
                             <button
                                 key={tab.id}
@@ -238,7 +238,7 @@ export default function GraficaCentroDispersionContinua({ datos }) {
                                     cursor: 'pointer',
                                     transition: 'all 0.2s ease',
                                     background: vistaActiva === tab.id ? 'var(--primary-color, #3b82f6)' : 'transparent',
-                                    color:      vistaActiva === tab.id ? '#ffffff' : '#64748b',
+                                    color:      vistaActiva === tab.id ? '#ffffff' : 'var(--text-main, #64748b)',
                                     boxShadow:  vistaActiva === tab.id ? '0 1px 4px rgba(59,130,246,0.3)' : 'none',
                                 }}
                             >

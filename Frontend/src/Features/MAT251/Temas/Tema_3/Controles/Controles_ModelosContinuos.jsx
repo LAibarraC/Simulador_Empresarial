@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../../styles/Temas/Tema3.css';
-import { calcularDistribucionContinua, generarDatosGraficoContinua } from '../../../Matematicas/logica_Tema3_continuas';
+import { calcularDistribucionContinua, generarDatosGraficoContinua } from '../../../Matematicas/logica_Tema3';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { IconoMas, IconoBasura, EditarDatos } from '../../../../../ui/iconos';
@@ -481,18 +481,18 @@ export default function Controles_ModelosContinuos({
 
                 {modo === 'matriz' && (modelo === 'Uniforme' || modelo === 'Normal' || modelo === 'ChiCuadrado' || modelo === 'TStudent') && (
                     <div style={{ marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', background: '#f8fafc', padding: '12px 15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', background: 'var(--bg-card, #f8fafc)', padding: '12px 15px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                             <div>
-                                <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#3b82f6', marginBottom: '4px', display: 'block' }}>Datos:</span>
+                                <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--primary-color, #3b82f6)', marginBottom: '4px', display: 'block' }}>Datos:</span>
                                 <div style={{ display: 'flex', gap: '15px' }}>
-                                    <small title="Datos cargados desde archivo o texto" style={{ color: '#64748b', fontSize: '0.75rem', cursor: 'help' }}>
-                                        Cargados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.cargados : 0}</strong>
+                                    <small title="Datos cargados desde archivo o texto" style={{ color: 'var(--text-muted, #64748b)', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Cargados: <strong style={{ color: 'var(--primary-color, #3b82f6)' }}>{statsDatos ? statsDatos.cargados : 0}</strong>
                                     </small>
-                                    <small title="Datos ingresados manualmente" style={{ color: '#64748b', fontSize: '0.75rem', cursor: 'help' }}>
-                                        Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.agregados : 0}</strong>
+                                    <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted, #64748b)', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Agregados: <strong style={{ color: 'var(--primary-color, #3b82f6)' }}>{statsDatos ? statsDatos.agregados : 0}</strong>
                                     </small>
-                                    <small title="Total de datos válidos" style={{ color: '#64748b', fontSize: '0.75rem', cursor: 'help' }}>
-                                        Total: <strong style={{ color: '#334155' }}>{statsDatos ? statsDatos.total : 0}</strong>
+                                    <small title="Total de datos válidos" style={{ color: 'var(--text-muted, #64748b)', fontSize: '0.75rem', cursor: 'help' }}>
+                                        Total: <strong style={{ color: 'var(--text-main, #334155)' }}>{statsDatos ? statsDatos.total : 0}</strong>
                                     </small>
                                 </div>
                             </div>

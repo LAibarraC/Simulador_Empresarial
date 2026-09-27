@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import 'react-data-grid/lib/styles.css';
-import { useMAT251Data } from '../../../components/Gestion_Datos/DataContext';
+import { useMAT251Data } from '../../../components/gestion_datos/DataContext';
 import { calcularTecnicasConteo, calcularProbabilidadClasica, calcularProbabilidadCondicional, calcularProbabilidadTotalParticion } from '../Matematicas/logica_Tema1';
-import { calcularMomentosDiscreta, calcularBivariante, calcularContinuaPlantilla } from '../Matematicas/logica_Tema2';
+import { calcularMomentosDiscreta, calcularMomentosContinua } from '../Matematicas/logica_Tema2';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import '../styles/pages/Pantalla.css';
@@ -27,19 +27,13 @@ import ResultadosMuestreo from '../Temas/Tema_1/Resultados/Resultados_Muestreo';
 import ResultadosEspacioContinuo from '../Temas/Tema_1/Resultados/Resultados_EspacioContinuo';
 import Gestor_CalculadoraMuestral from '../Temas/Tema_4/Controles/Gestor_CalculadoraMuestral';
 import CalculadoraTamanioMuestra from '../Temas/Tema_4/CalculadoraTamanioMuestra';
-
+import Gestor_EstimacionPuntual, { Controles_EstimacionPuntual_UI } from '../Temas/Tema_5/Controles/Gestor_EstimacionPuntual';
+import Gestor_EstimacionIntervalos, { Controles_EstimacionIntervalos_UI } from '../Temas/Tema_5/Controles/Gestor_EstimacionIntervalos';
 import Operacion from '../Temas/Tema_1/Controles/Operacion';
 import Controles_DistribucionDiscreta from '../Temas/Tema_2/Controles/Controles_DistribucionDiscreta';
 import Resultados_DistribucionDiscreta from '../Temas/Tema_2/Resultados/Resultados_DistribucionDiscreta';
-//import Controles_Bivariante from '../Temas/Tema_2/Controles/Controles_Bivariante';
-//import Resultados_Bivariante from '../Temas/Tema_2/Resultados/Resultados_Bivariante';
 import Controles_DistribucionContinua from '../Temas/Tema_2/Controles/Controles_DistribucionContinua';
 import Resultados_DistribucionContinua from '../Temas/Tema_2/Resultados/Resultados_DistribucionContinua';
-// import ControlDistribucionContinua from '../Temas/Tema_2/Controles/ControlDistribucionContinua';
-// import ControlDistribucionContinua_v2 from '../Temas/Tema_2/Controles/ControlDistribucionContinua_v2';
-// import ResultadoDistribucionContinua from '../Temas/Tema_2/Resultados/ResultadoDistribucionContinua';
-// import ResultadoDistribucionContinua_v2 from '../Temas/Tema_2/Resultados/ResultadoDistribucionContinua_v2';
-// import { calcularMomentosTeoricos } from '../Matematicas/logica_Tema2_v2';
 import '../styles/Temas/Tema2.css';
 
 import Controles_ModelosDiscretos from '../Temas/Tema_3/Controles/Controles_ModelosDiscretos';
@@ -155,6 +149,15 @@ export default function Principal() {
     const [resultadoUniforme, setResultadoUniforme] = useState(null);
     const [errorUniforme, setErrorUniforme] = useState('');
 
+    // ── Estimación Puntual ────────────────────────────────────────────────────────
+    const [paramEstimacion, setParamEstimacion] = useState('media');
+    const [modoEstimacion, setModoEstimacion] = useState('matriz');
+
+    // ── Estimación por Intervalos ──────────────────────────────────────────────────
+    const [paramIntervalos, setParamIntervalos] = useState('media');
+    const [modoIntervalos, setModoIntervalos] = useState('matriz');
+    const [confianzaIntervalos, setConfianzaIntervalos] = useState(95);
+
     // Estado para el Modal de Alerta Global
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
@@ -164,7 +167,6 @@ export default function Principal() {
     // Estados para Tema 2: Discreta y Continua
     const [datosDiscretos, setDatosDiscretos] = useState(null);
     const [datosContinuos, setDatosContinuos] = useState(null);
-    const [datosContinuosV2, setDatosContinuosV2] = useState(null);
 
     // Resultados Tema 3
     const [datosTema3, setDatosTema3] = useState(null);
@@ -594,6 +596,23 @@ export default function Principal() {
                             </div>
                         )}
 
+                        {/* CONTROLES ESTIMACION PUNTUAL */}
+                        {operacion === 'Estimacion_puntual' && (
+                            <Controles_EstimacionPuntual_UI 
+                                parametro={paramEstimacion} setParametro={setParamEstimacion} 
+                                modo={modoEstimacion} setModo={setModoEstimacion} 
+                            />
+                        )}
+
+                        {/* CONTROLES ESTIMACION INTERVALOS */}
+                        {operacion === 'Estimacion_intervalos' && (
+                            <Controles_EstimacionIntervalos_UI 
+                                parametro={paramIntervalos} setParametro={setParamIntervalos} 
+                                modo={modoIntervalos} setModo={setModoIntervalos} 
+                                confianza={confianzaIntervalos} setConfianza={setConfianzaIntervalos}
+                            />
+                        )}
+
 
                         {/* SEPARACION DE CONTROLES */}
                         {operacion === 'conteo' && (
@@ -607,7 +626,7 @@ export default function Principal() {
                                 setTipoElementos={setTipoElementos}
                             />
                         )}
-                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos' || operacion === 'modelos_continuos' || operacion === 'dist_discreta') && (
+                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos' || operacion === 'modelos_continuos' || operacion === 'dist_discreta' || operacion === 'Estimacion_puntual' || operacion === 'Estimacion_intervalos') && (
                             <ControlesProbabilidad
                                 setModalVars={setModalVars}
                                 varSeleccionada={varSeleccionada}
@@ -636,13 +655,17 @@ export default function Principal() {
                                     : operacion === 'muestreo' ? 'Introducción al Muestreo'
                                     : operacion === 'dist_uniforme' ? 'Espacio Continuo'
                                     : operacion === 'dist_discreta' ? 'Variables Aleatorias Discretas'
-                                    : operacion === 'dist_continua' ? 'Calculadora (Beta)'
+                                    : operacion === 'dist_continua' ? 'Calculadora de Funciones Continuas'
                                     : operacion === 'dist_continua_v2' ? 'Variable Aleatoria Continua'
                                     : operacion === 'modelos_discretos' ? 'Distribuciones Discretas'
                                     : operacion === 'modelos_continuos' ? 'Distribuciones Continuas'
                                     : operacion === 'distribuciones_muestrales' ? 'Distribuciones Muestrales'
                                     : operacion === 'tamanio_muestra' ? 'Tamaño de Muestra'
                                     : operacion === 'probabilidad_muestral' ? 'Probabilidad Muestral'
+                                    : operacion === 'Estimacion_puntual' ? 'Estimación Puntual'
+                                    : operacion === 'Estimacion_intervalos' ? 'Estimación por Intervalos'
+                                    : operacion === 'Hipotesis_parametricas' ? 'Hipótesis Paramétricas'
+                                    : operacion === 'Hipotesis_noparametricas' ? 'Hipótesis No Paramétricas'
                                     : 'Cálculo de Probabilidad'}
                             </span>
                             {operacion === 'probabilidad' && (
@@ -730,22 +753,22 @@ export default function Principal() {
                             />
                             <Resultados_DistribucionDiscreta resultados={datosDiscretos} />
                         </div>
-                    ) : operacion === 'dist_continua' || operacion === 'dist_continua_v2' ? (
+                    ) : operacion === 'dist_continua' ? (
                         <div className="tema2-container">
                             <div style={{ padding: '0 20px 20px 20px' }}>
                                 <Controles_DistribucionContinua
                                     onCalcular={(datos) => {
                                         if (datos) {
-                                            setDatosContinuosV2(datos);
+                                            setDatosContinuos(datos);
                                         } else {
-                                            setDatosContinuosV2(null);
+                                            setDatosContinuos(null);
                                         }
                                     }}
                                 />
 
-                                {datosContinuosV2 && (
+                                {datosContinuos && (
                                     <div style={{ marginTop: '20px' }}>
-                                        <Resultados_DistribucionContinua resultados={datosContinuosV2} />
+                                        <Resultados_DistribucionContinua resultados={datosContinuos} />
                                     </div>
                                 )}
                             </div>
@@ -862,6 +885,30 @@ export default function Principal() {
                             resultado={resultadoSimulador} setResultadoSimulador={setResultadoSimulador}
                             errorSimulador={errorSimulador} setErrorSimulador={setErrorSimulador}
                             statsDatos={statsDatos} abrirEditor={abrirEditor}
+                        />
+                    ) : operacion === 'Estimacion_puntual' ? (
+                        <Gestor_EstimacionPuntual 
+                            varSeleccionada={varSeleccionada} 
+                            filas={filas} 
+                            statsDatos={statsDatos} 
+                            abrirEditor={abrirEditor} 
+                            parametro={paramEstimacion}
+                            modo={modoEstimacion}
+                            setModo={setModoEstimacion}
+                            setParametro={setParamEstimacion}
+                        />
+                    ) : operacion === 'Estimacion_intervalos' ? (
+                        <Gestor_EstimacionIntervalos 
+                            varSeleccionada={varSeleccionada} 
+                            filas={filas} 
+                            statsDatos={statsDatos} 
+                            abrirEditor={abrirEditor} 
+                            parametro={paramIntervalos}
+                            setParametro={setParamIntervalos}
+                            modo={modoIntervalos}
+                            setModo={setModoIntervalos}
+                            confianza={confianzaIntervalos}
+                            setConfianza={setConfianzaIntervalos}
                         />
                     ) : operacion === 'conteo' ? (
                         <ResultadosConteo resConteo={resConteo} hayResultado={hayResultado} />

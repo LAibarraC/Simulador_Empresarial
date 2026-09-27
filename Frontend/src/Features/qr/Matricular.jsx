@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 import { alerta } from "../../utils/Notificaciones";
 import qrApi from "../../services/qrApi";
 import { CierreX, Regenerar, Graduacion } from "../../ui/iconos";

@@ -56,15 +56,29 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
         }, 0);
     }, [tabla]);
 
-    const esSumaValida = Math.abs(sumaProbabilidades - 1) < 0.0001;
+    const hayProbabilidadesNegativas = tabla.some(fila => parseFloat(fila.p) < 0);
+    const esSumaValida = Math.abs(sumaProbabilidades - 1) < 0.0001 && !hayProbabilidadesNegativas;
     const hayCamposVacios = tabla.some(fila => fila.x === '' || fila.p === '');
 
     const handleCalcular = () => {
         if (!esSumaValida || hayCamposVacios) return;
-        const datos = tabla.map(fila => ({
-            x: parseFloat(fila.x),
-            p: parseFloat(fila.p)
-        }));
+
+        const mapDatos = new Map();
+        tabla.forEach(fila => {
+            const xVal = parseFloat(fila.x);
+            const pVal = parseFloat(fila.p);
+            if (!isNaN(xVal) && !isNaN(pVal)) {
+                if (mapDatos.has(xVal)) {
+                    mapDatos.set(xVal, mapDatos.get(xVal) + pVal);
+                } else {
+                    mapDatos.set(xVal, pVal);
+                }
+            }
+        });
+
+        const datos = Array.from(mapDatos.entries()).map(([x, p]) => ({ x, p }));
+        datos.sort((a, b) => a.x - b.x);
+
         onCalcular(datos); 
     };
 
@@ -185,40 +199,20 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
     return (
         <div style={cardStyle}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
-                <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
+                <div style={{ display: 'inline-flex', gap: '5px', background: 'var(--bg-card)', padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
                     <button
                         type="button"
-                        className={modo === 'matriz' ? 'btn-tema3-active' : ''}
+                        className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
                         onClick={() => setModo('matriz')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: modo === 'matriz' ? '#3b82f6' : 'transparent',
-                            color: modo === 'matriz' ? '#fff' : 'var(--text-muted, #64748b)',
-                            transition: 'all 0.2s'
-                        }}
+                        style={{ flex: 1 }}
                     >
                         Análisis de Matriz
                     </button>
                     <button
                         type="button"
-                        className={modo === 'manual' ? 'btn-tema3-active' : ''}
+                        className={`btn-mat251-modo ${modo === 'manual' ? 'active' : ''}`}
                         onClick={() => setModo('manual')}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: modo === 'manual' ? '#3b82f6' : 'transparent',
-                            color: modo === 'manual' ? '#fff' : 'var(--text-muted, #64748b)',
-                            transition: 'all 0.2s'
-                        }}
+                        style={{ flex: 1 }}
                     >
                         Modo Manual
                     </button>
@@ -247,9 +241,9 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                             </div>
                         </div>
                         <button
-                            className="btn-tema3-active"
+                            className="btn-icon btn-editar-hover"
                             onClick={abrirEditor}
-                            style={{ padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)' }}
+                            style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--accent-color)', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-color)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             Editar Datos
@@ -257,86 +251,70 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                     </div>
                     {columnasDisponibles.length > 0 ? (
                         <>
-                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                                <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', width: '100%' }}>
+                                <div style={{ display: 'flex', gap: '5px', width: '100%', maxWidth: '400px', background: 'var(--bg-card)', padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
                                     <button
                                         type="button"
+                                        className={`btn-mat251-modo ${tipoMatriz === 'brutos' ? 'active' : ''}`}
                                         onClick={() => setTipoMatriz('brutos')}
-                                        style={{
-                                            padding: '6px 16px',
-                                            borderRadius: '6px',
-                                            fontSize: '0.85rem',
-                                            fontWeight: 600,
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            background: tipoMatriz === 'brutos' ? '#3b82f6' : 'transparent',
-                                            color: tipoMatriz === 'brutos' ? '#fff' : 'var(--text-muted, #64748b)',
-                                            transition: 'all 0.2s',
-                                            boxShadow: tipoMatriz === 'brutos' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                                        }}
+                                        style={{ flex: 1 }}
                                     >
-                                        Datos Brutos (1 columna)
+                                        Datos
                                     </button>
                                     <button
                                         type="button"
+                                        className={`btn-mat251-modo ${tipoMatriz === 'probabilidades' ? 'active' : ''}`}
                                         onClick={() => setTipoMatriz('probabilidades')}
-                                        style={{
-                                            padding: '6px 16px',
-                                            borderRadius: '6px',
-                                            fontSize: '0.85rem',
-                                            fontWeight: 600,
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            background: tipoMatriz === 'probabilidades' ? '#3b82f6' : 'transparent',
-                                            color: tipoMatriz === 'probabilidades' ? '#fff' : 'var(--text-muted, #64748b)',
-                                            transition: 'all 0.2s',
-                                            boxShadow: tipoMatriz === 'probabilidades' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                                        }}
+                                        style={{ flex: 1 }}
                                     >
-                                        Tabla Probabilidades (2 columnas)
+                                        Tabla Probabilidades
                                     </button>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-                                <div className="tema3-form-group" style={{ flex: 1, marginBottom: 0 }}>
-                                    <label className="tema3-label">
-                                        {tipoMatriz === 'probabilidades' ? 
-                                            <>Columna de Valor {renderLatex('(X)')}:</> : 
-                                            'Columna a evaluar:'}
-                                    </label>
-                                    <select
-                                        className="tema3-select"
-                                        value={columnaSeleccionada}
-                                        onChange={e => { setColumnaSeleccionada(e.target.value === '' ? '' : Number(e.target.value)); setError(''); }}
-                                    >
-                                        <option value="" disabled>Selecciona una columna...</option>
-                                        {columnasDisponibles.map((col, idx) => (
-                                            <option key={idx} value={idx}>{col}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', width: '100%', flexWrap: 'wrap' }}>
+                                <label className="tema3-label" style={{ margin: 0, whiteSpace: 'nowrap' }}>
+                                    {tipoMatriz === 'probabilidades' ? 
+                                        <>{renderLatex('X')}:</> : 
+                                        'Columna a evaluar:'}
+                                </label>
+                                <select
+                                    className="tema3-select"
+                                    style={{ flex: 1, minWidth: '100px' }}
+                                    value={columnaSeleccionada}
+                                    onChange={e => { setColumnaSeleccionada(e.target.value === '' ? '' : Number(e.target.value)); setError(''); }}
+                                >
+                                    <option value="" disabled>Selecciona una columna...</option>
+                                    {columnasDisponibles.map((col, idx) => (
+                                        <option key={idx} value={idx}>{col}</option>
+                                    ))}
+                                </select>
+
                                 {tipoMatriz === 'probabilidades' && (
-                                    <div className="tema3-form-group" style={{ flex: 1, marginBottom: 0 }}>
-                                        <label className="tema3-label">Columna Probabilidad {renderLatex('P(X)')}:</label>
+                                    <>
+                                        <label className="tema3-label" style={{ margin: 0, whiteSpace: 'nowrap', marginLeft: '5px' }}>
+                                            {renderLatex('P(X)')}:
+                                        </label>
                                         <select
                                             className="tema3-select"
+                                            style={{ flex: 1, minWidth: '100px' }}
                                             value={columnaProbabilidad}
                                             onChange={e => { setColumnaProbabilidad(e.target.value === '' ? '' : Number(e.target.value)); setError(''); }}
                                         >
-                                            <option value="" disabled>Selecciona una columna...</option>
+                                            <option value="" disabled>Selecciona...</option>
                                             {columnasDisponibles.map((col, idx) => (
                                                 <option key={idx} value={idx}>{col}</option>
                                             ))}
                                         </select>
-                                    </div>
+                                    </>
                                 )}
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            
+                            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '5px' }}>
                                 <button
-                                    className="tema3-btn btn-tema3-active"
+                                    className="button_calcular"
                                     onClick={procesarMatriz}
-                                    style={{ width: 'auto', padding: '8px 24px' }}
+                                    style={{ width: 'auto', padding: '5px 15px', margin: 0, whiteSpace: 'nowrap' }}
                                 >
                                     CALCULAR
                                 </button>
@@ -457,9 +435,14 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <span>Suma:</span> {sumaProbabilidades.toFixed(4)}
                                             </span>
-                                            {!esSumaValida && (
+                                            {!esSumaValida && !hayProbabilidadesNegativas && (
                                                 <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
                                                     Debe sumar 1.0
+                                                </span>
+                                            )}
+                                            {hayProbabilidadesNegativas && (
+                                                <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                                                    Prob. negativas
                                                 </span>
                                             )}
                                         </div>
@@ -472,10 +455,10 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
 
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
                         <button
-                            className="tema3-btn btn-tema3-active"
-                            onClick={handleCalcular}
+                            className="button_calcular"
+                            onClick={handleCalcular} 
                             disabled={!esSumaValida || hayCamposVacios}
-                            style={{ width: 'auto' }}
+                            style={{ width: 'auto', padding: '5px 15px'}}
                         >
                             CALCULAR
                         </button>

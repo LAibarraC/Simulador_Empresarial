@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 import { alerta } from "../../utils/Notificaciones";
 import { api, BASE_URL } from "../../services/api";
 import qrApi from "../../services/qrApi";

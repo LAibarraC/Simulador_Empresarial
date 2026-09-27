@@ -2,14 +2,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from models.tarea import Tarea, EntregaTarea
-from models import Clase, Inscripcion, Notificacion, Usuario
+from models import Clase, Inscripcion, Notificacion, Usuario, Archivo
 from validators.tareas import TareaCreate, EntregaTareaCreate
 from datetime import datetime
 
 async def crear_tarea(db: AsyncSession, tarea: TareaCreate, docente_id: int):
     nombre_fijo = None
     if tarea.archivo_id:
-        res_arc = await db.execute(select(models.Archivo).filter(models.Archivo.id == tarea.archivo_id))
+        res_arc = await db.execute(select(Archivo).filter(Archivo.id == tarea.archivo_id))
         arc_obj = res_arc.scalars().first()
         if arc_obj:
             nombre_fijo = arc_obj.nombre_original

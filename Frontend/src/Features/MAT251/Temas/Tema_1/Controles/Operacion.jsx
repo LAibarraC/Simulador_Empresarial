@@ -50,6 +50,18 @@ const getIcon = (val) => {
         case 'tamanio_muestra': return (
             <svg {...props}><path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></svg>
         );
+        case 'Estimacion_puntual': return (
+            <svg {...props}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
+        );
+        case 'Estimacion_intervalos': return (
+            <svg {...props}><polyline points="8 4 4 4 4 20 8 20" /><polyline points="16 4 20 4 20 20 16 20" /><line x1="9" y1="12" x2="15" y2="12" /></svg>
+        );
+        case 'Hipotesis_parametricas': return (
+            <svg {...props}><path d="M3 20h18" /><path d="M4 20c1.5-7 3-14 8-14s6.5 7 8 14" /><line x1="15" y1="8" x2="15" y2="20" strokeDasharray="2 2" /></svg>
+        );
+        case 'Hipotesis_noparametricas': return (
+            <svg {...props}><line x1="4" y1="20" x2="4" y2="4" /><line x1="4" y1="20" x2="20" y2="20" /><circle cx="8" cy="16" r="2" fill="currentColor" stroke="none" /><circle cx="13" cy="10" r="2" fill="currentColor" stroke="none" /><circle cx="18" cy="14" r="2" fill="currentColor" stroke="none" /></svg>
+        );
         default: return null;
     }
 };

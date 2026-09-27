@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useModuleData } from "../../../components/Gestion_Datos/DataContext";
+import { useModuleData } from "../../../components/gestion_datos/DataContext";
 
 import * as UniMath from "../utils/estadisticaUnidimensional";
 import * as MultiMath from "../utils/estadisticaMultivariante";

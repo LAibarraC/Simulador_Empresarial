@@ -137,7 +137,7 @@ export default function GraficoAreaContinua({ datos }) {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div style={{ background: 'white', border: '1px solid #ccc', padding: '10px', borderRadius: '5px', boxShadow: '0px 2px 4px rgba(0,0,0,0.1)' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '10px', borderRadius: '5px', boxShadow: '0px 2px 4px rgba(0,0,0,0.1)', color: 'var(--text-main)' }}>
                     <p style={{ margin: '0 0 5px 0', fontSize: FS.sm, fontWeight: 600 }}>x = {label}</p>
                     <p style={{ margin: 0, fontSize: FS.sm, color: payload[0].color }}>{datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} = {payload[0].value}</p>
                 </div>
@@ -147,66 +147,71 @@ export default function GraficoAreaContinua({ datos }) {
     };
 
     return (
-        <MarcoWidgetMAT251 titulo={datos.modo === 'acumulada' ? "Función de Distribución Acumulada F(x)" : "Función de Densidad f(x) y Esperanza E(X)"} anchoCompleto={true} alto="450px">
+        <MarcoWidgetMAT251 titulo="Función de Densidad f(x) y Esperanza E(X)" anchoCompleto={true} alto="450px">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', fontFamily: FONT }}>
-                <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden' }}>
+                <div style={{ flex: 1, minHeight: 0, width: '100%', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                        data={dataGrafica}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                        <ReferenceLine y={0} stroke="#475569" strokeWidth={2} />
-                        
-                        <XAxis 
-                            dataKey="x" 
-                            orientation={maxFx <= 0 ? 'top' : 'bottom'}
-                            tick={{ fontSize: 12, fill: '#333333', fontWeight: 500 }}
-                            tickLine={{ stroke: '#475569', strokeWidth: 2 }}
-                            axisLine={{ stroke: 'transparent' }}
-                            type="number"
-                            domain={calculatedDomainAndTicks.domain}
-                            ticks={calculatedDomainAndTicks.ticks}
-                            tickMargin={10}
-                            minTickGap={20}
-                            label={{ value: 'Valor de x', position: 'insideBottom', offset: -10, fill: '#475569', fontSize: 13, fontWeight: 600, fontFamily: FONT }}
-                        />
-                        
-                        <YAxis 
-                            tick={{ fontSize: 12, fill: '#333333', fontWeight: 500 }}
-                            tickLine={{ stroke: '#333333' }}
-                            axisLine={{ stroke: '#333333', strokeWidth: 2 }}
-                            tickFormatter={(val) => val.toFixed(2)}
-                            width={55}
-                            domain={['auto', 'auto']}
-                            label={{ value: datos.modo === 'acumulada' ? 'F(x)' : 'f(x)', angle: -90, position: 'insideLeft', offset: -5, fill: '#475569', fontSize: 13, fontWeight: 600, fontFamily: FONT }}
-                        />
-                        
-                        <Tooltip content={<CustomTooltip />} />
-                        
-                        {/* Curva de densidad / acumulada */}
-                        <Area 
-                            type="linear" 
-                            dataKey="fx" 
-                            stroke="var(--primary-color)" 
-                            fill="var(--primary-color)" 
-                            fillOpacity={0.3} 
-                            strokeWidth={2}
-                            baseValue={0}
-                            isAnimationActive={true}
-                        />
-                    </AreaChart>
-                </ResponsiveContainer>
+                        <AreaChart
+                            data={dataGrafica}
+                            margin={{ top: 20, right: 30, left: 5, bottom: 7 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                            <ReferenceLine y={0} stroke="var(--text-main)" strokeWidth={2} />
+                            
+                            {datos.eX !== undefined && (
+                                <ReferenceLine 
+                                    x={datos.eX} 
+                                    stroke="#ef4444" 
+                                    strokeDasharray="5 5" 
+                                    strokeWidth={2}
+                                    label={{ position: 'top', value: `E(X) = ${datos.eX.toFixed(4)}`, fill: '#ef4444', fontSize: 14, fontWeight: 'bold', fontFamily: FONT }}
+                                />
+                            )}
+                            
+                            <XAxis 
+                                dataKey="x" 
+                                orientation={maxFx <= 0 ? 'top' : 'bottom'}
+                                tick={{ fontSize: 12, fill: 'var(--text-main)', fontWeight: 500 }}
+                                tickLine={{ stroke: 'var(--text-main)', strokeWidth: 2 }}
+                                axisLine={{ stroke: 'transparent' }}
+                                type="number"
+                                domain={calculatedDomainAndTicks.domain}
+                                ticks={calculatedDomainAndTicks.ticks}
+                                tickMargin={10}
+                                minTickGap={20}
+                                label={{ value: 'Valor de x', position: 'insideBottom', offset: -7, fill: 'var(--text-main)', fontSize: 12, fontWeight: 600, fontFamily: FONT }}
+                            />
+                            
+                            <YAxis 
+                                tick={{ fontSize: 12, fill: 'var(--text-main)', fontWeight: 500 }}
+                                tickLine={{ stroke: 'var(--text-main)' }}
+                                axisLine={{ stroke: 'var(--text-main)', strokeWidth: 2 }}
+                                tickFormatter={(val) => val.toFixed(2)}
+                                width={55}
+                                domain={['auto', 'auto']}
+                                label={{ value: 'f(x)', angle: -90, position: 'insideLeft', offset: 10, fill: 'var(--text-main)', fontSize: 12, fontWeight: 600, fontFamily: FONT }}
+                            />
+                            
+                            <Tooltip content={<CustomTooltip />} />
+                            
+                            {/* Curva de densidad */}
+                            <Area 
+                                type="linear" 
+                                dataKey="fx" 
+                                stroke="var(--primary-color)" 
+                                fill="var(--primary-color)" 
+                                fillOpacity={0.3} 
+                                strokeWidth={2}
+                                baseValue={0}
+                                isAnimationActive={true}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
                 </div>
-            
-                <div style={{ marginTop: '10px', textAlign: 'center', fontSize: FS.sm, color: '#64748b' }}>
-                    {datos.modo === 'acumulada' ? (
-                        <>La curva muestra la probabilidad acumulada <strong>P(X ≤ x)</strong> hasta el valor x en el eje horizontal.</>
-                    ) : (
-                        <>
-                        El área sombreada bajo la curva entre <strong>a = {datos.a}</strong> y <strong>b = {datos.b}</strong> representa la probabilidad total (Área = {datos.area ? datos.area.toFixed(4) : '1.0'}).
-                        </>
-                    )}
+                
+                {/* Mensaje de Área en el flujo normal (sin absolute) para no superponerse */}
+                <div style={{ textAlign: 'center', fontSize: FS.sm, color: 'var(--text-main)', padding: '30px 0px', flexShrink: 0 }}>
+                    El área sombreada bajo la curva entre <strong>a = {datos.a}</strong> y <strong>b = {datos.b}</strong> representa la probabilidad total (Área = {datos.area ? datos.area.toFixed(4) : '1.0'}).
                 </div>
             </div>
         </MarcoWidgetMAT251>

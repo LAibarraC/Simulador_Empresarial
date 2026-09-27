@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 import { BASE_URL } from "../../services/api";
 import escudoAdmin from "../../assets/images/escudoAdmin.png";
 import PestaniaTareas from "./PestaniaTareas";

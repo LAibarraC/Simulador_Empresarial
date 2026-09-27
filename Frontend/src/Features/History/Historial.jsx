@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 import { api } from "../../services/api";
 import { alerta } from "../../utils/Notificaciones";
 import Skeleton from "../../ui/Skeleton";

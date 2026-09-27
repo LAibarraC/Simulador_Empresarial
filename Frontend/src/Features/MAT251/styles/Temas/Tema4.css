@@ -14,7 +14,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: var(--text-color, #1e293b);
+    color: var(--text-main, #1e293b);
     user-select: none;
 }
 
@@ -66,18 +66,18 @@
     padding: 10px 12px;
     cursor: pointer;
     background: transparent;
-    color: var(--text-color, #1e293b);
+    color: var(--text-main, #1e293b);
     font-weight: 400;
     font-size: 0.9rem;
     transition: background 0.2s;
 }
 
 .tema4-select-option:hover {
-    background: var(--bg-app, #f8fafc);
+    background: var(--bg-input, #f8fafc);
 }
 
 .tema4-select-option.selected {
-    background: var(--bg-app, #f8fafc);
+    background: var(--bg-input, #f8fafc);
     color: var(--primary-color, #3b82f6);
     font-weight: 600;
 }

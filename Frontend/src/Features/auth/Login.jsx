@@ -79,7 +79,7 @@ export default function Login({ onLogin }) {
     <div className="login-container" style={{ position: 'relative' }}>
 
       <div className="login-card">
-        <div style={{ textAlign: 'center', marginBottom: '35px', marginTop: '5px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '25px', marginTop: '5px' }}>
           <img
             src={logoSiCE}
             alt="Logo SiCE"

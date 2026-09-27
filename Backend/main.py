@@ -7,6 +7,8 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth, archivos, calculos, historial, grupos, notificaciones, tareas, qr as qr_router, admin_credenciales
+from MAT251.Tema2 import routers_simbolicos as mat251_tema2_simbolicos
+from MAT251.Tema5 import simulacion as mat251_simulacion
 from config.database import async_engine, get_db
 import models
 
@@ -30,6 +32,11 @@ async def lifespan(app: FastAPI):
             await conn.execute(text("UPDATE credenciales_autorizadas SET fecha_carga = CURRENT_TIMESTAMP WHERE fecha_carga IS NULL"))
         except Exception:
             pass
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE usuarios ADD COLUMN must_change_password BOOLEAN NOT NULL DEFAULT 0"))
+        except Exception:
+            pass
     yield
 
 _is_production = os.getenv("ENVIRONMENT") == "production"
@@ -38,6 +45,7 @@ app = FastAPI(
     docs_url=None if _is_production else "/docs",
     redoc_url=None if _is_production else "/redoc",
     openapi_url=None if _is_production else "/openapi.json",
+    root_path="/api",
 )
 
 #base de datos aiven
@@ -52,6 +60,7 @@ origins = [
     "https://proyecto-shc-170-54eovb4bb-coadiegos-projects.vercel.app", # Enlace temporal Vercel
     "https://proyecto-shc-170.vercel.app", # Enlace limpio Vercel
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
+    "https://sice.jboris.org" #enlace de temporal
     "https://backend-shc170.onrender.com",
     "https://simulador-empresarial-swart.vercel.app", #por las dudas 
     "http://10.250.54.12:5173",
@@ -76,6 +85,8 @@ app.include_router(historial.router)
 app.include_router(grupos.router)
 app.include_router(notificaciones.router)
 app.include_router(tareas.router)
+app.include_router(mat251_tema2_simbolicos.router)
+app.include_router(mat251_simulacion.router)
 # 🆕 Router de QR para matriculación por código
 # Las rutas internas del router ya están declaradas con el prefijo "/api/qr/...",
 # por lo que se registra sin prefix para evitar duplicarlo.
@@ -87,7 +98,7 @@ VISITAS_FILE = "visitas.txt"
 
 @app.get("/")
 async def root():
-    return {"message": "API de Estadística unificada y modularizada funcionando correctamente. Revisa /docs."}
+    return {"message": "API de Estadistica unificada y modularizada funcionando correctamente. Revisa /docs."}
 
 @app.get("/favicon.ico")
 async def favicon():

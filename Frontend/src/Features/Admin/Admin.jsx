@@ -105,7 +105,7 @@ export default function Admin() {
   const [contrasenaCopiada, setContrasenaCopiada] = useState(false);
   const [invitacionCopiada, setInvitacionCopiada] = useState(false);
   const [nuevaCredencial, setNuevaCredencial] = useState({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida() });
-  const credItemsPerPage = 5;
+  const credItemsPerPage = 6;
 
   // Estados para filtros por columna (Usuarios)
   const [menuFiltroAbierto, setMenuFiltroAbierto] = useState(null);
@@ -115,13 +115,27 @@ export default function Admin() {
 
   const menuRef = useRef(null);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuFiltroAbierto && menuRef.current && !menuRef.current.contains(event.target)) {
+        // Avoid closing if clicking on the toggle button itself (which will handle the toggle logic)
+        const isFilterButton = event.target.closest('button[title^="Filtrar"], button[title^="Ordenar"]');
+        if (!isFilterButton) {
+          setMenuFiltroAbierto(null);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuFiltroAbierto]);
+
   // Modal de confirmación para eliminar usuario
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
   const [confirmarNombre, setConfirmarNombre] = useState('');
 
   // Estados para paginación usuarios
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     cargarUsuarios();
@@ -369,14 +383,12 @@ export default function Admin() {
   };
 
   const renderNombreCredencial = (nombre) => {
-    const partes = (nombre || '').trim().split(/\s+/).filter(Boolean);
-    if (partes.length <= 2) return nombre;
-    return (
-      <span style={{ display: 'inline-flex', flexDirection: 'column', lineHeight: '1.35', maxWidth: '100%' }}>
-        <span>{partes.slice(0, 2).join(' ')}</span>
-        <span style={{ color: 'var(--text-muted)', fontWeight: 'normal' }}>{partes.slice(2).join(' ')}</span>
-      </span>
-    );
+    const nombreNormalizado = (nombre || '')
+      .trim()
+      .split(/\s+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    return <span style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{nombreNormalizado}</span>;
   };
   const totalCredPages = Math.ceil(credencialesFiltradas.length / credItemsPerPage);
   const credencialesPaginadas = credencialesFiltradas.slice(
@@ -393,7 +405,7 @@ export default function Admin() {
   const ControlesPaginacionCredenciales = () => {
     if (totalCredPages <= 1) return null;
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '25px', paddingBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '25px', paddingBottom: '10px' }}>
         <button
           onClick={() => setCurrentCredPage(prev => Math.max(prev - 1, 1))}
           disabled={currentCredPage === 1}
@@ -418,7 +430,7 @@ export default function Admin() {
   const ControlesPaginacion = () => {
     if (totalPages <= 1) return null;
     return (
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "25px", paddingBottom: "10px" }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginTop: "25px", paddingBottom: "10px" }}>
         <button
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
@@ -463,8 +475,8 @@ export default function Admin() {
 
   const getPopoverStyle = (columna) => ({
     position: 'absolute', top: 'calc(100% + 8px)',
-    left: columna === 'registro' || columna === 'estado' || columna === 'fechaCarga' ? 'auto' : 0,
-    right: columna === 'registro' || columna === 'estado' || columna === 'fechaCarga' ? 0 : 'auto',
+    left: columna === 'registro' || columna === 'estado' || columna === 'fechaCarga' || columna === 'mobileFilters' ? 'auto' : 0,
+    right: columna === 'registro' || columna === 'estado' || columna === 'fechaCarga' || columna === 'mobileFilters' ? 0 : 'auto',
     backgroundColor: 'var(--bg-card, #fff)', border: '1px solid var(--border-color, #e5e7eb)',
     borderRadius: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
     padding: '6px', zIndex: 50, minWidth: '160px',
@@ -489,500 +501,641 @@ export default function Admin() {
 
   return (
     <>
-    <div style={{ maxWidth: '1100px', margin: 'clamp(15px, 4vw, 40px) auto', padding: '0 20px', position: 'relative' }}>
+      <div style={{ width: '100%', margin: '0 auto', padding: '15px', position: 'relative' }}>
+        <style>{`
+          .input-busqueda-admin::placeholder {
+            font-size: 0.78rem !important;
+            opacity: 0.7;
+          }
+          .tab-label-short {
+            display: none;
+          }
+          .tab-label-full {
+            display: inline;
+          }
+          .mobile-filter-btn {
+            display: none !important;
+          }
+          .tabla-min-900 {
+            min-width: 900px;
+          }
+          @media (max-width: 768px) {
+            .mobile-filter-btn {
+              display: flex !important;
+            }
+            .tabla-min-900 {
+              min-width: 100% !important;
+            }
+            .contenedor-tabla-movil {
+              padding: 0 !important;
+              border: none !important;
+              background-color: transparent !important;
+              box-shadow: none !important;
+            }
+            table.tabla-responsive tbody tr {
+              display: flex !important;
+              flex-wrap: wrap !important;
+            }
+            table.tabla-responsive tbody tr.fila-vacia {
+              display: none !important;
+            }
+            table.tabla-responsive tbody td {
+              width: 100%;
+              box-sizing: border-box !important;
+            }
+            table.tabla-responsive tbody td.td-mitad {
+              display: flex !important;
+              width: 50% !important;
+            }
+            table.tabla-responsive td.td-mitad-izq {
+              border-right: 1px solid var(--border-color) !important;
+            }
+            .tab-label-full {
+              display: none;
+            }
+            .tab-label-short {
+              display: inline;
+            }
+          }
+        `}</style>
 
-      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 4vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
-        <div className="admin-title-container">
-          <h2 className="titulo-seccion-unificado">Panel de Administración</h2>
-          <p className="descripcion-seccion-unificada">
-            {pestanaActiva === 'usuarios'
-              ? 'Administra roles, suspende cuentas y elimina registros de forma centralizada.'
-              : pestanaActiva === 'credenciales'
-                ? 'Gestiona las credenciales autorizadas para el ingreso al sistema.'
-                : 'Visualiza métricas clave, gráficos de actividad y reportes generales.'}
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {pestanaActiva === 'usuarios' && (
-            <div className="admin-search-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '6px 15px', borderRadius: '30px', border: '1px solid var(--border-color)', minWidth: '280px', flex: '1', maxWidth: '380px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
-              <input
-                type="text"
-                placeholder="Buscar por nombre o correo..."
-                value={busqueda}
-                onChange={(e) => { setBusqueda(e.target.value); setCurrentPage(1); }}
-                style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', width: '100%', fontSize: '0.9rem' }}
-              />
-            </div>
-          )}
-          {pestanaActiva === 'credenciales' && (
-            <div className="admin-search-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '6px 15px', borderRadius: '30px', border: '1px solid var(--border-color)', minWidth: '280px', flex: '1', maxWidth: '380px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
-              <input
-                type="text"
-                placeholder="Buscar por CI, CU o Nombre..."
-                value={busquedaCred}
-                onChange={(e) => { setBusquedaCred(e.target.value); setCurrentCredPage(1); }}
-                style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', width: '100%', fontSize: '0.9rem' }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-        <button
-          onClick={() => setPestanaActiva('usuarios')}
-          style={{
-            padding: '10px 18px', backgroundColor: pestanaActiva === 'usuarios' ? 'var(--accent-color)' : 'transparent',
-            color: pestanaActiva === 'usuarios' ? 'white' : 'var(--text-muted)', border: 'none', borderRadius: '8px',
-            fontWeight: 'bold', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease'
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-          Gestión de Usuarios
-        </button>
-
-        <button
-          onClick={() => setPestanaActiva('credenciales')}
-          style={{
-            padding: '10px 18px', backgroundColor: pestanaActiva === 'credenciales' ? 'var(--accent-color)' : 'transparent',
-            color: pestanaActiva === 'credenciales' ? 'white' : 'var(--text-muted)', border: 'none', borderRadius: '8px',
-            fontWeight: 'bold', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease'
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-          Gestión de Credenciales
-        </button>
-
-        <button
-          onClick={() => setPestanaActiva('reportes')}
-          style={{
-            padding: '10px 18px', backgroundColor: pestanaActiva === 'reportes' ? 'var(--accent-color)' : 'transparent',
-            color: pestanaActiva === 'reportes' ? 'white' : 'var(--text-muted)', border: 'none', borderRadius: '8px',
-            fontWeight: 'bold', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease'
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-          </svg>
-          Reportes y Estadísticas
-        </button>
-      </div>
-
-      {pestanaActiva === 'reportes' ? (
-        <ReportesEstadisticas />
-      ) : pestanaActiva === 'credenciales' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <div className="grafico-card" style={{ padding: '20px 25px', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '18px', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 240px' }}>
-                <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem' }}>Credenciales autorizadas</h3>
-                <span style={{ display: 'block', marginTop: '5px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Administra las credenciales disponibles para el ingreso al sistema.</span>
-              </div>
-              <div className="credenciales-acciones">
-                <ExcelUploader onClick={() => setMostrarModalCarga(true)} />
-                <button className="btn-azul credencial-accion-manual-button" onClick={abrirModalCredencial}>
-                  <UserPlus size={17} strokeWidth={2.2} aria-hidden="true" />
-                  Crear acceso docente
-                </button>
-              </div>
-            </div>
+        <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 4vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
+          <div className="admin-title-container">
+            <h2 className="titulo-seccion-unificado">Panel de Administración</h2>
+            <p className="descripcion-seccion-unificada">
+              {pestanaActiva === 'usuarios'
+                ? 'Administra roles, suspende cuentas y elimina registros de forma centralizada.'
+                : pestanaActiva === 'credenciales'
+                  ? 'Gestiona las credenciales autorizadas para el ingreso al sistema.'
+                  : 'Visualiza métricas clave, gráficos de actividad y reportes generales.'}
+            </p>
           </div>
 
-          <div className="grafico-card" style={{ padding: '25px', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
-            {cargandoCred ? (
-              <div style={{ padding: '20px 0' }}>
-                {[1,2,3,4,5].map(i => <div key={i} style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}><Skeleton height="30px" width="100%" borderRadius="6px" /></div>)}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {pestanaActiva === 'usuarios' && (
+              <div style={{ display: 'flex', gap: '10px', position: 'relative', flex: 1 }}>
+                <div className="admin-search-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '5px 15px', borderRadius: '8px', border: '1px solid var(--border-color)', minWidth: '280px', flex: '1', maxWidth: '380px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
+                  <input
+                    type="text"
+                    className="input-busqueda-admin"
+                    placeholder="Buscar por nombre o correo..."
+                    value={busqueda}
+                    onChange={(e) => { setBusqueda(e.target.value); setCurrentPage(1); }}
+                    style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', width: '100%', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <button className="mobile-filter-btn" onClick={() => toggleMenu('mobileFiltrosUsr')} style={{ alignItems: 'center', gap: '6px', justifyContent: 'center', padding: '5px 15px', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', cursor: 'pointer' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" /></svg>
+                  <span>Filtros</span>
+                </button>
+                {menuFiltroAbierto === 'mobileFiltrosUsr' && (
+                  <div ref={menuRef} style={getPopoverStyle('mobileFilters')}>
+                     <div style={{ padding: '6px 12px', fontWeight: 'bold', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Rol</div>
+                     {[{ label: 'Todos', value: 'TODOS' }, { label: 'Estudiante', value: 'Estudiante' }, { label: 'Docente', value: 'Docente' }, { label: 'Administrador', value: 'Administrador' }].map(opcion => (
+                       <button key={opcion.value} onClick={() => { setFiltroRol(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroRol === opcion.value)}>{opcion.label}</button>
+                     ))}
+                     <div style={{ padding: '6px 12px', fontWeight: 'bold', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', marginTop: '4px', borderTop: '1px solid var(--border-color)' }}>Estado</div>
+                     {[{ label: 'Todos', value: 'TODOS' }, { label: 'Activo', value: 'ACTIVO' }, { label: 'Suspendido', value: 'SUSPENDIDO' }].map(opcion => (
+                       <button key={opcion.value} onClick={() => { setFiltroEstado(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroEstado === opcion.value)}>{opcion.label}</button>
+                     ))}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="tabla-responsive tabla-responsiva-panel" style={{ width: '100%', minWidth: '900px', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}>
-                  <colgroup>
-                    <col style={{ width: '11%' }} />
-                    <col style={{ width: '11%' }} />
-                    <col style={{ width: '23%' }} />
-                    <col style={{ width: '15%' }} />
-                    <col style={{ width: '15%' }} />
-                    <col style={{ width: '14%' }} />
-                    <col style={{ width: '11%' }} />
-                  </colgroup>
-                  <thead>
-                    <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>CI</th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>CU</th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>Nombre Completo</th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>Rol</span>
-                          <button style={btnAjustesStyle(filtroRolCred !== 'TODOS')} onClick={() => toggleMenu('rolCred')} title="Filtrar por rol"><IconoAjustes /></button>
-                        </div>
-                        {menuFiltroAbierto === 'rolCred' && (
-                          <div ref={menuRef} style={getPopoverStyle('rol')}>
-                            {[{ label: 'Todos', value: 'TODOS' }, { label: 'Estudiante', value: 'Estudiante' }, { label: 'Docente', value: 'Docente' }].map(opcion => (
-                              <button key={opcion.value} onClick={() => { setFiltroRolCred(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroRolCred === opcion.value)}>{opcion.label}</button>
-                            ))}
-                          </div>
-                        )}
-                      </th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>Estado</span>
-                          <button style={btnAjustesStyle(filtroEstadoCred !== 'TODOS')} onClick={() => toggleMenu('estadoCred')} title="Filtrar por estado"><IconoAjustes /></button>
-                        </div>
-                        {menuFiltroAbierto === 'estadoCred' && (
-                          <div ref={menuRef} style={getPopoverStyle('estado')}>
-                            {[{ label: 'Todos', value: 'TODOS' }, { label: 'Disponible', value: 'DISPONIBLE' }, { label: 'Registrado', value: 'REGISTRADO' }].map(opcion => (
-                              <button key={opcion.value} onClick={() => { setFiltroEstadoCred(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroEstadoCred === opcion.value)}>{opcion.label}</button>
-                            ))}
-                          </div>
-                        )}
-                      </th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>Fecha Carga</span>
-                          <button style={btnAjustesStyle(ordenFechaCarga !== 'ninguno')} onClick={() => toggleMenu('fechaCarga')} title="Ordenar por fecha de carga"><IconoAjustes /></button>
-                        </div>
-                        {menuFiltroAbierto === 'fechaCarga' && (
-                          <div ref={menuRef} style={getPopoverStyle('fechaCarga')}>
-                            {[{ label: 'Sin orden', value: 'ninguno' }, { label: 'Más antiguas', value: 'asc' }, { label: 'Más recientes', value: 'desc' }].map(opcion => (
-                              <button key={opcion.value} onClick={() => { setOrdenFechaCarga(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(ordenFechaCarga === opcion.value)}>{opcion.label}</button>
-                            ))}
-                          </div>
-                        )}
-                      </th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', textAlign: 'center' }}>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {credencialesFiltradas.length === 0 ? (
-                      <tr><td colSpan="7" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>No se encontraron credenciales autorizadas.</td></tr>
-                    ) : (
-                      credencialesPaginadas.map((c, index) => (
-                        <tr key={c.ci} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)' }}>
-                          <td data-label="CI" style={{ padding: '12px 10px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.ci}>{c.ci}</td>
-                          <td data-label="CU" style={{ padding: '12px 10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.cu || '—'}>{c.cu || '—'}</td>
-                          <td data-label="Nombre Completo" style={{ padding: '12px 10px', overflow: 'hidden', wordBreak: 'normal' }}>{renderNombreCredencial(c.nombre)}</td>
-                          <td data-label="Rol" style={{ padding: '12px 10px' }}>
-                            <span style={{ display: 'inline-block', maxWidth: '100%', padding: '4px 8px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 'bold', lineHeight: '1.2', backgroundColor: c.rol === 'Docente' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: c.rol === 'Docente' ? '#10b981' : '#3b82f6' }}>
-                              {c.rol}
-                            </span>
-                          </td>
-                          <td data-label="Estado" style={{ padding: '12px 10px' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 'bold', whiteSpace: 'nowrap', backgroundColor: c.registrado ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: c.registrado ? '#10b981' : '#3b82f6' }}>
-                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: c.registrado ? '#10b981' : '#3b82f6' }}></span>
-                              {c.registrado ? 'Registrado' : 'Disponible'}
-                            </span>
-                          </td>
-                          <td data-label="Fecha Carga" style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatearFechaCarga(c.fecha_carga)}</td>
-                          <td data-label="Acciones" style={{ padding: '12px 10px', textAlign: 'center' }}>
-                            <button className="btn-rojo" onClick={() => handleEliminarCredencial(c.ci)} style={{ padding: '6px 10px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>Eliminar</button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+            )}
+            {pestanaActiva === 'credenciales' && (
+              <div style={{ display: 'flex', gap: '10px', position: 'relative', flex: 1 }}>
+                <div className="admin-search-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '5px 15px', borderRadius: '8px', border: '1px solid var(--border-color)', minWidth: '280px', flex: '1', maxWidth: '380px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
+                  <input
+                    type="text"
+                    className="input-busqueda-admin"
+                    placeholder="Buscar por CI, CU o Nombre..."
+                    value={busquedaCred}
+                    onChange={(e) => { setBusquedaCred(e.target.value); setCurrentCredPage(1); }}
+                    style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', width: '100%', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <button className="mobile-filter-btn" onClick={() => toggleMenu('mobileFiltrosCred')} style={{ alignItems: 'center', gap: '6px', justifyContent: 'center', padding: '5px 15px', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', cursor: 'pointer' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" /></svg>
+                  <span>Filtros</span>
+                </button>
+                {menuFiltroAbierto === 'mobileFiltrosCred' && (
+                  <div ref={menuRef} style={getPopoverStyle('mobileFilters')}>
+                     <div style={{ padding: '6px 12px', fontWeight: 'bold', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Rol</div>
+                     {[{ label: 'Todos', value: 'TODOS' }, { label: 'Estudiante', value: 'Estudiante' }, { label: 'Docente', value: 'Docente' }].map(opcion => (
+                       <button key={opcion.value} onClick={() => { setFiltroRolCred(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroRolCred === opcion.value)}>{opcion.label}</button>
+                     ))}
+                     <div style={{ padding: '6px 12px', fontWeight: 'bold', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', marginTop: '4px', borderTop: '1px solid var(--border-color)' }}>Estado</div>
+                     {[{ label: 'Todos', value: 'TODOS' }, { label: 'Disponible', value: 'DISPONIBLE' }, { label: 'Registrado', value: 'REGISTRADO' }].map(opcion => (
+                       <button key={opcion.value} onClick={() => { setFiltroEstadoCred(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroEstadoCred === opcion.value)}>{opcion.label}</button>
+                     ))}
+                     <div style={{ padding: '6px 12px', fontWeight: 'bold', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', marginTop: '4px', borderTop: '1px solid var(--border-color)' }}>Fecha</div>
+                     {[{ label: 'Sin orden', value: 'ninguno' }, { label: 'Más antiguas', value: 'asc' }, { label: 'Más recientes', value: 'desc' }].map(opcion => (
+                       <button key={opcion.value} onClick={() => { setOrdenFechaCarga(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(ordenFechaCarga === opcion.value)}>{opcion.label}</button>
+                     ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
-          <ControlesPaginacionCredenciales />
         </div>
-      ) : (
-        <>
-          <div
-            className="grafico-card"
+
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', backgroundColor: 'var(--bg-card)', padding: '5px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <button
+            onClick={() => setPestanaActiva('usuarios')}
             style={{
-              borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
-              backgroundColor: 'var(--bg-card)', padding: '25px', border: '1px solid var(--border-color)'
+              padding: '9px 14px',
+              backgroundColor: pestanaActiva === 'usuarios' ? 'var(--accent-color)' : 'transparent',
+              color: pestanaActiva === 'usuarios' ? 'white' : 'var(--text-muted)',
+              border: 'none', borderRadius: '8px',
+              fontWeight: '600', fontSize: '0.88rem', cursor: 'pointer',
+              display: 'flex', flex: '1', whiteSpace: 'nowrap',
+              justifyContent: 'center', alignItems: 'center', gap: '7px',
+              transition: 'all 0.2s ease',
+              boxShadow: pestanaActiva === 'usuarios' ? '0 2px 8px rgba(217,119,6,0.25)' : 'none'
             }}
           >
-            {cargando ? (
-              <div style={{ padding: '10px 0' }}>
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px' }}>
-                  <div style={{ flex: '1.5' }}><Skeleton height="15px" width="60%" /></div>
-                  <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
-                  <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
-                  <div style={{ flex: '1' }}><Skeleton height="15px" width="60%" /></div>
-                  <div style={{ flex: '1.5' }}><Skeleton height="15px" width="70%" /></div>
-                </div>
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '15px', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
-                    <div style={{ flex: '1.5', display: 'flex', flexDirection: 'column', gap: '8px' }}><Skeleton height="18px" width="80%" /><Skeleton height="14px" width="50%" /></div>
-                    <div style={{ flex: '1' }}><Skeleton height="32px" width="90%" borderRadius="6px" /></div>
-                    <div style={{ flex: '1' }}><Skeleton height="24px" width="70%" borderRadius="12px" /></div>
-                    <div style={{ flex: '1' }}><Skeleton height="14px" width="50%" /></div>
-                    <div style={{ flex: '1.5', display: 'flex', gap: '10px' }}><Skeleton height="30px" width="45%" borderRadius="6px" /><Skeleton height="30px" width="45%" borderRadius="6px" /></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div
-                style={{ overflowX: 'auto', paddingBottom: menuFiltroAbierto ? '160px' : '10px', transition: 'padding-bottom 0.3s ease' }}
-                id="tour-admin-tabla"
-              >
-                <table className="tabla-responsive tabla-responsiva-panel" style={{ width: '100%', borderCollapse: 'collapse', borderSpacing: 0, textAlign: 'left' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold' }}>Nombre / Correo</th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>Rol</span>
-                          <button style={btnAjustesStyle(filtroRol !== 'TODOS')} onClick={() => toggleMenu('rol')} title="Filtrar por rol"><IconoAjustes /></button>
-                        </div>
-                        {menuFiltroAbierto === 'rol' && (
-                          <div ref={menuRef} style={getPopoverStyle('rol')}>
-                            {[{ label: 'Todos', value: 'TODOS' }, { label: 'Estudiante', value: 'Estudiante' }, { label: 'Docente', value: 'Docente' }, { label: 'Administrador', value: 'Administrador' }].map(opcion => (
-                              <button key={opcion.value} onClick={() => { setFiltroRol(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroRol === opcion.value)}>{opcion.label}</button>
-                            ))}
-                          </div>
-                        )}
-                      </th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>Estado</span>
-                          <button style={btnAjustesStyle(filtroEstado !== 'TODOS')} onClick={() => toggleMenu('estado')} title="Filtrar por estado"><IconoAjustes /></button>
-                        </div>
-                        {menuFiltroAbierto === 'estado' && (
-                          <div ref={menuRef} style={getPopoverStyle('estado')}>
-                            {[{ label: 'Todos', value: 'TODOS' }, { label: 'Activos', value: 'ACTIVO' }, { label: 'Suspendidos', value: 'SUSPENDIDO' }].map(opcion => (
-                              <button key={opcion.value} onClick={() => { setFiltroEstado(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroEstado === opcion.value)}>{opcion.label}</button>
-                            ))}
-                          </div>
-                        )}
-                      </th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', position: 'relative' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>Registro</span>
-                          <button style={btnAjustesStyle(ordenFecha !== 'ninguno')} onClick={() => toggleMenu('registro')} title="Ordenar por fecha"><IconoAjustes /></button>
-                        </div>
-                        {menuFiltroAbierto === 'registro' && (
-                          <div ref={menuRef} style={getPopoverStyle('registro')}>
-                            {[{ label: 'Sin orden', value: 'ninguno' }, { label: 'Más recientes primero', value: 'desc' }, { label: 'Más antiguos primero', value: 'asc' }].map(opcion => (
-                              <button key={opcion.value} onClick={() => { setOrdenFecha(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(ordenFecha === opcion.value)}>{opcion.label}</button>
-                            ))}
-                          </div>
-                        )}
-                      </th>
-                      <th style={{ padding: '12px 15px', fontWeight: 'bold', textAlign: 'center' }}>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {usuariosFiltrados.length === 0 ? (
-                      <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>No se encontraron usuarios registrados con los filtros aplicados.</td></tr>
-                    ) : (
-                      usuariosPaginados.map((u, index) => (
-                        <tr key={u.email} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)', transition: 'background-color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)'}>
-                          <td data-label="Nombre / Correo" style={{ padding: '15px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '100%' }}>
-                              <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{u.nombre}</div>
-                              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{u.email}</div>
-                            </div>
-                          </td>
-                          <td data-label="Rol" style={{ padding: '15px' }}>
-                            <select className="tour-admin-rol" value={u.rol} onChange={(e) => handleCambiarRol(u.email, e.target.value)} disabled={u.rol === "Administrador"} style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: u.rol === 'Administrador' ? 'rgba(239, 68, 68, 0.1)' : (u.rol === 'Docente' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)'), color: u.rol === 'Administrador' ? '#ef4444' : (u.rol === 'Docente' ? '#10b981' : '#3b82f6'), fontWeight: 'bold', cursor: u.rol === 'Administrador' ? 'not-allowed' : 'pointer', outline: 'none', fontSize: '0.85rem' }}>
-                              <option value="Estudiante" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Estudiante</option>
-                              <option value="Docente" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Docente</option>
-                              <option value="Administrador" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Administrador</option>
-                            </select>
-                          </td>
-                          <td data-label="Estado" style={{ padding: '15px' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold', backgroundColor: u.activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: u.activo ? '#10b981' : '#ef4444' }}>
-                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: u.activo ? '#10b981' : '#ef4444' }}></span>
-                              {u.activo ? 'Activo' : 'Suspendido'}
-                            </span>
-                          </td>
-                          <td data-label="Registro" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                            {u.fecha_creacion ? u.fecha_creacion.split(' ')[0] : 'N/A'}
-                          </td>
-                          <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                              {u.rol !== 'Administrador' ? (
-                                <>
-                                  <button className={u.activo ? "btn-amarillo tour-admin-estado" : "btn-azul tour-admin-estado"} onClick={() => handleCambiarEstado(u.email, !u.activo)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>{u.activo ? 'Suspender' : 'Activar'}</button>
-                                  <button className="btn-rojo tour-admin-eliminar" onClick={() => setUsuarioAEliminar(u)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>Eliminar</button>
-                                </>
-                              ) : (
-                                <span style={{ fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>Protegido <IconoEscudo width="14" height="14" style={{ color: '#10b981' }} /></span>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-          <ControlesPaginacion />
-        </>
-      )}
-    </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span className="tab-label-full">Gestión de Usuarios</span>
+            <span className="tab-label-short">Usuarios</span>
+          </button>
 
-    {mostrarModalCarga && (
-      <div className="credencial-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) cerrarModalCarga(); }}>
-        <div className="credencial-modal carga-masiva-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-carga-masiva">
-          <div className="credencial-modal-header">
-            <div className="credencial-modal-title-wrap">
-              <div className="credencial-modal-icon"><FileSpreadsheet size={24} aria-hidden="true" /></div>
-              <div><h3 id="titulo-carga-masiva">Cargar credenciales masivas</h3><p>Importa varias credenciales desde un archivo.</p></div>
+          <button
+            onClick={() => setPestanaActiva('credenciales')}
+            style={{
+              padding: '9px 14px',
+              backgroundColor: pestanaActiva === 'credenciales' ? 'var(--accent-color)' : 'transparent',
+              color: pestanaActiva === 'credenciales' ? 'white' : 'var(--text-muted)',
+              border: 'none', borderRadius: '8px',
+              fontWeight: '600', fontSize: '0.88rem', cursor: 'pointer',
+              display: 'flex', flex: '1', whiteSpace: 'nowrap',
+              justifyContent: 'center', alignItems: 'center', gap: '7px',
+              transition: 'all 0.2s ease',
+              boxShadow: pestanaActiva === 'credenciales' ? '0 2px 8px rgba(217,119,6,0.25)' : 'none'
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span className="tab-label-full">Gestión de Credenciales</span>
+            <span className="tab-label-short">Credenciales</span>
+          </button>
+
+          <button
+            onClick={() => setPestanaActiva('reportes')}
+            style={{
+              padding: '9px 14px',
+              backgroundColor: pestanaActiva === 'reportes' ? 'var(--accent-color)' : 'transparent',
+              color: pestanaActiva === 'reportes' ? 'white' : 'var(--text-muted)',
+              border: 'none', borderRadius: '8px',
+              fontWeight: '600', fontSize: '0.88rem', cursor: 'pointer',
+              display: 'flex', flex: '1', whiteSpace: 'nowrap',
+              justifyContent: 'center', alignItems: 'center', gap: '7px',
+              transition: 'all 0.2s ease',
+              boxShadow: pestanaActiva === 'reportes' ? '0 2px 8px rgba(217,119,6,0.25)' : 'none'
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            <span className="tab-label-full">Reportes y Estadísticas</span>
+            <span className="tab-label-short">Reportes</span>
+          </button>
+        </div>
+
+        {pestanaActiva === 'reportes' ? (
+          <ReportesEstadisticas />
+        ) : pestanaActiva === 'credenciales' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <div className="grafico-card" style={{ padding: '20px 25px', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '18px', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 240px' }}>
+                  <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem' }}>Credenciales autorizadas</h3>
+                  <span style={{ display: 'block', marginTop: '5px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Administra las credenciales disponibles para el ingreso al sistema.</span>
+                </div>
+                <div className="credenciales-acciones">
+                  <ExcelUploader onClick={() => setMostrarModalCarga(true)} />
+                  <button className="btn-azul credencial-accion-manual-button" onClick={abrirModalCredencial}>
+                    <UserPlus size={17} strokeWidth={2.2} aria-hidden="true" />
+                    Crear acceso docente
+                  </button>
+                </div>
+              </div>
             </div>
-            <button type="button" onClick={cerrarModalCarga} className="credencial-modal-close" aria-label="Cerrar"><X size={20} /></button>
+
+            <div className="grafico-card contenedor-tabla-movil" style={{ padding: '0 25px 25px 25px', borderRadius: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
+              {cargandoCred ? (
+                <div style={{ padding: '25px 0 20px 0' }}>
+                  {[1, 2, 3, 4, 5, 6].map(i => <div key={i} style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}><Skeleton height="30px" width="100%" borderRadius="6px" /></div>)}
+                </div>
+              ) : (
+                <div style={{ overflowX: 'auto', minHeight: '400px' }}>
+                  <table className="tabla-responsive tabla-responsiva-panel tabla-min-900" style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <colgroup>
+                      <col style={{ width: '11%' }} />
+                      <col style={{ width: '11%' }} />
+                      <col style={{ width: '23%' }} />
+                      <col style={{ width: '15%' }} />
+                      <col style={{ width: '15%' }} />
+                      <col style={{ width: '14%' }} />
+                      <col style={{ width: '11%' }} />
+                    </colgroup>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', verticalAlign: 'middle' }}>CI</th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', verticalAlign: 'middle' }}>CU</th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>Nombre Completo</th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', position: 'relative', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>Rol</span>
+                            <button style={btnAjustesStyle(filtroRolCred !== 'TODOS')} onClick={() => toggleMenu('rolCred')} title="Filtrar por rol"><IconoAjustes /></button>
+                          </div>
+                          {menuFiltroAbierto === 'rolCred' && (
+                            <div ref={menuRef} style={getPopoverStyle('rol')}>
+                              {[{ label: 'Todos', value: 'TODOS' }, { label: 'Estudiante', value: 'Estudiante' }, { label: 'Docente', value: 'Docente' }].map(opcion => (
+                                <button key={opcion.value} onClick={() => { setFiltroRolCred(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroRolCred === opcion.value)}>{opcion.label}</button>
+                              ))}
+                            </div>
+                          )}
+                        </th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', position: 'relative', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>Estado</span>
+                            <button style={btnAjustesStyle(filtroEstadoCred !== 'TODOS')} onClick={() => toggleMenu('estadoCred')} title="Filtrar por estado"><IconoAjustes /></button>
+                          </div>
+                          {menuFiltroAbierto === 'estadoCred' && (
+                            <div ref={menuRef} style={getPopoverStyle('estado')}>
+                              {[{ label: 'Todos', value: 'TODOS' }, { label: 'Disponible', value: 'DISPONIBLE' }, { label: 'Registrado', value: 'REGISTRADO' }].map(opcion => (
+                                <button key={opcion.value} onClick={() => { setFiltroEstadoCred(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroEstadoCred === opcion.value)}>{opcion.label}</button>
+                              ))}
+                            </div>
+                          )}
+                        </th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', position: 'relative', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                            <span>Fecha Carga</span>
+                            <button style={btnAjustesStyle(ordenFechaCarga !== 'ninguno')} onClick={() => toggleMenu('fechaCarga')} title="Ordenar por fecha de carga"><IconoAjustes /></button>
+                          </div>
+                          {menuFiltroAbierto === 'fechaCarga' && (
+                            <div ref={menuRef} style={getPopoverStyle('fechaCarga')}>
+                              {[{ label: 'Sin orden', value: 'ninguno' }, { label: 'Más antiguas', value: 'asc' }, { label: 'Más recientes', value: 'desc' }].map(opcion => (
+                                <button key={opcion.value} onClick={() => { setOrdenFechaCarga(opcion.value); setCurrentCredPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(ordenFechaCarga === opcion.value)}>{opcion.label}</button>
+                              ))}
+                            </div>
+                          )}
+                        </th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {credencialesFiltradas.length === 0 ? (
+                        <tr><td colSpan="7" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>No se encontraron credenciales autorizadas.</td></tr>
+                      ) : (
+                        <>
+                          {credencialesPaginadas.map((c, index) => (
+                            <tr key={c.ci} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)' }}>
+                              <td data-label="CI" className="td-mitad td-mitad-izq" style={{ padding: '15px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.ci}>{c.ci}</td>
+                              <td data-label="CU" className="td-mitad" style={{ padding: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.cu || '—'}>{c.cu || '—'}</td>
+                              <td data-label="Nombre Completo" style={{ padding: '15px', overflow: 'hidden', wordBreak: 'normal' }}>{renderNombreCredencial(c.nombre)}</td>
+                              <td data-label="Rol" style={{ padding: '15px' }}>
+                                <span style={{ display: 'inline-block', maxWidth: '100%', padding: '4px 8px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 'bold', lineHeight: '1.2', backgroundColor: c.rol === 'Docente' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: c.rol === 'Docente' ? '#10b981' : '#3b82f6' }}>
+                                  {c.rol}
+                                </span>
+                              </td>
+                              <td data-label="Estado" className="td-mitad td-mitad-izq" style={{ padding: '15px' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 'bold', whiteSpace: 'nowrap', backgroundColor: c.registrado ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: c.registrado ? '#10b981' : '#3b82f6' }}>
+                                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: c.registrado ? '#10b981' : '#3b82f6' }}></span>
+                                  {c.registrado ? 'Registrado' : 'Disponible'}
+                                </span>
+                              </td>
+                              <td data-label="Fecha Carga" className="td-mitad" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatearFechaCarga(c.fecha_carga)}</td>
+                              <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
+                                <button className="btn-rojo" onClick={() => handleEliminarCredencial(c.ci)} style={{ padding: '6px 10px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>Eliminar</button>
+                              </td>
+                            </tr>
+                          ))}
+                          {Array.from({ length: Math.max(0, credItemsPerPage - credencialesPaginadas.length) }).map((_, i) => (
+                            <tr key={`empty-${i}`} className="fila-vacia" style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: (credencialesPaginadas.length + i) % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)' }}>
+                              <td colSpan="7" style={{ padding: '15px' }}>&nbsp;</td>
+                            </tr>
+                          ))}
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+            <ControlesPaginacionCredenciales />
           </div>
-          <div className="credencial-form">
-            <div className="carga-masiva-ayuda">
-              <strong>Asegúrate de que tu archivo incluya estas columnas:</strong>
-              <span>CI, CU, NOMBRE COMPLETO</span>
-              <div className="carga-masiva-enlaces">
-                <a href={`data:text/csv;charset=utf-8,${encodeURIComponent('CI,CU,NOMBRE COMPLETO\\n')}`} download="formato_credenciales.csv"><Download size={15} /> Descargar formato de ejemplo .csv</a>
-                <a href="/archivos"><FolderOpen size={15} /> Ver archivos guardados en el sistema</a>
-              </div>
+        ) : (
+          <>
+            <div
+              className="grafico-card contenedor-tabla-movil"
+              style={{
+                borderRadius: '5px',
+                backgroundColor: 'var(--bg-card)', padding: '0px 10px', border: '1px solid var(--border-color)'
+              }}
+            >
+              {cargando ? (
+                <div style={{ padding: '25px 0 10px 0' }}>
+                  <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px' }}>
+                    <div style={{ flex: '1.5' }}><Skeleton height="15px" width="60%" /></div>
+                    <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
+                    <div style={{ flex: '1' }}><Skeleton height="15px" width="50%" /></div>
+                    <div style={{ flex: '1' }}><Skeleton height="15px" width="60%" /></div>
+                    <div style={{ flex: '1.5' }}><Skeleton height="15px" width="70%" /></div>
+                  </div>
+                  {[1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '15px', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
+                      <div style={{ flex: '1.5', display: 'flex', flexDirection: 'column', gap: '8px' }}><Skeleton height="18px" width="80%" /><Skeleton height="14px" width="50%" /></div>
+                      <div style={{ flex: '1' }}><Skeleton height="32px" width="90%" borderRadius="6px" /></div>
+                      <div style={{ flex: '1' }}><Skeleton height="24px" width="70%" borderRadius="12px" /></div>
+                      <div style={{ flex: '1' }}><Skeleton height="14px" width="50%" /></div>
+                      <div style={{ flex: '1.5', display: 'flex', gap: '10px' }}><Skeleton height="30px" width="45%" borderRadius="6px" /><Skeleton height="30px" width="45%" borderRadius="6px" /></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    // Si el menú está abierto, permitimos que "salga" del contenedor
+                    // Si está cerrado, mantenemos el scroll horizontal por si acaso
+                    overflowX: menuFiltroAbierto ? 'visible' : 'auto',
+                    overflowY: menuFiltroAbierto ? 'visible' : 'hidden',
+                    paddingBottom: '10px',
+                    minHeight: '340px'
+                  }}
+                  id="tour-admin-tabla"
+                >
+                  <table className="tabla-responsive tabla-responsiva-panel" style={{ width: '100%', borderCollapse: 'collapse', borderSpacing: 0, textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', verticalAlign: 'middle' }}>Nombre</th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', verticalAlign: 'middle' }}>Correo</th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', position: 'relative', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>Rol</span>
+                            <button style={btnAjustesStyle(filtroRol !== 'TODOS')} onClick={() => toggleMenu('rol')} title="Filtrar por rol"><IconoAjustes /></button>
+                          </div>
+                          {menuFiltroAbierto === 'rol' && (
+                            <div ref={menuRef} style={getPopoverStyle('rol')}>
+                              {[{ label: 'Todos', value: 'TODOS' }, { label: 'Estudiante', value: 'Estudiante' }, { label: 'Docente', value: 'Docente' }, { label: 'Administrador', value: 'Administrador' }].map(opcion => (
+                                <button key={opcion.value} onClick={() => { setFiltroRol(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroRol === opcion.value)}>{opcion.label}</button>
+                              ))}
+                            </div>
+                          )}
+                        </th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', position: 'relative', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>Estado</span>
+                            <button style={btnAjustesStyle(filtroEstado !== 'TODOS')} onClick={() => toggleMenu('estado')} title="Filtrar por estado"><IconoAjustes /></button>
+                          </div>
+                          {menuFiltroAbierto === 'estado' && (
+                            <div ref={menuRef} style={getPopoverStyle('estado')}>
+                              {[{ label: 'Todos', value: 'TODOS' }, { label: 'Activos', value: 'ACTIVO' }, { label: 'Suspendidos', value: 'SUSPENDIDO' }].map(opcion => (
+                                <button key={opcion.value} onClick={() => { setFiltroEstado(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroEstado === opcion.value)}>{opcion.label}</button>
+                              ))}
+                            </div>
+                          )}
+                        </th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', position: 'relative', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>Registro</span>
+                            <button style={btnAjustesStyle(ordenFecha !== 'ninguno')} onClick={() => toggleMenu('registro')} title="Ordenar por fecha"><IconoAjustes /></button>
+                          </div>
+                          {menuFiltroAbierto === 'registro' && (
+                            <div ref={menuRef} style={getPopoverStyle('registro')}>
+                              {[{ label: 'Sin orden', value: 'ninguno' }, { label: 'Más recientes primero', value: 'desc' }, { label: 'Más antiguos primero', value: 'asc' }].map(opcion => (
+                                <button key={opcion.value} onClick={() => { setOrdenFecha(opcion.value); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(ordenFecha === opcion.value)}>{opcion.label}</button>
+                              ))}
+                            </div>
+                          )}
+                        </th>
+                        <th style={{ padding: '15px 15px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usuariosFiltrados.length === 0 ? (
+                        <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>No se encontraron usuarios registrados con los filtros aplicados.</td></tr>
+                      ) : (
+                        <>
+                          {usuariosPaginados.map((u, index) => (
+                            <tr key={u.email} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)', transition: 'background-color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.01)'}>
+                              <td data-label="Nombre" style={{ padding: '15px' }}>
+                                <div style={{ fontWeight: 'bold', color: 'var(--text-main)', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{u.nombre}</div>
+                              </td>
+                              <td data-label="Correo" style={{ padding: '15px' }}>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{u.email}</div>
+                              </td>
+                              <td data-label="Rol" style={{ padding: '15px' }}>
+                                <select className="tour-admin-rol" value={u.rol} onChange={(e) => handleCambiarRol(u.email, e.target.value)} disabled={u.rol === "Administrador"} style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: u.rol === 'Administrador' ? 'rgba(239, 68, 68, 0.1)' : (u.rol === 'Docente' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)'), color: u.rol === 'Administrador' ? '#ef4444' : (u.rol === 'Docente' ? '#10b981' : '#3b82f6'), fontWeight: 'bold', cursor: u.rol === 'Administrador' ? 'not-allowed' : 'pointer', outline: 'none', fontSize: '0.85rem' }}>
+                                  <option value="Estudiante" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Estudiante</option>
+                                  <option value="Docente" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Docente</option>
+                                  <option value="Administrador" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Administrador</option>
+                                </select>
+                              </td>
+                              <td data-label="Estado" className="td-mitad td-mitad-izq" style={{ padding: '15px' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold', backgroundColor: u.activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: u.activo ? '#10b981' : '#ef4444' }}>
+                                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: u.activo ? '#10b981' : '#ef4444' }}></span>
+                                  {u.activo ? 'Activo' : 'Suspendido'}
+                                </span>
+                              </td>
+                              <td data-label="Registro" className="td-mitad" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                {u.fecha_creacion ? u.fecha_creacion.split(' ')[0] : 'N/A'}
+                              </td>
+                              <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                  {u.rol !== 'Administrador' ? (
+                                    <>
+                                      <button className={u.activo ? "btn-amarillo tour-admin-estado" : "btn-azul tour-admin-estado"} onClick={() => handleCambiarEstado(u.email, !u.activo)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>{u.activo ? 'Suspender' : 'Activar'}</button>
+                                      <button className="btn-rojo tour-admin-eliminar" onClick={() => setUsuarioAEliminar(u)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>Eliminar</button>
+                                    </>
+                                  ) : (
+                                    <span style={{ fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>Protegido <IconoEscudo width="14" height="14" style={{ color: '#10b981' }} /></span>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {Array.from({ length: Math.max(0, itemsPerPage - usuariosPaginados.length) }).map((_, i) => (
+                            <tr key={`empty-${i}`} style={{ borderBottom: 'none' }}>
+                              <td colSpan="6" style={{ padding: '15px', border: 'none' }}>&nbsp;</td>
+                            </tr>
+                          ))}
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-            <input ref={inputCargaRef} type="file" accept=".xlsx,.xls,.csv" hidden onChange={(e) => prepararArchivoCredenciales(e.target.files?.[0])} />
-            <button type="button" className={`btn-carga-masiva-dropzone carga-masiva-dropzone${arrastrandoArchivo ? ' is-dragging' : ''}`} onClick={() => inputCargaRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); setArrastrandoArchivo(true); }}
-              onDragLeave={() => setArrastrandoArchivo(false)}
-              onDrop={(e) => { e.preventDefault(); setArrastrandoArchivo(false); prepararArchivoCredenciales(e.dataTransfer.files?.[0]); }}>
-              <Upload size={28} /><strong>{archivoCredenciales ? archivoCredenciales.name : 'Arrastra tu archivo aquí o haz clic para seleccionarlo'}</strong>
-              <span>Formatos admitidos: .csv, .xls y .xlsx</span>
-            </button>
-            {filasPrevisualizacion.length > 0 && (
-              <div className="carga-masiva-preview"><strong>Vista previa · Encabezados detectados en la fila {filaEncabezadoDetectada}{filasPrevisualizacion.length > 1 ? ` · ${filasPrevisualizacion.length - 1} filas mostradas` : ''}</strong>
-                <div><table><tbody>{filasPrevisualizacion.map((fila, i) => <tr key={i}>{fila.map((celda, j) => <td key={j}>{String(celda)}</td>)}</tr>)}</tbody></table></div>
+            <ControlesPaginacion />
+          </>
+        )}
+      </div>
+
+      {mostrarModalCarga && (
+        <div className="credencial-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) cerrarModalCarga(); }}>
+          <div className="credencial-modal carga-masiva-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-carga-masiva">
+            <div className="credencial-modal-header">
+              <div className="credencial-modal-title-wrap">
+                <div className="credencial-modal-icon"><FileSpreadsheet size={24} aria-hidden="true" /></div>
+                <div><h3 id="titulo-carga-masiva">Cargar credenciales masivas</h3><p>Importa varias credenciales desde un archivo.</p></div>
               </div>
-            )}
-            <div className="credencial-modal-footer"><span><BadgeCheck size={15} /> Revisa los datos antes de confirmar</span>
-              <div><button type="button" onClick={cerrarModalCarga} className="btn-amarillo">Cancelar</button><button type="button" className="btn-azul credencial-submit" onClick={confirmarCargaCredenciales} disabled={!archivoCredenciales}><Upload size={16} /> Confirmar carga</button></div>
+              <button type="button" onClick={cerrarModalCarga} className="credencial-modal-close" aria-label="Cerrar"><X size={20} /></button>
+            </div>
+            <div className="credencial-form">
+              <div className="carga-masiva-ayuda">
+                <strong>Asegúrate de que tu archivo incluya estas columnas:</strong>
+                <span>CI, CU, NOMBRE COMPLETO</span>
+                <div className="carga-masiva-enlaces">
+                  <a href={`data:text/csv;charset=utf-8,${encodeURIComponent('CI,CU,NOMBRE COMPLETO\\n')}`} download="formato_credenciales.csv"><Download size={15} /> Descargar formato de ejemplo .csv</a>
+                  <a href="/archivos"><FolderOpen size={15} /> Ver archivos guardados en el sistema</a>
+                </div>
+              </div>
+              <input ref={inputCargaRef} type="file" accept=".xlsx,.xls,.csv" hidden onChange={(e) => prepararArchivoCredenciales(e.target.files?.[0])} />
+              <button type="button" className={`btn-carga-masiva-dropzone carga-masiva-dropzone${arrastrandoArchivo ? ' is-dragging' : ''}`} onClick={() => inputCargaRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setArrastrandoArchivo(true); }}
+                onDragLeave={() => setArrastrandoArchivo(false)}
+                onDrop={(e) => { e.preventDefault(); setArrastrandoArchivo(false); prepararArchivoCredenciales(e.dataTransfer.files?.[0]); }}>
+                <Upload size={28} /><strong>{archivoCredenciales ? archivoCredenciales.name : 'Arrastra tu archivo aquí o haz clic para seleccionarlo'}</strong>
+                <span>Formatos admitidos: .csv, .xls y .xlsx</span>
+              </button>
+              {filasPrevisualizacion.length > 0 && (
+                <div className="carga-masiva-preview"><strong>Vista previa · Encabezados detectados en la fila {filaEncabezadoDetectada}{filasPrevisualizacion.length > 1 ? ` · ${filasPrevisualizacion.length - 1} filas mostradas` : ''}</strong>
+                  <div><table><tbody>{filasPrevisualizacion.map((fila, i) => <tr key={i}>{fila.map((celda, j) => <td key={j}>{String(celda)}</td>)}</tr>)}</tbody></table></div>
+                </div>
+              )}
+              <div className="credencial-modal-footer"><span><BadgeCheck size={15} /> Revisa los datos antes de confirmar</span>
+                <div><button type="button" onClick={cerrarModalCarga} className="btn-amarillo">Cancelar</button><button type="button" className="btn-azul credencial-submit" onClick={confirmarCargaCredenciales} disabled={!archivoCredenciales}><Upload size={16} /> Confirmar carga</button></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {mostrarModalCred && (
-      <div className="credencial-modal-overlay">
-        <div className="credencial-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-crear-acceso-docente">
-          <div className="credencial-modal-header">
-            <div className="credencial-modal-title-wrap">
-              <div className="credencial-modal-icon"><UserRound size={24} aria-hidden="true" /></div>
-              <div>
-                <h3 id="titulo-crear-acceso-docente">Crear acceso docente</h3>
-                <p>Completa los datos para crear el acceso del docente.</p>
+      {mostrarModalCred && (
+        <div className="credencial-modal-overlay">
+          <div className="credencial-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-crear-acceso-docente">
+            <div className="credencial-modal-header">
+              <div className="credencial-modal-title-wrap">
+                <div className="credencial-modal-icon"><UserRound size={24} aria-hidden="true" /></div>
+                <div>
+                  <h3 id="titulo-crear-acceso-docente">Crear acceso docente</h3>
+                  <p>Completa los datos para crear el acceso del docente.</p>
+                </div>
               </div>
+              <button type="button" onClick={() => setMostrarModalCred(false)} className="credencial-modal-close" aria-label="Cerrar"><X size={20} /></button>
             </div>
-            <button type="button" onClick={() => setMostrarModalCred(false)} className="credencial-modal-close" aria-label="Cerrar"><X size={20} /></button>
-          </div>
 
-          <form onSubmit={handleCrearCredencial} className="credencial-form">
-            <label className="credencial-field">
-              <span><GraduationCap size={16} /> Rol</span>
-              <input type="text" value="Docente" readOnly />
-            </label>
-            <label className="credencial-field">
-              <span><UserRound size={16} /> Nombre</span>
-              <input
-                type="text"
-                value={nuevaCredencial.nombre}
-                onChange={(e) => {
-                  const nombre = e.target.value;
-                  setInvitacionCopiada(false);
-                  setNuevaCredencial(prev => ({ ...prev, nombre, email: correoEditado ? prev.email : generarCorreoSugerido(nombre, prev.apellido) }));
-                }}
-                placeholder="Nombre"
-                required
-              />
-            </label>
-            <label className="credencial-field">
-              <span><UserRound size={16} /> Apellido</span>
-              <input
-                type="text"
-                value={nuevaCredencial.apellido}
-                onChange={(e) => {
-                  const apellido = e.target.value;
-                  setInvitacionCopiada(false);
-                  setNuevaCredencial(prev => ({ ...prev, apellido, email: correoEditado ? prev.email : generarCorreoSugerido(prev.nombre, apellido) }));
-                }}
-                placeholder="Apellido"
-                required
-              />
-            </label>
-            <label className="credencial-field">
-              <span><Mail size={16} /> Correo electrónico <small>Sugerido automáticamente</small></span>
-              <input
-                type="text"
-                value={nuevaCredencial.email}
-                onChange={(e) => {
-                  setCorreoEditado(true);
-                  setInvitacionCopiada(false);
-                  setNuevaCredencial(prev => ({ ...prev, email: e.target.value }));
-                }}
-                placeholder="correo@ejemplo.com"
-                required
-              />
-            </label>
-            <label className="credencial-field">
-              <span><KeyRound size={16} /> Contraseña <small>Sugerida automáticamente</small></span>
-              <div className="credencial-password-wrap">
+            <form onSubmit={handleCrearCredencial} className="credencial-form">
+              <label className="credencial-field">
+                <span><GraduationCap size={16} /> Rol</span>
+                <input type="text" value="Docente" readOnly />
+              </label>
+              <label className="credencial-field">
+                <span><UserRound size={16} /> Nombre</span>
                 <input
                   type="text"
-                  value={nuevaCredencial.password}
+                  value={nuevaCredencial.nombre}
                   onChange={(e) => {
-                    setContrasenaCopiada(false);
+                    const nombre = e.target.value;
                     setInvitacionCopiada(false);
-                    setNuevaCredencial(prev => ({ ...prev, password: e.target.value }));
+                    setNuevaCredencial(prev => ({ ...prev, nombre, email: correoEditado ? prev.email : generarCorreoSugerido(nombre, prev.apellido) }));
                   }}
-                  placeholder="Contraseña"
+                  placeholder="Nombre"
                   required
                 />
-                <div className="credencial-password-actions">
-                  <button type="button" className="btn-credencial-password-action credencial-password-action" onClick={copiarContrasena} title="Copiar contraseña" aria-label="Copiar contraseña">
-                    {contrasenaCopiada ? <Check size={16} /> : <Copy size={16} />}
-                    <span>{contrasenaCopiada ? 'Copiada' : 'Copiar'}</span>
-                  </button>
-                  <button type="button" className="btn-credencial-password-action credencial-password-action credencial-password-action--generate" onClick={() => { setContrasenaCopiada(false); setInvitacionCopiada(false); setNuevaCredencial(prev => ({ ...prev, password: generarContrasenaSugerida() })); }} title="Generar otra contraseña" aria-label="Generar otra contraseña">
-                    <RefreshCw size={16} />
-                  </button>
+              </label>
+              <label className="credencial-field">
+                <span><UserRound size={16} /> Apellido</span>
+                <input
+                  type="text"
+                  value={nuevaCredencial.apellido}
+                  onChange={(e) => {
+                    const apellido = e.target.value;
+                    setInvitacionCopiada(false);
+                    setNuevaCredencial(prev => ({ ...prev, apellido, email: correoEditado ? prev.email : generarCorreoSugerido(prev.nombre, apellido) }));
+                  }}
+                  placeholder="Apellido"
+                  required
+                />
+              </label>
+              <label className="credencial-field">
+                <span><Mail size={16} /> Correo electrónico <small>Sugerido automáticamente</small></span>
+                <input
+                  type="text"
+                  value={nuevaCredencial.email}
+                  onChange={(e) => {
+                    setCorreoEditado(true);
+                    setInvitacionCopiada(false);
+                    setNuevaCredencial(prev => ({ ...prev, email: e.target.value }));
+                  }}
+                  placeholder="correo@ejemplo.com"
+                  required
+                />
+              </label>
+              <label className="credencial-field">
+                <span><KeyRound size={16} /> Contraseña <small>Sugerida automáticamente</small></span>
+                <div className="credencial-password-wrap">
+                  <input
+                    type="text"
+                    value={nuevaCredencial.password}
+                    onChange={(e) => {
+                      setContrasenaCopiada(false);
+                      setInvitacionCopiada(false);
+                      setNuevaCredencial(prev => ({ ...prev, password: e.target.value }));
+                    }}
+                    placeholder="Contraseña"
+                    required
+                  />
+                  <div className="credencial-password-actions">
+                    <button type="button" className="btn-credencial-password-action credencial-password-action" onClick={copiarContrasena} title="Copiar contraseña" aria-label="Copiar contraseña">
+                      {contrasenaCopiada ? <Check size={16} /> : <Copy size={16} />}
+                      <span>{contrasenaCopiada ? 'Copiada' : 'Copiar'}</span>
+                    </button>
+                    <button type="button" className="btn-credencial-password-action credencial-password-action credencial-password-action--generate" onClick={() => { setContrasenaCopiada(false); setInvitacionCopiada(false); setNuevaCredencial(prev => ({ ...prev, password: generarContrasenaSugerida() })); }} title="Generar otra contraseña" aria-label="Generar otra contraseña">
+                      <RefreshCw size={16} />
+                    </button>
+                  </div>
+                </div>
+              </label>
+              <div className="credencial-modal-footer">
+                <span><BadgeCheck size={15} /> Se creará el acceso del docente</span>
+                <div>
+                  <button type="button" className="btn-credencial-password-action credencial-password-action" onClick={copiarInvitacion} disabled={!nuevaCredencial.nombre.trim() || !nuevaCredencial.apellido.trim() || !nuevaCredencial.email.trim() || !nuevaCredencial.password}><Copy size={16} /> Copiar invitación</button>
+                  <button type="submit" className="btn-azul credencial-submit" disabled={!invitacionCopiada}><Save size={16} /> Crear acceso</button>
                 </div>
               </div>
-            </label>
-            <div className="credencial-modal-footer">
-              <span><BadgeCheck size={15} /> Se creará el acceso del docente</span>
-              <div>
-                <button type="button" className="btn-credencial-password-action credencial-password-action" onClick={copiarInvitacion} disabled={!nuevaCredencial.nombre.trim() || !nuevaCredencial.apellido.trim() || !nuevaCredencial.email.trim() || !nuevaCredencial.password}><Copy size={16} /> Copiar invitación</button>
-                <button type="submit" className="btn-azul credencial-submit" disabled={!invitacionCopiada}><Save size={16} /> Crear acceso</button>
-              </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN USUARIO */}
-    {usuarioAEliminar && (
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000, backdropFilter: 'blur(3px)' }}>
-        <div className="grafico-card" style={{ width: '95%', maxWidth: '500px', backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '30px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}><IconoAlerta width="24" height="24" /> Confirmar Eliminación Permanente</h3>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', marginBottom: '20px' }}>Estás a punto de eliminar al usuario <strong>{usuarioAEliminar.nombre}</strong> ({usuarioAEliminar.email}). Esto borrará permanentemente su cuenta, archivos, historial de cálculos e inscripciones. Esta acción no se puede deshacer.</p>
-          <form onSubmit={handleEliminarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div style={{ textAlign: 'left' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Escribe el nombre del usuario para confirmar (<strong>{usuarioAEliminar.nombre}</strong>):</label>
-              <input type="text" value={confirmarNombre} onChange={(e) => setConfirmarNombre(e.target.value)} placeholder="Escribe el nombre exacto" required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', boxSizing: 'border-box' }} />
-            </div>
-            <div style={{ display: 'flex', gap: '12px', marginTop: '10px', justifyContent: 'flex-end' }}>
-              <button type="button" onClick={() => { setUsuarioAEliminar(null); setConfirmarNombre(''); }} className="btn-amarillo">Cancelar</button>
-              <button type="submit" className="btn-rojo">Confirmar Borrado</button>
-            </div>
-          </form>
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN USUARIO */}
+      {usuarioAEliminar && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000, backdropFilter: 'blur(3px)' }}>
+          <div className="grafico-card" style={{ width: '95%', maxWidth: '500px', backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '30px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            <h3 style={{ margin: '0 0 15px 0', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}><IconoAlerta width="24" height="24" /> Confirmar Eliminación Permanente</h3>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', marginBottom: '20px' }}>Estás a punto de eliminar al usuario <strong>{usuarioAEliminar.nombre}</strong> ({usuarioAEliminar.email}). Esto borrará permanentemente su cuenta, archivos, historial de cálculos e inscripciones. Esta acción no se puede deshacer.</p>
+            <form onSubmit={handleEliminarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{ textAlign: 'left' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Escribe el nombre del usuario para confirmar (<strong>{usuarioAEliminar.nombre}</strong>):</label>
+                <input type="text" value={confirmarNombre} onChange={(e) => setConfirmarNombre(e.target.value)} placeholder="Escribe el nombre exacto" required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '10px', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => { setUsuarioAEliminar(null); setConfirmarNombre(''); }} className="btn-amarillo">Cancelar</button>
+                <button type="submit" className="btn-rojo">Confirmar Borrado</button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
     </>
   );

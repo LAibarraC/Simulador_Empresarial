@@ -2,9 +2,9 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { AgGridReact, AgGridProvider } from 'ag-grid-react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 
-import { useModuleData } from '../components/Gestion_Datos/DataContext';
+import { useModuleData } from '../components/gestion_datos/DataContext';
 import { keyToNum, getExcelChar, excelToCoords } from '../utils/excelHelpers';
-import VariableCard from '../components/Gestion_Datos/VariableCard';
+import VariableCard from '../components/gestion_datos/VariableCard';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import "ag-grid-community/styles/ag-theme-alpine.css";

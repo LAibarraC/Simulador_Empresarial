@@ -30,7 +30,7 @@ export default function ModalSeleccionRolInicial({ usuario, onRolAsignado }) {
   };
 
   return (
-    <div className="precuenta-modal-overlay" style={{ zIndex: 9999999 }}>
+    <div className="precuenta-modal-overlay" style={{ zIndex: 1000 }}>
       <div className="precuenta-modal login-card" role="dialog" aria-modal="true" aria-labelledby="titulo-datos-estudiante">
         <img className="precuenta-logo" src={logoSiCE} alt="Logo SiCE" />
         <h2 id="titulo-datos-estudiante">¡Bienvenido, {usuario?.nombre || "Usuario"}!</h2>
