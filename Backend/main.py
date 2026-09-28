@@ -55,18 +55,8 @@ origins = [
     "http://127.0.0.1:5173",         # Desarrollo local alternativo
     "http://localhost:3000",         # Desarrollo local (React alternativo)
     "http://127.0.0.1:3000",         # Desarrollo local (React alternativo)
-    "https://calculadora-estadistica-3inh.onrender.com",  # Producción en Render
-    "https://administracion-calculadora.vercel.app",  # Enlace oficial Vercel
-    "https://proyecto-shc-170-54eovb4bb-coadiegos-projects.vercel.app", # Enlace temporal Vercel
-    "https://proyecto-shc-170.vercel.app", # Enlace limpio Vercel
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
-    "https://sice.jboris.org" #enlace de temporal
-    "https://backend-shc170.onrender.com",
-    "https://simulador-empresarial-swart.vercel.app", #por las dudas 
-    "http://10.250.54.12:5173",
-    "http://10.250.50.52:5173",
-    "http://10.250.55.72:5173",
-    "http://10.0.2.2:5173",
+    "https://sice.jboris.org", #enlace de temporal
 ]                               
 
 app.add_middleware(
