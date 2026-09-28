@@ -12,6 +12,7 @@ Backend/routers/__pycache__/
 .env.production
 Backend/.env
 Frontend/.env
+Backend/ca.pem
 
 # Datos del usuario y cargas locales
 excels/
