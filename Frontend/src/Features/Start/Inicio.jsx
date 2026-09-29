@@ -11,6 +11,27 @@ import {
   FileText, History, ChevronDown
 } from "lucide-react";
 
+// Icono minimalista: Diana con flecha
+const IconoDianaFlecha = ({ size = 32, strokeWidth = 2, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="1" />
+    <path d="M12 7a5 5 0 1 0 5 5" />
+    <path d="M13 3.055a9 9 0 1 0 7.941 7.945" />
+    <path d="M15 6v3h3l3 -3h-3v-3z" />
+    <path d="M15 9l-3 3" />
+  </svg>
+);
+
 const INTERVALO_MS = 4000;
 
 export default function Inicio() {
@@ -108,7 +129,7 @@ export default function Inicio() {
     { nombre: "Diego Coa Véliz", cargo: "Desarrollador Full-Stack", modulo: "Estadística General", imagen: "https://ui-avatars.com/api/?name=Diego+Coa&background=17a2b8&color=fff&size=150" },
     { nombre: "Luis Alberto Ibarra Calderon", cargo: "Desarrollador Full-Stack", modulo: "Estadística Matemática", imagen: "https://ui-avatars.com/api/?name=Luis+Ibarra&background=17a2b8&color=fff&size=150" },
     { nombre: "Diego Santiago Solorzano Arancibia", cargo: "Desarrollador Full-Stack", modulo: "Analisis Empresarial", imagen: "https://ui-avatars.com/api/?name=Diego+Solorzano&background=17a2b8&color=fff&size=150" },
-    { nombre: "Ulises Jesús Mancilla Rodriguez", cargo: "Desarrollador Full-Stack", modulo: "Marketing", imagen: "https://ui-avatars.com/api/?name=Ulises&background=17a2b8&color=fff&size=150" }
+    { nombre: "Ulises Jesús Mancilla Rodriguez", cargo: "Desarrollador Full-Stack", modulo: "Marketing I", imagen: "https://ui-avatars.com/api/?name=Ulises&background=17a2b8&color=fff&size=150" }
   ];
 
   return (
@@ -346,6 +367,19 @@ export default function Inicio() {
               <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Análisis Empresarial</h3>
               <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
                 Integración de nuevos módulos orientados a la evaluación financiera y el diagnóstico integral de escenarios de negocios.
+              </p>
+            </div>
+
+            <div className="modern-card" style={{ backgroundColor: 'var(--bg-card)', padding: '35px', borderRadius: '20px', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'var(--accent-color, #f1c40f)', color: '#000', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                Próximamente
+              </div>
+              <div className="icon-container" style={{ width: '60px', height: '60px', borderRadius: '15px', backgroundColor: 'rgba(241, 196, 15, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-color, #f1c40f)' }}>
+                <IconoDianaFlecha size={32} strokeWidth={2} />
+              </div>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Marketing I</h3>
+              <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
+                Estrategias comerciales, análisis de mercado y comportamiento del consumidor orientados al posicionamiento estratégico y toma de decisiones.
               </p>
             </div>
           </div>
