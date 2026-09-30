@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Datos from "../../../pages/Datos";
-import Calculos from "../pages/Calculos";
+import Calculos from "./Calculos";
 import TablaDinamica from "../../../components/excel/TablaDinamica";
 import { useCalculadoraExcel } from "../hooks/useCalculadoraExcel";
 

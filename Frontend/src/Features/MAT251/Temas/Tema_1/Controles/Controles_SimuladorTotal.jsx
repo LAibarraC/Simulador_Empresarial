@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
-import { IconoCalculadora, IconoVariables } from '../../../../ui/iconos';
+import { IconoCalculadora, IconoVariables } from '../../../../../ui/iconos';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
 export default function ControlesSimuladorTotal({ 

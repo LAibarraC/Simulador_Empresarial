@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import 'react-data-grid/lib/styles.css';
-import { useMAT251Data } from '../../../components/gestion_datos/DataContext';
+import { useMAT251Data } from '../../../components/Gestion_Datos/DataContext';
 import { calcularTecnicasConteo, calcularProbabilidadClasica, calcularProbabilidadCondicional, calcularProbabilidadTotalParticion } from '../Matematicas/logica_Tema1';
 import { calcularMomentosDiscreta, calcularMomentosContinua } from '../Matematicas/logica_Tema2';
 import katex from 'katex';
@@ -9,7 +9,7 @@ import '../styles/pages/Pantalla.css';
 import '../styles/Temas/Tema1.css';
 
 // ── IMPORTACIONES DE LA NUEVA ESTRUCTURA ──
-import { FONT, FS, RADIUS, OPERACIONES, filaVacia, labelStyle } from '../Principal/Constantes';
+import { FONT, FS, RADIUS, OPERACIONES, filaVacia, labelStyle } from './Constantes';
 import ModalAlerta from '../ui/ModalAlerta';
 import ModalEditor, { textEditor } from '../Temas/Tema_1/Modales/Modal_Editor';
 import ModalEventos from '../Temas/Tema_1/Modales/Modal_Eventos_Modify';
