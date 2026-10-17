@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react';
 import katex from 'katex';
 import "katex/dist/katex.min.css";
 import GraficoBastonesDiscreta from "../../../Graficas/Tema_2/GraficoBastonesDiscreta";
-import MarcoWidgetMAT251 from "../../../ui/MarcoWidgetMAT251";
+import { FONT, FS, RADIUS } from "../../../Principal/Constantes";
+import "../../../styles/Temas/Tema2.css";
+import StatLabel from "../../../ui/StatLabel";
 
 const LatexText = React.memo(({ math }) => {
     return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />;
@@ -25,10 +27,11 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
         return <LatexText math={str} />;
     };
 
-    const cardStyle = {
+    const cardStyle = { 
         background: 'transparent',
-        color: 'var(--text-main, #1e293b)',
-        padding: '10px 0',
+        color: 'var(--text-pure)',
+        fontFamily: FONT,
+        padding: '0px 0',
         height: '100%',
         boxSizing: 'border-box'
     };
@@ -56,63 +59,87 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
     const propEsperanza = evalA * resultados.esperanza + evalB;
     const propVarianza = (evalA ** 2) * resultados.varianza;
 
+    const totalF = resultados && resultados.datos ? resultados.datos.reduce((acc, d) => acc + (d.f !== undefined ? d.f : 0), 0) : 0;
+    const totalP = resultados && resultados.datos ? resultados.datos.reduce((acc, d) => acc + (Number(d.p) || 0), 0) : 0;
+
     return (
         <div style={cardStyle}>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', paddingRight: '5px' }}>
 
                 {/* Tabla de Distribución y Desglose (Combinada) */}
-                <div style={{ marginBottom: '20px' }}>
-                    <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>Distribución de Probabilidad y Desglose</h4>
-                    <div style={{
-                        background: 'transparent',
-                        overflowX: 'auto',
-                        border: 'none',
-                        boxShadow: 'none'
-                    }}>
+                <div style={{ marginBottom: '10px' }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                        Distribución de Probabilidad:
+                    </h4>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                         <table style={{ 
                             width: '100%', 
-                            tableLayout: 'fixed', 
                             borderCollapse: 'collapse', 
                             textAlign: 'center', 
-                            fontSize: 'clamp(0.65rem, 1.8vw, 0.85rem)', 
-                            borderTop: '1px solid var(--border-color, #e2e8f0)', 
-                            borderBottom: '1px solid var(--border-color, #e2e8f0)', 
-                            borderLeft: 'none', 
-                            borderRight: 'none',
-                            boxShadow: 'none' 
+                            fontSize: FS.sx, 
+                            fontFamily: FONT,
+                            color: 'var(--text-pure)'
                         }}>
-                            <thead style={{ backgroundColor: 'rgba(148, 163, 184, 0.1)' }}>
-                                <tr>
-                                    <th style={{ padding: '10px 8px', color: 'var(--text-main)', fontWeight: 600, borderBottom: '1px solid var(--border-color)', borderLeft: 'none', borderRight: 'none' }}>{renderLatex('x_i')}</th>
+                            <thead style={{ backgroundColor: 'var(--bg-input)' }}>
+                                <tr className="table-header-responsive" style={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>
+                                    <th style={{ padding: '8px 6px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'bold', fontSize: 'clamp(0.72rem, 2.2vw, 0.85rem)', whiteSpace: 'nowrap' }}>
+                                        <StatLabel formulaKey="x_i" formulaLatex="\boldsymbol{x_i}" align="center" />
+                                    </th>
                                     {resultados.datos.some(d => d.f !== undefined) && (
-                                        <th style={{ padding: '10px 8px', color: 'var(--text-main)', fontWeight: 600, borderBottom: '1px solid var(--border-color)', borderLeft: 'none', borderRight: 'none' }}>{renderLatex('f_i')}</th>
+                                        <th style={{ padding: '8px 6px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'bold', fontSize: 'clamp(0.72rem, 2.2vw, 0.85rem)', whiteSpace: 'nowrap' }}>
+                                            <StatLabel formulaKey="f_i" formulaLatex="\boldsymbol{f_i}" align="center" />
+                                        </th>
                                     )}
-                                    <th style={{ padding: '10px 8px', color: 'var(--text-main)', fontWeight: 600, borderBottom: '1px solid var(--border-color)', borderLeft: 'none', borderRight: 'none' }}>{renderLatex('P(x_i)')}</th>
-                                    <th style={{ padding: '10px 8px', color: 'var(--text-main)', fontWeight: 600, borderBottom: '1px solid var(--border-color)', borderLeft: 'none', borderRight: 'none' }}>{renderLatex('x_i \\cdot P(x_i)')}</th>
-                                    <th style={{ padding: '10px 8px', color: 'var(--text-main)', fontWeight: 600, borderBottom: '1px solid var(--border-color)', borderLeft: 'none', borderRight: 'none' }}>{renderLatex('x_i^2 \\cdot P(x_i)')}</th>
+                                    <th style={{ padding: '8px 6px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'bold', fontSize: 'clamp(0.72rem, 2.2vw, 0.85rem)', whiteSpace: 'nowrap' }}>
+                                        <StatLabel formulaKey="P(X)" formulaLatex="\boldsymbol{P(x_i)}" align="center" />
+                                    </th>
+                                    <th style={{ padding: '8px 6px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'bold', fontSize: 'clamp(0.72rem, 2.2vw, 0.85rem)', whiteSpace: 'nowrap' }}>
+                                        <StatLabel formulaKey="xi_pi" formulaLatex="\boldsymbol{x_i \cdot P(x_i)}" align="center" />
+                                    </th>
+                                    <th style={{ padding: '8px 6px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'bold', fontSize: 'clamp(0.72rem, 2.2vw, 0.85rem)', whiteSpace: 'nowrap' }}>
+                                        <StatLabel formulaKey="xi2_pi" formulaLatex="\boldsymbol{x_i^2 \cdot P(x_i)}" align="center" />
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {resultados.datos.map((d, i) => (
-                                    <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                        <td style={{ padding: '10px 8px', color: 'var(--text-main)', borderLeft: 'none', borderRight: 'none' }}>{d.x}</td>
+                                    <tr key={i}>
+                                        <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                            {renderLatex(`${d.x}`)}
+                                        </td>
                                         {d.f !== undefined && (
-                                            <td style={{ padding: '10px 8px', color: 'var(--text-main)', borderLeft: 'none', borderRight: 'none' }}>{d.f}</td>
+                                            <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                                {renderLatex(`${d.f}`)}
+                                            </td>
                                         )}
-                                        <td style={{ padding: '10px 8px', color: 'var(--text-main)', borderLeft: 'none', borderRight: 'none' }}>{Number(d.p).toFixed(4)}</td>
-                                        <td style={{ padding: '10px 8px', color: 'var(--text-main)', borderLeft: 'none', borderRight: 'none' }}>{(d.x * d.p).toFixed(4)}</td>
-                                        <td style={{ padding: '10px 8px', color: 'var(--text-main)', borderLeft: 'none', borderRight: 'none' }}>{((d.x ** 2) * d.p).toFixed(4)}</td>
+                                        <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                            {renderLatex(`${Number(d.p).toFixed(4)}`)}
+                                        </td>
+                                        <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                            {renderLatex(`${(d.x * d.p).toFixed(4)}`)}
+                                        </td>
+                                        <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                            {renderLatex(`${((d.x ** 2) * d.p).toFixed(4)}`)}
+                                        </td>
                                     </tr>
                                 ))}
-                                <tr style={{ fontWeight: 'bold', backgroundColor: 'rgba(148, 163, 184, 0.05)', color: 'var(--text-main)' }}>
-                                    <td style={{ padding: '10px 8px', borderLeft: 'none', borderRight: 'none' }}>Total / Suma</td>
+                                <tr style={{ fontWeight: 'bold', backgroundColor: 'var(--bg-input)', color: 'var(--text-pure)' }}>
+                                    <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'bold', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>Total / Suma</td>
                                     {resultados.datos.some(d => d.f !== undefined) && (
-                                        <td style={{ padding: '10px 8px', borderLeft: 'none', borderRight: 'none' }}>{resultados.datos.reduce((acc, d) => acc + d.f, 0)}</td>
+                                        <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                            {renderLatex(`${totalF}`)}
+                                        </td>
                                     )}
-                                    <td style={{ padding: '10px 8px', borderLeft: 'none', borderRight: 'none' }}>{parseFloat(resultados.datos.reduce((acc, d) => acc + d.p, 0).toFixed(4))}</td>
-                                    <td style={{ padding: '10px 8px', borderLeft: 'none', borderRight: 'none' }}>{renderLatex(`\\sum = ${resultados.esperanza.toFixed(4)}`)}</td>
-                                    <td style={{ padding: '10px 8px', borderLeft: 'none', borderRight: 'none' }}>{renderLatex(`\\sum = ${esperanzaX2.toFixed(4)}`)}</td>
+                                    <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                        {renderLatex(`${totalP.toFixed(4)}`)}
+                                    </td>
+                                    <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                        {renderLatex(`\\sum = ${resultados.esperanza.toFixed(4)}`)}
+                                    </td>
+                                    <td style={{ padding: '6px 4px', verticalAlign: 'middle', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', fontWeight: 'normal', fontSize: 'clamp(0.72rem, 2vw, 0.8rem)', whiteSpace: 'nowrap' }}>
+                                        {renderLatex(`\\sum = ${esperanzaX2.toFixed(4)}`)}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -120,55 +147,73 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                 </div>
 
                 {/* Esperanza Matemática */}
-                <div style={{ marginBottom: '20px' }}>
-                    <h4 style={{ margin: '0 0 10px 0', color: 'var(--primary-color, #3b82f6)' }}>Esperanza Matemática {renderLatex('E(X)')}</h4>
-                    <div style={{ padding: '15px', background: 'var(--bg-input, #f8fafc)', borderRadius: '8px' }}>
-                        <div style={{ padding: '10px', background: 'var(--bg-card, #fff)', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '6px', textAlign: 'center', marginBottom: '15px' }}>
-                            <div style={{ fontSize: 'clamp(0.75rem, 2vw, 0.95rem)' }}>
+                <div style={{ marginBottom: '15px' }}>
+                    <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                        Esperanza Matemática {renderLatex('E(X)')}
+                    </h4>
+                    <div className="katex-responsive-container" style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                        <div className="formula-general-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', marginBottom: '5px', padding: '5px 0', background: 'transparent', border: 'none', borderRadius: RADIUS, textAlign: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                            <div className="formula-general-box" style={{ color: 'var(--text-pure)', display: 'inline-block', minWidth: 'max-content' }}>
                                 {renderLatex(`E(X) = \\sum x_i \\cdot P(X = x_i)`)}
                             </div>
                         </div>
-                        <div style={{ fontSize: 'clamp(0.65rem, 1.8vw, 0.85rem)', color: 'var(--text-muted, #64748b)', marginBottom: '10px' }}>
-                            {renderLatex(`E(X) = ${desgloseEX}`)}
-                        </div>
-                        <div style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight: 'bold', color: 'var(--text-main, #1e293b)' }}>
-                            {renderLatex(`E(X) = ${resultados.esperanza.toFixed(4)}`)}
+                        <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', background: 'var(--bg-input)', border: 'none', padding: '15px 10px', borderRadius: RADIUS, textAlign: 'left', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                            <div style={{ color: 'var(--text-pure)', display: 'inline-block', minWidth: 'max-content', textAlign: 'left' }}>
+                                <div style={{ marginBottom: '8px' }}>
+                                    {renderLatex(`E(X) = ${desgloseEX}`)}
+                                </div>
+                                <div style={{ fontWeight: 'normal' }}>
+                                    {renderLatex(`E(X) = \\mathbf{${resultados.esperanza.toFixed(4)}}`)}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Varianza y Desviación */}
-                <div style={{ marginBottom: '20px' }}>
+                <div style={{ marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
                         <div style={{ flex: 1, minWidth: '200px' }}>
-                            <h4 style={{ margin: '0 0 10px 0', color: 'var(--primary-color, #3b82f6)' }}>Varianza</h4>
-                            <div style={{ padding: '15px', background: 'var(--bg-input, #f8fafc)', borderRadius: '8px' }}>
-                                <div style={{ padding: '10px', background: 'var(--bg-card, #fff)', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '6px', textAlign: 'center', marginBottom: '15px' }}>
-                                    <div style={{ fontSize: 'clamp(0.75rem, 2vw, 0.95rem)' }}>
+                            <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                Varianza {renderLatex('V(X)')}
+                            </h4>
+                            <div className="katex-responsive-container" style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                                <div className="formula-general-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', marginBottom: '5px', padding: '5px 0', background: 'transparent', border: 'none', borderRadius: RADIUS, textAlign: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                                    <div className="formula-general-box" style={{ color: 'var(--text-pure)', display: 'inline-block', minWidth: 'max-content' }}>
                                         {renderLatex(`V(X) = E(X^2) - [E(X)]^2`)}
                                     </div>
                                 </div>
-                                <div style={{ fontSize: 'clamp(0.65rem, 1.8vw, 0.85rem)', color: 'var(--text-muted, #64748b)', marginBottom: '10px' }}>
-                                    {renderLatex(`V(X) = ${desgloseVar}`)}
-                                </div>
-                                <div style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight: 'bold', color: 'var(--text-main, #1e293b)' }}>
-                                    {renderLatex(`V(X) = ${resultados.varianza.toFixed(4)}`)}
+                                <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', background: 'var(--bg-input)', border: 'none', padding: '15px 10px', borderRadius: RADIUS, textAlign: 'left', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                                    <div style={{ color: 'var(--text-pure)', display: 'inline-block', minWidth: 'max-content', textAlign: 'left' }}>
+                                        <div style={{ marginBottom: '8px' }}>
+                                            {renderLatex(`V(X) = ${desgloseVar}`)}
+                                        </div>
+                                        <div style={{ fontWeight: 'normal' }}>
+                                            {renderLatex(`V(X) = \\mathbf{${resultados.varianza.toFixed(4)}}`)}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div style={{ flex: 1, minWidth: '200px' }}>
-                            <h4 style={{ margin: '0 0 10px 0', color: 'var(--primary-color, #3b82f6)' }}>Desviación Estándar</h4>
-                            <div style={{ padding: '15px', background: 'var(--bg-input, #f8fafc)', borderRadius: '8px' }}>
-                                <div style={{ padding: '10px', background: 'var(--bg-card, #fff)', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '6px', textAlign: 'center', marginBottom: '15px' }}>
-                                    <div style={{ fontSize: 'clamp(0.75rem, 2vw, 0.95rem)' }}>
+                            <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                Desviación Estándar {renderLatex('\\sigma')}
+                            </h4>
+                            <div className="katex-responsive-container" style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                                <div className="formula-general-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', marginBottom: '5px', padding: '5px 0', background: 'transparent', border: 'none', borderRadius: RADIUS, textAlign: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                                    <div className="formula-general-box" style={{ color: 'var(--text-pure)', display: 'inline-block', minWidth: 'max-content' }}>
                                         {renderLatex(`\\sigma = \\sqrt{V(X)}`)}
                                     </div>
                                 </div>
-                                <div style={{ fontSize: 'clamp(0.65rem, 1.8vw, 0.85rem)', color: 'var(--text-muted, #64748b)', marginBottom: '10px' }}>
-                                    {renderLatex(`\\sigma = \\sqrt{${resultados.varianza.toFixed(4)}}`)}
-                                </div>
-                                <div style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight: 'bold', color: 'var(--text-main, #1e293b)' }}>
-                                    {renderLatex(`\\sigma = ${resultados.desviacion.toFixed(4)}`)}
+                                <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', background: 'var(--bg-input)', border: 'none', padding: '15px 10px', borderRadius: RADIUS, textAlign: 'left', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                                    <div style={{ color: 'var(--text-pure)', display: 'inline-block', minWidth: 'max-content', textAlign: 'left' }}>
+                                        <div style={{ marginBottom: '8px' }}>
+                                            {renderLatex(`\\sigma = \\sqrt{${resultados.varianza.toFixed(4)}}`)}
+                                        </div>
+                                        <div style={{ fontWeight: 'normal' }}>
+                                            {renderLatex(`\\sigma = \\mathbf{${resultados.desviacion.toFixed(4)}}`)}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -177,26 +222,31 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
 
                 {/* Momentos de la Variable Aleatoria */}
                 <div style={{ marginBottom: '20px' }}>
-                    <h4 style={{ margin: '0 0 10px 0', color: 'var(--primary-color, #3b82f6)' }}>Momentos de la Variable Aleatoria</h4>
-                    <div style={{ padding: '15px', background: 'var(--bg-input, #f8fafc)', borderRadius: '8px' }}>
-                        <div style={{ padding: '10px', background: 'var(--bg-card, #fff)', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '6px', textAlign: 'center', marginBottom: '15px' }}>
-                            <div style={{ fontSize: 'clamp(0.75rem, 2vw, 0.95rem)' }}>
+                    <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                        Momentos de la Variable Aleatoria {renderLatex('\\mu\'_r')}
+                    </h4>
+                    <div className="katex-responsive-container" style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                        <div className="formula-general-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', marginBottom: '5px', padding: '5px 0', background: 'transparent', border: 'none', borderRadius: RADIUS, textAlign: 'center', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                            <div className="formula-general-box" style={{ color: 'var(--text-pure)', display: 'inline-block', minWidth: 'max-content' }}>
                                 {renderLatex(`\\mu'_{r} = E(X^r) = \\sum x_i^r \\cdot P(x_i)`)}
                             </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                            <div style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight: 'bold', color: 'var(--text-main, #1e293b)' }}>
-                                {renderLatex(`\\mu'_{${ordenMomento || 'r'}} = E(X^{${ordenMomento || 'r'}}) = ${momentoCalculado.toFixed(4)}`)}
+                        <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', background: 'var(--bg-input)', border: 'none', padding: '12px 10px', borderRadius: RADIUS, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', textAlign: 'left', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
+                            <div style={{ fontWeight: 'normal', textAlign: 'left' }}>
+                                {renderLatex(`\\mu'_{${ordenMomento || 'r'}} = E(X^{${ordenMomento || 'r'}}) = \\mathbf{${momentoCalculado.toFixed(4)}}`)}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <label style={{ fontSize: 'clamp(0.65rem, 1.5vw, 0.8rem)', fontWeight: 600, color: 'var(--text-muted, #64748b)' }}>r:</label>
+                                <label style={{ fontSize: FS.sm, color: 'var(--text-pure)', fontFamily: FONT, display: 'inline-flex', alignItems: 'center' }}>
+                                    {renderLatex('r:')}
+                                </label>
                                 <input 
                                     type="number" 
                                     min="1" 
                                     step="1" 
                                     value={ordenMomento} 
                                     onChange={(e) => setOrdenMomento(e.target.value)}
-                                    style={{ width: '60px', padding: '6px', borderRadius: '6px', border: '1px solid var(--border-color, #cbd5e1)', textAlign: 'center' }}
+                                    className="input-mat251"
+                                    style={{ width: '120px', padding: '8px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', fontFamily: FONT, fontSize: '0.9rem', fontWeight: 'normal', background: 'var(--bg-card)', color: 'var(--text-pure)', boxSizing: 'border-box' }}
                                     title="Ingresar orden del momento"
                                 />
                             </div>
@@ -267,17 +317,8 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                 )}
 
                 {/* Gráfico de Función de Masa de Probabilidad (Bastones) */}
-                <div style={{ marginTop: '20px' }}>
-                    <MarcoWidgetMAT251 
-                        id="grafico-bastones-discreta" 
-                        titulo="Función de Masa de Probabilidad - f(x)" 
-                        anchoCompleto={true} 
-                        alto="400px"
-                    >
-                        <div style={{ width: '100%', height: '100%', minHeight: '300px' }}>
-                            <GraficoBastonesDiscreta datos={resultados.datos} />
-                        </div>
-                    </MarcoWidgetMAT251>
+                <div style={{ marginTop: '0px' }}>
+                    <GraficoBastonesDiscreta datos={resultados.datos} />
                 </div>
 
             </div>

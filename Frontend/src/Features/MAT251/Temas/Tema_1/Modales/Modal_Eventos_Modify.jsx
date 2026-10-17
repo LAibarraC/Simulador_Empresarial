@@ -1,5 +1,5 @@
 import React from 'react';
-import { overlayStyle, modalBoxStyle, FS, RADIUS } from '../../../Principal/Constantes';
+import { FONT, overlayStyle, modalBoxStyle, FS, RADIUS } from '../../../Principal/Constantes';
 
 export default function ModalEventosModify({ modalEvento, setModalEvento, statsEventos, statsEventosPorColumna, eventoFavorable, setEventoFavorable, setResProbabilidad, titulo, mostrarFrecuencia = true }) {
     const [filtro, setFiltro] = React.useState('');
@@ -39,10 +39,11 @@ export default function ModalEventosModify({ modalEvento, setModalEvento, statsE
         return (
             <label
                 style={{
-                    display: 'flex', alignItems: 'center', padding: '10px 16px',
+                    display: 'flex', alignItems: 'center', padding: '9px 14px',
                     cursor: 'pointer', borderBottom: '1px solid var(--border-color)',
-                    transition: 'background 0.15s', gap: '14px',
-                    background: isSelected ? 'rgba(33, 115, 70, 0.08)' : 'transparent'
+                    transition: 'background 0.15s', gap: '12px',
+                    background: isSelected ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                    fontFamily: FONT
                 }}
                 onMouseEnter={(e) => !isSelected && (e.currentTarget.style.background = 'var(--bg-input)')}
                 onMouseLeave={(e) => !isSelected && (e.currentTarget.style.background = 'transparent')}
@@ -50,26 +51,26 @@ export default function ModalEventosModify({ modalEvento, setModalEvento, statsE
             >
                 {/* Checkbox custom */}
                 <div style={{
-                    width: '18px', height: '18px', borderRadius: '4px', flexShrink: 0,
+                    width: '18px', height: '18px', borderRadius: RADIUS, flexShrink: 0,
                     border: `2px solid ${isSelected ? 'var(--primary-color)' : 'var(--border-color)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: isSelected ? 'var(--primary-color)' : 'var(--bg-card)',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.15s'
                 }}>
                     {isSelected && (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     )}
                 </div>
                 {/* Texto */}
                 <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: isSelected ? 700 : 500, fontSize: FS.sm, color: isSelected ? 'var(--primary-color)' : 'var(--text-main)' }}>
+                    <div style={{ fontWeight: isSelected ? 'bold' : 500, fontSize: FS.sm, color: isSelected ? 'var(--primary-color)' : 'var(--text-pure)', fontFamily: FONT }}>
                         {valor}
                     </div>
                     {mostrarFrecuencia && (
-                        <div style={{ fontSize: FS.xs, color: 'var(--text-muted)', marginTop: '1px' }}>
-                            Aparece <strong>{count}</strong> {count === 1 ? 'vez' : 'veces'}
+                        <div style={{ fontSize: FS.xs, color: 'var(--text-muted)', marginTop: '1px', fontFamily: FONT }}>
+                            Aparece <strong style={{ color: 'var(--text-pure)' }}>{count}</strong> {count === 1 ? 'vez' : 'veces'}
                         </div>
                     )}
                 </div>
@@ -136,94 +137,129 @@ export default function ModalEventosModify({ modalEvento, setModalEvento, statsE
 
     return (
         <div style={overlayStyle} onClick={() => setModalEvento(false)}>
-            <div style={{ ...modalBoxStyle, maxWidth: statsEventosPorColumna ? '680px' : '440px', padding: '24px', width: '95vw' }} onClick={(e) => e.stopPropagation()}>
+            <div
+                style={{
+                    ...modalBoxStyle,
+                    maxWidth: statsEventosPorColumna ? '680px' : '450px',
+                    padding: '22px 24px',
+                    width: '95vw',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    maxHeight: '90vh'
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
 
                 {/* Cabecera */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-color)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-pure)', fontFamily: FONT }}>
                         {titulo || 'Evento Favorable (A)'}
                     </h3>
-                    <button onClick={() => setModalEvento(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}>
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
                 </div>
 
                 {/* Aviso de agrupación por columna */}
                 {statsEventosPorColumna && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', background: 'rgba(33,115,70,0.07)', border: '1px solid rgba(33,115,70,0.2)', borderRadius: RADIUS, padding: '8px 12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid var(--border-color)', borderRadius: RADIUS, padding: '7px 12px' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
-                        <span style={{ fontSize: FS.xs, color: 'var(--text-muted)' }}>
-                            Valores agrupados por <strong>columna de datos</strong>.
+                        <span style={{ fontSize: FS.xs, color: 'var(--text-muted)', fontFamily: FONT }}>
+                            Valores agrupados por <strong style={{ color: 'var(--text-pure)' }}>columna de datos</strong>.
                         </span>
                     </div>
                 )}
 
                 {/* Descripción cuando es lista simple */}
                 {!statsEventosPorColumna && (
-                    <p style={{ fontSize: FS.sm, color: 'var(--text-muted)', marginBottom: '14px', lineHeight: '1.4' }}>
+                    <p style={{ fontSize: FS.sm, color: 'var(--text-muted)', margin: '0 0 12px 0', lineHeight: '1.4', fontFamily: FONT, textAlign: 'center' }}>
                         Selecciona uno o varios valores que definen este evento.
                     </p>
                 )}
 
                 {/* Buscador */}
-                <div style={{ marginBottom: '12px' }}>
-                    <input
-                        type="text"
-                        placeholder="Filtrar por texto..."
-                        value={filtro}
-                        onChange={(e) => setFiltro(e.target.value)}
-                        style={{
-                            width: '100%', padding: '9px 12px', borderRadius: RADIUS,
-                            border: '1px solid var(--border-color)', fontSize: FS.sm,
-                            outline: 'none', boxSizing: 'border-box',
-                            background: 'var(--bg-input)', color: 'var(--text-main)'
-                        }}
-                    />
-                    {filtro && (
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                            <button onClick={seleccionarTodosVisibles} style={{ flex: 1, padding: '6px', fontSize: FS.xs, background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: RADIUS, cursor: 'pointer' }}>
-                                Seleccionar visibles
-                            </button>
-                            <button onClick={deseleccionarTodosVisibles} style={{ flex: 1, padding: '6px', fontSize: FS.xs, background: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: RADIUS, cursor: 'pointer' }}>
-                                Deseleccionar visibles
-                            </button>
-                        </div>
-                    )}
+                <div style={{ marginBottom: '14px' }}>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <svg style={{ position: 'absolute', left: '10px', color: 'var(--text-muted)', pointerEvents: 'none' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Filtrar por texto..."
+                            className="input-mat251 placeholder-small"
+                            value={filtro}
+                            onChange={(e) => setFiltro(e.target.value)}
+                            style={{
+                                width: '100%', padding: '8px 12px 8px 32px', borderRadius: RADIUS,
+                                border: '1px solid var(--border-color)', fontSize: FS.sm,
+                                outline: 'none', boxSizing: 'border-box',
+                                background: 'var(--bg-input)', color: 'var(--text-pure)',
+                                fontFamily: FONT
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {/* Lista de eventos */}
-                <div style={{ maxHeight: '360px', overflowY: 'auto', overflowX: 'hidden', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-body)' }}>
+                <div style={{ maxHeight: '320px', overflowY: 'auto', overflowX: 'hidden', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-body)' }}>
                     {statsEventosPorColumna
                         ? renderAgrupado()
-                        : eventosFiltrados.map(({ valor, count }) => (
-                            <EventoItem key={valor} valor={valor} count={count} />
-                        ))
+                        : eventosFiltrados.length > 0
+                            ? eventosFiltrados.map(({ valor, count }) => (
+                                <EventoItem key={valor} valor={valor} count={count} />
+                            ))
+                            : (
+                                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: FS.sm, fontFamily: FONT }}>
+                                    No se encontraron resultados con "{filtro}"
+                                </div>
+                            )
                     }
                 </div>
 
-                {/* Botón confirmar */}
-                <div style={{ marginTop: '16px' }}>
-                    <button
-                        onClick={() => setModalEvento(false)}
-                        style={{
-                            width: '100%', background: 'var(--primary-color)', color: 'white',
-                            padding: '11px', borderRadius: RADIUS, fontWeight: 600,
-                            fontSize: FS.base, border: 'none', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                        }}
-                    >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Confirmar Selección
-                    </button>
+                {/* Footer compacto con contador y botones */}
+                <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                    <div>
+                        <span style={{ fontSize: FS.xs, color: 'var(--text-muted)', fontFamily: FONT }}>
+                            Seleccionados: <strong style={{ color: 'var(--text-pure)' }}>{eventoFavorable.length}</strong>
+                        </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button
+                            type="button"
+                            className="btn-danger"
+                            onClick={() => setModalEvento(false)}
+                            style={{
+                                padding: '5px 14px',
+                                fontSize: FS.sm,
+                                borderRadius: RADIUS,
+                                fontFamily: FONT,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn-primary"
+                            onClick={() => setModalEvento(false)}
+                            style={{
+                                padding: '5px 18px',
+                                fontSize: FS.sm,
+                                borderRadius: RADIUS,
+                                fontFamily: FONT,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Confirmar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

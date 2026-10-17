@@ -4,29 +4,51 @@ import { calcularDistribucionMuestral } from '../../../Matematicas/logica_Tema1'
 import { EditarDatos } from '../../../../../ui/iconos';
 import Latex from '../../../../../components/excel/Latex';
 import Skeleton from '../../../../../ui/Skeleton';
+import StatLabel from '../../../ui/StatLabel';
+import ModalAlerta from '../../../ui/ModalAlerta';
+import '../../../styles/Temas/Tema4.css';
 
 export default function Resultados_DistribucionesMuestrales({ varSeleccionada, filas, abrirEditor }) {
     const [poblacion, setPoblacion] = useState('');
     const [n, setN] = useState('');
     const [conReemplazo, setConReemplazo] = useState(true);
     const [parametroCalculo, setParametroCalculo] = useState('media');
+    const [atributoExito, setAtributoExito] = useState('');
     const [isOpenParamSelect, setIsOpenParamSelect] = useState(false);
     const paramSelectRef = useRef(null);
+    const [isOpenAtributoSelect, setIsOpenAtributoSelect] = useState(false);
+    const atributoSelectRef = useRef(null);
     const [resDistMuestrales, setResDistMuestrales] = useState(null);
     const [paginaActual, setPaginaActual] = useState(1);
     const [cargando, setCargando] = useState(false);
-    const filasPorPagina = 50;
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+    const filasPorPagina = 10;
 
-    // Cerrar el selector personalizado al hacer clic fuera
+    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
+        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
+    };
+
+    // Cerrar los selectores personalizados al hacer clic fuera
     useEffect(() => {
         const handler = (e) => {
             if (paramSelectRef.current && !paramSelectRef.current.contains(e.target)) {
                 setIsOpenParamSelect(false);
             }
+            if (atributoSelectRef.current && !atributoSelectRef.current.contains(e.target)) {
+                setIsOpenAtributoSelect(false);
+            }
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
+
+    const esMultiColumna = Boolean(
+        (varSeleccionada?.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) ||
+        (varSeleccionada?.tipo && varSeleccionada.tipo.toLowerCase().includes('mixta')) ||
+        filas?.some(f => (f.valor || '').toString().includes(' | '))
+    );
+
+    const filasValidas = filas?.filter(f => (f.valor || '').toString().trim() !== '') || [];
 
     useEffect(() => {
         // Sincronizar estrictamente la población con las filas
@@ -36,20 +58,125 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
         if (valoresValidos && valoresValidos.length > 0) {
             setPoblacion(valoresValidos.join(', '));
+            const unique = [...new Set(valoresValidos.map(v => v.includes(' | ') ? v.split(' | ')[0].trim() : v))].filter(Boolean);
+            setAtributoExito(prev => prev && unique.includes(prev) ? prev : (unique[0] || ''));
         } else {
             setPoblacion('');
+            setAtributoExito('');
         }
+        setResDistMuestrales(null);
     }, [filas]);
 
-    const filasValidas = filas?.filter(f => (f.valor || '').toString().trim() !== '') || [];
-
     const ejecutar = () => {
+        // 1. Regla general: Restricción a 1 sola columna
+        if (esMultiColumna) {
+            mostrarAlerta("La variable debe tener 1 sola columna.", "Atención", "warning");
+            setResDistMuestrales(null);
+            return;
+        }
+
+        const valoresValidos = filasValidas.map(f => (f.valor || '').toString().trim()).filter(Boolean);
+        const N = valoresValidos.length;
+
+        if (N === 0) {
+            mostrarAlerta("Ingresa los datos de la población.", "Atención", "warning");
+            setResDistMuestrales(null);
+            return;
+        }
+
+        const esNumeroValido = (v) => {
+            if (v === null || v === undefined) return false;
+            const str = v.toString().trim();
+            if (str === '') return false;
+            return !isNaN(Number(str));
+        };
+
+        const numN = parseInt(n, 10);
+
+        // Caso A: Si selecciona "Promedios (Normal)"
+        if (parametroCalculo === 'media') {
+            const tieneTexto = valoresValidos.some(v => !esNumeroValido(v));
+            if (tieneTexto) {
+                mostrarAlerta("Para Promedios, los datos deben ser números.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+
+            if (isNaN(numN) || numN < 1) {
+                mostrarAlerta("El tamaño de muestra (n) debe ser mayor a 0.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+
+            if (!conReemplazo && numN > N) {
+                mostrarAlerta("Sin reemplazo, n no puede superar a la población.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+        }
+
+        // Caso B: Si selecciona "Varianza"
+        else if (parametroCalculo === 'varianza') {
+            const tieneTexto = valoresValidos.some(v => !esNumeroValido(v));
+            if (tieneTexto) {
+                mostrarAlerta("Para Varianza, los datos deben ser números.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+
+            if (N < 2) {
+                mostrarAlerta("Para Varianza, se requieren al menos 2 datos (N ≥ 2).", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+
+            if (isNaN(numN) || numN < 2) {
+                mostrarAlerta("Para Varianza, la muestra (n) debe ser al menos 2.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+
+            if (!conReemplazo && numN > N) {
+                mostrarAlerta("Sin reemplazo, n no puede superar a la población.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+        }
+
+        // Caso C: Si selecciona "Proporciones"
+        else if (parametroCalculo === 'proporcion') {
+            if (!atributoExito) {
+                mostrarAlerta("Selecciona un Atributo de Éxito.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+
+            if (isNaN(numN) || numN < 1) {
+                mostrarAlerta("El tamaño de muestra (n) debe ser mayor a 0.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+
+            if (!conReemplazo && numN > N) {
+                mostrarAlerta("Sin reemplazo, n no puede superar a la población.", "Atención", "warning");
+                setResDistMuestrales(null);
+                return;
+            }
+        }
+
         setCargando(true);
-        // Usamos un pequeño setTimeout (50ms) solo para permitir que React pinte el Skeleton antes de cálculos pesados
         setTimeout(() => {
-            const res = calcularDistribucionMuestral(poblacion, n, conReemplazo, parametroCalculo);
-            setResDistMuestrales(res);
-            setPaginaActual(1); // Reiniciar a la página 1 en cada nuevo cálculo
+            const res = calcularDistribucionMuestral(poblacion, n, conReemplazo, parametroCalculo, atributoExito);
+            if (res?.error) {
+                mostrarAlerta(res.error, "Atención", "warning");
+                setResDistMuestrales(null);
+            } else {
+                if (res?.resultado?.length > 5000) {
+                    mostrarAlerta(`Tabla paso a paso omitida por rendimiento (${res.resultado.length} muestras). Cálculos completados.`, "Aviso", "warning");
+                }
+                setResDistMuestrales(res);
+                setPaginaActual(1); // Reiniciar a la página 1 en cada nuevo cálculo
+            }
             setCargando(false);
         }, 50);
     };
@@ -61,32 +188,49 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
     const indexOfFirstFila = indexOfLastFila - filasPorPagina;
     const filasPaginadas = (resDistMuestrales?.resultado || []).slice(indexOfFirstFila, indexOfLastFila);
 
+    // Cálculos teóricos con redondeo estándar para conclusiones
+    const calcFinal = resDistMuestrales?.calculosFinales;
+    const nVal = calcFinal ? Number(calcFinal.n) : 1;
+    const NVal = calcFinal ? Number(calcFinal.N) : 1;
+    const factorCorr = (calcFinal && !calcFinal.conReemplazo && NVal > 1) ? ((NVal - nVal) / (NVal - 1)) : 1;
+    const varianzaTeoricaMedia = calcFinal ? ((Number(calcFinal.varianzaPoblacional) / nVal) * factorCorr) : 0;
+    const varianzaTeoricaMediaStr = Number(varianzaTeoricaMedia).toFixed(2);
+
+    const pPob = calcFinal ? Number(calcFinal.proporcionPoblacional) : 0;
+    const varianzaTeoricaProp = calcFinal ? (((pPob * (1 - pPob)) / nVal) * factorCorr) : 0;
+    const varianzaTeoricaPropStr = Number(varianzaTeoricaProp).toFixed(6);
+
     return (
-        <div style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', marginTop: '15px' }}>
-            {/* ── DATOS Y EDITAR DATOS ── */}
-            <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '15px' }}>
+        <div style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', marginTop: '0px' }}>
+            {/* ── DATOS Y EDITAR DATOS (Barra de Datos Canónica) ── */}
+            <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                 <div>
-                    <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.9rem', marginBottom: '4px', display: 'block' }}>Datos:</span>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                            Cargados: <strong style={{ color: 'var(--text-color)' }}>{filasValidas.filter(f => f.origen === 'cargado').length}</strong>
+                    <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
+                        <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                            Cargados: <strong style={{ color: 'var(--text-pure)' }}>{filasValidas.filter(f => f.origen === 'cargado').length}</strong>
                         </small>
-                        <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                            Agregados: <strong style={{ color: 'var(--text-color)' }}>{filasValidas.filter(f => f.origen === 'agregado').length}</strong>
+                        <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                            Agregados: <strong style={{ color: 'var(--text-pure)' }}>{filasValidas.filter(f => f.origen === 'agregado').length}</strong>
                         </small>
-                        <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                            Total: <strong style={{ color: '#3b82f6' }}>{filasValidas.length}</strong>
+                        <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                            Total: <strong style={{ color: 'var(--text-pure)' }}>{filasValidas.length}</strong>
                         </small>
                     </div>
                 </div>
-                <button onClick={abrirEditor} className="btn btn-outline-primary" style={{ padding: '6px 14px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                    <EditarDatos /> Editar Datos
+                <button
+                    onClick={abrirEditor}
+                    className="btn-primary"
+                    style={{ padding: '5px 14px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, cursor: 'pointer', border: 'none' }}
+                >
+                    <EditarDatos />
+                    Editar Datos
                 </button>
             </div>
 
             {/* Controles */}
             <div>
-                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end', background: 'var(--bg-input)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'flex-end', background: 'var(--bg-input)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                     <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
                         <label style={labelStyle}>Parámetro a Calcular:</label>
                         <div ref={paramSelectRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
@@ -95,201 +239,326 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                     padding: '8px 12px',
-                                    height: '36px',
+                                    minHeight: '38px',
                                     boxSizing: 'border-box',
                                     background: 'var(--bg-card)',
                                     border: `1px solid ${isOpenParamSelect ? 'var(--primary-color)' : 'var(--border-color)'}`,
                                     borderRadius: RADIUS,
                                     cursor: 'pointer',
-                                    boxShadow: isOpenParamSelect ? '0 0 0 3px rgba(0,123,255,0.15)' : '0 1px 2px rgba(0,0,0,0.05)',
+                                    boxShadow: isOpenParamSelect ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : 'none',
                                     transition: 'all 0.2s ease',
-                                    color: 'var(--text-color)',
+                                    color: 'var(--text-pure)',
                                     userSelect: 'none',
                                 }}
                             >
                                 <span style={{ fontWeight: 400, fontSize: FS.sm }}>
-                                    {parametroCalculo === 'media' ? 'Promedios (Normal)' : 'Varianzas (Chi-cuadrada)'}
+                                    {parametroCalculo === 'media' ? 'Promedios (Normal)' : (parametroCalculo === 'varianza' ? 'Varianzas (Chi-cuadrada)' : 'Proporciones')}
                                 </span>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                                    style={{ transform: isOpenParamSelect ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s ease', color: 'var(--text-muted)', flexShrink: 0 }}>
+                                    style={{ transform: isOpenParamSelect ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', color: 'var(--text-muted)', flexShrink: 0 }}>
                                     <polyline points="6 9 12 15 18 9" />
                                 </svg>
                             </div>
 
                             {isOpenParamSelect && (
                                 <div style={{
-                                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+                                    position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
                                     background: 'var(--bg-card)',
                                     border: '1px solid var(--border-color)',
                                     borderRadius: RADIUS,
-                                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
                                     zIndex: 1000,
                                     overflow: 'hidden',
                                     animation: 'fadeInDropdown 0.2s ease',
+                                    textAlign: 'left',
                                 }}>
-                                    <div
-                                        onClick={() => { setParametroCalculo('media'); setIsOpenParamSelect(false); }}
-                                        style={{
-                                            padding: '8px 12px',
-                                            fontSize: FS.sm,
-                                            cursor: 'pointer',
-                                            background: parametroCalculo === 'media' ? 'var(--primary-color)' : 'transparent',
-                                            color: parametroCalculo === 'media' ? '#fff' : 'var(--text-color)',
-                                            transition: 'background 0.2s',
-                                        }}
-                                        onMouseEnter={(e) => { if (parametroCalculo !== 'media') e.target.style.background = 'transparent' }}
-                                        onMouseLeave={(e) => { if (parametroCalculo !== 'media') e.target.style.background = 'transparent' }}
-                                    >
-                                        Promedios (Normal)
-                                    </div>
-                                    <div
-                                        onClick={() => { setParametroCalculo('varianza'); setIsOpenParamSelect(false); }}
-                                        style={{
-                                            padding: '8px 12px',
-                                            fontSize: FS.sm,
-                                            cursor: 'pointer',
-                                            background: parametroCalculo === 'varianza' ? 'var(--primary-color)' : 'transparent',
-                                            color: parametroCalculo === 'varianza' ? '#fff' : 'var(--text-color)',
-                                            transition: 'background 0.2s',
-                                        }}
-                                        onMouseEnter={(e) => { if (parametroCalculo !== 'varianza') e.target.style.background = 'transparent' }}
-                                        onMouseLeave={(e) => { if (parametroCalculo !== 'varianza') e.target.style.background = 'transparent' }}
-                                    >
-                                        Varianzas (Chi-cuadrada)
-                                    </div>
+                                    {[
+                                        { id: 'media', label: 'Promedios (Normal)' },
+                                        { id: 'proporcion', label: 'Proporciones' },
+                                        { id: 'varianza', label: 'Varianzas (Chi-cuadrada)' }
+                                    ].map(item => (
+                                        <div
+                                            key={item.id}
+                                            onClick={() => {
+                                                setParametroCalculo(item.id);
+                                                setIsOpenParamSelect(false);
+                                                setResDistMuestrales(null);
+                                            }}
+                                            style={{
+                                                padding: '9px 12px',
+                                                fontSize: FS.sm,
+                                                cursor: 'pointer',
+                                                background: parametroCalculo === item.id ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                                                color: parametroCalculo === item.id ? 'var(--primary-color)' : 'var(--text-pure)',
+                                                fontWeight: parametroCalculo === item.id ? 600 : 400,
+                                                fontFamily: FONT,
+                                                textAlign: 'left',
+                                                transition: 'background 0.2s',
+                                            }}
+                                            onMouseEnter={(e) => { if (parametroCalculo !== item.id) e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))'; }}
+                                            onMouseLeave={(e) => { if (parametroCalculo !== item.id) e.currentTarget.style.background = 'transparent'; }}
+                                        >
+                                            {item.label}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
                     </div>
+
+                    {parametroCalculo === 'proporcion' && (
+                        <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                            <label style={labelStyle}>Atributo de Éxito:</label>
+                            <div ref={atributoSelectRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
+                                <div
+                                    onClick={() => setIsOpenAtributoSelect(o => !o)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        padding: '8px 12px',
+                                        minHeight: '38px',
+                                        boxSizing: 'border-box',
+                                        background: 'var(--bg-card)',
+                                        border: `1px solid ${isOpenAtributoSelect ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                                        borderRadius: RADIUS,
+                                        cursor: 'pointer',
+                                        boxShadow: isOpenAtributoSelect ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : 'none',
+                                        transition: 'all 0.2s ease',
+                                        color: 'var(--text-pure)',
+                                        userSelect: 'none',
+                                    }}
+                                >
+                                    <span style={{ fontWeight: 400, fontSize: FS.sm }}>
+                                        {atributoExito || '-- Seleccionar --'}
+                                    </span>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                        style={{ transform: isOpenAtributoSelect ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', color: 'var(--text-muted)', flexShrink: 0 }}>
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                </div>
+
+                                {isOpenAtributoSelect && (
+                                    <div style={{
+                                        position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                                        background: 'var(--bg-card)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: RADIUS,
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+                                        zIndex: 1000,
+                                        overflow: 'hidden',
+                                        maxHeight: '220px',
+                                        overflowY: 'auto',
+                                        animation: 'fadeInDropdown 0.2s ease',
+                                        textAlign: 'left',
+                                    }}>
+                                        {[...new Set(filasValidas.map(f => {
+                                            const val = (f.valor || '').toString().trim();
+                                            return val.includes(' | ') ? val.split(' | ')[0].trim() : val;
+                                        }))].filter(Boolean).map(u => (
+                                            <div
+                                                key={u}
+                                                onClick={() => {
+                                                    setAtributoExito(u);
+                                                    setIsOpenAtributoSelect(false);
+                                                    setResDistMuestrales(null);
+                                                }}
+                                                style={{
+                                                    padding: '9px 12px',
+                                                    fontSize: FS.sm,
+                                                    cursor: 'pointer',
+                                                    background: atributoExito === u ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                                                    color: atributoExito === u ? 'var(--primary-color)' : 'var(--text-pure)',
+                                                    fontWeight: atributoExito === u ? 600 : 400,
+                                                    fontFamily: FONT,
+                                                    textAlign: 'left',
+                                                    transition: 'background 0.2s',
+                                                }}
+                                                onMouseEnter={(e) => { if (atributoExito !== u) e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))'; }}
+                                                onMouseLeave={(e) => { if (atributoExito !== u) e.currentTarget.style.background = 'transparent'; }}
+                                            >
+                                                {u}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
                         <label style={labelStyle}>Tamaño de la Muestra (n):</label>
                         <input
                             type="number"
                             value={n}
-                            onChange={e => setN(e.target.value)}
-                            min="1"
-                            placeholder="Ej. 2"
-                            style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)', boxSizing: 'border-box', height: '36px', background: 'var(--bg-card)', color: 'var(--text-color)' }}
+                            onChange={e => {
+                                setN(e.target.value);
+                                setResDistMuestrales(null);
+                            }}
+                            min={parametroCalculo === 'varianza' ? "2" : "1"}
+                            placeholder={parametroCalculo === 'varianza' ? "Ej. 2 (mín. 2)" : "Ej. 2"}
+                            className="input-mat251 placeholder-small"
+                            style={{
+                                width: '100%',
+                                borderRadius: RADIUS,
+                                padding: '8px 12px',
+                                fontSize: FS.sm,
+                                border: '1px solid var(--border-color)',
+                                boxSizing: 'border-box',
+                                minHeight: '38px',
+                                background: 'var(--bg-card)',
+                                color: 'var(--text-pure)',
+                                fontFamily: FONT,
+                                outline: 'none'
+                            }}
                         />
                     </div>
 
                     <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
                         <label style={labelStyle}>Tipo de Muestreo:</label>
-                        <div style={{ display: 'flex', margin: '0 auto', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', minHeight: '36px', boxSizing: 'border-box', gap: '4px' }}>
-                            <button
-                                type="button"
-                                className={`btn-mat251-modo ${conReemplazo ? 'active' : ''}`}
-                                onClick={() => setConReemplazo(true)}
-                                style={{ flex: 1, padding: '4px 8px' }}
-                            >
-                                Con Reemplazo
-                            </button>
-                            <button
-                                type="button"
-                                className={`btn-mat251-modo ${!conReemplazo ? 'active' : ''}`}
-                                onClick={() => setConReemplazo(false)}
-                                style={{ flex: 1, padding: '4px 8px' }}
-                            >
-                                Sin Reemplazo
-                            </button>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <div className="contenedor-selector-modos-mat251" style={{ display: 'inline-flex', alignItems: 'center', minHeight: '38px', boxSizing: 'border-box' }}>
+                                <button
+                                    type="button"
+                                    className={`btn-mat251-modo ${conReemplazo ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setConReemplazo(true);
+                                        setResDistMuestrales(null);
+                                    }}
+                                    style={{ fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 14px', fontSize: FS.sm, fontWeight: 600 }}
+                                >
+                                    Con Reemplazo
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`btn-mat251-modo ${!conReemplazo ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setConReemplazo(false);
+                                        setResDistMuestrales(null);
+                                    }}
+                                    style={{ fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 14px', fontSize: FS.sm, fontWeight: 600 }}
+                                >
+                                    Sin Reemplazo
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                         <button
+                            type="button"
                             onClick={ejecutar}
                             disabled={cargando}
-                            className="button_calcular btn-icon" style={{ padding: '5px 14px', borderRadius: RADIUS, fontSize: FS.sm, fontWeight: 700, height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 'fit-content' }}
+                            className="button_calcular"
+                            style={{
+                                width: 'fit-content',
+                                padding: '5px 20px',
+                                borderRadius: RADIUS,
+                                fontSize: FS.md,
+                                fontWeight: 'bold',
+                                fontFamily: FONT,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: cargando ? 'not-allowed' : 'pointer',
+                                opacity: cargando ? 0.6 : 1
+                            }}
                         >
-                            CALCULAR
+                            {cargando ? 'CALCULANDO...' : 'CALCULAR'}
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* Resultados */}
-            {resDistMuestrales && (
+            {resDistMuestrales && !resDistMuestrales.error && (
                 <div>
-                    {resDistMuestrales.error ? (
-                        <div style={{ padding: '15px', background: '#fee2e2', color: '#b91c1c', borderRadius: RADIUS, border: '1px solid #f87171', fontWeight: 'bold', fontSize: FS.sm }}>
-                            {resDistMuestrales.error}
-                        </div>
-                    ) : (
-                        (() => {
-                            const parametroCalculado = resDistMuestrales.calculosFinales?.parametroCalculo || 'media';
-                            return (
-                                <>
-                                    <h4 style={{ color: 'var(--primary-color)', margin: '0 0 15px 0', fontSize: FS.sm }}>
-                                        Subgrupos y Cálculos Muestrales
-                                    </h4>
-
-                                    {cargando ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
-                                            <Skeleton height="40px" borderRadius={RADIUS} />
-                                            <Skeleton height="50px" borderRadius={RADIUS} />
-                                            <Skeleton height="50px" borderRadius={RADIUS} />
-                                            <Skeleton height="50px" borderRadius={RADIUS} />
-                                            <Skeleton height="50px" borderRadius={RADIUS} />
-                                        </div>
+                    {(() => {
+                        const parametroCalculado = resDistMuestrales.calculosFinales?.parametroCalculo || 'media';
+                        return (
+                            <>
+                                <h4 style={{ color: 'var(--text-pure)', margin: '0 0 10px 0', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                    {parametroCalculado === 'varianza' ? (
+                                        <>Muestras Posibles y Varianzas Muestrales <Latex formula="(S^2)" /></>
+                                    ) : parametroCalculado === 'media' ? (
+                                        <>Muestras Posibles y Medias Muestrales <Latex formula="(\bar{X})" /></>
                                     ) : (
-                                        <>
-                                            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', fontSize: FS.sm, alignItems: 'center' }}>
-                                                <div style={{ background: 'rgba(0,123,255,0.1)', padding: '5px 10px', borderRadius: RADIUS }}>
-                                                    Total Muestras: <strong>{resDistMuestrales.resultado?.length || 0}</strong>
-                                                </div>
-                                            </div>
+                                        <>Muestras Posibles y Proporciones Muestrales <Latex formula="(\hat{p})" /></>
+                                    )}
+                                </h4>
 
-                                            {resDistMuestrales.resultado?.length > 1000 ? (
-                                                <div style={{ padding: '15px', background: '#fff3cd', color: '#856404', borderRadius: RADIUS, border: '1px solid #ffeeba', fontWeight: 'bold', fontSize: FS.sm, textAlign: 'center' }}>
-                                                    Se han generado más de 1000 iteraciones ({resDistMuestrales.resultado.length}). Por protección de rendimiento, la tabla visual de subgrupos ha sido ocultada, pero el cálculo de parámetros muestrales de abajo se ha completado correctamente.
-                                                </div>
-                                            ) : (
-                                                <div style={{ borderRadius: RADIUS, border: '1px solid var(--border-color)', overflow: 'hidden', background: 'var(--bg-card, white)' }}>
-                                                    <div className="thin-scrollbar" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                                        <table className="tabla-academica" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '15px', textAlign: 'center' }}>
-                                                            <thead>
-                                                                <tr>
-                                                                    <th style={{ padding: '12px 10px', position: 'sticky', top: 0, background: 'var(--header-bg, #f3f4f6)', zIndex: 10, boxShadow: 'inset 0 -1px 0 var(--border-color)' }}>Nº Muestra</th>
-                                                                    <th style={{ padding: '12px 10px', position: 'sticky', top: 0, background: 'var(--header-bg, #f3f4f6)', zIndex: 10, boxShadow: 'inset 0 -1px 0 var(--border-color)' }}>n = {n}</th>
-                                                                    <th style={{ padding: '12px 10px', position: 'sticky', top: 0, background: 'var(--header-bg, #f3f4f6)', zIndex: 10, boxShadow: 'inset 0 -1px 0 var(--border-color)' }}>Valores</th>
-                                                                    <th style={{ padding: '12px 10px', position: 'sticky', top: 0, background: 'var(--header-bg, #f3f4f6)', zIndex: 10, boxShadow: 'inset 0 -1px 0 var(--border-color)' }}>
-                                                                        <Latex formula={parametroCalculado === 'media' ? '\\bar{x}' : 'S^2'} />
-                                                                    </th>
+                                {cargando ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+                                        <Skeleton height="40px" borderRadius={RADIUS} />
+                                        <Skeleton height="50px" borderRadius={RADIUS} />
+                                        <Skeleton height="50px" borderRadius={RADIUS} />
+                                        <Skeleton height="50px" borderRadius={RADIUS} />
+                                        <Skeleton height="50px" borderRadius={RADIUS} />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div style={{ textAlign: 'center', marginBottom: '15px', fontSize: FS.sm, color: 'var(--text-pure)', fontFamily: FONT }}>
+                                            Total Muestras: <strong style={{ color: 'var(--text-pure)' }}>{resDistMuestrales.resultado?.length || 0}</strong>
+                                        </div>
+
+                                        {resDistMuestrales.resultado?.length <= 5000 && (
+                                            <div className="thin-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+                                                    <table className="tabla-academica" style={{ width: '100%', margin: 0, borderCollapse: 'collapse', textAlign: 'center', fontFamily: FONT, whiteSpace: 'nowrap' }}>
+                                                        <thead>
+                                                            <tr>
+                                                                <th style={{ padding: '8px 10px', background: 'var(--bg-input)', color: 'var(--text-pure)', border: '1px solid var(--text-pure)', fontFamily: FONT, fontSize: FS.sm, fontWeight: 'bold', whiteSpace: 'nowrap' }}>Nº Muestra</th>
+                                                                <th style={{ padding: '8px 10px', background: 'var(--bg-input)', color: 'var(--text-pure)', border: '1px solid var(--text-pure)', fontFamily: FONT, fontSize: FS.sm, fontWeight: 'bold', whiteSpace: 'nowrap' }}><Latex formula={`n = ${n}`} /></th>
+                                                                <th style={{ padding: '8px 10px', background: 'var(--bg-input)', color: 'var(--text-pure)', border: '1px solid var(--text-pure)', fontFamily: FONT, fontSize: FS.sm, fontWeight: 'bold', whiteSpace: 'nowrap' }}>Valores</th>
+                                                                <th style={{ padding: '8px 10px', background: 'var(--bg-input)', color: 'var(--text-pure)', border: '1px solid var(--text-pure)', fontFamily: FONT, fontSize: FS.sm, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                                                                    <StatLabel
+                                                                        formulaKey={parametroCalculado === 'media' ? "x_barra" : (parametroCalculado === 'varianza' ? "s2" : "p_sombrero")}
+                                                                        formulaLatex={parametroCalculado === 'media' ? "\\bar{x}" : (parametroCalculado === 'varianza' ? "S^2" : "\\hat{p}")}
+                                                                        align="center"
+                                                                    />
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style={{ fontSize: FS.sx }}>
+                                                            {filasPaginadas.map((fila) => (
+                                                                <tr key={fila.id}>
+                                                                    <td style={{ padding: '6px 8px', fontWeight: 600, color: 'var(--text-pure)', border: '1px solid var(--text-pure)', fontSize: FS.sx, whiteSpace: 'nowrap' }}>
+                                                                        <Latex formula={`${fila.id}`} />
+                                                                    </td>
+                                                                    <td style={{ padding: '6px 8px', fontWeight: 'bold', color: 'var(--text-pure)', border: '1px solid var(--text-pure)', fontSize: FS.sx, whiteSpace: 'nowrap' }}>
+                                                                        {fila.elementos}
+                                                                    </td>
+                                                                    <td style={{ padding: '6px 8px', color: 'var(--text-pure)', border: '1px solid var(--text-pure)', fontSize: FS.sx, whiteSpace: 'nowrap' }}>
+                                                                        <Latex formula={typeof fila.valores === 'string' ? fila.valores.trim().split(/\s+/).join('\\quad ') : `${fila.valores}`} />
+                                                                    </td>
+                                                                    <td style={{ padding: '6px 8px', color: 'var(--text-pure)', fontWeight: 'normal', border: '1px solid var(--text-pure)', fontSize: FS.sx, whiteSpace: 'nowrap' }}>
+                                                                        <Latex formula={`${parametroCalculado === 'media' ? Number(fila.media).toFixed(2) : (parametroCalculado === 'varianza' ? Number(fila.varianza).toFixed(2) : Number(fila.proporcion).toFixed(4))}`} />
+                                                                    </td>
                                                                 </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {filasPaginadas.map((fila, i) => (
-                                                                    <tr key={fila.id}>
-                                                                        <td style={{ padding: '8px 10px', fontWeight: 'bold' }}>{fila.id}</td>
-                                                                        <td style={{ padding: '8px 10px' }}>{fila.elementos}</td>
-                                                                        <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{fila.valores}</td>
-                                                                        <td style={{ padding: '8px 10px' }}>{parametroCalculado === 'media' ? fila.media : fila.varianza}</td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             )}
 
                                             {/* Controles de Paginación */}
-                                            {totalPaginas > 1 && (
+                                            {totalPaginas > 1 && resDistMuestrales.resultado?.length <= 5000 && (
                                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '15px', fontSize: FS.sm }}>
                                                     <button
+                                                        type="button"
                                                         disabled={paginaActual === 1}
                                                         onClick={() => setPaginaActual(paginaActual - 1)}
-                                                        style={{ padding: '6px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: paginaActual === 1 ? 'var(--header-bg, #f3f4f6)' : 'var(--bg-card, white)', cursor: paginaActual === 1 ? 'not-allowed' : 'pointer', color: paginaActual === 1 ? 'var(--text-muted)' : 'var(--text-color)', fontWeight: 600 }}
+                                                        className="btn-outline-primary"
+                                                        style={{ padding: '5px 16px', borderRadius: RADIUS, fontSize: FS.sm, fontFamily: FONT }}
                                                     >
                                                         Anterior
                                                     </button>
-                                                    <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+                                                    <span style={{ fontWeight: 600, color: 'var(--text-pure)' }}>
                                                         Página {paginaActual} de {totalPaginas}
                                                     </span>
                                                     <button
+                                                        type="button"
                                                         disabled={paginaActual === totalPaginas}
                                                         onClick={() => setPaginaActual(paginaActual + 1)}
-                                                        style={{ padding: '6px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: paginaActual === totalPaginas ? 'var(--header-bg, #f3f4f6)' : 'var(--bg-card, white)', cursor: paginaActual === totalPaginas ? 'not-allowed' : 'pointer', color: paginaActual === totalPaginas ? 'var(--text-muted)' : 'var(--text-color)', fontWeight: 600 }}
+                                                        className="btn-outline-primary"
+                                                        style={{ padding: '5px 16px', borderRadius: RADIUS, fontSize: FS.sm, fontFamily: FONT }}
                                                     >
                                                         Siguiente
                                                     </button>
@@ -298,33 +567,30 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
                                             {/* Nueva Tabla de Distribución Muestral */}
                                             {resDistMuestrales.distribucion && (
-                                                <div style={{ marginTop: '30px' }}>
-                                                    <h4 style={{ color: 'var(--primary-color)', margin: '0 0 15px 0', fontSize: FS.sm }}>
-                                                        Distribución Muestral de {parametroCalculado === 'media' ? 'Medias' : 'Varianzas'}
-                                                    </h4>
-                                                    <div className="thin-scrollbar" style={{ overflowX: 'auto', background: 'var(--bg-card, white)', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '15px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                                <div style={{ marginTop: '25px' }}>
+                                                    <div className="tema4-titulo-seccion" style={{ color: 'var(--text-pure)', margin: '0 0 12px 0', fontFamily: FONT, textAlign: 'center' }}>
+                                                        Distribución Muestral de {parametroCalculado === 'media' ? 'Medias' : (parametroCalculado === 'varianza' ? 'Varianzas' : 'Proporciones')}
+                                                    </div>
+                                                    <div className="tema4-distribucion-tabla-wrapper thin-scrollbar" style={{ background: 'transparent', border: 'none', overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', marginBottom: '20px' }}>
+                                                        <table style={{ width: '100%', margin: 0, borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'center', whiteSpace: 'nowrap', fontFamily: FONT }}>
                                                             <tbody>
                                                                 <tr>
-                                                                    <td style={{ padding: '6px 20px', fontWeight: 'bold', borderRight: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', background: 'var(--header-bg, #f3f4f6)' }}>
-                                                                        <Latex formula={parametroCalculado === 'media' ? "\\bar{X}" : "S^2"} />
+                                                                    <td style={{ padding: '8px 16px', fontWeight: 600, border: '1px solid var(--text-pure)', background: 'var(--bg-input)', color: 'var(--text-pure)', minWidth: '90px', fontSize: '0.8rem', verticalAlign: 'middle' }}>
+                                                                        <Latex formula={parametroCalculado === 'media' ? "\\bar{X}" : (parametroCalculado === 'varianza' ? "S^2" : "\\hat{p}")} />
                                                                     </td>
                                                                     {resDistMuestrales.distribucion.map((d, i) => (
-                                                                        <td key={i} style={{ padding: '6px 20px', fontSize: '14px', borderBottom: '1px solid var(--border-color)', borderRight: i < resDistMuestrales.distribucion.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
-                                                                            {d.valor}
+                                                                        <td key={i} style={{ padding: '8px 14px', fontSize: '0.8rem', color: 'var(--text-pure)', fontWeight: 'normal', border: '1px solid var(--text-pure)', verticalAlign: 'middle' }}>
+                                                                            <Latex formula={`${d.valor}`} />
                                                                         </td>
                                                                     ))}
                                                                 </tr>
                                                                 <tr>
-                                                                    <td style={{ padding: '8px 20px', fontWeight: 'bold', borderRight: '1px solid var(--border-color)', background: 'var(--header-bg, #f3f4f6)' }}>
-                                                                        <Latex formula={parametroCalculado === 'media' ? "P(\\bar{X} = \\bar{x}_i) = p_i" : "P(S^2 = s^2_i) = p_i"} />
+                                                                    <td style={{ padding: '8px 16px', fontWeight: 600, border: '1px solid var(--text-pure)', background: 'var(--bg-input)', color: 'var(--text-pure)', minWidth: '90px', fontSize: '0.8rem', verticalAlign: 'middle' }}>
+                                                                        <Latex formula={parametroCalculado === 'media' ? "P(\\bar{X} = \\bar{x}_i) = p_i" : (parametroCalculado === 'varianza' ? "P(S^2 = S_i^2) = p_i" : "P(\\hat{p} = \\hat{p}_i) = p_i")} />
                                                                     </td>
                                                                     {resDistMuestrales.distribucion.map((d, i) => (
-                                                                        <td key={i} style={{ padding: '8px 20px', fontSize: '14px', borderRight: i < resDistMuestrales.distribucion.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
-                                                                            <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                <span style={{ padding: '0 5px' }}>{d.frecuencia}</span>
-                                                                                <span style={{ borderTop: '1px solid currentColor', width: '100%', padding: '0 5px' }}>{d.total}</span>
-                                                                            </div>
+                                                                        <td key={i} style={{ padding: '8px 14px', fontSize: '0.8rem', color: 'var(--text-pure)', border: '1px solid var(--text-pure)', verticalAlign: 'middle' }}>
+                                                                            <Latex formula={`\\dfrac{${d.frecuencia}}{${d.total}}`} />
                                                                         </td>
                                                                     ))}
                                                                 </tr>
@@ -336,51 +602,93 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
                                             {/* Conclusión y Cálculos Finales */}
                                             {resDistMuestrales.calculosFinales && (
-                                                <div style={{ marginTop: '30px' }}>
-                                                    <h4 style={{ color: 'var(--primary-color)', margin: '0 0 15px 0', fontSize: FS.sm }}>
-                                                        Conclusión y Cálculos Finales
-                                                    </h4>
+                                                <div style={{ marginTop: '20px' }}>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '15px' }}>
-                                                        <div style={{ fontWeight: 600, color: 'var(--text-color)' }}>
-                                                            Parámetros Muestrales
-                                                        </div>
-
                                                         {parametroCalculado === 'media' ? (
                                                             <>
-                                                                <div style={{ padding: '15px', background: 'var(--header-bg, #f3f4f6)', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                                                                    <div className="thin-scrollbar" style={{ padding: '10px 0 10px 0', overflowX: 'auto', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
-                                                                        <Latex formula={`\\begin{aligned} E(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} \\bar{x}_i p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} \\end{aligned}`} />
-                                                                    </div>
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                    Esperanza Muestral <Latex formula="E(\bar{X})" />
                                                                 </div>
-                                                                <div style={{ color: 'var(--text-muted)', marginTop: '10px', marginBottom: '15px', textAlign: 'center' }}>
+                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                    <Latex formula={`\\begin{aligned} E(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} \\bar{x}_i p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} \\end{aligned}`} />
+                                                                </div>
+                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', marginBottom: '5px', textAlign: 'center', fontSize:'0.75rem' }}>
                                                                     Obsérvese que: <Latex formula={`E(\\bar{X}) = \\mu = ${Number(resDistMuestrales.calculosFinales.mediaPoblacional).toFixed(2)}`} />
                                                                 </div>
 
-                                                                <div style={{ padding: '15px', background: 'var(--header-bg, #f3f4f6)', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                                                                    <div className="thin-scrollbar" style={{ padding: '10px 0 10px 0', overflowX: 'auto', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
-                                                                        <Latex formula={`\\begin{aligned} Var(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} (\\bar{x}_i - E(\\bar{X}))^2 p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)} - ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)})^2`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(2)} \\end{aligned}`} />
-                                                                    </div>
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                    Varianza Muestral <Latex formula="V(\bar{X})" />
                                                                 </div>
-                                                                <div style={{ color: 'var(--text-muted)', marginTop: '10px', textAlign: 'center' }}>
-                                                                    Obsérvese que: <Latex formula={`Var(\\bar{X}) = \\frac{\\sigma^2}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''} = \\frac{${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(2)}}{${resDistMuestrales.calculosFinales.n}} ${!resDistMuestrales.calculosFinales.conReemplazo ? `\\left(\\frac{${resDistMuestrales.calculosFinales.N}-${resDistMuestrales.calculosFinales.n}}{${resDistMuestrales.calculosFinales.N}-1}\\right)` : ''} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(2)}`} />
+                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                    <Latex formula={`\\begin{aligned} V(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} (\\bar{x}_i - E(\\bar{X}))^2 p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)} - ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)})^2`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(2)} \\end{aligned}`} />
+                                                                </div>
+                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize:'0.75rem' }}>
+                                                                    Obsérvese que: <Latex formula={`V(\\bar{X}) = \\frac{\\sigma^2}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''} = \\frac{${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(2)}}{${resDistMuestrales.calculosFinales.n}} ${!resDistMuestrales.calculosFinales.conReemplazo ? `\\left(\\frac{${resDistMuestrales.calculosFinales.N}-${resDistMuestrales.calculosFinales.n}}{${resDistMuestrales.calculosFinales.N}-1}\\right)` : ''} = ${varianzaTeoricaMediaStr}`} />
                                                                 </div>
 
-                                                                <div style={{ marginTop: '15px', padding: '15px', background: 'var(--header-bg, #f3f4f6)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
-                                                                    <Latex formula={`\\bar{X} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} ; ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(2)})`} />
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    Distribución Normal Aproximada
+                                                                </div>
+                                                                <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                    <Latex formula={`\\bar{X} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} ; ${varianzaTeoricaMediaStr})`} />
+                                                                </div>
+                                                            </>
+                                                        ) : parametroCalculado === 'varianza' ? (
+                                                            <>
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                    Varianza Poblacional <Latex formula="(\sigma^2)" />
+                                                                </div>
+                                                                <div style={{ padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                    <Latex formula={`\\sigma^2 = \\frac{\\sum (x_i - \\mu)^2}{N} = ${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(4)}`} />
+                                                                </div>
+
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                    Esperanza de la Varianza Muestral <Latex formula="E(S^2)" />
+                                                                </div>
+                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                    <Latex formula={`\\begin{aligned} E(S^2) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} S_i^2 P(S_i^2) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} \\end{aligned}`} />
+                                                                </div>
+                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                    Obsérvese que: <Latex formula={`E(S^2) = \\sigma^2 = ${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(4)}`} />
+                                                                </div>
+
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    Distribución Chi-cuadrada
+                                                                </div>
+                                                                <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                                                                        La variable aleatoria sigue una distribución Chi-cuadrada con <Latex formula={`n-1 = ${resDistMuestrales.calculosFinales.n}-1 = ${resDistMuestrales.calculosFinales.n - 1}`} /> grados de libertad:
+                                                                    </div>
+                                                                    <Latex formula={`\\frac{(${resDistMuestrales.calculosFinales.n}-1)S^2}{\\sigma^2} \\sim \\chi^2_{${resDistMuestrales.calculosFinales.n}-1}`} />
                                                                 </div>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <div style={{ padding: '15px', background: 'var(--header-bg, #f3f4f6)', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                                                                    <div className="thin-scrollbar" style={{ padding: '10px 0 10px 0', overflowX: 'auto', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
-                                                                        <Latex formula={`\\begin{aligned} E(S^2) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} s^2_i p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} \\end{aligned}`} />
-                                                                    </div>
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                    Esperanza Muestral <Latex formula="E(\hat{p})" />
                                                                 </div>
-                                                                <div style={{ color: 'var(--text-muted)', marginTop: '10px', textAlign: 'center' }}>
-                                                                    Obsérvese que: <Latex formula={`E(S^2) = \\sigma^2 = ${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(2)}`} />
+                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                    <Latex formula={`\\begin{aligned} E(\\hat{p}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} \\hat{p}_i P(\\hat{p}_i) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} \\end{aligned}`} />
                                                                 </div>
-                                                                <div style={{ marginTop: '15px', padding: '15px', background: 'var(--header-bg, #f3f4f6)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
-                                                                    <Latex formula={`\\frac{(${resDistMuestrales.calculosFinales.n}-1)S^2}{\\sigma^2} \\sim \\chi^2_{${resDistMuestrales.calculosFinales.n}-1}`} />
+                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', marginBottom: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                    Obsérvese que: <Latex formula={`E(\\hat{p}) = P = ${Number(resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)}`} />
+                                                                </div>
+
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                    Varianza Muestral <Latex formula="V(\hat{p})" />
+                                                                </div>
+                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                    <Latex formula={`\\begin{aligned} V(\\hat{p}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} (\\hat{p}_i - E(\\hat{p}))^2 P(\\hat{p}_i) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)} - ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)})^2`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(6)} \\end{aligned}`} />
+                                                                </div>
+                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                    Obsérvese que: <Latex formula={`V(\\hat{p}) = \\frac{P \\cdot Q}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''} = \\frac{${Number(resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)} \\cdot ${(1 - resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)}}{${resDistMuestrales.calculosFinales.n}} ${!resDistMuestrales.calculosFinales.conReemplazo ? `\\left(\\frac{${resDistMuestrales.calculosFinales.N}-${resDistMuestrales.calculosFinales.n}}{${resDistMuestrales.calculosFinales.N}-1}\\right)` : ''} = ${varianzaTeoricaPropStr}`} />
+                                                                </div>
+
+                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    Distribución Normal Aproximada
+                                                                </div>
+                                                                <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                    <Latex formula={`\\hat{p} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} ; ${varianzaTeoricaPropStr})`} />
                                                                 </div>
                                                             </>
                                                         )}
@@ -391,10 +699,18 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                     )}
                                 </>
                             );
-                        })()
-                    )}
+                        })()}
                 </div>
             )}
+
+            {/* Modal de Alerta */}
+            <ModalAlerta
+                isOpen={modalAlerta.isOpen}
+                mensaje={modalAlerta.mensaje}
+                titulo={modalAlerta.titulo}
+                tipo={modalAlerta.tipo}
+                onClose={() => setModalAlerta(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     );
 }

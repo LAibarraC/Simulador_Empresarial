@@ -24,8 +24,14 @@ export default function ResultadosProbabilidad({
     const [isDropdownColOpen, setIsDropdownColOpen] = useState(false);
     const dropdownColRef = useRef(null);
 
+    // Estados y refs para dropdowns de Simulación Clásica
+    const [isDropdownExpOpen, setIsDropdownExpOpen] = useState(false);
+    const dropdownExpRef = useRef(null);
+    const [isDropdownEventoOpen, setIsDropdownEventoOpen] = useState(false);
+    const dropdownEventoRef = useRef(null);
+
     // Estados para el Simulador Frecuentista
-    const [iteracionesN, setIteracionesN] = useState(1000);
+    const [iteracionesN, setIteracionesN] = useState('');
     const [simulacionActiva, setSimulacionActiva] = useState(false);
     const [datosSimulacion, setDatosSimulacion] = useState([]);
     const [resultadoFrecuentista, setResultadoFrecuentista] = useState(null);
@@ -33,7 +39,7 @@ export default function ResultadosProbabilidad({
     // Estados para la Simulación Clásica
     const [experimentoClasico, setExperimentoClasico] = useState('');
     const [eventoClasico, setEventoClasico] = useState('');
-    const [iteracionesClasica, setIteracionesClasica] = useState(100);
+    const [iteracionesClasica, setIteracionesClasica] = useState('');
     const [resSimulacionClasica, setResSimulacionClasica] = useState(null);
     const [historialSimClasica, setHistorialSimClasica] = useState([]);
     const [historialSimulacionMoneda, setHistorialSimulacionMoneda] = useState([]);
@@ -84,6 +90,12 @@ export default function ResultadosProbabilidad({
             if (dropdownColRef.current && !dropdownColRef.current.contains(e.target)) {
                 setIsDropdownColOpen(false);
             }
+            if (dropdownExpRef.current && !dropdownExpRef.current.contains(e.target)) {
+                setIsDropdownExpOpen(false);
+            }
+            if (dropdownEventoRef.current && !dropdownEventoRef.current.contains(e.target)) {
+                setIsDropdownEventoOpen(false);
+            }
         };
         document.addEventListener('mousedown', handler);
         return () => {
@@ -97,6 +109,16 @@ export default function ResultadosProbabilidad({
     const InlineMath = ({ math }) => (
         <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
+
+    const renderKatexValue = (val) => {
+        if (val === undefined || val === null || val === '') return '-';
+        const str = String(val).trim();
+        const escaped = str.replace(/%/g, '\\%');
+        if (/^[0-9.,\s\\%-]+$/.test(escaped)) {
+            return <InlineMath math={escaped} />;
+        }
+        return <InlineMath math={`\\text{${escaped}}`} />;
+    };
     const isFrec = tipo === 'frecuentista';
     const isCond = tipo === 'condicional';
 
@@ -188,7 +210,11 @@ export default function ResultadosProbabilidad({
             }
         }
 
-        const totalIteraciones = parseInt(iteracionesN) || 1000;
+        const totalIteraciones = parseInt(iteracionesN);
+        if (!totalIteraciones || totalIteraciones <= 0) {
+            mostrarAlerta("Ingresa el número de iteraciones (N) mayor a 0 para iniciar la simulación.", "Faltan Parámetros", "warning");
+            return;
+        }
         const favorablesTeoricos = arr.filter(v => eventoFavorable.includes(v)).length;
         const probTeorica = arr.length > 0 ? favorablesTeoricos / arr.length : 0;
 
@@ -221,13 +247,60 @@ export default function ResultadosProbabilidad({
         setSimulacionActiva(true);
     };
 
+    // Definición de opciones y metadatos para Simulación Clásica
+    const OPCIONES_EXPERIMENTOS = [
+        { value: 'moneda', label: 'Lanzar Moneda' },
+        { value: 'dado', label: 'Lanzar Dado de 6 caras' },
+        { value: 'baraja', label: 'Sacar Carta (Baraja 52)' }
+    ];
+
+    const getOpcionesEventos = (exp) => {
+        if (exp === 'moneda') {
+            return [
+                { value: 'cara', label: 'Cara' },
+                { value: 'cruz', label: 'Cruz' }
+            ];
+        }
+        if (exp === 'dado') {
+            return [
+                { value: '1', label: 'Sacar 1' },
+                { value: '2', label: 'Sacar 2' },
+                { value: '3', label: 'Sacar 3' },
+                { value: '4', label: 'Sacar 4' },
+                { value: '5', label: 'Sacar 5' },
+                { value: '6', label: 'Sacar 6' },
+                { value: 'par', label: 'Número Par (2, 4, 6)' },
+                { value: 'impar', label: 'Número Impar (1, 3, 5)' }
+            ];
+        }
+        if (exp === 'baraja') {
+            return [
+                { value: 'roja', label: 'Carta Roja (Corazones o Diamantes)' },
+                { value: 'negra', label: 'Carta Negra (Tréboles o Picas)' },
+                { value: 'corazones', label: 'Corazones' },
+                { value: 'diamantes', label: 'Diamantes' },
+                { value: 'treboles', label: 'Tréboles' },
+                { value: 'espadas', label: 'Espadas' },
+                { value: 'as', label: 'Un As' },
+                { value: 'rey', label: 'Un Rey (K)' },
+                { value: 'reina', label: 'Una Reina (Q)' },
+                { value: 'jota', label: 'Una Jota (J)' }
+            ];
+        }
+        return [];
+    };
+
     const handleEjecutarSimulacionClasica = () => {
         if (!experimentoClasico || !eventoClasico) {
             mostrarAlerta("Selecciona un experimento y un evento de interés para comenzar.", "Faltan Parámetros", "warning");
             return;
         }
 
-        const N = parseInt(iteracionesClasica) || 100;
+        const N = parseInt(iteracionesClasica);
+        if (!N || N <= 0) {
+            mostrarAlerta("Ingresa el número de repeticiones (N) mayor a 0 para iniciar la simulación.", "Faltan Parámetros", "warning");
+            return;
+        }
         const { casosFavorables, totalPosibles, pTeorica } = obtenerProbabilidadTeorica(experimentoClasico, eventoClasico);
 
         setSimulacionEnCurso(true);
@@ -418,14 +491,15 @@ export default function ResultadosProbabilidad({
     }, [activeRes, inputMode, tipo, formulaProbRef, isFrec, isCond, resultadoFrecuentista]);
 
     return (
-        <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column' }}>
             {/* SELECTOR DE MODO DE ENTRADA */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
-                <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                <div className="contenedor-selector-modos-mat251">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
                         onClick={() => setInputMode('matriz')}
+                        style={{ fontFamily: FONT }}
                     >
                         Análisis de Matriz
                     </button>
@@ -440,6 +514,7 @@ export default function ResultadosProbabilidad({
                                     if (setEventoFavorable) setEventoFavorable([]);
                                 }
                             }}
+                            style={{ fontFamily: FONT }}
                         >
                             Simulación
                         </button>
@@ -448,25 +523,28 @@ export default function ResultadosProbabilidad({
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
                         onClick={() => setInputMode('manual')}
+                        style={{ fontFamily: FONT }}
                     >
                         Modo Manual
                     </button>
                 </div>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '10px' }}>
                 {inputMode === 'manual' ? (
                     /* INTERFAZ PARA MODO MANUAL */
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '15px' }}>
-                        <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 700, color: 'var(--primary-color)' }}>Datos del Ejercicio</h4>
+                        <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)' }}>Datos del Ejercicio</h4>
                         <div className="panel-inputs" style={{ display: 'flex', flexWrap: 'wrap', gap: '25px', marginTop: 0, marginBottom: '15px', background: 'var(--bg-input)', padding: '20px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '250px' }}>
-                                <label style={{ ...labelStyle, marginBottom: 0 }}>{labels.numerador.text.trim()}</label>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>{labels.numerador.text.trim()}</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, fontSize: FS.md, color: 'var(--text-main)', whiteSpace: 'nowrap' }}><InlineMath math={labels.numerador.math} />:</span>
                                     <input
                                         type="number"
                                         min="0"
+                                        placeholder="Ej: 5"
+                                        className="input-mat251 placeholder-small"
                                         value={manualF}
                                         onChange={(e) => setManualF(e.target.value)}
                                         style={{
@@ -485,12 +563,14 @@ export default function ResultadosProbabilidad({
                                 </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '250px' }}>
-                                <label style={{ ...labelStyle, marginBottom: 0 }}>{labels.denominador.text.trim()}</label>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>{labels.denominador.text.trim()}</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, fontSize: FS.md, color: 'var(--text-main)', whiteSpace: 'nowrap' }}><InlineMath math={labels.denominador.math} />:</span>
                                     <input
                                         type="number"
                                         min="1"
+                                        placeholder="Ej: 10"
+                                        className="input-mat251 placeholder-small"
                                         value={manualN}
                                         onChange={(e) => setManualN(e.target.value)}
                                         style={{
@@ -517,118 +597,305 @@ export default function ResultadosProbabilidad({
                         )}
                     </div>
                 ) : inputMode === 'simulacion' && tipo === 'clasica' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '5px' }}>
-                        <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 700, color: 'var(--primary-color)' }}>Configuración de Simulación</h4>
-                        <div className="panel-inputs" style={{ display: 'flex', flexWrap: 'wrap', gap: '25px', marginTop: 0, marginBottom: '5px', background: 'var(--bg-input)', padding: '20px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '0px' }}>
+                        <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)', fontFamily: FONT }}>Configuración:</h4>
+                        <div className="panel-inputs" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: 0, marginBottom: '5px', background: 'var(--bg-card)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                            {/* Selector personalizado de Experimento */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
-                                <label style={{ ...labelStyle, marginBottom: 0 }}>Experimento</label>
-                                <select
-                                    value={experimentoClasico}
-                                    onChange={(e) => {
-                                        detenerSimulacion();
-                                        setExperimentoClasico(e.target.value);
-                                        setEventoClasico('');
-                                    }}
-                                    style={{ padding: '8px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-color)', fontSize: FS.sm, outline: 'none', fontFamily: FONT, width: '100%' }}
-                                >
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="moneda">Lanzar Moneda</option>
-                                    <option value="dado">Lanzar Dado de 6 caras</option>
-                                    <option value="baraja">Sacar Carta (Baraja 52)</option>
-                                </select>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>Experimento</label>
+                                <div ref={dropdownExpRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
+                                    {(() => {
+                                        const expSeleccionado = OPCIONES_EXPERIMENTOS.find(o => o.value === experimentoClasico);
+                                        return (
+                                            <>
+                                                <div
+                                                    onClick={() => {
+                                                        if (!simulacionEnCurso) {
+                                                            setIsDropdownExpOpen(prev => !prev);
+                                                            setIsDropdownEventoOpen(false);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        padding: '8px 12px',
+                                                        background: 'var(--bg-input)',
+                                                        border: `1px solid ${isDropdownExpOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                                                        borderRadius: RADIUS,
+                                                        cursor: simulacionEnCurso ? 'not-allowed' : 'pointer',
+                                                        opacity: simulacionEnCurso ? 0.6 : 1,
+                                                        boxShadow: isDropdownExpOpen ? '0 0 0 3px rgba(37,99,235,0.15)' : 'none',
+                                                        transition: 'all 0.2s ease',
+                                                        color: 'var(--text-pure)',
+                                                        userSelect: 'none',
+                                                        minHeight: '38px',
+                                                        boxSizing: 'border-box'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                                                        <span style={{ fontSize: FS.sm, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: expSeleccionado ? 'var(--text-pure)' : 'var(--text-muted)' }}>
+                                                            {expSeleccionado ? expSeleccionado.label : '-- Seleccionar --'}
+                                                        </span>
+                                                    </div>
+                                                    <svg
+                                                        width="16"
+                                                        height="16"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        style={{
+                                                            transform: isDropdownExpOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                            transition: 'transform 0.2s ease',
+                                                            color: 'var(--text-muted)',
+                                                            flexShrink: 0,
+                                                            marginLeft: '8px'
+                                                        }}
+                                                    >
+                                                        <polyline points="6 9 12 15 18 9" />
+                                                    </svg>
+                                                </div>
+
+                                                {isDropdownExpOpen && (
+                                                    <div
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: 'calc(100% + 4px)',
+                                                            left: 0,
+                                                            right: 0,
+                                                            background: 'var(--bg-card)',
+                                                            border: '1px solid var(--border-color)',
+                                                            borderRadius: RADIUS,
+                                                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+                                                            zIndex: 1000,
+                                                            overflow: 'hidden',
+                                                            animation: 'fadeInDropdown 0.2s ease',
+                                                        }}
+                                                    >
+                                                        {OPCIONES_EXPERIMENTOS.map(opt => {
+                                                            const isSelected = opt.value === experimentoClasico;
+                                                            return (
+                                                                <div
+                                                                    key={opt.value}
+                                                                    onClick={() => {
+                                                                        detenerSimulacion();
+                                                                        setExperimentoClasico(opt.value);
+                                                                        setEventoClasico('');
+                                                                        setIsDropdownExpOpen(false);
+                                                                    }}
+                                                                    style={{
+                                                                        padding: '9px 12px',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: FS.sm,
+                                                                        color: isSelected ? 'var(--primary-color)' : 'var(--text-pure)',
+                                                                        background: isSelected ? 'rgba(37,99,235,0.08)' : 'transparent',
+                                                                        transition: 'background 0.15s ease',
+                                                                        fontWeight: isSelected ? 600 : 400,
+                                                                        fontFamily: FONT
+                                                                    }}
+                                                                    onMouseEnter={e => {
+                                                                        if (!isSelected) e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))';
+                                                                    }}
+                                                                    onMouseLeave={e => {
+                                                                        if (!isSelected) e.currentTarget.style.background = 'transparent';
+                                                                    }}
+                                                                >
+                                                                    <span>{opt.label}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+
+                            {/* Selector personalizado de Evento de Interés */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>Evento de Interés</label>
+                                <div ref={dropdownEventoRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
+                                    {(() => {
+                                        const opcionesEventos = getOpcionesEventos(experimentoClasico);
+                                        const eventoSeleccionado = opcionesEventos.find(o => o.value === eventoClasico);
+                                        const deshabilitado = !experimentoClasico || simulacionEnCurso;
+
+                                        return (
+                                            <>
+                                                <div
+                                                    onClick={() => {
+                                                        if (!deshabilitado) {
+                                                            setIsDropdownEventoOpen(prev => !prev);
+                                                            setIsDropdownExpOpen(false);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        padding: '8px 12px',
+                                                        background: 'var(--bg-input)',
+                                                        border: `1px solid ${isDropdownEventoOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                                                        borderRadius: RADIUS,
+                                                        cursor: deshabilitado ? 'not-allowed' : 'pointer',
+                                                        opacity: deshabilitado ? 0.6 : 1,
+                                                        boxShadow: isDropdownEventoOpen ? '0 0 0 3px rgba(37,99,235,0.15)' : 'none',
+                                                        transition: 'all 0.2s ease',
+                                                        color: 'var(--text-pure)',
+                                                        userSelect: 'none',
+                                                        minHeight: '38px',
+                                                        boxSizing: 'border-box'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                                                        <span style={{ fontSize: FS.sm, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: eventoSeleccionado ? 'var(--text-pure)' : 'var(--text-muted)' }}>
+                                                            {eventoSeleccionado ? eventoSeleccionado.label : (
+                                                                experimentoClasico ? '-- Seleccionar --' : '-- Selecciona experimento primero --'
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <svg
+                                                        width="16"
+                                                        height="16"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        style={{
+                                                            transform: isDropdownEventoOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                            transition: 'transform 0.2s ease',
+                                                            color: 'var(--text-muted)',
+                                                            flexShrink: 0,
+                                                            marginLeft: '8px'
+                                                        }}
+                                                    >
+                                                        <polyline points="6 9 12 15 18 9" />
+                                                    </svg>
+                                                </div>
+
+                                                {isDropdownEventoOpen && opcionesEventos.length > 0 && (
+                                                    <div
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: 'calc(100% + 4px)',
+                                                            left: 0,
+                                                            right: 0,
+                                                            background: 'var(--bg-card)',
+                                                            border: '1px solid var(--border-color)',
+                                                            borderRadius: RADIUS,
+                                                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+                                                            zIndex: 1000,
+                                                            maxHeight: '260px',
+                                                            overflowY: 'auto',
+                                                            animation: 'fadeInDropdown 0.2s ease',
+                                                        }}
+                                                    >
+                                                        {opcionesEventos.map(opt => {
+                                                            const isSelected = opt.value === eventoClasico;
+                                                            return (
+                                                                <div
+                                                                    key={opt.value}
+                                                                    onClick={() => {
+                                                                        detenerSimulacion();
+                                                                        setEventoClasico(opt.value);
+                                                                        setIsDropdownEventoOpen(false);
+                                                                    }}
+                                                                    style={{
+                                                                        padding: '9px 12px',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: FS.sm,
+                                                                        color: isSelected ? 'var(--primary-color)' : 'var(--text-pure)',
+                                                                        background: isSelected ? 'rgba(37,99,235,0.08)' : 'transparent',
+                                                                        transition: 'background 0.15s ease',
+                                                                        fontWeight: isSelected ? 600 : 400,
+                                                                        fontFamily: FONT
+                                                                    }}
+                                                                    onMouseEnter={e => {
+                                                                        if (!isSelected) e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))';
+                                                                    }}
+                                                                    onMouseLeave={e => {
+                                                                        if (!isSelected) e.currentTarget.style.background = 'transparent';
+                                                                    }}
+                                                                >
+                                                                    <span>{opt.label}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
+                                </div>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
-                                <label style={{ ...labelStyle, marginBottom: 0 }}>Evento de Interés</label>
-                                <select
-                                    value={eventoClasico}
-                                    onChange={(e) => {
-                                        detenerSimulacion();
-                                        setEventoClasico(e.target.value);
-                                    }}
-                                    disabled={!experimentoClasico}
-                                    style={{ padding: '8px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-color)', fontSize: FS.sm, outline: 'none', fontFamily: FONT, width: '100%', opacity: !experimentoClasico ? 0.6 : 1 }}
-                                >
-                                    <option value="">-- Seleccionar --</option>
-                                    {experimentoClasico === 'moneda' && (
-                                        <>
-                                            <option value="cara">Cara</option>
-                                            <option value="cruz">Cruz</option>
-                                        </>
-                                    )}
-                                    {experimentoClasico === 'dado' && (
-                                        <>
-                                            <option value="1">Sacar 1</option>
-                                            <option value="2">Sacar 2</option>
-                                            <option value="3">Sacar 3</option>
-                                            <option value="4">Sacar 4</option>
-                                            <option value="5">Sacar 5</option>
-                                            <option value="6">Sacar 6</option>
-                                            <option value="par">Número Par (2, 4, 6)</option>
-                                            <option value="impar">Número Impar (1, 3, 5)</option>
-                                        </>
-                                    )}
-                                    {experimentoClasico === 'baraja' && (
-                                        <>
-                                            <option value="roja">Carta Roja (Corazones o Diamantes)</option>
-                                            <option value="negra">Carta Negra (Tréboles o Picas)</option>
-                                            <option value="corazones">Corazones</option>
-                                            <option value="diamantes">Diamantes</option>
-                                            <option value="treboles">Tréboles</option>
-                                            <option value="espadas">Espadas</option>
-                                            <option value="as">Un As</option>
-                                            <option value="rey">Un Rey (K)</option>
-                                            <option value="reina">Una Reina (Q)</option>
-                                            <option value="jota">Una Jota (J)</option>
-                                        </>
-                                    )}
-                                </select>
-                            </div>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '150px' }}>
-                                <label style={{ ...labelStyle, marginBottom: 0 }}>Repeticiones (N)</label>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>Repeticiones (<InlineMath math="N" />)</label>
                                 <input
                                     type="number"
                                     min="1"
+                                    placeholder="Ej: 100"
+                                    className="input-mat251 placeholder-small"
                                     value={iteracionesClasica}
                                     onChange={(e) => {
                                         detenerSimulacion();
                                         setIteracionesClasica(e.target.value);
                                     }}
-                                    style={{ padding: '8px 12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-color)', fontSize: FS.sm, outline: 'none', fontFamily: FONT, width: '100%', boxSizing: 'border-box' }}
+                                    style={{ padding: '8px 12px', minHeight: '38px', borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-pure)', fontSize: FS.sm, outline: 'none', fontFamily: FONT, width: '100%', boxSizing: 'border-box' }}
                                 />
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-5px', marginBottom: '0px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center'}}>
                             <button
                                 type="button"
                                 onClick={handleEjecutarSimulacionClasica}
                                 disabled={simulacionEnCurso}
                                 className="button_calcular"
-                                style={{ width: 'fit-content', padding: '5px 14px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: simulacionEnCurso ? 0.6 : 1, cursor: simulacionEnCurso ? 'not-allowed' : 'pointer' }}
+                                style={{ width: 'fit-content', padding: '5px 20px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 600, fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: simulacionEnCurso ? 0.6 : 1, cursor: simulacionEnCurso ? 'not-allowed' : 'pointer' }}
                             >
                                 {simulacionEnCurso ? 'SIMULANDO...' : 'INICIAR SIMULACIÓN'}
                             </button>
                         </div>
 
                         {(simulacionEnCurso || progresoSimulacion.intentoActual > 0) && (
-                            <div style={{ marginTop: '5px', padding: '20px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '0', position: 'relative', overflow: 'hidden' }}>
+                            <div style={{
+                                marginTop: '5px',
+                                padding: '20px',
+                                background: 'var(--bg-card)',
+                                border: '1px solid var(--border-color)',
+                                borderTop: 'none',
+                                borderRadius: `0 0 ${RADIUS} ${RADIUS}`,
+                                borderTopLeftRadius: 0,
+                                borderTopRightRadius: 0,
+                                borderBottomLeftRadius: RADIUS,
+                                borderBottomRightRadius: RADIUS,
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}>
                                 <style>{`
                                     @keyframes anim-spin { 100% { transform: rotate(360deg); } }
                                     @keyframes anim-flip { 100% { transform: rotateY(360deg); } }
                                 `}</style>
 
-                                {/* Progress Bar */}
-                                <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${Math.min(100, (progresoSimulacion.intentoActual / Math.max(1, parseInt(iteracionesClasica) || 1)) * 100)}%`, transition: 'width 0.1s linear' }} />
-                                
+                                {/* Progress Bar Track & Fill */}
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--border-color)' }}>
+                                    <div style={{ height: '100%', background: 'var(--primary-color)', width: `${Math.min(100, (progresoSimulacion.intentoActual / Math.max(1, parseInt(iteracionesClasica) || 1)) * 100)}%`, transition: 'width 0.1s linear' }} />
+                                </div>
+
                                 {/* TOP SECTION: Lanzamiento and Controls */}
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-                                    <span className="texto-lanzamiento-simulacion" style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-muted)' }}>Lanzamiento: {progresoSimulacion.intentoActual} / {parseInt(iteracionesClasica) || 100}</span>
-                                    
+                                    <span className="texto-lanzamiento-simulacion" style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-pure)', fontFamily: FONT }}>Lanzamiento: {progresoSimulacion.intentoActual} / {parseInt(iteracionesClasica) || 0}</span>
+
                                     <div className="controles-simulacion-movil" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center' }}>
                                         {/* Speed Controls */}
-                                        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-input)', padding: '3px', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
+                                        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-input)', padding: '3px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                             {['1x', '2x', '4x', 'MAX'].map(vel => (
                                                 <button
                                                     key={vel}
@@ -640,8 +907,8 @@ export default function ResultadosProbabilidad({
                                                     style={{
                                                         background: velocidadSimulacion === vel ? 'var(--primary-color)' : 'transparent',
                                                         color: velocidadSimulacion === vel ? '#fff' : 'var(--text-muted)',
-                                                        border: 'none', borderRadius: '15px', padding: '2px 8px', cursor: 'pointer', fontSize: '0.65rem',
-                                                        fontWeight: 800, transition: 'all 0.2s', boxShadow: velocidadSimulacion === vel ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                                                        border: 'none', borderRadius: RADIUS, padding: '2px 8px', cursor: 'pointer', fontSize: '0.65rem',
+                                                        fontWeight: 800, fontFamily: FONT, transition: 'all 0.2s', boxShadow: velocidadSimulacion === vel ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
                                                     }}
                                                 >
                                                     {vel}
@@ -664,14 +931,30 @@ export default function ResultadosProbabilidad({
                                                     }
                                                 }}
                                                 style={{
-                                                    background: simulacionPausada ? '#10b981' : 'var(--text-muted)',
-                                                    color: '#fff', border: 'none', borderRadius: '15px',
+                                                    background: simulacionPausada ? '#10b981' : '#f59e0b',
+                                                    color: '#fff', border: 'none', borderRadius: RADIUS,
                                                     padding: '4px 12px', cursor: 'pointer', fontSize: FS.xs,
+                                                    fontFamily: FONT,
                                                     fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px',
                                                     transition: 'background 0.2s', minWidth: '105px', justifyContent: 'center', whiteSpace: 'nowrap'
                                                 }}
                                             >
-                                                {simulacionPausada ? '▶ CONTINUAR' : '⏸ PAUSAR'}
+                                                {simulacionPausada ? (
+                                                    <>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                                        </svg>
+                                                        CONTINUAR
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <rect x="6" y="4" width="4" height="16"></rect>
+                                                            <rect x="14" y="4" width="4" height="16"></rect>
+                                                        </svg>
+                                                        PAUSAR
+                                                    </>
+                                                )}
                                             </button>
                                         )}
                                     </div>
@@ -682,9 +965,9 @@ export default function ResultadosProbabilidad({
                                     {/* Left Side: Probabilidad Teórica */}
                                     <div className="col-simulacion-lateral">
                                         {resSimulacionClasica && (
-                                            <div className="tarjeta-probabilidad" style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                                                <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>PROB. TEÓRICA</p>
-                                                <p className="tarjeta-prob-valor" style={{ margin: '5px 0 0', fontSize: '1.2rem', color: 'var(--primary-color)', fontWeight: 900 }}>{(resSimulacionClasica.teorica * 100).toFixed(2)}%</p>
+                                            <div className="tarjeta-probabilidad" style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                                                <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>PROB. TEÓRICA</p>
+                                                <div className="tarjeta-prob-valor" style={{ margin: '5px 0 0', fontSize: '0.9rem', color: 'var(--text-pure)', fontWeight: 'normal' }}>{renderKatexValue(`${(resSimulacionClasica.teorica * 100).toFixed(2)}%`)}</div>
                                             </div>
                                         )}
                                     </div>
@@ -719,9 +1002,9 @@ export default function ResultadosProbabilidad({
                                     {/* Right Side: Probabilidad Simulada */}
                                     <div className="col-simulacion-lateral right-side">
                                         {resSimulacionClasica && (
-                                            <div className="tarjeta-probabilidad" style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', width: '100%' }}>
-                                                <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>PROB. SIMULADA</p>
-                                                <p className="tarjeta-prob-valor" style={{ margin: '5px 0 0', fontSize: '1.2rem', color: 'var(--primary-color)', fontWeight: 900 }}>{(resSimulacionClasica.simulada * 100).toFixed(2)}%</p>
+                                            <div className="tarjeta-probabilidad" style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', width: '100%' }}>
+                                                <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>PROB. SIMULADA</p>
+                                                <div className="tarjeta-prob-valor" style={{ margin: '5px 0 0', fontSize: '0.9rem', color: 'var(--text-pure)', fontWeight: 'normal' }}>{renderKatexValue(`${(resSimulacionClasica.simulada * 100).toFixed(2)}%`)}</div>
                                             </div>
                                         )}
                                     </div>
@@ -729,7 +1012,7 @@ export default function ResultadosProbabilidad({
 
                                 {/* BOTTOM SECTION: Resultados and Exitos */}
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginTop: '20px' }}>
-                                    <div className="texto-resultado-simulacion" style={{ fontSize: FS.md, fontWeight: 800, color: 'var(--text-color)', minHeight: '24px', textAlign: 'center' }}>
+                                    <div className="texto-resultado-simulacion" style={{ fontSize: FS.md, fontWeight: 800, color: 'var(--text-pure)', minHeight: '24px', textAlign: 'center', fontFamily: FONT }}>
                                         {progresoSimulacion.ultimoResultado ? (
                                             progresoSimulacion.ultimoResultado === 'girando...' ? 'Girando...' :
                                                 simulacionEnCurso ? `Resultado: ${progresoSimulacion.ultimoResultado}` : `Último resultado: ${progresoSimulacion.ultimoResultado}`
@@ -738,32 +1021,32 @@ export default function ResultadosProbabilidad({
 
                                     {resSimulacionClasica && (
                                         <div className="bloque-exitos-simulacion" style={{ textAlign: 'center' }}>
-                                            <p className="titulo-exitos-simulacion" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 800 }}>ÉXITOS OBTENIDOS</p>
-                                            <p className="valor-exitos-simulacion" style={{ margin: '5px 0 0', fontSize: '1.3rem', color: 'var(--primary-color)', fontWeight: 900 }}>{resSimulacionClasica.exitos}</p>
+                                            <p className="titulo-exitos-simulacion" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>ÉXITOS OBTENIDOS</p>
+                                            <div className="valor-exitos-simulacion" style={{ margin: '5px 0 0', fontSize: '1.3rem', color: 'var(--text-pure)', fontWeight: 'normal' }}>{renderKatexValue(resSimulacionClasica.exitos)}</div>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Nuevas métricas empíricas */}
                                 {resSimulacionClasica && (
-                                    <div className="grid-metricas-empiricas">
+                                    <div className="grid-metricas-empiricas" style={{ borderTop: 'none' }}>
                                         <div className="tarjeta-metrica-empirica">
-                                            <p className="titulo-metrica-empirica"><span>Esperanza Empírica</span> <InlineMath math="E(X)" /></p>
-                                            <p className="valor-metrica-empirica">
-                                                {resSimulacionClasica.simulada.toFixed(4)}
-                                            </p>
+                                            <p className="titulo-metrica-empirica" style={{ fontFamily: FONT, color: 'var(--text-pure)' }}><span>Esperanza Empírica</span> <InlineMath math="E(X)" /></p>
+                                            <div className="valor-metrica-empirica" style={{ color: 'var(--text-pure)', fontWeight: 'normal' }}>
+                                                {renderKatexValue(resSimulacionClasica.simulada.toFixed(4))}
+                                            </div>
                                         </div>
                                         <div className="tarjeta-metrica-empirica">
-                                            <p className="titulo-metrica-empirica"><span>Varianza Empírica</span> <InlineMath math="V(X)" /></p>
-                                            <p className="valor-metrica-empirica">
-                                                {(resSimulacionClasica.simulada * (1 - resSimulacionClasica.simulada)).toFixed(4)}
-                                            </p>
+                                            <p className="titulo-metrica-empirica" style={{ fontFamily: FONT, color: 'var(--text-pure)' }}><span>Varianza Empírica</span> <InlineMath math="V(X)" /></p>
+                                            <div className="valor-metrica-empirica" style={{ color: 'var(--text-pure)', fontWeight: 'normal' }}>
+                                                {renderKatexValue((resSimulacionClasica.simulada * (1 - resSimulacionClasica.simulada)).toFixed(4))}
+                                            </div>
                                         </div>
                                         <div className="tarjeta-metrica-empirica">
-                                            <p className="titulo-metrica-empirica"><span>Desviación Estándar</span> <InlineMath math={'\\sigma'} /></p>
-                                            <p className="valor-metrica-empirica">
-                                                {Math.sqrt(resSimulacionClasica.simulada * (1 - resSimulacionClasica.simulada)).toFixed(4)}
-                                            </p>
+                                            <p className="titulo-metrica-empirica" style={{ fontFamily: FONT, color: 'var(--text-pure)' }}><span>Desviación Estándar</span> <InlineMath math={'\\sigma'} /></p>
+                                            <div className="valor-metrica-empirica" style={{ color: 'var(--text-pure)', fontWeight: 'normal' }}>
+                                                {renderKatexValue(Math.sqrt(resSimulacionClasica.simulada * (1 - resSimulacionClasica.simulada)).toFixed(4))}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -775,23 +1058,23 @@ export default function ResultadosProbabilidad({
                     <>
                         <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                             <div>
-                                <span style={{ ...labelStyle, margin: 0 }}>Datos:</span>
+                                <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
                                     <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                        Cargados: <strong style={{ color: 'var(--primary-color)' }}>{statsDatos.cargados}</strong>
+                                        Cargados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos.cargados}</strong>
                                     </small>
                                     <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                        Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos.agregados}</strong>
+                                        Agregados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos.agregados}</strong>
                                     </small>
                                     <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                        Total: <strong>{statsDatos.total}</strong>
+                                        Total: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos.total}</strong>
                                     </small>
                                 </div>
                             </div>
                             <button
                                 onClick={abrirEditor}
                                 className="btn-primary"
-                                style={{ padding: '5px 14px', fontSize: FS.sm }}
+                                style={{ padding: '5px 14px', fontSize: FS.sm, fontFamily: FONT }}
                             >
                                 <EditarDatos />
                                 Editar Datos
@@ -801,7 +1084,7 @@ export default function ResultadosProbabilidad({
                         {/* Selector de Columna (Solo si hay múltiples columnas y no es condicional) */}
                         {!isCond && varSeleccionada?.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 && (
                             <div style={{ marginBottom: '15px' }}>
-                                <label style={{ ...labelStyle, fontSize: FS.sm, marginBottom: '6px' }}>Columna a analizar:</label>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)', fontSize: FS.sm, marginBottom: '6px' }}>Columna a analizar:</label>
                                 <div ref={dropdownColRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
                                     <div
                                         onClick={() => setIsDropdownColOpen(!isDropdownColOpen)}
@@ -825,13 +1108,12 @@ export default function ResultadosProbabilidad({
 
                                     {isDropdownColOpen && (
                                         <div style={{
-                                            position: 'absolute', top: '100%', left: 0, right: 0,
-                                            marginTop: '5px',
+                                            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
                                             background: 'var(--bg-card)',
                                             border: '1px solid var(--border-color)',
                                             borderRadius: RADIUS,
-                                            boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
-                                            zIndex: 100,
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+                                            zIndex: 1000,
                                             overflow: 'hidden'
                                         }}>
                                             {varSeleccionada.nombresColumnas.map((colName, idx) => (
@@ -874,8 +1156,8 @@ export default function ResultadosProbabilidad({
                         <div className="grid-resultados-probabilidad">
                             {/* Evento Condicion (Solo Condicional) */}
                             {isCond && (
-                                <div style={{ ...cardStyle, marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
-                                    <label style={labelStyle}>Condición Dada (Evento <InlineMath math="B" />):</label>
+                                <div style={{ ...cardStyle, marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                                    <label style={{ ...labelStyle, color: 'var(--text-pure)' }}>Condición Dada (Evento <InlineMath math="B" />):</label>
                                     {statsEventos.length > 0 ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexGrow: 1 }}>
                                             <button
@@ -884,7 +1166,7 @@ export default function ResultadosProbabilidad({
                                                     detenerSimulacion();
                                                     setModalCondicion(true);
                                                 }}
-                                                style={{ alignSelf: 'center', padding: '5px 14px', fontSize: FS.sm  }}
+                                                style={{ alignSelf: 'center', padding: '5px 14px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, fontWeight: 600 }}
                                             >
                                                 <ModificarSeleccion />
                                                 {eventoCondicion.length > 0 ? 'Modificar Condición' : 'Configurar Evento B'}
@@ -892,12 +1174,12 @@ export default function ResultadosProbabilidad({
 
                                             {eventoCondicion.length > 0 ? (
                                                 <div style={{ background: 'rgba(33, 115, 70, 0.03)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)', flexGrow: 1 }}>
-                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                    <div style={{ fontSize: FS.xs, color: 'var(--text-pure)', marginBottom: '6px', fontWeight: 'bold', fontFamily: FONT }}>
                                                         Eventos B ({eventoCondicion.length}):
                                                     </div>
                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                                         {eventoCondicion.map(v => (
-                                                            <span key={v} style={{ color: 'var(--primary-color)', fontSize: '0.75rem', fontWeight: 700, background: 'rgba(33, 115, 70, 0.1)', padding: '3px 12px', borderRadius: '5px', border: '1px solid rgba(33, 115, 70, 0.2)' }}>
+                                                            <span key={v} style={{ color: 'var(--text-pure)', fontSize: '0.75rem', fontWeight: 700, background: 'rgba(33, 115, 70, 0.1)', padding: '3px 12px', borderRadius: '5px', border: '1px solid rgba(33, 115, 70, 0.2)', fontFamily: FONT }}>
                                                                 {v}
                                                             </span>
                                                         ))}
@@ -912,14 +1194,14 @@ export default function ResultadosProbabilidad({
                                             )}
                                         </div>
                                     ) : (
-                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: FS.sm, flexGrow: 1 }}>Primero agrega datos al espacio muestral.</p>
+                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: FS.xs, flexGrow: 1 }}>Primero agrega datos al espacio muestral.</p>
                                     )}
                                 </div>
                             )}
 
                             {/* Evento Favorable*/}
                             <div style={{ ...cardStyle, marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
-                                <label style={labelStyle}>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)' }}>
                                     {isFrec ? <>Evento de Interés <InlineMath math="A" />:</> : isCond ? <>Evento de Interés <InlineMath math="A" />:</> : <>Evento Favorable <InlineMath math="E" />:</>}
                                 </label>
                                 {statsEventos.length > 0 ? (
@@ -930,7 +1212,7 @@ export default function ResultadosProbabilidad({
                                                 detenerSimulacion();
                                                 setModalEvento(true);
                                             }}
-                                            style={{ alignSelf: 'center', padding: '5px 14px', fontSize: FS.sm }}
+                                            style={{ alignSelf: 'center', padding: '5px 14px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, fontWeight: 600 }}
                                         >
                                             <ModificarSeleccion />
                                             {eventoFavorable.length > 0 ? 'Modificar Selección' : (isCond ? 'Configurar Evento A' : isFrec ? 'Configurar Evento de Interés' : 'Configurar Eventos Favorables')}
@@ -938,12 +1220,12 @@ export default function ResultadosProbabilidad({
 
                                         {eventoFavorable.length > 0 ? (
                                             <div style={{ background: 'rgba(33, 115, 70, 0.03)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)', flexGrow: 1 }}>
-                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                    Eventos Seleccionados ({eventoFavorable.length}):
+                                                <div style={{ fontSize: FS.xs, color: 'var(--text-pure)', marginBottom: '6px', fontWeight: 'bold', fontFamily: FONT }}>
+                                                    {isCond ? 'Eventos A' : 'Eventos Seleccionados'} ({eventoFavorable.length}):
                                                 </div>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                                     {eventoFavorable.map(v => (
-                                                        <span key={v} style={{ color: 'var(--primary-color)', fontSize: '0.75rem', fontWeight: 700, background: 'rgba(33, 115, 70, 0.1)', padding: '3px 12px', borderRadius: '5px', border: '1px solid rgba(33, 115, 70, 0.2)' }}>
+                                                        <span key={v} style={{ color: 'var(--text-pure)', fontSize: '0.75rem', fontWeight: 600, background: 'rgba(33, 115, 70, 0.1)', padding: '3px 12px', borderRadius: RADIUS, border: '1px solid rgba(33, 115, 70, 0.2)', fontFamily: FONT }}>
                                                             {v}
                                                         </span>
                                                     ))}
@@ -952,55 +1234,58 @@ export default function ResultadosProbabilidad({
                                         ) : (
                                             <div style={{ textAlign: 'center', padding: '10px', border: '1px dashed var(--border-color)', borderRadius: RADIUS, flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 <small style={{ color: 'var(--text-muted)', fontSize: FS.xs }}>
-                                                    Ningún evento seleccionado aún.
+                                                    {isCond ? 'Ningún evento A seleccionado.' : 'Ningún evento seleccionado aún.'}
                                                 </small>
                                             </div>
                                         )}
                                     </div>
                                 ) : (
-                                    <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: FS.sm, flexGrow: 1 }}>Primero agrega datos al espacio muestral.</p>
+                                    <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: FS.xs, flexGrow: 1 }}>Primero agrega datos al espacio muestral.</p>
                                 )}
                             </div>
                         </div>
 
                         {isFrec && inputMode === 'simulacion' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
-                                <label style={{ fontSize: FS.xs, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Número de Iteraciones (N)</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', margin: '15px 0 5px 0' }}>
+                                <label style={{ fontSize: FS.xs, fontWeight: 'bold', color: 'var(--text-pure)', textTransform: 'uppercase', fontFamily: FONT }}>Número de Iteraciones (<InlineMath math="N" />)</label>
                                 <input
                                     type="number"
                                     min="1"
+                                    placeholder="Ej: 1000"
+                                    className="input-mat251 placeholder-small"
                                     value={iteracionesN}
                                     onChange={(e) => {
                                         detenerSimulacion();
                                         setIteracionesN(e.target.value);
                                     }}
                                     style={{
-                                        padding: '8px 12px',
+                                        padding: '5px 12px',
                                         borderRadius: RADIUS,
                                         border: '1px solid var(--border-color)',
                                         background: 'var(--bg-input)',
-                                        color: 'var(--text-color)',
+                                        color: 'var(--text-pure)',
                                         fontSize: FS.sm,
                                         outline: 'none',
+                                        fontFamily: FONT,
                                         width: '150px',
-                                        textAlign: 'center',
-                                        fontWeight: 600
+                                        textAlign: 'center'
                                     }}
                                 />
                             </div>
                         )}
 
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0px' }}>
                             <button
                                 onClick={isFrec && inputMode === 'simulacion' ? handleEjecutarSimulacion : ejecutar}
                                 className="button_calcular"
                                 style={{
                                     width: 'fit-content',
                                     alignSelf: 'center',
-                                    padding: '5px 14px',
+                                    padding: '5px 20px',
                                     borderRadius: RADIUS,
                                     fontSize: FS.md,
-                                    fontWeight: 700,
+                                    fontWeight: 600,
+                                    fontFamily: FONT,
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '10px'
@@ -1023,28 +1308,28 @@ export default function ResultadosProbabilidad({
                 {/* Resultado Math*/}
                 {(activeRes || (isFrec && resultadoFrecuentista && inputMode === 'simulacion') || (tipo === 'clasica' && historialSimClasica.length > 0 && inputMode === 'simulacion')) && (
                     <>
-                        {inputMode !== 'simulacion' && (
-                            <div ref={formulaProbRef} style={{ overflowX: 'auto' }} />
+                        {(inputMode !== 'simulacion' || (isFrec && resultadoFrecuentista && inputMode === 'simulacion')) && (
+                            <div ref={formulaProbRef} style={{ overflowX: 'auto', marginTop: '10px' }} />
                         )}
                         {(inputMode !== 'simulacion' || (isFrec && resultadoFrecuentista && inputMode === 'simulacion')) && (
                             <div className="grid-metricas-probabilidad">
                                 {isFrec && resultadoFrecuentista && inputMode === 'simulacion' ? (
                                     <>
                                         <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Evento A</p>
-                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.evento}</p>
+                                            <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>EVENTO <InlineMath math="A" /></p>
+                                            <div className="tarjeta-prob-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>{renderKatexValue(resultadoFrecuentista.evento)}</div>
                                         </div>
                                         <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Frecuencia Empírica f</p>
-                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.f}</p>
+                                            <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>FRECUENCIA EMPÍRICA <InlineMath math="f" /></p>
+                                            <div className="tarjeta-prob-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>{renderKatexValue(resultadoFrecuentista.f)}</div>
                                         </div>
                                         <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Simulaciones N</p>
-                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.N}</p>
+                                            <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>SIMULACIONES <InlineMath math="N" /></p>
+                                            <div className="tarjeta-prob-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>{renderKatexValue(resultadoFrecuentista.N)}</div>
                                         </div>
                                         <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>Porcentaje Empírico</p>
-                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{resultadoFrecuentista.probPorcentaje}%</p>
+                                            <p className="tarjeta-prob-titulo" style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>PORCENTAJE EMPÍRICO</p>
+                                            <div className="tarjeta-prob-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>{renderKatexValue(`${resultadoFrecuentista.probPorcentaje}%`)}</div>
                                         </div>
                                     </>
                                 ) : (
@@ -1056,8 +1341,8 @@ export default function ResultadosProbabilidad({
                                         { label: 'Porcentaje', val: `${activeRes?.probabilidadPorcentaje}%` },
                                     ].map(({ label, val }, i) => (
                                         <div key={i} style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                            <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>{label}</p>
-                                            <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--primary-color)', fontSize: FS.md }}>{val}</p>
+                                            <p className="tarjeta-calculo-titulo" style={{ margin: 0, fontSize: FS.sl, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>{label}</p>
+                                            <div className="tarjeta-calculo-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>{renderKatexValue(val)}</div>
                                         </div>
                                     ))
                                 )}
@@ -1069,18 +1354,18 @@ export default function ResultadosProbabilidad({
                                 <MarcoWidgetMAT251 titulo="Convergencia de la Probabilidad" anchoCompleto={true} alto="400px">
                                     <div style={{ width: '100%', height: '100%', minWidth: 0, padding: 0, boxSizing: 'border-box' }}>
                                         <ResponsiveContainer width="100%" height="100%">
-                                            <LineChart data={historialSimClasica} margin={{ top: 20, right: 30, left: 0, bottom: 25 }}>
+                                            <LineChart data={historialSimClasica} margin={{ top: 20, right: 10, left: 5, bottom: 10 }}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                                                 <XAxis dataKey="intento" stroke="var(--text-muted)" fontSize={12} />
                                                 <YAxis domain={[0, 1]} stroke="var(--text-muted)" fontSize={12} width={30} />
                                                 <Tooltip
-                                                    contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', color: 'var(--text-color)' }}
+                                                    contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: RADIUS, color: 'var(--text-color)' }}
                                                     itemStyle={{ color: 'var(--primary-color)' }}
                                                     formatter={(value) => value.toFixed(4)}
                                                 />
                                                 <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--text-color)' }} />
-                                                <ReferenceLine y={historialSimClasica[0]?.teorica} stroke="#10b981" strokeDasharray="5 5" label={{ position: 'top', value: 'Prob. Teórica', fill: '#10b981', fontSize: 12 }} />
-                                                <Line type="monotone" dataKey="empirica" name="Prob. Simulada" stroke="var(--primary-color)" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                                                <ReferenceLine y={historialSimClasica[0]?.teorica} stroke="#10b981" strokeDasharray="5 5" label={{ position: 'top', value: 'Probabilidad Teórica', fill: '#10b981', fontSize: 12 }} />
+                                                <Line type="linear" dataKey="empirica" name="Probabilidad Simulada" stroke="var(--primary-color)" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>
@@ -1090,25 +1375,38 @@ export default function ResultadosProbabilidad({
 
                         {tipo === 'clasica' && historialSimulacionMoneda.length > 0 && inputMode === 'simulacion' && (experimentoClasico === 'moneda' || experimentoClasico === 'dado' || experimentoClasico === 'baraja') && (
                             <div style={{ marginTop: '15px' }}>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center' }}>
+                                {/* Tabla de datos de la simulación directamente visible */}
+                                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm, color: 'var(--text-color)' }}>
+                                        <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 1, boxShadow: '0 1px 0 var(--border-color)' }}>
+                                            <tr>
+                                                <th style={{ padding: '10px', fontWeight: 700 }}>Lanzamiento</th>
+                                                <th style={{ padding: '10px', fontWeight: 700 }}>Resultado</th>
+                                                <th style={{ padding: '10px', fontWeight: 700 }}>¿Es Éxito?</th>
+                                                <th style={{ padding: '10px', fontWeight: 700 }}>Éxitos Acumulados</th>
+                                                <th style={{ padding: '10px', fontWeight: 700 }}>Probabilidad Simulada</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {historialSimulacionMoneda.map((h, i) => (
+                                                <tr key={i} style={{ borderBottom: '1px solid var(--border-color)', background: i % 2 === 0 ? 'var(--bg-input)' : 'transparent' }}>
+                                                    <td style={{ padding: '8px' }}>{h.intento}</td>
+                                                    <td style={{ padding: '8px', textTransform: 'capitalize' }}>{h.resultadoObtenido}</td>
+                                                    <td style={{ padding: '8px', color: h.esExito ? '#10b981' : 'var(--text-muted)' }}>{h.esExito ? 'Sí' : 'No'}</td>
+                                                    <td style={{ padding: '8px' }}>{h.exitosAcumulados}</td>
+                                                    <td style={{ padding: '8px', fontWeight: 600 }}>{h.probabilidadAcumulada.toFixed(4)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Botones centrados debajo de la tabla */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'center', marginTop: '15px' }}>
                                     <button
-                                        className="btn-secundario"
-                                        style={{ padding: '5px 14px', fontSize: FS.sm }}
-                                        onClick={() => {
-                                            if (!mostrarTablaMoneda) {
-                                                setIsRenderingTabla(true);
-                                                setMostrarTablaMoneda(true);
-                                                setTimeout(() => setIsRenderingTabla(false), 50);
-                                            } else {
-                                                setMostrarTablaMoneda(false);
-                                            }
-                                        }}
-                                    >
-                                        {mostrarTablaMoneda ? <><IconoOcultar /> Ocultar Datos de Simulación</> : <><IconoMostrar /> Ver Datos de Simulación</>}
-                                    </button>
-                                    <button
+                                        type="button"
                                         className="btn-primary"
-                                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                                        style={{ padding: '5px 20px', fontSize: FS.sm, fontWeight: 600, fontFamily: FONT, borderRadius: RADIUS, display: 'flex', alignItems: 'center', gap: '6px' }}
                                         onClick={async () => {
                                             if (!historialSimulacionMoneda || historialSimulacionMoneda.length === 0) return;
                                             try {
@@ -1142,11 +1440,12 @@ export default function ResultadosProbabilidad({
                                             }
                                         }}
                                     >
-                                        <IconoGuardar /> Guardar en Mi Espacio
+                                        <IconoGuardar /> Guardar
                                     </button>
                                     <button
+                                        type="button"
                                         className="btn-verde"
-                                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                                        style={{ padding: '5px 20px', fontSize: FS.sm, fontWeight: 600, fontFamily: FONT, borderRadius: RADIUS, display: 'flex', alignItems: 'center', gap: '6px' }}
                                         onClick={() => {
                                             if (!historialSimulacionMoneda || historialSimulacionMoneda.length === 0) return;
                                             const worksheet = XLSX.utils.json_to_sheet(historialSimulacionMoneda.map(h => ({
@@ -1162,44 +1461,9 @@ export default function ResultadosProbabilidad({
                                             XLSX.writeFile(workbook, `Historial_Simulacion_${nombreExp}.xlsx`);
                                         }}
                                     >
-                                        <Descargar /> Descargar Datos (.xlsx)
+                                        <Descargar /> Descargar (.xlsx)
                                     </button>
                                 </div>
-
-                                {mostrarTablaMoneda && (
-                                    <div style={{ marginTop: '15px', maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
-                                        {isRenderingTabla ? (
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
-                                                <div style={{ width: '30px', height: '30px', border: '3px solid var(--border-color)', borderTop: '3px solid var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                                                <p style={{ marginTop: '10px', fontSize: FS.sm, color: 'var(--text-muted)' }}>Cargando datos de la simulación...</p>
-                                                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                                            </div>
-                                        ) : (
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm, color: 'var(--text-color)' }}>
-                                                <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 1, boxShadow: '0 1px 0 var(--border-color)' }}>
-                                                    <tr>
-                                                        <th style={{ padding: '10px', fontWeight: 700 }}># Lanzamiento</th>
-                                                        <th style={{ padding: '10px', fontWeight: 700 }}>Resultado</th>
-                                                        <th style={{ padding: '10px', fontWeight: 700 }}>¿Es Éxito?</th>
-                                                        <th style={{ padding: '10px', fontWeight: 700 }}>Éxitos Acumulados</th>
-                                                        <th style={{ padding: '10px', fontWeight: 700 }}>Prob. Simulada</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {historialSimulacionMoneda.map((h, i) => (
-                                                        <tr key={i} style={{ borderBottom: '1px solid var(--border-color)', background: i % 2 === 0 ? 'var(--bg-input)' : 'transparent' }}>
-                                                            <td style={{ padding: '8px' }}>{h.intento}</td>
-                                                            <td style={{ padding: '8px', textTransform: 'capitalize' }}>{h.resultadoObtenido}</td>
-                                                            <td style={{ padding: '8px', color: h.esExito ? '#10b981' : 'var(--text-muted)' }}>{h.esExito ? 'Sí' : 'No'}</td>
-                                                            <td style={{ padding: '8px' }}>{h.exitosAcumulados}</td>
-                                                            <td style={{ padding: '8px', fontWeight: 600 }}>{h.probabilidadAcumulada.toFixed(4)}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        )}
-                                    </div>
-                                )}
                             </div>
                         )}
 
@@ -1212,19 +1476,19 @@ export default function ResultadosProbabilidad({
                                                 return (
                                                     <MarcoWidgetMAT251 key={widgetId} id={widgetId} titulo="Convergencia de la Probabilidad Empírica" anchoCompleto={true} alto="400px">
                                                         <div style={{ width: '100%', height: '100%', minWidth: 0, padding: 0, boxSizing: 'border-box' }}>
-                                                            <ResponsiveContainer>
-                                                                <LineChart data={datosSimulacion} margin={{ top: 10, right: 30, left: 0, bottom: 25 }}>
+                                                            <ResponsiveContainer width="100%" height="100%">
+                                                                <LineChart data={datosSimulacion} margin={{ top: 20, right: 15, left: 5, bottom: 10 }}>
                                                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                                                                     <XAxis dataKey="iteracion" stroke="var(--text-muted)" fontSize={12} />
                                                                     <YAxis domain={[0, 1]} stroke="var(--text-muted)" fontSize={12} width={35} />
                                                                     <Tooltip
-                                                                        contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: '8px', color: 'var(--text-color)' }}
+                                                                        contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: RADIUS, color: 'var(--text-color)' }}
                                                                         itemStyle={{ color: 'var(--primary-color)' }}
                                                                         formatter={(value) => value.toFixed(4)}
                                                                     />
                                                                     <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--text-color)' }} />
-                                                                    <ReferenceLine y={datosSimulacion[0]?.teorica} stroke="#10b981" strokeDasharray="5 5" label={{ position: 'top', value: 'Prob. Teórica', fill: '#10b981', fontSize: 12 }} />
-                                                                    <Line type="monotone" dataKey="empirica" name="Prob. Empírica" stroke="var(--primary-color)" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                                                                    <ReferenceLine y={datosSimulacion[0]?.teorica} stroke="#10b981" strokeDasharray="5 5" label={{ position: 'top', value: 'Probabilidad Teórica', fill: '#10b981', fontSize: 12 }} />
+                                                                    <Line type="monotone" dataKey="empirica" name="Probabilidad Empírica" stroke="var(--primary-color)" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
                                                                 </LineChart>
                                                             </ResponsiveContainer>
                                                         </div>

@@ -116,7 +116,7 @@ def generar_pasos_evaluacion(F, x, a_sym, b_sym):
     # Paso 3 y 4: Fracción final y Decimal
     res_simp = sp.simplify(Fb - Fa)
     paso3 = sp.latex(res_simp)
-    paso4 = f"{float(res_simp.evalf()):.4f}"
+    paso4 = f"\\mathbf{{{float(res_simp.evalf()):.4f}}}"
     
     return f"= {paso1} = {paso2} = {paso3} = {paso4}"
 
@@ -172,7 +172,7 @@ def generar_desarrollo_absoluto(nombre_latex, integrand, integrand_display, x, a
     eval_pos = f"\\left( \\left({safe_frac(Fb)}\\right) - {safe_frac(F0_pos)} \\right)"
     
     step_eval = f"&= {eval_neg} + {eval_pos} \\\\[1em]"
-    step_res = f"&= {safe_frac(val_neg)} + {safe_frac(val_pos)} = {total_val_float:.4f}"
+    step_res = f"&= {safe_frac(val_neg)} + {safe_frac(val_pos)} = \\mathbf{{{total_val_float:.4f}}}"
     
     block = f"{nombre_latex} &= \\int_{{{sp.latex(a_sym)}}}^{{{sp.latex(b_sym)}}} {integrand_display} \\, dx \\\\[1em]\n{step_integ}\n{step_eval}\n{step_res}"
     
@@ -274,7 +274,7 @@ def resolver_varianza(func_str: str, a_val: float, b_val: float, eX_val: float) 
     if desarrollo_abs:
         block_body, eX2_float = desarrollo_abs
         var_float = eX2_float - (eX_val**2)
-        block = f"\\begin{{aligned}}\n{block_body} \\\\[1em]\nV(X) &= E(X^2) - (E(X))^2 = {eX2_float:.4f} - ({eX_val:.4f})^2 = {var_float:.4f}\n\\end{{aligned}}"
+        block = f"\\begin{{aligned}}\n{block_body} \\\\[1em]\nV(X) &= E(X^2) - (E(X))^2 = {eX2_float:.4f} - ({eX_val:.4f})^2 = \\mathbf{{{var_float:.4f}}}\n\\end{{aligned}}"
         return block, var_float
         
     pasos_antiderivada = generar_pasos_antiderivada(integrand, F, x, a_sym, b_sym)
@@ -286,7 +286,7 @@ def resolver_varianza(func_str: str, a_val: float, b_val: float, eX_val: float) 
     block = f"""\\begin{{aligned}}
 E(X^2) &= \\int_{{{latex_a}}}^{{{latex_b}}} x^2 \\left( {latex_f} \\right) dx = \\int_{{{latex_a}}}^{{{latex_b}}} {latex_int} \\, dx \\\\[1em]
        &= {pasos_antiderivada} {pasos_evaluacion} \\\\[1em]
-V(X) &= E(X^2) - (E(X))^2 = {eX2_float:.4f} - ({eX_val:.4f})^2 = {var_float:.4f}
+V(X) &= E(X^2) - (E(X))^2 = {eX2_float:.4f} - ({eX_val:.4f})^2 = \\mathbf{{{var_float:.4f}}}
 \\end{{aligned}}"""
 
     return block, var_float
@@ -337,9 +337,9 @@ def resolver_k(func_str: str, a_val: float, b_val: float, var_k: str = 'k') -> t
             latex_F_neg = sp.latex(F_neg)
             latex_F_pos = sp.latex(F_pos)
             
-            planteamiento = f"\\int_{{{sp.latex(a_sym)}}}^{{{sp.latex(b_sym)}}} {var_k} \\left( {sp.latex(sp.simplify(integrand))} \\right) \\, dx &= 1"
-            div = f"{var_k} \\left( \\int_{{{sp.latex(a_sym)}}}^{{0}} \\left({latex_integrand_neg}\\right) \\, dx + \\int_{{0}}^{{{sp.latex(b_sym)}}} \\left({latex_integrand_pos}\\right) \\, dx \\right) &= 1"
-            integ = f"{var_k} \\left( \\left[ {latex_F_neg} \\right]_{{{sp.latex(a_sym)}}}^{{0}} + \\left[ {latex_F_pos} \\right]_{{0}}^{{{sp.latex(b_sym)}}} \\right) &= 1"
+            planteamiento = f"\\int_{{{sp.latex(a_sym)}}}^{{{sp.latex(b_sym)}}} {var_k} \\left( {sp.latex(sp.simplify(integrand))} \\right) \\, dx = 1"
+            div = f"{var_k} \\left( \\int_{{{sp.latex(a_sym)}}}^{{0}} \\left({latex_integrand_neg}\\right) \\, dx + \\int_{{0}}^{{{sp.latex(b_sym)}}} \\left({latex_integrand_pos}\\right) \\, dx \\right)"
+            integ = f"{var_k} \\left( \\left[ {latex_F_neg} \\right]_{{{sp.latex(a_sym)}}}^{{0}} + \\left[ {latex_F_pos} \\right]_{{0}}^{{{sp.latex(b_sym)}}} \\right)"
             
             def safe_frac(val):
                 return sp.latex(sp.simplify(val))
@@ -347,13 +347,14 @@ def resolver_k(func_str: str, a_val: float, b_val: float, var_k: str = 'k') -> t
             eval_neg = f"\\left( {safe_frac(F0_neg)} - \\left({safe_frac(Fa_abs)}\\right) \\right)"
             eval_pos = f"\\left( \\left({safe_frac(Fb_abs)}\\right) - {safe_frac(F0_pos)} \\right)"
             
-            eval_str = f"{var_k} \\left( {eval_neg} + {eval_pos} \\right) &= 1"
-            res_str = f"{var_k} \\left( {safe_frac(area_val)} \\right) &= 1"
+            eval_str = f"{var_k} \\left( {eval_neg} + {eval_pos} \\right)"
+            res_str = f"{var_k} \\left( {safe_frac(area_val)} \\right) = 1"
             
             k_latex = sp.latex(sp.simplify(k_val))
-            despeje = f"{var_k} &= {k_latex} = {k_float:.4f}"
+            despeje = f"\\implies {var_k} = {k_latex} = \\mathbf{{{k_float:.4f}}}"
             
-            block = f"\\begin{{aligned}}\n{planteamiento} \\\\[1em]\n{div} \\\\[1em]\n{integ} \\\\[1em]\n{eval_str} \\\\[1em]\n{res_str} \\\\[1em]\n{despeje}\n\\end{{aligned}}"
+            cadena_abs = f"{div} = {integ} = {eval_str} = {res_str} {despeje}"
+            block = f"\\begin{{aligned}}\n& {planteamiento} \\\\[1em]\n& = {cadena_abs}\n\\end{{aligned}}"
             
             return block, k_float, str(sp.simplify(k_val))
     except Exception:
@@ -371,32 +372,33 @@ def resolver_k(func_str: str, a_val: float, b_val: float, var_k: str = 'k') -> t
         
     # 2. Integración
     F_latex = sp.latex(F)
-    integracion = f"{var_k} \\left[ {F_latex} \\right]_{{{sp.latex(a_sym)}}}^{{{sp.latex(b_sym)}}} = 1"
+    integracion = f"{var_k} \\left[ {F_latex} \\right]_{{{sp.latex(a_sym)}}}^{{{sp.latex(b_sym)}}}"
     
     # 3. Evaluación
     sub_b_lit = sp.latex(F.subs(x, sp.UnevaluatedExpr(b_sym)))
     sub_a_lit = sp.latex(F.subs(x, sp.UnevaluatedExpr(a_sym)))
     
-    eval_line_1 = f"{var_k} \\left( {sub_b_lit} - {sub_a_lit} \\right) = 1"
-    eval_line_2 = f"{var_k} \\left( {sp.latex(Fb)} - {sp.latex(Fa)} \\right) = 1"
+    eval_line_1 = f"{var_k} \\left( {sub_b_lit} - {sub_a_lit} \\right)"
+    eval_line_2 = f"{var_k} \\left( {sp.latex(Fb)} - {sp.latex(Fa)} \\right)"
     
     area_simp = sp.simplify(Fb - Fa)
-    eval_line_3 = f"{var_k} \\left( {sp.latex(area_simp)} \\right) = 1"
+    eval_line_3 = f"{var_k} \\left( {sp.latex(area_simp)} \\right)"
     
-    lines = []
-    lines.append(eval_line_1)
+    steps = [integracion]
+    if eval_line_1.replace(" ", "") != integracion.replace(" ", ""):
+        steps.append(eval_line_1)
     if eval_line_2.replace(" ", "") != eval_line_1.replace(" ", ""):
-        lines.append(eval_line_2)
+        steps.append(eval_line_2)
     if eval_line_3.replace(" ", "") != eval_line_2.replace(" ", "") and eval_line_3.replace(" ", "") != eval_line_1.replace(" ", ""):
-        lines.append(eval_line_3)
+        steps.append(eval_line_3)
         
-    eval_lines_str = f"& " + " \\\\[1em]\n& ".join(lines)
+    cadena_desarrollo = " = ".join(steps) + " = 1"
     
     # 4. Despeje final
     k_latex = sp.latex(sp.simplify(k_val))
-    despeje_final = f"{var_k} = {k_latex} = {k_float:.4f}"
+    despeje_final = f"\\implies {var_k} = {k_latex} = \\mathbf{{{k_float:.4f}}}"
     
-    block = f"\\begin{{aligned}}\n& {planteamiento} \\\\[1em]\n& {integracion} \\\\[1em]\n{eval_lines_str} \\\\[1em]\n& {despeje_final}\n\\end{{aligned}}"
+    block = f"\\begin{{aligned}}\n& {planteamiento} \\\\[1em]\n& = {cadena_desarrollo} {despeje_final}\n\\end{{aligned}}"
     
     return block, k_float, str(sp.simplify(k_val))
 

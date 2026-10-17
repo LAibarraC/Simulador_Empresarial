@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import logoSiCEInicio from "../../assets/images/Logo-SiCE-Inicio.png";
+import logoSiCEInicio from "../../assets/images/Logo-SiCE-Inicio.webp";
 import imagenInicio1 from "../../assets/images/imagen de inicio 1.jpg";
 import imagenInicio2 from "../../assets/images/imagen de inicio 2.jpg";
 import "../../styles/ui/Inicio.css";

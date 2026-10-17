@@ -4,12 +4,12 @@
     font-family: system-ui, -apple-system, sans-serif;
     color: var(--text-main, #334155);
     background: transparent;
-    border-radius: 8px;
+    border-radius: 5px;
 }
 
 .tema3-card {
     background: transparent;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 0;
     margin-bottom: 20px;
     box-shadow: none;
@@ -35,7 +35,7 @@
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 5px;
-    color: var(--text-muted, #475569);
+    color: var(--text-pure, #475569);
 }
 
 .tema3-input,
@@ -43,11 +43,11 @@
     width: 100%;
     padding: 8px 12px;
     border: 1px solid var(--border-color, #cbd5e1);
-    border-radius: 6px;
+    border-radius: 5px;
     font-size: 0.95rem;
     box-sizing: border-box;
     background: var(--bg-input, #ffffff);
-    color: var(--text-main, #000000);
+    color: var(--text-pure, #000000);
 }
 
 .tema3-input:focus,
@@ -62,7 +62,7 @@
     color: var(--primary-color);
     font-weight: 600;
     border: 1px solid var(--primary-color);
-    border-radius: 6px;
+    border-radius: 5px;
     padding: 10px 16px;
     cursor: pointer;
     transition: all 0.2s;
@@ -84,7 +84,7 @@
     display: flex;
     background: var(--bg-input, #f1f5f9);
     padding: 4px;
-    border-radius: 8px;
+    border-radius: 5px;
     border: 1px solid var(--border-color, #e2e8f0);
     margin-bottom: 20px;
 }
@@ -92,7 +92,7 @@
 .tema3-switch-btn {
     flex: 1;
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 5px;
     font-size: 0.85rem;
     font-weight: 600;
     border: none;
@@ -119,56 +119,284 @@
     }
 }
 
-/* Tooltip para Tema 3 */
+/* ======================================================= */
+/* TARJETAS DE MÉTRICAS Y RESULTADOS MAT251 EN TEMA 3      */
+/* ======================================================= */
+.tarjeta-calculo-mat251 {
+    background: var(--bg-card);
+    padding: 10px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: var(--text-pure);
+}
+
+.tarjeta-calculo-titulo {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-pure);
+    font-weight: 700;
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tarjeta-calculo-titulo .katex {
+    text-transform: none;
+}
+
+.tarjeta-calculo-valor {
+    margin: 5px 0 0;
+    font-size: 0.95rem;
+    color: var(--text-pure);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarjeta-calculo-valor .katex {
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .tarjeta-calculo-titulo {
+        font-size: 0.65rem !important;
+    }
+
+    .tarjeta-calculo-valor {
+        font-size: 0.95rem !important;
+    }
+}
+
+/* Contenedor con scroll horizontal para fórmulas matemáticas que no deben partirse */
+.t3-formula-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 0 4px 0;
+    color: var(--text-pure);
+}
+
+.t3-formula-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.t3-formula-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.t3-formula-scroll::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.t3-formula-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.t3-formula-inner {
+    display: inline-block;
+    min-width: 100%;
+    text-align: center;
+    white-space: nowrap !important;
+    color: var(--text-pure);
+}
+
+.t3-formula-inner,
+.t3-formula-inner *,
+.t3-formula-inner span,
+.t3-formula-inner .katex,
+.t3-formula-inner .katex-html,
+.t3-formula-inner .base,
+.t3-formula-inner .mord,
+.t3-formula-inner .mrel,
+.t3-formula-inner .mbin {
+    white-space: nowrap !important;
+}
+
+/* =========================================
+   TOOLTIPS ESTADÍSTICOS MAT251 (StatLabel)
+========================================= */
+.mat251-stat-label-container {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dashed var(--text-pure, #666);
+    padding-bottom: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mat251-stat-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(4px);
+    background-color: #1e293b;
+    color: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 5px;
+    width: max-content;
+    max-width: min(92vw, 440px);
+    box-sizing: border-box;
+    text-align: center;
+    z-index: 9999;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-weight: normal;
+    font-size: 0.8rem;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mat251-stat-label-container:hover {
+    z-index: 10000;
+}
+
+.mat251-stat-label-container:hover .mat251-stat-tooltip {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+.mat251-stat-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: var(--arrow-left, 50%);
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #1e293b transparent;
+}
+
+/* Posicionamiento superior opcional (StatLabel position="top") */
+.mat251-stat-tooltip.mat251-tooltip-top {
+    top: auto;
+    bottom: calc(100% + 8px);
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(-4px);
+}
+
+.mat251-stat-label-container:hover .mat251-tooltip-top {
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+.mat251-stat-tooltip.mat251-tooltip-top::after {
+    top: 100%;
+    bottom: auto;
+    border-color: #1e293b transparent transparent transparent;
+}
+
+.mat251-tooltip-text {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.25;
+}
+
+.mat251-tooltip-math {
+    color: #fbbf24;
+    font-size: 0.85rem;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+.mat251-tooltip-math .katex,
+.mat251-tooltip-math .katex * {
+    color: #fbbf24 !important;
+    white-space: nowrap !important;
+}
+
+/* Compatibilidad con t3-tooltip-box según estándares MAT251 */
 .t3-tooltip-wrap {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+    border-bottom: 1px dashed var(--text-pure, #666);
+    padding-bottom: 1px;
+}
+
+.t3-tooltip-wrap:hover {
+    z-index: 10000;
 }
 
 .t3-tooltip-box {
+    display: none;
     visibility: hidden;
-    background-color: #2c3e50;
-    color: white;
+    background-color: #1e293b;
+    color: #ffffff;
     text-align: center;
-    border-radius: 8px;
-    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 8px 12px;
     position: absolute;
-    z-index: 1000;
-    bottom: 125%;
+    z-index: 9999;
+    top: calc(100% + 8px);
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(4px);
     opacity: 0;
-    transition: opacity 0.2s, visibility 0.2s;
+    transition: opacity 0.2s ease, transform 0.2s ease;
     width: max-content;
-    max-width: 250px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-width: 240px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
     pointer-events: none;
     font-weight: normal;
-    font-size: 0.95rem;
+    font-size: 0.76rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
 }
 
-/* El triangulito (flecha) del tooltip */
 .t3-tooltip-box::after {
     content: "";
     position: absolute;
-    top: 100%;
+    bottom: 100%;
     left: 50%;
-    margin-left: -6px;
-    border-width: 6px;
+    margin-left: -5px;
+    border-width: 5px;
     border-style: solid;
-    border-color: #2c3e50 transparent transparent transparent;
+    border-color: transparent transparent #1e293b transparent;
 }
 
 .t3-tooltip-wrap:hover .t3-tooltip-box {
+    display: flex;
     visibility: visible;
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 .t3-tooltip-math {
-    font-size: 1.1rem;
-    color: #fbbf24; /* Amarillo para la fórmula */
-    font-weight: bold;
-    margin-top: 4px;
+    font-size: 0.85rem;
+    color: #fbbf24;
+    margin-top: 2px;
+}
+
+.t3-tooltip-math .katex {
+    color: #fbbf24 !important;
 }
 
 /* Contenedor responsivo para las tarjetas de estadísticas */
@@ -241,3 +469,1299 @@
         width: 100px;
     }
 }
+
+/* ======================================================= */
+/* TABLA RESPONSIVA DE PARÁMETROS ESTIMADOS (TEMA 3)       */
+/* ======================================================= */
+.t3-tabla-estimados-wrapper {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    overflow: visible;
+}
+
+.t3-tabla-estimados {
+    width: fit-content;
+    margin: 0 auto;
+    border-collapse: collapse;
+    text-align: center;
+    border: 1px solid var(--text-pure);
+    border-radius: 0px;
+    color: var(--text-pure);
+}
+
+.t3-tabla-estimados th,
+.t3-tabla-estimados td {
+    border: 1px solid var(--text-pure);
+    color: var(--text-pure);
+    white-space: nowrap;
+    padding: 10px 28px;
+    text-align: center;
+}
+
+.t3-tabla-estimados th {
+    font-weight: 700;
+}
+
+.t3-col-param-sm {
+    min-width: 110px;
+}
+
+.t3-col-param-lg {
+    min-width: 220px;
+}
+
+/* En Celulares y dispositivos pequeños */
+@media (max-width: 600px) {
+    .t3-tabla-estimados-wrapper {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        overflow: visible;
+    }
+
+    .t3-tabla-estimados {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .t3-tabla-estimados th,
+    .t3-tabla-estimados td {
+        padding: 6px 6px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .t3-col-param-sm {
+        min-width: unset !important;
+    }
+
+    .t3-col-param-lg {
+        min-width: unset !important;
+    }
+
+    .mat251-stat-tooltip {
+        max-width: min(94vw, 440px);
+        font-size: 0.72rem;
+        padding: 6px 8px;
+    }
+}
+
+/* ======================================================= */
+/* FILA RESPONSIVA DE CONTROLES DE MATRIZ (TEMA 3)        */
+/* ======================================================= */
+.t3-fila-controles-matriz {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.t3-control-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+    box-sizing: border-box;
+}
+
+.t3-control-item label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-pure);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.t3-control-item .t3-control-input-wrapper {
+    width: 180px;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.t3-control-item .t3-control-input-wrapper input {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+    .t3-fila-controles-matriz {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 0 15px 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box;
+    }
+
+    .t3-control-item {
+        width: 100% !important;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        flex: none !important;
+        height: auto !important;
+        min-height: unset !important;
+        box-sizing: border-box;
+    }
+
+    .t3-control-item label {
+        font-size: 0.8rem !important;
+        white-space: nowrap;
+        flex-shrink: 0;
+        text-align: left;
+    }
+
+    .t3-control-item .t3-control-input-wrapper {
+        flex: 1 1 auto;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0;
+        display: flex;
+        box-sizing: border-box;
+    }
+
+    .t3-control-item .t3-control-input-wrapper input {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+}
+
+/* ======================================================= */
+/* CUADRÍCULA DE PARÁMETROS HIPERGEOMÉTRICA (TEMA 3)      */
+/* ======================================================= */
+.t3-grid-hipergeometrica {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 18px;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.t3-grid-hipergeometrica .tema3-form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.t3-grid-hipergeometrica .tema3-form-group label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-pure);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.t3-grid-hipergeometrica .tema3-form-group input {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 640px) {
+    .t3-grid-hipergeometrica {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        gap: 10px 8px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .t3-grid-hipergeometrica .tema3-form-group {
+        gap: 5px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .t3-grid-hipergeometrica .tema3-form-group label {
+        font-size: 0.8rem !important;
+        flex-shrink: 0 !important;
+        min-width: unset !important;
+    }
+
+    .t3-grid-hipergeometrica .tema3-form-group input {
+        min-width: 0 !important;
+        width: 100% !important;
+        padding: 6px 6px !important;
+        font-size: 0.78rem !important;
+        text-align: center;
+    }
+}
+
+/* 12.1 Botones de Acción Destructiva / Eliminar (IconoBasura) */
+.btn-eliminar-fila-mat251 {
+    background: transparent !important;
+    color: #ef4444 !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-eliminar-fila-mat251:hover:not(:disabled) {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+}
+
+.btn-eliminar-fila-mat251:disabled {
+    opacity: 0.25 !important;
+    cursor: not-allowed !important;
+    background: transparent !important;
+}
+
+/* ======================================================= */
+/* TABLA DE INTERVALOS (SUMA DE INTERVALOS) - MAT251       */
+/* ======================================================= */
+.t3-tabla-intervalos-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 10px;
+    overflow: visible;
+}
+
+.t3-tabla-intervalos-card {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    border: 1px solid var(--text-pure);
+    background-color: var(--bg-card);
+    border-radius: 0px;
+    overflow: visible;
+}
+
+.t3-tabla-intervalos {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.t3-tabla-intervalos th {
+    background-color: var(--bg-input);
+    border-bottom: 1px solid var(--text-pure);
+    border-right: 1px solid var(--text-pure);
+    padding: 8px 12px;
+    text-align: center;
+    color: var(--text-pure);
+    font-weight: 700;
+}
+
+.t3-tabla-intervalos th:last-child {
+    border-right: none;
+}
+
+.t3-tabla-intervalos td {
+    border-right: 1px solid var(--text-pure);
+    padding: 0;
+    text-align: center;
+}
+
+.t3-tabla-intervalos td:last-child {
+    border-right: none;
+    padding: 6px;
+}
+
+.t3-tabla-intervalos tr:not(:last-child) td {
+    border-bottom: 1px solid var(--text-pure);
+}
+
+.t3-tabla-intervalos .td-intervalo-idx {
+    padding: 6px 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.t3-tabla-intervalos input {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 12px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text-pure);
+    font-size: 0.85rem;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .t3-tabla-intervalos-card {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .t3-tabla-intervalos th,
+    .t3-tabla-intervalos td {
+        padding: 4px 2px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .t3-tabla-intervalos input {
+        padding: 6px 4px !important;
+        font-size: 0.78rem !important;
+        min-height: 34px !important;
+    }
+}
+
+/* ======================================================= */
+/* CONDICIÓN LÓGICA / SELECTOR RESPONSIVO (TEMA 3)         */
+/* ======================================================= */
+.t3-condicion-fila {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: nowrap !important;
+}
+
+.t3-condicion-label {
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: var(--text-pure);
+    font-weight: bold;
+    white-space: nowrap;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.t3-condicion-select-wrapper {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+@media (max-width: 520px) {
+    .t3-condicion-fila {
+        gap: 6px !important;
+    }
+
+    .t3-condicion-label {
+        font-size: 0.78rem !important;
+    }
+
+    .t3-condicion-select-wrapper {
+        flex: 1 1 auto !important;
+        max-width: 220px !important;
+    }
+
+    .custom-select-trigger {
+        padding: 5px 8px !important;
+        min-height: 32px !important;
+    }
+
+    .t3-parametros-fila-manual {
+        gap: 8px !important;
+    }
+
+    .t3-parametros-fila-manual .tema3-form-group {
+        gap: 4px !important;
+    }
+
+    .t3-parametros-fila-manual input {
+        padding: 6px 4px !important;
+        font-size: 0.8rem !important;
+        width: 100% !important;
+        max-width: 130px !important;
+    }
+}
+
+.t3-parametros-fila-manual {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+    max-width: 380px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+}
+
+/* ======================================================= */
+/* MODAL INTERACTIVO DE TABLA NORMAL ESTÁNDAR Z           */
+/* ======================================================= */
+.modal-tabla-z-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(5px);
+    z-index: 1000005 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.modal-tabla-z-container {
+    background: var(--bg-card, #ffffff);
+    color: var(--text-pure, #1e293b);
+    border-radius: 5px;
+    width: 100%;
+    max-width: 960px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border-color, #e2e8f0);
+    overflow: hidden;
+    padding: 0px 20px 0px 20px;
+}
+
+.modal-tabla-z-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-card, #ffffff);
+}
+
+.modal-tabla-z-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    background: rgba(217, 119, 6, 0.12);
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-tabla-z-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 'bold';
+    color: var(--text-pure, #1e293b);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.modal-tabla-z-subtitle {
+    margin: 2px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-pure, #1e293b);
+    opacity: 0.85;
+}
+
+.modal-tabla-z-btn-close {
+    display: none;
+}
+
+/* Panel Educativo */
+.modal-tabla-z-panel-educativo {
+    padding: 12px 20px;
+    background: rgba(217, 119, 6, 0.05);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.modal-tabla-z-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.modal-tabla-z-badge-target {
+    background: var(--accent-color);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.modal-tabla-z-steps-grid {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.modal-tabla-z-step-card {
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #cbd5e1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 140px;
+}
+
+.modal-tabla-z-step-card-active {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.modal-tabla-z-step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-tabla-z-step-num.green {
+    background: #10b981;
+}
+
+.modal-tabla-z-step-label {
+    font-size: 0.68rem;
+    color: var(--text-pure, #1e293b);
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.modal-tabla-z-step-val {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-pure, #1e293b);
+}
+
+.modal-tabla-z-step-val.green {
+    color: #059669;
+}
+
+html.dark .modal-tabla-z-step-val.green {
+    color: #34d399;
+}
+
+.modal-tabla-z-step-arrow {
+    color: var(--text-muted, #94a3b8);
+    display: flex;
+    align-items: center;
+}
+
+.modal-tabla-z-alerta-extrema {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgba(245, 158, 11, 0.12);
+    border-left: 3px solid #f59e0b;
+    font-size: 0.76rem;
+    color: var(--text-pure, #1e293b);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Toolbar */
+.modal-tabla-z-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    gap: 8px;
+    background: var(--bg-card, #ffffff);
+    border-bottom: none !important;
+    flex-wrap: nowrap !important;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+
+/* Selector de pestañas Z <= 0 / Z >= 0 con la misma interfaz unificada de modos MAT251 */
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 {
+    display: inline-flex;
+    background: var(--bg-input, #f1f5f9);
+    padding: 3px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo {
+    font-family: inherit;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--text-pure);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo:hover:not(.active) {
+    background-color: rgba(217, 119, 6, 0.1);
+    color: var(--accent-color);
+}
+
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo:hover:not(.active) *,
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo:hover:not(.active) .katex,
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo:hover:not(.active) .katex-html {
+    color: var(--accent-color) !important;
+}
+
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo.active {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25) !important;
+}
+
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo.active *,
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo.active .katex,
+.modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo.active .katex-html {
+    color: #ffffff !important;
+}
+
+.modal-tabla-z-custom-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 0.8rem !important;
+}
+
+/* Botón Buscar: Outline en reposo -> Relleno en hover (según App.css) */
+.modal-tabla-z-btn-ir {
+    background-color: transparent !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    border-radius: 5px !important;
+    padding: 4px 10px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: inherit !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.modal-tabla-z-btn-ir:hover:not(:disabled) {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Botón Volver al Z original: Outline SOLID en reposo -> Relleno en hover */
+.modal-tabla-z-btn-reset {
+    background-color: transparent !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    border-radius: 5px !important;
+    padding: 4px 10px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: inherit !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.modal-tabla-z-btn-reset:hover:not(:disabled) {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Table Area con bordes 1px solid negro */
+.modal-tabla-z-table-wrap {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    max-height: 48vh;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid #000000 !important;
+    border-radius: 0px !important;
+    margin-bottom: 10px;
+}
+
+.modal-tabla-z-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.7rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    border: none !important;
+}
+
+.modal-tabla-z-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 25;
+    background: var(--header-bg, #f1f5f9);
+}
+
+.modal-tabla-z-table thead tr {
+    background: var(--header-bg, #f1f5f9);
+}
+
+/* Sticky Corner */
+.modal-tabla-z-th-corner {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    background: var(--header-bg, #f1f5f9) !important;
+    color: var(--text-pure, #1e293b) !important;
+    font-weight: 800;
+    padding: 8px 10px;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    text-align: center;
+}
+
+/* Sticky Column Headers */
+.modal-tabla-z-th-col {
+    position: sticky;
+    top: 0;
+    z-index: 25;
+    background: var(--header-bg, #f1f5f9) !important;
+    color: var(--text-pure, #1e293b) !important;
+    font-weight: 700;
+    padding: 8px 6px;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    text-align: center;
+    min-width: 62px;
+}
+
+.modal-tabla-z-th-col.col-highlight {
+    background: #fef3c7 !important;
+    color: var(--accent-color) !important;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    font-weight: 800;
+}
+
+html.dark .modal-tabla-z-th-col.col-highlight {
+    background: rgba(245, 158, 11, 0.25) !important;
+    color: var(--accent-color) !important;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+}
+
+/* Sticky Row Header */
+.modal-tabla-z-th-row {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: var(--header-bg, #f1f5f9) !important;
+    color: var(--text-pure, #1e293b) !important;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.modal-tabla-z-th-row.row-label-active {
+    background: #fef3c7 !important;
+    color: var(--accent-color) !important;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    font-weight: 800;
+}
+
+html.dark .modal-tabla-z-th-row.row-label-active {
+    background: rgba(245, 158, 11, 0.25) !important;
+    color: var(--accent-color) !important;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+}
+
+/* Table Cells */
+.modal-tabla-z-td {
+    padding: 4px 6px;
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    text-align: center;
+    color: var(--text-pure) !important;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    user-select: none;
+}
+
+.modal-tabla-z-td:hover {
+    background-color: rgba(217, 119, 6, 0.15) !important;
+}
+
+/* Row & Column Cross Highlight */
+.row-highlight .modal-tabla-z-td {
+    background-color: rgba(217, 119, 6, 0.05);
+}
+
+.modal-tabla-z-td.cell-cross-highlight {
+    background-color: rgba(217, 119, 6, 0.10);
+}
+
+/* Intersection Cell: Verde Esmeralda (#10b981) */
+.modal-tabla-z-td.cell-intersection-active {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    box-shadow: inset 0 0 0 2px #047857, 0 0 10px rgba(16, 185, 129, 0.5);
+    border-right: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* Evitar bordes dobles contra el marco perimetral negro (solo última columna y última fila del tbody) */
+.modal-tabla-z-table th:last-child,
+.modal-tabla-z-table td:last-child {
+    border-right: none !important;
+}
+
+.modal-tabla-z-table tbody tr:last-child th,
+.modal-tabla-z-table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Footer */
+.modal-tabla-z-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0px;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-card, #ffffff);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.modal-tabla-z-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.7rem;
+    color: var(--text-pure, #1e293b);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.legend-box.green {
+    background: #10b981;
+    border: 1px solid #047857;
+}
+
+.legend-box.gold {
+    background: #f59e0b;
+    border: 1px solid #d97706;
+}
+
+.legend-box.blue {
+    background: rgba(37, 99, 235, 0.25);
+    border: 1px solid var(--primary-color, #2563eb);
+}
+
+/* Botón Entendido / Cerrar: Outline en reposo -> Relleno en hover (según App.css) */
+.modal-tabla-z-btn-cerrar {
+    background-color: transparent !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    border-radius: 5px !important;
+    font-weight: 'bold' !important;
+    font-size: 0.85rem !important;
+    padding: 5px 20px !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-family: inherit !important;
+    box-sizing: border-box !important;
+}
+
+.modal-tabla-z-btn-cerrar:hover:not(:disabled) {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Botón disparador dentro de la tarjeta de resultados: Outline en reposo -> Relleno en hover (según App.css) */
+.btn-abrir-tabla-z {
+    background-color: transparent !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    border-radius: 6px !important;
+    padding: 5px 12px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    font-family: inherit !important;
+    box-sizing: border-box !important;
+}
+
+.btn-abrir-tabla-z:hover:not(:disabled) {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ======================================================= */
+/* RESPONSIVIDAD Y OPTIMIZACIÓN MÓVIL PARA TABLA NORMAL Z */
+/* ======================================================= */
+
+/* Visibilidad de etiquetas en Desktop */
+.step-label-short,
+.tab-desc-mobile,
+.form-label-short,
+.btn-reset-short {
+    display: none;
+}
+
+.step-label-full,
+.tab-desc-full,
+.form-label-full,
+.btn-reset-full,
+.legend-text-full {
+    display: inline;
+}
+
+@media (max-width: 640px) {
+    /* Alternancia de textos resumidos en celular */
+    .step-label-short,
+    .tab-desc-mobile,
+    .form-label-short,
+    .btn-reset-short {
+        display: inline !important;
+    }
+
+    .step-label-full,
+    .tab-desc-full,
+    .form-label-full,
+    .btn-reset-full,
+    .legend-text-full {
+        display: none !important;
+    }
+
+    /* Modal Overlay & Container */
+    .modal-tabla-z-overlay {
+        padding: 6px !important;
+    }
+
+    .modal-tabla-z-container {
+        padding: 0 10px !important;
+        max-height: 96vh !important;
+        border-radius: 6px !important;
+    }
+
+    /* Header */
+    .modal-tabla-z-header {
+        padding: 8px 0 !important;
+    }
+
+    .modal-tabla-z-title {
+        font-size: 0.82rem !important;
+        gap: 4px !important;
+    }
+
+    .modal-tabla-z-icon {
+        width: 24px !important;
+        height: 24px !important;
+        border-radius: 4px !important;
+    }
+
+    .modal-tabla-z-icon svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /* Panel Educativo */
+    .modal-tabla-z-panel-educativo {
+        padding: 6px 8px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .modal-tabla-z-panel-header {
+        margin-bottom: 0 !important;
+        gap: 6px !important;
+    }
+
+    .modal-tabla-z-panel-header span:first-child {
+        font-size: 0.75rem !important;
+    }
+
+    .modal-tabla-z-badge-target {
+        font-size: 0.74rem !important;
+        padding: 1px 6px !important;
+    }
+
+    /* Tarjetas de pasos en UNA SOLA FILA horizontal compacta con 10px de margin-top */
+    .modal-tabla-z-steps-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 4px !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+    }
+
+    .modal-tabla-z-step-card {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        padding: 4px 5px !important;
+        gap: 5px !important;
+        border-radius: 4px !important;
+    }
+
+    .modal-tabla-z-step-body {
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .modal-tabla-z-step-num {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 0.65rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .modal-tabla-z-step-label {
+        font-size: 0.58rem !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        overflow: hidden !important;
+    }
+
+    .modal-tabla-z-step-val {
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        line-height: 1.15 !important;
+        white-space: nowrap !important;
+    }
+
+    .step-prob-pct {
+        display: none !important;
+    }
+
+    .modal-tabla-z-step-arrow {
+        transform: none !important;
+        color: var(--text-muted) !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 10px !important;
+    }
+
+    .modal-tabla-z-step-arrow svg {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    /* Toolbar en 2 filas limpias */
+    .modal-tabla-z-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        padding: 6px 0 6px 0 !important;
+        margin-top: 4px !important;
+        overflow: visible !important;
+    }
+
+    /* Fila 1: Pestañas de modo proporcional 50% / 50% */
+    .modal-tabla-z-toolbar .contenedor-selector-modos-mat251 {
+        width: 100% !important;
+        display: flex !important;
+        box-sizing: border-box !important;
+        padding: 2px !important;
+    }
+
+    .modal-tabla-z-toolbar .contenedor-selector-modos-mat251 .btn-mat251-modo {
+        flex: 1 1 50% !important;
+        min-width: 0 !important;
+        text-align: center !important;
+        padding: 5px 2px !important;
+        font-size: 0.74rem !important;
+    }
+
+    /* Fila 2: Formulario de exploración agrupado al centro con buen espaciado y margin-top */
+    .modal-tabla-z-custom-form {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        flex-wrap: nowrap !important;
+        margin-top: 4px !important;
+    }
+
+    .modal-tabla-z-form-label {
+        font-size: 0.74rem !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+    }
+
+    .modal-tabla-z-input {
+        width: 54px !important;
+        padding: 3px 4px !important;
+        font-size: 0.75rem !important;
+        text-align: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    .modal-tabla-z-btn-ir {
+        padding: 4px 10px !important;
+        font-size: 0.72rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .modal-tabla-z-btn-reset {
+        padding: 4px 10px !important;
+        font-size: 0.72rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Table Area optimizada para celulares */
+    .modal-tabla-z-table-wrap {
+        max-height: 44vh !important;
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .modal-tabla-z-table {
+        font-size: 0.65rem !important;
+    }
+
+    .modal-tabla-z-th-corner {
+        padding: 4px 6px !important;
+        font-size: 0.68rem !important;
+    }
+
+    .modal-tabla-z-th-col {
+        padding: 4px 2px !important;
+        font-size: 0.68rem !important;
+        min-width: 44px !important;
+    }
+
+    .modal-tabla-z-th-row {
+        padding: 3px 5px !important;
+        font-size: 0.68rem !important;
+    }
+
+    .modal-tabla-z-td {
+        padding: 3px 2px !important;
+        font-size: 0.65rem !important;
+    }
+
+    /* Footer */
+    .modal-tabla-z-footer {
+        padding: 6px 0 8px 0 !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    .modal-tabla-z-legend {
+        font-size: 0.68rem !important;
+    }
+
+    .modal-tabla-z-btn-cerrar {
+        padding: 4px 14px !important;
+        font-size: 0.78rem !important;
+    }
+}
+
+

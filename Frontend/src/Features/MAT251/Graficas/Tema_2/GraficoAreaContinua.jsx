@@ -1,9 +1,66 @@
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { compile } from 'mathjs';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 import { FONT, FS } from '../../Principal/Constantes';
 
+const CustomKatexLabel = (props) => {
+    const { viewBox, value, offsetY = 0, offsetX = 0 } = props;
+    if (!viewBox) return null;
+    const { x, y } = viewBox;
+
+    return (
+        <foreignObject x={x - 70 + offsetX} y={y - 24 + offsetY} width={140} height={24} style={{ overflow: 'visible', pointerEvents: 'none' }}>
+            <div
+                dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }}
+                style={{
+                    color: 'var(--text-pure)',
+                    fontSize: '11px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    fontFamily: FONT
+                }}
+            />
+        </foreignObject>
+    );
+};
+
+const YAxisKatexLabel = ({ viewBox, value }) => {
+    if (!viewBox) return null;
+    const { x, y, height } = viewBox;
+    const cx = x + 15;
+    const cy = y + height / 2;
+    return (
+        <foreignObject x={cx - 50} y={cy - 50} width={100} height={100} style={{ overflow: 'visible', pointerEvents: 'none' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ transform: 'rotate(-90deg)', color: 'var(--text-pure)', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    <span dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} />
+                </div>
+            </div>
+        </foreignObject>
+    );
+};
+
+const XAxisKatexLabel = ({ viewBox, value }) => {
+    if (!viewBox) return null;
+    const { x, y, width, height } = viewBox;
+    const cx = x + width / 2;
+    const cy = y + height - 5;
+    return (
+        <foreignObject x={cx - 100} y={cy - 12} width={200} height={30} style={{ overflow: 'visible', pointerEvents: 'none' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-pure)', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', gap: '4px' }}>
+                <span>Valor de</span>
+                <span dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} />
+            </div>
+        </foreignObject>
+    );
+};
 
 export default function GraficoAreaContinua({ datos }) {
     const dataGrafica = useMemo(() => {
@@ -132,14 +189,42 @@ export default function GraficoAreaContinua({ datos }) {
         return Math.max(...dataGrafica.map(d => d.fx));
     }, [dataGrafica]);
 
+    const yAxisConfig = useMemo(() => {
+        const areaVal = datos && datos.area !== undefined && datos.area !== null ? Number(datos.area) : 1;
+        const esAreaUno = Math.abs(areaVal - 1) < 0.05 || (datos && datos.modo === 'acumulada');
+
+        if (esAreaUno && maxFx <= 1) {
+            return {
+                domain: [0, 1],
+                ticks: [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+            };
+        }
+
+        if (maxFx > 0) {
+            return {
+                domain: [0, 'auto'],
+                ticks: undefined
+            };
+        }
+
+        return {
+            domain: ['auto', 'auto'],
+            ticks: undefined
+        };
+    }, [datos, maxFx]);
+
     if (!datos || dataGrafica.length === 0) return null;
 
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '10px', borderRadius: '5px', boxShadow: '0px 2px 4px rgba(0,0,0,0.1)', color: 'var(--text-main)' }}>
-                    <p style={{ margin: '0 0 5px 0', fontSize: FS.sm, fontWeight: 600 }}>x = {label}</p>
-                    <p style={{ margin: 0, fontSize: FS.sm, color: payload[0].color }}>{datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} = {payload[0].value}</p>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '10px', borderRadius: '5px', boxShadow: '0px 2px 4px rgba(0,0,0,0.1)', color: 'var(--text-pure)' }}>
+                    <p style={{ margin: '0 0 4px 0', fontSize: FS.sm, fontWeight: 600 }}>
+                        <InlineMath math={`x = ${label}`} />
+                    </p>
+                    <p style={{ margin: 0, fontSize: FS.sm, color: payload[0].color }}>
+                        <InlineMath math={`${datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} = ${payload[0].value}`} />
+                    </p>
                 </div>
             );
         }
@@ -147,13 +232,17 @@ export default function GraficoAreaContinua({ datos }) {
     };
 
     return (
-        <MarcoWidgetMAT251 titulo="Función de Densidad f(x) y Esperanza E(X)" anchoCompleto={true} alto="450px">
-            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', fontFamily: FONT }}>
-                <div style={{ flex: 1, minHeight: 0, width: '100%', position: 'relative' }}>
+        <div style={{ width: '100%', fontFamily: FONT }}>
+            <MarcoWidgetMAT251 
+                titulo={<>Función de Densidad <InlineMath math={datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} /> y Esperanza <InlineMath math="E(X)" /></>} 
+                anchoCompleto={true} 
+                alto="380px"
+            >
+                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
                             data={dataGrafica}
-                            margin={{ top: 20, right: 30, left: 5, bottom: 7 }}
+                            margin={{ top: 36, right: 30, left: -5, bottom: 25 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                             <ReferenceLine y={0} stroke="var(--text-main)" strokeWidth={2} />
@@ -164,14 +253,14 @@ export default function GraficoAreaContinua({ datos }) {
                                     stroke="#ef4444" 
                                     strokeDasharray="5 5" 
                                     strokeWidth={2}
-                                    label={{ position: 'top', value: `E(X) = ${datos.eX.toFixed(4)}`, fill: '#ef4444', fontSize: 14, fontWeight: 'bold', fontFamily: FONT }}
+                                    label={<CustomKatexLabel value={`\\mathbf{E(X)} = \\mathrm{${datos.eX.toFixed(4)}}`} color="#000000" />}
                                 />
                             )}
                             
                             <XAxis 
                                 dataKey="x" 
                                 orientation={maxFx <= 0 ? 'top' : 'bottom'}
-                                tick={{ fontSize: 12, fill: 'var(--text-main)', fontWeight: 500 }}
+                                tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 500 }}
                                 tickLine={{ stroke: 'var(--text-main)', strokeWidth: 2 }}
                                 axisLine={{ stroke: 'transparent' }}
                                 type="number"
@@ -179,17 +268,18 @@ export default function GraficoAreaContinua({ datos }) {
                                 ticks={calculatedDomainAndTicks.ticks}
                                 tickMargin={10}
                                 minTickGap={20}
-                                label={{ value: 'Valor de x', position: 'insideBottom', offset: -7, fill: 'var(--text-main)', fontSize: 12, fontWeight: 600, fontFamily: FONT }}
+                                label={<XAxisKatexLabel value="x" />}
                             />
                             
                             <YAxis 
-                                tick={{ fontSize: 12, fill: 'var(--text-main)', fontWeight: 500 }}
+                                tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 500 }}
                                 tickLine={{ stroke: 'var(--text-main)' }}
                                 axisLine={{ stroke: 'var(--text-main)', strokeWidth: 2 }}
                                 tickFormatter={(val) => val.toFixed(2)}
                                 width={55}
-                                domain={['auto', 'auto']}
-                                label={{ value: 'f(x)', angle: -90, position: 'insideLeft', offset: 10, fill: 'var(--text-main)', fontSize: 12, fontWeight: 600, fontFamily: FONT }}
+                                domain={yAxisConfig.domain}
+                                ticks={yAxisConfig.ticks}
+                                label={<YAxisKatexLabel value={datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} />}
                             />
                             
                             <Tooltip content={<CustomTooltip />} />
@@ -208,12 +298,12 @@ export default function GraficoAreaContinua({ datos }) {
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
-                
-                {/* Mensaje de Área en el flujo normal (sin absolute) para no superponerse */}
-                <div style={{ textAlign: 'center', fontSize: FS.sm, color: 'var(--text-main)', padding: '30px 0px', flexShrink: 0 }}>
-                    El área sombreada bajo la curva entre <strong>a = {datos.a}</strong> y <strong>b = {datos.b}</strong> representa la probabilidad total (Área = {datos.area ? datos.area.toFixed(4) : '1.0'}).
-                </div>
+            </MarcoWidgetMAT251>
+            
+            {/* Mensaje explicativo situado debajo de la gráfica */}
+            <div style={{ textAlign: 'center', fontSize: FS.sl, color: 'var(--text-main)', marginTop: '8px' }}>
+                El área sombreada bajo la curva entre <InlineMath math={`a = ${datos.a}`} /> y <InlineMath math={`b = ${datos.b}`} /> representa la probabilidad total (<InlineMath math={`\\text{Área} = ${datos.area ? datos.area.toFixed(4) : '1.0000'}`} />).
             </div>
-        </MarcoWidgetMAT251>
+        </div>
     );
 }

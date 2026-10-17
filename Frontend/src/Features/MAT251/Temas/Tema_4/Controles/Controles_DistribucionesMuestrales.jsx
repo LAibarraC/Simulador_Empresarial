@@ -17,7 +17,7 @@ export default function Controles_DistribucionesMuestrales({ setResDistMuestrale
 
     return (
         <div style={{ ...cardStyle, border: 'none', marginBottom: '20px' }}>
-            <h4 style={{ color: 'var(--primary-color)', margin: '0 0 15px 0', fontSize: FS.sm }}>
+            <h4 style={{ color: 'var(--text-pure)', margin: '0 0 15px 0', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                 Distribuciones Muestrales
             </h4>
             
@@ -25,10 +25,11 @@ export default function Controles_DistribucionesMuestrales({ setResDistMuestrale
                 <label style={labelStyle}>Población (separada por comas):</label>
                 <input 
                     type="text"
+                    className="input-mat251 placeholder-small"
                     value={poblacion} 
                     onChange={e => setPoblacion(e.target.value)} 
                     placeholder="Ej. 2, 4, 8, 10, 20"
-                    style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
+                    style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)', height: '38px', boxSizing: 'border-box' }}
                 />
             </div>
 
@@ -36,11 +37,12 @@ export default function Controles_DistribucionesMuestrales({ setResDistMuestrale
                 <label style={labelStyle}>Tamaño de la Muestra (n):</label>
                 <input 
                     type="number" 
+                    className="input-mat251 placeholder-small"
                     value={n} 
                     onChange={e => setN(e.target.value)} 
                     min="1"
                     placeholder="Valor"
-                    style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }}
+                    style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)', height: '38px', boxSizing: 'border-box' }}
                 />
             </div>
 
@@ -68,7 +70,7 @@ export default function Controles_DistribucionesMuestrales({ setResDistMuestrale
                 </div>
             </div>
 
-            <button onClick={ejecutar} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            <button onClick={ejecutar} className="button_calcular" style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 600, fontFamily: FONT, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
             >
                 GRAFICAR
             </button>

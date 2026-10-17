@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { AgGridReact, AgGridProvider } from 'ag-grid-react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
 
 import { useModuleData } from '../components/gestion_datos/DataContext';
 import { keyToNum, getExcelChar, excelToCoords } from '../utils/excelHelpers';
@@ -16,6 +16,7 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+provideGlobalGridOptions({ theme: 'legacy' });
 
 const SimuladorMAT251 = () => {
 
@@ -298,7 +299,7 @@ const SimuladorMAT251 = () => {
             let tipoDetectado = "Sin datos";
             if (datosValidos.length > 0) {
                 if (contadorNumeros > 0 && contadorTextos > 0) {
-                    tipoDetectado = "Mixta (Error)";
+                    tipoDetectado = "Mixta";
                 } else if (contadorNumeros > 0 && contadorTextos === 0) {
                     tipoDetectado = "Cuantitativa (Número)";
                 } else {
@@ -381,7 +382,7 @@ const SimuladorMAT251 = () => {
                 if (datosValidos.length > 0) {
                     // Si hay por lo menos 1 número Y por lo menos 1 texto en la misma selección:
                     if (contadorNumeros > 0 && contadorTextos > 0) {
-                        tipoDetectado = "Mixta (Error)";
+                        tipoDetectado = "Mixta";
                     }
                     // Si SOLO hay números:
                     else if (contadorNumeros > 0 && contadorTextos === 0) {
@@ -580,6 +581,7 @@ const SimuladorMAT251 = () => {
                         <div id="tour-datos-tabla" className="ag-theme-alpine grid-wrapper">
                             <AgGridReact
                                 ref={gridRef} rowData={rowData} columnDefs={columnDefs}
+                                theme="legacy"
                                 onCellMouseDown={p => setSelection({ start: { row: p.node.rowIndex, col: keyToNum(p.column.colId) }, end: { row: p.node.rowIndex, col: keyToNum(p.column.colId) }, isDragging: true })}
                                 onCellMouseOver={p => selection.isDragging && setSelection(prev => ({ ...prev, end: { row: p.node.rowIndex, col: keyToNum(p.column.colId) } }))}
                                 suppressCellFocus={true} headerHeight={30} rowHeight={25}

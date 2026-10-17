@@ -26,6 +26,9 @@ const getIcon = (val) => {
         case 'distribuciones_muestrales': return (
             <svg {...props}><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
         );
+        case 'tyf': return (
+            <svg {...props}><path d="M3 20h18" /><path d="M4 20c2-5 4-10 8-10s6 5 8 10" /><path d="M6 20c2-8 5-12 12-12" strokeDasharray="3 3" /></svg>
+        );
         case 'dist_uniforme': return (
             <svg {...props}><line x1="3" y1="20" x2="21" y2="20" /><line x1="3" y1="4" x2="3" y2="20" /><rect x="6" y="10" width="12" height="10" /></svg>
         );

@@ -82,6 +82,7 @@ export const calcularDistribucionModelo = (modelo, params, condicion) => {
             probabilidadFinal: null,
             esperanza: E,
             varianza: V,
+            desviacion: Math.sqrt(V)
         };
     }
 
@@ -603,18 +604,20 @@ export const calcularDistribucionContinua = (modelo, params, condicion) => {
                     resultExtra.c = jStat.studentt.inv(1 - pInput, n);
                     prob = pInput;
                     break;
-                case 'inversa_entre':
+                case 'inversa_entre': {
                     const tailProb = (1 - pInput) / 2;
                     resultExtra.c1 = jStat.studentt.inv(tailProb, n);
                     resultExtra.c2 = jStat.studentt.inv(1 - tailProb, n);
                     prob = pInput;
                     break;
-                case 'inversa_exterior':
+                }
+                case 'inversa_exterior': {
                     const halfP = pInput / 2;
                     resultExtra.c1 = jStat.studentt.inv(halfP, n);
                     resultExtra.c2 = jStat.studentt.inv(1 - halfP, n);
                     prob = pInput;
                     break;
+                }
                 default:
                     prob = 0;
             }

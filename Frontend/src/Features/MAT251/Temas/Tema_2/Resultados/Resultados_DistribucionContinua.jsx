@@ -5,6 +5,9 @@ import { InlineMath } from 'react-katex';
 import { compile, simplify, parse } from 'mathjs';
 import GraficoAreaContinua from '../../../Graficas/Tema_2/GraficoAreaContinua';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
+import { FONT, FS, RADIUS } from '../../../Principal/Constantes';
+import StatLabel from '../../../ui/StatLabel';
+import '../../../styles/Temas/Tema2.css';
 
 // Integración numérica mediante la Regla de Simpson 1/3
 const simpsonIntegrate = (fn, a, b, n = 1000) => {
@@ -75,6 +78,16 @@ export default function Resultados_DistribucionContinua({ resultados }) {
         return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
     };
 
+    const renderKatexValue = (val) => {
+        if (val === undefined || val === null || val === '') return '-';
+        const str = String(val).trim();
+        const escaped = str.replace(/%/g, '\\%');
+        if (/^[0-9.,\s\\%-]+$/.test(escaped)) {
+            return <InlineMath math={escaped} />;
+        }
+        return <InlineMath math={`\\text{${escaped}}`} />;
+    };
+
     const latexIntegrandEX = useMemo(() => {
         try {
             return simplify(`x * (${funcionFx})`).toTex({ parenthesis: 'auto' });
@@ -93,9 +106,9 @@ export default function Resultados_DistribucionContinua({ resultados }) {
 
     if (calculos.error) {
         return (
-            <div style={{ padding: '20px', background: 'var(--bg-card, #1e293b)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                <h3 style={{ color: '#ef4444', margin: '0 0 10px 0' }}>Error de Validación</h3>
-                <p style={{ color: 'var(--text-main, #f8fafc)', margin: 0 }}>{calculos.error}</p>
+            <div style={{ padding: '15px', background: 'var(--bg-card)', borderRadius: RADIUS, border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                <h3 style={{ color: '#ef4444', margin: '0 0 8px 0', fontSize: FS.md, fontWeight: 700, fontFamily: FONT }}>Error de Validación</h3>
+                <p style={{ color: 'var(--text-pure)', margin: 0, fontSize: FS.sm }}>{calculos.error}</p>
             </div>
         );
     }
@@ -107,42 +120,54 @@ export default function Resultados_DistribucionContinua({ resultados }) {
             
             {/* Tarjetas de Resultados */}
             <div className="resultados-grid-continua">
-                <div style={{ background: 'var(--bg-card, #1e293b)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color, var(--text-main))', textAlign: 'center' }}>
-                    <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '0.9rem', marginBottom: '5px' }}>Esperanza {renderLatex('E[X]')}</div>
-                    <div style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 'bold' }}>{eX.toFixed(4)}</div>
+                <div className="tarjeta-calculo-mat251" style={{ background: 'var(--bg-card)', padding: '12px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                    <p className="tarjeta-calculo-titulo" style={{ margin: 0, fontSize: FS.sl, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>
+                        Esperanza <StatLabel formulaKey="E_continua" formulaLatex="E[X]" align="center" />
+                    </p>
+                    <div className="tarjeta-calculo-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>
+                        {renderKatexValue(eX.toFixed(4))}
+                    </div>
                 </div>
-                <div style={{ background: 'var(--bg-card, #1e293b)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color, var(--text-main))', textAlign: 'center' }}>
-                    <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '0.9rem', marginBottom: '5px' }}>Varianza {renderLatex('V[X]')}</div>
-                    <div style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 'bold' }}>{varX.toFixed(4)}</div>
+                <div className="tarjeta-calculo-mat251" style={{ background: 'var(--bg-card)', padding: '12px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                    <p className="tarjeta-calculo-titulo" style={{ margin: 0, fontSize: FS.sl, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>
+                        Varianza <StatLabel formulaKey="V_continua" formulaLatex="V[X]" align="center" />
+                    </p>
+                    <div className="tarjeta-calculo-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>
+                        {renderKatexValue(varX.toFixed(4))}
+                    </div>
                 </div>
-                <div className="desviacion-card" style={{ background: 'var(--bg-card, #1e293b)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color, var(--text-main))', textAlign: 'center' }}>
-                    <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '0.9rem', marginBottom: '5px' }}>Desv. Estándar {renderLatex('\\sigma')}</div>
-                    <div style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 'bold' }}>{stdDev.toFixed(4)}</div>
+                <div className="tarjeta-calculo-mat251" style={{ background: 'var(--bg-card)', padding: '12px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                    <p className="tarjeta-calculo-titulo" style={{ margin: 0, fontSize: FS.sl, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>
+                        Desv. Estándar <StatLabel formulaKey="sigma" formulaLatex="\sigma" align="center" />
+                    </p>
+                    <div className="tarjeta-calculo-valor" style={{ margin: '4px 0 0', fontWeight: 'normal', color: 'var(--text-pure)', fontSize: FS.md }}>
+                        {renderKatexValue(stdDev.toFixed(4))}
+                    </div>
                 </div>
             </div>
 
             {/* Desarrollo Paso a Paso */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <h3 style={{ margin: '0', color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 'bold' }}>Desarrollo Matemático</h3>
+                <h3 style={{ margin: '0', color: 'var(--text-pure)', fontSize: FS.md, fontWeight: 700, fontFamily: FONT }}>Desarrollo Matemático</h3>
                 
                 {latex_esperanza ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {/* Cuadro Validación de Área */}
                         {latex_area && (
                             <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                    <h4 style={{ margin: '0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Validación de Área</h4>
-                                </div>
-                                <div style={{ background: 'var(--bg-card, #ffffff)', padding: '15px 20px', borderRadius: '12px', border: '1px solid var(--border-color, #cbd5e1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', overflowX: 'auto', marginBottom: '10px' }}>
-                                    <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>{renderLatex(latex_area)}</div>
+                                <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                    Validación de Área
+                                </h4>
+                                <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: RADIUS, border: '1px solid var(--border-color)', overflowX: 'auto', marginBottom: '8px' }}>
+                                    <div style={{ color: 'var(--text-pure)', fontSize: '0.9rem' }}>{renderLatex(latex_area)}</div>
                                 </div>
                                 {Math.abs(calculos.area - 1) < 0.02 ? (
-                                    <div style={{ background: '#dcfce7', color: '#166534', padding: '10px 15px', borderRadius: '8px', fontSize: '0.7rem', border: '1px solid #bbf7d0' }}>
-                                        La función es una densidad de probabilidad válida (Área = 1)
+                                    <div className="alerta-valida-continua" style={{ padding: '8px 12px', borderRadius: RADIUS, fontSize: FS.xs, display: 'flex', alignItems: 'center', fontWeight: 500 }}>
+                                        <span><strong>Éxito: </strong>La función es una densidad de probabilidad válida (Área = 1)</span>
                                     </div>
                                 ) : (
-                                    <div style={{ background: '#fef3c7', color: '#92400e', padding: '10px 15px', borderRadius: '8px', fontSize: '0.7rem', border: '1px solid #fde68a' }}>
-                                        El área es distinta de 1. No es una función de densidad válida, pero el cálculo continuará con fines demostrativos.
+                                    <div className="alerta-invalida-continua" style={{ padding: '8px 12px', borderRadius: RADIUS, fontSize: FS.xs, display: 'flex', alignItems: 'center', fontWeight: 500 }}>
+                                        <span><strong>Aviso: </strong>El área es distinta de 1. No es una función de densidad válida, pero el cálculo continuará con fines demostrativos.</span>
                                     </div>
                                 )}
                             </div>
@@ -150,70 +175,66 @@ export default function Resultados_DistribucionContinua({ resultados }) {
 
                         {/* Cuadro Esperanza */}
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <h4 style={{ margin: '0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Esperanza Matemática</h4>
-                                <span style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{renderLatex('E(X)')}</span>
-                            </div>
-                            <div style={{ background: 'var(--bg-card, #ffffff)', padding: '15px 20px', borderRadius: '12px', border: '1px solid var(--border-color, #cbd5e1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', overflowX: 'auto' }}>
-                                <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>{renderLatex(latex_esperanza)}</div>
+                            <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                Esperanza Matemática {renderLatex('E(X)')}
+                            </h4>
+                            <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: RADIUS, border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+                                <div style={{ color: 'var(--text-pure)', fontSize: '0.9rem' }}>{renderLatex(latex_esperanza)}</div>
                             </div>
                         </div>
                         
                         {/* Cuadro Varianza */}
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <h4 style={{ margin: '0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Varianza</h4>
-                                <span style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{renderLatex('V(X)')}</span>
-                            </div>
-                            <div style={{ background: 'var(--bg-card, #ffffff)', padding: '15px 20px', borderRadius: '12px', border: '1px solid var(--border-color, #cbd5e1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', overflowX: 'auto' }}>
-                                <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>{renderLatex(latex_varianza)}</div>
+                            <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                Varianza {renderLatex('V(X)')}
+                            </h4>
+                            <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: RADIUS, border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+                                <div style={{ color: 'var(--text-pure)', fontSize: '0.9rem' }}>{renderLatex(latex_varianza)}</div>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {/* Cuadro Validación de Área Fallback */}
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <h4 style={{ margin: '0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Validación de Área</h4>
-                            </div>
-                            <div style={{ background: 'var(--bg-card, #ffffff)', padding: '15px 20px', borderRadius: '12px', border: '1px solid var(--border-color, #cbd5e1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', overflowX: 'auto', marginBottom: '10px' }}>
-                                <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                                    {renderLatex(`\\text{Área} = \\int_{${a}}^{${b}} \\left(${latexString}\\right) dx = ${calculos.area.toFixed(4)}`)}
+                            <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                Validación de Área
+                            </h4>
+                            <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: RADIUS, border: '1px solid var(--border-color)', overflowX: 'auto', marginBottom: '8px' }}>
+                                <div style={{ color: 'var(--text-pure)', fontSize: '0.9rem' }}>
+                                    {renderLatex(`\\text{Área} = \\int_{${a}}^{${b}} \\left(${latexString}\\right) dx = \\mathbf{${calculos.area.toFixed(4)}}`)}
                                 </div>
                             </div>
                             {Math.abs(calculos.area - 1) < 0.02 ? (
-                                <div style={{ background: '#dcfce7', color: '#166534', padding: '10px 15px', borderRadius: '8px', fontSize: '0.7rem', border: '1px solid #bbf7d0' }}>
-                                    La función es una densidad de probabilidad válida (Área = 1)
+                                <div className="alerta-valida-continua" style={{ padding: '8px 12px', borderRadius: RADIUS, fontSize: FS.xs, display: 'flex', alignItems: 'center', fontWeight: 500 }}>
+                                    <span><strong>Éxito: </strong>La función es una densidad de probabilidad válida (Área = 1)</span>
                                 </div>
                             ) : (
-                                <div style={{ background: '#fef3c7', color: '#92400e', padding: '10px 15px', borderRadius: '5px', fontSize: '0.7rem', border: '1px solid #fde68a' }}>
-                                    El área es distinta de 1. No es una función de densidad válida, pero el cálculo continuará con fines demostrativos. 
+                                <div className="alerta-invalida-continua" style={{ padding: '8px 12px', borderRadius: RADIUS, fontSize: FS.xs, display: 'flex', alignItems: 'center', fontWeight: 500 }}>
+                                    <span><strong>Aviso: </strong>El área es distinta de 1. No es una función de densidad válida, pero el cálculo continuará con fines demostrativos.</span>
                                 </div>
                             )}
                         </div>
 
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <h4 style={{ margin: '0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Esperanza Matemática</h4>
-                                <span style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{renderLatex('E(X)')}</span>
-                            </div>
-                            <div style={{ background: 'var(--bg-card, #ffffff)', padding: '15px 20px', borderRadius: '12px', border: '1px solid var(--border-color, #cbd5e1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', overflowX: 'auto' }}>
-                                <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                                    {renderLatex(`E[X] = \\int_{${a}}^{${b}} x \\cdot \\left(${latexString}\\right) dx = \\int_{${a}}^{${b}} \\left(${latexIntegrandEX}\\right) dx = ${eX.toFixed(4)}`)}
+                            <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                Esperanza Matemática {renderLatex('E(X)')}
+                            </h4>
+                            <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: RADIUS, border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+                                <div style={{ color: 'var(--text-pure)', fontSize: '0.9rem' }}>
+                                    {renderLatex(`E[X] = \\int_{${a}}^{${b}} x \\cdot \\left(${latexString}\\right) dx = \\int_{${a}}^{${b}} \\left(${latexIntegrandEX}\\right) dx = \\mathbf{${eX.toFixed(4)}}`)}
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <h4 style={{ margin: '0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Varianza</h4>
-                                <span style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{renderLatex('V(X)')}</span>
-                            </div>
-                            <div style={{ background: 'var(--bg-card, #ffffff)', padding: '15px 20px', borderRadius: '12px', border: '1px solid var(--border-color, #cbd5e1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', overflowX: 'auto' }}>
-                                <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                            <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                Varianza {renderLatex('V(X)')}
+                            </h4>
+                            <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: RADIUS, border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+                                <div style={{ color: 'var(--text-pure)', fontSize: '0.9rem' }}>
                                     {renderLatex(`V[X] = E[X^2] - (E[X])^2`)}<br/><br/>
-                                    {renderLatex(`E[X^2] = \\int_{${a}}^{${b}} x^2 \\cdot \\left(${latexString}\\right) dx = \\int_{${a}}^{${b}} \\left(${latexIntegrandEX2}\\right) dx = ${calculos.eX2.toFixed(4)}`)}<br/><br/>
-                                    {renderLatex(`V[X] = ${calculos.eX2.toFixed(4)} - (${eX.toFixed(4)})^2 = ${varX.toFixed(4)}`)}
+                                    {renderLatex(`E[X^2] = \\int_{${a}}^{${b}} x^2 \\cdot \\left(${latexString}\\right) dx = \\int_{${a}}^{${b}} \\left(${latexIntegrandEX2}\\right) dx = \\mathbf{${calculos.eX2.toFixed(4)}}`)}<br/><br/>
+                                    {renderLatex(`V[X] = ${calculos.eX2.toFixed(4)} - (${eX.toFixed(4)})^2 = \\mathbf{${varX.toFixed(4)}}`)}
                                 </div>
                             </div>
                         </div>

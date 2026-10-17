@@ -31,12 +31,9 @@ import GraficoStudent from '../../../Graficas/Tema_4/GraficoStudent';
 
 const OpcionesHerramienta = [
     { id: 'normal', label: 'Distribución de la Media con varianza conocida' },
-    { id: 'chi', label: 'Distribución de la Varianza Muestral' },
     { id: 'proporcion', label: 'Distribución de una Proporción' },
+    { id: 'chi', label: 'Distribución de la Varianza Muestral' },
     { id: 'dif_medias', label: 'Distribución de Diferencia de Medias muestrales con Varianzas conocidas' },
-    { id: 'student', label: 'Distribución de la Media con varianza desconocida' },
-    { id: 'dif_medias_desc', label: 'Distribución de la Diferencia de Medias Muestrales con Varianzas Desconocidas' },
-    { id: 'razon_varianzas', label: 'Distribución de la Razón de dos Varianzas Muestrales' },
     { id: 'dif_proporciones', label: 'Distribución de la Diferencia entre dos Proporciones' }
 ];
 
@@ -57,19 +54,12 @@ function CustomSelectHerramienta({ value, onChange }) {
     const selectedLabel = OpcionesHerramienta.find(o => o.id === value)?.label || '';
 
     return (
-        <div ref={selectRef} className="tema4-select-container">
+        <div ref={selectRef} className="tema4-select-container" style={{ fontFamily: FONT }}>
             <div
                 onClick={() => setIsOpen(!isOpen)}
                 className={`tema4-select-header ${isOpen ? 'open' : ''}`}
             >
-                <div className="tema4-select-header-content">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="tema4-select-icon-primary">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <line x1="3" y1="9" x2="21" y2="9" />
-                        <line x1="9" y1="21" x2="9" y2="9" />
-                    </svg>
-                    <span className="tema4-select-text">{selectedLabel}</span>
-                </div>
+                <span className="tema4-select-text">{selectedLabel}</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                     className={`tema4-select-chevron ${isOpen ? 'open' : ''}`}>
                     <polyline points="6 9 12 15 18 9" />
@@ -107,31 +97,59 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
     const [datosDiferenciaProporciones, setDatosDiferenciaProporciones] = useState(null);
     const [datosStudent, setDatosStudent] = useState(null);
 
+    const limpiarResultados = () => {
+        setDatosProbMuestral(null);
+        setDatosChiCuadrada(null);
+        setDatosFisher(null);
+        setDatosProporcion(null);
+        setDatosDiferenciaMedias(null);
+        setDatosDifMediasDesc(null);
+        setDatosRazonVarianzas(null);
+        setDatosDiferenciaProporciones(null);
+        setDatosStudent(null);
+    };
+
+    const cambiarDistribucion = (nuevaDistribucion) => {
+        if (nuevaDistribucion === distribucionActiva) return;
+        limpiarResultados();
+        setDistribucionActiva(nuevaDistribucion);
+    };
+
+    const cambiarModoMuestral = (nuevoModo) => {
+        if (nuevoModo === modoMuestral) return;
+        limpiarResultados();
+        setModoMuestral(nuevoModo);
+    };
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'row', margin: '0 auto', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', gap: '4px', width: '100%', maxWidth: '400px' }}>
-                <button
-                    type="button"
-                    className={`btn-mat251-modo ${modoMuestral === 'empirica' ? 'active' : ''}`}
-                    onClick={() => setModoMuestral('empirica')}
-                    style={{ flex: 1, padding: '8px 10px', fontSize: FS.sm, textAlign: 'center' }}
-                >
-                    Demostración Empírica
-                </button>
-                <button
-                    type="button"
-                    className={`btn-mat251-modo ${modoMuestral === 'calculadora' ? 'active' : ''}`}
-                    onClick={() => setModoMuestral('calculadora')}
-                    style={{ flex: 1, padding: '8px 10px', fontSize: FS.sm, textAlign: 'center' }}
-                >
-                    Calculadora
-                </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', fontFamily: FONT }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px' }}>
+                <div className="contenedor-selector-modos-mat251" style={{ width: '100%', maxWidth: '420px', display: 'flex' }}>
+                    <button
+                        type="button"
+                        className={`btn-mat251-modo ${modoMuestral === 'empirica' ? 'active' : ''}`}
+                        onClick={() => cambiarModoMuestral('empirica')}
+                        style={{ flex: 1, textAlign: 'center', fontFamily: FONT, fontWeight: 600, fontSize: FS.sm }}
+                    >
+                        Demostración Empírica
+                    </button>
+                    <button
+                        type="button"
+                        className={`btn-mat251-modo ${modoMuestral === 'calculadora' ? 'active' : ''}`}
+                        onClick={() => cambiarModoMuestral('calculadora')}
+                        style={{ flex: 1, textAlign: 'center', fontFamily: FONT, fontWeight: 600, fontSize: FS.sm }}
+                    >
+                        Calculadora de Probabilidades
+                    </button>
+                </div>
             </div>
             {modoMuestral === 'empirica' ? (
                 <Resultados_DistribucionesMuestrales varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} />
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <CustomSelectHerramienta value={distribucionActiva} onChange={setDistribucionActiva} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        <CustomSelectHerramienta value={distribucionActiva} onChange={cambiarDistribucion} />
+                    </div>
                     {distribucionActiva === 'normal' ? (
                 <div className="tema4-calculadora-wrapper">
                     <Controles_ProbabilidadMuestral onCalcular={setDatosProbMuestral} />
@@ -190,7 +208,7 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
                             datosDifMediasDesc.escenario === 'grandes' ? (
                                 <GraficoDiferenciaMedias resultados={datosDifMediasDesc} />
                             ) : (
-                                <GraficoStudent resultados={datosDifMediasDesc} />
+                                <GraficoStudent resultados={datosDifMediasDesc} esDiferenciaMedias={true} />
                             )
                         )}
                         <div className="tema4-calculadora-resultados">

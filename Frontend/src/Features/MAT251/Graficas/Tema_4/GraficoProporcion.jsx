@@ -5,31 +5,59 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot
 } from 'recharts';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
+import ModalLimiteFueraDeGrafica from './ModalLimiteFueraDeGrafica';
+import EtiquetaLimiteIntervalo from './EtiquetaLimiteIntervalo';
 
 const CustomKatexLabel = (props) => {
-    const { viewBox, value, offsetY = 0, offsetX = 0 } = props;
+    const { viewBox, value, offsetY = 0, offsetX = 0, showGuideLine = false } = props;
     if (!viewBox) return null;
     const { x, y } = viewBox;
 
+    const posY = Math.max(2, y - 28 + offsetY);
+
     return (
-        <foreignObject x={x - 50 + offsetX} y={y - 30 + offsetY} width={100} height={30} style={{ overflow: 'visible' }}>
-            <div
-                dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }}
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}
-            />
-        </foreignObject>
+        <g style={{ pointerEvents: 'none' }}>
+            {showGuideLine && posY < y - 10 && (
+                <line
+                    x1={x}
+                    y1={y}
+                    x2={x}
+                    y2={posY + 26}
+                    stroke="#f97316"
+                    strokeWidth={3}
+                    strokeDasharray="4 4"
+                />
+            )}
+            <foreignObject x={x - 60 + offsetX} y={posY} width={120} height={28} style={{ overflow: 'visible' }}>
+                <div
+                    className="tema4-etiqueta-limite"
+                    dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }}
+                    style={{
+                        color: 'var(--text-pure)',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '100%',
+                        whiteSpace: 'nowrap'
+                    }}
+                />
+            </foreignObject>
+        </g>
     );
 };
 
 const YAxisKatexLabel = ({ viewBox, prefix, value }) => {
     if (!viewBox) return null;
     const { x, y, height } = viewBox;
-    const cx = x + 15;
+    const cx = x - 18;
     const cy = y + height / 2;
     return (
-        <foreignObject x={cx - 100} y={cy - 100} width={200} height={200} style={{ overflow: 'visible', pointerEvents: 'none' }}>
+        <foreignObject x={cx - 70} y={cy - 100} width={200} height={200} style={{ overflow: 'visible', pointerEvents: 'none' }}>
             <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <div style={{ transform: 'rotate(-90deg)', color: 'var(--text-main, #333333)', fontSize: '14px', fontWeight: 'bold', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <div style={{ transform: 'rotate(-90deg)', color: 'var(--text-pure)', fontSize: '13px', fontWeight: 'bold', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '3px' }}>
                     <span>{prefix}</span>
                     <span dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} />
                 </div>
@@ -45,7 +73,7 @@ const XAxisKatexLabel = ({ viewBox, prefix, value }) => {
     const cy = y + height - 5;
     return (
         <foreignObject x={cx - 150} y={cy - 10} width={300} height={30} style={{ overflow: 'visible', pointerEvents: 'none' }}>
-            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-main, #333333)', fontSize: '14px', fontWeight: 'bold', whiteSpace: 'nowrap', gap: '3px' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-pure)', fontSize: '13px', fontWeight: 'bold', whiteSpace: 'nowrap', gap: '3px' }}>
                 <span>{prefix}</span>
                 <span dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} />
             </div>
@@ -85,16 +113,16 @@ const SmartAnnotation = (props) => {
             <path
                 d={`M ${cx},${cy} L ${midX},${midY} L ${lineEndX},${lineEndY}`}
                 fill="none"
-                stroke="var(--text-main, #3b82f6)"
+                stroke="var(--text-pure)"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />
-            <circle cx={cx} cy={cy} r={5} fill="var(--text-main, #3b82f6)" />
+            <circle cx={cx} cy={cy} r={5} fill="var(--text-pure)" />
 
             <foreignObject x={boxX} y={boxY} width={boxWidth} height={boxHeight} style={{ overflow: 'visible' }}>
                 <div style={{
-                    color: 'var(--text-main, #1e293b)',
+                    color: 'var(--text-pure)',
                     fontWeight: 'bold',
                     fontSize: '13px',
                     display: 'flex',
@@ -116,6 +144,10 @@ export default function GraficoProporcion({ resultados }) {
 
     const { se: SE, p: mu, x1, x2, condicion, probFinal } = resultados;
     const tieneProbabilidad = probFinal !== undefined;
+    const numX1 = (x1 !== undefined && x1 !== null && x1 !== '') ? parseFloat(x1) : undefined;
+    const numX2 = (x2 !== undefined && x2 !== null && x2 !== '') ? parseFloat(x2) : undefined;
+    const hasX1 = numX1 !== undefined && !isNaN(numX1);
+    const hasX2 = numX2 !== undefined && !isNaN(numX2);
 
     // Generación de datos
     const { datosGrafico, customTicks, annotationData } = useMemo(() => {
@@ -136,11 +168,11 @@ export default function GraficoProporcion({ resultados }) {
 
             let fillY = 0;
             if (tieneProbabilidad) {
-                if (condicion === 'menor_que' && x <= x1) {
+                if (condicion === 'menor_que' && hasX1 && x <= numX1) {
                     fillY = y;
-                } else if (condicion === 'mayor_que' && x >= x1) {
+                } else if (condicion === 'mayor_que' && hasX1 && x >= numX1) {
                     fillY = y;
-                } else if (condicion === 'entre' && x >= x1 && x <= x2) {
+                } else if (condicion === 'entre' && hasX1 && hasX2 && x >= numX1 && x <= numX2) {
                     fillY = y;
                 }
             }
@@ -157,16 +189,29 @@ export default function GraficoProporcion({ resultados }) {
         if (curSegment.length > 0) segments.push(curSegment);
 
         // Custom Ticks para el eje X
-        let ticks = [mu - 3 * SE, mu - 2 * SE, mu - SE, mu, mu + SE, mu + 2 * SE, mu + 3 * SE];
+        const specialPoints = [];
         if (tieneProbabilidad) {
-            if (condicion === 'entre') {
-                ticks.push(x1, x2);
-            } else if (condicion) {
-                ticks.push(x1);
+            if (condicion === 'entre' && hasX1 && hasX2) {
+                specialPoints.push(numX1, numX2);
+            } else if (condicion && hasX1) {
+                specialPoints.push(numX1);
             }
         }
 
-        ticks = [...new Set(ticks.map(t => Math.round(t * 1000) / 1000))].sort((a, b) => a - b);
+        const baseTicks = [mu - 3 * SE, mu - 2 * SE, mu - SE, mu, mu + SE, mu + 2 * SE, mu + 3 * SE];
+
+        // Filtrar ticks base que colisionen o dupliquen visualmente con los puntos de corte especiales
+        const filteredBaseTicks = baseTicks.filter(bt => {
+            const btStr = Number(bt).toFixed(2);
+            return !specialPoints.some(sp => {
+                const spNum = Number(sp);
+                const spStr = spNum.toFixed(2);
+                return Math.abs(spNum - bt) < 0.55 * SE || spStr === btStr;
+            });
+        });
+
+        let ticks = [...filteredBaseTicks, ...specialPoints];
+        ticks = [...new Set(ticks.map(t => Math.round(t * 10000) / 10000))].sort((a, b) => a - b);
 
         // Annotation Data
         const annData = segments.map(seg => {
@@ -197,35 +242,46 @@ export default function GraficoProporcion({ resultados }) {
         });
 
         return { datosGrafico: datos, customTicks: ticks, annotationData: annData };
-    }, [mu, SE, x1, x2, condicion, probFinal, tieneProbabilidad]);
+    }, [mu, SE, numX1, numX2, hasX1, hasX2, condicion, probFinal, tieneProbabilidad]);
+
+    // Detección inteligente de colisión entre etiquetas x1 y x2
+    const estanCerca = useMemo(() => {
+        if (!tieneProbabilidad || condicion !== 'entre' || !hasX1 || !hasX2) {
+            return false;
+        }
+        const span = 8 * SE;
+        return span > 0 && Math.abs(numX2 - numX1) / span < 0.22;
+    }, [tieneProbabilidad, condicion, hasX1, hasX2, numX1, numX2, SE]);
 
     return (
         <MarcoWidgetMAT251 titulo="Gráfica de Densidad de Probabilidad f(p̂)" anchoCompleto={true} alto="450px" id="grafico-proporcion">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={datosGrafico} margin={{ top: 35, right: 30, left: -5, bottom: 35 }}>
+                        <AreaChart data={datosGrafico} margin={{ top: 20, right: 5, left: 0, bottom: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
 
                             <XAxis
                                 dataKey="x"
                                 type="number"
                                 domain={['dataMin', 'dataMax']}
+                                allowDataOverflow={true}
                                 ticks={customTicks}
-                                padding={{ left: 20, right: 20 }}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
-                                axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickFormatter={(val) => Number.isInteger(val) ? val : val.toFixed(3)}
+                                padding={{ left: 10, right: 10 }}
+                                tick={{ fill: 'var(--text-pure)', fontSize: 10, fontWeight: 'bold' }}
+                                axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickFormatter={(val) => Number.isInteger(val) ? val : val.toFixed(2)}
                                 label={<XAxisKatexLabel prefix="Proporción Muestral " value={"(\\hat{p})"} />}
                             />
 
                             <YAxis
+                                width={65}
                                 padding={{ top: 30 }}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
-                                axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickFormatter={(val) => val === 0 ? '0' : val.toFixed(3)}
+                                tick={{ fill: 'var(--text-pure)', fontSize: 10, fontWeight: 'bold' }}
+                                axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickFormatter={(val) => val === 0 ? '0' : val.toFixed(2)}
                                 label={<YAxisKatexLabel prefix="Densidad " value={"f(\\hat{p})"} />}
                             />
 
@@ -254,15 +310,46 @@ export default function GraficoProporcion({ resultados }) {
                                 />
                             )}
 
-                            {/* Reference Lines para Cortes */}
-                            {tieneProbabilidad && condicion === 'entre' && (
+                            {/* Reference Lines para Cortes con anticolisión inteligente */}
+                            {tieneProbabilidad && condicion === 'entre' && hasX1 && hasX2 && (
                                 <>
-                                    <ReferenceLine x={x1} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3} label={<CustomKatexLabel value={`\\boldsymbol{\\hat{p}_1 = ${x1}}`} offsetY={-10} />} />
-                                    <ReferenceLine x={x2} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3} label={<CustomKatexLabel value={`\\boldsymbol{\\hat{p}_2 = ${x2}}`} offsetY={-10} />} />
+                                    <ReferenceLine
+                                        x={numX1}
+                                        stroke="#f97316"
+                                        strokeDasharray="4 4"
+                                        strokeWidth={3}
+                                        label={
+                                            <EtiquetaLimiteIntervalo
+                                                value={`\\boldsymbol{\\hat{p}_1 = ${x1}}`}
+                                                side={estanCerca ? 'left' : 'center'}
+                                                offsetY={-4}
+                                            />
+                                        }
+                                    />
+                                    <ReferenceLine
+                                        x={numX2}
+                                        stroke="#f97316"
+                                        strokeDasharray="4 4"
+                                        strokeWidth={3}
+                                        label={
+                                            <EtiquetaLimiteIntervalo
+                                                value={`\\boldsymbol{\\hat{p}_2 = ${x2}}`}
+                                                side={estanCerca ? 'right' : 'center'}
+                                                offsetY={-4}
+                                                showGuideLine={estanCerca}
+                                            />
+                                        }
+                                    />
                                 </>
                             )}
-                            {tieneProbabilidad && (condicion === 'menor_que' || condicion === 'mayor_que') && (
-                                <ReferenceLine x={x1} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3} label={<CustomKatexLabel value={`\\boldsymbol{\\hat{p} = ${x1}}`} offsetY={-10} />} />
+                            {tieneProbabilidad && (condicion === 'menor_que' || condicion === 'mayor_que') && hasX1 && (
+                                <ReferenceLine
+                                    x={numX1}
+                                    stroke="#f97316"
+                                    strokeDasharray="4 4"
+                                    strokeWidth={3}
+                                    label={<CustomKatexLabel value={`\\boldsymbol{\\hat{p} = ${x1}}`} offsetY={-8} />}
+                                />
                             )}
 
                             {/* Anotaciones */}
@@ -278,6 +365,11 @@ export default function GraficoProporcion({ resultados }) {
 
                         </AreaChart>
                     </ResponsiveContainer>
+                    <ModalLimiteFueraDeGrafica
+                        limites={tieneProbabilidad ? (condicion === 'entre' ? [x1, x2] : [x1]) : []}
+                        datos={datosGrafico}
+                        condicion={condicion}
+                    />
                 </div>
             </div>
         </MarcoWidgetMAT251>

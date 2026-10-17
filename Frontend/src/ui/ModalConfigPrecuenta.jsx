@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logoSiCE from "../assets/images/Logo-SiCE.png";
+import logoSiCE from "../assets/images/Logo-SiCE.webp";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { api } from "../services/api.js";
 import { alerta } from "../utils/Notificaciones.jsx";

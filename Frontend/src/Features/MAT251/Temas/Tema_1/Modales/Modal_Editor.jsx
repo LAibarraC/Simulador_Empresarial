@@ -1,7 +1,7 @@
 import React from 'react';
 import { DataGrid } from 'react-data-grid';
 import 'react-data-grid/lib/styles.css';
-import { overlayStyle, modalBoxStyle, FS, RADIUS, filaVacia } from '../../../Principal/Constantes';
+import { overlayStyle, modalBoxStyle, FS, RADIUS, FONT, filaVacia } from '../../../Principal/Constantes';
 
 export function textEditor({ row, column, onRowChange, onClose }) {
     return (
@@ -29,7 +29,8 @@ export function textEditor({ row, column, onRowChange, onClose }) {
             }}
             style={{
                 width: '100%', height: '100%', border: 'none',
-                padding: '0 8px', outline: '2px solid #217346', boxSizing: 'border-box'
+                padding: '0 8px', outline: '2px solid #217346', boxSizing: 'border-box',
+                fontFamily: FONT
             }}
         />
     );
@@ -77,13 +78,13 @@ export default function ModalEditor({ modalEditor, setModalEditor, filasTemp, se
 
     return (
         <div style={overlayStyle} onClick={() => setModalEditor(false)}>
-            <div style={{ ...modalBoxStyle, maxWidth: anchoModal, width: '90vw', padding: '30px', transition: 'max-width 0.3s ease' }} onClick={(e) => e.stopPropagation()}>
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <h3 style={{ margin: '0 0 5px', fontSize: '1.4rem', fontWeight: 700, color: 'var(--primary-color)' }}>
+            <div style={{ ...modalBoxStyle, maxWidth: anchoModal, width: '90vw', padding: '30px', transition: 'max-width 0.3s ease', border: '1px solid var(--border-color)', borderRadius: RADIUS }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                    <h3 style={{ margin: '0 0 5px', fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-pure)', marginBottom: '10px' }}>
                         {columns.length > 2 ? 'Editor de Matriz' : 'Editor de Espacio Muestral'}
                     </h3>
-                    <div style={{ display: 'inline-block', padding: '4px 12px', background: 'var(--bg-body)', borderRadius: '20px', border: '1px solid var(--border-color)', fontSize: FS.xs, color: 'var(--text-muted)' }}>
-                        Total: <strong>{filasTemp.filter(f => {
+                    <div style={{ display: 'inline-block', padding: '4px 12px', background: 'var(--bg-body)', borderRadius: RADIUS, border: '1px solid var(--border-color)', fontSize: FS.xs, color: 'var(--text-pure)', fontFamily: FONT}}>
+                        Total: <strong style={{ color: 'var(--text-pure)' }}>{filasTemp.filter(f => {
                             if (columns.length > 2) {
                                 return columns.some(col => col.key !== 'id' && (f[col.key] || '').toString().trim() !== '');
                             }
@@ -92,46 +93,59 @@ export default function ModalEditor({ modalEditor, setModalEditor, filasTemp, se
                     </div>
                 </div>
 
-                <p style={{ color: 'var(--text-muted)', fontSize: FS.xs, textAlign: 'center', marginBottom: '15px', lineHeight: '1.4' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: FS.xs, textAlign: 'center', marginBottom: '15px', lineHeight: '1.4', fontFamily: FONT }}>
                     Ingresa los datos manualmente o edita los existentes.<br />
-                    <span style={{ color: 'var(--primary-color)' }}>Doble clic</span> para editar una celda.
+                    <span style={{ color: 'var(--primary-pure)', fontWeight: 'bold' }}>Doble clic</span> para editar una celda.
                 </p>
 
                 <div 
                     onPaste={handlePaste}
                     style={{ height: columns.length > 2 ? '450px' : '380px', border: '1px solid var(--border-color)', borderRadius: RADIUS, overflow: 'hidden', marginBottom: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
                 >
+                    <style>{`
+                        .rdg-header-row .rdg-cell,
+                        .rdg-header-row .rdg-cell * {
+                            color: var(--text-pure) !important;
+                            font-weight: 700 !important;
+                        }
+                        .rdg-cell {
+                            color: var(--text-pure) !important;
+                        }
+                    `}</style>
                     <DataGrid
                         columns={columns}
                         rows={filasTemp}
                         onRowsChange={setFilasTemp}
                         className="rdg-light"
-                        style={{ height: '100%' }}
+                        style={{ height: '100%', fontFamily: FONT }}
                     />
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
                     <button
+                        type="button"
                         className="btn-primary"
                         onClick={() => setFilasTemp([...filasTemp, filaVacia(filasTemp.length + 1)])}
-                        style={{ padding: '5px 14px', fontSize: '0.85rem' }}
+                        style={{ padding: '5px 20px', fontSize: FS.sm, borderRadius: RADIUS, fontFamily: FONT, cursor: 'pointer' }}
                     >
                         Añadir
                     </button>
 
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
+                            type="button"
                             className="btn-danger"
                             onClick={() => setModalEditor(false)}
-                            style={{ padding: '5px 14px', fontSize: '0.85rem' }}
+                            style={{ padding: '5px 20px', fontSize: FS.sm, borderRadius: RADIUS, fontFamily: FONT, cursor: 'pointer' }}
                         >
                             Cancelar
                         </button>
                         <button
+                            type="button"
                             className="btn-verde"
                             onClick={guardarEditor}
                             disabled={!hayCambiosEditor}
-                            style={{ padding: '5px 14px', fontSize: '0.85rem' }}
+                            style={{ padding: '5px 20px', fontSize: FS.sm, borderRadius: RADIUS, fontFamily: FONT, cursor: 'pointer' }}
                         >
                             Guardar
                         </button>
@@ -139,5 +153,5 @@ export default function ModalEditor({ modalEditor, setModalEditor, filasTemp, se
                 </div>
             </div>
         </div>
-    )
+    );
 }

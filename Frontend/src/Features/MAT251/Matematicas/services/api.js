@@ -40,10 +40,11 @@ export const mat251Api = {
         parametroVerdadero: r.parametro_verdadero,
         distribucion: r.distribucion,
         paramsDist: payload.paramsDist,
+        n: payload.n,
         simulaciones: estimaciones.map((est, i) => ({
             simulacion: i + 1,
             estimacion: est,
-            muestra: null,
+            muestra: r.muestras_raw ? r.muestras_raw[i] : null,
             diferencia: r.parametro_verdadero !== null ? est - r.parametro_verdadero : null
         })),
         resumen: { promedio, desviacion, min: minVal, max: maxVal, sesgo, ecm }
@@ -68,7 +69,10 @@ export const mat251Api = {
       throw new Error(data.error || 'Error en la simulación de intervalos.');
     }
 
-    return data.resultado;
+    return {
+      ...data.resultado,
+      n: payload.n
+    };
   },
 
   // ==========================================

@@ -13,6 +13,7 @@ class SimulacionRequest(BaseModel):
     n: int
     numSimulaciones: int
     parametro: str
+    incluirMuestras: bool = False
 
 
 @router.post("/simulacion")
@@ -26,6 +27,7 @@ def ejecutar_simulacion(data: SimulacionRequest):
     n = data.n
     num_sim = data.numSimulaciones
     parametro = data.parametro
+    incluir_muestras = data.incluirMuestras
 
     # Validaciones
     if n <= 0:
@@ -84,6 +86,7 @@ def ejecutar_simulacion(data: SimulacionRequest):
             return {"success": False, "error": f"Parametro '{parametro}' no soportado."}
 
         estimadores_list = estimadores.tolist()
+        muestras_list = muestras.tolist() if incluir_muestras else None
         media_estimadores = float(np.mean(estimadores))
         var_estimadores = float(np.var(estimadores, ddof=1)) if num_sim > 1 else 0.0
         sesgo = float(media_estimadores - parametro_verdadero) if parametro_verdadero is not None else None
@@ -92,6 +95,7 @@ def ejecutar_simulacion(data: SimulacionRequest):
             "success": True,
             "resultado": {
                 "simulaciones": estimadores_list,
+                "muestras_raw": muestras_list,
                 "media_estimadores": media_estimadores,
                 "varianza_estimadores": var_estimadores,
                 "parametro_verdadero": parametro_verdadero,

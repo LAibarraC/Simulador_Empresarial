@@ -4,24 +4,24 @@ import {
     BarChart, Bar, Legend
 } from 'recharts';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
-import { FONT } from '../../Principal/Constantes';
+import { FONT, FS, RADIUS } from '../../Principal/Constantes';
 
-export default function GraficoEstimacionSimulacion({ resultados }) {
-    if (!resultados || !resultados.simulaciones) return null;
+export default function GraficoEstimacionSimulacion({ resultados, simulacionesVisibles }) {
+    if (!resultados || !simulacionesVisibles) return null;
 
-    const { parametroVerdadero, resumen, simulaciones, parametro } = resultados;
+    const { parametroVerdadero, resumen, parametro, simulaciones } = resultados;
 
     // Preparar datos para el gráfico de línea (Evolución)
-    // Si hay más de 500 simulaciones, reducimos para no saturar el gráfico
     const datosLinea = useMemo(() => {
-        if (simulaciones.length <= 500) return simulaciones;
-        const step = Math.ceil(simulaciones.length / 500);
-        return simulaciones.filter((_, i) => i % step === 0);
-    }, [simulaciones]);
+        if (simulacionesVisibles.length <= 500) return simulacionesVisibles;
+        const step = Math.ceil(simulacionesVisibles.length / 500);
+        return simulacionesVisibles.filter((_, i) => i % step === 0);
+    }, [simulacionesVisibles]);
 
     // Preparar datos para el Histograma (Frecuencias)
     const datosHistograma = useMemo(() => {
-        const ests = simulaciones.map(s => s.estimacion);
+        const ests = simulacionesVisibles.map(s => s.estimacion);
+        if (ests.length === 0) return [];
         const min = ests.reduce((m, val) => val < m ? val : m, ests[0]);
         const max = ests.reduce((m, val) => val > m ? val : m, ests[0]);
         const bins = 20; // 20 intervalos
@@ -39,7 +39,7 @@ export default function GraficoEstimacionSimulacion({ resultados }) {
             frecuencia: f,
             marcaClase: min + (i + 0.5) * binWidth
         }));
-    }, [simulaciones]);
+    }, [simulacionesVisibles]);
 
     const nearestBin = useMemo(() => {
         if (parametroVerdadero === null || !datosHistograma.length) return null;
@@ -54,6 +54,8 @@ export default function GraficoEstimacionSimulacion({ resultados }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+
             {/* GRÁFICO DE EVOLUCIÓN */}
             <MarcoWidgetMAT251 titulo={`Evolución de las estimaciones (${yLabel.includes('μ') ? 'X̄' : (yLabel.includes('p') ? 'p̂' : 'S²')})`} anchoCompleto={true} alto="450px">
                 <ResponsiveContainer width="100%" height="100%">

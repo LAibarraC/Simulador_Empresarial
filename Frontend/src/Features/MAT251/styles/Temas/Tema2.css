@@ -52,6 +52,10 @@
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
+.button_calcular {
+    border-radius: 5px !important;
+}
+
 .tema2-button {
     background: #3b82f6;
     color: white;
@@ -210,4 +214,347 @@
     border-radius: 8px;
     display: inline-block;
     box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15);
+}
+
+/* ======================================================= */
+/* TEMA 2: FÓRMULAS Y RESOLUCIONES (ESTILO PROBABILIDAD TOTAL) */
+/* ======================================================= */
+
+.katex-responsive-container {
+    color: var(--text-pure);
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.katex-responsive-container .katex {
+    color: var(--text-pure);
+}
+
+.formula-scroll-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin;
+}
+
+.formula-scroll-container::-webkit-scrollbar {
+    height: 5px;
+}
+
+.formula-scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+}
+
+.formula-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6);
+    border-radius: 4px;
+}
+
+.formula-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.9);
+}
+
+/* --- TAMAÑOS EN PC (DESKTOP) IDÉNTICOS A PROBABILIDAD TOTAL --- */
+.formula-general-box {
+    font-size: 1rem;
+    color: var(--text-pure);
+}
+
+.formula-desarrollo-box {
+    font-size: 0.9rem;
+    color: var(--text-pure);
+    text-align: left;
+}
+
+.formula-desarrollo-box .katex {
+    font-size: 0.9rem;
+    color: var(--text-pure);
+    text-align: left;
+}
+
+.tema2-card-metrica {
+    padding: 10px;
+    background: var(--bg-card);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.tema2-titulo-metrica {
+    margin: 0 0 10px 0;
+    color: var(--text-pure);
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.tema2-titulo-metrica .katex {
+    text-transform: none;
+}
+
+/* ======================================================= */
+/* TARJETAS DE MÉTRICAS Y RESULTADOS CONTINUAS MAT251      */
+/* ======================================================= */
+.resultados-grid-continua {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+}
+
+.tarjeta-calculo-mat251 {
+    background: var(--bg-card);
+    padding: 12px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-pure);
+}
+
+.tarjeta-calculo-titulo {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-pure);
+    font-weight: 700;
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tarjeta-calculo-titulo .katex {
+    text-transform: none;
+}
+
+.tarjeta-calculo-valor {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: var(--text-pure);
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarjeta-calculo-valor .katex {
+    font-weight: normal;
+}
+
+/* --- TAMAÑOS EN MÓVIL / CELULAR (<= 768px) IDÉNTICOS A PROBABILIDAD TOTAL --- */
+@media (max-width: 768px) {
+    .katex-responsive-container {
+        font-size: 1rem !important;
+    }
+
+    .katex-responsive-container .katex {
+        font-size: 1.1rem !important;
+    }
+
+    .formula-general-box {
+        font-size: 0.8rem !important;
+    }
+
+    .formula-desarrollo-box {
+        font-size: 0.9rem !important;
+    }
+
+    .formula-desarrollo-box .katex {
+        font-size: 0.9rem !important;
+    }
+
+    .tema2-titulo-metrica {
+        font-size: 0.65rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    .tema2-card-metrica {
+        padding: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .tarjeta-calculo-titulo {
+        font-size: 0.65rem !important;
+    }
+
+    .tarjeta-calculo-valor {
+        font-size: 0.95rem !important;
+    }
+}
+
+/* --- ADAPTABILIDAD EN CELULARES (<= 600px) --- */
+@media (max-width: 600px) {
+    .resultados-grid-continua {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    /* Si hay 3 tarjetas, centrar la última en la segunda fila manteniendo el mismo ancho */
+    .resultados-grid-continua > *:last-child:nth-child(odd) {
+        grid-column: 1 / -1 !important;
+        justify-self: center !important;
+        width: calc(50% - 5px) !important;
+    }
+}
+
+/* --- ALERTAS CONTINUAS MAT251 (Validación de Área y Constante K) --- */
+.alerta-valida-continua {
+    background: rgba(34, 197, 94, 0.12) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34, 197, 94, 0.35) !important;
+}
+html.dark .alerta-valida-continua,
+.dark .alerta-valida-continua,
+[data-theme='dark'] .alerta-valida-continua {
+    background: rgba(34, 197, 94, 0.18) !important;
+    color: #86efac !important;
+    border-color: rgba(34, 197, 94, 0.4) !important;
+}
+
+.alerta-invalida-continua {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+html.dark .alerta-invalida-continua,
+.dark .alerta-invalida-continua,
+[data-theme='dark'] .alerta-invalida-continua {
+    background: rgba(245, 158, 11, 0.18) !important;
+    color: #fcd34d !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+/* =========================================
+   TOOLTIPS ESTADÍSTICOS MAT251 (StatLabel)
+========================================= */
+.mat251-stat-label-container {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dashed var(--text-pure, #666);
+    padding-bottom: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mat251-stat-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(4px);
+    background-color: #1e293b;
+    color: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    width: max-content;
+    max-width: min(92vw, 450px);
+    box-sizing: border-box;
+    text-align: center;
+    z-index: 9999;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-weight: normal;
+    font-size: 0.8rem;
+    display: none; /* No ocupa espacio en el cálculo de scroll horizontal cuando está oculto */
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mat251-stat-label-container:hover .mat251-stat-tooltip {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+/* Alineación para la última columna a la derecha */
+.mat251-stat-tooltip.mat251-tooltip-right {
+    left: auto;
+    right: 0;
+    transform: translateY(4px);
+}
+.mat251-stat-label-container:hover .mat251-tooltip-right {
+    transform: translateY(0);
+}
+.mat251-stat-tooltip.mat251-tooltip-right::after {
+    left: auto;
+    right: 14px;
+}
+
+/* Alineación para la primera columna a la izquierda */
+.mat251-stat-tooltip.mat251-tooltip-left {
+    left: 0;
+    transform: translateY(4px);
+}
+.mat251-stat-label-container:hover .mat251-tooltip-left {
+    transform: translateY(0);
+}
+.mat251-stat-tooltip.mat251-tooltip-left::after {
+    left: 14px;
+}
+
+.mat251-tooltip-text {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.25;
+}
+
+.mat251-tooltip-math {
+    color: #fbbf24;
+    font-size: 0.85rem;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+.mat251-tooltip-math .katex,
+.mat251-tooltip-math .katex * {
+    color: #fbbf24 !important;
+    white-space: nowrap !important;
+}
+
+.mat251-stat-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: var(--arrow-left, 50%);
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #1e293b transparent;
+}
+
+/* Posicionamiento superior opcional (StatLabel position="top") */
+.mat251-stat-tooltip.mat251-tooltip-top {
+    top: auto;
+    bottom: calc(100% + 8px);
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(-4px);
+}
+.mat251-stat-label-container:hover .mat251-tooltip-top {
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+.mat251-stat-tooltip.mat251-tooltip-top::after {
+    top: 100%;
+    bottom: auto;
+    border-color: #1e293b transparent transparent transparent;
 }

@@ -188,7 +188,7 @@
     display: flex;
     align-items: center;
     background: var(--bg-body);
-    border-radius: 8px;
+    border-radius: 5px;
     overflow: hidden;
 }
 
@@ -277,7 +277,7 @@
     /* Evita que el padding rompa el ancho total */
     padding: 12px;
     border: 2px solid var(--text-muted);
-    border-radius: 8px;
+    border-radius: 5px;
     background: var(--bg-body);
     color: var(--text-variable);
     font-family: inherit;
@@ -303,7 +303,7 @@
     padding: 12px;
     border: 2px solid #2563eb;
     /* Borde azul para destacar que es importante */
-    border-radius: 8px;
+    border-radius: 5px;
     background: #f8fafc;
     color: var(--text-variable);
     font-weight: bold;
@@ -404,7 +404,7 @@
 .tarjeta-variable-modal {
     padding: 15px;
     border: 1px solid var(--text-muted, #cbd5e1);
-    border-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
     transition: border-color 0.2s, background-color 0.2s;
 }
@@ -498,7 +498,7 @@
     min-height: 120px;
     padding: 15px;
     border: 2px solid var(--text-muted);
-    border-radius: 8px;
+    border-radius: 5px;
     resize: vertical;
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.95rem;
@@ -527,7 +527,7 @@
 .input-datos-principal {
     padding: 12px;
     border: 2px solid var(--text-muted);
-    border-radius: 8px;
+    border-radius: 5px;
     background: var(--bg-body);
     color: var(--text-variable);
     font-size: 1rem;
@@ -640,6 +640,16 @@
     border: none !important;
 }
 
+.rdg-header-row .rdg-cell,
+.rdg-header-row .rdg-cell * {
+    color: var(--text-pure) !important;
+    font-weight: 700 !important;
+}
+
+.rdg-cell {
+    color: var(--text-pure) !important;
+}
+
 /* =========================================
    ESTILOS DARK MODE PARA BOTONES (Tema 1)
    Borde de color #ff6e00 igual al tema 3
@@ -667,11 +677,11 @@
     color: #ff6e00 !important;
 }
 
-[data-theme='dark'] .button_calcular, .dark .button_calcular, [data-bs-theme='dark'] .button_calcular,
-[data-theme='dark'] .btn-icon, .dark .btn-icon, [data-bs-theme='dark'] .btn-icon,
-[data-theme='dark'] .btn-abrir-modal, .dark .btn-abrir-modal, [data-bs-theme='dark'] .btn-abrir-modal,
-[data-theme='dark'] .btn-abrir-excel, .dark .btn-abrir-excel, [data-bs-theme='dark'] .btn-abrir-excel,
-[data-theme='dark'] .btn-guardar-excel, .dark .btn-guardar-excel, [data-bs-theme='dark'] .btn-guardar-excel,
+[data-theme='dark'] .tema1-container .button_calcular, .dark .tema1-container .button_calcular, [data-bs-theme='dark'] .tema1-container .button_calcular,
+[data-theme='dark'] .tema1-container .btn-icon, .dark .tema1-container .btn-icon, [data-bs-theme='dark'] .tema1-container .btn-icon,
+[data-theme='dark'] .tema1-container .btn-abrir-modal, .dark .tema1-container .btn-abrir-modal, [data-bs-theme='dark'] .tema1-container .btn-abrir-modal,
+[data-theme='dark'] .tema1-container .btn-abrir-excel, .dark .tema1-container .btn-abrir-excel, [data-bs-theme='dark'] .tema1-container .btn-abrir-excel,
+[data-theme='dark'] .tema1-container .btn-guardar-excel, .dark .tema1-container .btn-guardar-excel, [data-bs-theme='dark'] .tema1-container .btn-guardar-excel,
 [data-theme='dark'] .btn-tema1-active, .dark .btn-tema1-active, [data-bs-theme='dark'] .btn-tema1-active {
     background: #2c2c2c !important;
     border: 1px solid #ff6e00 !important;
@@ -679,8 +689,8 @@
     box-shadow: none !important;
 }
 
-[data-theme='dark'] .button_calcular:hover, .dark .button_calcular:hover, [data-bs-theme='dark'] .button_calcular:hover,
-[data-theme='dark'] .btn-icon:hover, .dark .btn-icon:hover, [data-bs-theme='dark'] .btn-icon:hover {
+[data-theme='dark'] .tema1-container .button_calcular:hover, .dark .tema1-container .button_calcular:hover, [data-bs-theme='dark'] .tema1-container .button_calcular:hover,
+[data-theme='dark'] .tema1-container .btn-icon:hover, .dark .tema1-container .btn-icon:hover, [data-bs-theme='dark'] .tema1-container .btn-icon:hover {
     background: #3a3a3a !important;
 }
 
@@ -688,7 +698,7 @@
 .custom-select-tema1 {
     width: 100%;
     padding: 10px 14px;
-    border-radius: 8px;
+    border-radius: 5px;
     border: 1px solid var(--border-color);
     background-color: var(--bg-input);
     color: var(--text-color);

@@ -1,7 +1,7 @@
   import { useState, useEffect, useRef } from "react";
   import { NavLink, useNavigate, useLocation } from "react-router-dom";
   import OscuroClaro from "./oscuro_claro.jsx";
-  import logoSiCE from "../assets/images/Logo-SiCE.png";
+  import logoSiCE from "../assets/images/Logo-SiCE.webp";
   import '../styles/ui/Menu.css';
   import { alerta } from "../utils/Notificaciones";
   import { api } from "../services/api";

@@ -1,18 +1,14 @@
 import React, { useMemo } from 'react';
 import { FONT } from '../../Principal/Constantes';
+import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 
-const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
+function ContenidoArbolManual({ resultado, modReemplazo, svgWidth, svgHeight, numHojas, ROW_HEIGHT, topMargin, N, isMaximized }) {
     const events = resultado.events;
-    const N = events.length;
-    const ROW_HEIGHT = 80;
-    const numHojas = N + 1;
-    const svgHeight = Math.max(300, numHojas * ROW_HEIGHT + 100);
-    const svgWidth = 150 + N * 240;
 
     // Calcular posiciones Y de las hojas (0 es la activa final, 1 a N son las inactivas)
     const leafYs = [];
     for (let i = 0; i <= N; i++) {
-        leafYs.push(50 + i * ROW_HEIGHT);
+        leafYs.push(topMargin + i * ROW_HEIGHT);
     }
 
     // Calcular posiciones Y de los nodos activos (padres)
@@ -23,8 +19,8 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
         activeYs[i] = (activeYs[i + 1] + inactiveY) / 2;
     }
 
-    const rootY = activeYs[0];
-    const rootX = 60;
+    const rootY = svgHeight / 2;
+    const rootX = 90;
 
     const activeColor = "#10b981"; // Verde iluminado
     const activeStroke = 3;
@@ -34,8 +30,57 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
     let accumP = 1;
 
     return (
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
-            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height="auto" style={{ maxWidth: '100%', fontFamily: FONT }}>
+        <div
+            className="arbol-scroll-wrapper thin-scrollbar"
+            style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '0',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+            }}
+        >
+            <style>{`
+                @media (max-width: 768px) {
+                    .arbol-scroll-wrapper {
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        display: flex !important;
+                        justify-content: flex-start !important;
+                        align-items: center !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        padding: 0 15px !important;
+                        box-sizing: border-box !important;
+                    }
+                    .arbol-scroll-svg {
+                        display: block !important;
+                        height: 100% !important;
+                        max-height: 100% !important;
+                        width: auto !important;
+                        aspect-ratio: ${svgWidth} / ${svgHeight} !important;
+                        flex-shrink: 0 !important;
+                        margin: auto 0 !important;
+                    }
+                }
+            `}</style>
+            <svg
+                className="arbol-scroll-svg"
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    maxWidth: isMaximized ? '1200px' : `${svgWidth}px`,
+                    maxHeight: isMaximized ? '85vh' : `${svgHeight}px`,
+                    margin: 'auto',
+                    fontFamily: FONT,
+                    display: 'block'
+                }}
+            >
                 <defs>
                     <marker id="arrow-active" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
                         <path d="M0,0 L0,6 L9,3 z" fill={activeColor} />
@@ -51,8 +96,8 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
                 <text x={rootX} y={rootY + 12} textAnchor="middle" fontSize="14" fill="var(--text-main, #0f172a)" fontWeight="bold">N = 100%</text>
 
                 {events.map((ev, i) => {
-                    const startX = rootX + 40 + i * 240;
-                    const endX = startX + 160;
+                    const startX = rootX + 40 + i * 220;
+                    const endX = startX + 140;
                     const p = ev.prob;
                     const pComp = 1 - p;
                     accumP *= p;
@@ -76,8 +121,8 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
                                 markerEnd="url(#arrow-active)" 
                                 strokeLinecap="round"
                             />
-                            <rect x={(startX + endX)/2 - 45} y={(startY + activeY)/2 - 15} width="60" height="20" fill="var(--bg-card, white)" opacity="0.9" />
-                            <text x={(startX + endX)/2 - 15} y={(startY + activeY)/2} textAnchor="middle" fontSize="11" fill={activeColor} fontWeight="bold">
+                            <rect x={(startX + endX)/2 - 35} y={(startY + activeY)/2 - 12} width="60" height="20" fill="var(--bg-card, white)" rx="4" opacity="0.95" />
+                            <text x={(startX + endX)/2 - 5} y={(startY + activeY)/2 + 2} textAnchor="middle" fontSize="11" fill={activeColor} fontWeight="bold">
                                 P={p.toFixed(4)}
                             </text>
 
@@ -96,7 +141,7 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
 
                             {/* Si es el último nodo activo, agregar texto de ruta */}
                             {isLast && (
-                                <text x={endX + 70} y={activeY + 4} textAnchor="start" fontSize="14" fill={activeColor} fontWeight="bold">
+                                <text x={endX + 68} y={activeY + 4} textAnchor="start" fontSize="13" fill={activeColor} fontWeight="bold">
                                     ← RUTA SELECCIONADA ({accumP.toFixed(4)})
                                 </text>
                             )}
@@ -109,8 +154,8 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
                                 markerEnd="url(#arrow-inactive)" 
                                 strokeLinecap="round"
                             />
-                            <rect x={(startX + endX)/2 - 45} y={(startY + inactiveY)/2 - 15} width="60" height="20" fill="var(--bg-card, white)" opacity="0.9" />
-                            <text x={(startX + endX)/2 - 15} y={(startY + inactiveY)/2} textAnchor="middle" fontSize="11" fill={inactiveColor} fontWeight="bold">
+                            <rect x={(startX + endX)/2 - 35} y={(startY + inactiveY)/2 - 12} width="60" height="20" fill="var(--bg-card, white)" rx="4" opacity="0.95" />
+                            <text x={(startX + endX)/2 - 5} y={(startY + inactiveY)/2 + 2} textAnchor="middle" fontSize="11" fill={inactiveColor} fontWeight="bold">
                                 P={pComp.toFixed(4)}
                             </text>
 
@@ -132,13 +177,192 @@ const ArbolManualDinamico = ({ resultado, modReemplazo }) => {
             </svg>
         </div>
     );
-};
+}
+
+function ContenidoArbolMatriz({ dataArbol, svgWidth, svgHeight, resultado, isMaximized }) {
+    const { N, ramasA } = dataArbol;
+
+    const rootX = 90;
+    const rootY = svgHeight / 2;
+    const l1X = 320;
+    const l2X = 570;
+
+    const activeColor = "#10b981";
+    const activeStroke = 3;
+    const inactiveColor = "#94a3b8";
+    const inactiveStroke = 1.5;
+
+    return (
+        <div
+            className="arbol-scroll-wrapper thin-scrollbar"
+            style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '0',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+            }}
+        >
+            <style>{`
+                @media (max-width: 768px) {
+                    .arbol-scroll-wrapper {
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        display: flex !important;
+                        justify-content: flex-start !important;
+                        align-items: center !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        padding: 0 15px !important;
+                        box-sizing: border-box !important;
+                    }
+                    .arbol-scroll-svg {
+                        display: block !important;
+                        height: 100% !important;
+                        max-height: 100% !important;
+                        width: auto !important;
+                        aspect-ratio: ${svgWidth} / ${svgHeight} !important;
+                        flex-shrink: 0 !important;
+                        margin: auto 0 !important;
+                    }
+                }
+            `}</style>
+            <svg
+                className="arbol-scroll-svg"
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    maxWidth: isMaximized ? '1200px' : `${svgWidth}px`,
+                    maxHeight: isMaximized ? '85vh' : `${svgHeight}px`,
+                    margin: 'auto',
+                    fontFamily: FONT,
+                    display: 'block'
+                }}
+            >
+                <defs>
+                    <marker id="arrow-active-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill={activeColor} />
+                    </marker>
+                    <marker id="arrow-inactive-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill={inactiveColor} />
+                    </marker>
+                </defs>
+
+                {/* Raíz Total */}
+                <rect x={rootX - 40} y={rootY - 25} width="80" height="50" rx="8" fill="var(--bg-input, #f8fafc)" stroke={inactiveColor} strokeWidth="2" />
+                <text x={rootX} y={rootY - 5} textAnchor="middle" fontSize="13" fill="var(--text-main, #334155)" fontWeight="bold">Total</text>
+                <text x={rootX} y={rootY + 12} textAnchor="middle" fontSize="14" fill="var(--text-main, #0f172a)" fontWeight="bold">N={N}</text>
+
+                {ramasA.map((rama, i) => {
+                    const colorL1 = rama.esActiva ? activeColor : inactiveColor;
+                    const strokeL1 = rama.esActiva ? activeStroke : inactiveStroke;
+                    const markerL1 = rama.esActiva ? "url(#arrow-active-m)" : "url(#arrow-inactive-m)";
+
+                    return (
+                        <g key={`l1-${i}`}>
+                            <line 
+                                x1={rootX + 40} y1={rootY} 
+                                x2={l1X - 65} y2={rama.y} 
+                                stroke={colorL1} strokeWidth={strokeL1} 
+                                markerEnd={markerL1} 
+                                strokeLinecap="round"
+                            />
+                            <rect x={(rootX + 40 + l1X - 65)/2 - 30} y={(rootY + rama.y)/2 - 12} width="60" height="20" fill="var(--bg-card, white)" rx="4" opacity="0.95" />
+                            <text x={(rootX + 40 + l1X - 65)/2} y={(rootY + rama.y)/2 + 2} textAnchor="middle" fontSize="11" fill={colorL1} fontWeight="bold">
+                                {rama.count === '-' ? `P=${rama.pA.toFixed(4)}` : `${rama.count}/${N}`}
+                            </text>
+
+                            <rect 
+                                x={l1X - 60} y={rama.y - 25} width="120" height="50" rx="6" 
+                                fill={rama.esActiva ? "var(--bg-input, rgba(16, 185, 129, 0.05))" : "var(--bg-input, #fff)"} 
+                                stroke={colorL1} strokeWidth={rama.esActiva ? 2 : 1} 
+                            />
+                            <text x={l1X} y={rama.y - 5} textAnchor="middle" fontSize="12" fill={rama.esActiva ? "var(--text-main, #064e3b)" : "var(--text-main, #475569)"} fontWeight={rama.esActiva ? "bold" : "normal"}>
+                                {rama.valor.length > 15 ? rama.valor.substring(0, 15) + '...' : rama.valor}
+                            </text>
+                            <text x={l1X} y={rama.y + 12} textAnchor="middle" fontSize="12" fill={rama.esActiva ? activeColor : "var(--text-muted, #64748b)"} fontWeight="bold">
+                                {rama.count === '-' ? `P=${rama.pA.toFixed(4)}` : `n=${rama.count}`}
+                            </text>
+
+                            {rama.hijos.map((hijo, j) => {
+                                const colorL2 = hijo.esActiva ? activeColor : inactiveColor;
+                                const strokeL2 = hijo.esActiva ? activeStroke : inactiveStroke;
+                                const markerL2 = hijo.esActiva ? "url(#arrow-active-m)" : "url(#arrow-inactive-m)";
+
+                                return (
+                                    <g key={`l2-${i}-${j}`}>
+                                        <line 
+                                            x1={l1X + 60} y1={rama.y} 
+                                            x2={l2X - 65} y2={hijo.y} 
+                                            stroke={colorL2} strokeWidth={strokeL2} 
+                                            markerEnd={markerL2} 
+                                            strokeLinecap="round"
+                                        />
+                                        <rect x={(l1X + 60 + l2X - 65)/2 - 30} y={(rama.y + hijo.y)/2 - 12} width="60" height="20" fill="var(--bg-card, white)" rx="4" opacity="0.95" />
+                                        <text x={(l1X + 60 + l2X - 65)/2} y={(rama.y + hijo.y)/2 + 2} textAnchor="middle" fontSize="11" fill={colorL2} fontWeight="bold">
+                                            {hijo.count === '-' ? `P=${hijo.pB.toFixed(4)}` : `${hijo.count}/${hijo.total}`}
+                                        </text>
+
+                                        <rect 
+                                            x={l2X - 60} y={hijo.y - 25} width="120" height="50" rx="6" 
+                                            fill={hijo.esActiva ? "var(--bg-input, rgba(16, 185, 129, 0.1))" : "var(--bg-input, #fff)"} 
+                                            stroke={colorL2} strokeWidth={hijo.esActiva ? 2 : 1} 
+                                        />
+                                        <text x={l2X} y={hijo.y - 5} textAnchor="middle" fontSize="12" fill={hijo.esActiva ? "var(--text-main, #064e3b)" : "var(--text-main, #475569)"} fontWeight={hijo.esActiva ? "bold" : "normal"}>
+                                            {hijo.valor.length > 15 ? hijo.valor.substring(0, 15) + '...' : hijo.valor}
+                                        </text>
+                                        <text x={l2X} y={hijo.y + 12} textAnchor="middle" fontSize="12" fill={hijo.esActiva ? activeColor : "var(--text-muted, #64748b)"} fontWeight="bold">
+                                            P = {(hijo.pB).toFixed(4)}
+                                        </text>
+
+                                        {hijo.esActiva && (
+                                            <text x={l2X + 68} y={hijo.y + 4} textAnchor="start" fontSize="13" fill={activeColor} fontWeight="bold">
+                                                ← RUTA SELECCIONADA
+                                            </text>
+                                        )}
+                                    </g>
+                                );
+                            })}
+                        </g>
+                    );
+                })}
+            </svg>
+        </div>
+    );
+}
 
 export default function ArbolProbabilidades({ resultado, filas, varSeleccionada, colA, colB, modReemplazo, inputMode = 'matriz' }) {
     if (!resultado) return null;
 
     if (resultado.isManualDinamic) {
-        return <ArbolManualDinamico resultado={resultado} modReemplazo={modReemplazo} />;
+        const events = resultado.events || [];
+        const N = events.length;
+        const ROW_HEIGHT = 70;
+        const numHojas = N + 1;
+        const topMargin = 45;
+        const svgHeight = topMargin + Math.max(0, numHojas - 1) * ROW_HEIGHT + topMargin;
+        const svgWidth = Math.max(820, 220 * N + 360);
+        const altoWidget = Math.max(380, svgHeight + 85);
+
+        return (
+            <MarcoWidgetMAT251 id="w-flow-tree" titulo="Árbol de Probabilidades Sucesivas" anchoCompleto={true} alto={`${altoWidget}px`}>
+                <ContenidoArbolManual
+                    resultado={resultado}
+                    modReemplazo={modReemplazo}
+                    svgWidth={svgWidth}
+                    svgHeight={svgHeight}
+                    numHojas={numHojas}
+                    ROW_HEIGHT={ROW_HEIGHT}
+                    topMargin={topMargin}
+                    N={N}
+                />
+            </MarcoWidgetMAT251>
+        );
     }
 
     const dataArbol = (() => {
@@ -206,19 +430,15 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
 
     if (!dataArbol) return null;
 
-    const { N, ramasA } = dataArbol;
+    const { ramasA } = dataArbol;
     const numHojas = ramasA.reduce((sum, rama) => sum + rama.hijos.length, 0);
     
-    const ROW_HEIGHT = 70;
-    const svgHeight = Math.max(300, numHojas * ROW_HEIGHT + 100);
-    const svgWidth = 800;
+    const ROW_HEIGHT = 68;
+    const topMargin = 45;
+    const svgHeight = topMargin + Math.max(0, numHojas - 1) * ROW_HEIGHT + topMargin;
+    const svgWidth = 850;
 
-    const rootX = 60;
-    const rootY = svgHeight / 2;
-    const l1X = 300;
-    const l2X = 580;
-
-    let currentY = 50;
+    let currentY = topMargin;
     ramasA.forEach(ramaA => {
         const hYStart = currentY;
         ramaA.hijos.forEach(hijoB => {
@@ -229,101 +449,16 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
         ramaA.y = (hYStart + hYEnd) / 2;
     });
 
-    const activeColor = "#10b981";
-    const activeStroke = 3;
-    const inactiveColor = "#94a3b8";
-    const inactiveStroke = 1.5;
+    const altoWidget = Math.max(380, svgHeight + 85);
 
     return (
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
-            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height="auto" style={{ maxWidth: '900px', fontFamily: FONT }}>
-                <defs>
-                    <marker id="arrow-active-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-                        <path d="M0,0 L0,6 L9,3 z" fill={activeColor} />
-                    </marker>
-                    <marker id="arrow-inactive-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-                        <path d="M0,0 L0,6 L9,3 z" fill={inactiveColor} />
-                    </marker>
-                </defs>
-
-                <rect x={rootX - 40} y={rootY - 25} width="80" height="50" rx="8" fill="var(--bg-input, #f8fafc)" stroke={inactiveColor} strokeWidth="2" />
-                <text x={rootX} y={rootY - 5} textAnchor="middle" fontSize="13" fill="var(--text-main, #334155)" fontWeight="bold">Total</text>
-                <text x={rootX} y={rootY + 12} textAnchor="middle" fontSize="14" fill="var(--text-main, #0f172a)" fontWeight="bold">N={N}</text>
-
-                {ramasA.map((rama, i) => {
-                    const colorL1 = rama.esActiva ? activeColor : inactiveColor;
-                    const strokeL1 = rama.esActiva ? activeStroke : inactiveStroke;
-                    const markerL1 = rama.esActiva ? "url(#arrow-active-m)" : "url(#arrow-inactive-m)";
-
-                    return (
-                        <g key={`l1-${i}`}>
-                            <line 
-                                x1={rootX + 40} y1={rootY} 
-                                x2={l1X - 65} y2={rama.y} 
-                                stroke={colorL1} strokeWidth={strokeL1} 
-                                markerEnd={markerL1} 
-                                strokeLinecap="round"
-                            />
-                            <rect x={(rootX + l1X)/2 - 30} y={(rootY + rama.y)/2 - 15} width="60" height="20" fill="var(--bg-card, white)" opacity="0.9" />
-                            <text x={(rootX + l1X)/2} y={(rootY + rama.y)/2} textAnchor="middle" fontSize="11" fill={colorL1} fontWeight="bold">
-                                {rama.count === '-' ? `P=${rama.pA.toFixed(4)}` : `${rama.count}/${N}`}
-                            </text>
-
-                            <rect 
-                                x={l1X - 60} y={rama.y - 25} width="120" height="50" rx="6" 
-                                fill={rama.esActiva ? "var(--bg-input, rgba(16, 185, 129, 0.05))" : "var(--bg-input, #fff)"} 
-                                stroke={colorL1} strokeWidth={rama.esActiva ? 2 : 1} 
-                            />
-                            <text x={l1X} y={rama.y - 5} textAnchor="middle" fontSize="12" fill={rama.esActiva ? "var(--text-main, #064e3b)" : "var(--text-main, #475569)"} fontWeight={rama.esActiva ? "bold" : "normal"}>
-                                {rama.valor.length > 15 ? rama.valor.substring(0, 15) + '...' : rama.valor}
-                            </text>
-                            <text x={l1X} y={rama.y + 12} textAnchor="middle" fontSize="12" fill={rama.esActiva ? activeColor : "var(--text-muted, #64748b)"} fontWeight="bold">
-                                {rama.count === '-' ? `P=${rama.pA.toFixed(4)}` : `n=${rama.count}`}
-                            </text>
-
-                            {rama.hijos.map((hijo, j) => {
-                                const colorL2 = hijo.esActiva ? activeColor : inactiveColor;
-                                const strokeL2 = hijo.esActiva ? activeStroke : inactiveStroke;
-                                const markerL2 = hijo.esActiva ? "url(#arrow-active-m)" : "url(#arrow-inactive-m)";
-
-                                return (
-                                    <g key={`l2-${i}-${j}`}>
-                                        <line 
-                                            x1={l1X + 60} y1={rama.y} 
-                                            x2={l2X - 65} y2={hijo.y} 
-                                            stroke={colorL2} strokeWidth={strokeL2} 
-                                            markerEnd={markerL2} 
-                                            strokeLinecap="round"
-                                        />
-                                        <rect x={(l1X + l2X)/2 - 30} y={(rama.y + hijo.y)/2 - 15} width="60" height="20" fill="var(--bg-card, white)" opacity="0.9" />
-                                        <text x={(l1X + l2X)/2} y={(rama.y + hijo.y)/2} textAnchor="middle" fontSize="11" fill={colorL2} fontWeight="bold">
-                                            {hijo.count === '-' ? `P=${hijo.pB.toFixed(4)}` : `${hijo.count}/${hijo.total}`}
-                                        </text>
-
-                                        <rect 
-                                            x={l2X - 60} y={hijo.y - 25} width="120" height="50" rx="6" 
-                                            fill={hijo.esActiva ? "var(--bg-input, rgba(16, 185, 129, 0.1))" : "var(--bg-input, #fff)"} 
-                                            stroke={colorL2} strokeWidth={hijo.esActiva ? 2 : 1} 
-                                        />
-                                        <text x={l2X} y={hijo.y - 5} textAnchor="middle" fontSize="12" fill={hijo.esActiva ? "var(--text-main, #064e3b)" : "var(--text-main, #475569)"} fontWeight={hijo.esActiva ? "bold" : "normal"}>
-                                            {hijo.valor.length > 15 ? hijo.valor.substring(0, 15) + '...' : hijo.valor}
-                                        </text>
-                                        <text x={l2X} y={hijo.y + 12} textAnchor="middle" fontSize="12" fill={hijo.esActiva ? activeColor : "var(--text-muted, #64748b)"} fontWeight="bold">
-                                            P = {(hijo.pB).toFixed(4)}
-                                        </text>
-
-                                        {hijo.esActiva && (
-                                            <text x={l2X + 70} y={hijo.y + 4} textAnchor="start" fontSize="14" fill={activeColor} fontWeight="bold">
-                                                ← RUTA SELECCIONADA
-                                            </text>
-                                        )}
-                                    </g>
-                                );
-                            })}
-                        </g>
-                    );
-                })}
-            </svg>
-        </div>
+        <MarcoWidgetMAT251 id="w-flow-tree" titulo="Árbol de Probabilidades Sucesivas" anchoCompleto={true} alto={`${altoWidget}px`}>
+            <ContenidoArbolMatriz
+                dataArbol={dataArbol}
+                svgWidth={svgWidth}
+                svgHeight={svgHeight}
+                resultado={resultado}
+            />
+        </MarcoWidgetMAT251>
     );
 }

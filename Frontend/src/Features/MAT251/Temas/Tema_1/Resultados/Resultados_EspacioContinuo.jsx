@@ -178,11 +178,11 @@ export default function ResultadosEspacioContinuo({
                                 <h5 style={{ margin: '10px 0 10px 0', color: '#334155', fontSize: FS.sm, width: '100%' }}>1. Límites del Universo Poblacional</h5>
                                 <div style={{ flex: 1, minWidth: '150px' }}>
                                     <label style={{ fontSize: FS.sm, color: '#1e3a8a', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>Universo Min (A):</label>
-                                    <input type="number" value={manualA} onChange={(e) => setManualA(e.target.value)} placeholder="Ej. 0" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #93c5fd' }} />
+                                    <input type="number" value={manualA} onChange={(e) => setManualA(e.target.value)} placeholder="Ej. 0" className="input-mat251 placeholder-small" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #93c5fd' }} />
                                 </div>
                                 <div style={{ flex: 1, minWidth: '150px' }}>
                                     <label style={{ fontSize: FS.sm, color: '#1e3a8a', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>Universo Max (B):</label>
-                                    <input type="number" value={manualB} onChange={(e) => setManualB(e.target.value)} placeholder="Ej. 100" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #93c5fd' }} />
+                                    <input type="number" value={manualB} onChange={(e) => setManualB(e.target.value)} placeholder="Ej. 100" className="input-mat251 placeholder-small" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #93c5fd' }} />
                                 </div>
                             </div>
                         )}
@@ -191,11 +191,11 @@ export default function ResultadosEspacioContinuo({
                         <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                             <div style={{ flex: 1, minWidth: '150px' }}>
                                 <label style={{ fontSize: FS.sm, display: 'block', marginBottom: '4px', fontWeight: 'bold', color: '#1e293b' }}>Mínimo a evaluar (a):</label>
-                                <input type="number" value={inputMin} onChange={(e) => setInputMin(e.target.value)} placeholder="Ej. 10" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #94a3b8' }} />
+                                <input type="number" value={inputMin} onChange={(e) => setInputMin(e.target.value)} placeholder="Ej. 10" className="input-mat251 placeholder-small" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #94a3b8' }} />
                             </div>
                             <div style={{ flex: 1, minWidth: '150px' }}>
                                 <label style={{ fontSize: FS.sm, display: 'block', marginBottom: '4px', fontWeight: 'bold', color: '#1e293b' }}>Máximo a evaluar (b):</label>
-                                <input type="number" value={inputMax} onChange={(e) => setInputMax(e.target.value)} placeholder="Ej. 20" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #94a3b8' }} />
+                                <input type="number" value={inputMax} onChange={(e) => setInputMax(e.target.value)} placeholder="Ej. 20" className="input-mat251 placeholder-small" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid #94a3b8' }} />
                             </div>
                         </div>
 

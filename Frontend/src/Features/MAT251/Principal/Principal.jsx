@@ -26,9 +26,11 @@ import ResultadosReglaMultiplicacion from '../Temas/Tema_1/Resultados/Resultados
 import ResultadosMuestreo from '../Temas/Tema_1/Resultados/Resultados_Muestreo';
 import ResultadosEspacioContinuo from '../Temas/Tema_1/Resultados/Resultados_EspacioContinuo';
 import Gestor_CalculadoraMuestral from '../Temas/Tema_4/Controles/Gestor_CalculadoraMuestral';
-import CalculadoraTamanioMuestra from '../Temas/Tema_4/CalculadoraTamanioMuestra';
+import Gestor_DistribucionesTyF from '../Temas/Tema_4/Controles/Gestor_DistribucionesTyF';
 import Gestor_EstimacionPuntual, { Controles_EstimacionPuntual_UI } from '../Temas/Tema_5/Controles/Gestor_EstimacionPuntual';
 import Gestor_EstimacionIntervalos, { Controles_EstimacionIntervalos_UI } from '../Temas/Tema_5/Controles/Gestor_EstimacionIntervalos';
+import Gestor_HipotesisParametricas, { Controles_HP_UI } from '../Temas/Tema_6/Controles/Gestor_HipotesisParametricas';
+import Gestor_HipotesisNoParametricas, { Controles_HNP_UI } from '../Temas/Tema_6/Controles/Gestor_HipotesisNoParametricas';
 import Operacion from '../Temas/Tema_1/Controles/Operacion';
 import Controles_DistribucionDiscreta from '../Temas/Tema_2/Controles/Controles_DistribucionDiscreta';
 import Resultados_DistribucionDiscreta from '../Temas/Tema_2/Resultados/Resultados_DistribucionDiscreta';
@@ -52,6 +54,35 @@ export default function Principal() {
     const [operacion, setOperacion] = useState('');
     const [subTipoProbabilidad, setSubTipoProbabilidad] = useState('clasica');
     const [columnaParticion, setColumnaParticion] = useState(''); // Para probabilidad total
+
+    const nombreOperacion = useMemo(() => {
+        if (!operacion) return '';
+        for (const t of OPERACIONES) {
+            const found = t.operaciones?.find(o => o.value === operacion);
+            if (found) return found.label;
+        }
+        if (operacion === 'conteo') return 'Técnicas de Conteo';
+        if (operacion === 'simulador_total') return 'Probabilidad Total';
+        if (operacion === 'regla_adicion') return 'Regla de la Adición';
+        if (operacion === 'regla_multiplicacion') return 'Regla de la Multiplicación';
+        if (operacion === 'muestreo') return 'Introducción al Muestreo';
+        if (operacion === 'dist_uniforme') return 'Espacio Continuo';
+        if (operacion === 'dist_discreta') return 'Variables Aleatorias Discretas';
+        if (operacion === 'dist_continua') return 'Calculadora de Funciones Continuas';
+        if (operacion === 'dist_continua_v2') return 'Variable Aleatoria Continua';
+        if (operacion === 'modelos_discretos') return 'Distribuciones Discretas';
+        if (operacion === 'modelos_continuos') return 'Distribuciones Continuas';
+        if (operacion === 'distribuciones_muestrales') return 'Distribuciones Muestrales';
+        if (operacion === 'tyf') return 'Distribuciones T y F';
+        if (operacion === 'tamanio_muestra') return 'Tamaño de Muestra';
+        if (operacion === 'probabilidad_muestral') return 'Probabilidad Muestral';
+        if (operacion === 'Estimacion_puntual') return 'Estimación Puntual';
+        if (operacion === 'Estimacion_intervalos') return 'Estimación por Intervalos';
+        if (operacion === 'Hipotesis_parametricas') return 'Hipótesis Paramétricas';
+        if (operacion === 'Hipotesis_noparametricas') return 'Hipótesis No Paramétricas';
+        if (operacion === 'probabilidad') return 'Cálculo de Probabilidad';
+        return 'Cálculo de Probabilidad';
+    }, [operacion]);
 
     // ── Conteo ───────────────────────────────────────────────────────────────────
     const [n, setN] = useState('0');
@@ -174,6 +205,14 @@ export default function Principal() {
     const [modalProcTema3, setModalProcTema3] = useState(false);
 
     // Resultados Tema 4 delegados a Gestor_CalculadoraMuestral
+
+    // Tema 6: Hipótesis Paramétricas
+    const [pruebaHP, setPruebaHP] = useState('media_z');
+    const [modoHP, setModoHP] = useState('matriz');
+
+    // Tema 6: Hipótesis No Paramétricas
+    const [pruebaHNP, setPruebaHNP] = useState('chi_cuadrada');
+    const [modoHNP, setModoHNP] = useState('matriz');
 
     // ==========================================FUNCIONES //
 
@@ -355,12 +394,25 @@ export default function Principal() {
         setFilas(renumeradas.length ? renumeradas : [filaVacia(1)]);
         setEventoFavorable([]);
         setResProbabilidad(null);
+        setDatosDiscretos(null);
+        setDatosContinuos(null);
         setModalEditor(false);
     };
 
     const cargarVariable = (varsArray) => {
         const arr = Array.isArray(varsArray) ? varsArray : [varsArray];
         if (arr.length === 0) return;
+
+        if (operacion === 'distribuciones_muestrales') {
+            const tieneMultiplesCols = arr.length > 1 || 
+                (arr[0]?.nombresColumnas && arr[0].nombresColumnas.length > 1) ||
+                (arr[0]?.tipo && arr[0].tipo.toLowerCase().includes('mixta')) ||
+                (arr[0]?.datos && arr[0].datos.some(d => typeof d === 'string' && d.includes(' | ')));
+            if (tieneMultiplesCols) {
+                mostrarAlerta("La variable debe tener 1 sola columna.", "Atención", "warning");
+                return;
+            }
+        }
 
         const nombreCombinado = arr.map(v => v.nombre).join(' | ');
         const longitud = arr[0]?.datos?.length || 0;
@@ -375,6 +427,8 @@ export default function Principal() {
         setEventoFavorable([]);
         setEventoCondicion([]);
         setResProbabilidad(null);
+        setDatosDiscretos(null);
+        setDatosContinuos(null);
         setVarSeleccionada({
             nombre: nombreCombinado,
             esCombinada: arr.length > 1,
@@ -393,6 +447,8 @@ export default function Principal() {
         setEventoCondicion([]);
         setColumnaParticion('');
         setResProbabilidad(null);
+        setDatosDiscretos(null);
+        setDatosContinuos(null);
     };
 
     // Sincronizar datos si la variable es editada/eliminada en Gestión de Datos
@@ -406,6 +462,8 @@ export default function Principal() {
             setFilas([filaVacia(1), filaVacia(2), filaVacia(3)]);
             setEventoFavorable([]);
             setResProbabilidad(null);
+            setDatosDiscretos(null);
+            setDatosContinuos(null);
             return;
         }
 
@@ -420,6 +478,8 @@ export default function Principal() {
             setEventoCondicion([]);
             setColumnaParticion('');
             setResProbabilidad(null);
+            setDatosDiscretos(null);
+            setDatosContinuos(null);
         }
     }, [variables, varSeleccionada]);
 
@@ -482,6 +542,8 @@ export default function Principal() {
         setErrorMuestreo('');
         setResultadoUniforme(null);
         setErrorUniforme('');
+        setDatosDiscretos(null);
+        setDatosContinuos(null);
     };
 
     // Al cambiar subTipo, borrar resultados
@@ -528,6 +590,13 @@ export default function Principal() {
                     font-weight: 700 !important;
                     background-color: var(--bg-input) !important;
                     line-height: 35px !important;
+                    color: var(--text-pure) !important;
+                    }
+                    .rdg-header-row .rdg-cell * {
+                    color: var(--text-pure) !important;
+                    }
+                    .rdg-cell {
+                    color: var(--text-pure) !important;
                     }
                     .btn-icon {
                     display: inline-flex;
@@ -552,22 +621,22 @@ export default function Principal() {
             {/* PANEL IZQUIERDO */}
             <div className="calculadora-datos" style={{ fontFamily: FONT }}>
                 <div>
-                    {panelAbierto && <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 600 }}>Parámetros</h3>}
+                    {panelAbierto && <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 'bold' }}>Parámetros</h3>}
                 </div>
                 {panelAbierto && (
                     <div className="panel-controles-excel" style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column' }}>
                         {/* Selector de operación iterativo (Personalizado) */}
                         {/* Selector de operación iterativo (Personalizado) */}
-                        <label style={{ ...labelStyle, fontSize: FS.xs, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Operación:</label>
+                        <label style={{ ...labelStyle, fontSize: FS.xs }}>OPERACIÓN:</label>
                         <Operacion operacion={operacion} handleOperacion={handleOperacion} />
 
                         {/* Hint cuando no hay operación */}
                         {!operacion && (
-                            <div style={{ padding: '12px', background: 'var(--bg-body, #f8fafc)', border: '1px dashed var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)', opacity: 0.5, marginBottom: '6px' }}>
+                            <div style={{ padding: '10px', background: 'var(--bg-body, #f8fafc)', border: '1px dashed var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)', opacity: 0.5, marginBottom: '5px' }}>
                                     <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
                                 </svg>
-                                <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)'}}>
                                     Expande un tema y elige<br />una operación para continuar.
                                 </p>
                             </div>
@@ -576,8 +645,8 @@ export default function Principal() {
                         {/* SUB-SELECTOR DE PROBABILIDAD */}
                         {operacion === 'probabilidad' && (
                             <div style={{ marginBottom: '15px' }}>
-                                <label style={{ ...labelStyle, fontSize: '1.1em', marginBottom: '8px' }}>Tipo de Probabilidad:</label>
-                                <div style={{ display: 'flex', gap: '5px', background: 'var(--bg-card)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                                <label style={{ ...labelStyle, color: 'var(--text-pure)', fontSize: '0.85rem', marginBottom: '10px' }}>Tipo de Probabilidad:</label>
+                                <div style={{ display: 'flex', gap: '5px', background: 'var(--bg-card)', padding: '3px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                     {[
                                         { id: 'clasica', label: 'Clásica' },
                                         { id: 'frecuentista', label: 'Frecuentista' },
@@ -587,7 +656,7 @@ export default function Principal() {
                                             key={tipo.id}
                                             className={`btn-mat251-modo ${subTipoProbabilidad === tipo.id ? 'active' : ''}`}
                                             onClick={() => setSubTipoProbabilidad(tipo.id)}
-                                            style={{ flex: 1, padding: '8px 4px' }}
+                                            style={{ flex: 1, padding: '5px 4px' }}
                                         >
                                             {tipo.label}
                                         </button>
@@ -613,6 +682,19 @@ export default function Principal() {
                             />
                         )}
 
+                        {/* CONTROLES HIPOTESIS PARAMETRICAS */}
+                        {operacion === 'Hipotesis_parametricas' && (
+                            <Controles_HP_UI 
+                                prueba={pruebaHP} setPrueba={setPruebaHP} 
+                            />
+                        )}
+
+                        {/* CONTROLES HIPOTESIS NO PARAMETRICAS */}
+                        {operacion === 'Hipotesis_noparametricas' && (
+                            <Controles_HNP_UI 
+                                prueba={pruebaHNP} setPrueba={setPruebaHNP} 
+                            />
+                        )}
 
                         {/* SEPARACION DE CONTROLES */}
                         {operacion === 'conteo' && (
@@ -626,7 +708,7 @@ export default function Principal() {
                                 setTipoElementos={setTipoElementos}
                             />
                         )}
-                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos' || operacion === 'modelos_continuos' || operacion === 'dist_discreta' || operacion === 'Estimacion_puntual' || operacion === 'Estimacion_intervalos') && (
+                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos' || operacion === 'modelos_continuos' || operacion === 'dist_discreta' || operacion === 'Estimacion_puntual' || operacion === 'Estimacion_intervalos' || operacion === 'Hipotesis_parametricas' || operacion === 'Hipotesis_noparametricas') && (
                             <ControlesProbabilidad
                                 setModalVars={setModalVars}
                                 varSeleccionada={varSeleccionada}
@@ -634,6 +716,7 @@ export default function Principal() {
                                 cargarVariable={cargarVariable}
                                 setVarSeleccionada={setVarSeleccionada}
                                 deseleccionarVariable={deseleccionarVariable}
+                                operacion={operacion}
                             />
                         )}
                     </div>
@@ -645,46 +728,17 @@ export default function Principal() {
             <div className="calculadora-resultados" style={{ fontFamily: FONT }}>
                 <div className="frecuencias" style={{ borderRadius: RADIUS }}>
                     {operacion && (
-                        <div className="titulo-operacion-calculadora" style={{ display: 'flex', alignItems: 'center', gap: '5px', margin: '0 0 20px 0', fontFamily: FONT }}>
-                            <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>OPERACIÓN:</span>
-                            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-                                {operacion === 'conteo' ? 'Técnicas de Conteo'
-                                    : operacion === 'simulador_total' ? 'Probabilidad Total'
-                                    : operacion === 'regla_adicion' ? 'Regla de la Adición'
-                                    : operacion === 'regla_multiplicacion' ? 'Regla de la Multiplicación'
-                                    : operacion === 'muestreo' ? 'Introducción al Muestreo'
-                                    : operacion === 'dist_uniforme' ? 'Espacio Continuo'
-                                    : operacion === 'dist_discreta' ? 'Variables Aleatorias Discretas'
-                                    : operacion === 'dist_continua' ? 'Calculadora de Funciones Continuas'
-                                    : operacion === 'dist_continua_v2' ? 'Variable Aleatoria Continua'
-                                    : operacion === 'modelos_discretos' ? 'Distribuciones Discretas'
-                                    : operacion === 'modelos_continuos' ? 'Distribuciones Continuas'
-                                    : operacion === 'distribuciones_muestrales' ? 'Distribuciones Muestrales'
-                                    : operacion === 'tamanio_muestra' ? 'Tamaño de Muestra'
-                                    : operacion === 'probabilidad_muestral' ? 'Probabilidad Muestral'
-                                    : operacion === 'Estimacion_puntual' ? 'Estimación Puntual'
-                                    : operacion === 'Estimacion_intervalos' ? 'Estimación por Intervalos'
-                                    : operacion === 'Hipotesis_parametricas' ? 'Hipótesis Paramétricas'
-                                    : operacion === 'Hipotesis_noparametricas' ? 'Hipótesis No Paramétricas'
-                                    : 'Cálculo de Probabilidad'}
+                        <div className="titulo-operacion-calculadora" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: FONT }}>
+                            <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>OPERACIÓN:</span>
+                            <span style={{ color: 'var(--text-pure)' }}>
+                                {nombreOperacion}
                             </span>
-                            {operacion === 'probabilidad' && (
-                                <>
-                                    <span style={{ color: 'var(--text-muted)' }}>–</span>
-                                    <span style={{ fontWeight: 600, color: 'var(--accent-color)' }}>
-                                        {subTipoProbabilidad === 'clasica' ? 'Probabilidad Clásica'
-                                            : subTipoProbabilidad === 'frecuentista' ? 'Probabilidad Frecuentista'
-                                            : subTipoProbabilidad === 'condicional' ? 'Probabilidad Condicional'
-                                            : 'Probabilidad Total'}
-                                    </span>
-                                </>
-                            )}
                         </div>
                     )}
 
                     {/* RESULTADOS */}
                     {!operacion ? (
-                        <div style={{ padding: '24px 20px', fontFamily: FONT }}>
+                        <div style={{ padding: '10px 10px', fontFamily: FONT }}>
                             {/* Header bienvenida */}
                             <div className="banner-bienvenida">
                                 <div style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.9, marginBottom: '6px' }}>
@@ -701,7 +755,7 @@ export default function Principal() {
                                     { num: '01', titulo: 'Cálculo de probabilidades e introducción al muestreo', ops: 5, activo: true },
                                     { num: '02', titulo: 'Variables aleatorias', ops: 2, activo: true },
                                     { num: '03', titulo: 'Distribuciones discretas y continuas importantes', ops: 2, activo: true },
-                                    { num: '04', titulo: 'Distribuciones en el muestreo estadístico', ops: 1, activo: true },
+                                    { num: '04', titulo: 'Distribuciones en el muestreo estadístico', ops: 2, activo: true },
                                     { num: '05', titulo: 'Estimación e inferencia estadística', ops: 2, activo: true }, 
                                     { num: '06', titulo: 'Pruebas de hipótesis paramétricas y no paramétricas', ops: 2, activo: true },
                                 ].map(t => (
@@ -755,7 +809,7 @@ export default function Principal() {
                         </div>
                     ) : operacion === 'dist_continua' ? (
                         <div className="tema2-container">
-                            <div style={{ padding: '0 20px 20px 20px' }}>
+                            <div>
                                 <Controles_DistribucionContinua
                                     onCalcular={(datos) => {
                                         if (datos) {
@@ -854,8 +908,8 @@ export default function Principal() {
                         />
                     ) : operacion === 'distribuciones_muestrales' ? (
                         <Gestor_CalculadoraMuestral varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} />
-                    ) : operacion === 'tamanio_muestra' ? (
-                        <CalculadoraTamanioMuestra />
+                    ) : operacion === 'tyf' ? (
+                        <Gestor_DistribucionesTyF />
                     ) : operacion === 'regla_multiplicacion' ? (
                         <ResultadosReglaMultiplicacion
                             varSeleccionada={varSeleccionada} filas={filas}
@@ -912,6 +966,29 @@ export default function Principal() {
                         />
                     ) : operacion === 'conteo' ? (
                         <ResultadosConteo resConteo={resConteo} hayResultado={hayResultado} />
+                    ) : operacion === 'Hipotesis_parametricas' ? (
+                        <Gestor_HipotesisParametricas 
+                            varSeleccionada={varSeleccionada} 
+                            filas={filas} 
+                            statsDatos={statsDatos} 
+                            abrirEditor={abrirEditor} 
+                            prueba={pruebaHP}
+                            setPrueba={setPruebaHP}
+                            modo={modoHP}
+                            setModo={setModoHP}
+                        />
+                    ) : operacion === 'Hipotesis_noparametricas' ? (
+                        <Gestor_HipotesisNoParametricas 
+                            varSeleccionada={varSeleccionada} 
+                            filas={filas} 
+                            statsDatos={statsDatos} 
+                            abrirEditor={abrirEditor} 
+                            prueba={pruebaHNP}
+                            setPrueba={setPruebaHNP}
+                            modo={modoHNP}
+                            setModo={setModoHNP}
+                            variables={variables}
+                        />
                     ) : (
                         <ResultadosProbabilidad
                             statsDatos={statsDatos} abrirEditor={abrirEditor} valoresUnicos={valoresUnicos}
@@ -933,7 +1010,7 @@ export default function Principal() {
 
             {/* MODALES*/}
             <ModalEditor modalEditor={modalEditor} setModalEditor={setModalEditor} filasTemp={filasTemp} setFilasTemp={setFilasTemp} columns={columns} guardarEditor={guardarEditor} hayCambiosEditor={hayCambiosEditor} titulo={subTipoProbabilidad === 'frecuentista' ? 'Editor de Datos Históricos' : 'Editor de Espacio Muestral'} />
-            <ModalEventos modalEvento={modalEvento} setModalEvento={setModalEvento} statsEventos={statsEventos} statsEventosPorColumna={(subTipoProbabilidad === 'clasica' || subTipoProbabilidad === 'frecuentista') ? null : statsEventosPorColumnaParaA} eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable} setResProbabilidad={setResProbabilidad} titulo={subTipoProbabilidad === 'frecuentista' ? 'Seleccionar Evento de Interés' : 'Seleccionar Eventos Favorables'} mostrarFrecuencia={subTipoProbabilidad === 'condicional' || (subTipoProbabilidad === 'frecuentista' && inputModeProb === 'matriz')} />
+            <ModalEventos modalEvento={modalEvento} setModalEvento={setModalEvento} statsEventos={statsEventos} statsEventosPorColumna={(subTipoProbabilidad === 'clasica' || subTipoProbabilidad === 'frecuentista') ? null : statsEventosPorColumnaParaA} eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable} setResProbabilidad={setResProbabilidad} titulo={subTipoProbabilidad === 'frecuentista' ? 'Seleccionar Evento de Interés' : subTipoProbabilidad === 'condicional' ? 'Seleccionar Eventos para Interés (A)' : 'Seleccionar Eventos Favorables'} mostrarFrecuencia={subTipoProbabilidad === 'condicional' || (subTipoProbabilidad === 'frecuentista' && inputModeProb === 'matriz')} />
             <ModalEventos modalEvento={modalCondicion} setModalEvento={setModalCondicion} statsEventos={statsEventos} statsEventosPorColumna={statsEventosPorColumnaParaB} eventoFavorable={eventoCondicion} setEventoFavorable={setEventoCondicion} setResProbabilidad={setResProbabilidad} titulo="Seleccionar Eventos para Condición (B)" mostrarFrecuencia={subTipoProbabilidad === 'condicional'} />
             <ModalVariables modalVars={modalVars} setModalVars={setModalVars} variables={variables} cargarVariable={cargarVariable} />
 

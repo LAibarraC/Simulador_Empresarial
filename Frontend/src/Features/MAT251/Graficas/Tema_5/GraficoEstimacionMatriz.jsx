@@ -37,8 +37,12 @@ export default function GraficoEstimacionMatriz({ resultados, parametro }) {
     const maxFreq = Math.max(...Object.values(frecuencias), 1);
     const uniqueXs = Object.keys(frecuencias).map(Number).sort((a, b) => a - b);
     
-    // Generar ticks personalizados si hay 25 o menos valores únicos para que se vean todos
-    const xAxisProps = { domain: ['auto', 'auto'] };
+    const minX = uniqueXs[0];
+    const maxX = uniqueXs[uniqueXs.length - 1];
+    const range = maxX - minX;
+    const padding = range === 0 ? 1 : range * 0.1;
+    
+    const xAxisProps = { domain: [minX - padding, maxX + padding] };
     if (uniqueXs.length <= 25) {
         xAxisProps.ticks = uniqueXs;
     }
@@ -47,7 +51,7 @@ export default function GraficoEstimacionMatriz({ resultados, parametro }) {
     const containerStyle = uniqueXs.length <= 7 ? { maxWidth: '700px', margin: '0 auto', height: '100%' } : { width: '100%', height: '100%' };
 
     return (
-        <MarcoWidgetMAT251 titulo="Dispersión de los Datos (Dot Plot)" anchoCompleto={true} alto="450px">
+        <MarcoWidgetMAT251 titulo="Dispersión de los Datos" anchoCompleto={true} alto="450px">
             <div style={containerStyle}>
                 <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart margin={{ top: 30, right: 30, left: -20, bottom: 20 }}>

@@ -1,35 +1,142 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { cardStyle, FS, RADIUS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { cardStyle, FS, RADIUS } from '../../../Principal/Constantes';
+import ModalTablaNormalZ from '../../Tema_3/Modales/ModalTablaNormalZ';
+import StatLabel from '../../../ui/StatLabel';
+import '../../../styles/Temas/Tema3.css';
+import '../../../styles/Temas/Tema4.css';
 
 export default function Resultados_DiferenciaMedias({ resultados }) {
-    if (!resultados || !resultados.probFinal) return null;
+    const [modalTablaZ, setModalTablaZ] = useState({ isOpen: false, z: 0 });
+
+    if (!resultados || resultados.probFinal === undefined) return null;
+
+    let z1Val = typeof resultados.z1 === 'number' && !isNaN(resultados.z1) ? resultados.z1 : null;
+    let z2Val = typeof resultados.z2 === 'number' && !isNaN(resultados.z2) ? resultados.z2 : null;
+
+    if (z1Val === null && resultados.strDesarrollo) {
+        const matches = [...resultados.strDesarrollo.matchAll(/P\(\s*Z\s*(?:\\le|\\ge|<=|>=|<|>)\s*([-\d.,]+)\s*\)/gi)];
+        if (matches.length > 0) z1Val = parseFloat(matches[0][1].replace(',', '.'));
+        if (matches.length > 1) z2Val = parseFloat(matches[1][1].replace(',', '.'));
+    }
+
+    z1Val = z1Val !== null && !isNaN(z1Val) ? z1Val : 0;
+    z2Val = z2Val !== null && !isNaN(z2Val) ? z2Val : 0;
+
+    const getMathProbFinal = (cond) => {
+        if (cond === 'mayor_que') {
+            return "P(\\bar{X} - \\bar{Y} \\ge x) = 1 - P(Z \\le z)";
+        }
+        if (cond === 'entre') {
+            return "P(x_1 \\le \\bar{X} - \\bar{Y} \\le x_2) = P(Z \\le z_2) - P(Z \\le z_1)";
+        }
+        return "P(\\bar{X} - \\bar{Y} \\le x) = P(Z \\le z)";
+    };
 
     return (
-        <div style={{ ...cardStyle, background: 'var(--bg-card)', height: '100%', display: 'flex', flexDirection: 'column', border: 'none', boxShadow: 'none', padding: 0 }}>
-            <h3 style={{ color: 'var(--primary-color)', fontSize: FS.md, margin: '0 0 15px 0' }}>
-                Resultados y Desarrollo
-            </h3>
-
+        <div style={{ ...cardStyle, background: 'var(--bg-card)', height: '100%', display: 'flex', flexDirection: 'column', border: 'none', boxShadow: 'none', padding: 0, fontFamily: FONT, color: 'var(--text-pure)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ background: 'transparent', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
-                    <div style={{ color: 'var(--text-muted)', fontSize: FS.sm, marginBottom: '15px' }}>
-                        Cálculo y Estandarización a Z
+                <div style={{ background: 'var(--bg-card)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
+                    <div 
+                        className="tema4-tarjeta-titulo-unificado"
+                        style={{ marginBottom: '12px', color: 'var(--text-pure)', fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
+                    >
+                        <span>Estandarización</span>
+                        <StatLabel
+                            formulaKey="Z_dif_medias"
+                            formulaLatex="Z"
+                            customTexto="Estandarización de la Diferencia de Medias"
+                            customMath="Z = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sqrt{\frac{\sigma_X^2}{n_X} + \frac{\sigma_Y^2}{n_Y}}}"
+                            align="center"
+                        />
+                        <span>y Probabilidad</span>
                     </div>
-                    <div className="thin-scrollbar formula-responsive" style={{ overflowX: 'auto' }}>
+                    <div className="thin-scrollbar formula-responsive" style={{ overflowX: 'auto', paddingBottom: '10px', color: 'var(--text-pure)' }}>
                         <Latex formula={resultados.strDesarrollo} />
                     </div>
-                </div>
 
-                <div style={{ background: 'transparent', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
-                    <div style={{ color: 'var(--text-muted)', fontSize: FS.xs, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-                        PROBABILIDAD FINAL
-                    </div>
-                    <div style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 800, lineHeight: 1 }}>
-                        {(resultados.probFinal * 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
+                    {/* Botón para ver en Tabla Z */}
+                    {resultados.condicion === 'entre' ? (
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '6px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setModalTablaZ({ isOpen: true, z: z1Val })}
+                                className="btn-abrir-tabla-z"
+                                title="Abrir la tabla Z interactiva para ver cómo se localiza este valor"
+                            >
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                                <span>Ver z₁ = {z1Val.toFixed(4)} en Tabla Z</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setModalTablaZ({ isOpen: true, z: z2Val })}
+                                className="btn-abrir-tabla-z"
+                                title="Abrir la tabla Z interactiva para ver cómo se localiza este valor"
+                            >
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                                <span>Ver z₂ = {z2Val.toFixed(4)} en Tabla Z</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '6px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setModalTablaZ({ isOpen: true, z: z1Val })}
+                                className="btn-abrir-tabla-z"
+                                title="Abrir la tabla Z interactiva para ver cómo se localiza este valor"
+                            >
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                                <span>Ver lectura en Tabla Z (z = {z1Val.toFixed(4)})</span>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Sección Probabilidad Final unificada dentro de la misma tarjeta */}
+                    <div style={{ marginTop: '18px' }}>
+                        <div 
+                            className="tema4-tarjeta-titulo-unificado"
+                            style={{ 
+                                marginBottom: '8px', 
+                                color: 'var(--text-pure)', 
+                                fontSize: '0.8rem', 
+                                fontWeight: 'bold', 
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <span>PROBABILIDAD FINAL</span>
+                            <StatLabel
+                                formulaKey="P_dif_medias_final"
+                                formulaLatex="P(\bar{X} - \bar{Y})"
+                                customTexto="Cálculo de Probabilidad Normal Estándar"
+                                customMath={getMathProbFinal(resultados.condicion)}
+                                align="center"
+                            />
+                        </div>
+                        <div 
+                            className="formula-responsive formula-bold" 
+                            style={{ 
+                                color: 'var(--text-pure)', 
+                                fontWeight: 'bold', 
+                                lineHeight: 1.2, 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                alignItems: 'center' 
+                            }}
+                        >
+                            <Latex formula={`\\mathbf{${resultados.probFinal.toFixed(4)}} \\;\\mathbf{\\rightarrow}\\; \\mathbf{${(resultados.probFinal * 100).toFixed(2)}\\%}`} />
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <ModalTablaNormalZ
+                isOpen={modalTablaZ.isOpen}
+                onClose={() => setModalTablaZ({ isOpen: false, z: 0 })}
+                zInicial={modalTablaZ.z}
+            />
         </div>
     );
 }

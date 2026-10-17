@@ -3,14 +3,21 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 
-export default function GraficoEstimacionIntervalos({ resultados }) {
-    if (!resultados || !resultados.simulaciones || resultados.simulaciones.length === 0) return null;
+export default function GraficoEstimacionIntervalos({ resultados, simulacionesVisibles }) {
+    if (!resultados || !simulacionesVisibles || simulacionesVisibles.length === 0) return null;
 
-    const { simulaciones, parametroVerdadero, parametro, confianza } = resultados;
+    const { parametroVerdadero, parametro, confianza } = resultados;
 
     // Solo dibujamos hasta 100 simulaciones para no sobrecargar el SVG visualmente
     const maxSimsToDraw = 100;
-    const simsToDraw = simulaciones.slice(0, maxSimsToDraw);
+    const simsToDraw = simulacionesVisibles.slice(0, maxSimsToDraw);
+
+    const resumenAnimado = useMemo(() => {
+        let contienen = 0;
+        simulacionesVisibles.forEach(s => { if (s.contiene) contienen++; });
+        const cobertura = simulacionesVisibles.length > 0 ? (contienen / simulacionesVisibles.length) * 100 : 0;
+        return { contienen, noContienen: simulacionesVisibles.length - contienen, cobertura, total: simulacionesVisibles.length };
+    }, [simulacionesVisibles]);
 
     // Calcular los límites para el gráfico (min LI, max LS)
     const { minX, maxX } = useMemo(() => {
@@ -65,7 +72,7 @@ export default function GraficoEstimacionIntervalos({ resultados }) {
                             Nivel de confianza nominal: {confianza}%, {renderKatex("n")} = {resultados.n}, {renderKatex(`${getSymboloParam()} = ${parametroVerdadero.toFixed(3)}`)}
                         </h5>
                         <div style={{ fontSize: '0.75rem', marginBottom: '10px' }}>
-                            Después de {resultados.resumen.total} simulaciones: {resultados.resumen.contienen} intervalos contienen, {resultados.resumen.noContienen} no
+                            Después de {resumenAnimado.total} simulaciones: {resumenAnimado.contienen} intervalos contienen, {resumenAnimado.noContienen} no
                         </div>
 
                         <div style={{
@@ -81,12 +88,12 @@ export default function GraficoEstimacionIntervalos({ resultados }) {
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <div style={{ width: '12px', height: '12px', background: '#10b981', borderRadius: '2px' }}></div>
-                                <span>{resultados.resumen.cobertura.toFixed(2)}% contienen</span>
+                                <span>{resumenAnimado.cobertura.toFixed(2)}% contienen</span>
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <div style={{ width: '12px', height: '12px', background: '#ef4444', borderRadius: '2px' }}></div>
-                                <span>{(100 - resultados.resumen.cobertura).toFixed(2)}% no contienen</span>
+                                <span>{(100 - resumenAnimado.cobertura).toFixed(2)}% no contienen</span>
                             </div>
                         </div>
                     </div>

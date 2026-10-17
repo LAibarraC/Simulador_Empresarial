@@ -8,7 +8,7 @@ import Controles_EstimacionManual from './Controles_EstimacionManual';
 import Resultados_EstimacionManual from '../Resultados/Resultados_EstimacionManual';
 import Controles_EstimacionSimulacion from './Controles_EstimacionSimulacion';
 import Resultados_EstimacionSimulacion from '../Resultados/Resultados_EstimacionSimulacion';
-import GraficoEstimacionSimulacion from '../../../Graficas/Tema_5/GraficoEstimacionSimulacion';
+
 import GraficoEstimacionMatriz from '../../../Graficas/Tema_5/GraficoEstimacionMatriz';
 
 import katex from 'katex';
@@ -33,18 +33,18 @@ const MODOS = [
 
 export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, setModo }) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             {/* Selector de Parámetro */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
-                    <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
+                    <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '5px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {PARAMETROS.map(p => (
                             <button
                                 key={p.id}
                                 type="button"
                                 className={`btn-mat251-modo ${parametro === p.id ? 'active' : ''}`}
                                 onClick={() => setParametro(p.id)}
-                                style={{ flex: '1 1 0', minWidth: 'max-content', padding: '3px 13px', textAlign: 'center' }}
+                                style={{ flex: '1 1 0', minWidth: 'max-content', padding: '5px 10px', textAlign: 'center' }}
                             >
                                 {p.label}
                             </button>
@@ -75,10 +75,10 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
     }, [parametro, modo, setModo]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: FONT }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT }}>
             
             {/* Selector de Modo de Trabajo */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
                     <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {MODOS.filter(m => !(parametro === 'media' && m.id === 'manual')).map(m => (
@@ -132,10 +132,7 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
                             onCalcular={setResSimulacion}
                         />
                         {resSimulacion && (
-                            <>
-                                <Resultados_EstimacionSimulacion resultados={resSimulacion} />
-                                <GraficoEstimacionSimulacion resultados={resSimulacion} />
-                            </>
+                            <Resultados_EstimacionSimulacion resultados={resSimulacion} />
                         )}
                     </>
                 )}

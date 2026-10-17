@@ -90,10 +90,8 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
 
     return (
         <div style={{ padding: '0px' }}>
-            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>Análisis de Matriz de Datos</h4>
-            
-            <div style={{ marginBottom: '15px' }}>
-                <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', padding: '12px' }}>
+            <div style={{ marginBottom: '10px' }}>
+                <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '10px' }}>
                     <div>
                         <span style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)' }}>Datos:</span>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>

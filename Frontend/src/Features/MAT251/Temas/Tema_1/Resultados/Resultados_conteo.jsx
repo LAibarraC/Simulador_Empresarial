@@ -28,7 +28,7 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
 
     if (!hayResultado && !resConteo) {
         return (
-            <p className="mensaje-instruccion-vacio" style={{ color: 'var(--text-muted)', marginTop: '10px' }}>
+            <p className="mensaje-instruccion-vacio" style={{ color: 'var(--text-pure)', fontSize:'0.7rem', marginTop: '10px' }}>
                 Configura los parámetros y presiona <strong>CALCULAR</strong>.
             </p>
         );
@@ -38,20 +38,20 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
     const { permutacion, combinacion, n } = resConteo;
 
     const renderPanel = (titulo, datos, ref, color, limite, setLimite) => (
-        <div style={{ flex: '1 1 290px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-color)', borderRadius: RADIUS, background: 'var(--bg-card)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)' }}>
+        <div style={{ flex: '1 1 290px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-color)', borderRadius: RADIUS, background: 'var(--bg-card)', overflow: 'hidden'}}>
             <div style={{ background: color, color: '#fff', padding: '10px', textAlign: 'center', fontWeight: 'bold', fontSize: FS.md }}>
                 {titulo}
             </div>
             <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                 <div style={{ minHeight: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <div ref={ref} style={{ overflowX: 'auto', marginBottom: '10px', color: 'var(--text-main)' }} />
-                    <p style={{ color: 'var(--text-muted)', fontSize: FS.sm, fontStyle: 'italic', margin: 0, textAlign: 'center' }}>
+                    <p style={{ color: 'var(--text-pure)', fontSize: FS.sm, fontStyle: 'italic', margin: 0, textAlign: 'center' }}>
                         {datos.explicacion}
                     </p>
                 </div>
 
                 <div style={{ marginTop: '15px', padding: '15px', background: 'var(--bg-body)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
-                    <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: FS.sm, fontWeight: 600 }}>Total Posibles</p>
+                    <p style={{ margin: 0, color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 'bold' }}>Total Posibles</p>
                     <p style={{ margin: '5px 0 0', fontSize: '2rem', fontWeight: 700, color: color }}>
                         {datos.resultado.toLocaleString()}
                     </p>
@@ -64,8 +64,8 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
                     const extraCount = totalElements - maxRender;
 
                     return (
-                        <div style={{ marginTop: '20px' }}>
-                            <p style={{ margin: '0 0 10px', color: 'var(--text-main)', fontSize: FS.sm, borderBottom: '1px solid var(--border-color)', paddingBottom: '5px' }}>
+                        <div style={{ marginTop: '10px' }}>
+                            <p style={{ margin: '0 0 10px', color: 'var(--text-pure)', fontSize: FS.sx, paddingBottom: '5px' }}>
                                 Visualización de Elementos <strong style={{ color: 'var(--text-main)', fontSize: '0.9em' }}>({totalElements})</strong>:
                             </p>
                             <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid var(--border-color)', padding: '10px', borderRadius: RADIUS, background: 'var(--bg-body)' }}>
@@ -103,7 +103,7 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
                                                 fontSize: '0.72rem',
                                                 fontWeight: 'bold',
                                                 padding: '4px 12px',
-                                                borderRadius: '4px',
+                                                borderRadius: RADIUS,
                                                 backgroundColor: 'var(--primary-color)',
                                                 color: '#fff',
                                                 border: 'none',
@@ -124,7 +124,7 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
     );
 
     return (
-        <div style={{ marginTop: '20px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+        <div style={{ marginTop: '10px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
             {renderPanel('PERMUTACIONES (Importa el orden)', permutacion, formulaPermRef, '#d32f2f', limitePerm, setLimitePerm)}
             {renderPanel('COMBINACIONES (No importa el orden)', combinacion, formulaCombRef, '#1976d2', limiteComb, setLimiteComb)}
         </div>

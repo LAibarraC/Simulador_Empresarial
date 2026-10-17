@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api } from "../services/api";
 import { alerta } from "../utils/Notificaciones";
-import logoSiCE from "../assets/images/Logo-SiCE.png";
+import logoSiCE from "../assets/images/Logo-SiCE.webp";
 import "../styles/ui/Login.css";
 
 export default function ModalSeleccionRolInicial({ usuario, onRolAsignado }) {

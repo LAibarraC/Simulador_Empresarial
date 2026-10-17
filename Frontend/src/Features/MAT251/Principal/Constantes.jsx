@@ -3,8 +3,8 @@ import katex from 'katex';
 
 // v2 — Tema 2 habilitado
 export const FONT = 'system-ui, -apple-system, sans-serif';
-export const FS = { xs: '0.75rem', sm: '0.85rem', sx: '0.75rem', base: '0.95rem', md: '1rem', lg: '1.1rem' };
-export const RADIUS = '5px';
+export const FS = { xs: '0.7rem', sm: '0.85rem', sx: '0.75rem', base: '0.95rem', md: '0.9rem', lg: '0.9rem', sl:'0.8rem', sg:'1rem' };
+export const RADIUS = '5px'; 
 
 export const OPERACIONES = [
   {
@@ -38,7 +38,8 @@ export const OPERACIONES = [
     tema: 'Tema 4',
     titulo: 'Distribuciones en el muestreo estadístico',
     operaciones: [
-      { value: 'distribuciones_muestrales', label: 'Distribuciones Muestrales' }
+      { value: 'distribuciones_muestrales', label: 'Distribuciones Muestrales' },
+      { value: 'tyf', label: 'Distribuciones T y F' }
     ],
   },
   {
@@ -60,6 +61,6 @@ export const OPERACIONES = [
 export const filaVacia = (id) => ({ id, valor: '', origen: 'agregado' });
 
 export const cardStyle = { padding: '10px', border: '1px solid var(--border-color)', borderRadius: RADIUS, backgroundColor: 'var(--bg-card)', fontFamily: FONT };
-export const labelStyle = { fontSize: FS.sm, fontWeight: 600, fontFamily: FONT, display: 'block', marginBottom: '5px', color: 'var(--primary-color)' };
+export const labelStyle = { fontSize: FS.sm, fontWeight: 'bold', fontFamily: FONT, display: 'block', marginBottom: '5px', color: 'var(--text-pure)' };
 export const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
-export const modalBoxStyle = { background: 'var(--bg-card)', borderRadius: RADIUS, padding: '24px', width: '90%', maxWidth: '500px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', fontFamily: FONT };
+export const modalBoxStyle = { background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, padding: '24px', width: '90%', maxWidth: '500px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', fontFamily: FONT };

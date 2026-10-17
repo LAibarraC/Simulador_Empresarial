@@ -36,7 +36,7 @@ export default function MarcoWidget({ id, titulo, children, anchoCompleto = fals
   };
 
   const childrenConProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
+    if (React.isValidElement(child) && typeof child.type !== 'string') {
       return React.cloneElement(child, { isMaximized });
     }
     return child;

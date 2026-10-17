@@ -1,30 +1,59 @@
 import React from 'react';
 import { FONT } from '../../Principal/Constantes';
 import katex from 'katex';
+import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 
-export default function DiagramaFlujoSucesivo({ resultado, modReemplazo }) {
-    if (!resultado) return null;
-    
-    const strokeColor = "var(--primary-color, #3b82f6)";
-    const boxBg = "var(--bg-input, #eff6ff)";
-    const textColor = "var(--text-main, #1e293b)";
-
-    const isManual = resultado.isManualDinamic;
-    const events = isManual ? resultado.events : [
-        { name: resultado.nameA, pVal: resultado.pA, count: resultado.countA, total: resultado.totalA },
-        { name: resultado.nameB, pVal: resultado.pB, count: resultado.countB, total: resultado.totalB }
-    ];
-
-    const numBoxes = events.length;
-    // Base width: 100 for Total box, + (110 arrow + 130 box) per event = 240 * numBoxes + 50 margin
-    const svgWidth = 120 + (numBoxes * 240);
-    const svgHeight = 170; // Aumentado ligeramente para dar espacio a la píldora inferior
-
-    const intersectionLatex = events.map((_, i) => String.fromCharCode(65+i)).join('\\cap ');
+function ContenidoFlujo({
+    resultado, modReemplazo, svgWidth, svgHeight,
+    intersectionLatex, strokeColor, boxBg, textColor,
+    events, isManual, isMaximized
+}) {
+    const minScrollWidth = Math.max(svgWidth, 600);
 
     return (
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
-            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height="100%" style={{ maxWidth: `${svgWidth}px`, fontFamily: FONT }}>
+        <div
+            className="flujo-scroll-wrapper thin-scrollbar"
+            style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '0',
+                boxSizing: 'border-box'
+            }}
+        >
+            <style>{`
+                @media (max-width: 768px) {
+                    .flujo-scroll-wrapper {
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        justify-content: flex-start !important;
+                        padding: 0 15px !important;
+                        height: 100% !important;
+                        min-height: 100% !important;
+                    }
+                    .flujo-scroll-svg {
+                        width: ${minScrollWidth}px !important;
+                        min-width: ${minScrollWidth}px !important;
+                        margin: auto 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                }
+            `}</style>
+            <svg
+                className="flujo-scroll-svg"
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    maxWidth: isMaximized ? '920px' : `${Math.max(svgWidth, 620)}px`,
+                    maxHeight: isMaximized ? '50vh' : '220px',
+                    fontFamily: FONT,
+                    display: 'block'
+                }}
+            >
                 {/* Caja Inicial */}
                 <foreignObject x="10" y="35" width="100" height="60">
                     <div xmlns="http://www.w3.org/1999/xhtml" style={{
@@ -56,8 +85,6 @@ export default function DiagramaFlujoSucesivo({ resultado, modReemplazo }) {
 
                     return (
                         <g key={i}>
-                            {/* Flecha y Textos con KaTeX centrados con foreignObject */}
-                            
                             {/* Texto Superior a la Flecha */}
                             <foreignObject x={startX} y="25" width="110" height="35">
                                 <div xmlns="http://www.w3.org/1999/xhtml" style={{ textAlign: 'center', fontSize: '12px', color: textColor, display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}>
@@ -94,7 +121,7 @@ export default function DiagramaFlujoSucesivo({ resultado, modReemplazo }) {
                 })}
 
                 {/* Resultado Final Intersección Píldora */}
-                <foreignObject x="0" y="120" width={svgWidth} height="40">
+                <foreignObject x="0" y="118" width={svgWidth} height="46">
                     <div xmlns="http://www.w3.org/1999/xhtml" style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <div style={{ padding: '6px 20px', background: 'var(--bg-input, rgba(16, 185, 129, 0.1))', border: '1.5px solid var(--border-color, #10b981)', borderRadius: '20px', fontSize: '14px', color: 'var(--text-main, #047857)', display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <span dangerouslySetInnerHTML={{ __html: katex.renderToString(`P(${intersectionLatex}) = ${resultado.pAandB.toFixed(4)}`) }} />
@@ -114,3 +141,40 @@ export default function DiagramaFlujoSucesivo({ resultado, modReemplazo }) {
     );
 }
 
+export default function DiagramaFlujoSucesivo({ resultado, modReemplazo }) {
+    if (!resultado) return null;
+    
+    const strokeColor = "var(--primary-color, #3b82f6)";
+    const boxBg = "var(--bg-input, #eff6ff)";
+    const textColor = "var(--text-main, #1e293b)";
+
+    const isManual = resultado.isManualDinamic;
+    const events = isManual ? resultado.events : [
+        { name: resultado.nameA, pVal: resultado.pA, count: resultado.countA, total: resultado.totalA },
+        { name: resultado.nameB, pVal: resultado.pB, count: resultado.countB, total: resultado.totalB }
+    ];
+
+    const numBoxes = events.length;
+    // Base width: 100 for Total box, + (110 arrow + 130 box) per event = 240 * numBoxes + 50 margin
+    const svgWidth = 120 + (numBoxes * 240);
+    const svgHeight = 180; // Altura con holgura suficiente para no recortar la píldora
+
+    const intersectionLatex = events.map((_, i) => String.fromCharCode(65+i)).join('\\cap ');
+
+    return (
+        <MarcoWidgetMAT251 id="w-flow-linear" titulo="Flujo Lineal de Extracción" anchoCompleto={true} alto="320px">
+            <ContenidoFlujo
+                resultado={resultado}
+                modReemplazo={modReemplazo}
+                svgWidth={svgWidth}
+                svgHeight={svgHeight}
+                intersectionLatex={intersectionLatex}
+                strokeColor={strokeColor}
+                boxBg={boxBg}
+                textColor={textColor}
+                events={events}
+                isManual={isManual}
+            />
+        </MarcoWidgetMAT251>
+    );
+}

@@ -79,12 +79,17 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
         setIsCalculating(true);
         
         try {
+            const numN = Number(n);
+            const numSims = Number(numSimulaciones);
+            const totalDatos = numN * numSims;
+
             const payload = {
                 distribucion, 
                 paramsDist, 
-                n: Number(n), 
-                numSimulaciones: Number(numSimulaciones), 
-                parametro
+                n: numN, 
+                numSimulaciones: numSims, 
+                parametro,
+                incluirMuestras: totalDatos <= 5000
             };
             const resultado = await mat251Api.ejecutarSimulacionPuntual(payload);
             if (resultado && resultado.error) {

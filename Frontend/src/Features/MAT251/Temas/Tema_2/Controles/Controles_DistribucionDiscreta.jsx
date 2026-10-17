@@ -1,15 +1,153 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import '../../../styles/Temas/Tema2.css';
 import '../../../styles/Temas/Tema3.css';
-import { IconoBasura, IconoMas } from '../../../../../ui/iconos';
+import { IconoBasura, IconoMas, EditarDatos } from '../../../../../ui/iconos';
+import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
+import ModalAlerta from '../../../ui/ModalAlerta';
+import StatLabel from '../../../ui/StatLabel';
+
+// COMPONENTE SELECTOR PERSONALIZADO (REGLA 2)
+function CustomSelect({ value, onChange, options, placeholder = 'Selecciona una opción...' }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setIsOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const selectedOption = options.find(o => o.value === value);
+    const displayText = selectedOption ? selectedOption.label : placeholder;
+
+    return (
+        <div ref={ref} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
+            <div
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: '38px',
+                    padding: '8px 12px',
+                    background: 'var(--bg-input, var(--bg-card))',
+                    border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                    borderRadius: RADIUS,
+                    cursor: 'pointer',
+                    boxShadow: isOpen ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : 'none',
+                    transition: 'all 0.2s ease',
+                    color: 'var(--text-pure)',
+                    userSelect: 'none',
+                    fontSize: FS.sm,
+                    boxSizing: 'border-box'
+                }}
+            >
+                <span style={{
+                    fontWeight: 500,
+                    color: selectedOption ? 'var(--text-pure)' : 'var(--text-muted)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '85%'
+                }}>
+                    {displayText}
+                </span>
+                <svg
+                    style={{
+                        transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease',
+                        flexShrink: 0,
+                        color: 'var(--text-muted)'
+                    }}
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+
+            {isOpen && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 4px)',
+                        left: 0,
+                        right: 0,
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: RADIUS,
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+                        zIndex: 1000,
+                        maxHeight: '260px',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        animation: 'fadeInDropdown 0.2s ease'
+                    }}
+                    className="thin-scrollbar"
+                >
+                    {options.length === 0 ? (
+                        <div style={{ padding: '9px 12px', color: 'var(--text-muted)', fontSize: FS.sm, fontStyle: 'italic' }}>
+                            Sin opciones
+                        </div>
+                    ) : (
+                        options.map((opt, idx) => {
+                            const isSelected = value === opt.value;
+                            return (
+                                <div
+                                    key={idx}
+                                    onClick={() => {
+                                        onChange(opt.value);
+                                        setIsOpen(false);
+                                    }}
+                                    style={{
+                                        padding: '9px 12px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        background: isSelected ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                                        borderBottom: idx < options.length - 1 ? '1px solid var(--border-color)' : 'none',
+                                        color: isSelected ? 'var(--primary-color)' : 'var(--text-pure)',
+                                        fontSize: FS.sm,
+                                        fontWeight: isSelected ? 600 : 400,
+                                        transition: 'background 0.15s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isSelected) e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isSelected) e.currentTarget.style.background = 'transparent';
+                                    }}
+                                >
+                                    <span>{opt.label}</span>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccionada, filas, statsDatos, abrirEditor }) {
     const [modo, setModo] = useState('matriz'); // 'manual' | 'matriz'
-    const [tipoMatriz, setTipoMatriz] = useState('brutos'); // 'brutos' | 'probabilidades'
     const [columnaSeleccionada, setColumnaSeleccionada] = useState('');
-    const [columnaProbabilidad, setColumnaProbabilidad] = useState('');
-    const [error, setError] = useState('');
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+
+    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
+        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
+    };
 
     const [tabla, setTabla] = useState([
         { id: 1, x: '', p: '' },
@@ -23,19 +161,36 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
             : (varSeleccionada ? [varSeleccionada.nombre || 'Datos'] : []);
     }, [varSeleccionada]);
 
-    useEffect(() => {
-        setColumnaSeleccionada('');
-        setColumnaProbabilidad('');
+    const opcionesColumnas = useMemo(() => {
+        return columnasDisponibles.map((col, idx) => ({
+            value: idx,
+            label: col
+        }));
     }, [columnasDisponibles]);
 
-    // Reseteos al cambiar de modo
     useEffect(() => {
-        setError('');
+        if (columnasDisponibles.length === 1) {
+            setColumnaSeleccionada(0);
+        } else {
+            setColumnaSeleccionada('');
+        }
+    }, [columnasDisponibles]);
+
+    // Reseteos al cambiar de modo, columna, variable seleccionada o datos globales
+    useEffect(() => {
         onCalcular(null);
-    }, [modo, tipoMatriz]);
+    }, [modo, columnaSeleccionada, varSeleccionada, statsDatos?.total]);
+
+    // Si estamos en modo matriz y no hay variable o los datos son 0, limpiar cálculos inmediatamente
+    useEffect(() => {
+        if (modo === 'matriz' && (!varSeleccionada || !statsDatos || statsDatos.total === 0)) {
+            onCalcular(null);
+        }
+    }, [modo, varSeleccionada, statsDatos?.total]);
 
     const agregarFila = () => {
         setTabla([...tabla, { id: Date.now(), x: '', p: '' }]);
+        onCalcular(null);
     };
 
     const eliminarFila = (id) => {
@@ -61,7 +216,25 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
     const hayCamposVacios = tabla.some(fila => fila.x === '' || fila.p === '');
 
     const handleCalcular = () => {
-        if (!esSumaValida || hayCamposVacios) return;
+        if (tabla.length === 0) {
+            mostrarAlerta('Debes ingresar al menos una fila en la tabla.', 'Tabla Vacía', 'warning');
+            return;
+        }
+
+        if (hayCamposVacios) {
+            mostrarAlerta('Por favor completa todos los campos de Valor (X) y Probabilidad P(X) en la tabla.', 'Campos Incompletos', 'warning');
+            return;
+        }
+
+        if (hayProbabilidadesNegativas) {
+            mostrarAlerta('Las probabilidades P(X) no pueden ser negativas.', 'Valores Inválidos', 'error');
+            return;
+        }
+
+        if (!esSumaValida) {
+            mostrarAlerta(`La suma de las probabilidades es ${sumaProbabilidades.toFixed(4)}. La suma total de P(X) debe ser exactamente igual a 1.0.`, 'Suma Inválida', 'warning');
+            return;
+        }
 
         const mapDatos = new Map();
         tabla.forEach(fila => {
@@ -86,125 +259,138 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
         return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
     };
 
+    const colAEvaluar = useMemo(() => {
+        return columnasDisponibles.length === 1 ? 0 : columnaSeleccionada;
+    }, [columnasDisponibles.length, columnaSeleccionada]);
+
     const datosColumna = useMemo(() => {
-        if (!varSeleccionada || !filas || filas.length === 0 || columnaSeleccionada === '') return [];
+        if (!varSeleccionada || !filas || filas.length === 0 || colAEvaluar === '') return [];
         const validas = filas.filter(f => (f.valor || '').toString().trim() !== '');
 
         return validas.map(f => {
             if (varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) {
                 const partes = (f.valor || '').toString().split(' | ');
-                return partes[columnaSeleccionada] ? partes[columnaSeleccionada].trim() : '';
+                return partes[colAEvaluar] ? partes[colAEvaluar].trim() : '';
             }
             return (f.valor || '').toString().trim();
         }).map(v => parseFloat(v)).filter(v => !isNaN(v));
-    }, [varSeleccionada, filas, columnaSeleccionada]);
+    }, [varSeleccionada, filas, colAEvaluar]);
 
     const procesarMatriz = () => {
-        if (tipoMatriz === 'brutos') {
-            if (columnaSeleccionada === '') {
-                setError('Por favor selecciona la columna a evaluar.');
-                return;
-            }
-            if (datosColumna.length === 0) {
-                setError('No hay datos numéricos válidos en la columna seleccionada.');
-                return;
-            }
-
-            const counts = {};
-            datosColumna.forEach(val => {
-                counts[val] = (counts[val] || 0) + 1;
-            });
-
-            const totalDatos = datosColumna.length;
-            const datosGenerados = Object.keys(counts).map(key => {
-                const val = parseFloat(key);
-                const freq = counts[key];
-                return {
-                    x: val,
-                    p: freq / totalDatos,
-                    f: freq
-                };
-            }).sort((a, b) => a.x - b.x); // Ordenar por X de menor a mayor
-
-            setError('');
-            onCalcular(datosGenerados);
-        } else {
-            // Modo Tabla de Probabilidades (2 columnas)
-            if (columnaSeleccionada === '' || columnaProbabilidad === '') {
-                setError('Por favor selecciona las columnas para X y P(X).');
-                return;
-            }
-
-            const validas = filas.filter(f => (f.valor || '').toString().trim() !== '');
-            let sumaP = 0;
-            const datosGenerados = [];
-
-            for (let f of validas) {
-                let valX = '';
-                let valP = '';
-                if (varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) {
-                    const partes = (f.valor || '').toString().split(' | ');
-                    valX = partes[columnaSeleccionada] ? partes[columnaSeleccionada].trim() : '';
-                    valP = partes[columnaProbabilidad] ? partes[columnaProbabilidad].trim() : '';
-                } else {
-                    valX = (f.valor || '').toString().trim();
-                    valP = valX; // Fallback, though likely to sum > 1
-                }
-
-                const numX = parseFloat(valX);
-                const numP = parseFloat(valP);
-
-                if (!isNaN(numX) && !isNaN(numP)) {
-                    datosGenerados.push({ x: numX, p: numP });
-                    sumaP += numP;
-                }
-            }
-
-            if (datosGenerados.length === 0) {
-                setError('No hay filas con valores numéricos válidos en ambas columnas.');
-                return;
-            }
-
-            if (Math.abs(sumaP - 1) > 0.001) {
-                setError(`Las probabilidades seleccionadas suman ${sumaP.toFixed(4)}. Deben sumar 1.0.`);
-                return;
-            }
-
-            datosGenerados.sort((a, b) => a.x - b.x);
-            setError('');
-            onCalcular(datosGenerados);
+        if (colAEvaluar === '') {
+            mostrarAlerta('Por favor selecciona la columna a evaluar.', 'Columna no seleccionada', 'warning');
+            return;
         }
-    };
+        if (datosColumna.length === 0) {
+            mostrarAlerta('No hay datos numéricos válidos en la columna seleccionada.', 'Datos no válidos', 'error');
+            return;
+        }
 
-    const cardStyle = {
-        background: 'transparent',
-        color: 'var(--text-main, #1e293b)',
-        padding: '5px 0',
-        height: '100%',
-        boxSizing: 'border-box'
+        const counts = {};
+        datosColumna.forEach(val => {
+            counts[val] = (counts[val] || 0) + 1;
+        });
+
+        const totalDatos = datosColumna.length;
+        const datosGenerados = Object.keys(counts).map(key => {
+            const val = parseFloat(key);
+            const freq = counts[key];
+            return {
+                x: val,
+                p: freq / totalDatos,
+                f: freq
+            };
+        }).sort((a, b) => a.x - b.x);
+
+        onCalcular(datosGenerados);
     };
 
     const inputStyle = {
         width: '100%',
+        minHeight: '38px',
         padding: '8px 12px',
-        border: '1px solid var(--border-color, #cbd5e1)',
-        borderRadius: '6px',
+        border: '1px solid var(--border-color)',
+        borderRadius: RADIUS,
         outline: 'none',
-        fontSize: '0.85rem',
-        backgroundColor: 'var(--bg-input, #fff)',
-        color: 'var(--text-main, #0f172a)',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+        fontSize: FS.sm,
+        fontFamily: FONT,
+        background: 'var(--bg-input)',
+        color: 'var(--text-pure)',
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+        boxSizing: 'border-box'
     };
 
     return (
-        <div style={cardStyle}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
-                <div style={{ display: 'inline-flex', gap: '5px', background: 'var(--bg-card)', padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+        <div style={{ padding: '0px', fontFamily: FONT, boxSizing: 'border-box', marginTop:'10px'}}>
+            <style>{`
+                .btn-eliminar-fila-mat251 {
+                    background: transparent !important;
+                    border: none !important;
+                    color: #ef4444 !important;
+                    border-radius: ${RADIUS} !important;
+                    padding: 6px !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    cursor: pointer;
+                    opacity: 0.85;
+                    transition: all 0.2s ease !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                    margin: 0 auto !important;
+                }
+                .btn-eliminar-fila-mat251:hover:not(:disabled) {
+                    background-color: #ef4444 !important;
+                    color: #ffffff !important;
+                    border: none !important;
+                    opacity: 1 !important;
+                    transform: scale(1.08) !important;
+                    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35) !important;
+                }
+                .btn-eliminar-fila-mat251:disabled {
+                    opacity: 0.25 !important;
+                    cursor: not-allowed !important;
+                    background: transparent !important;
+                    color: #ef4444 !important;
+                    box-shadow: none !important;
+                    transform: none !important;
+                }
+                .btn-agregar-fila-discreta {
+                    border: 1px solid var(--primary-color) !important;
+                    color: var(--primary-color) !important;
+                    background-color: transparent !important;
+                    box-shadow: none !important;
+                }
+                .btn-agregar-fila-discreta:hover:not(:disabled) {
+                    background-color: var(--primary-color) !important;
+                    color: #ffffff !important;
+                    border-color: var(--primary-color) !important;
+                    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+                }
+                [data-theme='dark'] .btn-agregar-fila-discreta,
+                .dark .btn-agregar-fila-discreta,
+                [data-bs-theme='dark'] .btn-agregar-fila-discreta {
+                    border: 1px solid var(--primary-color) !important;
+                    color: var(--primary-color) !important;
+                    background-color: transparent !important;
+                    box-shadow: none !important;
+                }
+                [data-theme='dark'] .btn-agregar-fila-discreta:hover:not(:disabled),
+                .dark .btn-agregar-fila-discreta:hover:not(:disabled),
+                [data-bs-theme='dark'] .btn-agregar-fila-discreta:hover:not(:disabled) {
+                    background-color: var(--primary-color) !important;
+                    color: #ffffff !important;
+                    border-color: var(--primary-color) !important;
+                }
+            `}</style>
+            {/* SELECTOR DE MODOS PRINCIPAL (REGLA 6) */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                <div className="contenedor-selector-modos-mat251">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
                         onClick={() => setModo('matriz')}
-                        style={{ flex: 1 }}
+                        style={{ fontFamily: FONT }}
                     >
                         Análisis de Matriz
                     </button>
@@ -212,259 +398,285 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                         type="button"
                         className={`btn-mat251-modo ${modo === 'manual' ? 'active' : ''}`}
                         onClick={() => setModo('manual')}
-                        style={{ flex: 1 }}
+                        style={{ fontFamily: FONT }}
                     >
                         Modo Manual
                     </button>
                 </div>
             </div>
 
-            <h3 style={{ marginTop: 0, color: '#3b82f6', fontSize: '1rem', fontWeight: 600, marginBottom: '10px' }}>
-                Datos
-            </h3>
-
-            {error && (
-                <div style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #f87171', padding: '10px', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '15px' }}>
-                    <strong>Error: </strong> {error}
-                </div>
-            )}
-
             {modo === 'matriz' && (
                 <div style={{ marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card, #fff)', padding: '12px 15px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '20px' }}>
+                    {/* BARRA DE DATOS Y EDICIÓN (REGLA 4) */}
+                    <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                         <div>
-                            <div style={{ color: '#3b82f6', fontSize: '1rem', fontWeight: 600, marginBottom: '4px' }}>Conjunto de Datos:</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted, #64748b)' }}>
-                                Cargados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.cargados : 0}</strong> &nbsp;
-                                Agregados: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.agregados : 0}</strong> &nbsp;
-                                Total: <strong style={{ color: '#3b82f6' }}>{statsDatos ? statsDatos.total : 0}</strong>
+                            <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '2px', flexWrap: 'wrap' }}>
+                                <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                    Cargados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.cargados || 0}</strong>
+                                </small>
+                                <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                    Agregados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.agregados || 0}</strong>
+                                </small>
+                                <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                    Total: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.total || 0}</strong>
+                                </small>
                             </div>
                         </div>
                         <button
-                            className="btn-icon btn-editar-hover"
+                            type="button"
                             onClick={abrirEditor}
-                            style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--accent-color)', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-color)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+                            className="btn-primary btn-icon"
+                            style={{
+                                borderRadius: RADIUS,
+                                fontSize: FS.sm,
+                                fontFamily: FONT,
+                                fontWeight: 600,
+                                padding: '5px 14px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                flexShrink: 0
+                            }}
                         >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <EditarDatos />
                             Editar Datos
                         </button>
                     </div>
+
                     {columnasDisponibles.length > 0 ? (
                         <>
-                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', width: '100%' }}>
-                                <div style={{ display: 'flex', gap: '5px', width: '100%', maxWidth: '400px', background: 'var(--bg-card)', padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-                                    <button
-                                        type="button"
-                                        className={`btn-mat251-modo ${tipoMatriz === 'brutos' ? 'active' : ''}`}
-                                        onClick={() => setTipoMatriz('brutos')}
-                                        style={{ flex: 1 }}
-                                    >
-                                        Datos
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`btn-mat251-modo ${tipoMatriz === 'probabilidades' ? 'active' : ''}`}
-                                        onClick={() => setTipoMatriz('probabilidades')}
-                                        style={{ flex: 1 }}
-                                    >
-                                        Tabla Probabilidades
-                                    </button>
+                            {/* SELECTOR DESPLEGABLE CUANDO HAY MÁS DE 1 COLUMNA */}
+                            {columnasDisponibles.length > 1 && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+                                    <label style={{ ...labelStyle, margin: 0, whiteSpace: 'nowrap' }}>Columna a evaluar:</label>
+                                    <div style={{ flex: 1 }}>
+                                        <CustomSelect
+                                            value={columnaSeleccionada}
+                                            onChange={(val) => setColumnaSeleccionada(val)}
+                                            options={opcionesColumnas}
+                                            placeholder="Selecciona una columna..."
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', width: '100%', flexWrap: 'wrap' }}>
-                                <label className="tema3-label" style={{ margin: 0, whiteSpace: 'nowrap' }}>
-                                    {tipoMatriz === 'probabilidades' ? 
-                                        <>{renderLatex('X')}:</> : 
-                                        'Columna a evaluar:'}
-                                </label>
-                                <select
-                                    className="tema3-select"
-                                    style={{ flex: 1, minWidth: '100px' }}
-                                    value={columnaSeleccionada}
-                                    onChange={e => { setColumnaSeleccionada(e.target.value === '' ? '' : Number(e.target.value)); setError(''); }}
-                                >
-                                    <option value="" disabled>Selecciona una columna...</option>
-                                    {columnasDisponibles.map((col, idx) => (
-                                        <option key={idx} value={idx}>{col}</option>
-                                    ))}
-                                </select>
-
-                                {tipoMatriz === 'probabilidades' && (
-                                    <>
-                                        <label className="tema3-label" style={{ margin: 0, whiteSpace: 'nowrap', marginLeft: '5px' }}>
-                                            {renderLatex('P(X)')}:
-                                        </label>
-                                        <select
-                                            className="tema3-select"
-                                            style={{ flex: 1, minWidth: '100px' }}
-                                            value={columnaProbabilidad}
-                                            onChange={e => { setColumnaProbabilidad(e.target.value === '' ? '' : Number(e.target.value)); setError(''); }}
-                                        >
-                                            <option value="" disabled>Selecciona...</option>
-                                            {columnasDisponibles.map((col, idx) => (
-                                                <option key={idx} value={idx}>{col}</option>
-                                            ))}
-                                        </select>
-                                    </>
-                                )}
-                            </div>
-                            
-                            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '5px' }}>
+                            {/* BOTÓN CALCULAR (REGLA 8) */}
+                            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '0px' }}>
                                 <button
+                                    type="button"
                                     className="button_calcular"
                                     onClick={procesarMatriz}
-                                    style={{ width: 'auto', padding: '5px 15px', margin: 0, whiteSpace: 'nowrap' }}
+                                    style={{
+                                        width: 'fit-content',
+                                        padding: '5px 20px',
+                                        borderRadius: RADIUS,
+                                        fontSize: FS.md,
+                                        fontWeight: 600,
+                                        fontFamily: FONT,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer'
+                                    }}
                                 >
                                     CALCULAR
                                 </button>
                             </div>
                         </>
                     ) : (
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted, #64748b)' }}>No hay datos cargados en el estado global. Ve a Gestión de Datos para importar.</p>
+                        <p style={{ fontSize: FS.xs, color: 'var(--text-muted)', fontFamily: FONT }}>
+                            No hay datos cargados en el estado global. Ve a Gestión de Datos para importar.
+                        </p>
                     )}
                 </div>
             )}
 
             {modo === 'manual' && (
                 <>
-                    <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-                        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 6px', textAlign: 'left', tableLayout: 'fixed' }}>
-                            <thead>
+                    <div style={{
+                        width: '55%',
+                        minWidth: '340px',
+                        maxWidth: '520px',
+                        margin: '0 auto 15px auto',
+                        borderRadius: '0px',
+                        border: '1px solid var(--text-pure)',
+                        backgroundColor: 'var(--bg-card)'
+                    }}>
+                        <table style={{
+                            width: '100%',
+                            borderCollapse: 'collapse',
+                            fontSize: FS.sm,
+                            fontFamily: FONT,
+                            tableLayout: 'fixed'
+                        }}>
+                            <thead style={{ backgroundColor: 'var(--bg-input)' }}>
                                 <tr>
-                                    <th style={{ padding: '0px', color: 'var(--text-muted, #475569)', fontWeight: 600, fontSize: '0.9rem', width: '45%' }}>Valor {renderLatex('(X)')}</th>
-                                    <th style={{ padding: '0 10px', color: 'var(--text-muted, #475569)', fontWeight: 600, fontSize: '0.9rem', width: '45%' }}>Probabilidad {renderLatex('P(X)')}</th>
-                                    <th style={{ padding: '0 0px', width: '10%' }}></th>
+                                    <th style={{
+                                        borderBottom: '1px solid var(--text-pure)',
+                                        borderRight: '1px solid var(--text-pure)',
+                                        padding: '8px 12px',
+                                        textAlign: 'center',
+                                        color: 'var(--text-pure)',
+                                        fontWeight: 700,
+                                        fontSize: FS.sm,
+                                        width: '39%'
+                                    }}>
+                                        <StatLabel formulaKey="X" formulaLatex="X" />
+                                    </th>
+                                    <th style={{
+                                        borderBottom: '1px solid var(--text-pure)',
+                                        borderRight: '1px solid var(--text-pure)',
+                                        padding: '8px 12px',
+                                        textAlign: 'center',
+                                        color: 'var(--text-pure)',
+                                        fontWeight: 700,
+                                        fontSize: FS.sm,
+                                        width: '39%'
+                                    }}>
+                                        <StatLabel formulaKey="P(X)" formulaLatex="P(X)" />
+                                    </th>
+                                    <th style={{
+                                        borderBottom: '1px solid var(--text-pure)',
+                                        padding: '8px 6px',
+                                        textAlign: 'center',
+                                        color: 'var(--text-pure)',
+                                        fontWeight: 700,
+                                        fontSize: FS.sm,
+                                        width: '22%',
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        Acción
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {tabla.map((fila) => (
-                                    <tr key={fila.id}>
-                                        <td style={{ padding: '0 8px 0 0' }}>
+                                {tabla.map((fila, idx) => (
+                                    <tr
+                                        key={fila.id}
+                                        style={{
+                                            borderBottom: idx === tabla.length - 1 ? 'none' : '1px solid var(--text-pure)'
+                                        }}
+                                    >
+                                        <td style={{ borderRight: '1px solid var(--text-pure)', padding: 0 }}>
                                             <input
                                                 type="number"
-                                                style={inputStyle}
+                                                className="input-mat251 placeholder-small"
                                                 value={fila.x}
                                                 placeholder="Ej. 0"
                                                 onChange={(e) => actualizarFila(fila.id, 'x', e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    minHeight: '38px',
+                                                    padding: '8px 12px',
+                                                    textAlign: 'center',
+                                                    border: 'none',
+                                                    background: 'transparent',
+                                                    outline: 'none',
+                                                    color: 'var(--text-pure)',
+                                                    fontSize: FS.sm,
+                                                    fontFamily: FONT,
+                                                    boxSizing: 'border-box'
+                                                }}
                                             />
                                         </td>
-                                        <td style={{ padding: '0 8px' }}>
+                                        <td style={{ borderRight: '1px solid var(--text-pure)', padding: 0 }}>
                                             <input
                                                 type="number"
-                                                style={inputStyle}
+                                                className="input-mat251 placeholder-small"
                                                 step="0.01"
                                                 min="0"
                                                 max="1"
                                                 value={fila.p}
                                                 placeholder="Ej. 0.25"
                                                 onChange={(e) => actualizarFila(fila.id, 'p', e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    minHeight: '38px',
+                                                    padding: '8px 12px',
+                                                    textAlign: 'center',
+                                                    border: 'none',
+                                                    background: 'transparent',
+                                                    outline: 'none',
+                                                    color: 'var(--text-pure)',
+                                                    fontSize: FS.sm,
+                                                    fontFamily: FONT,
+                                                    boxSizing: 'border-box'
+                                                }}
                                             />
                                         </td>
-                                        <td style={{ padding: '0 0 0 8px', textAlign: 'right' }}>
+                                        <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '6px' }}>
                                             <button
+                                                type="button"
                                                 onClick={() => eliminarFila(fila.id)}
-                                                style={{
-                                                    background: 'transparent',
-                                                    color: 'var(--text-error, #ef4444)',
-                                                    border: 'none',
-                                                    borderRadius: '6px',
-                                                    padding: '8px',
-                                                    cursor: tabla.length > 1 ? 'pointer' : 'not-allowed',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    opacity: tabla.length > 1 ? 0.7 : 0.3,
-                                                    transition: 'opacity 0.2s ease, transform 0.1s ease',
-                                                }}
-                                                onMouseEnter={(e) => { if(tabla.length > 1) { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1.1)'; } }}
-                                                onMouseLeave={(e) => { if(tabla.length > 1) { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.transform = 'scale(1)'; } }}
+                                                className="btn-eliminar-fila-mat251"
                                                 disabled={tabla.length <= 1}
                                                 title="Eliminar fila"
                                             >
-                                                <IconoBasura width="18" height="18" />
+                                                <IconoBasura width="17" height="17" />
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colSpan="2" style={{ padding: '0px', textAlign: 'center' }}>
-                                        <button
-                                            onClick={agregarFila}
-                                            style={{
-                                                background: 'transparent',
-                                                color: 'var(--primary-color, #3b82f6)',
-                                                border: '1px dashed var(--primary-color, #3b82f6)',
-                                                borderRadius: '10px',
-                                                padding: '5px 10px',
-                                                cursor: 'pointer',
-                                                display: 'inline-flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                transition: 'all 0.2s ease',
-                                            }}
-                                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'var(--bg-input, rgba(59, 130, 246, 0.05))'; }}
-                                            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.8'; e.currentTarget.style.background = 'transparent'; }}
-                                            title="Agregar valor"
-                                        >
-                                            <IconoMas width="15" height="15" />
-                                        </button>
-                                    </td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td style={{ padding: '4px 8px 0 8px' }}>
-                                        <div style={{
-                                            padding: '4px 8px',
-                                            borderRadius: '6px',
-                                            backgroundColor: esSumaValida ? 'var(--bg-success, #dcfce7)' : 'var(--bg-error, #fee2e2)',
-                                            color: esSumaValida ? 'var(--text-success, #166534)' : 'var(--text-error, #991b1b)',
-                                            border: `1px solid ${esSumaValida ? '#bbf7d0' : '#fecaca'}`,
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            gap: '6px',
-                                            fontWeight: 600,
-                                            fontSize: '0.8rem',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <span>Suma:</span> {sumaProbabilidades.toFixed(4)}
-                                            </span>
-                                            {!esSumaValida && !hayProbabilidadesNegativas && (
-                                                <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
-                                                    Debe sumar 1.0
-                                                </span>
-                                            )}
-                                            {hayProbabilidadesNegativas && (
-                                                <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
-                                                    Prob. negativas
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td></td>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
                         <button
+                            type="button"
+                            onClick={agregarFila}
+                            className="btn-primary btn-agregar-fila-discreta"
+                            style={{
+                                borderRadius: RADIUS,
+                                fontSize: FS.sm,
+                                fontFamily: FONT,
+                                fontWeight: 600,
+                                padding: '5px 20px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                cursor: 'pointer'
+                            }}
+                            title="Agregar fila"
+                        >
+                            <span>Agregar Fila</span>
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '0px' }}>
+                        <button
+                            type="button"
                             className="button_calcular"
-                            onClick={handleCalcular} 
-                            disabled={!esSumaValida || hayCamposVacios}
-                            style={{ width: 'auto', padding: '5px 15px'}}
+                            onClick={handleCalcular}
+                            style={{
+                                width: 'fit-content',
+                                padding: '5px 20px',
+                                borderRadius: RADIUS,
+                                fontSize: FS.md,
+                                fontWeight: 600,
+                                fontFamily: FONT,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer'
+                            }}
                         >
                             CALCULAR
                         </button>
                     </div>
                 </>
             )}
+
+            <ModalAlerta
+                isOpen={modalAlerta.isOpen}
+                mensaje={modalAlerta.mensaje}
+                titulo={modalAlerta.titulo}
+                tipo={modalAlerta.tipo}
+                onClose={() => setModalAlerta({ ...modalAlerta, isOpen: false })}
+            />
         </div>
     );
 }

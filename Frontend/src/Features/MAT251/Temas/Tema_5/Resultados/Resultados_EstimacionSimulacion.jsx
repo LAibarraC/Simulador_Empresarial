@@ -1,17 +1,165 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import GraficoEstimacionSimulacion from '../../../Graficas/Tema_5/GraficoEstimacionSimulacion';
+import { FS, RADIUS } from '../../../Principal/Constantes';
+import * as XLSX from 'xlsx';
+import { api } from '../../../../../services/api';
+import { alerta } from '../../../../../utils/Notificaciones';
+import { IconoGuardar, Descargar } from '../../../../../ui/iconos';
 
 export default function Resultados_EstimacionSimulacion({ resultados }) {
+    const [visibleCount, setVisibleCount] = useState(0);
+    const [velocidad, setVelocidad] = useState('1x');
+    const [pausado, setPausado] = useState(false);
+
+    useEffect(() => {
+        setVisibleCount(0);
+        setPausado(false);
+        setVelocidad('1x');
+    }, [resultados]);
+
+    useEffect(() => {
+        if (!resultados || !resultados.simulaciones) return;
+        
+        const total = resultados.simulaciones.length;
+        if (visibleCount < total && !pausado) {
+            let delay = 1000;
+            let step = 1;
+            
+            if (velocidad === '1x') delay = 1000;
+            else if (velocidad === '2x') delay = 500;
+            else if (velocidad === '4x') delay = 250;
+            else if (velocidad === 'MAX') {
+                delay = 16;
+                step = Math.max(1, Math.floor(total / 50));
+            }
+
+            const timer = setTimeout(() => {
+                setVisibleCount(prev => Math.min(prev + step, total));
+            }, delay);
+
+            return () => clearTimeout(timer);
+        }
+    }, [resultados, visibleCount, pausado, velocidad]);
+
     if (!resultados) return null;
 
     const { parametro, parametroVerdadero, resumen, simulaciones, distribucion, paramsDist } = resultados;
+
+    const simulacionesVisibles = useMemo(() => {
+        return simulaciones.slice(0, Math.max(1, visibleCount));
+    }, [simulaciones, visibleCount]);
+
+    const resumenDinamico = useMemo(() => {
+        if (simulacionesVisibles.length === 0) return { promedio: 0, min: 0, max: 0, desviacion: 0, sesgo: 0, ecm: 0 };
+        const nSims = simulacionesVisibles.length;
+        let suma = 0;
+        let min = Infinity;
+        let max = -Infinity;
+
+        for (let i = 0; i < nSims; i++) {
+            const val = simulacionesVisibles[i].estimacion;
+            suma += val;
+            if (val < min) min = val;
+            if (val > max) max = val;
+        }
+
+        const promedio = suma / nSims;
+
+        let sumaCuadradosDiff = 0;
+        let ecmSuma = 0;
+        for (let i = 0; i < nSims; i++) {
+            const val = simulacionesVisibles[i].estimacion;
+            sumaCuadradosDiff += Math.pow(val - promedio, 2);
+            if (parametroVerdadero !== null) {
+                ecmSuma += Math.pow(val - parametroVerdadero, 2);
+            }
+        }
+
+        const varianza = nSims > 1 ? sumaCuadradosDiff / (nSims - 1) : 0;
+        const desviacion = Math.sqrt(varianza);
+        const sesgo = parametroVerdadero !== null ? promedio - parametroVerdadero : 0;
+        const ecm = parametroVerdadero !== null ? ecmSuma / nSims : 0;
+
+        return { promedio, min, max, desviacion, sesgo, ecm };
+    }, [simulacionesVisibles, parametroVerdadero]);
+
+    const total = simulaciones.length;
+    const simulacionEnCurso = visibleCount < total;
+
+    const getFileName = () => {
+        const d = new Date();
+        const pad = (num) => num.toString().padStart(2, '0');
+        const fecha = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}h${pad(d.getMinutes())}`;
+        const paramName = resultados.parametro ? resultados.parametro.charAt(0).toUpperCase() + resultados.parametro.slice(1) : 'Estadistica';
+        const sampleN = resultados.n || (resultados.simulaciones.length > 0 && resultados.simulaciones[0].muestra ? resultados.simulaciones[0].muestra.length : 0);
+        return `Simulacion_${paramName}_n${sampleN}_${fecha}.xlsx`;
+    };
+
+    const handleGuardarEnEspacio = async () => {
+        if (!resultados.simulaciones || resultados.simulaciones.length === 0) return;
+        try {
+            const worksheet = XLSX.utils.json_to_sheet(resultados.simulaciones.map((s, i) => {
+                const fila = { "Simulación": i + 1 };
+                if (s.muestra) {
+                    s.muestra.forEach((val, idx) => {
+                        fila[`Muestra ${idx + 1}`] = val;
+                    });
+                }
+                fila["Estimación"] = s.estimacion;
+                if (resultados.parametroVerdadero !== null) {
+                    fila["Diferencia"] = s.estimacion - resultados.parametroVerdadero;
+                }
+                return fila;
+            }));
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, `Simulacion Estimacion`);
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const fileObj = new File([blob], getFileName(), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+            const usuarioGuardado = localStorage.getItem('usuario');
+            const autor = usuarioGuardado ? JSON.parse(usuarioGuardado).nombre : 'Estudiante';
+
+            const formData = new FormData();
+            formData.append("file", fileObj);
+            formData.append("autor", autor);
+            formData.append("visibilidad", "personal");
+
+            await api.subirArchivo(formData);
+            alerta.success("¡Guardado exitoso!", "El archivo de simulación se ha guardado en tu Espacio Personal.");
+        } catch (error) {
+            console.error("Error al guardar en el espacio personal:", error);
+            alerta.error("Error", "No se pudo guardar el archivo en tu Espacio Personal.");
+        }
+    };
+
+    const handleDescargarExcel = () => {
+        if (!resultados.simulaciones || resultados.simulaciones.length === 0) return;
+        const worksheet = XLSX.utils.json_to_sheet(resultados.simulaciones.map((s, i) => {
+            const fila = { "Simulación": i + 1 };
+            if (s.muestra) {
+                s.muestra.forEach((val, idx) => {
+                    fila[`Muestra ${idx + 1}`] = val;
+                });
+            }
+            fila["Estimación"] = s.estimacion;
+            if (resultados.parametroVerdadero !== null) {
+                fila["Diferencia"] = s.estimacion - resultados.parametroVerdadero;
+            }
+            return fila;
+        }));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, `Simulacion Estimacion`);
+        XLSX.writeFile(workbook, getFileName());
+    };
 
     const renderKatex = (math) => (
         <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
 
-    const n = simulaciones.length > 0 && simulaciones[0].muestra ? simulaciones[0].muestra.length : 0;
+    const n = resultados.n || (simulaciones.length > 0 && simulaciones[0].muestra ? simulaciones[0].muestra.length : 0);
     
     const getParamsText = () => {
         if (!distribucion || !paramsDist) return '';
@@ -32,9 +180,69 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
         <div style={{ marginTop: '0px' }}>
             <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>Resultados:</h4>
             
+            {/* CONTROLES DE SIMULACIÓN TIPO TEMA 1 */}
+            <div style={{ marginTop: '0px', marginBottom: '5px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${(visibleCount / total) * 100}%`, transition: 'width 0.1s linear' }} />
+                
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontSize: FS.sx, fontWeight: 700, color: 'var(--text-muted)' }}>Simulación: {visibleCount} / {total}</span>
+                    
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-input)', padding: '3px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
+                            {['1x', '2x', '4x', 'MAX'].map(vel => (
+                                <button
+                                    key={vel}
+                                    type="button"
+                                    onClick={() => setVelocidad(vel)}
+                                    style={{
+                                        background: velocidad === vel ? 'var(--primary-color)' : 'transparent',
+                                        color: velocidad === vel ? '#fff' : 'var(--text-muted)',
+                                        border: 'none', borderRadius: '5px', padding: '1px 5px', cursor: 'pointer', fontSize: '0.55rem',
+                                        fontWeight: 800, transition: 'all 0.2s', boxShadow: velocidad === vel ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                                    }}
+                                >
+                                    {vel}
+                                </button>
+                            ))}
+                        </div>
+
+                        {simulacionEnCurso && (
+                            <button
+                                type="button"
+                                onClick={() => setPausado(!pausado)}
+                                style={{
+                                    background: pausado ? '#10b981' : '#f59e0b',
+                                    color: '#fff', border: 'none', borderRadius: '5px',
+                                    padding: '3px 5px', cursor: 'pointer', fontSize: '0.6rem',
+                                    fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px',
+                                    transition: 'background 0.2s', minWidth: '105px', justifyContent: 'center', whiteSpace: 'nowrap'
+                                }}
+                            >
+                                {pausado ? (
+                                    <>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                        </svg>
+                                        CONTINUAR
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="6" y="4" width="4" height="16"></rect>
+                                            <rect x="14" y="4" width="4" height="16"></rect>
+                                        </svg>
+                                        PAUSAR
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             <div style={{ 
-                background: 'rgba(37, 99, 235, 0.05)', 
-                border: '1px solid rgba(37, 99, 235, 0.2)', 
+                background: simulacionEnCurso ? 'rgba(245, 158, 11, 0.05)' : 'rgba(37, 99, 235, 0.05)', 
+                border: simulacionEnCurso ? '1px solid rgba(245, 158, 11, 0.2)' : '1px solid rgba(37, 99, 235, 0.2)', 
                 borderRadius: '8px', 
                 padding: '12px 18px', 
                 marginBottom: '20px',
@@ -42,17 +250,26 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                 alignItems: 'center',
                 gap: '15px'
             }}>
-                <div style={{ color: 'var(--primary-color, #2563eb)' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
+                <div style={{ color: simulacionEnCurso ? '#f59e0b' : 'var(--primary-color, #2563eb)' }}>
+                    {simulacionEnCurso ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="spin-animation" style={{ animation: 'spin 2s linear infinite' }}>
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                        </svg>
+                    ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    )}
                 </div>
                 <div>
-                    <h5 style={{ margin: '0 0 0px 0', color: 'var(--primary-color, #2563eb)', fontSize: '0.9rem', fontWeight: 600 }}>Simulación completada</h5>
+                    <h5 style={{ margin: '0 0 0px 0', color: simulacionEnCurso ? '#f59e0b' : 'var(--primary-color, #2563eb)', fontSize: '0.9rem', fontWeight: 600 }}>
+                        {simulacionEnCurso ? 'Simulando...' : 'Simulación completada'}
+                    </h5>
                     <p style={{ margin: 0, fontSize: '0.7rem' }}>
-                        Se generaron <strong>{simulaciones.length}</strong> muestras de tamaño <strong>{renderKatex(`n = ${n}`)}</strong>
+                        {simulacionEnCurso ? 'Generando ' : 'Se generaron '}
+                        <strong>{visibleCount}</strong> {simulacionEnCurso ? `de ${total} ` : ''} muestras de tamaño <strong>{renderKatex(`n = ${n}`)}</strong>
                         {distribucion && paramsDist ? (
                             <span> desde una población {distribucion !== 'normal' ? distribucion : ''} con <strong>{renderKatex(getParamsText())}</strong>.</span>
                         ) : (
@@ -88,7 +305,7 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                         Promedio de las Estimaciones
                     </div>
                     <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>
-                        {renderKatex(`\\overline{${simbolo}} = ${resumen.promedio.toFixed(4)}`)}
+                        {renderKatex(`\\overline{${simbolo}} = ${resumenDinamico.promedio.toFixed(4)}`)}
                     </div>
                 </div>
             </div>
@@ -102,7 +319,7 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                         </svg>
                         Desv. Est. de Estimaciones:
                     </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold'}}>{resumen.desviacion.toFixed(4)}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 'bold'}}>{resumenDinamico.desviacion.toFixed(4)}</span>
                 </div>
                 <div className="card-stat" style={{ background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.4)' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600 }}>
@@ -114,7 +331,7 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                         </svg>
                         Mínimo {renderKatex(`(${simbolo})`)}:
                     </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumen.min.toFixed(4)}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.min === Infinity ? '0.0000' : resumenDinamico.min.toFixed(4)}</span>
                 </div>
                 <div className="card-stat" style={{ background: 'rgba(22, 163, 74, 0.08)', border: '1px solid rgba(22, 163, 74, 0.4)' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600 }}>
@@ -126,7 +343,7 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                         </svg>
                         Máximo {renderKatex(`(${simbolo})`)}:
                     </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumen.max.toFixed(4)}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.max === -Infinity ? '0.0000' : resumenDinamico.max.toFixed(4)}</span>
                 </div>
             </div>
 
@@ -134,20 +351,41 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px', marginBottom: '20px' }}>
                     <div className="card-stat" style={{ background: 'var(--bg-input)' }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 600 }}>Sesgo del Estimador:</span>
-                        <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumen.sesgo.toFixed(6)}</span>
+                        <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.sesgo.toFixed(6)}</span>
                     </div>
                     <div className="card-stat" style={{ background: 'var(--bg-input)' }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 600 }}>Error Cuadrático Medio:</span>
-                        <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumen.ecm.toFixed(6)}</span>
+                        <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.ecm.toFixed(6)}</span>
                     </div>
                 </div>
             )}
             
 
 
+            {/* GRÁFICOS */}
+            <div style={{ marginTop: '20px' }}>
+                <GraficoEstimacionSimulacion resultados={resultados} simulacionesVisibles={simulacionesVisibles} />
+            </div>
+
             {/* TABLA DE RESULTADOS */}
             <div style={{ marginTop: '20px' }}>
-                <Tabla_EstimacionSimulacion resultados={resultados} />
+                <Tabla_EstimacionSimulacion resultados={resultados} simulacionesVisibles={simulacionesVisibles} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                    <button
+                        className="btn-primary"
+                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                        onClick={handleGuardarEnEspacio}
+                    >
+                        <IconoGuardar /> Guardar en Mi Espacio
+                    </button>
+                    <button
+                        className="btn-verde"
+                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                        onClick={handleDescargarExcel}
+                    >
+                        <Descargar /> Descargar Excel
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -158,9 +396,9 @@ const renderKatex = (math) => (
     <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
 );
 
-function Tabla_EstimacionSimulacion({ resultados }) {
+function Tabla_EstimacionSimulacion({ resultados, simulacionesVisibles }) {
     const [limiteVisible, setLimiteVisible] = useState(10);
-    if (!resultados) return null;
+    if (!resultados || !simulacionesVisibles) return null;
 
     const { parametro, parametroVerdadero, simulaciones } = resultados;
 
@@ -178,20 +416,21 @@ function Tabla_EstimacionSimulacion({ resultados }) {
         diferenciaLabel = <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>Diferencia ({renderKatex('S^2 - \\sigma^2')})</span>;
     }
 
-    const simsMostradas = simulaciones.slice(0, limiteVisible);
+    // Orden normal (1, 2, 3...)
+    const simsMostradas = simulacionesVisibles.slice(0, limiteVisible);
 
-    // Calcular tamaño de muestra n basado en la primera simulación
-    const n = simulaciones.length > 0 && simulaciones[0].muestra ? simulaciones[0].muestra.length : 0;
+    const n = resultados.n || (simulaciones.length > 0 && simulaciones[0].muestra ? simulaciones[0].muestra.length : 0);
+    const tieneMuestras = simulaciones.length > 0 && simulaciones[0].muestra != null;
     
     // Configurar qué columnas de muestra mostrar dinámicamente para no desbordar
     const sampleCols = useMemo(() => {
-        if (n === 0) return [];
+        if (!tieneMuestras || n === 0) return [];
         if (n <= 100) {
             return Array.from({ length: n }, (_, i) => i + 1);
         } else {
             return [1, 2, 3, '...', n - 2, n - 1, n];
         }
-    }, [n]);
+    }, [n, tieneMuestras]);
 
     const renderSampleValue = (muestra, colIdx) => {
         if (!muestra) return '-';
@@ -210,18 +449,18 @@ function Tabla_EstimacionSimulacion({ resultados }) {
                 <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'center', fontSize: '0.85em', whiteSpace: 'nowrap' }}>
                     <thead style={{ background: 'var(--bg-input)', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                         <tr>
-                            <th rowSpan={n > 0 ? 2 : 1} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', width: '1%', whiteSpace: 'nowrap' }}>Simulación</th>
-                            {n > 0 && (
+                            <th rowSpan={tieneMuestras ? 2 : 1} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', width: '1%', whiteSpace: 'nowrap' }}>Simulación</th>
+                            {tieneMuestras && (
                                 <th colSpan={sampleCols.length} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)' }}>
                                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>Muestra ( {renderKatex(`n = ${n}`)})</span>
                                 </th>
                             )}
-                            <th rowSpan={n > 0 ? 2 : 1} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', width: '1%', whiteSpace: 'nowrap' }}>{estimacionLabel}</th>
+                            <th rowSpan={tieneMuestras ? 2 : 1} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', width: '1%', whiteSpace: 'nowrap' }}>{estimacionLabel}</th>
                             {parametroVerdadero !== null && (
-                                <th rowSpan={n > 0 ? 2 : 1} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', width: '1%', whiteSpace: 'nowrap' }}>{diferenciaLabel}</th>
+                                <th rowSpan={tieneMuestras ? 2 : 1} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', width: '1%', whiteSpace: 'nowrap' }}>{diferenciaLabel}</th>
                             )}
                         </tr>
-                        {n > 0 && (
+                        {tieneMuestras && (
                             <tr>
                                 {sampleCols.map((col, idx) => (
                                     <th key={idx} style={{ padding: '4px', borderBottom: '1px solid var(--border-color)', borderRight: idx === sampleCols.length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-muted, #64748b)', fontWeight: 500, width: '40px' }}>
@@ -236,7 +475,7 @@ function Tabla_EstimacionSimulacion({ resultados }) {
                             <tr key={s.simulacion} style={{ borderBottom: '1px solid var(--border-color)', background: index % 2 === 0 ? 'transparent' : 'var(--bg-input)' }}>
                                 <td style={{ padding: '8px', borderRight: '1px solid var(--border-color)', fontWeight: 600 }}>{s.simulacion}</td>
                                 
-                                {n > 0 && sampleCols.map((col, idx) => (
+                                {tieneMuestras && sampleCols.map((col, idx) => (
                                     <td key={idx} style={{ padding: '4px', fontSize: '0.9em', color: col === '...' ? 'var(--text-muted)' : 'inherit', borderRight: idx === sampleCols.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
                                         {s.muestra ? renderSampleValue(s.muestra, col) : <span style={{ color: 'var(--text-muted)' }}>-</span>}
                                     </td>

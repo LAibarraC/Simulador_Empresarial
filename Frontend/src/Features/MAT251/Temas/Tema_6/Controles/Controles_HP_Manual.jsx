@@ -1,0 +1,231 @@
+import React, { useState, useRef, useEffect } from 'react';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import { pruebaMediaZ, pruebaMediaT, pruebaProporcionZ, pruebaVarianzaChi } from '../../../Matematicas/Logica_Tema6';
+import { cardStyle, labelStyle, FS, RADIUS } from '../../../Principal/Constantes';
+
+export default function Controles_HP_Manual({ prueba, onCalcular }) {
+    const [n, setN] = useState('');
+    const [xBar, setXBar] = useState('');
+    const [s, setS] = useState('');
+    const [s2, setS2] = useState('');
+    const [sigma, setSigma] = useState('');
+    const [x, setX] = useState('');
+    const [mu0, setMu0] = useState('');
+    const [p0, setP0] = useState('');
+    const [sigma02, setSigma02] = useState('');
+    const [alpha, setAlpha] = useState('0.05');
+    const [tipoPrueba, setTipoPrueba] = useState('bilateral'); 
+
+    const [isAlphaOpen, setIsAlphaOpen] = useState(false);
+    const alphaRef = useRef(null);
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (alphaRef.current && !alphaRef.current.contains(e.target)) setIsAlphaOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    useEffect(() => {
+        onCalcular?.(null);
+    }, [prueba]);
+
+    const alphaOptions = [
+        { value: '0.10', label: '0.10 (90%) - Significación' },
+        { value: '0.05', label: '0.05 (95%) - Significación' },
+        { value: '0.01', label: '0.01 (99%) - Significación' }
+    ];
+
+    const renderKatex = (math) => (
+        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+    );
+
+    const paramSymbol = prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu';
+    const paramHypo = prueba === 'proporcion' ? 'p_0' : prueba === 'varianza' ? '\\sigma_0^2' : '\\mu_0';
+
+    const handleCalcular = () => {
+        let res;
+        const numN = Number(n);
+        const numAlpha = Number(alpha);
+
+        if (prueba === 'media_z') {
+            res = pruebaMediaZ(numN, Number(xBar), Number(sigma), Number(mu0), numAlpha, tipoPrueba);
+        } else if (prueba === 'media_t') {
+            res = pruebaMediaT(numN, Number(xBar), Number(s), Number(mu0), numAlpha, tipoPrueba);
+        } else if (prueba === 'proporcion') {
+            res = pruebaProporcionZ(numN, Number(x), Number(p0), numAlpha, tipoPrueba);
+        } else if (prueba === 'varianza') {
+            res = pruebaVarianzaChi(numN, Number(s2), Number(sigma02), numAlpha, tipoPrueba);
+        }
+
+        if (res?.error) {
+            alert(res.error);
+            onCalcular(null);
+        } else {
+            onCalcular(res);
+        }
+    };
+
+    return (
+        <div style={cardStyle}>
+            <p style={{ fontSize: FS.sm, marginBottom: '10px' }}>
+                Ingrese directamente los valores estadísticos conocidos:
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', marginBottom: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('n:')}</label>
+                    <input type="number" className="input-mat251 placeholder-small" value={n} onChange={(e) => setN(e.target.value)} placeholder="Tamaño de muestra" min="1" style={{ flex: 1 }} />
+                </div>
+
+                {(prueba === 'media_z' || prueba === 'media_t') && (
+                    <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('\\bar{X}:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={xBar} onChange={(e) => setXBar(e.target.value)} placeholder="Media muestral" step="any" style={{ flex: 1 }} />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('\\mu_0:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={mu0} onChange={(e) => setMu0(e.target.value)} placeholder="Media hipotética" step="any" style={{ flex: 1 }} />
+                        </div>
+                    </>
+                )}
+
+                {prueba === 'media_z' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('\\sigma:')}</label>
+                        <input type="number" className="input-mat251 placeholder-small" value={sigma} onChange={(e) => setSigma(e.target.value)} placeholder="Desv. est. poblacional" min="0" step="any" style={{ flex: 1 }} />
+                    </div>
+                )}
+
+                {prueba === 'media_t' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('S:')}</label>
+                        <input type="number" className="input-mat251 placeholder-small" value={s} onChange={(e) => setS(e.target.value)} placeholder="Desv. est. muestral" min="0" step="any" style={{ flex: 1 }} />
+                    </div>
+                )}
+
+                {prueba === 'proporcion' && (
+                    <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('x:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={x} onChange={(e) => setX(e.target.value)} placeholder="Casos favorables" min="0" style={{ flex: 1 }} />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('p_0:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={p0} onChange={(e) => setP0(e.target.value)} placeholder="Proporción hipotética" min="0" max="1" step="any" style={{ flex: 1 }} />
+                        </div>
+                    </>
+                )}
+
+                {prueba === 'varianza' && (
+                    <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('S^2:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={s2} onChange={(e) => setS2(e.target.value)} placeholder="Varianza muestral" min="0" step="any" style={{ flex: 1 }} />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('\\sigma_0^2:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={sigma02} onChange={(e) => setSigma02(e.target.value)} placeholder="Varianza hipotética" min="0" step="any" style={{ flex: 1 }} />
+                        </div>
+                    </>
+                )}
+
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 235px 1fr', gap: '15px 10px', width: '100%', alignItems: 'center', marginBottom: '15px' }}>
+                
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)' }}>{renderKatex('\\alpha:')}</label>
+                </div>
+                <div ref={alphaRef} style={{ position: 'relative' }}>
+                    <div
+                        onClick={() => setIsAlphaOpen(!isAlphaOpen)}
+                        style={{
+                            padding: '8px 12px', background: 'var(--bg-card)',
+                            border: `1px solid ${isAlphaOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                            borderRadius: RADIUS || '4px', cursor: 'pointer',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            fontSize: FS.sm, color: 'var(--text-color, var(--text-main))',
+                            boxShadow: isAlphaOpen ? '0 0 0 3px rgba(0,123,255,0.15)' : 'none',
+                            transition: 'all 0.2s ease', userSelect: 'none'
+                        }}
+                    >
+                        <span style={{ fontWeight: 500 }}>{alphaOptions.find(o => o.value === alpha)?.label}</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            style={{ transform: isAlphaOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s ease', color: 'var(--text-muted)', flexShrink: 0 }}>
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </div>
+                    {isAlphaOpen && (
+                        <div style={{
+                            position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+                            background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+                            borderRadius: RADIUS || '4px', zIndex: 1000, boxShadow: '0 8px 24px rgba(0,0,0,0.15)', overflow: 'hidden'
+                        }}>
+                            {alphaOptions.map(opt => (
+                                <div 
+                                    key={opt.value}
+                                    onClick={() => { setAlpha(opt.value); setIsAlphaOpen(false); }}
+                                    style={{ 
+                                        padding: '8px 12px', cursor: 'pointer', fontSize: FS.sm,
+                                        background: alpha === opt.value ? 'var(--primary-light, #eff6ff)' : 'transparent',
+                                        color: alpha === opt.value ? 'var(--primary-color)' : 'var(--text-main)',
+                                        borderBottom: '1px solid var(--border-light, #f1f5f9)'
+                                    }}
+                                    onMouseEnter={(e) => { if (alpha !== opt.value) e.target.style.background = 'var(--bg-hover, #f8fafc)'; }}
+                                    onMouseLeave={(e) => { if (alpha !== opt.value) e.target.style.background = 'transparent'; }}
+                                >
+                                    {opt.label}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div></div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)' }}>{renderKatex('H_1:')}</label>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    {['bilateral', 'derecha', 'izquierda'].map(tipo => {
+                        const isSelected = tipoPrueba === tipo;
+                        const mathStr = tipo === 'bilateral' ? `${paramSymbol} \\neq ${paramHypo}` :
+                                        tipo === 'derecha' ? `${paramSymbol} > ${paramHypo}` :
+                                        `${paramSymbol} < ${paramHypo}`;
+                        return (
+                            <div
+                                key={tipo}
+                                onClick={() => setTipoPrueba(tipo)}
+                                style={{
+                                    flex: 1, padding: '2px 0', textAlign: 'center', cursor: 'pointer',
+                                    border: `1px solid ${isSelected ? 'var(--accent-color)' : 'var(--border-color, #cbd5e1)'}`,
+                                    borderRadius: RADIUS || '4px',
+                                    background: isSelected ? 'var(--accent-color)' : 'var(--bg-input, #fff)',
+                                    color: isSelected ? '#fff' : 'var(--text-main)',
+                                    boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                                    transition: 'all 0.2s',
+                                    display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                    fontSize: FS.xs,
+                                }}
+                            >
+                                {renderKatex(mathStr)}
+                            </div>
+                        );
+                    })}
+                </div>
+                <div></div>
+
+                <div></div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                    <button className="button_calcular" style={{ width: 'auto', padding: '5px 15px' }} onClick={handleCalcular}>
+                        Calcular Prueba
+                    </button>
+                </div>
+                <div></div>
+            </div>
+        </div>
+    );
+}

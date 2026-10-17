@@ -3,7 +3,7 @@
   border: none;
   padding: 0 5px;
   outline: none;
-  background: transparent; 
+  background: transparent;
   color: inherit;
 }
 
@@ -120,8 +120,8 @@
 .calculadora-datos {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 5px;
+  padding: 15px;
   height: fit-content;
   overflow: visible;
   transition: padding 0.3s ease;
@@ -210,6 +210,88 @@ html.dark .banner-bienvenida {
 .container_cal_input {
   width: 100%;
   margin-top: 5px;
+  border-radius: 5px;
+}
+
+/* Inputs y Placeholder pequeño estandarizado para MAT251 */
+.input-mat251 {
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-pure);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-mat251:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.placeholder-small::placeholder,
+.input-mat251.placeholder-small::placeholder,
+.input-mat251::placeholder,
+.calculadora-datos input::placeholder,
+.calculadora-datos textarea::placeholder,
+.container_cal_input::placeholder {
+  font-size: 0.72rem !important;
+  opacity: 0.65;
+  color: var(--text-muted);
+}
+
+/* ========================================= */
+/* SELECT ESTILO OPERACIÓN (MAT251)          */
+/* ========================================= */
+.select-mat251,
+.select-estilo-operacion {
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-pure);
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.select-mat251:hover,
+.select-estilo-operacion:hover {
+  border-color: var(--primary-color);
+}
+
+.select-mat251:focus,
+.select-estilo-operacion:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.select-mat251 option,
+.select-estilo-operacion option {
+  background-color: var(--bg-card);
+  color: var(--text-pure);
+  padding: 8px 12px;
+}
+
+html.dark .select-mat251,
+html.dark .select-estilo-operacion {
+  background-color: var(--bg-card);
+  color: var(--text-pure);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
 .container_cal_percentil {
@@ -250,11 +332,6 @@ html.dark .banner-bienvenida {
   padding: 5px;
 }
 
-.button_calcular {
-  padding: 10px 35px;
-  margin-top: 10px;
-  /* El ancho se controla ahora desde el componente con fit-content */
-}
 
 .info_cargando {
   text-align: center;
@@ -279,7 +356,7 @@ html.dark .banner-bienvenida {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 5px;
 }
 
 .tendencias {
@@ -296,22 +373,23 @@ html.dark .banner-bienvenida {
 .tabla-academica {
   width: 100%;
   border-collapse: collapse;
-  font-family: "Times New Roman", serif;
+  font-family: inherit;
   font-size: 1.1em;
-  margin-top: 10px;
+  margin: 0;
 }
 
 .tabla-academica th,
 .tabla-academica td {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--text-pure);
   padding: 8px;
   text-align: center;
-  color: var(--text-main);
+  color: var(--text-pure);
 }
 
 .tabla-academica th {
-  background-color: var(--header-bg);
+  background-color: var(--bg-input);
   font-weight: bold;
+  color: var(--text-pure);
 }
 
 /* ======================================================= */
@@ -383,17 +461,20 @@ html.dark .banner-bienvenida {
 /* TEXTOS Y MENSAJES RESPONSIVOS                           */
 /* ======================================================= */
 .mensaje-instruccion-vacio {
-  font-size: 0.95rem; /* Tamaño normal (FS.base) */
+  font-size: 0.7rem;
+  /* Tamaño normal (FS.base) */
 }
 
 .titulo-operacion-calculadora {
-  font-size: 0.75rem; /* Tamaño pequeño (FS.sx) */
+  font-size: 0.7rem;
+  /* Tamaño pequeño (FS.sx) */
 }
 
 @media (max-width: 900px) {
   .mensaje-instruccion-vacio {
     font-size: 0.85rem;
   }
+
   .titulo-operacion-calculadora {
     font-size: 0.70rem;
   }
@@ -403,9 +484,11 @@ html.dark .banner-bienvenida {
   .mensaje-instruccion-vacio {
     font-size: 0.75rem;
   }
+
   .titulo-operacion-calculadora {
     font-size: 0.65rem;
-    flex-wrap: wrap; /* Por si el nombre de la operación es muy largo */
+    flex-wrap: wrap;
+    /* Por si el nombre de la operación es muy largo */
   }
 }
 
@@ -418,16 +501,78 @@ html.dark .banner-bienvenida {
 
 @media (max-width: 600px) {
   .grid-metricas-probabilidad {
-    grid-template-columns: repeat(2, 1fr); /* Forzar exactamente 2 columnas en celulares */
+    grid-template-columns: repeat(2, 1fr);
+    /* Forzar exactamente 2 columnas en celulares */
   }
-  
+
   /* Si hay un número impar de tarjetas (ej. 3), centrar la última en la fila de abajo y mantener su tamaño original */
-  .grid-metricas-probabilidad > *:last-child:nth-child(odd) {
+  .grid-metricas-probabilidad>*:last-child:nth-child(odd) {
     grid-column: 1 / -1;
     justify-self: center;
-    width: calc(50% - 5px); /* Exactamente el mismo ancho que las tarjetas de arriba (considerando el gap de 10px) */
+    width: calc(50% - 5px);
+    /* Exactamente el mismo ancho que las tarjetas de arriba (considerando el gap de 10px) */
   }
 }
+
+.tarjeta-prob-titulo {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--text-pure);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tarjeta-prob-titulo .katex {
+  text-transform: none;
+}
+
+.tarjeta-prob-valor {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-pure);
+  font-weight: 400;
+}
+
+/* Tarjetas de Resultados de Cálculos (Texto en formato normal / Title Case) */
+.tarjeta-calculo-titulo {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-pure);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tarjeta-calculo-titulo .katex {
+  text-transform: none;
+}
+
+/* Unificación de títulos de sección y conclusiones en Tema 4 */
+.tema4-titulo-seccion {
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+}
+
+.tema4-titulo-seccion .katex {
+  text-transform: none;
+  font-size: 0.9rem !important;
+}
+
+.tarjeta-calculo-valor {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-pure);
+  font-weight: 400;
+}
+
+
 
 /* ======================================================= */
 /* SIMULACIÓN PROBABILIDAD CLÁSICA                         */
@@ -438,7 +583,8 @@ html.dark .banner-bienvenida {
   align-items: flex-start;
   width: 100%;
   gap: 20px;
-  flex-wrap: nowrap; /* Mantener en una sola fila */
+  flex-wrap: nowrap;
+  /* Mantener en una sola fila */
 }
 
 .col-simulacion-lateral {
@@ -463,32 +609,52 @@ html.dark .banner-bienvenida {
 @media (max-width: 768px) {
   .contenedor-simulacion-clasica {
     gap: 5px;
-    align-items: flex-start; /* Alinear arriba para que no queden tan abajo */
+    align-items: flex-start;
+    /* Alinear arriba para que no queden tan abajo */
   }
-  
+
   .col-simulacion-lateral {
-    width: 32%; /* Ajustar el ancho para que quepan */
-    align-items: center !important; /* Centrar contenido en ambos lados */
+    width: 32%;
+    /* Ajustar el ancho para que quepan */
+    align-items: center !important;
+    /* Centrar contenido en ambos lados */
   }
-  
-  .texto-lanzamiento-simulacion, 
+
+  .texto-lanzamiento-simulacion,
   .texto-lanzamiento-simulacion-placeholder {
     font-size: 0.65rem !important;
     text-align: center;
   }
-  
+
   .tarjeta-probabilidad {
     padding: 8px 4px !important;
     width: 100% !important;
   }
-  
+
   .tarjeta-prob-titulo {
     font-size: 0.55rem !important;
   }
-  
+
   .tarjeta-prob-valor {
     font-size: 0.95rem !important;
   }
+
+  .tarjeta-calculo-titulo {
+    font-size: 0.65rem !important;
+  }
+
+  .tema4-titulo-seccion {
+    font-size: 0.85rem !important;
+  }
+
+  .tema4-titulo-seccion .katex {
+    font-size: 0.85rem !important;
+  }
+
+  .tarjeta-calculo-valor {
+    font-size: 0.95rem !important;
+  }
+
 
   .texto-resultado-simulacion {
     font-size: 0.75rem !important;
@@ -506,24 +672,22 @@ html.dark .banner-bienvenida {
 .grid-metricas-empiricas {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid var(--border-color);
+  margin-top: 15px;
   gap: 15px;
 }
 
 .tarjeta-metrica-empirica {
   background: var(--bg-input);
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 5px;
   border: 1px solid var(--border-color);
   text-align: center;
 }
 
 .titulo-metrica-empirica {
   margin: 0;
-  font-size: 0.65rem;
-  color: var(--text-muted);
+  font-size: 0.7rem;
+  color: var(--text-pure);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -532,11 +696,15 @@ html.dark .banner-bienvenida {
   text-transform: uppercase;
 }
 
+.titulo-metrica-empirica .katex {
+  text-transform: none;
+}
+
 .valor-metrica-empirica {
   margin: 5px 0 0;
-  font-size: 1.1rem;
-  color: var(--text-color);
-  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text-pure);
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {
@@ -544,101 +712,346 @@ html.dark .banner-bienvenida {
     display: flex !important;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px; /* Menor espacio entre cajas en móvil */
+    gap: 8px;
+    /* Menor espacio entre cajas en móvil */
   }
-  .grid-metricas-empiricas > div {
-    flex: 0 0 calc(50% - 4px); /* Dos por fila */
+
+  .grid-metricas-empiricas>div {
+    flex: 0 0 calc(50% - 4px);
+    /* Dos por fila */
   }
-  .grid-metricas-empiricas > div:last-child {
-    flex: 0 0 calc(50% - 4px); /* El tercero ocupa lo mismo pero se centrará */
+
+  .grid-metricas-empiricas>div:last-child {
+    flex: 0 0 calc(50% - 4px);
+    /* El tercero ocupa lo mismo pero se centrará */
     margin-top: 0px;
   }
-  
+
   .tarjeta-metrica-empirica {
-    padding: 8px 4px; /* Mucho menos padding en móvil para que quepa el texto */
+    padding: 8px 4px;
+    /* Mucho menos padding en móvil para que quepa el texto */
   }
-  
+
   .titulo-metrica-empirica {
-    font-size: 0.55rem; /* Letras más pequeñas en móvil */
+    font-size: 0.55rem;
+    /* Letras más pequeñas en móvil */
   }
-  
+
   .valor-metrica-empirica {
-    font-size: 0.95rem; /* Números más pequeños en móvil */
+    font-size: 0.95rem;
+    /* Números más pequeños en móvil */
   }
 }
 
 .widget-titulo {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: bold;
   line-height: 1.3;
-  color: var(--text-main) !important; /* Revertido al color original */
+  color: var(--text-main) !important;
+  /* Revertido al color original */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 950px) {
   .widget-titulo {
-    font-size: 0.75rem; /* Mucho más pequeño en móvil para que no ocupe 3 líneas */
+    font-size: 0.7rem;
+    /* Mucho más pequeño en móvil para que no ocupe 3 líneas */
   }
-  
+
   .widget-header {
-    align-items: flex-start !important; /* Si envuelve, que quede bien alineado arriba */
+    align-items: center !important;
   }
 }
 
 /* Clases para el Modal Maximizado */
 .modal-grafico-gigante {
-  width: 90%;
-  height: 90%;
+  width: 85% !important;
+  height: 85% !important;
+  margin: auto !important;
+  box-sizing: border-box !important;
+  resize: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.modal-header-gigante {
+  align-items: center !important;
+  cursor: default !important;
 }
 
 .widget-titulo-max {
   color: var(--text-main);
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
 }
 
-@media (max-width: 768px) {
+.cuerpo-grafico-gigante {
+  flex: 1 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 15px 20px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 950px) {
   .modal-grafico-gigante {
-    height: auto !important;
-    max-height: 90vh;
+    width: 95% !important;
+    height: 53% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: auto !important;
   }
-  
+
   .modal-header-gigante {
     /* Mantenemos el layout original horizontal */
     padding: 10px 15px !important;
+    flex-shrink: 0 !important;
+    align-items: center !important;
   }
-  
+
   .widget-titulo-max {
-    font-size: 0.75rem !important; /* Mismo tamaño que el título normal en móvil para que quepa todo horizontal */
-    line-height: 1.2;
+    font-size: 0.75rem !important;
+    /* Mismo tamaño que el título normal en móvil para que quepa todo horizontal */
+    line-height: 1.2 !important;
+    display: flex !important;
+    align-items: center !important;
   }
-  
+
   .controles-modal-gigante {
-    gap: 5px !important; /* Menos separación entre los controles en móvil */
+    gap: 5px !important;
+    /* Menos separación entre los controles en móvil */
   }
-  
+
   .cuerpo-grafico-gigante {
-    flex: none !important;
-    height: 55vh !important;
-    min-height: 350px;
-    padding: 10px 0px 10px 15px !important; /* 15px a la izquierda para que los números no toquen el borde, 0px a la derecha porque ya tiene 30px de margin el LineChart */
+    flex: 1 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 10px 15px !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+    box-sizing: border-box !important;
   }
-  
+
   .katex-responsive-container {
-    font-size: 0.8rem !important; /* Force smaller base font size on mobile */
+    font-size: 1rem !important;
   }
-  
-  /* Additionally, target KaTeX specifically to ensure it scales down */
+
   .katex-responsive-container .katex {
-    font-size: 0.9em !important; 
+    font-size: 1.1rem !important;
   }
-  
+
+  .formula-general-box {
+    font-size: 0.8rem !important;
+  }
+
+  .formula-desarrollo-box {
+    font-size: 0.9rem !important;
+  }
+
+  .formula-desarrollo-box .katex {
+    font-size: 0.9rem !important;
+  }
+
+  .label-bayes-pregunta {
+    font-size: 0.75rem !important;
+  }
+
+  .label-bayes-pregunta .katex {
+    font-size: 1em !important;
+  }
+
   .table-header-responsive {
-    font-size: 0.7rem !important; /* Smaller text for headers on mobile */
+    font-size: 0.7rem !important;
+    /* Smaller text for headers on mobile */
   }
+}
+
+.formula-desarrollo-box {
+  font-size: 0.9rem;
+}
+
+.formula-desarrollo-box .katex {
+  font-size: 0.9rem;
 }
 
 .katex-responsive-container {
-  font-size: 1rem;
+  color: var(--text-pure);
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.katex-responsive-container .katex {
+  color: var(--text-pure);
+}
+
+.formula-scroll-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin;
+}
+
+.formula-scroll-container::-webkit-scrollbar {
+  height: 5px;
+}
+
+.formula-scroll-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+}
+
+.formula-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.6);
+  border-radius: 4px;
+}
+
+.formula-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.9);
 }
 
 .table-header-responsive {
-  font-size: 0.95em; /* Normal size on desktop */
+  font-size: 0.95em;
+  /* Normal size on desktop */
+}
+
+.formula-general-box {
+  font-size: 1rem;
+}
+
+.label-bayes-pregunta {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--text-pure);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.label-bayes-pregunta .katex {
+  font-size: 1em;
+}
+
+/* ── TOOLTIPS ESTADÍSTICOS PEDAGÓGICOS (StatLabel) ── */
+.mat251-stat-label-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  text-decoration: underline dotted 1px rgba(100, 116, 139, 0.5);
+  text-underline-offset: 3px;
+}
+
+.mat251-stat-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(4px);
+  background-color: #1e293b;
+  color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 5px;
+  width: max-content;
+  max-width: min(92vw, 440px);
+  box-sizing: border-box;
+  text-align: center;
+  z-index: 9999;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: normal;
+  font-size: 0.8rem;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mat251-stat-label-container:hover {
+  z-index: 10000;
+}
+
+.mat251-stat-label-container:hover .mat251-stat-tooltip {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+.mat251-stat-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: var(--arrow-left, 50%);
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #1e293b transparent;
+}
+
+.mat251-stat-tooltip.mat251-tooltip-top {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(-4px);
+}
+
+.mat251-stat-label-container:hover .mat251-tooltip-top {
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+.mat251-stat-tooltip.mat251-tooltip-top::after {
+  top: 100%;
+  bottom: auto;
+  border-color: #1e293b transparent transparent transparent;
+}
+
+.mat251-tooltip-text {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.mat251-tooltip-math {
+  color: #fbbf24 !important;
+  font-size: 0.85rem;
+}
+
+.mat251-tooltip-math,
+.mat251-tooltip-math *,
+.mat251-tooltip-math .katex,
+.mat251-tooltip-math .katex * {
+  color: #fbbf24 !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 768px) {
+  .mat251-stat-tooltip {
+    max-width: min(90vw, 320px);
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+  .mat251-tooltip-text {
+    font-size: 0.72rem;
+  }
+  .mat251-tooltip-math {
+    font-size: 0.78rem;
+  }
 }

@@ -72,12 +72,15 @@ export default function Pantalla() {
   const _stats = useCalculadoraExcel(selectedFile, selectedSheet);
 
   const esAdmin = usuario?.rol === "Administrador" || usuario?.isAdmin === true;
+  const esDocente = usuario?.rol === "Docente";
+  const esEstudiante = usuario?.rol === "Estudiante";
+  const tieneAcceso = esAdmin || esDocente || esEstudiante;
 
   const targetDate = new Date("2026-10-30T00:00:00").getTime();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    if (esAdmin) return;
+    if (tieneAcceso) return;
 
     const actualizarContador = () => {
       const now = new Date().getTime();
@@ -98,9 +101,9 @@ export default function Pantalla() {
     const interval = setInterval(actualizarContador, 1000);
 
     return () => clearInterval(interval);
-  }, [esAdmin]);
+  }, [tieneAcceso]);
 
-  if (!esAdmin) {
+  if (!tieneAcceso) {
     return (
       <div 
         style={{

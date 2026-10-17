@@ -6,20 +6,48 @@ import {
 } from 'recharts';
 import { jStat } from 'jstat';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
-import { cardStyle, FS, RADIUS } from '../../Principal/Constantes';
+import ModalLimiteFueraDeGrafica from './ModalLimiteFueraDeGrafica';
+import EtiquetaLimiteIntervalo from './EtiquetaLimiteIntervalo';
 
 const CustomKatexLabel = (props) => {
-    const { viewBox, value, offsetY = 0, offsetX = 0 } = props;
+    const { viewBox, value, offsetY = 0, offsetX = 0, showGuideLine = false } = props;
     if (!viewBox) return null;
     const { x, y } = viewBox;
-    
+
+    // Protección absoluta contra desborde superior: nunca permitir Y < 2
+    const posY = Math.max(2, y - 28 + offsetY);
+
     return (
-        <foreignObject x={x - 50 + offsetX} y={y - 30 + offsetY} width={100} height={30} style={{ overflow: 'visible' }}>
-            <div 
-                dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} 
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }} 
-            />
-        </foreignObject>
+        <g style={{ pointerEvents: 'none' }}>
+            {showGuideLine && posY < y - 10 && (
+                <line
+                    x1={x}
+                    y1={y}
+                    x2={x}
+                    y2={posY + 26}
+                    stroke="#f97316"
+                    strokeWidth={3}
+                    strokeDasharray="4 4"
+                />
+            )}
+            <foreignObject x={x - 60 + offsetX} y={posY} width={120} height={28} style={{ overflow: 'visible' }}>
+                <div
+                    className="tema4-etiqueta-limite"
+                    dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }}
+                    style={{
+                        color: 'var(--text-pure, var(--text-pure))',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '100%',
+                        whiteSpace: 'nowrap'
+                    }}
+                />
+            </foreignObject>
+        </g>
     );
 };
 
@@ -55,16 +83,16 @@ const SmartAnnotation = (props) => {
             <path
                 d={`M ${cx},${cy} L ${midX},${midY} L ${lineEndX},${lineEndY}`}
                 fill="none"
-                stroke="var(--text-main, #3b82f6)"
+                stroke="var(--primary-color, #3b82f6)"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />
-            <circle cx={cx} cy={cy} r={5} fill="var(--text-main, #3b82f6)" />
+            <circle cx={cx} cy={cy} r={5} fill="var(--primary-color, #3b82f6)" />
 
             <foreignObject x={boxX} y={boxY} width={boxWidth} height={boxHeight} style={{ overflow: 'visible' }}>
                 <div style={{
-                    color: 'var(--text-main, #1e293b)',
+                    color: 'var(--text-pure)',
                     fontWeight: 'bold',
                     fontSize: '13px',
                     display: 'flex',
@@ -87,19 +115,37 @@ export default function GraficoChiCuadrada({ resultados }) {
     const { k, varPob, x1, x2, condicion, probFinal } = resultados;
     const tieneProbabilidad = probFinal !== undefined;
 
-    const formatLatexNum = (num) => {
-        return num.toLocaleString('es-ES', { maximumFractionDigits: 4 }).replace(',', '{,}');
+    const formatNum = (num) => {
+        if (num === null || num === undefined || isNaN(num)) return '';
+        const parsed = parseFloat(num);
+        return Number.isInteger(parsed) ? parsed.toString() : parsed.toFixed(4);
     };
 
     const { datosGrafico, annotationData } = useMemo(() => {
         // Rango del eje X para la Chi-Cuadrada
         const mean = k;
         const sd = Math.sqrt(2 * k);
-        const maxVal = Math.max(mean + 4 * sd, 20); 
+        const baseMaxChi = Math.max(mean + 4 * sd, 20); 
+
+        // Rango dinámico que asegure incluir x1 y x2
+        const s2Targets = [];
+        if (tieneProbabilidad) {
+            if (x1 !== undefined && !isNaN(parseFloat(x1))) s2Targets.push(parseFloat(x1));
+            if (x2 !== undefined && !isNaN(parseFloat(x2))) s2Targets.push(parseFloat(x2));
+        }
+
+        let maxChi = baseMaxChi;
+        if (s2Targets.length > 0) {
+            const maxS2 = Math.max(...s2Targets);
+            const targetChi = (k * maxS2) / varPob;
+            if (targetChi * 1.2 > maxChi) {
+                maxChi = targetChi * 1.2;
+            }
+        }
         
         const puntos = [];
-        const numPuntos = 200;
-        const paso = maxVal / numPuntos;
+        const numPuntos = 250;
+        const paso = maxChi / numPuntos;
 
         // Límites
         let fillStart = -1;
@@ -110,7 +156,7 @@ export default function GraficoChiCuadrada({ resultados }) {
                 fillEnd = x1;
             } else if (condicion === 'mayor_que') {
                 fillStart = x1;
-                fillEnd = maxVal * 2; // Suficiente
+                fillEnd = (maxChi * varPob) / k;
             } else if (condicion === 'entre') {
                 fillStart = x1;
                 fillEnd = x2;
@@ -173,46 +219,71 @@ export default function GraficoChiCuadrada({ resultados }) {
                 });
             });
         }
-
         return { datosGrafico: puntos, annotationData: annData };
     }, [k, varPob, x1, x2, condicion, probFinal, tieneProbabilidad]);
 
+    // Detección inteligente de colisión entre etiquetas x1 y x2
+    const estanCerca = useMemo(() => {
+        if (!tieneProbabilidad || condicion !== 'entre') return false;
+        const x1Num = parseFloat(x1);
+        const x2Num = parseFloat(x2);
+        if (isNaN(x1Num) || isNaN(x2Num)) return false;
+        const maxS2 = datosGrafico.length > 0 ? datosGrafico[datosGrafico.length - 1].x : 10;
+        const minS2 = datosGrafico.length > 0 ? datosGrafico[0].x : 0;
+        const span = Math.max(maxS2 - minS2, 1);
+        return span > 0 && Math.abs(x2Num - x1Num) / span < 0.22;
+    }, [tieneProbabilidad, condicion, x1, x2, datosGrafico]);
+
     return (
-        <MarcoWidgetMAT251 titulo="Gráfica de Densidad de Probabilidad f(x)" anchoCompleto={true} alto="450px" id="grafico-chi-cuadrada">
+        <MarcoWidgetMAT251 titulo="Gráfica de Densidad de Probabilidad f(S²)" anchoCompleto={true} alto="450px" id="grafico-chi-cuadrada">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={datosGrafico} margin={{ top: 45, right: 30, left: 80, bottom: 30 }}>
+                        <AreaChart data={datosGrafico} margin={{ top: 25, right: 5, left: 0, bottom: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                             
                             <XAxis 
                                 dataKey="x" 
                                 type="number" 
-                                domain={['dataMin', 'dataMax']}
-                                padding={{ left: 20, right: 20 }}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
-                                axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickFormatter={(val) => Number.isInteger(val) ? val : val.toFixed(1)}
-                                label={{ value: 'Varianza Muestral (S²)', position: 'insideBottom', offset: -10, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                domain={[0, 'dataMax']}
+                                allowDataOverflow={true}
+                                padding={{ left: 10, right: 20 }}
+                                tick={{ fill: 'var(--text-pure)', fontSize: 10, fontWeight: 'bold' }}
+                                axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickFormatter={(val) => Number.isInteger(val) ? val.toString() : val.toFixed(2)}
+                                label={{ value: 'Varianza Muestral (S²)', position: 'insideBottom', offset: -15, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
                             />
                             
                             <YAxis 
-                                hide
                                 domain={[0, 'auto']}
+                                tick={{ fill: 'var(--text-pure)', fontSize: 10, fontWeight: 'bold' }}
+                                axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickFormatter={(val) => Number.isInteger(val) ? val.toString() : val.toFixed(2)}
+                                label={{ 
+                                    value: 'Densidad f(S²)', 
+                                    angle: -90, 
+                                    position: 'insideLeft', 
+                                    offset: 10, 
+                                    fill: 'var(--text-pure)', 
+                                    fontSize: 13, 
+                                    fontWeight: 'bold', 
+                                    textAnchor: 'middle' 
+                                }}
                             />
                             
                             <Tooltip 
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                                formatter={(value, name) => [value.toFixed(5), name === 'y' ? 'f(x)' : 'Área']}
-                                labelFormatter={(label) => `S² = ${label.toFixed(4)}`}
+                                formatter={(value, name) => [value.toFixed(5), name === 'y' ? 'f(S²)' : 'Área']}
+                                labelFormatter={(label) => `S² = ${Number.isInteger(label) ? label : label.toFixed(4)}`}
                             />
 
                             <Area 
                                 type="monotone" 
                                 dataKey="y" 
                                 stroke="#3b82f6" 
-                                strokeWidth={3}
+                                strokeWidth={3} 
                                 fill="transparent" 
                                 isAnimationActive={false}
                             />
@@ -227,15 +298,39 @@ export default function GraficoChiCuadrada({ resultados }) {
                                 />
                             )}
 
-                            {/* Reference Lines para Cortes */}
+                            {/* Reference Lines para Cortes con anticolisión inteligente */}
                             {tieneProbabilidad && condicion === 'entre' && (
                                 <>
-                                    <ReferenceLine x={x1} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3} label={<CustomKatexLabel value={`\\boldsymbol{S_1^2 = ${x1}}`} offsetY={-10} />} />
-                                    <ReferenceLine x={x2} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3} label={<CustomKatexLabel value={`\\boldsymbol{S_2^2 = ${x2}}`} offsetY={-10} />} />
+                                    <ReferenceLine 
+                                        x={x1} 
+                                        stroke="#f97316" 
+                                        strokeDasharray="4 4" 
+                                        strokeWidth={3} 
+                                        label={
+                                            <EtiquetaLimiteIntervalo
+                                                value={`\\boldsymbol{S_1^2 = ${formatNum(x1)}}`}
+                                                side={estanCerca ? 'left' : 'center'}
+                                                offsetY={-4}
+                                            />
+                                        } 
+                                    />
+                                    <ReferenceLine 
+                                        x={x2} 
+                                        stroke="#f97316" 
+                                        strokeDasharray="4 4" 
+                                        strokeWidth={3} 
+                                        label={
+                                            <EtiquetaLimiteIntervalo
+                                                value={`\\boldsymbol{S_2^2 = ${formatNum(x2)}}`}
+                                                side={estanCerca ? 'right' : 'center'}
+                                                offsetY={-4}
+                                            />
+                                        } 
+                                    />
                                 </>
                             )}
                             {tieneProbabilidad && (condicion === 'menor_que' || condicion === 'mayor_que') && (
-                                <ReferenceLine x={x1} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3} label={<CustomKatexLabel value={`\\boldsymbol{S^2 = ${x1}}`} offsetY={-10} />} />
+                                <ReferenceLine x={x1} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3} label={<CustomKatexLabel value={`\\boldsymbol{S^2 = ${formatNum(x1)}}`} offsetY={-8} />} />
                             )}
 
                             {/* Anotaciones */}
@@ -251,6 +346,11 @@ export default function GraficoChiCuadrada({ resultados }) {
 
                         </AreaChart>
                     </ResponsiveContainer>
+                    <ModalLimiteFueraDeGrafica
+                        limites={tieneProbabilidad ? (condicion === 'entre' ? [x1, x2] : [x1]) : []}
+                        datos={datosGrafico}
+                        condicion={condicion}
+                    />
                 </div>
             </div>
         </MarcoWidgetMAT251>

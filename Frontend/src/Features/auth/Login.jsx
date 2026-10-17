@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logoSiCE from "../../assets/images/Logo-SiCE.png";
+import logoSiCE from "../../assets/images/Logo-SiCE.webp";
 import { api } from "../../services/api.js";
 import { alerta } from '../../utils/Notificaciones.jsx';
 import '../../styles/ui/Login.css';

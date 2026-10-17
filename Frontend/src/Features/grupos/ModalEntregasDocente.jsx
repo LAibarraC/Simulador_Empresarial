@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
@@ -1071,7 +1072,7 @@ export default function ModalEntregasDocente({ tarea, onClose }) {
     setComentarios({ ...comentarios, [entregaActual.id]: nuevo });
   };
 
-  return (
+  return createPortal(
     <div style={{
       position: "fixed",
       top: 0,
@@ -1642,7 +1643,8 @@ export default function ModalEntregasDocente({ tarea, onClose }) {
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

@@ -8,7 +8,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 25px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
 }
 
 .input-section {
@@ -378,17 +378,32 @@
 /* ========================================= */
 /* BOTONES SELECTORES DE MODO (TEMA 1)       */
 /* ========================================= */
+.contenedor-selector-modos-mat251 {
+  display: inline-flex;
+  background: var(--bg-input, #f1f5f9);
+  padding: 4px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .btn-mat251-modo {
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-family: inherit;
+  padding: 5px 20px;
+  border-radius: 5px;
+  font-size: 0.8rem;
   border: 1px solid transparent;
   cursor: pointer;
   background-color: transparent;
-  color: var(--text-muted);
+  color: var(--text-pure);
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.contenedor-selector-modos-mat251 .btn-mat251-modo {
+  flex: 1;
+  text-align: center;
 }
 
 .btn-mat251-modo:hover:not(.active) {
@@ -403,9 +418,67 @@
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
 }
 
+@media (max-width: 640px) {
+  .contenedor-selector-modos-mat251 {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .contenedor-selector-modos-mat251::-webkit-scrollbar {
+    display: none;
+  }
+
+  .btn-mat251-modo {
+    padding: 5px 8px;
+    font-size: 0.74rem;
+  }
+
+  .contenedor-selector-modos-mat251 .btn-mat251-modo {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 4px !important;
+    font-size: 0.72rem !important;
+    text-align: center;
+    white-space: normal !important;
+    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: normal;
+  }
+}
+
+@media (max-width: 768px) {
+  /* En pantallas móviles y tablets, reposicionar el FAB para que no tape los inputs en el centro */
+  .menu-flotante-radial {
+    top: auto !important;
+    bottom: 25px !important;
+    right: 15px !important;
+    transform: none !important;
+  }
+
+  .menu-flotante-radial.abierto .item-1 {
+    transform: translate(-50px, -45px);
+  }
+  .menu-flotante-radial.abierto .item-2 {
+    transform: translate(-65px, 0px);
+  }
+  .menu-flotante-radial.abierto .item-3 {
+    transform: translate(0px, -65px);
+  }
+
+  .menu-flotante-radial.abierto .item-1:hover { transform: translate(-50px, -45px) scale(1.15); }
+  .menu-flotante-radial.abierto .item-2:hover { transform: translate(-65px, 0px) scale(1.15); }
+  .menu-flotante-radial.abierto .item-3:hover { transform: translate(0px, -65px) scale(1.15); }
+}
+
 .btn-mat251-confianza {
   padding: 6px 16px;
-  border-radius: 8px;
+  border-radius: 5px;
   border: 1px solid transparent !important;
   background-color: transparent !important;
   color: var(--text-muted) !important;
@@ -428,4 +501,42 @@
   border: 1px solid var(--primary-color) !important;
   font-weight: 700 !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+}
+
+@keyframes fadeInDropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================= */
+/* INPUTS Y PLACEHOLDERS ESTANDARIZADOS MAT251 */
+/* ========================================= */
+.input-mat251 {
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-pure);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-mat251:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.placeholder-small::placeholder,
+.input-mat251.placeholder-small::placeholder,
+.input-mat251::placeholder {
+  font-size: 0.72rem !important;
+  opacity: 0.65;
+  color: var(--text-muted);
 }

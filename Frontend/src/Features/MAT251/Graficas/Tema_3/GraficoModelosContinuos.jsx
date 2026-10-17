@@ -15,10 +15,10 @@ const CustomKatexLabel = (props) => {
         <foreignObject x={x - 50 + offsetX} y={y - 30 + offsetY} width={100} height={30} style={{ overflow: 'visible' }}>
             <div 
                 dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} 
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }} 
+                style={{ color: 'var(--text-pure)', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }} 
             />
         </foreignObject>
-    );
+    ); 
 };
 
 const SmartAnnotation = (props) => {
@@ -65,7 +65,7 @@ const SmartAnnotation = (props) => {
 
             <foreignObject x={boxX} y={boxY} width={boxWidth} height={boxHeight} style={{ overflow: 'visible' }}>
                 <div style={{
-                    color: 'var(--text-main, #1e293b)',
+                    color: 'var(--text-pure)',
                     fontWeight: 'bold',
                     fontSize: '13px',
                     display: 'flex',
@@ -108,9 +108,11 @@ export default function GraficoModelosContinuos({ datos, condicion, resultados, 
     });
     
     // Generar ticks estándar para no perder los números base del eje X
-    const minX = datos[0].x;
-    const maxX = datos[datos.length - 1].x;
-    const estimatedSigma = (maxX - minX) / 8; // El dominio en la normal es approx mu +/- 4 sigma
+    const minX = datos.length > 0 ? Math.min(...datos.map(d => (typeof d.x === 'number' && !isNaN(d.x) ? d.x : 0))) : 0;
+    const maxX = datos.length > 0 ? Math.max(...datos.map(d => (typeof d.x === 'number' && !isNaN(d.x) ? d.x : 1))) : 1;
+    const dMin = minX === maxX ? minX - 1 : minX;
+    const dMax = minX === maxX ? maxX + 1 : maxX;
+    const estimatedSigma = (dMax - dMin) / 8; // El dominio en la normal es approx mu +/- 4 sigma
     
     if (modelo === 'Uniforme') {
         const puntosMayorCero = datos.filter(d => d.y > 0);
@@ -170,8 +172,10 @@ export default function GraficoModelosContinuos({ datos, condicion, resultados, 
         if (resultados.c2 !== undefined) customTicks.push(resultados.c2);
     }
 
-    // Filtrar duplicados y ordenar de menor a mayor
-    const finalTicks = [...new Set(customTicks)].sort((a,b) => a - b);
+    // Filtrar duplicados y ordenar de menor a mayor dentro del rango del dominio
+    const finalTicks = [...new Set(customTicks)]
+        .filter(t => typeof t === 'number' && !isNaN(t) && t >= dMin && t <= dMax)
+        .sort((a,b) => a - b);
 
     // Calcular punteros inteligentes para los porcentajes de cada región
     const annotationDataArray = React.useMemo(() => {
@@ -233,10 +237,10 @@ export default function GraficoModelosContinuos({ datos, condicion, resultados, 
                 text: `${(segProb * 100).toFixed(2)}%`
             };
         });
-    }, [datos, resultados]);
+    }, [datos, resultados]); 
 
     return (
-        <MarcoWidgetMAT251 titulo="Gráfica de Densidad de Probabilidad f(x)" anchoCompleto={true} alto="450px" id="grafico-area-tema3">
+        <MarcoWidgetMAT251 titulo={<span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Gráfica de Densidad de Probabilidad {modelo === 'NormalEstandar' ? 'f(z)' : (modelo === 'ChiCuadrado' ? 'f(χ²)' : (modelo === 'FFisher' ? 'f(F)' : (modelo === 'TStudent' ? 'f(t)' : 'f(x)')))}</span>} anchoCompleto={true} alto="450px" id="grafico-area-tema3">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     {condicion && (condicion.tipo === 'exterior' || condicion.tipo === 'suma_intervalos' || condicion.tipo === 'inversa_exterior') && resultados?.probabilidadFinal > 0 && (
@@ -245,43 +249,44 @@ export default function GraficoModelosContinuos({ datos, condicion, resultados, 
                         </div>
                     )}
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={datos} margin={{ top: 45, right: 30, left: 0, bottom: 30 }}>
+                        <AreaChart data={datos} margin={{ top: 20, right: 5, left: -5, bottom: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                             
                                 <XAxis 
                                     dataKey="x" 
                                     type="number"
-                                    domain={['dataMin', 'dataMax']}
+                                    domain={[dMin, dMax]}
+                                    allowDataOverflow={true}
                                     ticks={finalTicks}
                                     padding={{ left: 20, right: 20 }}
-                                    tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
-                                    axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                    tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
+                                    tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
+                                    axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                    tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                     tickFormatter={(val) => {
                                         if (val === 0) return '0';
                                         if (Math.abs(val) < 0.001) return val.toExponential(2);
                                         return parseFloat(val.toFixed(2)).toString();
                                     }}
-                                    label={{ value: modelo === 'NormalEstandar' ? 'Valor (z)' : (modelo === 'ChiCuadrado' ? 'Valor (χ²)' : (modelo === 'FFisher' ? 'Valor (F)' : (modelo === 'TStudent' ? 'Valor (t)' : 'Valor (x)'))), position: 'insideBottom', offset: -10, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                    label={{ value: modelo === 'NormalEstandar' ? 'Valor (z)' : (modelo === 'ChiCuadrado' ? 'Valor (χ²)' : (modelo === 'FFisher' ? 'Valor (F)' : (modelo === 'TStudent' ? 'Valor (t)' : 'Valor (x)'))), position: 'insideBottom', offset: -10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
                                 />
                             
                             <YAxis 
                                 padding={{ top: 30 }}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
-                                axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
+                                tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
+                                axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickFormatter={(val) => {
                                     if (val === 0) return '0';
                                     if (Math.abs(val) < 0.001) return val.toExponential(2);
                                     return parseFloat(val.toFixed(4)).toString();
                                 }}
-                                label={{ value: 'Densidad f(x)', angle: -90, position: 'insideLeft', offset: 15, fill: 'var(--text-main, #333333)', fontSize: 14, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={{ value: modelo === 'NormalEstandar' ? 'Densidad f(z)' : (modelo === 'ChiCuadrado' ? 'Densidad f(χ²)' : (modelo === 'FFisher' ? 'Densidad f(F)' : (modelo === 'TStudent' ? 'Densidad f(t)' : 'Densidad f(x)'))), angle: -90, position: 'insideLeft', offset: 15, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
                             />
                             
                             <Tooltip 
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                                formatter={(value, name) => [value.toFixed(6), name === 'y' ? 'f(x)' : 'P']}
-                                labelFormatter={(label) => `x = ${Number(label).toFixed(4)}`}
+                                formatter={(value, name) => [value.toFixed(6), name === 'y' ? (modelo === 'NormalEstandar' ? 'f(z)' : (modelo === 'ChiCuadrado' ? 'f(χ²)' : (modelo === 'FFisher' ? 'f(F)' : (modelo === 'TStudent' ? 'f(t)' : 'f(x)')))) : 'P']}
+                                labelFormatter={(label) => `${modelo === 'NormalEstandar' ? 'z' : (modelo === 'TStudent' ? 't' : (modelo === 'FFisher' ? 'F' : (modelo === 'ChiCuadrado' ? 'χ²' : 'x')))} = ${Number(label).toFixed(4)}`}
                             />
                             
                             <Area 

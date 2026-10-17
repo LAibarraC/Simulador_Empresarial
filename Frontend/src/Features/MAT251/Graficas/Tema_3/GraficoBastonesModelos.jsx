@@ -37,8 +37,8 @@ const CustomKatexLabel = (props) => {
 const CustomLabelX = ({ viewBox }) => {
     if (!viewBox) return null;
     return (
-        <text x={viewBox.x + viewBox.width / 2} y={viewBox.y + 40} fill="var(--text-main, #333333)" fontSize={14} fontWeight="bold" textAnchor="middle">
-            Valor (<tspan fontFamily="'KaTeX_Math', 'Times New Roman', serif" fontStyle="italic" fontSize={15}>x</tspan>)
+        <text x={viewBox.x + viewBox.width / 2} y={viewBox.y + 40} fill="var(--text-main, #333333)" fontSize={12} fontWeight="bold" textAnchor="middle">
+            Valor (<tspan fontFamily="'KaTeX_Math', 'Times New Roman', serif" fontStyle="italic" fontSize={13}>x</tspan>)
         </text>
     );
 };
@@ -46,8 +46,8 @@ const CustomLabelX = ({ viewBox }) => {
 const CustomLabelY = ({ viewBox }) => {
     if (!viewBox) return null;
     return (
-        <text x={viewBox.x + 20} y={viewBox.y + viewBox.height / 2} transform={`rotate(-90, ${viewBox.x + 20}, ${viewBox.y + viewBox.height / 2})`} fill="var(--text-main, #333333)" fontSize={14} fontWeight="bold" textAnchor="middle">
-            Probabilidad <tspan fontFamily="'KaTeX_Math', 'Times New Roman', serif" fontStyle="italic" fontSize={15}>P(x)</tspan>
+        <text x={viewBox.x + 20} y={viewBox.y + viewBox.height / 2} transform={`rotate(-90, ${viewBox.x + 20}, ${viewBox.y + viewBox.height / 2})`} fill="var(--text-main, #333333)" fontSize={12} fontWeight="bold" textAnchor="middle">
+            Probabilidad <tspan fontFamily="'KaTeX_Math', 'Times New Roman', serif" fontStyle="italic" fontSize={13}>P(x)</tspan>
         </text>
     );
 };
@@ -66,7 +66,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
     if (!datos || datos.length === 0) return null;
 
     const renderLatex = (str) => {
-        return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
+        return <span style={{ display: 'inline-flex', alignItems: 'center' }} dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
     };
 
     // Detectar si es el modelo de Bernoulli por la forma de sus datos
@@ -150,13 +150,13 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
     };
 
     return (
-        <MarcoWidgetMAT251 titulo={<>Gráfico de Bastones {renderLatex('P(X = x)')}</>} anchoCompleto={true} alto="450px" id="grafico-bastones-tema3">
+        <MarcoWidgetMAT251 titulo={<span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Gráfico de Bastones {renderLatex('P(X = x)')}</span>} anchoCompleto={true} alto="450px" id="grafico-bastones-tema3">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden' }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart
                             data={datosRecortados}
-                            margin={{ top: 20, right: 30, left: 0, bottom: 30 }}
+                            margin={{ top: 20, right: 5, left: -5, bottom: 20 }}
                             barCategoryGap={esBernoulli ? '15%' : '10%'}
                         >
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -167,9 +167,9 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
                                 dataKey="x"
                                 type={esBernoulli ? "category" : "number"}
                                 domain={esBernoulli ? undefined : ['dataMin', 'dataMax']}
-                                padding={esBernoulli ? { left: 40, right: 40 } : { left: 20, right: 20 }}
+                                padding={esBernoulli ? { left: 10, right: 10 } : { left: 10, right: 10 }}
                                 ticks={datosRecortados.map(d => d.x)}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
+                                tick={{ fill: 'var(--text-main, #333333)', fontSize: '0.7rem', fontWeight: 600 }}
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 label={<CustomLabelX />}
@@ -178,7 +178,7 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
                             <YAxis
                                 domain={esBernoulli ? [0, 1] : [0, 'auto']}
                                 padding={{ top: 30 }}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 600 }}
+                                tick={{ fill: 'var(--text-main, #333333)', fontSize: '0.7rem', fontWeight: 600 }}
                                 axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 label={<CustomLabelY />}

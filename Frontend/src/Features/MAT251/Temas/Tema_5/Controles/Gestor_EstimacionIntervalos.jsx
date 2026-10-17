@@ -38,7 +38,7 @@ const NIVELES_CONFIANZA = [
 
 export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, modo, setModo, confianza, setConfianza }) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             {/* Selector de Parámetro */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
@@ -60,7 +60,7 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
 
             {/* Selector de Nivel de Confianza */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '0px' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase'}}>Nivel de Confianza</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-pure)', marginBottom: '5px', fontWeight: 'bold'}}>NIVEL DE CONFIANZA</div>
 
                 <div style={{
                     display: 'flex',
@@ -106,14 +106,14 @@ export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, st
     }, [parametro, modo, confianza]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: FONT }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT }}>
 
             {/* Selector de Modo de Trabajo */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
-                    <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
+                    <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '5px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {MODOS.map(m => (
-                            <button
+                            <button 
                                 key={m.id}
                                 type="button"
                                 className={`btn-mat251-modo ${modo === m.id ? 'active' : ''}`}

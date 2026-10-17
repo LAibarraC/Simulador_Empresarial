@@ -57,10 +57,12 @@ origins = [
     "http://127.0.0.1:3000",         # Desarrollo local (React alternativo)
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
     "https://sice.jboris.org", #enlace de temporal
+    "http://10.250.52.137:5173",
+    "http://192.168.100.179:5173",
 ]                               
 
-app.add_middleware(
-    CORSMiddleware,
+app.add_middleware( 
+    CORSMiddleware, 
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],  # Permite GET, POST, PUT, DELETE, etc.
@@ -77,7 +79,7 @@ app.include_router(notificaciones.router)
 app.include_router(tareas.router)
 app.include_router(mat251_tema2_simbolicos.router)
 app.include_router(mat251_simulacion.router)
-# 🆕 Router de QR para matriculación por código
+# Router de QR para matriculación por código
 # Las rutas internas del router ya están declaradas con el prefijo "/api/qr/...",
 # por lo que se registra sin prefix para evitar duplicarlo.
 app.include_router(qr_router.router)

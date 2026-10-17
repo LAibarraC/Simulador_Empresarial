@@ -1,31 +1,174 @@
-import React, { useState } from 'react';
-import { cardStyle, labelStyle, RADIUS, FS } from '../../../Principal/Constantes';
+import React, { useState, useRef, useEffect } from 'react';
+import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { IconoCalculadora } from '../../../../../ui/iconos';
 import { generarDistribucionFisher, calcularProbabilidadFisher } from '../../../Matematicas/Logica_Tema4';
-import { jStat } from 'jstat';
+import ModalAlerta from '../../../ui/ModalAlerta';
+
+const CustomSelect = ({ value, onChange, options = [], placeholder = 'Seleccionar...', style = {} }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value === value);
+
+    return (
+        <div ref={dropdownRef} style={{ position: 'relative', width: '100%', fontFamily: FONT, ...style }}>
+            <div 
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 12px',
+                    minHeight: '38px',
+                    boxSizing: 'border-box',
+                    background: 'var(--bg-input)',
+                    border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                    borderRadius: RADIUS,
+                    cursor: 'pointer',
+                    boxShadow: isOpen ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : 'none',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                    color: 'var(--text-pure)',
+                    userSelect: 'none',
+                    fontSize: FS.sm,
+                    fontFamily: FONT
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', flex: 1, minWidth: 0 }}>
+                    <span style={{
+                        fontWeight: selectedOption ? 500 : 400,
+                        fontSize: FS.sm,
+                        color: selectedOption ? 'var(--text-pure)' : 'var(--text-muted)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                    }}>
+                        {selectedOption ? selectedOption.label : placeholder}
+                    </span>
+                </div>
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                        transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease',
+                        color: 'var(--text-muted)',
+                        flexShrink: 0
+                    }}
+                >
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </div>
+            {isOpen && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 4px)',
+                        left: 0,
+                        right: 0,
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: RADIUS,
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+                        zIndex: 1000,
+                        maxHeight: '260px',
+                        overflowY: 'auto',
+                        animation: 'fadeInDropdown 0.2s ease'
+                    }}
+                    className="thin-scrollbar"
+                >
+                    {options.length === 0 ? (
+                        <div style={{ padding: '9px 12px', color: 'var(--text-muted)', fontSize: FS.sm, fontStyle: 'italic', fontFamily: FONT }}>
+                            Sin opciones
+                        </div>
+                    ) : (
+                        options.map((opt) => {
+                            const isSelected = value === opt.value;
+                            return (
+                                <div 
+                                    key={opt.value}
+                                    onClick={() => {
+                                        onChange(opt.value);
+                                        setIsOpen(false);
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isSelected) {
+                                            e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isSelected) {
+                                            e.currentTarget.style.background = 'transparent';
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '9px 12px',
+                                        cursor: 'pointer',
+                                        fontSize: FS.sm,
+                                        fontFamily: FONT,
+                                        background: isSelected ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                                        color: isSelected ? 'var(--primary-color)' : 'var(--text-pure)',
+                                        fontWeight: isSelected ? 600 : 400,
+                                        transition: 'all 0.15s ease',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between'
+                                    }}
+                                >
+                                    <span>{opt.label}</span>
+                                    {isSelected && (
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)' }}>
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    )}
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
 
 export default function Controles_Fisher({ onCalcular }) {
-    // Inputs
+    // Inputs del problema (Muestrales)
     const [varPob1, setVarPob1] = useState('');
     const [n1, setN1] = useState('');
-    
     const [varPob2, setVarPob2] = useState('');
     const [n2, setN2] = useState('');
 
-    // Estado del paso 1
+    // Estado del proceso
     const [distribucionGenerada, setDistribucionGenerada] = useState(false);
     const [datosParciales, setDatosParciales] = useState(null);
 
-    // Condicion
-    const [condicion, setCondicion] = useState('');
+    // Inputs de objetivo
+    const [condicion, setCondicion] = useState('menor_que');
     const [valorX1, setValorX1] = useState('');
     const [valorX2, setValorX2] = useState('');
+
+    // Alertas
+    const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
 
     const generarDistribucion = () => {
         const result = generarDistribucionFisher(varPob1, n1, varPob2, n2);
         if (result.error) {
-            alert(result.error);
+            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
             return;
         }
 
@@ -34,7 +177,7 @@ export default function Controles_Fisher({ onCalcular }) {
         
         setDatosParciales(parciales);
         setDistribucionGenerada(true);
-        setCondicion('');
+        setCondicion('menor_que');
         setValorX1('');
         setValorX2('');
         onCalcular(parciales);
@@ -43,7 +186,9 @@ export default function Controles_Fisher({ onCalcular }) {
     const calcularProbabilidad = () => {
         const result = calcularProbabilidadFisher(datosParciales, condicion, valorX1, valorX2);
         if (result.error) {
-            if (result.error !== 'Faltan parámetros previos.') alert(result.error);
+            if (result.error !== 'Faltan parámetros previos.') {
+                setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
+            }
             return;
         }
 
@@ -51,6 +196,8 @@ export default function Controles_Fisher({ onCalcular }) {
             ...datosParciales,
             strDesarrollo: result.strDesarrollo,
             probFinal: result.probFinal,
+            f1: result.f1,
+            f2: result.f2,
             x1: result.x1,
             x2: result.x2,
             condicion: result.condicion
@@ -60,135 +207,287 @@ export default function Controles_Fisher({ onCalcular }) {
     const resetDistribucion = () => {
         setDistribucionGenerada(false);
         setDatosParciales(null);
-        setCondicion('');
+        setCondicion('menor_que');
         setValorX1('');
         setValorX2('');
         onCalcular(null);
     };
 
     return (
-        <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent', marginTop: '20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
+            <div className="tema4-population-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px' }}>
                 {/* Población 1 */}
-                <div style={{ background: 'var(--bg-app)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--primary-color)' }}>Población 1</h4>
+                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 1</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, width: '40px' }}><Latex formula="\sigma_1^2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="\sigma_1^2 =" /></label>
                             <input
                                 type="number"
+                                className="input-mat251 placeholder-small"
                                 placeholder="Var. Muestral 1"
                                 value={varPob1}
                                 onChange={(e) => { setVarPob1(e.target.value); resetDistribucion(); }}
-                                style={{ flex: 1, padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
+                                style={{
+                                    flex: 1,
+                                    width: '100%',
+                                    minWidth: 0,
+                                    minHeight: '38px',
+                                    padding: '8px 12px',
+                                    borderRadius: RADIUS,
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-pure)',
+                                    fontSize: FS.sm,
+                                    fontFamily: FONT,
+                                    boxSizing: 'border-box'
+                                }}
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, width: '40px' }}><Latex formula="n_1 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="n_1 =" /></label>
                             <input
                                 type="number"
+                                className="input-mat251 placeholder-small"
                                 placeholder="Muestra 1"
                                 value={n1}
                                 onChange={(e) => { setN1(e.target.value); resetDistribucion(); }}
-                                style={{ flex: 1, padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
+                                style={{
+                                    flex: 1,
+                                    width: '100%',
+                                    minWidth: 0,
+                                    minHeight: '38px',
+                                    padding: '8px 12px',
+                                    borderRadius: RADIUS,
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-pure)',
+                                    fontSize: FS.sm,
+                                    fontFamily: FONT,
+                                    boxSizing: 'border-box'
+                                }}
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Población 2 */}
-                <div style={{ background: 'var(--bg-app)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--primary-color)' }}>Población 2</h4>
+                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 2</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, width: '40px' }}><Latex formula="\sigma_2^2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="\sigma_2^2 =" /></label>
                             <input
                                 type="number"
+                                className="input-mat251 placeholder-small"
                                 placeholder="Var. Muestral 2"
                                 value={varPob2}
                                 onChange={(e) => { setVarPob2(e.target.value); resetDistribucion(); }}
-                                style={{ flex: 1, padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
+                                style={{
+                                    flex: 1,
+                                    width: '100%',
+                                    minWidth: 0,
+                                    minHeight: '38px',
+                                    padding: '8px 12px',
+                                    borderRadius: RADIUS,
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-pure)',
+                                    fontSize: FS.sm,
+                                    fontFamily: FONT,
+                                    boxSizing: 'border-box'
+                                }}
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-main)', marginBottom: 0, width: '40px' }}><Latex formula="n_2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="n_2 =" /></label>
                             <input
                                 type="number"
-                                placeholder="Var. Muestral 2"
+                                className="input-mat251 placeholder-small"
+                                placeholder="Muestra 2"
                                 value={n2}
                                 onChange={(e) => { setN2(e.target.value); resetDistribucion(); }}
-                                style={{ flex: 1, padding: '8px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
+                                style={{
+                                    flex: 1,
+                                    width: '100%',
+                                    minWidth: 0,
+                                    minHeight: '38px',
+                                    padding: '8px 12px',
+                                    borderRadius: RADIUS,
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-pure)',
+                                    fontSize: FS.sm,
+                                    fontFamily: FONT,
+                                    boxSizing: 'border-box'
+                                }}
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button onClick={generarDistribucion} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '15px auto 20px', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-            >CALCULAR</button>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', marginBottom: '10px' }}>
+                <button
+                    type="button"
+                    onClick={generarDistribucion}
+                    className="button_calcular"
+                    style={{ width: 'fit-content', padding: '5px 20px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 600, fontFamily: FONT, fontSize: FS.md, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                >
+                    CALCULAR
+                </button>
+            </div>
 
             {distribucionGenerada && (
                 <div style={{ marginTop: '20px', animation: 'fadeIn 0.5s ease-out' }}>
-                    <div style={{ background: 'var(--bg-app)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '20px' }}>
-                        <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-main)' }}>Grados de Libertad (v)</h4>
-                        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                    <div style={{ background: 'var(--bg-card)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px', textAlign: 'center' }}>
+                        <h4 style={{ margin: '0 0 10px 0', fontSize: '0.8rem', color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>Grados de Libertad (v)</h4>
+                        <div className="tema4-parametros-scroll" style={{ display: 'flex', gap: '20px', justifyContent: 'center', color: 'var(--text-pure)' }}>
                             <Latex formula={`v_1 = ${n1} - 1 = ${datosParciales.v1}`} />
                             <Latex formula={`v_2 = ${n2} - 1 = ${datosParciales.v2}`} />
                         </div>
                     </div>
 
-                    <label style={{ ...labelStyle, display: 'block', marginBottom: '10px' }}>Condición a Calcular</label>
-                    <select
-                        value={condicion}
-                        onChange={(e) => setCondicion(e.target.value)}
-                        style={{ width: '100%', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px', outline: 'none', background: 'white' }}
-                    >
-                        <option value="">-- Selecciona una Condición --</option>
-                        <option value="menor_que">P(S₁² / S₂² {'<'} x)</option>
-                        <option value="mayor_que">P(S₁² / S₂² {'>'} x)</option>
-                        <option value="entre">P(x₁ {'<'} S₁² / S₂² {'<'} x₂)</option>
-                    </select>
+                    {/* Sección Condición de Búsqueda */}
+                    <div style={{ margin: '15px 0 5px 0' }}></div>
 
-                    {condicion && (
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                            <label style={{ ...labelStyle, marginBottom: 0 }}>x {condicion === 'entre' && '1'} = </label>
-                            <input
-                                type="number"
-                                placeholder="Valor"
-                                value={valorX1}
-                                onChange={(e) => setValorX1(e.target.value)}
-                                style={{ flex: 1, padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
+                    <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT, fontWeight: 'bold' }}>
+                        Condición de Búsqueda:
+                    </h4>
+
+                    {/* FILA 1: Condición lógica y su dropdown en una sola fila centrada */}
+                    <div className="tema4-condicion-fila">
+                        <label className="tema4-condicion-label">
+                            Condición lógica:
+                        </label>
+                        <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '250px' : '200px' }}>
+                            <CustomSelect
+                                value={condicion}
+                                onChange={(val) => setCondicion(val)}
+                                options={[
+                                    { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(S_1^2 / S_2^2 < x)" /></div> },
+                                    { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(S_1^2 / S_2^2 > x)" /></div> },
+                                    { value: 'entre', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(x_1 < S_1^2 / S_2^2 < x_2)" /></div> }
+                                ]}
                             />
-                            {condicion === 'entre' && (
-                                <>
-                                    <label style={{ ...labelStyle, marginBottom: 0 }}>x 2 = </label>
+                        </div>
+                    </div>
+
+                    {/* FILA 2: Valor(es) x (y x2 si entre) */}
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'nowrap',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        marginBottom: '14px',
+                        width: '100%',
+                        maxWidth: condicion === 'entre' ? '360px' : '200px',
+                        margin: '0 auto 14px auto',
+                        boxSizing: 'border-box'
+                    }}>
+                        {condicion === 'entre' ? (
+                            <>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                    <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                        <Latex formula="\mathbf{x}_1:" />
+                                    </label>
                                     <input
                                         type="number"
-                                        placeholder="Valor"
+                                        className="input-mat251 placeholder-small"
+                                        placeholder="Límite inferior"
+                                        value={valorX1}
+                                        onChange={(e) => setValorX1(e.target.value)}
+                                        style={{
+                                            padding: '6px 12px',
+                                            fontSize: FS.sm,
+                                            fontFamily: FONT,
+                                            borderRadius: RADIUS,
+                                            border: '1px solid var(--border-color)',
+                                            background: 'var(--bg-input)',
+                                            color: 'var(--text-pure)',
+                                            height: '36px',
+                                            flex: 1,
+                                            minWidth: 0,
+                                            boxSizing: 'border-box'
+                                        }}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                    <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                        <Latex formula="\mathbf{x}_2:" />
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="input-mat251 placeholder-small"
+                                        placeholder="Límite superior"
                                         value={valorX2}
                                         onChange={(e) => setValorX2(e.target.value)}
-                                        style={{ flex: 1, padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', outline: 'none' }}
+                                        style={{
+                                            padding: '6px 12px',
+                                            fontSize: FS.sm,
+                                            fontFamily: FONT,
+                                            borderRadius: RADIUS,
+                                            border: '1px solid var(--border-color)',
+                                            background: 'var(--bg-input)',
+                                            color: 'var(--text-pure)',
+                                            height: '36px',
+                                            flex: 1,
+                                            minWidth: 0,
+                                            boxSizing: 'border-box'
+                                        }}
                                     />
-                                </>
-                            )}
-                        </div>
-                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                    <Latex formula="\mathbf{x}:" />
+                                </label>
+                                <input
+                                    type="number"
+                                    className="input-mat251 placeholder-small"
+                                    placeholder="Valor x"
+                                    value={valorX1}
+                                    onChange={(e) => setValorX1(e.target.value)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontSize: FS.sm,
+                                        fontFamily: FONT,
+                                        borderRadius: RADIUS,
+                                        border: '1px solid var(--border-color)',
+                                        background: 'var(--bg-input)',
+                                        color: 'var(--text-pure)',
+                                        height: '36px',
+                                        flex: 1,
+                                        minWidth: 0,
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
 
-                    {condicion && (
-                        <button onClick={calcularProbabilidad} className="button_calcular btn-icon" style={{ width: 'fit-content', margin: '15px auto 0', padding: '10px 40px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    {/* Botón GRAFICAR */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                        <button
+                            type="button"
+                            onClick={calcularProbabilidad}
+                            className="button_calcular"
+                            style={{ width: 'fit-content', padding: '5px 20px', borderRadius: RADIUS, cursor: 'pointer', fontWeight: 600, fontFamily: FONT, fontSize: FS.md, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                         >
-                            Graficar
+                            GRAFICAR
                         </button>
-                    )}
+                    </div>
                 </div>
             )}
+
+            <ModalAlerta
+                isOpen={alertaModal.isOpen}
+                onClose={() => setAlertaModal({ ...alertaModal, isOpen: false })}
+                mensaje={alertaModal.mensaje}
+                tipo={alertaModal.tipo}
+            />
         </div>
     );
 }
-
-
-
-
-
-
-

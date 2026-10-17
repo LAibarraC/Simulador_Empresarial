@@ -23,11 +23,11 @@ export default function ModalAlerta({ isOpen, onClose, titulo = "Atención", men
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)',
-            display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 99999,
+            display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999999,
             animation: 'fadeIn 0.2s ease-out'
         }}>
             <div style={{
-                background: 'var(--bg-card, #ffffff)', padding: '24px', borderRadius: '12px',
+                background: 'var(--bg-card, #ffffff)', padding: '24px', borderRadius: '5px',
                 width: '90%', maxWidth: '380px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                 display: 'flex', flexDirection: 'column', gap: '16px', borderTop: `4px solid ${colorTheme}`,
                 animation: 'slideUp 0.3s ease-out'
@@ -39,15 +39,16 @@ export default function ModalAlerta({ isOpen, onClose, titulo = "Atención", men
                     }}>
                         <IconoAlerta width="24" height="24" style={{ color: colorTheme }} />
                     </div>
-                    <h3 style={{ margin: 0, color: 'var(--text-color, #1e293b)', fontSize: '1.25rem', fontWeight: 600 }}>{titulo}</h3>
+                    <h3 style={{ margin: 0, color: 'var(--text-color, #1e293b)', fontSize: '1.25rem', fontWeight: 'bold' }}>{titulo}</h3>
                 </div>
                 
-                <p style={{ margin: 0, color: 'var(--text-muted, #64748b)', fontSize: FS.md, lineHeight: 1.5 }}>
+                <p style={{ margin: 0, color: 'var(--text-pure)', fontSize: FS.md}}>
                     {mensaje}
                 </p>
                 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
                     <button
+                    style={{padding:'5px 20px'}}
                         className={isError ? "btn-danger" : "btn-accent"}
                         onClick={onClose}
                     >

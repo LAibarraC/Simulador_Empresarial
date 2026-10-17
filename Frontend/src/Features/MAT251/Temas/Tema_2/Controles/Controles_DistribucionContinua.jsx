@@ -6,7 +6,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 import { parse, fraction, evaluate, simplify } from 'mathjs';
 import { mat251Api } from '../../../Matematicas/services/api';
 
-const MATH_FONT = "'Cambria Math', 'Times New Roman', serif";
+const MATH_FONT = "'Cambria Math', 'Times New Roman', serif"; 
 
 // ─── FACTORY ────────────────────────────────────────────────────────────────
 const crearBloque = (tipo, valor = '') => ({
@@ -81,6 +81,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
         setBloques(nuevos);
         if (!preserveK) {
             setMensajeK(null);
+            if (onCalcular) onCalcular(null);
         }
     };
 
@@ -651,32 +652,13 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                 };
                 reemplazarKRecursivo(currentBloques);
                 setBloquesSync(currentBloques, true);
-                stringMathFinal = parsearArray(currentBloques, 'x');
 
-                let latexString = `(${stringMathFinal})`;
-                try {
-                    const parsed = parse(stringMathFinal);
-                    let simplified;
-                    try { simplified = simplify(parsed); } catch (e) { simplified = parsed; }
-                    latexString = simplified.toTex({ parenthesis: 'auto' });
-                } catch (e) { }
-
-                onCalcular({ 
-                    funcionFx: stringMathFinal, 
-                    a, 
-                    b: b_v, 
-                    latexString, 
-                    modo: modo === 'acumulada' ? 'densidad' : modo,
-                    latex_esperanza: null,
-                    latex_varianza: null,
-                    esperanza_backend: null,
-                    varianza_backend: null,
-                    esperanza: null,
-                    varianza: null,
-                    area: 1
-                });
+                // Al resolver la constante 'k', SOLO mostramos el procedimiento de la constante.
+                // Limpiamos los cálculos previos para no mostrar área, esperanza, varianza ni gráfica todavía.
+                // Al presionar CALCULAR por segunda vez, se resolverá todo de forma completa y analítica con la API.
+                if (onCalcular) onCalcular(null);
                 
-                return; // Detener la ejecución para no calcular esperanza/varianza todavía
+                return; // Detener la ejecución: solo mostrar el cálculo de la constante k
                 
             } catch (err) {
                 setError("Error de conexión al resolver la constante.");
@@ -762,6 +744,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
         v = v.replace(/pi/gi, 'π');
         setter(v);
         setMensajeK(null);
+        if (onCalcular) onCalcular(null);
     };
 
     const limpiarTodo = () => {
@@ -770,6 +753,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
         setFocusSlotSync(null);
         setLimiteA('');
         setLimiteB('');
+        if (onCalcular) onCalcular(null);
     };
 
     const handleBtnMouseDown = (e, charToAppend, blockAction) => {
@@ -1068,7 +1052,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
     };
 
     return (
-        <div style={{ fontFamily: FONT, background: 'transparent', padding: '0', margin: '-20px' }}>
+        <div style={{ fontFamily: FONT, background: 'transparent', padding: '0', marginTop: '10px' }}>
             <style>{`
                 @keyframes blinkCursorMat251 { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
                 .teclado-btn {
@@ -1156,14 +1140,14 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                     opacity: 0 !important;
                 }
             `}</style>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', marginTop: '5px',flexWrap: 'wrap', gap: '10px'}}>
-                <h4 style={{ color: 'var(--text-main)', margin: '0', fontSize: FS.md, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px',flexWrap: 'wrap', gap: '10px'}}>
+                <h4 style={{ color: 'var(--text-pure)', margin: '0', fontSize: FS.md, fontWeight: 700, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '8px' }}>
                     Funciones Continuas
                 </h4>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div onClick={() => { setActiveIdSync(null); setFocusSlotSync(null); }} className="formula-container" style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', padding: '10px 10px', borderRadius: '12px', overflowX: 'auto', minHeight: '80px' }}>
+                <div onClick={() => { setActiveIdSync(null); setFocusSlotSync(null); }} className="formula-container" style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', padding: '15px 15px', borderRadius: '5px', overflowX: 'auto', minHeight: '80px' }}>
                     <div style={{ fontSize: '1rem', marginRight: '10px', color: 'inherit', flexShrink: 0 }}><InlineMath math={'f(x) ='} /></div>
                     <div style={{ position: 'relative', display: 'inline-block', width: 'max-content', marginRight: '25px', flexShrink: 0 }}>
                         <div style={{ fontSize: '1.2rem', paddingRight: '5px', lineHeight: '1' }}><InlineMath math="\displaystyle \int" /></div>
@@ -1185,8 +1169,8 @@ export default function ControlDistribucionContinua({ onCalcular }) {
 
 
 
-                <div className="teclado-container" style={{ padding: '10px', borderRadius: '12px', marginTop: '5px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+                <div className="teclado-container" style={{ padding: '10px', borderRadius: RADIUS, marginTop: '5px' }}>
+                    <div className="teclado-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                         {/* Fila 1 */}
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '(', 'paren_abre'); }}><InlineMath math="(" /></button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, ')', 'paren_cierra'); }}><InlineMath math=")" /></button>
@@ -1232,7 +1216,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                         background: #f8fafc;
                         color: #1e293b;
                         border: 1px solid #e2e8f0;
-                        border-radius: 6px;
+                        border-radius: 5px;
                         padding: 8px 0;
                         cursor: pointer;
                         transition: all 0.15s ease;
@@ -1267,6 +1251,25 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                         transform: translateY(2px);
                         box-shadow: none;
                     }
+                    @media (max-width: 640px) {
+                        .teclado-grid {
+                            gap: 4px !important;
+                        }
+                        .teclado-btn-dark {
+                            min-height: 38px;
+                            font-size: 0.95rem;
+                            padding: 4px 0;
+                        }
+                    }
+                    @media (max-width: 420px) {
+                        .teclado-grid {
+                            gap: 3px !important;
+                        }
+                        .teclado-btn-dark {
+                            min-height: 34px;
+                            font-size: 0.85rem;
+                        }
+                    }
                 `}</style>
 
                 {error && <div style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #f87171', padding: '12px 15px', borderRadius: RADIUS, fontSize: FS.sm }}><strong>Error: </strong>{error}</div>}
@@ -1274,23 +1277,49 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                 {mensajeInfo && <div style={{ backgroundColor: '#eff6ff', color: '#1e3a8a', border: '1px solid #bfdbfe', padding: '12px 15px', borderRadius: RADIUS, fontSize: FS.sm }}><strong>Info: </strong>{mensajeInfo}</div>}
 
                 {mensajeK && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-                        <div style={{ backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #86efac', padding: '12px 15px', borderRadius: RADIUS, fontSize: FS.sm, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span><strong>Éxito: </strong>{mensajeK.texto}</span>
-                        </div>
-                        {mensajeK.datos && mensajeK.datos.latex_block && (
-                            <div style={{ background: 'var(--bg-card, white)', borderRadius: RADIUS, padding: '20px', border: '1px solid var(--border-color, #e2e8f0)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', overflowX: 'auto' }}>
-                                <h4 style={{ margin: '0 0 15px 0', color: 'var(--primary-color)', fontSize: FS.md }}>Procedimiento: Cálculo de constante {mensajeK.datos.incognitaVar}</h4>
-                                <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                                    <BlockMath math={mensajeK.datos.latex_block} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '0px' }}>
+                        {mensajeK.datos && mensajeK.datos.latex_block ? (
+                            <div>
+                                <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
+                                    Procedimiento: Cálculo de constante {mensajeK.datos.incognitaVar}
+                                </h4>
+                                <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: RADIUS, border: '1px solid var(--border-color)', overflowX: 'auto', marginBottom: '8px' }}>
+                                    <div style={{ color: 'var(--text-pure)', fontSize: '0.9rem' }}>
+                                        <InlineMath math={mensajeK.datos.latex_block} />
+                                    </div>
                                 </div>
+                                <div className="alerta-valida-continua" style={{ padding: '8px 12px', borderRadius: RADIUS, fontSize: FS.xs, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 500 }}>
+                                    <span><strong>Éxito: </strong>{mensajeK.texto}</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="alerta-valida-continua" style={{ padding: '8px 12px', borderRadius: RADIUS, fontSize: FS.xs, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 500 }}>
+                                <span><strong>Éxito: </strong>{mensajeK.texto}</span>
                             </div>
                         )}
                     </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
-                    <button className="button_calcular" onClick={manejarValidacion} style={{ borderRadius: RADIUS, padding: '5px 15px', fontSize: FS.sm, cursor: 'pointer', width: 'fit-content' }}>CALCULAR</button>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+                    <button
+                        type="button"
+                        className="button_calcular"
+                        onClick={manejarValidacion}
+                        style={{
+                            width: 'fit-content',
+                            padding: '5px 20px',
+                            borderRadius: RADIUS,
+                            fontSize: FS.md,
+                            fontWeight: 600,
+                            fontFamily: FONT,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        CALCULAR
+                    </button>
                 </div>
             </div>
         </div>

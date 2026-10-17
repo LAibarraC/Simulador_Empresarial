@@ -27,11 +27,19 @@ usuarios_iniciales = [
         institucion="USFX"
     ),
     Usuario(
-    email="ulises@usfx.bo",
-    nombre="Ulises Mancilla",
-    password="123",
-    rol="Administrador",
-    perfil="Administrador",
+    email="docente@usfx.bo",
+    nombre="docente",
+    password="PruebaDocente26*",
+    rol="Docente",
+    perfil="Docente",
+    institucion="USFX"
+),
+ Usuario(
+    email="estudiante@usfx.bo",
+    nombre="estudiante",
+    password="PruebaEstudiante26*",
+    rol="Estudiante",
+    perfil="Estudiante",
     institucion="USFX"
 ),
 ]
