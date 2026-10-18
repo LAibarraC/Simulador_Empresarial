@@ -3,6 +3,7 @@ import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Cons
 import Latex from '../../../../../components/excel/Latex';
 import { generarDistribucionStudent, calcularProbabilidadStudent } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
+import StatLabel from '../../../ui/StatLabel';
 
 const CustomSelect = ({ value, onChange, options = [], placeholder = 'Seleccionar...', style = {} }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -222,9 +223,9 @@ export default function Controles_Student({ onCalcular }) {
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {/* Fila 1: μ y S / S² */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '15px', marginTop: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '15px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\mu =" /></label>
+                        <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{\mu} =" /></label>
                         <input
                             type="number"
                             className="input-mat251 placeholder-small"
@@ -253,8 +254,8 @@ export default function Controles_Student({ onCalcular }) {
                                 value={tipoDispersion}
                                 onChange={(val) => { setTipoDispersion(val); resetDistribucion(); }}
                                 options={[
-                                    { value: 'desviacion', label: <Latex formula="S =" /> },
-                                    { value: 'varianza', label: <Latex formula="S^2 =" /> }
+                                    { value: 'desviacion', label: <Latex formula="\boldsymbol{S} =" /> },
+                                    { value: 'varianza', label: <Latex formula="\boldsymbol{S}^2 =" /> }
                                 ]}
                             />
                         </div>
@@ -284,7 +285,7 @@ export default function Controles_Student({ onCalcular }) {
                 {/* Fila 2: n centrado */}
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '50%' }}>
-                        <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="n =" /></label>
+                        <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{n} =" /></label>
                         <input
                             type="number"
                             className="input-mat251 placeholder-small"
@@ -323,10 +324,28 @@ export default function Controles_Student({ onCalcular }) {
 
             {distribucionGenerada && (
                 <div style={{ marginTop: '15px', animation: 'fadeIn 0.5s ease-out' }}>
-                    <div style={{ background: 'var(--bg-card)', padding: '14px 16px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px', textAlign: 'center' }}>
-                        <h4 style={{ margin: '0 0 10px 0', fontSize: '0.8rem', color: 'var(--text-pure)', textAlign: 'center', fontWeight: 700, fontFamily: FONT }}>Parámetros t-Student</h4>
-                        <div className="thin-scrollbar formula-responsive" style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowX: 'auto', paddingBottom: '4px', alignItems: 'center' }}>
-                            <Latex formula={`\\begin{aligned} v &= n - 1 = ${datosParciales.n} - 1 = ${datosParciales.v} \\\\ E(\\bar{X}) &= \\mu = ${formatNumber(datosParciales.mu)} \\\\ V(\\bar{X}) &= \\frac{S^2}{n} = \\frac{${formatNumber(datosParciales.s2, 0, 4)}}{${datosParciales.n}} = ${formatNumber(datosParciales.varXbar, 0, 4)} \\end{aligned}`} />
+                    <div style={{ background: 'var(--bg-card)', padding: '14px 16px', borderRadius: RADIUS, border: 'none', boxShadow: 'none', textAlign: 'center', marginTop: '10px', marginBottom: '10px', overflow: 'visible' }}>
+                        <div className="tema4-tarjeta-titulo-unificado" style={{ marginBottom: '10px', color: 'var(--text-pure)', fontSize: '0.8rem', fontWeight: 700, fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Parámetros de la Distribución t-Student</div>
+                        <div className="formula-responsive" style={{ width: '100%', overflow: 'visible', padding: '4px', color: 'var(--text-pure)', fontWeight: 'normal', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                                <StatLabel formulaKey="v_grados_libertad_student" formulaLatex="v" customTexto="Grados de Libertad" customMath="v = n - 1" align="center" />
+                                <Latex formula={'= n - 1 = ' + datosParciales.n + ' - 1 = \\mathbf{' + datosParciales.v + '}'} />
+                            </div>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                                <StatLabel formulaKey="E_x_barra_student" formulaLatex="E(\bar{X})" customTexto="Esperanza de la Media Muestral" customMath="E(\bar{X}) = \mu" align="center" />
+                                <Latex formula={'= \\mu = \\mathbf{' + formatNumber(datosParciales.mu) + '}'} />
+                            </div>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                                <StatLabel formulaKey="V_x_barra_student" formulaLatex="V(\bar{X})" customTexto="Varianza estimada de la Media Muestral" customMath="V(\bar{X}) = \frac{S^2}{n}" align="center" />
+                                <Latex formula={'= \\frac{S^2}{n} = \\frac{' + formatNumber(datosParciales.s2) + '}{' + formatNumber(datosParciales.n, 0, 0) + '} = \\mathbf{' + formatNumber(datosParciales.varXbar, 0, 4) + '}'} />
+                            </div>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                                <StatLabel formulaKey="se_x_barra_student" formulaLatex="S_{\bar{X}}" customTexto="Error Estándar de la Media" customMath="S_{\bar{X}} = \frac{S}{\sqrt{n}}" align="center" />
+                                <Latex formula={'= \\frac{S}{\\sqrt{n}} = \\frac{' + formatNumber(datosParciales.s) + '}{\\sqrt{' + formatNumber(datosParciales.n, 0, 0) + '}} = \\mathbf{' + formatNumber(datosParciales.se, 0, 4) + '}'} />
+                            </div>
+                            <div className="formula-bold" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '4px', fontWeight: 'bold' }}>
+                                <Latex formula={'\\mathbf{T = \\frac{\\bar{X} - \\mu}{S / \\sqrt{n}} \\sim t_{(' + formatNumber(datosParciales.v, 0, 0) + ')}}'} />
+                            </div>
                         </div>
                     </div>
 

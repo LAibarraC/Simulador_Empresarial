@@ -4,15 +4,17 @@ import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
+const renderBoldMath = (formula) => katex.renderToString(formula, { throwOnError: false });
+
 const CustomLabel = ({ viewBox, valor, simbolo, offsetY = -25 }) => {
     const { x, y } = viewBox;
-    const mathString = `${simbolo} = ${valor.toFixed(4)}`;
+    const mathString = `\\boldsymbol{${simbolo}} = ${valor.toFixed(4)}`;
     return (
-        <foreignObject x={x - 60} y={y + offsetY} width={120} height={30} style={{ overflow: 'visible' }}>
+        <foreignObject className={`grafica-intervalo-label grafica-intervalo-label-${simbolo === 'LI' ? 'li' : simbolo === 'LS' ? 'ls' : 'centro'}`} x={x - 60} y={y + offsetY} width={120} height={30} style={{ overflow: 'visible' }}>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
                 <span
-                    style={{ color: 'var(--text-main)', fontSize: '13px', fontWeight: 'bold', background: 'transparent' }}
-                    dangerouslySetInnerHTML={{ __html: katex.renderToString(mathString, { throwOnError: false }) }}
+                    style={{ color: 'var(--text-main)', fontSize: '13px', background: 'transparent' }}
+                    dangerouslySetInnerHTML={{ __html: renderBoldMath(mathString) }}
                 />
             </div>
         </foreignObject>
@@ -22,17 +24,14 @@ const CustomLabel = ({ viewBox, valor, simbolo, offsetY = -25 }) => {
 const LabelVisual = ({ viewBox, valor, titulo, isCenter, simbolo }) => {
     const { x, y } = viewBox;
     return (
-        <foreignObject x={x - 40} y={isCenter ? y - 45 : y + 5} width={80} height={40} style={{ overflow: 'visible' }}>
+        <foreignObject className={`grafica-intervalo-label grafica-intervalo-label-${isCenter ? 'centro' : titulo.toLowerCase()}`} x={x - 40} y={isCenter ? y - 45 : y + 5} width={80} height={40} style={{ overflow: 'visible' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', background: 'transparent' }}>
                 {isCenter ? (
-                    <>
-                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--primary-color)' }}>{valor.toFixed(4)}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--primary-color)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString(simbolo, { throwOnError: false }) }}></div>
-                    </>
+                    <div style={{ fontSize: '12px', color: 'var(--primary-color)', whiteSpace: 'nowrap' }} dangerouslySetInnerHTML={{ __html: renderBoldMath(`\\boldsymbol{${simbolo}} = ${valor.toFixed(4)}`) }} />
                 ) : (
                     <>
-                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-main)', marginTop: '4px' }}>{valor.toFixed(4)}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{titulo}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-main)', marginTop: '4px' }} dangerouslySetInnerHTML={{ __html: renderBoldMath(`${valor.toFixed(4)}`) }} />
+                        <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-muted)' }} dangerouslySetInnerHTML={{ __html: renderBoldMath(`\\boldsymbol{${titulo}}`) }} />
                     </>
                 )}
             </div>
@@ -58,11 +57,14 @@ export default function Grafica_IntervalosMatriz({ resultados, parametro }) {
     if (se <= 0 || isNaN(se)) return null;
 
     const plotData = [];
-    const minX = mean - 4 * se;
-    const maxX = mean + 4 * se;
+    // Extiende el dominio más allá de los límites para que también se vean las colas,
+    // incluso cuando el valor crítico supera las 4 desviaciones estándar (p. ej. 99%).
+    const plotRange = Math.max(4, (mean - LI) / se, (LS - mean) / se) + 0.5;
+    const minX = mean - plotRange * se;
+    const maxX = mean + plotRange * se;
 
     // Generar puntos para la curva (aproximación Normal)
-    for (let i = -4; i <= 4; i += 0.05) {
+    for (let i = -plotRange; i <= plotRange; i += 0.05) {
         const x = mean + i * se;
         const y = Math.exp(-0.5 * Math.pow((x - mean) / se, 2)) / (se * Math.sqrt(2 * Math.PI));
         plotData.push({ x, y });
@@ -98,30 +100,42 @@ export default function Grafica_IntervalosMatriz({ resultados, parametro }) {
     const simboloCentro = parametro === 'proporcion' ? '\\hat{p}' : '\\bar{X}';
 
     return (
-        <MarcoWidgetMAT251 titulo={`Gráfica de Confianza (${resultados.confianza}%)`} anchoCompleto={true} alto="500px">
+        <MarcoWidgetMAT251 titulo={`Gráfica de Confianza (${resultados.confianza}%)`} anchoCompleto={true} alto="480px">
             <style>{`
                 .grafica-campana-container {
                     flex: 1;
                     width: 100%;
                     min-height: 250px;
                 }
+                .grafica-intervalos-legend { position: absolute; top: 0; left: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 0.7rem; z-index: 10; }
+                @media (max-width: 600px) {
+                    .grafica-campana-container { min-height: 210px; }
+                    .grafica-intervalos-legend { position: relative !important; inset: auto !important; width: calc(100% - 12px); flex-direction: row !important; flex-wrap: wrap; justify-content: center !important; align-items: center; gap: 3px 10px !important; margin: 0 6px 3px; text-align: center; font-size: 0.62rem !important; }
+                    .grafica-intervalos-legend > div > div { width: 9px !important; height: 9px !important; }
+                    .grafica-intervalo-label { font-size: 9px !important; }
+                    .grafica-intervalo-label span, .grafica-intervalo-label > div > div { font-size: 9px !important; }
+                    .grafica-intervalo-label-li { transform: translateX(18px); }
+                    .grafica-intervalo-label-ls { transform: translateX(-18px); }
+                    .grafica-intervalo-label-centro { font-size: 9px !important; }
+                    .grafica-intervalos-chart .recharts-xAxis .recharts-cartesian-axis-tick-value { font-size: 9px !important; }
+                }
             `}</style>
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 {/* Leyenda Visual */}
-                <div style={{ position: 'absolute', top: 0, left: 10, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem', zIndex: 10 }}>
+                <div className="grafica-intervalos-legend" style={{ position: 'absolute', top: 0, left: 10, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.7rem', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ width: '15px', height: '15px', background: 'var(--primary-color)', opacity: 0.7, borderRadius: '3px' }}></div>
-                        <span style={{ color: 'var(--text-main)' }}>Nivel de Confianza ({resultados.confianza}%)</span>
+                        <div style={{ width: '12px', height: '12px', background: 'var(--primary-color)', opacity: 0.7, borderRadius: '3px' }}></div>
+                        <span style={{ color: 'var(--text-pure)' }}>Nivel de Confianza ({resultados.confianza}%)</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ width: '15px', height: '15px', background: '#ef4444', opacity: 0.6, borderRadius: '3px' }}></div>
-                        <span style={{ color: 'var(--text-main)' }}>Riesgo / Colas ({(100 - resultados.confianza).toFixed(1)}%)</span>
+                        <div style={{ width: '12px', height: '12px', background: '#ef4444', opacity: 0.6, borderRadius: '3px' }}></div>
+                        <span style={{ color: 'var(--text-pure)' }}>Riesgo / Colas ({(100 - resultados.confianza).toFixed(1)}%)</span>
                     </div>
                 </div>
 
-                <div className="grafica-campana-container">
+                <div className="grafica-campana-container grafica-intervalos-chart">
                     <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={plotData} margin={{ top: 50, right: 30, left: -50, bottom: 0 }}>
+                        <ComposedChart data={plotData} margin={{ top: 20, right: 0, left: -60, bottom:20 }}>
                             <defs>
                                 <linearGradient id="colorArea" x1="0" y1="0" x2="1" y2="0">
                                     <stop offset="0%" stopColor="#ef4444" stopOpacity={0.6} />
@@ -141,8 +155,8 @@ export default function Grafica_IntervalosMatriz({ resultados, parametro }) {
                                 domain={[minX, maxX]}
                                 ticks={niceTicks}
                                 tickFormatter={(v) => Number.isInteger(v) ? v : Number(v.toFixed(3))}
-                                tick={{ fontSize: 12, fill: 'var(--text-main)' }}
-                                stroke="var(--text-main)"
+                                tick={{ fontSize: 11, fontWeight: 'bold', fill: 'var(--text-pure)' }}
+                                stroke="var(--text-pure)"
                             />
                             <YAxis dataKey="y" type="number" domain={[0, yAtMean * 1.15]} tick={false} axisLine={false} tickLine={false} />
                             <Tooltip
@@ -188,7 +202,7 @@ export default function Grafica_IntervalosMatriz({ resultados, parametro }) {
                 {/* Representación Visual Inferior (Regla de Intervalo) */}
                 <div style={{ marginTop: '-15px', flexShrink: 0 }}>
                     <ResponsiveContainer width="100%" height={110}>
-                        <ComposedChart data={plotData} margin={{ top: 10, right: 30, left: -50, bottom: 40 }}>
+                        <ComposedChart data={plotData} margin={{ top: 0, right: 0, left: -60, bottom: 40 }}>
                             <XAxis dataKey="x" type="number" domain={[minX, maxX]} hide />
                             <YAxis type="number" domain={[0, 1]} tick={false} axisLine={false} tickLine={false} />
 
@@ -199,8 +213,8 @@ export default function Grafica_IntervalosMatriz({ resultados, parametro }) {
                             <ReferenceLine segment={[{ x: LI, y: 0.5 }, { x: LS, y: 0.5 }]} stroke="var(--text-main)" strokeWidth={2} />
 
                             {/* Marcas Verticales LI y LS */}
-                            <ReferenceLine segment={[{ x: LI, y: 0.35 }, { x: LI, y: 0.65 }]} stroke="var(--text-main)" strokeWidth={2} />
-                            <ReferenceLine segment={[{ x: LS, y: 0.35 }, { x: LS, y: 0.65 }]} stroke="var(--text-main)" strokeWidth={2} />
+                            <ReferenceLine segment={[{ x: LI, y: 0.4 }, { x: LI, y: 0.6 }]} stroke="var(--text-main)" strokeWidth={2} />
+                            <ReferenceLine segment={[{ x: LS, y: 0.4 }, { x: LS, y: 0.6 }]} stroke="var(--text-main)" strokeWidth={2} />
 
                             {/* Etiquetas */}
                             <ReferenceLine segment={[{ x: LI, y: 0.5 }, { x: LI, y: 0.5 }]} stroke="none" label={<LabelVisual valor={LI} titulo="LI" isCenter={false} />} />

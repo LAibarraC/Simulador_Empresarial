@@ -37,7 +37,7 @@ function CustomSelectHerramienta({ value, onChange }) {
     const selectedLabel = OpcionesHerramienta.find(o => o.id === value)?.label || '';
 
     return (
-        <div ref={selectRef} className="tema4-select-container" style={{ fontFamily: FONT }}>
+        <div ref={selectRef} className="tema4-select-container tema4-select-tyf" style={{ fontFamily: FONT }}>
             <div
                 onClick={() => setIsOpen(!isOpen)}
                 className={`tema4-select-header ${isOpen ? 'open' : ''}`}
@@ -73,10 +73,18 @@ export default function Gestor_DistribucionesTyF() {
     const [datosDifMediasDesc, setDatosDifMediasDesc] = useState(null);
     const [datosRazonVarianzas, setDatosRazonVarianzas] = useState(null);
 
+    const cambiarDistribucion = (nuevaDistribucion) => {
+        if (nuevaDistribucion === distribucionActiva) return;
+        setDatosStudent(null);
+        setDatosDifMediasDesc(null);
+        setDatosRazonVarianzas(null);
+        setDistribucionActiva(nuevaDistribucion);
+    };
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <CustomSelectHerramienta value={distribucionActiva} onChange={setDistribucionActiva} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop:'10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <CustomSelectHerramienta value={distribucionActiva} onChange={cambiarDistribucion} />
                 
                 {distribucionActiva === 'student' ? (
                     <div className="tema4-calculadora-wrapper">

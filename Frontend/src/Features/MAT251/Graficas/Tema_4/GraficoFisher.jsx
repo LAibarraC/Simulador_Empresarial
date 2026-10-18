@@ -50,6 +50,40 @@ const CustomKatexLabel = (props) => {
     );
 };
 
+const KaTeXInline = ({ formula }) => (
+    <span dangerouslySetInnerHTML={{ __html: katex.renderToString(formula, { throwOnError: false }) }} />
+);
+
+const XAxisKatexLabel = ({ viewBox, prefix, value }) => {
+    if (!viewBox) return null;
+    const { x, y, width, height } = viewBox;
+    const cx = x + width / 2;
+    const cy = y + height - 5;
+    return (
+        <foreignObject x={cx - 210} y={cy - 8} width={420} height={30} style={{ overflow: "visible", pointerEvents: "none" }}>
+            <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", color: "var(--text-pure)", fontSize: "13px", fontWeight: "bold", whiteSpace: "nowrap", gap: "4px" }}>
+                <span>{prefix}</span>
+                <KaTeXInline formula={value} />
+            </div>
+        </foreignObject>
+    );
+};
+
+const YAxisKatexLabel = ({ viewBox, prefix, value }) => {
+    if (!viewBox) return null;
+    const { x, y, height } = viewBox;
+    return (
+        <foreignObject x={x -25} y={y} width={80} height={height} style={{ overflow: "visible", pointerEvents: "none" }}>
+            <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%) rotate(-90deg)", transformOrigin: "center", color: "var(--text-pure)", fontSize: "13px", fontWeight: "bold", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span>{prefix}</span>
+                    <KaTeXInline formula={value} />
+                </div>
+            </div>
+        </foreignObject>
+    );
+};
+
 const SmartAnnotation = (props) => {
     const { viewBox, value } = props;
     if (!viewBox || viewBox.x === undefined || viewBox.y === undefined) return null;
@@ -111,7 +145,7 @@ const SmartAnnotation = (props) => {
 export default function GraficoFisher({ resultados }) {
     if (!resultados || resultados.v1 === undefined) return null;
 
-    const { v1, v2, varPob1, varPob2, x1, x2, condicion, probFinal } = resultados;
+    const { v1, v2, vp1: varPob1, vp2: varPob2, x1, x2, condicion, probFinal } = resultados;
     const tieneProbabilidad = probFinal !== undefined;
 
     const { datosGrafico, annotationData } = useMemo(() => {
@@ -157,7 +191,7 @@ export default function GraficoFisher({ resultados }) {
             // F value starts slightly above 0 to avoid Infinity in pdf for some v1, v2 combinations
             const FValue = i === 0 ? 0.0001 : i * paso;
             const RVal = FValue * razonVarPobInv; // R = S1^2 / S2^2
-            const pdf = jStat.centralF.pdf(FValue, v1, v2);
+            const pdf = jStat.centralF.pdf(FValue, v1, v2) / razonVarPobInv;
 
             let fillY = 0;
             if (tieneProbabilidad && RVal >= fillStart && RVal <= fillEnd) {
@@ -226,7 +260,7 @@ export default function GraficoFisher({ resultados }) {
     }, [tieneProbabilidad, condicion, x1, x2, datosGrafico]);
 
     return (
-        <MarcoWidgetMAT251 titulo="Gráfica de Densidad de Probabilidad f(x) [Fisher]" anchoCompleto={true} alto="450px" id="grafico-fisher">
+        <MarcoWidgetMAT251 titulo={<span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><span>{"Gr\u00e1fica de Densidad de Probabilidad"}</span><KaTeXInline formula="f(x)" /><span>[Fisher]</span></span>} anchoCompleto={true} alto="450px" id="grafico-fisher">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -242,19 +276,24 @@ export default function GraficoFisher({ resultados }) {
                                 tick={{ fill: 'var(--text-pure)', fontSize: 10, fontWeight: 'bold' }}
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
-                                tickFormatter={(val) => Number.isInteger(val) ? val : val.toFixed(2)}
-                                label={{ value: 'Razón de Varianzas Muestrales (S₁² / S₂²)', position: 'insideBottom', offset: -10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                tickFormatter={(val) => Number.isInteger(val) ? val : val.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                                label={<XAxisKatexLabel prefix={'Raz\u00f3n de Varianzas Muestrales'} value={'(S_1^2 / S_2^2)'} />}
                             />
                             
                             <YAxis 
-                                hide
-                                domain={[0, 'auto']}
+                                width={65}
+                                padding={{ top: 20 }}
+                                tick={{ fill: 'var(--text-pure)', fontSize: 10, fontWeight: 'bold' }}
+                                axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                                tickFormatter={(val) => val === 0 ? '0' : val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 3 })}
+                                label={<YAxisKatexLabel prefix="Densidad" value={'f(S_1^2 / S_2^2)'} />}
                             />
                             
                             <Tooltip 
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                                formatter={(value, name) => [value.toFixed(5), name === 'y' ? 'f(x)' : 'Área']}
-                                labelFormatter={(label) => `S₁²/S₂² = ${label.toFixed(4)}`}
+                                formatter={(value, name) => [value.toLocaleString('es-ES', { minimumFractionDigits: 5, maximumFractionDigits: 5 }), name === 'y' ? 'f(x)' : 'Área']}
+                                labelFormatter={(label) => `S₁²/S₂² = ${label.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`}
                             />
 
                             <Area 

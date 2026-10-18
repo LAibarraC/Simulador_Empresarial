@@ -318,13 +318,13 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
-            <div className="tema4-population-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px', marginBottom: '15px' }}>
+            <div className="tema4-population-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px', width: '100%', marginBottom: '15px' }}>
                 {/* Población 1 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, marginBottom: '10px', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 1</h4>
+                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                    <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, margin: '0 0 10px 0', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 1</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="\mu_1 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{\mu_1} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -348,7 +348,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="S_1 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{S_1} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -372,7 +372,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="n_1 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{n_1} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -399,11 +399,11 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                 </div>
 
                 {/* Población 2 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, marginBottom: '10px', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 2</h4>
+                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                    <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, margin: '0 0 10px 0', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 2</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="\mu_2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{\mu_2} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -427,7 +427,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="S_2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{S_2} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -451,7 +451,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: '40px', whiteSpace: 'nowrap' }}><Latex formula="n_2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{n_2} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -481,15 +481,18 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
             {/* Escenario de Evaluación */}
             <div style={{ marginBottom: '15px' }}>
                 <label style={{ ...labelStyle, display: 'block', marginBottom: '8px' }}>Escenario de Evaluación</label>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <CustomSelect
                     value={escenario}
                     onChange={(val) => { setEscenario(val); resetValues(); }}
+                    style={{ width: '420px', maxWidth: '100%' }}
                     options={[
-                        { value: 'grandes', label: <Latex formula="\text{Muestras grandes, } n + m > 30" /> },
-                        { value: 'iguales', label: <Latex formula="\text{Muestras pequeñas, } n + m \le 30 \text{ y } \sigma_X^2 = \sigma_Y^2" /> },
-                        { value: 'distintas', label: <Latex formula="\text{Muestras pequeñas, } n + m \le 30 \text{ y } \sigma_X^2 \neq \sigma_Y^2" /> }
+                        { value: 'grandes', label: <>Muestras grandes, <Latex formula="n + m > 30" /></> },
+                        { value: 'iguales', label: <>Muestras pequeñas, <Latex formula="n + m \le 30" /> y <Latex formula="\sigma_X^2 = \sigma_Y^2" /></> },
+                        { value: 'distintas', label: <>Muestras pequeñas, <Latex formula="n + m \le 30" /> y <Latex formula="\sigma_X^2 \neq \sigma_Y^2" /></> }
                     ]}
                 />
+                </div>
             </div>
 
             {/* Sección Condición de Búsqueda */}

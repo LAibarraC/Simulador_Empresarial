@@ -67,15 +67,17 @@ export default function GraficoEstimacionIntervalos({ resultados, simulacionesVi
                 anchoCompleto={true} alto="100%"
             >
                 <div style={{ width: '95%', height: '100%', padding: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '15px', color: 'var(--text-main, #1e293b)' }}>
-                        <h5 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                            Nivel de confianza nominal: {confianza}%, {renderKatex("n")} = {resultados.n}, {renderKatex(`${getSymboloParam()} = ${parametroVerdadero.toFixed(3)}`)}
+                    <div className="tema5-intervalos-resumen" style={{ textAlign: 'center', marginBottom: '15px', color: 'var(--text-main, #1e293b)' }}>
+                        <h5 className="tema5-intervalos-resumen-principal" style={{ margin: '0 0 5px 0', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                            <span>Nivel de confianza nominal: {confianza}%</span>
+                            <span>{renderKatex(`n = ${resultados.n}`)}</span>
+                            <span>{renderKatex(`${getSymboloParam()} = ${parametroVerdadero.toFixed(3)}`)}</span>
                         </h5>
-                        <div style={{ fontSize: '0.75rem', marginBottom: '10px' }}>
+                        <div className="tema5-intervalos-resumen-secundario" style={{ fontSize: '0.75rem', marginBottom: '10px' }}>
                             Después de {resumenAnimado.total} simulaciones: {resumenAnimado.contienen} intervalos contienen, {resumenAnimado.noContienen} no
                         </div>
 
-                        <div style={{
+                        <div className="tema5-intervalos-cobertura-leyenda" style={{
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '20px',
@@ -86,20 +88,21 @@ export default function GraficoEstimacionIntervalos({ resultados, simulacionesVi
                         }}>
                             <span style={{ fontWeight: 'bold' }}>Cobertura:</span>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div className="tema5-intervalos-cobertura-item" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <div style={{ width: '12px', height: '12px', background: '#10b981', borderRadius: '2px' }}></div>
-                                <span>{resumenAnimado.cobertura.toFixed(2)}% contienen</span>
+                                <span><strong>{resumenAnimado.cobertura.toFixed(2)}%</strong> contienen</span>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div className="tema5-intervalos-cobertura-item" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <div style={{ width: '12px', height: '12px', background: '#ef4444', borderRadius: '2px' }}></div>
-                                <span>{(100 - resumenAnimado.cobertura).toFixed(2)}% no contienen</span>
+                                <span><strong>{(100 - resumenAnimado.cobertura).toFixed(2)}%</strong> no contienen</span>
                             </div>
                         </div>
                     </div>
 
-                    <div style={{ width: '100%', flex: 1, minHeight: 0, display: 'flex', justifyContent: 'center' }}>
+                    <div className="tema5-intervalos-grafico-scroll" style={{ width: '100%', flex: 1, minHeight: 0, display: 'flex', justifyContent: 'center' }}>
                         <svg
+                            className="tema5-intervalos-grafico-svg"
                             viewBox={`0 0 ${width} ${height + 40}`}
                             style={{
                                 width: '100%',

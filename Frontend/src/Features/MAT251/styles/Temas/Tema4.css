@@ -6,6 +6,20 @@
     margin: 0 auto;
 }
 
+.tema4-select-container.tema4-select-tyf {
+    width: min(100%, 460px);
+    max-width: 460px;
+    margin-inline: auto;
+}
+
+.tema4-select-tyf .tema4-select-header {
+    width: 100%;
+}
+
+.tema4-select-tyf .tema4-select-text {
+    flex: 0 1 auto;
+}
+
 .tema4-select-header {
     display: flex;
     align-items: center;
@@ -443,4 +457,3 @@
 .tema4-difference-calculation-row .mat251-stat-tooltip .katex {
     font-size: 1rem !important;
 }
-

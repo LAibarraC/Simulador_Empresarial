@@ -1055,3 +1055,46 @@ html.dark .select-estilo-operacion {
     font-size: 0.78rem;
   }
 }
+
+/* En móviles, el título de la gráfica se desplaza sin invadir sus controles. */
+@media (max-width: 600px) {
+  .widget-grafico > .widget-header > div:first-child {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
+  .widget-grafico > .widget-header .widget-titulo {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    pointer-events: auto !important;
+    touch-action: pan-x;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-muted, #9aa3ad) transparent;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .widget-grafico > .widget-header .widget-titulo > span:last-child {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .widget-grafico > .widget-header .widget-titulo::-webkit-scrollbar {
+    height: 2px !important;
+    margin: 0;
+  }
+
+  .widget-grafico > .widget-header .widget-titulo::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 0;
+  }
+
+  .widget-grafico > .widget-header .widget-titulo::-webkit-scrollbar-thumb {
+    background: var(--text-muted, #9aa3ad);
+    border-radius: 2px;
+  }
+}

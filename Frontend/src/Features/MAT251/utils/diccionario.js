@@ -529,6 +529,34 @@ export const glosarioMAT251 = {
         texto: "Media Muestral",
         math: "\\bar{X} = \\frac{1}{n} \\sum_{i=1}^n X_i"
     },
+    "n_muestra": {
+        texto: "Tamaño de la Muestra",
+        math: "n"
+    },
+    "suma_muestral": {
+        texto: "Suma de los Valores de la Muestra",
+        math: "\\sum_{i=1}^{n} X_i"
+    },
+    "desviacion_muestral": {
+        texto: "Desviación Estándar Muestral",
+        math: "S = \\sqrt{\\frac{1}{n-1}\\sum_{i=1}^{n}(X_i-\\bar{X})^2}"
+    },
+    "estimador_media_puntual": {
+        texto: "Estimador Puntual de la Media Poblacional",
+        math: "\\hat{\\mu}=\\bar{X}"
+    },
+    "indice_muestra": {
+        texto: "Índice de la Observación",
+        math: "i = 1, 2, \\dots, n"
+    },
+    "desviacion_observacion": {
+        texto: "Desviación de la Observación respecto a la Media Muestral",
+        math: "x_i - \\bar{X}"
+    },
+    "desviacion_observacion_cuadrado": {
+        texto: "Desviación Cuadrática de la Observación",
+        math: "(x_i - \\bar{X})^2"
+    },
     "s2": {
         texto: "Varianza Muestral",
         math: "S^2 = \\frac{1}{n-1} \\sum_{i=1}^n (X_i - \\bar{X})^2"
@@ -536,6 +564,10 @@ export const glosarioMAT251 = {
     "p_sombrero": {
         texto: "Proporción Muestral",
         math: "\\hat{p} = \\frac{X}{n}"
+    },
+    "indicador_exito": {
+        texto: "Indicador de Éxito",
+        math: "I_i = \\begin{cases}1, & x_i = a \\\\ 0, & x_i \\ne a\\end{cases}"
     },
     "P_x_barra": {
         texto: "Distribución de la Media Muestral",
@@ -552,6 +584,34 @@ export const glosarioMAT251 = {
     "IC_media": {
         texto: "Intervalo de Confianza para la Media",
         math: "\\bar{X} \\pm Z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}"
+    },
+    "IC_media_t": {
+        texto: "Intervalo de confianza para la media con desviación estándar desconocida",
+        math: "\\bar{X} \\pm t_{\\alpha/2, n-1} \\frac{S}{\\sqrt{n}}"
+    },
+    "IC_media_z": {
+        texto: "Intervalo de confianza para la media con desviación estándar poblacional conocida",
+        math: "\\bar{X} \\pm Z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}"
+    },
+    "IC_proporcion": {
+        texto: "Intervalo de confianza para la proporción poblacional",
+        math: "\\hat{p} \\pm Z_{\\alpha/2} \\sqrt{\\frac{\\hat{p}(1-\\hat{p})}{n}}"
+    },
+    "IC_varianza": {
+        texto: "Intervalo de confianza para la varianza poblacional",
+        math: "\\left[\\frac{(n-1)S^2}{\\chi^2_{1-\\alpha/2}}, \\frac{(n-1)S^2}{\\chi^2_{\\alpha/2}}\\right]"
+    },
+    "E_media_t": {
+        texto: "Margen de error para la media con desviación estándar desconocida",
+        math: "E = t_{\\alpha/2, n-1} \\frac{S}{\\sqrt{n}}"
+    },
+    "E_media_z": {
+        texto: "Margen de error para la media con desviación estándar poblacional conocida",
+        math: "E = Z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}"
+    },
+    "E_proporcion": {
+        texto: "Margen de error para una proporción poblacional",
+        math: "E = Z_{\\alpha/2} \\sqrt{\\frac{\\hat{p}(1-\\hat{p})}{n}}"
     },
     "H0": {
         texto: "Hipótesis Nula",

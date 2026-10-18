@@ -10,8 +10,8 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
     const localLabelStyle = { ...labelStyle, color: 'var(--text-main, #1e293b)' };
     const [distribucion, setDistribucion] = useState('normal');
     
-    const renderKatex = (math) => (
-        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+    const renderKatex = (math, negrita = false) => (
+        <span className={negrita ? 'tema5-matematica-negrita' : undefined} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
     
     // Params por defecto (vacíos para que se vean los placeholders)
@@ -29,6 +29,7 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
     const [isCalculating, setIsCalculating] = useState(false);
     const [isSelectOpen, setIsSelectOpen] = useState(false);
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+    const [simulacionPendiente, setSimulacionPendiente] = useState(null);
     const selectRef = useRef(null);
 
     const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
@@ -55,6 +56,24 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
         setDistribucion(distDisponibles[parametro][0]);
     }
 
+    const ejecutarSimulacion = async (payload) => {
+        setIsCalculating(true);
+        try {
+            const resultado = await mat251Api.ejecutarSimulacionPuntual(payload);
+            if (resultado && resultado.error) {
+                mostrarAlerta(resultado.error, "Error en la Simulación", "error");
+                onCalcular(null);
+            } else {
+                onCalcular(resultado);
+            }
+        } catch (error) {
+            mostrarAlerta(error.message || 'Hubo un error al ejecutar la simulación.', "Error en la Simulación", "error");
+            onCalcular(null);
+        } finally {
+            setIsCalculating(false);
+        }
+    };
+
     const handleCalcular = async () => {
         if (!n || !numSimulaciones) {
             mostrarAlerta("Por favor, ingrese el tamaño de la muestra (n) y el número de simulaciones.", "Faltan Parámetros", "warning");
@@ -76,45 +95,44 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
         if (distribucion === 'uniforme') paramsDist = { a: Number(a), b: Number(b) };
         if (distribucion === 'binomial') paramsDist = { p: Number(p), n_ensayos: Number(nEnsayos) };
 
-        setIsCalculating(true);
-        
-        try {
-            const numN = Number(n);
-            const numSims = Number(numSimulaciones);
-            const totalDatos = numN * numSims;
+        const numN = Number(n);
+        const numSims = Number(numSimulaciones);
+        const totalDatos = numN * numSims;
+        const payload = {
+            distribucion,
+            paramsDist,
+            n: numN,
+            numSimulaciones: numSims,
+            parametro,
+            incluirMuestras: totalDatos <= 5000
+        };
 
-            const payload = {
-                distribucion, 
-                paramsDist, 
-                n: numN, 
-                numSimulaciones: numSims, 
-                parametro,
-                incluirMuestras: totalDatos <= 5000
-            };
-            const resultado = await mat251Api.ejecutarSimulacionPuntual(payload);
-            if (resultado && resultado.error) {
-                mostrarAlerta(resultado.error, "Error en la Simulación", "error");
-                onCalcular(null);
-            } else {
-                onCalcular(resultado);
-            }
-        } catch (error) {
-            mostrarAlerta(error.message || 'Hubo un error al ejecutar la simulación.', "Error en la Simulación", "error");
-            onCalcular(null);
-        } finally {
-            setIsCalculating(false);
+        if (totalDatos > 5000) {
+            setSimulacionPendiente(payload);
+            mostrarAlerta(
+                "La simulación supera los 5.000 datos. Se mostrarán los resultados, pero no la tabla de muestras.",
+                "Aviso sobre las muestras",
+                "warning"
+            );
+            return;
+        }
+
+        await ejecutarSimulacion(payload);
+    };
+
+    const cerrarModalAlerta = () => {
+        setModalAlerta(prev => ({ ...prev, isOpen: false }));
+        if (simulacionPendiente) {
+            const payload = simulacionPendiente;
+            setSimulacionPendiente(null);
+            ejecutarSimulacion(payload);
         }
     };
 
     return (
         <div style={{ padding: '0px' }}>
-            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>Simulación:</h4>
-            <p style={{ fontSize: FS.sm, marginBottom: '15px' }}>
-                Genere múltiples muestras aleatorias para observar el comportamiento del estimador.
-            </p>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                <div className="tema5-sim-distribucion-selector" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <label style={{ ...localLabelStyle, margin: 0 }}>Distribución Poblacional:</label>
                     
                     <div ref={selectRef} style={{ position: 'relative', width: '220px', fontFamily: FONT }}>
@@ -196,50 +214,78 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                             </div>
                         )}
                     </div>
+                    <div className="tema5-simulacion-ayuda">
+                        <button
+                            type="button"
+                            id="tema5-ayuda-simulador"
+                            className="tema5-simulacion-ayuda-boton"
+                            aria-label="Ayuda sobre el simulador"
+                            aria-describedby="tema5-ayuda-contenido"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M9.6 9a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.8" />
+                                <path d="M12 17h.01" />
+                            </svg>
+                        </button>
+                        <div id="tema5-ayuda-contenido" className="tema5-simulacion-ayuda-panel" role="tooltip">
+                            <strong>¿Qué puedes hacer?</strong>
+                            <p>Genera muestras aleatorias repetidas para observar cómo se comporta el estimador seleccionado.</p>
+                            <ul>
+                                <li>Elige una distribución poblacional y completa sus parámetros.</li>
+                                <li>{renderKatex('n', true)} indica el tamaño de cada muestra.</li>
+                                <li>{renderKatex('N', true)} indica cuántas simulaciones se ejecutarán.</li>
+                                <li>Al ejecutar, consulta los resultados y la variación entre las estimaciones.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Parámetros de la distribución */}
-                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', borderRadius: '4px' }}>
-                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-muted)' }}>PARÁMETROS DE LA DISTRIBUCIÓN</div>
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: '1px solid rgba(0, 0, 0, 0.12)', borderRadius: '5px' }}>
+                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-pure)' }}>PARÁMETROS DE LA DISTRIBUCIÓN</div>
+                    <div className="tema5-simulacion-parametros-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                         {distribucion === 'normal' && (
                             <>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\mu:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\mu:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={mu} onChange={e => setMu(e.target.value)} placeholder="Media" />
                                 </div>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\sigma:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\sigma:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={sigma} onChange={e => setSigma(e.target.value)} min="0.001" placeholder="Desv. Estándar" />
                                 </div>
                             </>
                         )}
                         {(distribucion === 'bernoulli' || distribucion === 'binomial') && (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '220px' }}>
-                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('p:')}</label>
+                            <div
+                                className={`tema5-simulacion-campo ${distribucion === 'bernoulli' ? 'tema5-simulacion-campo-centrado' : ''}`}
+                                style={{ flex: distribucion === 'bernoulli' ? '0 1 50%' : 1, maxWidth: distribucion === 'bernoulli' ? '50%' : undefined, margin: distribucion === 'bernoulli' ? '0 auto' : undefined, display: 'flex', alignItems: 'center', gap: '8px', minWidth: distribucion === 'bernoulli' ? 0 : '220px' }}
+                            >
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('p:', true)}</label>
                                 <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={p} onChange={e => setP(e.target.value)} min="0" max="1" step="0.01" placeholder="Probabilidad de éxito" />
                             </div>
                         )}
                         {distribucion === 'binomial' && (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:')}</label>
+                            <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:', true)}</label>
                                 <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={nEnsayos} onChange={e => setNEnsayos(e.target.value)} min="1" placeholder="Nº de Ensayos" />
                             </div>
                         )}
                         {distribucion === 'poisson' && (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\lambda:')}</label>
+                            <div className="tema5-simulacion-campo tema5-simulacion-campo-centrado" style={{ flex: '0 1 50%', maxWidth: '50%', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\lambda:', true)}</label>
                                 <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={lambda} onChange={e => setLambda(e.target.value)} min="0.001" placeholder="Tasa" />
                             </div>
                         )}
                         {distribucion === 'uniforme' && (
                             <>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('a:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('a:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={a} onChange={e => setA(e.target.value)} placeholder="Mínimo" />
                                 </div>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('b:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('b:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={b} onChange={e => setB(e.target.value)} placeholder="Máximo" />
                                 </div>
                             </>
@@ -248,9 +294,9 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                 </div>
 
                 {/* Parámetros de Simulación */}
-                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
-                        <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>Tamaño de Muestra (n):</label>
+                <div className="tema5-simulacion-entradas-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                    <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                        <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:', true)}</label>
                         <input
                             type="number"
                             className="input-mat251 placeholder-small"
@@ -258,11 +304,11 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                             value={n}
                             onChange={(e) => setN(e.target.value)}
                             min={parametro === 'varianza' ? '2' : '1'}
-                            placeholder="Ej: 30"
+                            placeholder="Tamaño de muestra"
                         />
                     </div>
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
-                        <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>Nº Simulaciones:</label>
+                    <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                        <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('N:', true)}</label>
                         <input
                             type="number"
                             className="input-mat251 placeholder-small"
@@ -270,8 +316,8 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                             value={numSimulaciones}
                             onChange={(e) => setNumSimulaciones(e.target.value)}
                             min="1"
-                            max="100000"
-                            placeholder="Limite: 1 - 100.000"
+                            max="10000"
+                            placeholder="Número de simulaciones"
                         />
                     </div>
                 </div>
@@ -293,7 +339,7 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                 mensaje={modalAlerta.mensaje}
                 titulo={modalAlerta.titulo}
                 tipo={modalAlerta.tipo}
-                onClose={() => setModalAlerta({ ...modalAlerta, isOpen: false })}
+                onClose={cerrarModalAlerta}
             />
 
 

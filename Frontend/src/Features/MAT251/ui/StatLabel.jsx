@@ -35,6 +35,7 @@ export default function StatLabel({ formulaKey, formulaLatex, align = 'center', 
         const containerRect = container.getBoundingClientRect();
         const tooltipRect = tooltip.getBoundingClientRect();
         const tooltipWidth = tooltipRect.width;
+        const scrollTable = container.closest('.tema5-tabla-resolucion-scroll');
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         const padding = 10; // Margen de seguridad respecto al borde de la pantalla o contenedor
 
@@ -44,6 +45,10 @@ export default function StatLabel({ formulaKey, formulaLatex, align = 'center', 
 
         let el = container.parentElement;
         while (el && el !== document.body && el !== document.documentElement) {
+                if (scrollTable && el === scrollTable) {
+                    el = el.parentElement;
+                    continue;
+                }
             const style = window.getComputedStyle(el);
             const ox = style.overflowX;
             const oy = style.overflowY;
@@ -87,10 +92,31 @@ export default function StatLabel({ formulaKey, formulaLatex, align = 'center', 
 
             tooltip.style.setProperty('--tooltip-shift', shiftVal);
             tooltip.style.setProperty('--arrow-left', arrowVal);
-            setPositionStyle({
+            const nextPositionStyle = {
                 '--tooltip-shift': shiftVal,
                 '--arrow-left': arrowVal
-            });
+            };
+
+            if (scrollTable) {
+                const tooltipLeft = containerCenterX + shiftX;
+                const tooltipTop = position === 'top'
+                    ? containerRect.top - tooltipRect.height - 8
+                    : containerRect.bottom + 8;
+                Object.assign(nextPositionStyle, {
+                    position: 'fixed',
+                    left: `${Math.round(tooltipLeft)}px`,
+                    top: `${Math.round(tooltipTop)}px`,
+                    bottom: 'auto',
+                    transform: 'translateX(-50%)'
+                });
+                tooltip.style.position = 'fixed';
+                tooltip.style.left = nextPositionStyle.left;
+                tooltip.style.top = nextPositionStyle.top;
+                tooltip.style.bottom = 'auto';
+                tooltip.style.transform = nextPositionStyle.transform;
+            }
+
+            setPositionStyle(nextPositionStyle);
         }
 
         if (isHidden) {

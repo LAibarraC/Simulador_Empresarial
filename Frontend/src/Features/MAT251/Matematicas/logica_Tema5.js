@@ -31,7 +31,7 @@ export const calcularEstimacionPuntualMatriz = (datos, parametro, valorExito = n
             n,
             estimacion: p_hat,
             simbolo: '\\hat{p}',
-            calculos: { x, p_hat }
+            calculos: { x, p_hat, numDatos: [...datos], valorExito }
         };
     }
 
@@ -44,7 +44,7 @@ export const calcularEstimacionPuntualMatriz = (datos, parametro, valorExito = n
             n,
             estimacion: varianza,
             simbolo: '\\hat{\\sigma}^2 = S^2',
-            calculos: { media, varianza, desviacion: Math.sqrt(varianza) }
+            calculos: { media, varianza, desviacion: Math.sqrt(varianza), numDatos }
         };
     }
 

@@ -3,8 +3,10 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { calcularIntervaloMedia, calcularIntervaloProporcion, calcularIntervaloVarianza } from '../../../Matematicas/logica_Tema5';
 import { cardStyle, labelStyle, FS } from '../../../Principal/Constantes';
+import ModalAlerta from '../../../ui/ModalAlerta';
 
 export default function Controles_IntervalosManual({ parametro, confianza, onCalcular }) {
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Dato inválido', tipo: 'warning' });
     const [n, setN] = useState('');
     
     // Para media
@@ -18,11 +20,20 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
     // Para varianza
     const [s2, setS2] = useState('');
 
-    const renderKatex = (math) => (
-        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+    const renderKatex = (math, negrita = false) => (
+        <span className={negrita ? 'tema5-matematica-negrita' : undefined} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
 
     const handleCalcular = () => {
+        if ((parametro === 'proporcion' && (n === '' || x === '')) || (parametro === 'varianza' && (n === '' || s2 === ''))) {
+            const mensaje = parametro === 'proporcion'
+                ? 'Ingrese el tamaño de la muestra y los casos favorables.'
+                : 'Ingrese el tamaño de la muestra y la varianza muestral.';
+            setModalAlerta({ isOpen: true, mensaje, titulo: 'Faltan datos', tipo: 'warning' });
+            onCalcular(null);
+            return;
+        }
+
         let res = null;
         const numN = parseFloat(n);
 
@@ -35,7 +46,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
         }
 
         if (res && res.error) {
-            alert(res.error);
+            setModalAlerta({ isOpen: true, mensaje: res.error, titulo: 'Dato inválido', tipo: 'warning' });
             onCalcular(null);
         } else {
             onCalcular(res);
@@ -43,13 +54,13 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
     };
 
     return (
-        <div style={cardStyle}>
+        <div className="tema5-intervalos-manual-form tema5-manual-card" style={{ ...cardStyle, border: 'none' }}>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '15px' }}>
+            <div className="tema5-manual-content">
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{renderKatex('n =')}</label>
+                <div className={`tema5-manual-fields ${parametro === 'media' ? 'tema5-manual-fields-media' : ''} ${['proporcion', 'varianza'].includes(parametro) ? 'tema5-manual-fields-compact' : ''}`}>
+                    <div className={`tema5-manual-field ${parametro === 'media' ? 'tema5-manual-field-inline' : ''}`}>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex(['proporcion', 'varianza'].includes(parametro) ? 'n:' : 'n =', true)}</label>
                         <input
                             type="number"
                             className="input-mat251 placeholder-small"
@@ -57,13 +68,13 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                             onChange={(e) => setN(e.target.value)}
                             placeholder="Tamaño de la muestra"
                             min="1"
-                            style={{ flex: 1, width: '100%' }}
+                            style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
                         />
                     </div>
 
                     {parametro === 'media' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{renderKatex('\\bar{X} =')}</label>
+                        <div className="tema5-manual-field tema5-manual-field-inline">
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('\\bar{X} =', true)}</label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -71,14 +82,14 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                                 onChange={(e) => setXBar(e.target.value)}
                                 placeholder="Media Muestral"
                                 step="any"
-                                style={{ flex: 1, width: '100%' }}
+                                style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
                             />
                         </div>
                     )}
 
                     {parametro === 'proporcion' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{renderKatex('x =')}</label>
+                        <div className="tema5-manual-field">
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('x:', true)}</label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -86,14 +97,14 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                                 onChange={(e) => setX(e.target.value)}
                                 placeholder="Casos Favorables"
                                 min="0"
-                                style={{ flex: 1, width: '100%' }}
+                                style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
                             />
                         </div>
                     )}
 
                     {parametro === 'varianza' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{renderKatex('S^2 =')}</label>
+                        <div className="tema5-manual-field">
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('S^2:', true)}</label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -102,18 +113,18 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                                 placeholder="Varianza Muestral"
                                 min="0"
                                 step="any"
-                                style={{ flex: 1, width: '100%' }}
+                                style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
                             />
                         </div>
                     )}
                 </div>
 
                 {parametro === 'media' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>Desviación Estándar:</label>
+                    <div className="tema5-manual-media-extra">
+                        <div className="tema5-manual-sigma-selector">
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>Desviación Estándar:</label>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+                            <div className="tema5-manual-sigma-options" style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
                                 {/* Radio Poblacional */}
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                     <div style={{ 
@@ -169,9 +180,9 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                                 </label>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
-                                {sigmaConocida ? renderKatex('\\sigma =') : renderKatex('S =')}
+                        <div className="tema5-manual-field tema5-manual-deviation-input">
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>
+                                {sigmaConocida ? renderKatex('\\sigma =', true) : renderKatex('S =', true)}
                             </label>
                             <input
                                 type="number"
@@ -181,7 +192,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                                 placeholder={sigmaConocida ? "Desviación Poblacional" : "Desviación Muestral"}
                                 step="any"
                                 min="0"
-                                style={{ flex: 1, width: '100%' }}
+                                style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
                             />
                         </div>
                     </div>
@@ -190,8 +201,9 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
 
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
+            <div className="tema5-manual-submit-wrap" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <button 
+                    type="button"
                     className="button_calcular" 
                     style={{ width: 'auto', padding: '5px 15px' }}
                     onClick={handleCalcular}
@@ -199,6 +211,14 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                     Calcular Intervalo de Confianza
                 </button>
             </div>
+
+            <ModalAlerta
+                isOpen={modalAlerta.isOpen}
+                titulo={modalAlerta.titulo}
+                mensaje={modalAlerta.mensaje}
+                tipo={modalAlerta.tipo}
+                onClose={() => setModalAlerta(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     );
 }

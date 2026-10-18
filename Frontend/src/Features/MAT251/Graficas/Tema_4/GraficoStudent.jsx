@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { jStat } from 'jstat';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
+import { TituloGraficaFormula, EtiquetaEjeXKaTeX, EtiquetaEjeYKaTeX } from './EtiquetasKaTeX';
 import ModalLimiteFueraDeGrafica from './ModalLimiteFueraDeGrafica';
 import EtiquetaLimiteIntervalo from './EtiquetaLimiteIntervalo';
 
@@ -219,7 +220,7 @@ export default function GraficoStudent({ resultados, esDiferenciaMedias = false 
 
     return (
         <MarcoWidgetMAT251 
-            titulo={esDiferencia ? "Gráfica de Densidad f(X̄₁ - X̄₂) [t-Student]" : "Gráfica de Densidad f(X̄) [t-Student]"} 
+            titulo={esDiferencia ? <TituloGraficaFormula antes={'Gr\u00e1fica de Densidad '} formula={"f(\\bar{X}_1 - \\bar{X}_2)"} despues=" [t-Student]" /> : <TituloGraficaFormula antes={'Gr\u00e1fica de Densidad '} formula={"f(\\bar{X})"} despues=" [t-Student]" />}
             anchoCompleto={true} 
             alto="450px" 
             id={esDiferencia ? "grafico-student-dif-medias" : "grafico-student"}
@@ -241,7 +242,7 @@ export default function GraficoStudent({ resultados, esDiferenciaMedias = false 
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickFormatter={(val) => Number.isInteger(val) ? val : val.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                                label={{ value: esDiferencia ? 'Diferencia de Medias (X̄₁ - X̄₂)' : 'Media Muestral (X̄)', position: 'insideBottom', offset: -10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<EtiquetaEjeXKaTeX prefix={esDiferencia ? "Diferencia de Medias" : "Media Muestral"} value={esDiferencia ? "(\\bar{X}_1 - \\bar{X}_2)" : "(\\bar{X})"} />}
                             />
                             
                             <YAxis 
@@ -251,7 +252,7 @@ export default function GraficoStudent({ resultados, esDiferenciaMedias = false 
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickFormatter={(val) => val === 0 ? '0' : val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                label={{ value: esDiferencia ? 'Densidad f(X̄₁ - X̄₂)' : 'Densidad f(X̄)', angle: -90, position: 'insideLeft', offset: 10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<EtiquetaEjeYKaTeX prefix="Densidad" value={esDiferencia ? "f(\\bar{X}_1 - \\bar{X}_2)" : "f(\\bar{X})"} />}
                             />
                             
                             <Tooltip 

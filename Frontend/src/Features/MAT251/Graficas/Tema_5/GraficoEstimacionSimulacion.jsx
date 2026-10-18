@@ -5,10 +5,19 @@ import {
 } from 'recharts';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 import { FONT, FS, RADIUS } from '../../Principal/Constantes';
+import katex from 'katex';
+
+const simboloKatex = (formula) => (
+    <span
+        style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle' }}
+        dangerouslySetInnerHTML={{ __html: katex.renderToString(formula, { throwOnError: false }) }}
+    />
+);
 
 export default function GraficoEstimacionSimulacion({ resultados, simulacionesVisibles }) {
     if (!resultados || !simulacionesVisibles) return null;
 
+    const esMovil = typeof window !== 'undefined' && window.matchMedia('(max-width: 600px)').matches;
     const { parametroVerdadero, resumen, parametro, simulaciones } = resultados;
 
     // Preparar datos para el gráfico de línea (Evolución)
@@ -48,30 +57,46 @@ export default function GraficoEstimacionSimulacion({ resultados, simulacionesVi
         ).marcaClase;
     }, [parametroVerdadero, datosHistograma]);
 
-    let yLabel = 'Media (μ)';
-    if (parametro === 'proporcion') yLabel = 'Proporción (p)';
-    if (parametro === 'varianza') yLabel = 'Varianza (σ²)';
+    let parametroLabel = 'Media';
+    let simboloEstimador = '\\bar{X}';
+    let simboloParametro = '\\mu';
+    if (parametro === 'proporcion') {
+        parametroLabel = 'Proporción';
+        simboloEstimador = '\\hat{p}';
+        simboloParametro = 'p';
+    }
+    if (parametro === 'varianza') {
+        parametroLabel = 'Varianza';
+        simboloEstimador = 'S^2';
+        simboloParametro = '\\sigma^2';
+    }
+    const tituloEstimador = <>Evolución de las estimaciones ({simboloKatex(simboloEstimador)})</>;
+    const tituloDistribucion = <>Distribución de las estimaciones ({simboloKatex(simboloEstimador)})</>;
+    const leyendaParametroReal = (
+        <>{parametroLabel} real ({simboloKatex(`${simboloParametro} = ${parametroVerdadero?.toFixed(2)}`)})</>
+    );
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
 
             {/* GRÁFICO DE EVOLUCIÓN */}
-            <MarcoWidgetMAT251 titulo={`Evolución de las estimaciones (${yLabel.includes('μ') ? 'X̄' : (yLabel.includes('p') ? 'p̂' : 'S²')})`} anchoCompleto={true} alto="450px">
+            <MarcoWidgetMAT251 titulo={tituloEstimador} anchoCompleto={true} alto="450px">
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={datosLinea} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                    <LineChart data={datosLinea} margin={{ top: 20, right: 30, left: -10, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color, #e2e8f0)" />
                         <XAxis 
                             dataKey="simulacion" 
                             stroke="var(--text-main, #334155)"
+                            interval={esMovil ? Math.max(1, Math.ceil(datosLinea.length / 6)) : 'preserveStartEnd'}
                             label={{ value: 'Simulación', position: 'insideBottom', offset: -5, fill: 'var(--text-main, #334155)', fontSize: 12, fontFamily: FONT }} 
-                            tick={{ fontSize: 10, fontFamily: FONT, fill: 'var(--text-main, #334155)' }}
+                            tick={{ fontSize: esMovil ? 9 : 10, fontFamily: FONT, fontWeight: 700, fill: 'var(--text-main, #334155)' }}
                         />
                         <YAxis 
                             domain={['auto', 'auto']}
                             stroke="var(--text-main, #334155)"
-                            label={{ value: `Estimación de la ${yLabel.split(' ')[0].toLowerCase()}`, angle: -90, position: 'insideLeft', offset: 15, style: { textAnchor: 'middle' }, fill: 'var(--text-main, #334155)', fontSize: 12, fontFamily: FONT }}
-                            tick={{ fontSize: 10, fontFamily: FONT, fill: 'var(--text-main, #334155)' }}
+                            label={{ value: `Estimación de la ${parametroLabel.toLowerCase()}`, angle: -90, position: 'insideLeft', offset: 15, style: { textAnchor: 'middle' }, fill: 'var(--text-main, #334155)', fontSize: 12, fontFamily: FONT }}
+                            tick={{ fontSize: 10, fontFamily: FONT, fontWeight: 700, fill: 'var(--text-main, #334155)' }}
                         />
                         <Tooltip 
                             formatter={(value) => [value.toFixed(4), 'Estimación']}
@@ -80,20 +105,21 @@ export default function GraficoEstimacionSimulacion({ resultados, simulacionesVi
                         <Legend 
                             verticalAlign="bottom" 
                             height={36}
+                            wrapperStyle={{ left: 0, right: 0, width: '100%' }}
                             content={(props) => (
-                                <ul style={{ listStyle: 'none', padding: '15px 0 0 0', margin: 0, display: 'flex', justifyContent: 'center', gap: '30px', fontSize: '12px', fontFamily: FONT }}>
-                                    <li style={{ display: 'flex', alignItems: 'center' }}>
+                                <ul style={{ listStyle: 'none', width: '100%', boxSizing: 'border-box', padding: esMovil ? '8px 0 0' : '15px 0 0', margin: 0, display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'center', gap: esMovil ? '8px' : '30px', fontSize: esMovil ? '9px' : '12px', fontFamily: FONT }}>
+                                    <li style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
                                         <span style={{ display: 'inline-flex', alignItems: 'center', width: '20px', height: '0', borderTop: '2px solid #3b82f6', marginRight: '8px', position: 'relative' }}>
                                             {simulaciones.length <= 500 && (
                                                 <span style={{ position: 'absolute', left: '6px', top: '-4px', width: '8px', height: '8px', backgroundColor: '#3b82f6', borderRadius: '50%' }}></span>
                                             )}
                                         </span>
-                                        <span style={{ color: 'var(--text-main, #334155)' }}>{`Estimación (${yLabel.includes('μ') ? 'X̄' : (yLabel.includes('p') ? 'p̂' : 'S²')})`}</span>
+                                        <span style={{ color: 'var(--text-main, #334155)', whiteSpace: 'nowrap' }}>Estimación ({simboloKatex(simboloEstimador)})</span>
                                     </li>
                                     {parametroVerdadero !== null && (
-                                        <li style={{ display: 'flex', alignItems: 'center' }}>
+                                        <li style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
                                             <span style={{ display: 'inline-block', width: '20px', height: '0', borderTop: '2px dashed #ef4444', marginRight: '8px' }}></span>
-                                            <span style={{ color: 'var(--text-main, #334155)' }}>{`${yLabel.split(' ')[0]} real (${yLabel.split('(')[1].split(')')[0]} = ${parametroVerdadero.toFixed(2)})`}</span>
+                                            <span style={{ color: 'var(--text-main, #334155)', whiteSpace: 'nowrap' }}>{leyendaParametroReal}</span>
                                         </li>
                                     )}
                                 </ul>
@@ -122,21 +148,23 @@ export default function GraficoEstimacionSimulacion({ resultados, simulacionesVi
             </MarcoWidgetMAT251>
 
             {/* HISTOGRAMA */}
-            <MarcoWidgetMAT251 titulo={`Distribución de las estimaciones (${yLabel.includes('μ') ? 'X̄' : (yLabel.includes('p') ? 'p̂' : 'S²')})`} anchoCompleto={true} alto="450px">
+            <MarcoWidgetMAT251 titulo={tituloDistribucion} anchoCompleto={true} alto="450px">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={datosHistograma} margin={{ top: 20, right: 30, left: -25, bottom: 20 }} barCategoryGap="0%" barGap={0}>
+                    <BarChart data={datosHistograma} margin={{ top: 20, right: 30, left: -10, bottom: 0 }} barCategoryGap="0%" barGap={0}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color, #e2e8f0)" />
                         <XAxis 
                             dataKey="marcaClase" 
+                            padding={{ left: 8, right: 0 }}
                             stroke="var(--text-main, #334155)"
-                            label={{ value: `Estimaciones de la ${yLabel.split(' ')[0].toLowerCase()}`, position: 'insideBottom', offset: -5, fill: 'var(--text-main, #334155)', fontSize: 12, fontFamily: FONT }} 
-                            tick={{ fontSize: 10, fontFamily: FONT, fill: 'var(--text-main, #334155)' }}
+                            interval={esMovil ? 3 : 'preserveStartEnd'}
+                            label={{ value: `Estimaciones de la ${parametroLabel.toLowerCase()}`, position: 'insideBottom', offset: -5, fill: 'var(--text-main, #334155)', fontSize: 12, fontFamily: FONT }}
+                            tick={{ fontSize: esMovil ? 9 : 10, fontFamily: FONT, fontWeight: 700, fill: 'var(--text-main, #334155)' }}
                             tickFormatter={(val) => val.toFixed(2)}
                         />
                         <YAxis 
                             stroke="var(--text-main, #334155)"
-                            label={{ value: 'Frecuencia', angle: -90, position: 'insideLeft', offset: 30, style: { textAnchor: 'middle' }, fill: 'var(--text-main, #334155)', fontSize: 12, fontFamily: FONT }} 
-                            tick={{ fontSize: 10, fontFamily: FONT, fill: 'var(--text-main, #334155)' }}
+                            label={{ value: 'Frecuencia', angle: -90, position: 'insideLeft', offset: 15, style: { textAnchor: 'middle' }, fill: 'var(--text-main, #334155)', fontSize: 12, fontFamily: FONT }} 
+                            tick={{ fontSize: 10, fontFamily: FONT, fontWeight: 700, fill: 'var(--text-main, #334155)' }}
                         />
                         <Tooltip 
                             formatter={(value) => [value, 'Simulaciones']}
@@ -149,16 +177,17 @@ export default function GraficoEstimacionSimulacion({ resultados, simulacionesVi
                         <Legend 
                             verticalAlign="bottom" 
                             height={36}
+                            wrapperStyle={{ left: 0, right: 0, width: '100%' }}
                             content={(props) => (
-                                <ul style={{ listStyle: 'none', padding: '15px 0 0 0', margin: 0, display: 'flex', justifyContent: 'center', gap: '30px', fontSize: '12px', fontFamily: FONT }}>
-                                    <li style={{ display: 'flex', alignItems: 'center' }}>
+                                <ul style={{ listStyle: 'none', width: '100%', boxSizing: 'border-box', padding: esMovil ? '8px 0 0' : '15px 0 0', margin: 0, display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'center', gap: esMovil ? '8px' : '30px', fontSize: esMovil ? '9px' : '12px', fontFamily: FONT }}>
+                                    <li style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
                                         <span style={{ display: 'inline-block', width: '12px', height: '12px', backgroundColor: '#60a5fa', marginRight: '8px', borderRadius: '2px' }}></span>
-                                        <span style={{ color: 'var(--text-main, #334155)' }}>Estimaciones simuladas</span>
+                                        <span style={{ color: 'var(--text-main, #334155)', whiteSpace: 'nowrap' }}>Estimaciones simuladas</span>
                                     </li>
                                     {parametroVerdadero !== null && (
-                                        <li style={{ display: 'flex', alignItems: 'center' }}>
+                                        <li style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
                                             <span style={{ display: 'inline-block', width: '20px', height: '0', borderTop: '2px dashed #ef4444', marginRight: '8px' }}></span>
-                                            <span style={{ color: 'var(--text-main, #334155)' }}>{`${yLabel.split(' ')[0]} real (${yLabel.split('(')[1].split(')')[0]} = ${parametroVerdadero.toFixed(2)})`}</span>
+                                            <span style={{ color: 'var(--text-main, #334155)', whiteSpace: 'nowrap' }}>{leyendaParametroReal}</span>
                                         </li>
                                     )}
                                 </ul>

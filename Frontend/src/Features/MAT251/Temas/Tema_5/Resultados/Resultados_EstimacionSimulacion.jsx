@@ -177,11 +177,9 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
     if (parametro === 'varianza') { simbolo = 'S^2'; pName = 'Varianza (σ²)'; }
 
     return (
-        <div style={{ marginTop: '0px' }}>
-            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>Resultados:</h4>
-            
+        <div className="tema5-resultados-pure" style={{ marginTop: '0px' }}>
             {/* CONTROLES DE SIMULACIÓN TIPO TEMA 1 */}
-            <div style={{ marginTop: '0px', marginBottom: '5px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ marginTop: '10px', marginBottom: '5px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${(visibleCount / total) * 100}%`, transition: 'width 0.1s linear' }} />
                 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
@@ -282,20 +280,20 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '15px' }}>
                 {parametroVerdadero !== null && (
                     <div className="card-resultado" style={{ background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.4)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
                             <svg width="18" height="18" viewBox="0 0 640 512" fill="currentColor" style={{ color: '#ea580c' }}>
                                 <path d="M96 224c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm448 0c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm32 32h-64c-17.6 0-33.5 7.1-45.1 18.6 40.3 22.1 68.9 62 75.1 109.4h66c17.7 0 32-14.3 32-32v-32c0-35.3-28.7-64-64-64zm-256 0c61.9 0 112-50.1 112-112S381.9 32 320 32 208 82.1 208 144s50.1 112 112 112zm76.8 32h-8.3c-20.8 10-43.9 16-68.5 16s-47.6-6-68.5-16h-8.3C179.6 288 128 339.6 128 403.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-28.8c0-63.6-51.6-115.2-115.2-115.2zm-223.7-13.4C161.5 263.1 145.6 256 128 256H64c-35.3 0-64 28.7-64 64v32c0 17.7 14.3 32 32 32h66.9c6.2-47.4 34.8-87.3 75.1-109.4z"/>
                             </svg>
                             Parámetro Poblacional Real
                         </div>
-                        <div style={{ fontSize: '1rem', fontWeight: 'bold'}}>
-                            {parametroVerdadero.toFixed(4)}
+                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
+                            {renderKatex(parametroVerdadero.toFixed(4))}
                         </div>
                     </div>
                 )}
 
                 <div className="card-resultado" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.4)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75em', color: 'var(--text-muted)', fontWeight: 'bold' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75em', color: 'var(--text-pure)', fontWeight: 'bold' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
                                 style={{ color: 'var(--primary-color)' }}>
                             <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -304,7 +302,7 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                         </svg>
                         Promedio de las Estimaciones
                     </div>
-                    <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
                         {renderKatex(`\\overline{${simbolo}} = ${resumenDinamico.promedio.toFixed(4)}`)}
                     </div>
                 </div>
@@ -312,17 +310,17 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '15px' }}>
                 <div className="card-stat" style={{ background: 'rgba(147, 51, 234, 0.08)', border: '1px solid rgba(147, 51, 234, 0.4)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                         style={{ color: '#9333ea' }}>
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                         </svg>
                         Desv. Est. de Estimaciones:
                     </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold'}}>{resumenDinamico.desviacion.toFixed(4)}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.desviacion.toFixed(4))}</span>
                 </div>
                 <div className="card-stat" style={{ background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.4)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                         style={{ color: '#dc2626' }}>
                             <circle cx="12" cy="12" r="10"></circle>
@@ -331,10 +329,10 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                         </svg>
                         Mínimo {renderKatex(`(${simbolo})`)}:
                     </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.min === Infinity ? '0.0000' : resumenDinamico.min.toFixed(4)}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.min === Infinity ? '0.0000' : resumenDinamico.min.toFixed(4))}</span>
                 </div>
                 <div className="card-stat" style={{ background: 'rgba(22, 163, 74, 0.08)', border: '1px solid rgba(22, 163, 74, 0.4)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                          style={{ color: '#16a34a' }}>
                             <circle cx="12" cy="12" r="10"></circle>
@@ -343,24 +341,9 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                         </svg>
                         Máximo {renderKatex(`(${simbolo})`)}:
                     </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.max === -Infinity ? '0.0000' : resumenDinamico.max.toFixed(4)}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.max === -Infinity ? '0.0000' : resumenDinamico.max.toFixed(4))}</span>
                 </div>
             </div>
-
-            {parametroVerdadero !== null && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px', marginBottom: '20px' }}>
-                    <div className="card-stat" style={{ background: 'var(--bg-input)' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 600 }}>Sesgo del Estimador:</span>
-                        <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.sesgo.toFixed(6)}</span>
-                    </div>
-                    <div className="card-stat" style={{ background: 'var(--bg-input)' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 600 }}>Error Cuadrático Medio:</span>
-                        <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{resumenDinamico.ecm.toFixed(6)}</span>
-                    </div>
-                </div>
-            )}
-            
-
 
             {/* GRÁFICOS */}
             <div style={{ marginTop: '20px' }}>
@@ -370,20 +353,22 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
             {/* TABLA DE RESULTADOS */}
             <div style={{ marginTop: '20px' }}>
                 <Tabla_EstimacionSimulacion resultados={resultados} simulacionesVisibles={simulacionesVisibles} />
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
                     <button
+                        type="button"
                         className="btn-primary"
-                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                        style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
                         onClick={handleGuardarEnEspacio}
                     >
-                        <IconoGuardar /> Guardar en Mi Espacio
+                        <IconoGuardar /> Guardar
                     </button>
                     <button
+                        type="button"
                         className="btn-verde"
-                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                        style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
                         onClick={handleDescargarExcel}
                     >
-                        <Descargar /> Descargar Excel
+                        <Descargar width="18" height="18" /> Descargar (.xlsx)
                     </button>
                 </div>
             </div>
@@ -432,6 +417,24 @@ function Tabla_EstimacionSimulacion({ resultados, simulacionesVisibles }) {
         }
     }, [n, tieneMuestras]);
 
+    const estiloBotonMostrarMas = {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '6px',
+        width: 'fit-content',
+        background: 'transparent',
+        border: '1px solid var(--primary-color)',
+        color: 'var(--primary-color)',
+        cursor: 'pointer',
+        fontWeight: 600,
+        padding: '5px 14px',
+        borderRadius: RADIUS,
+        transition: 'all 0.2s ease',
+        fontSize: FS.sm,
+        fontFamily: 'inherit'
+    };
+
     const renderSampleValue = (muestra, colIdx) => {
         if (!muestra) return '-';
         if (colIdx === '...') return '...';
@@ -445,8 +448,8 @@ function Tabla_EstimacionSimulacion({ resultados, simulacionesVisibles }) {
             <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main)', textAlign:'center' }}>
                 Muestras y Estimaciones
             </h4>
-            <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--bg-card)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'center', fontSize: '0.85em', whiteSpace: 'nowrap' }}>
+            <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', border: '1px solid var(--border-color)', borderRadius: '0px', background: 'var(--bg-card)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'center', fontSize: '0.85em', whiteSpace: 'nowrap', color: 'var(--text-pure)' }}>
                     <thead style={{ background: 'var(--bg-input)', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                         <tr>
                             <th rowSpan={tieneMuestras ? 2 : 1} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', width: '1%', whiteSpace: 'nowrap' }}>Simulación</th>
@@ -496,10 +499,11 @@ function Tabla_EstimacionSimulacion({ resultados, simulacionesVisibles }) {
             <div style={{ display: 'flex', gap: '15px', marginTop: '20px', justifyContent: 'center', width: '100%' }}>
                 {limiteVisible < simulaciones.length && (
                     <button 
+                        type="button"
                         onClick={() => setLimiteVisible(prev => Math.min(prev + 10, simulaciones.length))}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1.5px solid var(--primary-color)', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '600', padding: '8px 20px', borderRadius: '25px', transition: 'all 0.2s ease', fontSize: '0.85em', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)' }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)' }}
+                        style={estiloBotonMostrarMas}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; }}
                     >
                         Mostrar 10 más
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -510,10 +514,11 @@ function Tabla_EstimacionSimulacion({ resultados, simulacionesVisibles }) {
                 )}
                 {limiteVisible < simulaciones.length && limiteVisible + 10 < simulaciones.length && (
                     <button 
+                        type="button"
                         onClick={() => setLimiteVisible(prev => Math.min(prev + 50, simulaciones.length))}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1.5px solid var(--primary-color)', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '600', padding: '8px 20px', borderRadius: '25px', transition: 'all 0.2s ease', fontSize: '0.85em', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)' }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)' }}
+                        style={estiloBotonMostrarMas}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; }}
                     >
                         Mostrar 50 más
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

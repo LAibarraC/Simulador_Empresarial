@@ -4,6 +4,7 @@ import 'katex/dist/katex.min.css';
 import Grafica_IntervalosMatriz from '../../../Graficas/Tema_5/Grafica_IntervalosMatriz';
 import Grafica_IntervalosProporcion from '../../../Graficas/Tema_5/Grafica_IntervalosProporcion';
 import Grafica_IntervalosVarianza from '../../../Graficas/Tema_5/Grafica_IntervalosVarianza';
+import StatLabel from '../../../ui/StatLabel';
 import '../../../styles/Temas/Tema3.css';
 
 export default function Resultados_IntervalosMatriz({ resultados, parametro }) {
@@ -27,32 +28,6 @@ export default function Resultados_IntervalosMatriz({ resultados, parametro }) {
         return '';
     };
 
-    const getFormulaIC = () => {
-        if (parametro === 'media') {
-            if (resultados.metodo.includes('Z')) {
-                return `\\bar{X} \\pm Z \\frac{\\sigma}{\\sqrt{n}}`;
-            } else {
-                return `\\bar{X} \\pm t \\frac{\\sigma}{\\sqrt{n}}`;
-            }
-        } else if (parametro === 'proporcion') {
-            return `\\hat{p} \\pm Z \\sqrt{\\frac{\\hat{p}(1-\\hat{p})}{n}}`;
-        }
-        return '';
-    };
-
-    const getFormulaE = () => {
-        if (parametro === 'media') {
-            if (resultados.metodo.includes('Z')) {
-                return `E = Z \\frac{\\sigma}{\\sqrt{n}}`;
-            } else {
-                return `E = t \\frac{\\sigma}{\\sqrt{n}}`;
-            }
-        } else if (parametro === 'proporcion') {
-            return `E = Z \\sqrt{\\frac{\\hat{p}(1-\\hat{p})}{n}}`;
-        }
-        return '';
-    };
-
     const getFormulaICNum = () => {
         const critico = resultados.valorCritico.toFixed(4);
         const punt = puntual.estimacion.toFixed(4);
@@ -69,155 +44,112 @@ export default function Resultados_IntervalosMatriz({ resultados, parametro }) {
         return '';
     };
 
-    const renderDesviacion = () => {
-        if (parametro === 'media' && resultados.margenError !== undefined && resultados.valorCritico !== undefined) {
-            const SE = resultados.margenError / resultados.valorCritico;
-            const s_or_sigma = (SE * Math.sqrt(resultados.n)).toFixed(4);
-            const sym = '\\sigma';
-            const formula = '\\sigma = \\sqrt{\\frac{\\sum(x_i-\\bar{x})^2}{n-1}}';
-            
-            // Si es t-student, sabemos 100% que fue calculada (muestral), mostramos tooltip.
-            // Si es Z, asumimos que fue ingresada manualmente (conocida), no mostramos tooltip.
-            const showTooltip = !resultados.metodo.includes('Z');
-            
-            return (
-                <div style={{ flex: '1 1 130px', maxWidth: '250px', padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Desviación Estándar</div>
-                    <div style={{ fontSize: '1rem', marginTop: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '3px' }}>
-                        {showTooltip ? (
-                            <span className="t3-tooltip-wrap" style={{ borderBottom: '1px dashed #94a3b8', cursor: 'help', paddingBottom: '0px' }}>
-                                <div className="t3-tooltip-box" style={{ fontWeight: 'normal', width: 'max-content', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.9rem', color: '#fff' }}>
-                                        {renderKatex(formula)}
-                                    </div>
-                                </div>
-                                {renderKatex(sym)}
-                            </span>
-                        ) : (
-                            renderKatex(sym)
-                        )}
-                        {renderKatex(`= ${s_or_sigma}`)}
-                    </div>
-                </div>
-            );
-        }
-        return null;
-    };
-
     const puntual = resultados.puntual;
 
+    if (!puntual || !Number.isFinite(Number(puntual.estimacion))) return null;
+    if (parametro === 'varianza') {
+        if (!Number.isFinite(Number(resultados.criticoInf)) || !Number.isFinite(Number(resultados.criticoSup))) return null;
+    } else if (!Number.isFinite(Number(resultados.valorCritico)) || !Number.isFinite(Number(resultados.margenError))) {
+        return null;
+    }
+
+    const filasResolucion = [];
+    if (parametro === 'varianza') {
+        const chiCuadradoSuperior = Math.max(resultados.criticoInf, resultados.criticoSup).toFixed(4);
+        const chiCuadradoInferior = Math.min(resultados.criticoInf, resultados.criticoSup).toFixed(4);
+        filasResolucion.push(
+            ['Fórmula del intervalo', <StatLabel formulaKey="IC_varianza" formulaLatex="IC" align="left" position="top" />],
+            ['Cálculo del intervalo', renderKatex(`IC = \\left[ \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${chiCuadradoSuperior}}, \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${chiCuadradoInferior}} \\right]`)],
+            ['Límite inferior', renderKatex(`LI = \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${chiCuadradoSuperior}} = \\mathbf{${resultados.LI.toFixed(4)}}`)],
+            ['Límite superior', renderKatex(`LS = \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${chiCuadradoInferior}} = \\mathbf{${resultados.LS.toFixed(4)}}`)]
+        );
+    } else {
+        const formulaKeyIC = parametro === 'proporcion'
+            ? 'IC_proporcion'
+            : (resultados.metodo.includes('Z') ? 'IC_media_z' : 'IC_media_t');
+        const formulaKeyError = parametro === 'proporcion'
+            ? 'E_proporcion'
+            : (resultados.metodo.includes('Z') ? 'E_media_z' : 'E_media_t');
+        filasResolucion.push(
+            ['Fórmula del intervalo', <StatLabel formulaKey={formulaKeyIC} formulaLatex="IC" align="left" position="top" />],
+            ['Cálculo del intervalo', renderKatex(`IC = ${getFormulaICNum()}`)],
+            ['Margen de error', <><StatLabel formulaKey={formulaKeyError} formulaLatex="E" align="left" position="top" />{renderKatex(` = \\mathbf{${resultados.margenError.toFixed(4)}}`)}</>],
+            ['Límite inferior', renderKatex(`LI = ${getSymboloPuntual()} - E = ${puntual.estimacion.toFixed(4)} - ${resultados.margenError.toFixed(4)} = \\mathbf{${resultados.LI.toFixed(4)}}`)],
+            ['Límite superior', renderKatex(`LS = ${getSymboloPuntual()} + E = ${puntual.estimacion.toFixed(4)} + ${resultados.margenError.toFixed(4)} = \\mathbf{${resultados.LS.toFixed(4)}}`)]
+        );
+    }
+    filasResolucion.push(
+        ['Intervalo de confianza', renderKatex(`IC = [\\, \\mathbf{${resultados.LI.toFixed(4)}} \\, , \\, \\mathbf{${resultados.LS.toFixed(4)}} \\,]`)],
+        ['Interpretación', renderKatex(`P(\\mathbf{${resultados.LI.toFixed(4)}} \\le ${getSymboloParam()} \\le \\mathbf{${resultados.LS.toFixed(4)}}) = \\mathbf{${resultados.confianza / 100}}`)]
+    );
+
+    const columnasResumen = [
+        { titulo: 'Tamaño de Muestra', valor: renderKatex(`n = ${resultados.n}`) },
+        { titulo: 'Estimador Puntual', valor: renderKatex(`${getSymboloPuntual()} = ${puntual.estimacion.toFixed(4)}`) },
+        { titulo: 'Nivel de Confianza', valor: renderKatex(`${resultados.confianza}\\%`) },
+        {
+            titulo: `Valor Crítico - ${resultados.metodo}`,
+            valor: parametro === 'varianza'
+                ? renderKatex(`\\chi^2_{sup} = ${Math.max(resultados.criticoInf, resultados.criticoSup).toFixed(4)}, \\; \\chi^2_{inf} = ${Math.min(resultados.criticoInf, resultados.criticoSup).toFixed(4)}`)
+                : renderKatex(`${resultados.metodo.includes('Z') ? 'Z' : 'T'} = ${resultados.valorCritico.toFixed(4)}`)
+        }
+    ];
+    if (parametro === 'media') {
+        const desviacion = (resultados.margenError / resultados.valorCritico) * Math.sqrt(resultados.n);
+        columnasResumen.push({ titulo: 'Desviación Estándar', valor: renderKatex(`\\sigma = ${desviacion.toFixed(4)}`) });
+    }
+
     return (
-        <div style={{ width: '100%' }}>
-            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>
-                Resultados:
-            </h4>
-
-            {/* Fila de Estimación Puntual y Descriptivos */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
-                <div style={{ flex: '1 1 130px', maxWidth: '250px', padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Tamaño de Muestra</div>
-                    <div style={{ fontSize: '1rem', marginTop: '5px' }}>{renderKatex(`n = ${resultados.n}`)}</div>
-                </div>
-
-                <div style={{ flex: '1 1 130px', maxWidth: '250px', padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Estimador Puntual</div>
-                    <div style={{ fontSize: '1rem', marginTop: '5px' }}>
-                        {renderKatex(`${getSymboloPuntual()} = ${puntual.estimacion.toFixed(4)}`)}
-                    </div>
-                </div>
-
-                <div style={{ flex: '1 1 130px', maxWidth: '250px', padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Nivel de Confianza</div>
-                    <div style={{ fontSize: '1rem', marginTop: '5px' }}>{renderKatex(`${resultados.confianza}\\%`)}</div>
-                </div>
+        <div className="tema5-resultados-pure" style={{ width: '100%' }}>
+            <div className="tema5-tabla-estimacion-wrapper tema5-tabla-resolucion-scroll">
+                <table className="tema5-tabla-estimacion tema5-tabla-resumen-intervalo" style={{ width: 'fit-content', maxWidth: '100%', tableLayout: 'auto' }}>
+                    <colgroup>{Array.from({ length: 6 }, (_, indice) => <col key={indice} />)}</colgroup>
+                    <tbody>
+                        <tr>
+                            {columnasResumen.slice(0, 3).map((columna) => (
+                                <td key={columna.titulo} colSpan={2} style={{ whiteSpace: 'normal', fontWeight: 700, fontSize: '0.85rem' }}>{columna.titulo}</td>
+                            ))}
+                        </tr>
+                        <tr>
+                            {columnasResumen.slice(0, 3).map((columna) => (
+                                <td key={columna.titulo} colSpan={2} style={{ whiteSpace: 'normal', fontSize: '0.85rem' }}>{columna.valor}</td>
+                            ))}
+                        </tr>
+                        <tr>
+                            {columnasResumen.slice(3).map((columna) => (
+                                <td key={columna.titulo} colSpan={columnasResumen.length === 5 ? 3 : 6} style={{ whiteSpace: 'normal', fontWeight: 700, fontSize: '0.85rem' }}>{columna.titulo}</td>
+                            ))}
+                        </tr>
+                        <tr>
+                            {columnasResumen.slice(3).map((columna) => (
+                                <td key={columna.titulo} colSpan={columnasResumen.length === 5 ? 3 : 6} style={{ whiteSpace: 'normal', fontSize: '0.85rem' }}>{columna.valor}</td>
+                            ))}
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginBottom: '15px' }}>
-                <div style={{ flex: '1 1 200px', maxWidth: '400px', padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Valor Crítico - {resultados.metodo}</div>
-                    <div style={{ fontSize: parametro === 'varianza' ? '0.9rem' : '1rem', marginTop: '5px' }}>
-                        {parametro === 'varianza' 
-                            ? renderKatex(`\\chi^2_{sup} = ${Math.max(resultados.criticoInf, resultados.criticoSup).toFixed(4)}, \\chi^2_{inf} = ${Math.min(resultados.criticoInf, resultados.criticoSup).toFixed(4)}`)
-                            : renderKatex(`${resultados.metodo.includes('Z') ? 'Z' : 'T'} = ${resultados.valorCritico.toFixed(4)}`)
-                        }
-                    </div>
+            <section className="tema5-resolucion-estimacion">
+                <h4>Desarrollo del intervalo de confianza</h4>
+                <div className="tema5-tabla-estimacion-wrapper tema5-tabla-resolucion-scroll tema5-tabla-intervalo-wrapper">
+                    <table className="tema5-tabla-estimacion tema5-tabla-resolucion tema5-tabla-intervalo-detalle">
+                        <thead>
+                            <tr>
+                                <th>Detalle</th>
+                                <th>Cálculo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filasResolucion.map(([detalle, calculo]) => (
+                                <tr key={detalle}>
+                                    <td>{detalle}</td>
+                                    <td>{calculo}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-
-                {renderDesviacion()}
-            </div>
-
-            {/* Resultado Principal: El Intervalo */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                <div style={{ padding: '15px 25px', background: 'rgba(37, 99, 235, 0.1)', border: '2px solid var(--primary-color)', borderRadius: '12px', textAlign: 'center', minWidth: '300px', display: 'inline-block' }}>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-main)', fontWeight: 'bold', marginBottom: '8px' }}>
-                        Intervalo de Confianza para {renderKatex(getSymboloParam())} al {resultados.confianza}%
-                    </div>
-                    {resultados.margenError !== undefined && (
-                        <div style={{ marginTop: '15px', marginBottom: '10px' }}>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
-                                <span className="t3-tooltip-wrap" style={{ borderBottom: '1px dashed #94a3b8', cursor: 'help', paddingBottom: '0px' }}>
-                                    <div className="t3-tooltip-box" style={{ fontWeight: 'normal', width: 'max-content', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.9rem', color: '#fff' }}>
-                                            {renderKatex(`IC = ${getFormulaIC()}`)}
-                                        </div>
-                                    </div>
-                                    {renderKatex(`IC`)}
-                                </span>
-                                {renderKatex(`= ${getFormulaICNum()}`)}
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px', marginBottom: '5px' }}>
-                                <span>Margen de Error</span>
-                                <span className="t3-tooltip-wrap" style={{ borderBottom: '1px dashed #94a3b8', cursor: 'help', paddingBottom: '0px' }}>
-                                    <div className="t3-tooltip-box" style={{ fontWeight: 'normal', width: 'max-content', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.9rem', color: '#fff' }}>
-                                            {renderKatex(getFormulaE())}
-                                        </div>
-                                    </div>
-                                    {renderKatex(`(E)`)}
-                                </span>
-                                {renderKatex(`= ${resultados.margenError.toFixed(4)}`)}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', marginTop: '8px', display: 'grid', gridTemplateColumns: 'max-content max-content', rowGap: '4px', columnGap: '8px', justifyContent: 'center', alignItems: 'center' }}>
-                                <div style={{ textAlign: 'right' }}>Límite Inferior</div>
-                                <div style={{ textAlign: 'left' }}>{renderKatex(`= LI = ${getSymboloPuntual()} - E = ${puntual.estimacion.toFixed(4)} - ${resultados.margenError.toFixed(4)} = ${resultados.LI.toFixed(4)}`)}</div>
-                                <div style={{ textAlign: 'right' }}>Límite Superior</div>
-                                <div style={{ textAlign: 'left' }}>{renderKatex(`= LS = ${getSymboloPuntual()} + E = ${puntual.estimacion.toFixed(4)} + ${resultados.margenError.toFixed(4)} = ${resultados.LS.toFixed(4)}`)}</div>
-                            </div>
-                        </div>
-                    )}
-
-                    {parametro === 'varianza' && (
-                        <div style={{ marginTop: '15px', marginBottom: '10px' }}>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
-                                <span className="t3-tooltip-wrap" style={{ borderBottom: '1px dashed #94a3b8', cursor: 'help', paddingBottom: '0px' }}>
-                                    <div className="t3-tooltip-box" style={{ fontWeight: 'normal', width: 'max-content', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.9rem', color: '#fff' }}>
-                                            {renderKatex(`IC = \\left[ \\frac{(n - 1)S^2}{\\chi^2_{sup}}, \\frac{(n - 1)S^2}{\\chi^2_{inf}} \\right]`)}
-                                        </div>
-                                    </div>
-                                    {renderKatex(`IC`)}
-                                </span>
-                                {renderKatex(`= \\left[ \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${Math.max(resultados.criticoInf, resultados.criticoSup).toFixed(4)}}, \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${Math.min(resultados.criticoInf, resultados.criticoSup).toFixed(4)}} \\right]`)}
-                            </div>
-                            
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', marginTop: '15px', display: 'grid', gridTemplateColumns: 'max-content max-content', rowGap: '4px', columnGap: '8px', justifyContent: 'center', alignItems: 'center' }}>
-                                <div style={{ textAlign: 'right' }}>Límite Inferior</div>
-                                <div style={{ textAlign: 'left' }}>{renderKatex(`= LI = \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${Math.max(resultados.criticoInf, resultados.criticoSup).toFixed(4)}} = ${resultados.LI.toFixed(4)}`)}</div>
-                                <div style={{ textAlign: 'right' }}>Límite Superior</div>
-                                <div style={{ textAlign: 'left' }}>{renderKatex(`= LS = \\frac{(${resultados.n} - 1)(${puntual.estimacion.toFixed(4)})}{${Math.min(resultados.criticoInf, resultados.criticoSup).toFixed(4)}} = ${resultados.LS.toFixed(4)}`)}</div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-main)', marginTop: '15px' }}>
-                        {renderKatex(`IC = [\\, ${resultados.LI.toFixed(4)} \\, , \\, ${resultados.LS.toFixed(4)} \\,]`)}
-                    </div>
-
-                    <div style={{ fontSize: '1rem' , fontWeight: 'bold', color: 'var(--text-main)', marginTop: '15px' }}>
-                        {renderKatex(`P(${resultados.LI.toFixed(4)} \\le ${getSymboloParam()} \\le ${resultados.LS.toFixed(4)}) = ${resultados.confianza / 100}`)}
-                    </div>
-                </div>
-            </div>
+            </section>
 
             {parametro !== 'varianza' ? (
                 <div style={{ marginTop: '20px' }}>

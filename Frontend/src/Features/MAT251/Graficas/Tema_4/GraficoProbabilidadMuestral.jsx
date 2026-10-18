@@ -5,6 +5,7 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot
 } from 'recharts';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
+import { TituloGraficaFormula, EtiquetaEjeXKaTeX, EtiquetaEjeYKaTeX } from './EtiquetasKaTeX';
 import ModalLimiteFueraDeGrafica from './ModalLimiteFueraDeGrafica';
 import EtiquetaLimiteIntervalo from './EtiquetaLimiteIntervalo';
 
@@ -235,7 +236,7 @@ export default function GraficoProbabilidadMuestral({ resultados }) {
     }, [tieneProbabilidad, condicion, hasX1, hasX2, numX1, numX2, SE]);
 
     return (
-        <MarcoWidgetMAT251 titulo="Gráfica de Densidad de Probabilidad f(x̄)" anchoCompleto={true} alto="450px" id="grafico-normal-muestral">
+        <MarcoWidgetMAT251 titulo={<TituloGraficaFormula antes={'Gr\u00e1fica de Densidad de Probabilidad '} formula={"f(\\bar{x})"} />} anchoCompleto={true} alto="450px" id="grafico-normal-muestral">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -253,7 +254,7 @@ export default function GraficoProbabilidadMuestral({ resultados }) {
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickFormatter={(val) => Number.isInteger(val) ? val : val.toFixed(1)}
-                                label={{ value: 'Media Muestral (x̄)', position: 'insideBottom', offset: -10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<EtiquetaEjeXKaTeX prefix="Media Muestral" value={"(\\bar{x})"} />}
                             />
                             
                             <YAxis 
@@ -262,7 +263,7 @@ export default function GraficoProbabilidadMuestral({ resultados }) {
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickFormatter={(val) => val === 0 ? '0' : val.toFixed(2)}
-                                label={{ value: 'Densidad f(x̄)', angle: -90, position: 'insideLeft', offset: 10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<EtiquetaEjeYKaTeX prefix="Densidad" value={"f(\\bar{x})"} />}
                             />
                             
                             <Tooltip 

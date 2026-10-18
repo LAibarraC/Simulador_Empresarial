@@ -32,8 +32,8 @@ def ejecutar_simulacion(data: SimulacionRequest):
     # Validaciones
     if n <= 0:
         return {"success": False, "error": "El tamano de muestra debe ser mayor a 0."}
-    if num_sim <= 0 or num_sim > 100000:
-        return {"success": False, "error": "Numero de simulaciones invalido (1 - 100000)."}
+    if num_sim <= 0 or num_sim > 10000:
+        return {"success": False, "error": "Numero de simulaciones invalido (1 - 10000)."}
     if parametro == "varianza" and n < 2:
         return {"success": False, "error": "El tamano de muestra debe ser al menos 2 para varianza."}
 
@@ -139,8 +139,8 @@ def ejecutar_simulacion_intervalos(data: SimulacionIntervalosRequest):
     # Validaciones
     if n <= 0:
         return {"success": False, "error": "El tamano de muestra debe ser mayor a 0."}
-    if num_sim <= 0 or num_sim > 100000:
-        return {"success": False, "error": "Numero de simulaciones invalido (1 - 100000)."}
+    if num_sim <= 0 or num_sim > 10000:
+        return {"success": False, "error": "Numero de simulaciones invalido (1 - 10000)."}
 
     # Calcular parametro verdadero
     parametro_verdadero = None

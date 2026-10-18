@@ -67,7 +67,7 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
                     alignItems: 'center',
                     background: 'var(--bg-input, #f8fafc)',
                     padding: '5px',
-                    borderRadius: '12px',
+                    borderRadius: '5px',
                     border: '1px solid var(--border-color, #e2e8f0)',
                     boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
                 }}>
@@ -92,6 +92,7 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
 }
 
 export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, setParametro, modo, setModo, confianza, setConfianza }) {
+    const variableKey = varSeleccionada?.nombre ?? null;
 
     // Estados para almacenar resultados de cada modo
     const [resMatriz, setResMatriz] = useState(null);
@@ -103,10 +104,14 @@ export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, st
         setResMatriz(null);
         setResManual(null);
         setResSimulacion(null);
-    }, [parametro, modo, confianza]);
+    }, [parametro, modo, confianza, variableKey]);
+
+    const resultadoMatrizActual = resMatriz?.parametro === parametro && resMatriz?.confianza === confianza && resMatriz?.variableKey === variableKey ? resMatriz.resultado : null;
+    const resultadoManualActual = resManual?.parametro === parametro && resManual?.confianza === confianza && resManual?.variableKey === variableKey ? resManual.resultado : null;
+    const resultadoSimulacionActual = resSimulacion?.parametro === parametro && resSimulacion?.confianza === confianza && resSimulacion?.variableKey === variableKey ? resSimulacion.resultado : null;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT, '--text-main': 'var(--text-pure)' }}>
 
             {/* Selector de Modo de Trabajo */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
@@ -132,38 +137,41 @@ export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, st
                 {modo === 'matriz' && (
                     <>
                         <Controles_IntervalosMatriz
+                            key={`matriz-${parametro}-${confianza}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
                             confianza={confianza}
                             varSeleccionada={varSeleccionada}
                             filas={filas}
                             statsDatos={statsDatos}
                             abrirEditor={abrirEditor}
-                            onCalcular={setResMatriz}
+                            onCalcular={(resultado) => setResMatriz(resultado ? { parametro, confianza, variableKey, resultado } : null)}
                         />
-                        <Resultados_IntervalosMatriz resultados={resMatriz} parametro={parametro} />
+                        <Resultados_IntervalosMatriz resultados={resultadoMatrizActual} parametro={parametro} />
                     </>
                 )}
 
                 {modo === 'manual' && (
                     <>
                         <Controles_IntervalosManual
+                            key={`manual-${parametro}-${confianza}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
                             confianza={confianza}
-                            onCalcular={setResManual}
+                            onCalcular={(resultado) => setResManual(resultado ? { parametro, confianza, variableKey, resultado } : null)}
                         />
-                        <Resultados_IntervalosManual resultados={resManual} parametro={parametro} />
+                        <Resultados_IntervalosManual resultados={resultadoManualActual} parametro={parametro} />
                     </>
                 )}
 
                 {modo === 'simulacion' && (
                     <>
                         <Controles_IntervalosSimulacion
+                            key={`simulacion-${parametro}-${confianza}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
                             confianza={confianza}
-                            onCalcular={setResSimulacion}
+                            onCalcular={(resultado) => setResSimulacion(resultado ? { parametro, confianza, variableKey, resultado } : null)}
                         />
-                        {resSimulacion && (
-                            <Resultados_IntervalosSimulacion resultados={resSimulacion} />
+                        {resultadoSimulacionActual && (
+                            <Resultados_IntervalosSimulacion resultados={resultadoSimulacionActual} />
                         )}
                     </>
                 )}

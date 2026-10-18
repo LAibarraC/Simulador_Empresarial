@@ -5,6 +5,7 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot
 } from 'recharts';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
+import { TituloGraficaFormula, EtiquetaEjeXKaTeX, EtiquetaEjeYKaTeX } from './EtiquetasKaTeX';
 import ModalLimiteFueraDeGrafica from './ModalLimiteFueraDeGrafica';
 import EtiquetaLimiteIntervalo from './EtiquetaLimiteIntervalo';
 
@@ -208,7 +209,7 @@ export default function GraficoDiferenciaProporciones({ resultados }) {
     }, [tieneProbabilidad, condicion, x1, x2, SE]);
 
     return (
-        <MarcoWidgetMAT251 titulo="Gráfica de Densidad f(p̂) [Diferencia de Proporciones]" anchoCompleto={true} alto="450px" id="grafico-diferencia-proporciones">
+        <MarcoWidgetMAT251 titulo={<TituloGraficaFormula antes={'Gr\u00e1fica de Densidad '} formula={"f(\\hat{p}_1 - \\hat{p}_2)"} despues=" [Diferencia de Proporciones]" />} anchoCompleto={true} alto="450px" id="grafico-diferencia-proporciones">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -226,7 +227,7 @@ export default function GraficoDiferenciaProporciones({ resultados }) {
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickFormatter={(val) => Number.isInteger(val) ? val : val.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                                label={{ value: 'Diferencia de Proporciones (p̂₁ - p̂₂)', position: 'insideBottom', offset: -10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<EtiquetaEjeXKaTeX prefix="Diferencia de Proporciones" value={"(\\hat{p}_1 - \\hat{p}_2)"} />}
                             />
                             
                             <YAxis 
@@ -236,7 +237,7 @@ export default function GraficoDiferenciaProporciones({ resultados }) {
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickFormatter={(val) => val === 0 ? '0' : val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                label={{ value: 'Densidad f(p̂₁ - p̂₂)', angle: -90, position: 'insideLeft', offset: 10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+                                label={<EtiquetaEjeYKaTeX prefix="Densidad" value={"f(\\hat{p}_1 - \\hat{p}_2)"} />}
                             />
                             
                             <Tooltip 

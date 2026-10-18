@@ -153,9 +153,7 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
     };
 
     return (
-        <div style={{ marginTop: '0px' }}>
-            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>Resultados de Cobertura de Intervalos:</h4>
-            
+        <div className="tema5-resultados-pure" style={{ marginTop: '0px' }}>
             {/* CONTROLES DE SIMULACIÓN */}
             <div style={{ marginTop: '0px', marginBottom: '15px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${(visibleCount / total) * 100}%`, transition: 'width 0.1s linear' }} />
@@ -259,7 +257,7 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
                             Parámetro Poblacional ({renderKatex(pName)})
                         </div>
                         <div style={{ fontSize: '1rem', fontWeight: 'bold'}}>
-                            {parametroVerdadero.toFixed(4)}
+                            {renderKatex(parametroVerdadero.toFixed(4))}
                         </div>
                     </div>
                 )}
@@ -269,10 +267,10 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
                         Cobertura Observada
                     </div>
                     <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#059669' }}>
-                        {resumenDinamico.cobertura.toFixed(2)}%
+                        {renderKatex(`${resumenDinamico.cobertura.toFixed(2)}\\%`)}
                     </div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                        {resumenDinamico.contienen} de {visibleCount || 1} intervalos contienen a {renderKatex(pName)}
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-pure)' }}>
+                        {renderKatex(String(resumenDinamico.contienen))} de {renderKatex(String(visibleCount || 1))} intervalos contienen a {renderKatex(pName)}
                     </div>
                 </div>
 
@@ -281,9 +279,9 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
                         Ancho del Intervalo (Promedio)
                     </div>
                     <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                        {resumenDinamico.promedioAmplitud.toFixed(4)}
+                        {renderKatex(resumenDinamico.promedioAmplitud.toFixed(4))}
                     </div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-pure)' }}>
                         (Límite Superior - Límite Inferior)
                     </div>
                 </div>
@@ -300,18 +298,20 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
                 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
                     <button
+                        type="button"
                         className="btn-primary"
-                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                        style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
                         onClick={handleGuardarEnEspacio}
                     >
-                        <IconoGuardar /> Guardar en Mi Espacio
+                        <IconoGuardar /> Guardar
                     </button>
                     <button
+                        type="button"
                         className="btn-verde"
-                        style={{ padding: '5px 14px', fontSize: FS.sm }}
+                        style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
                         onClick={handleDescargarExcel}
                     >
-                        <Descargar /> Descargar Excel
+                        <Descargar width="18" height="18" /> Descargar (.xlsx)
                     </button>
                 </div>
             </div>
@@ -330,21 +330,38 @@ function Tabla_IntervalosSimulacion({ resultados, simulacionesVisibles }) {
     if (parametro === 'varianza') { pName = '\\sigma^2'; }
 
     const simsMostradas = simulacionesVisibles.slice(0, limiteVisible);
+    const estiloBotonMostrarMas = {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '6px',
+        width: 'fit-content',
+        background: 'transparent',
+        border: '1px solid var(--primary-color)',
+        color: 'var(--primary-color)',
+        cursor: 'pointer',
+        fontWeight: 600,
+        padding: '5px 14px',
+        borderRadius: RADIUS,
+        transition: 'all 0.2s ease',
+        fontSize: FS.sm,
+        fontFamily: 'inherit'
+    };
 
     return (
         <div style={{ marginTop: '0px' }}>
-            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main)', textAlign:'center' }}>
+            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-pure)', textAlign:'center' }}>
                 Detalle de Simulaciones
             </h4>
-            <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--bg-card)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'center', fontSize: '0.85em', whiteSpace: 'nowrap' }}>
-                    <thead style={{ background: 'var(--bg-input)', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', border: '1px solid var(--border-color)', borderRadius: '0px', background: 'var(--bg-card)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'center', fontSize: '0.85em', whiteSpace: 'nowrap', color: 'var(--text-pure)' }}>
+                    <thead style={{ background: 'var(--bg-input)', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', color: 'var(--text-pure)' }}>
                         <tr>
-                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)' }}>Simulación</th>
-                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)' }}>{renderKatex(parametro === 'media' ? '\\bar{X}' : parametro === 'proporcion' ? '\\hat{p}' : 'S^2')}</th>
-                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)' }}>Límite Inferior</th>
-                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)' }}>Límite Superior</th>
-                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)' }}>¿Contiene a {renderKatex(pName)}?</th>
+                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>Simulación</th>
+                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>{renderKatex(parametro === 'media' ? '\\bar{X}' : parametro === 'proporcion' ? '\\hat{p}' : 'S^2')}</th>
+                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>Límite Inferior</th>
+                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>Límite Superior</th>
+                            <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>¿Contiene a {renderKatex(pName)}?</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -353,10 +370,10 @@ function Tabla_IntervalosSimulacion({ resultados, simulacionesVisibles }) {
                             const puntual = sim.estimacionPuntual !== undefined ? sim.estimacionPuntual : sim.estimacion || 0;
                             return (
                                 <tr key={i} style={{ borderBottom: '1px solid var(--border-color)', background: i % 2 === 0 ? 'transparent' : 'var(--bg-input)' }}>
-                                    <td style={{ padding: '8px', fontWeight: 600, borderRight: '1px solid var(--border-color)' }}>{indexReal}</td>
-                                    <td style={{ padding: '8px', borderRight: '1px solid var(--border-color)' }}>{puntual.toFixed(4)}</td>
-                                    <td style={{ padding: '8px', borderRight: '1px solid var(--border-color)' }}>{sim.LI.toFixed(4)}</td>
-                                    <td style={{ padding: '8px', borderRight: '1px solid var(--border-color)' }}>{sim.LS.toFixed(4)}</td>
+                                    <td style={{ padding: '8px', fontWeight: 600, borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>{indexReal}</td>
+                                    <td style={{ padding: '8px', borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>{puntual.toFixed(4)}</td>
+                                    <td style={{ padding: '8px', borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>{sim.LI.toFixed(4)}</td>
+                                    <td style={{ padding: '8px', borderRight: '1px solid var(--border-color)', color: 'var(--text-pure)' }}>{sim.LS.toFixed(4)}</td>
                                     <td style={{ padding: '8px' }}>
                                         {sim.contiene ? (
                                             <span style={{ color: '#059669', fontWeight: 'bold' }}>Sí</span>
@@ -374,26 +391,47 @@ function Tabla_IntervalosSimulacion({ resultados, simulacionesVisibles }) {
             <div style={{ display: 'flex', gap: '15px', marginTop: '20px', justifyContent: 'center', width: '100%' }}>
                 {limiteVisible < simulaciones.length && (
                     <button 
+                        type="button"
                         onClick={() => setLimiteVisible(prev => Math.min(prev + 10, simulaciones.length))}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1.5px solid var(--primary-color)', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '600', padding: '8px 20px', borderRadius: '25px', transition: 'all 0.2s ease', fontSize: '0.85em', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}
-                        onMouseOver={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = 'white'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; }}
+                        style={estiloBotonMostrarMas}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; }}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="13 17 18 12 13 7"></polyline>
+                            <polyline points="6 17 11 12 6 7"></polyline>
                         </svg>
                         Mostrar 10 más
                     </button>
                 )}
+                {limiteVisible < simulaciones.length && limiteVisible + 10 < simulaciones.length && (
+                    <button
+                        type="button"
+                        onClick={() => setLimiteVisible(prev => Math.min(prev + 50, simulaciones.length))}
+                        style={estiloBotonMostrarMas}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; }}
+                    >
+                        Mostrar 50 más
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="13 17 18 12 13 7"></polyline>
+                            <polyline points="6 17 11 12 6 7"></polyline>
+                        </svg>
+                    </button>
+                )}
                 {limiteVisible > 10 && (
                     <button 
+                        type="button"
                         onClick={() => setLimiteVisible(10)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid var(--text-muted)', color: 'var(--text-main)', cursor: 'pointer', fontWeight: '500', padding: '8px 20px', borderRadius: '25px', transition: 'all 0.2s ease', fontSize: '0.85em' }}
-                        onMouseOver={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1.5px solid var(--border-color)', color: 'var(--text-muted, #64748b)', cursor: 'pointer', fontWeight: '600', padding: '8px 20px', borderRadius: RADIUS, transition: 'all 0.2s ease', fontSize: FS.sm, fontFamily: 'inherit' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-main)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted, #64748b)'; }}
                     >
-                        Contraer tabla
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="11 17 6 12 11 7"></polyline>
+                            <polyline points="18 17 13 12 18 7"></polyline>
+                        </svg>
+                        Restablecer a 10
                     </button>
                 )}
             </div>

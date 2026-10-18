@@ -5,6 +5,7 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot
 } from 'recharts';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
+import { TituloGraficaFormula } from './EtiquetasKaTeX';
 import ModalLimiteFueraDeGrafica from './ModalLimiteFueraDeGrafica';
 
 
@@ -275,7 +276,7 @@ export default function GraficoDiferenciaMedias({ resultados }) {
     }, [tieneProbabilidad, condicion, x1, x2, SE]);
 
     return (
-        <MarcoWidgetMAT251 titulo="Gráfica de Densidad f(x) [Diferencia de Medias]" anchoCompleto={true} alto="450px" id="grafico-diferencia-medias">
+        <MarcoWidgetMAT251 titulo={<TituloGraficaFormula antes={'Gr\u00e1fica de Densidad '} formula="f(x)" despues=" [Diferencia de Medias]" />} anchoCompleto={true} alto="450px" id="grafico-diferencia-medias">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">

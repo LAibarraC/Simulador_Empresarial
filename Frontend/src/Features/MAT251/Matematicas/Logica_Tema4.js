@@ -123,6 +123,10 @@ export function calcularProbabilidadProporcion(datosParciales, condicion, x1, x2
         }
     }
 
+    if (condicion === 'entre' && x1 >= x2) {
+        return { error: 'El limite inferior debe ser menor que el superior.' };
+    }
+
     let probFinal = 0;
     let strDesarrollo = '';
     const z1 = (x1Num - p) / se;
@@ -219,7 +223,7 @@ export function calcularProbabilidadDiferenciaProporciones(parametrosPrevios, co
     let probFinal = 0;
     let statValue = 0; 
     let strDesarrollo = '';
-    const formulaLaTeX = `Z = \\frac{(\\hat{p}_1 - \\hat{p}_2) - (p_1 - p_2)}{\\sqrt{\\frac{p_1 q_1}{n_1} + \\frac{p_2 q_2}{n_2}}}`;
+    const formulaLaTeX = `F = \\left( \\frac{S_1^2}{S_2^2} \\right) \\cdot \\left( \\frac{\\sigma_2^2}{\\sigma_1^2} \\right) \\sim F(${v1}, ${v2})`;
 
     if (condicion === 'menor_que') {
         statValue = (x1 - esperanza) / se;
@@ -852,6 +856,10 @@ export function generarDistribucionFisher(varPob1, n1, varPob2, n2) {
 
     if (isNaN(vp1) || isNaN(nn1) || isNaN(vp2) || isNaN(nn2) || vp1 <= 0 || nn1 <= 1 || vp2 <= 0 || nn2 <= 1) {
         return { error: "Por favor, ingrese valores numéricos válidos. Las varianzas deben ser mayores a 0 y las muestras mayores a 1." };
+    }
+
+    if (!Number.isInteger(nn1) || !Number.isInteger(nn2)) {
+        return { error: "Los tamanos de muestra deben ser numeros enteros." };
     }
 
     const v1 = nn1 - 1;

@@ -36,7 +36,12 @@ export default function Resultados_RazonVarianzas({ resultados }) {
                         <span>y Probabilidad</span>
                     </div>
                     <div className="thin-scrollbar formula-responsive" style={{ overflowX: 'auto', paddingBottom: '10px', color: 'var(--text-pure)' }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                        <Latex formula={`v_1 = n_1 - 1 = ${resultados.nn1} - 1 = ${resultados.v1}`} />
+                        <Latex formula={`v_2 = n_2 - 1 = ${resultados.nn2} - 1 = ${resultados.v2}`} />
+                        <Latex formula={resultados.formulaLaTeX} />
                         <Latex formula={resultados.strDesarrollo} />
+                        </div>
                     </div>
 
                     {/* Sección Probabilidad Final unificada dentro de la misma tarjeta */}

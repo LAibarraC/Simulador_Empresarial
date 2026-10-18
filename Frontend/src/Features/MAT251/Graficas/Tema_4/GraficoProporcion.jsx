@@ -5,6 +5,7 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot
 } from 'recharts';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
+import { TituloGraficaFormula } from './EtiquetasKaTeX';
 import ModalLimiteFueraDeGrafica from './ModalLimiteFueraDeGrafica';
 import EtiquetaLimiteIntervalo from './EtiquetaLimiteIntervalo';
 
@@ -254,7 +255,7 @@ export default function GraficoProporcion({ resultados }) {
     }, [tieneProbabilidad, condicion, hasX1, hasX2, numX1, numX2, SE]);
 
     return (
-        <MarcoWidgetMAT251 titulo="Gráfica de Densidad de Probabilidad f(p̂)" anchoCompleto={true} alto="450px" id="grafico-proporcion">
+        <MarcoWidgetMAT251 titulo={<TituloGraficaFormula antes={'Gr\u00e1fica de Densidad de Probabilidad '} formula={"f(\\hat{p})"} />} anchoCompleto={true} alto="450px" id="grafico-proporcion">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">

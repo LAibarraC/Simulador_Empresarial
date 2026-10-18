@@ -10,13 +10,16 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const [isSelectOpen, setIsSelectOpen] = useState(false);
     const selectRef = useRef(null);
+    const hayDatosMatriz = Boolean(varSeleccionada) && Array.isArray(filas) && filas.some(
+        (fila) => fila.valor !== undefined && fila.valor !== null && fila.valor.toString().trim() !== ''
+    );
 
     // Opciones para la media cuando usamos matriz
     const [sigmaConocida, setSigmaConocida] = useState(false);
     const [sigmaPoblacional, setSigmaPoblacional] = useState('');
 
-    const renderKatex = (math) => (
-        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+    const renderKatex = (math, negrita = false) => (
+        <span className={negrita ? 'tema5-matematica-negrita' : undefined} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
 
     useEffect(() => {
@@ -117,12 +120,14 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                 </div>
             </div>
 
+            {hayDatosMatriz ? (
+                <>
             {parametro === 'media' && (
                 <div style={{ ...cardStyle, marginBottom: '15px', padding: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '180px' }}>Desviación Estándar:</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', textAlign: 'center' }}>Desviación Estándar:</label>
                         
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '24px', flexWrap: 'nowrap', width: '100%' }}>
                             {/* Radio Muestral */}
                             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                 <div style={{ 
@@ -191,17 +196,17 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)' }}>
-                                Valor de {renderKatex('\\sigma')}:
+                                {renderKatex('\\sigma', true)}:
                             </label>
                             <input
                                 type="number"
                                 className="input-mat251"
                                 value={sigmaPoblacional}
                                 onChange={(e) => setSigmaPoblacional(e.target.value)}
-                                placeholder={`Ej. 15.2`}
+                                placeholder="Desviación estándar poblacional"
                                 step="any"
                                 min="0"
-                                style={{ width: '180px', textAlign: 'center' }}
+                                style={{ width: '280px', maxWidth: '100%', boxSizing: 'border-box', textAlign: 'center' }}
                             />
                         </div>
                     </div>
@@ -216,15 +221,18 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                 )];
 
                 return (
-                    <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)' }}>Seleccione el dato a contabilizar:</label>
+                    <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)', textAlign: 'center' }}>Seleccione el dato a contabilizar:</label>
                         
-                        <div ref={selectRef} style={{ position: 'relative', flex: 1, minWidth: '200px', fontFamily: FONT }}>
+                        <div ref={selectRef} className="tema5-selector-proporcion" style={{ position: 'relative', maxWidth: '100%', fontFamily: FONT }}>
                             <div
                                 onClick={() => setIsSelectOpen(o => !o)}
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                     padding: '8px 12px',
+                                    boxSizing: 'border-box',
+                                    width: '100%',
+                                    minWidth: 0,
                                     background: 'var(--bg-card)',
                                     border: `1px solid ${isSelectOpen ? 'var(--primary-color)' : 'var(--border-color, #e2e8f0)'}`,
                                     borderRadius: RADIUS, cursor: 'pointer',
@@ -234,7 +242,7 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                                     userSelect: 'none',
                                 }}
                             >
-                                <span style={{ fontWeight: 500, fontSize: FS.sm, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <span style={{ fontWeight: 500, fontSize: FS.sm, flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {valorExito || '-- Seleccione un dato --'}
                                 </span>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -251,7 +259,10 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                                     borderRadius: RADIUS,
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                                     zIndex: 1000,
-                                    maxHeight: '200px', overflowY: 'auto',
+                                    overflow: 'hidden',
+                                    maxHeight: valoresUnicos.length > 5 ? '220px' : 'none',
+                                    overflowY: valoresUnicos.length > 5 ? 'auto' : 'visible',
+                                    overscrollBehavior: 'contain',
                                     animation: 'fadeInDropdown 0.2s ease',
                                 }}>
                                     {valoresUnicos.length > 0 ? (
@@ -301,7 +312,7 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                 );
             })()}
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <button 
                     className="button_calcular" 
                     style={{ width: 'auto', padding: '5px 15px' }}
@@ -310,6 +321,12 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                     Calcular Intervalo de Confianza
                 </button>
             </div>
+                </>
+            ) : (
+                <p style={{ fontSize: FS.xs, color: 'var(--text-muted)', fontFamily: FONT }}>
+                    No hay datos cargados. Selecciona una variable con datos o usa “Editar Datos” para agregarlos.
+                </p>
+            )}
 
             <ModalAlerta 
                 isOpen={modalAlerta.isOpen}

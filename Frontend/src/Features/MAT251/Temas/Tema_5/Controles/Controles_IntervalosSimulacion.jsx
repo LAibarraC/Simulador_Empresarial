@@ -9,8 +9,8 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
     const localLabelStyle = { ...labelStyle, color: 'var(--text-main, #1e293b)' };
     const [distribucion, setDistribucion] = useState('normal');
     
-    const renderKatex = (math) => (
-        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+    const renderKatex = (math, negrita = false) => (
+        <span className={negrita ? 'tema5-matematica-negrita' : undefined} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
     
     // Params por defecto (vacíos para que se vean los placeholders)
@@ -57,6 +57,25 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
         setDistribucion(distDisponibles[parametro][0]);
     }
 
+    const ejecutarSimulacion = async (payload) => {
+        setIsCalculating(true);
+        try {
+            const resultado = await mat251Api.ejecutarSimulacionIntervalos(payload);
+
+            if (resultado && resultado.error) {
+                mostrarAlerta(resultado.error, "Error en la Simulación", "error");
+                onCalcular(null);
+            } else {
+                onCalcular(resultado);
+            }
+        } catch (error) {
+            mostrarAlerta(error.message || 'Hubo un error al ejecutar la simulación de intervalos.', "Error en la Simulación", "error");
+            onCalcular(null);
+        } finally {
+            setIsCalculating(false);
+        }
+    };
+
     const handleCalcular = async () => {
         if (!n || !numSimulaciones) {
             mostrarAlerta("Por favor, ingrese el tamaño de la muestra (n) y el número de simulaciones.", "Faltan Parámetros", "warning");
@@ -78,43 +97,41 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
         if (distribucion === 'uniforme') paramsDist = { a: Number(a), b: Number(b) };
         if (distribucion === 'binomial') paramsDist = { p: Number(p), n_ensayos: Number(nEnsayos) };
 
-        setIsCalculating(true);
-        
-        try {
-            const payload = {
-                distribucion,
-                paramsDist,
-                n: Number(n),
-                numSimulaciones: Number(numSimulaciones),
-                parametro,
-                confianza: Number(confianza),
-                sigmaConocida: distribucion === 'normal' && parametro === 'media' ? sigmaConocida : false
-            };
-            const resultado = await mat251Api.ejecutarSimulacionIntervalos(payload);
-            
-            if (resultado && resultado.error) {
-                mostrarAlerta(resultado.error, "Error en la Simulación", "error");
-                onCalcular(null);
-            } else {
-                onCalcular(resultado);
-            }
-        } catch (error) {
-            mostrarAlerta(error.message || 'Hubo un error al ejecutar la simulación de intervalos.', "Error en la Simulación", "error");
-            onCalcular(null);
-        } finally {
-            setIsCalculating(false);
+        const payload = {
+            distribucion,
+            paramsDist,
+            n: Number(n),
+            numSimulaciones: Number(numSimulaciones),
+            parametro,
+            confianza: Number(confianza),
+            sigmaConocida: distribucion === 'normal' && parametro === 'media' ? sigmaConocida : false
+        };
+
+        if (payload.numSimulaciones > 10000) {
+            mostrarAlerta("El número de simulaciones debe estar entre 1 y 10.000.", "Límite de Simulaciones", "warning");
+            return;
         }
+
+        await ejecutarSimulacion(payload);
     };
 
     return (
-        <div style={{ padding: '0px' }}>
-            <h4 style={{ margin: '0 0 10px 0'}}>Simulación de Intervalos de Confianza:</h4>
-
+        <div className="tema5-intervalos-simulacion" style={{ padding: '0px' }}>
+            <style>{`
+                @media (max-width: 600px) {
+                    .tema5-sim-distribucion-selector { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; padding-right: 0 !important; }
+                    .tema5-sim-sigma-setting { flex-direction: column; align-items: flex-start !important; gap: 8px !important; }
+                    .tema5-sim-sigma-setting > label { min-width: 0 !important; white-space: normal; }
+                    .tema5-sim-sigma-options { flex-direction: row !important; flex-wrap: wrap; gap: 8px 18px !important; }
+                    .tema5-sim-generate { margin-top: 12px !important; }
+                    .tema5-sim-generate button { width: 100% !important; max-width: 360px; }
+                }
+            `}</style>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                <div className="tema5-sim-distribucion-selector" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <label style={{ ...localLabelStyle, margin: 0 }}>Distribución Poblacional:</label>
                     
-                    <div ref={selectRef} style={{ position: 'relative', width: '220px', fontFamily: FONT }}>
+                    <div ref={selectRef} style={{ position: 'relative', width: '220px', maxWidth: '100%', fontFamily: FONT }}>
                         <div
                             onClick={() => setIsSelectOpen(o => !o)}
                             style={{
@@ -193,50 +210,69 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                             </div>
                         )}
                     </div>
+                    <div className="tema5-simulacion-ayuda">
+                        <button type="button" id="tema5-ayuda-intervalos-simulador" className="tema5-simulacion-ayuda-boton" aria-label="Ayuda sobre la simulación de intervalos" aria-describedby="tema5-ayuda-intervalos-contenido">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M9.6 9a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.8" />
+                                <path d="M12 17h.01" />
+                            </svg>
+                        </button>
+                        <div id="tema5-ayuda-intervalos-contenido" className="tema5-simulacion-ayuda-panel" role="tooltip">
+                            <strong>Simulación de intervalos</strong>
+                            <p>Repite el experimento para mostrar cómo se comportan los intervalos de confianza.</p>
+                            <ul>
+                                <li>Genera {renderKatex('N', true)} muestras de tamaño {renderKatex('n', true)} usando la distribución elegida.</li>
+                                <li>Calcula un intervalo de confianza para cada muestra.</li>
+                                <li>Compara los intervalos con el valor real para observar cuántos lo contienen y cómo influye el nivel de confianza.</li>
+                                <li>En media normal, elige si la desviación estándar poblacional {renderKatex('\\sigma', true)} es conocida.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Parámetros de la distribución */}
-                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', borderRadius: '4px' }}>
-                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-muted)' }}>PARÁMETROS DE LA DISTRIBUCIÓN</div>
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                <div className="tema5-sim-panel" style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: 'none', borderRadius: '5px' }}>
+                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-pure)' }}>PARÁMETROS DE LA DISTRIBUCIÓN</div>
+                    <div className="tema5-simulacion-parametros-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                         {distribucion === 'normal' && (
                             <>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\mu:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\mu:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={mu} onChange={e => setMu(e.target.value)} placeholder="Media real" />
                                 </div>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\sigma:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\sigma:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={sigma} onChange={e => setSigma(e.target.value)} min="0.001" placeholder="Desv. Estándar real" />
                                 </div>
                             </>
                         )}
                         {(distribucion === 'bernoulli' || distribucion === 'binomial') && (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '220px' }}>
-                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('p:')}</label>
-                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={p} onChange={e => setP(e.target.value)} min="0" max="1" step="0.01" placeholder="Prob. real de éxito" />
+                            <div className={`tema5-simulacion-campo ${distribucion === 'bernoulli' ? 'tema5-simulacion-campo-centrado' : ''}`} style={{ flex: distribucion === 'bernoulli' ? '0 1 50%' : 1, maxWidth: distribucion === 'bernoulli' ? '50%' : undefined, margin: distribucion === 'bernoulli' ? '0 auto' : undefined, display: 'flex', alignItems: 'center', gap: '8px', minWidth: distribucion === 'bernoulli' ? 0 : '220px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('p:', true)}</label>
+                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={p} onChange={e => setP(e.target.value)} min="0" max="1" step="0.01" placeholder="Probabilidad de éxito" />
                             </div>
                         )}
                         {distribucion === 'binomial' && (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:')}</label>
+                            <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:', true)}</label>
                                 <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={nEnsayos} onChange={e => setNEnsayos(e.target.value)} min="1" placeholder="Nº de Ensayos reales" />
                             </div>
                         )}
                         {distribucion === 'poisson' && (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\lambda:')}</label>
+                            <div className="tema5-simulacion-campo tema5-simulacion-campo-centrado" style={{ flex: '0 1 50%', maxWidth: '50%', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('\\lambda:', true)}</label>
                                 <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={lambda} onChange={e => setLambda(e.target.value)} min="0.001" placeholder="Tasa real" />
                             </div>
                         )}
                         {distribucion === 'uniforme' && (
                             <>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('a:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('a:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={a} onChange={e => setA(e.target.value)} placeholder="Mínimo real" />
                                 </div>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
-                                    <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('b:')}</label>
+                                <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                                <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('b:', true)}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, width: '100%' }} value={b} onChange={e => setB(e.target.value)} placeholder="Máximo real" />
                                 </div>
                             </>
@@ -245,11 +281,11 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                 </div>
 
                 {/* Parámetros de Simulación */}
-                <div style={{ background: 'var(--bg-card, white)', padding: '10px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-muted)' }}>PARÁMETROS DEL EXPERIMENTO (ESTIMACIÓN)</div>
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
-                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>Tamaño de Muestra (n):</label>
+                <div className="tema5-sim-panel" style={{ background: 'var(--bg-card, white)', padding: '10px', borderRadius: '5px', border: 'none' }}>
+                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-pure)' }}>PARÁMETROS DEL EXPERIMENTO (INTERVALOS)</div>
+                    <div className="tema5-simulacion-entradas-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                        <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:', true)}</label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -257,11 +293,11 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                                 value={n}
                                 onChange={(e) => setN(e.target.value)}
                                 min={parametro === 'varianza' ? '2' : '1'}
-                                placeholder="Ej: 30"
+                                placeholder="Tamaño de muestra"
                             />
                         </div>
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
-                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>Nº Intervalos a Simular:</label>
+                        <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                            <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('N:', true)}</label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -269,15 +305,15 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                                 value={numSimulaciones}
                                 onChange={(e) => setNumSimulaciones(e.target.value)}
                                 min="1"
-                                max="100000"
-                                placeholder="Limite: 1 - 100.000"
+                                max="10000"
+                                placeholder="Número de simulaciones"
                             />
                         </div>
 
                         {distribucion === 'normal' && parametro === 'media' && (
-                            <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '15px', marginTop: '5px' }}>
+                            <div className="tema5-sim-sigma-setting" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '15px', marginTop: '5px' }}>
                                 <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '180px' }}>Para los intervalos, asumir:</label>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+                                <div className="tema5-sim-sigma-options" style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                         <div style={{ 
                                             width: '18px', height: '18px', borderRadius: '50%', 
@@ -337,7 +373,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+            <div className="tema5-sim-generate" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <button 
                     className="button_calcular"
                     style={{ width: 'auto', padding: '5px 15px', opacity: isCalculating ? 0.7 : 1, cursor: isCalculating ? 'wait' : 'pointer' }} 
@@ -353,7 +389,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                 mensaje={modalAlerta.mensaje}
                 titulo={modalAlerta.titulo}
                 tipo={modalAlerta.tipo}
-                onClose={() => setModalAlerta({ ...modalAlerta, isOpen: false })}
+                onClose={() => setModalAlerta(prev => ({ ...prev, isOpen: false }))}
             />
 
         </div>

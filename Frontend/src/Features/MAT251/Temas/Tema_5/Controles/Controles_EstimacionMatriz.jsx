@@ -9,6 +9,9 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const [isSelectOpen, setIsSelectOpen] = useState(false);
     const selectRef = useRef(null);
+    const hayDatosMatriz = Boolean(varSeleccionada) && Array.isArray(filas) && filas.some(
+        (fila) => fila.valor !== undefined && fila.valor !== null && fila.valor.toString().trim() !== ''
+    );
 
     useEffect(() => {
         const handler = (e) => {
@@ -50,25 +53,25 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
     return (
         <div style={{ padding: '0px' }}>
             <div style={{ marginBottom: '10px' }}>
-                <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '10px' }}>
+                <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', padding: '10px' }}>
                     <div>
-                        <span style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)' }}>Datos:</span>
+                        <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
                             <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                Cargados: <strong style={{ color: 'var(--text-main, #1e293b)' }}>{statsDatos?.cargados || 0}</strong>
+                                Cargados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.cargados || 0}</strong>
                             </small>
                             <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                Agregados: <strong style={{ color: 'var(--text-main, #1e293b)' }}>{statsDatos?.agregados || 0}</strong>
+                                Agregados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.agregados || 0}</strong>
                             </small>
                             <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
-                                Total: <strong style={{ color: 'var(--text-main, #1e293b)' }}>{statsDatos?.total || 0}</strong>
+                                Total: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.total || 0}</strong>
                             </small>
                         </div>
                     </div>
                     <button
                         onClick={abrirEditor}
-                        className="btn-mat251-primario"
-                        style={{ padding: '5px 14px', fontSize: FS.sm, backgroundColor: 'transparent', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        className="btn-primary"
+                        style={{ padding: '5px 14px', fontSize: FS.sm, borderRadius: RADIUS, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                         <EditarDatos />
                         Editar Datos
@@ -76,6 +79,8 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                 </div>
             </div>
 
+            {hayDatosMatriz ? (
+                <>
             {parametro === 'proporcion' && (() => {
                 const valoresUnicos = [...new Set(filas
                     .map(f => f.valor)
@@ -84,15 +89,18 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                 )];
 
                 return (
-                    <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)' }}>Seleccione el dato a contabilizar:</label>
+                    <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)', textAlign: 'center' }}>Seleccione el dato a contabilizar:</label>
                         
-                        <div ref={selectRef} style={{ position: 'relative', flex: 1, minWidth: '200px', fontFamily: FONT }}>
+                        <div ref={selectRef} className="tema5-selector-proporcion" style={{ position: 'relative', maxWidth: '100%', fontFamily: FONT }}>
                             <div
                                 onClick={() => setIsSelectOpen(o => !o)}
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                     padding: '8px 12px',
+                                    boxSizing: 'border-box',
+                                    width: '100%',
+                                    minWidth: 0,
                                     background: 'var(--bg-card)',
                                     border: `1px solid ${isSelectOpen ? 'var(--primary-color)' : 'var(--border-color, #e2e8f0)'}`,
                                     borderRadius: RADIUS, cursor: 'pointer',
@@ -102,7 +110,7 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                                     userSelect: 'none',
                                 }}
                             >
-                                <span style={{ fontWeight: 500, fontSize: FS.sm }}>
+                                <span style={{ fontWeight: 500, fontSize: FS.sm, flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {valorExito || '-- Seleccione un valor --'}
                                 </span>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -120,6 +128,9 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                                     zIndex: 1000,
                                     overflow: 'hidden',
+                                    maxHeight: valoresUnicos.length > 5 ? '220px' : 'none',
+                                    overflowY: valoresUnicos.length > 5 ? 'auto' : 'visible',
+                                    overscrollBehavior: 'contain',
                                     animation: 'fadeInDropdown 0.2s ease',
                                 }}>
                                     {valoresUnicos.length > 0 ? (
@@ -150,7 +161,8 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                                                         fontSize: FS.sm,
                                                         borderBottom: idx < valoresUnicos.length - 1 ? '1px solid var(--border-color, #e2e8f0)' : 'none',
                                                         transition: 'all 0.2s ease',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                        whiteSpace: 'nowrap', overflow: 'hidden'
                                                     }}
                                                 >
                                                     {val}
@@ -185,6 +197,12 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                     Calcular Estimación Puntual
                 </button>
             </div>
+                </>
+            ) : (
+                <p style={{ fontSize: FS.xs, color: 'var(--text-muted)', fontFamily: FONT }}>
+                    No hay datos cargados en el estado global. Ve a Gestión de Datos para importar.
+                </p>
+            )}
 
             <ModalAlerta
                 isOpen={modalAlerta.isOpen}

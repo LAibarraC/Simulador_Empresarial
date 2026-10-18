@@ -3,6 +3,7 @@ import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Cons
 import Latex from '../../../../../components/excel/Latex';
 import { calcularParametrosRazonVarianzas, calcularProbabilidadRazonVarianzas } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
+import StatLabel from '../../../ui/StatLabel';
 
 const CustomSelect = ({ value, onChange, options = [], placeholder = 'Seleccionar...', style = {} }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -200,13 +201,13 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
-            <div className="tema4-population-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px', marginBottom: '15px' }}>
+            <div className="tema4-population-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px', marginBottom: '10px' }}>
                 {/* Población 1 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ margin: '0 0 15px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 1</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 1</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="\sigma_1^2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{\sigma_1^2} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -230,7 +231,7 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="n_1 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{n_1} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -257,11 +258,11 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                 </div>
 
                 {/* Población 2 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ margin: '0 0 15px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 2</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 2</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="\sigma_2^2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{\sigma_2^2} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -285,7 +286,7 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="n_2 =" /></label>
+                            <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, minWidth: '45px', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{n_2} =" /></label>
                             <input
                                 type="number"
                                 className="input-mat251 placeholder-small"
@@ -312,7 +313,6 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                 </div>
             </div>
 
-            {!parametrosPrevios ? (
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                     <button
                         onClick={calcularParametros}
@@ -322,21 +322,28 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                         CALCULAR
                     </button>
                 </div>
-            ) : (
+            {parametrosPrevios && (
                 <>
-                    {/* Grados de Libertad */}
-                    <div style={{ background: 'var(--bg-card)', padding: '15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px', textAlign: 'center' }}>
-                        <div style={{ color: 'var(--text-pure)', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 700, fontFamily: FONT }}>
-                            Grados de Libertad (v)
+                    {/* Resumen de parametros con etiquetas explicativas */}
+                    <div style={{ background: 'var(--bg-card)', padding: '14px 16px', borderRadius: RADIUS, border: 'none', boxShadow: 'none', textAlign: 'center', marginTop: '10px', marginBottom: '10px', overflow: 'visible' }}>
+                        <div className="tema4-tarjeta-titulo-unificado" style={{ marginBottom: '10px', color: 'var(--text-pure)', fontSize: '0.8rem', fontWeight: 700, fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {'Par\u00e1metros de la Distribuci\u00f3n F de Fisher'}
                         </div>
-                        <div className="tema4-parametros-scroll" style={{ display: 'flex', justifyContent: 'center', gap: '30px', alignItems: 'center', color: 'var(--text-pure)' }}>
-                            <Latex formula={`v_1 = ${parametrosPrevios.nn1} - 1 = ${parametrosPrevios.v1}`} />
-                            <Latex formula={`v_2 = ${parametrosPrevios.nn2} - 1 = ${parametrosPrevios.v2}`} />
+                        <div className="formula-responsive" style={{ width: '100%', overflow: 'visible', padding: '4px', color: 'var(--text-pure)', fontWeight: 'normal', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                                <StatLabel formulaKey="v_grados_libertad" formulaLatex="v_1" customTexto="Grados de libertad de la poblacion 1" customMath="v_1 = n_1 - 1" align="center" />
+                                <Latex formula={'= n_1 - 1 = ' + parametrosPrevios.nn1 + ' - 1 = \\mathbf{' + parametrosPrevios.v1 + '}'} />
+                            </div>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                                <StatLabel formulaKey="v_grados_libertad" formulaLatex="v_2" customTexto="Grados de libertad de la poblacion 2" customMath="v_2 = n_2 - 1" align="center" />
+                                <Latex formula={'= n_2 - 1 = ' + parametrosPrevios.nn2 + ' - 1 = \\mathbf{' + parametrosPrevios.v2 + '}'} />
+                            </div>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                                <StatLabel formulaKey="FFisher" formulaLatex="F" customTexto="Estadistico de la distribucion F de Fisher" customMath={'F \\sim F(v_1, v_2)'} align="center" />
+                                <Latex formula={'\\sim F(v_1, v_2)'} />
+                            </div>
                         </div>
                     </div>
-
-                    {/* Sección Condición de Búsqueda */}
-                    <div style={{ margin: '15px 0 5px 0' }}></div>
 
                     <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT, fontWeight: 'bold' }}>
                         Condición de Búsqueda:
@@ -350,7 +357,7 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                         <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '250px' : '200px' }}>
                             <CustomSelect
                                 value={condicion}
-                                onChange={(val) => { setCondicion(val); onCalcular(null); }}
+                                onChange={(val) => { setCondicion(val); onCalcular(parametrosPrevios); }}
                                 options={[
                                     { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P\left(\frac{S_1^2}{S_2^2} \le x\right)" /></div> },
                                     { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P\left(\frac{S_1^2}{S_2^2} \ge x\right)" /></div> },
@@ -384,7 +391,7 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                                         className="input-mat251 placeholder-small"
                                         placeholder="Límite inferior"
                                         value={valorX1}
-                                        onChange={(e) => { setValorX1(e.target.value); onCalcular(null); }}
+                                        onChange={(e) => { setValorX1(e.target.value); onCalcular(parametrosPrevios); }}
                                         style={{
                                             padding: '6px 12px',
                                             fontSize: FS.sm,
@@ -409,7 +416,7 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                                         className="input-mat251 placeholder-small"
                                         placeholder="Límite superior"
                                         value={valorX2}
-                                        onChange={(e) => { setValorX2(e.target.value); onCalcular(null); }}
+                                        onChange={(e) => { setValorX2(e.target.value); onCalcular(parametrosPrevios); }}
                                         style={{
                                             padding: '6px 12px',
                                             fontSize: FS.sm,
@@ -436,7 +443,7 @@ export default function Controles_RazonVarianzas({ onCalcular }) {
                                     className="input-mat251 placeholder-small"
                                     placeholder="Valor x"
                                     value={valorX1}
-                                    onChange={(e) => { setValorX1(e.target.value); onCalcular(null); }}
+                                    onChange={(e) => { setValorX1(e.target.value); onCalcular(parametrosPrevios); }}
                                     style={{
                                         padding: '6px 12px',
                                         fontSize: FS.sm,

@@ -1,7 +1,7 @@
 import React from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import { cardStyle } from '../../../Principal/Constantes';
+import StatLabel from '../../../ui/StatLabel';
 
 export default function Resultados_EstimacionMatriz({ resultados, parametro }) {
     if (!resultados) return null;
@@ -9,89 +9,200 @@ export default function Resultados_EstimacionMatriz({ resultados, parametro }) {
     const renderKatex = (math) => (
         <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
+    const formatDecimal = (valor) => Number(valor).toFixed(2);
+    const formatDato = (valor) => {
+        const numerico = Number(valor);
+        return valor !== '' && Number.isFinite(numerico)
+            ? (Number.isInteger(numerico) ? String(valor) : numerico.toFixed(2))
+            : String(valor);
+    };
+    const datosVarianza = parametro === 'varianza' && Array.isArray(resultados.calculos?.numDatos)
+        ? resultados.calculos.numDatos
+        : null;
+    const datosMedia = parametro === 'media' && Array.isArray(resultados.calculos?.numDatos)
+        ? resultados.calculos.numDatos
+        : null;
+    const datosProporcion = parametro === 'proporcion' && Array.isArray(resultados.calculos?.numDatos)
+        ? resultados.calculos.numDatos
+        : null;
+    const sumaDatosMedia = datosMedia?.reduce((suma, valor) => suma + valor, 0);
+    const sumaCuadradosDesviaciones = datosVarianza?.reduce(
+        (suma, valor) => suma + (valor - resultados.calculos.media) ** 2,
+        0
+    );
+
+    const columnas = [
+        {
+            key: 'n_muestra',
+            formula: 'n',
+            valor: renderKatex(`${resultados.n}`)
+        }
+    ];
+
+    if (parametro === 'media') {
+        columnas.push(
+            { key: 'suma_muestral', formula: '\\sum X_i', valor: renderKatex(formatDecimal(resultados.calculos.suma)) },
+            { key: 'desviacion_muestral', formula: 'S', valor: renderKatex(formatDecimal(resultados.calculos.desviacion)) },
+            { key: 'estimador_media_puntual', formula: '\\hat{\\mu}', valor: renderKatex(formatDecimal(resultados.estimacion)) }
+        );
+    } else if (parametro === 'proporcion') {
+        columnas.push(
+            { key: 'x', formula: 'x', valor: renderKatex(`${resultados.calculos?.x ?? ''}`) },
+            {
+                key: 'p_sombrero',
+                formula: '\\hat{p}',
+                valor: renderKatex(`${formatDecimal(resultados.estimacion)}\\;(${(resultados.estimacion * 100).toFixed(2)}\\%)`)
+            }
+        );
+    } else if (parametro === 'varianza') {
+        columnas.push(
+            { key: 'x_barra', formula: '\\bar{X}', valor: renderKatex(formatDecimal(resultados.calculos?.media ?? 0)) },
+            { key: 'desviacion_muestral', formula: 'S', valor: renderKatex(formatDecimal(resultados.calculos?.desviacion ?? 0)) },
+            { key: 's2', formula: 'S^2', valor: renderKatex(formatDecimal(resultados.estimacion)) }
+        );
+    }
 
     return (
-        <div style={{ width: '100%' }}>
-            <h4 style={{ margin: '0 0 15px 0', color: 'var(--text-main, #1e293b)' }}>Resultados:</h4>
-            
-            
-            {parametro === 'media' && (
-                <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginBottom: '12px' }}>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '5px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.70rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Tamaño de Muestra</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '5px' }}>{renderKatex(`n = ${resultados.n}`)}</div>
-                        </div>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '5px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.70rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Suma de Valores</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '5px' }}>{renderKatex(`\\sum X_i = ${resultados.calculos.suma.toFixed(2)}`)}</div>
-                        </div>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '5px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Desviación Estándar <span style={{ whiteSpace: 'nowrap' }}>({renderKatex('S')})</span></div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '5px' }}>{renderKatex(`S = ${resultados.calculos.desviacion.toFixed(4)}`)}</div>
-                        </div>
+        <div className="tema5-resultados-pure" style={{ width: '100%' }}>
+            <div className="tema5-tabla-estimacion-wrapper">
+                <table className="tema5-tabla-estimacion">
+                    <thead>
+                        <tr>
+                            {columnas.map((columna) => (
+                                <th key={columna.key}>
+                                    <StatLabel formulaKey={columna.key} formulaLatex={columna.formula} align="center" position="top" />
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {columnas.map((columna) => (
+                                <td key={columna.key}>{columna.valor}</td>
+                            ))}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {datosMedia && (
+                <section className="tema5-resolucion-estimacion">
+                    <h4>Desarrollo paso a paso de la media muestral</h4>
+                    <div className={`tema5-tabla-estimacion-wrapper${datosMedia.length > 10 ? ' tema5-tabla-resolucion-scroll' : ''}`}>
+                        <table className="tema5-tabla-estimacion tema5-tabla-resolucion">
+                            <thead>
+                                <tr>
+                                    <th><StatLabel formulaKey="indice_muestra" formulaLatex="i" align="center" position="bottom" /></th>
+                                    <th><StatLabel formulaKey="x_i" formulaLatex="x_i" align="center" position="bottom" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {datosMedia.map((valor, indice) => (
+                                    <tr key={`${indice}-${valor}`}>
+                                        <td>{renderKatex(`${indice + 1}`)}</td>
+                                        <td>{renderKatex(formatDato(valor))}</td>
+                                    </tr>
+                                ))}
+                                <tr className="tema5-fila-suma">
+                                    <td>{renderKatex('\\boldsymbol{\\sum}')}</td>
+                                    <td>{renderKatex(formatDecimal(sumaDatosMedia))}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ padding: '8px 15px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid var(--primary-color)', borderRadius: '8px', textAlign: 'center', minWidth: '200px', display: 'inline-block' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Estimación Puntual de {renderKatex('\\mu')}</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '5px' }}>
-                                {renderKatex(`${resultados.simbolo} = ${resultados.estimacion.toFixed(4)}`)}
-                            </div>
-                        </div>
+                    <div className="tema5-resultado-final">
+                        <h5>Resultado final</h5>
+                        <p className="tema5-formula-resolucion">
+                            <StatLabel formulaKey="x_barra" formulaLatex={'\\bar{X}'} align="center" position="top" />
+                            {renderKatex(`= \\frac{${formatDecimal(sumaDatosMedia)}}{${datosMedia.length}} = \\mathbf{${formatDecimal(resultados.estimacion)}}`)}
+                        </p>
                     </div>
-                </>
+                </section>
             )}
 
-            {parametro === 'proporcion' && (
-                <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginBottom: '12px' }}>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.7em', color: 'var(--text-muted)', fontWeight: 'bold' }}>Tamaño de Muestra</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '3px' }}>{renderKatex(`n = ${resultados.n}`)}</div>
-                        </div>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.7em', color: 'var(--text-muted)', fontWeight: 'bold' }}>Casos Favorables</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '3px' }}>{renderKatex(`x = ${resultados.calculos?.x ?? ''}`)}</div>
-                        </div>
+            {datosVarianza && (
+                <section className="tema5-resolucion-estimacion">
+                    <h4>Desarrollo paso a paso de la varianza muestral</h4>
+                    <div className={`tema5-tabla-estimacion-wrapper${datosVarianza.length > 10 ? ' tema5-tabla-resolucion-scroll' : ''}`}>
+                        <table className="tema5-tabla-estimacion tema5-tabla-resolucion">
+                            <thead>
+                                <tr>
+                                    <th><StatLabel formulaKey="indice_muestra" formulaLatex="i" align="center" position="bottom" /></th>
+                                    <th><StatLabel formulaKey="x_i" formulaLatex="x_i" align="center" position="bottom" /></th>
+                                    <th><StatLabel formulaKey="desviacion_observacion" formulaLatex={'x_i - \\bar{X}'} align="center" position="bottom" /></th>
+                                    <th><StatLabel formulaKey="desviacion_observacion_cuadrado" formulaLatex={'(x_i - \\bar{X})^2'} align="center" position="bottom" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {datosVarianza.map((valor, indice) => {
+                                    const desviacion = valor - resultados.calculos.media;
+                                    return (
+                                        <tr key={`${indice}-${valor}`}>
+                                            <td>{renderKatex(`${indice + 1}`)}</td>
+                                            <td>{renderKatex(formatDato(valor))}</td>
+                                            <td>{renderKatex(formatDecimal(desviacion))}</td>
+                                            <td>{renderKatex(formatDecimal(desviacion ** 2))}</td>
+                                        </tr>
+                                    );
+                                })}
+                                <tr className="tema5-fila-suma">
+                                    <td>{renderKatex('\\boldsymbol{\\sum}')}</td>
+                                    <td>{renderKatex(formatDecimal(datosVarianza.reduce((suma, valor) => suma + valor, 0)))}</td>
+                                    <td>{renderKatex('0.00')}</td>
+                                    <td>{renderKatex(formatDecimal(sumaCuadradosDesviaciones))}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ padding: '8px 15px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid var(--primary-color)', borderRadius: '8px', textAlign: 'center', minWidth: '200px', display: 'inline-block' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Estimación Puntual de {renderKatex('p')}</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-muted)', marginTop: '3px' }}>
-                                {renderKatex(`${resultados.simbolo} = ${resultados.estimacion.toFixed(4)}`)}
-                            </div>
-                            <div style={{ fontSize: '0.7em', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                ({(resultados.estimacion * 100).toFixed(2)}%)
-                            </div>
-                        </div>
+                    <div className="tema5-resultado-final">
+                        <h5>Resultado final</h5>
+                        <p className="tema5-formula-resolucion">
+                            <StatLabel formulaKey="s2" formulaLatex="S^2" align="center" position="top" />
+                            {renderKatex(`= \\frac{${formatDecimal(sumaCuadradosDesviaciones)}}{${datosVarianza.length} - 1} = \\mathbf{${formatDecimal(resultados.estimacion)}}`)}
+                        </p>
                     </div>
-                </>
+                </section>
             )}
 
-            {parametro === 'varianza' && (
-                <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginBottom: '12px' }}>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.7em', color: 'var(--text-muted)', fontWeight: 'bold' }}>Tamaño de Muestra</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '3px' }}>{renderKatex(`n = ${resultados.n}`)}</div>
-                        </div>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.7em', color: 'var(--text-muted)', fontWeight: 'bold' }}>Media Muestral</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '3px' }}>{renderKatex(`\\bar{X} = ${resultados.calculos?.media?.toFixed(4) ?? ''}`)}</div>
-                        </div>
-                        <div style={{ padding: '8px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Desviación Estándar <span style={{ whiteSpace: 'nowrap' }}>({renderKatex('S')})</span></div>                            <div style={{ fontSize: '0.95em', fontWeight: 'bold', marginTop: '3px' }}>{renderKatex(`S = ${resultados.calculos?.desviacion?.toFixed(4) ?? ''}`)}</div>
-                        </div>
+            {datosProporcion && (
+                <section className="tema5-resolucion-estimacion">
+                    <h4>Desarrollo paso a paso de la proporción muestral</h4>
+                    <div className={`tema5-tabla-estimacion-wrapper${datosProporcion.length > 10 ? ' tema5-tabla-resolucion-scroll' : ''}`}>
+                        <table className="tema5-tabla-estimacion tema5-tabla-resolucion">
+                            <thead>
+                                <tr>
+                                    <th><StatLabel formulaKey="indice_muestra" formulaLatex="i" align="center" position="bottom" /></th>
+                                    <th><StatLabel formulaKey="x_i" formulaLatex="x_i" align="center" position="bottom" /></th>
+                                    <th><StatLabel formulaKey="indicador_exito" formulaLatex="I_i" align="center" position="bottom" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {datosProporcion.map((valor, indice) => {
+                                    const esExito = String(valor).trim() === String(resultados.calculos.valorExito).trim();
+                                    return (
+                                        <tr key={`${indice}-${String(valor)}`}>
+                                            <td>{renderKatex(`${indice + 1}`)}</td>
+                                            <td>{formatDato(valor)}</td>
+                                            <td>{renderKatex(esExito ? '1' : '0')}</td>
+                                        </tr>
+                                    );
+                                })}
+                                <tr className="tema5-fila-suma">
+                                    <td>{renderKatex('\\boldsymbol{\\sum}')}</td>
+                                    <td />
+                                    <td>{renderKatex(`${resultados.calculos.x}`)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ padding: '8px 15px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid var(--primary-color)', borderRadius: '8px', textAlign: 'center', minWidth: '200px', display: 'inline-block' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Estimación Puntual de {renderKatex('\\sigma^2')}</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-muted)', marginTop: '3px' }}>
-                                {renderKatex(`${resultados.simbolo} = ${resultados.estimacion.toFixed(4)}`)}
-                            </div>
-                        </div>
+                    <div className="tema5-resultado-final">
+                        <h5>Resultado final</h5>
+                        <p className="tema5-formula-resolucion">
+                            <StatLabel formulaKey="p_sombrero" formulaLatex={'\\hat{p}'} align="center" position="top" />
+                            {renderKatex(`= \\frac{${resultados.calculos.x}}{${resultados.n}} = \\mathbf{${formatDecimal(resultados.estimacion)}}\\; (\\mathbf{${(resultados.estimacion * 100).toFixed(2)}\\%})`)}
+                        </p>
                     </div>
-                </>
+                </section>
             )}
         </div>
     );

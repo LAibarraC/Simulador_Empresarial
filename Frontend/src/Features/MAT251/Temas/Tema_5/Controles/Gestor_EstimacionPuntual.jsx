@@ -9,7 +9,6 @@ import Resultados_EstimacionManual from '../Resultados/Resultados_EstimacionManu
 import Controles_EstimacionSimulacion from './Controles_EstimacionSimulacion';
 import Resultados_EstimacionSimulacion from '../Resultados/Resultados_EstimacionSimulacion';
 
-import GraficoEstimacionMatriz from '../../../Graficas/Tema_5/GraficoEstimacionMatriz';
 
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -57,6 +56,7 @@ export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, 
 }
 
 export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, modo, setModo }) {
+    const variableKey = varSeleccionada?.nombre ?? null;
     // Estados para almacenar resultados de cada modo
     const [resMatriz, setResMatriz] = useState(null);
     const [resManual, setResManual] = useState(null);
@@ -72,10 +72,14 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
         if (parametro === 'media' && modo === 'manual') {
             setModo('matriz');
         }
-    }, [parametro, modo, setModo]);
+    }, [parametro, modo, variableKey, setModo]);
+
+    const resultadoMatrizActual = resMatriz?.parametro === parametro && resMatriz?.variableKey === variableKey ? resMatriz.resultado : null;
+    const resultadoManualActual = resManual?.parametro === parametro && resManual?.variableKey === variableKey ? resManual.resultado : null;
+    const resultadoSimulacionActual = resSimulacion?.parametro === parametro && resSimulacion?.variableKey === variableKey ? resSimulacion.resultado : null;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT, '--text-main': 'var(--text-pure)' }}>
             
             {/* Selector de Modo de Trabajo */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
@@ -97,42 +101,42 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
             </div>
 
             {/* CONTENIDO PRINCIPAL SEGÚN MODO */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: modo === 'manual' && ['proporcion', 'varianza'].includes(parametro) ? '10px' : '20px' }}>
                 {modo === 'matriz' && (
                     <>
                         <Controles_EstimacionMatriz
+                            key={`matriz-${parametro}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
                             varSeleccionada={varSeleccionada}
                             filas={filas}
                             statsDatos={statsDatos}
                             abrirEditor={abrirEditor}
-                            onCalcular={setResMatriz}
+                            onCalcular={(resultado) => setResMatriz(resultado ? { parametro, variableKey, resultado } : null)}
                         />
-                        <Resultados_EstimacionMatriz resultados={resMatriz} parametro={parametro} />
-                        {resMatriz && (
-                            <GraficoEstimacionMatriz resultados={resMatriz} parametro={parametro} />
-                        )}
+                        <Resultados_EstimacionMatriz resultados={resultadoMatrizActual} parametro={parametro} />
                     </>
                 )}
 
                 {modo === 'manual' && (
                     <>
                         <Controles_EstimacionManual
+                            key={`manual-${parametro}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
-                            onCalcular={setResManual}
+                            onCalcular={(resultado) => setResManual(resultado ? { parametro, variableKey, resultado } : null)}
                         />
-                        <Resultados_EstimacionManual resultados={resManual} parametro={parametro} />
+                        <Resultados_EstimacionManual resultados={resultadoManualActual} parametro={parametro} />
                     </>
                 )}
 
                 {modo === 'simulacion' && (
                     <>
                         <Controles_EstimacionSimulacion
+                            key={`simulacion-${parametro}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
-                            onCalcular={setResSimulacion}
+                            onCalcular={(resultado) => setResSimulacion(resultado ? { parametro, variableKey, resultado } : null)}
                         />
-                        {resSimulacion && (
-                            <Resultados_EstimacionSimulacion resultados={resSimulacion} />
+                        {resultadoSimulacionActual && (
+                            <Resultados_EstimacionSimulacion resultados={resultadoSimulacionActual} />
                         )}
                     </>
                 )}
