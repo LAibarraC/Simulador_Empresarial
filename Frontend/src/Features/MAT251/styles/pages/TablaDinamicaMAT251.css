@@ -1,0 +1,937 @@
+.mat251_tabla_dinamica .editor_text{
+    width: 100%;
+    border: none;
+    padding: 0 5px;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    text-align: center;
+}
+
+.mat251_tabla_dinamica .columnas_editor{
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-Weight: bold;
+    outline: none;
+    text-Align: center;
+}
+
+.mat251_tabla_dinamica.container_tablas_Dinamica{
+    padding: 20px 20px 0;
+    border: 1px solid var(--border-color);
+    border-Radius: 8px;
+    background: var(--bg-card);
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.mat251_tabla_dinamica .titulo_tabla{
+    margin-Top: 0;
+    color: var(--primary-color);
+
+}
+
+.mat251_tabla_dinamica .titulo_tabla_contenido {
+    position: relative;
+}
+
+.mat251_tabla_dinamica .titulo_tabla_icono {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.mat251_tabla_dinamica .titulo_tabla_texto {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.mat251_tabla_dinamica .titulo_salto_movil {
+    display: none;
+}
+
+.mat251_tabla_dinamica .container_input{
+    margin-Bottom: 15px;
+}
+
+.mat251_tabla_dinamica .mat251_nombre_archivo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.mat251_tabla_dinamica .mat251_nombre_archivo .container_input_datos{
+    flex: 0 1 700px;
+    max-width: 100%;
+    min-width: min(100%, 550px);
+    align-items: center;
+}
+
+.mat251_tabla_dinamica .mat251_guardar_archivo{
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.mat251_tabla_dinamica .container_input label{
+    display: block;
+    margin-Bottom: 5px;
+    font-Weight: bold;
+}
+
+.mat251_tabla_dinamica .container_input_datos{
+    display: flex;
+    gap: 10px;
+}
+
+.mat251_tabla_dinamica .mat251_nombre_archivo .container_input_datos label{
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    color: var(--text-pure);
+}
+
+.mat251_tabla_dinamica .container_input_datos input{
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color, #cbd5e0);
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: var(--bg-input, #ffffff);
+    color: var(--text-main, #2d3748);
+    transition: all 0.2s ease;
+}
+
+.mat251_tabla_dinamica .input-mat251.placeholder-small::placeholder{
+    font-size: 0.72rem !important;
+    opacity: 0.65;
+    color: var(--text-muted);
+}
+
+.mat251_tabla_dinamica .container_input_datos input:focus{
+    outline: none;
+    border-color: var(--accent-color, #3182ce);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+}
+
+.mat251_tabla_dinamica .container_input_datos span{
+    align-Self: center;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.mat251_tabla_dinamica .container_herramientas{
+    margin-Bottom: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-Wrap: wrap;
+}
+
+.mat251_tabla_dinamica .button_fila_columna{
+    background-color: transparent;
+    color: #10b981;
+    border: 1px solid #10b981;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.mat251_tabla_dinamica .button_fila_columna:hover:not(:disabled){
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.mat251_tabla_dinamica .button_eliminar_fila{
+    background-color: transparent;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.mat251_tabla_dinamica .button_eliminar_fila:hover:not(:disabled){
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #ef4444 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.mat251_tabla_dinamica .button_guardar{
+    background-color: transparent;
+    color: #10b981;
+    border: 1px solid #10b981;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mat251_tabla_dinamica .button_guardar:hover:not(:disabled){
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.mat251_tabla_dinamica .button_guardar:disabled{
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.mat251_tabla_dinamica .mensaje{
+    margin-Bottom: 15px;
+    font-Weight: bold;
+}
+
+.mat251_tabla_dinamica .container_grilla{
+    flex: 1 1 400px;
+    min-height: 200px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    isolation: isolate;
+    border: 1px solid var(--border-color);
+}
+
+.mat251_tabla_dinamica .container_grilla::after{
+    content: "";
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    width: 1px;
+    background: var(--border-color);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.mat251_tabla_dinamica .container_grilla .rdg-cell{
+    text-align: center;
+}
+
+.mat251_tabla_dinamica .informacion_grilla{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+
+.mat251_tabla_dinamica .generador_matriz_container{
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mat251_tabla_dinamica .generador_matriz_inputs{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.mat251_tabla_dinamica .input_group_matriz{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mat251_tabla_dinamica .input_group_matriz label{
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-main, #4a5568);
+    letter-spacing: 0.5px;
+}
+
+.mat251_tabla_dinamica .input_matriz{
+    width: 110px;
+    padding: 5px 20px;
+    border: 1px solid var(--border-color, #cbd5e0);
+    border-radius: 5px;
+    background-color: var(--bg-card, #ffffff);
+    color: var(--text-main, #2d3748);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.mat251_tabla_dinamica .input_matriz:focus{
+    outline: none;
+    border-color: var(--accent-color, #3182ce);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+}
+
+.mat251_tabla_dinamica .button_generar_matriz{
+    background-color: transparent;
+    color: #10b981;
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    padding: 6px 20px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 22px;
+    transition: all 0.2s ease;
+}
+
+.mat251_tabla_dinamica .button_generar_matriz:hover:not(:disabled){
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+
+.mat251_tabla_dinamica .modal_overlay_col{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+    z-index: 9999;
+}
+
+.mat251_tabla_dinamica .modal_content_col{
+    background: var(--bg-card, #ffffff);
+    padding: 24px;
+    border-radius: 8px;
+    width: 420px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow: visible;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mat251_tabla_dinamica .modal_content_col h4{
+    margin: 0;
+    color: var(--primary-color, #2d3748);
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.mat251_tabla_dinamica .modal_content_col .btn-cerrar-config-variable,
+.mat251_tabla_dinamica .modal_content_col .btn-cerrar-config-variable:hover{
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--error-color, #ef4444) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+.mat251_tabla_dinamica .modal_content_col .btn-cerrar-config-variable:focus-visible{
+    outline: 2px solid var(--error-color, #ef4444);
+    outline-offset: 2px;
+}
+
+.mat251_tabla_dinamica .form_group_col{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mat251_tabla_dinamica .form_group_col label{
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main, #4a5568);
+}
+
+.mat251_tabla_dinamica .form_group_col input,
+.mat251_tabla_dinamica .form_group_col select{
+    padding: 8px 10px;
+    border: 1px solid var(--border-color, #cbd5e0);
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.mat251_tabla_dinamica .mat251_selector_tipo_dato{
+    position: relative;
+    width: 100%;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-trigger{
+    width: 100%;
+    height: 38px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 5px;
+    background: var(--bg-input) !important;
+    color: var(--text-pure) !important;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-trigger > span{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-trigger:hover{
+    border-color: var(--border-color) !important;
+    background: var(--bg-input) !important;
+    color: var(--text-pure) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-trigger[aria-expanded="true"],
+.mat251_tabla_dinamica .btn-mat251-selector-trigger:focus-visible{
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    outline: none;
+}
+
+.mat251_tabla_dinamica .mat251_selector_tipo_dato_opciones{
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    animation: fadeInDropdown 0.2s ease;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-opcion{
+    width: 100%;
+    padding: 9px 12px;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    color: var(--text-pure) !important;
+    display: flex;
+    justify-content: flex-start;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 400;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-opcion:hover{
+    background: var(--bg-input, rgba(0, 0, 0, 0.04)) !important;
+    color: var(--text-pure) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-opcion.seleccionada:hover{
+    color: var(--primary-color) !important;
+}
+
+.mat251_tabla_dinamica .btn-mat251-selector-opcion.seleccionada{
+    background: rgba(37, 99, 235, 0.08) !important;
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+.mat251_tabla_dinamica .button_guardar_col{
+    background-color: transparent;
+    color: #10b981;
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+}
+
+.mat251_tabla_dinamica .button_guardar_col:hover:not(:disabled){
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.mat251_tabla_dinamica .button_eliminar_col_esp{
+    background-color: transparent;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 10px;
+    flex: 1;
+    transition: all 0.2s ease;
+}
+
+.mat251_tabla_dinamica .button_eliminar_col_esp:hover:not(:disabled){
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #ef4444 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+
+.mat251_tabla_dinamica .generador_dist_panel{
+    border: 1px solid color-mix(in srgb, var(--accent-color, #3182ce) 30%, transparent);
+    border-radius: 8px;
+    padding: 14px;
+    background: color-mix(in srgb, var(--accent-color, #3182ce) 5%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mat251_tabla_dinamica .generador_dist_titulo{
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-color, #3182ce);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+    padding-bottom: 8px;
+}
+
+.mat251_tabla_dinamica .generador_dist_fila{
+    display: flex;
+    gap: 10px;
+}
+
+.mat251_tabla_dinamica .generador_dist_fila .form_group_col{
+    min-width: 0;
+}
+
+.mat251_tabla_dinamica .generador_dist_fila .form_group_col input,
+.mat251_tabla_dinamica .generador_dist_fila .form_group_col select{
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--bg-input, #ffffff);
+    color: var(--text-main, #2d3748);
+}
+
+.mat251_tabla_dinamica .generador_dist_fila .form_group_col input:focus,
+.mat251_tabla_dinamica .generador_dist_fila .form_group_col select:focus{
+    outline: none;
+    border-color: var(--accent-color, #3182ce);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color, #3182ce) 20%, transparent);
+}
+
+.mat251_tabla_dinamica .generador_dist_info{
+    font-size: 0.78rem;
+    color: var(--text-muted, #718096);
+    margin: 0;
+    text-align: center;
+}
+
+.mat251_tabla_dinamica .button_generar_dist{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background-color: transparent;
+    color: #10b981;
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.mat251_tabla_dinamica .button_generar_dist:hover:not(:disabled){
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.mat251_tabla_dinamica .btn_config_columna{
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.mat251_tabla_dinamica .btn_config_columna:hover{
+    color: #10b981 !important;
+    transform: scale(1.1);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+
+.mat251_tabla_dinamica .select_categoria{
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    text-align: center;
+    cursor: pointer;
+    color: inherit;
+    font-family: inherit;
+}
+
+.mat251_tabla_dinamica .select_categoria option{
+    background-color: var(--bg-card, #ffffff);
+    color: var(--text-main, #333333);
+    text-align: center;
+}
+
+
+.mat251_tabla_dinamica .celda_error{
+    background-color: rgba(229, 62, 62, 0.9) !important;
+    
+    color: white !important;
+    font-weight: bold;
+}
+
+
+.mat251_tabla_dinamica input[type="number"]::-webkit-inner-spin-button,
+.mat251_tabla_dinamica input[type="number"]::-webkit-outer-spin-button{
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.mat251_tabla_dinamica input[type="number"]{
+    -moz-appearance: textfield;
+    
+}
+
+
+.mat251_tabla_dinamica .hojas_tabs_container{
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 0;
+    border-top: 0;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+
+.mat251_tabla_dinamica .hoja_tab{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px 7px;
+    background: var(--header-bg, #f3f4f6);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-pure);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+    min-width: 70px;
+    max-width: 150px;
+}
+
+.mat251_tabla_dinamica .hoja_tab:hover{
+    background: color-mix(in srgb, var(--header-bg, #f3f4f6) 80%, var(--bg-card, #fff));
+    color: var(--text-pure);
+}
+
+.mat251_tabla_dinamica .hoja_tab_activa{
+    background: var(--bg-card, #ffffff) !important;
+    color: var(--text-pure) !important;
+    font-weight: 700;
+    border-color: var(--border-color, #e2e8f0);
+    border-bottom: 3px solid #217346;
+    margin-bottom: -1px;
+    z-index: 1;
+}
+
+.mat251_tabla_dinamica .hoja_tab span{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+.mat251_tabla_dinamica .hoja_tab_input{
+    width: 90px;
+    border: none;
+    outline: 1px solid #10b981;
+    border-radius: 3px;
+    font-size: 0.82rem;
+    padding: 1px 4px;
+    background: var(--bg-input, #fff);
+    color: var(--text-main, #2d3748);
+}
+
+.mat251_tabla_dinamica .hoja_tab_cerrar{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    left: 10px;
+    background: none;
+    border: 0 !important;
+    box-shadow: none !important;
+    appearance: none;
+    cursor: pointer;
+    color: #ef4444 !important;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 3px;
+    border-radius: 5px;
+    transition: color 0.15s, background-color 0.15s;
+    flex-shrink: 0;
+}
+
+.mat251_tabla_dinamica .hoja_tab_cerrar:hover{
+    color: #dc2626 !important;
+    background: color-mix(in srgb, #ef4444 12%, transparent);
+}
+
+.mat251_tabla_dinamica .hoja_tab_agregar{
+    align-self: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: transparent;
+    border: 0 !important;
+    box-shadow: none !important;
+    appearance: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #10b981;
+    outline: 0 !important;
+    transition: background-color 0.15s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mat251_tabla_dinamica .hoja_tab_agregar:hover{
+    background: color-mix(in srgb, #10b981 10%, transparent);
+}
+
+.mat251_tabla_dinamica .hoja_tab_agregar:active{
+    transform: scale(0.96);
+}
+
+.mat251_tabla_dinamica .hoja_tab_agregar:focus-visible{
+    outline: 0 !important;
+    background: color-mix(in srgb, #10b981 16%, transparent);
+}
+
+
+@media (max-width: 600px) {
+    .mat251_tabla_dinamica .modal_overlay_col {
+        box-sizing: border-box;
+        padding: 0 5px;
+    }
+
+    .mat251_tabla_dinamica .modal_content_col {
+        box-sizing: border-box;
+        width: calc(100% - 20px);
+        max-width: calc(95vw - 20px);
+        margin-inline: auto;
+    }
+
+    .mat251_tabla_dinamica.container_tablas_Dinamica {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .mat251_tabla_dinamica .hojas_tabs_container {
+        padding-top: 13px;
+    }
+
+    .mat251_tabla_dinamica .mat251_nombre_archivo{
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 0;
+    }
+
+    .mat251_tabla_dinamica .titulo_salto_movil {
+        display: block;
+    }
+
+    .mat251_tabla_dinamica .mat251_nombre_archivo .container_input_datos{
+        display: flex;
+        flex-direction: row;
+        flex: 1 1 auto;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        gap: 5px;
+    }
+
+    .mat251_tabla_dinamica .mat251_nombre_archivo .container_input_datos label {
+        flex: 0 0 auto;
+        font-size: 0.7rem;
+        white-space: nowrap;
+    }
+
+    .mat251_tabla_dinamica .mat251_nombre_archivo .container_input_datos input {
+        flex: 1 1 0;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 8px;
+    }
+
+    .mat251_tabla_dinamica .mat251_nombre_archivo .container_input_datos span {
+        flex: 0 0 auto;
+        font-size: 0.7rem;
+    }
+
+    .mat251_tabla_dinamica .mat251_guardar_archivo {
+        width: auto;
+        align-self: center;
+        padding: 5px 20px;
+    }
+
+    .mat251_tabla_dinamica .container_herramientas {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        max-width: 490px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .mat251_tabla_dinamica .container_herramientas > button {
+        grid-column: auto !important;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 8px 4px;
+        white-space: nowrap;
+    }
+
+    .mat251_tabla_dinamica .generador_matriz_inputs{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: center;
+        align-items: center;
+        column-gap: 16px;
+        row-gap: 10px;
+    }
+
+    .mat251_tabla_dinamica .input_group_matriz {
+        min-width: 0;
+    }
+
+    .mat251_tabla_dinamica .input_matriz {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .mat251_tabla_dinamica .generador_matriz_container {
+        margin-top: 10px;
+    }
+
+    .mat251_tabla_dinamica .button_generar_matriz{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        max-width: 100%;
+        box-sizing: border-box;
+        grid-column: 1 / -1;
+        justify-self: center;
+        margin: 0;
+        padding: 5px 20px;
+        font-size: 13px;
+    }
+
+    
+    
+    .mat251_tabla_dinamica .container_herramientas .button_guardar{
+        grid-column: span 2;
+        width: 100%;
+        margin-top: 5px;
+    }
+}
+
+.mat251_tabla_dinamica {
+    --text-main: var(--text-pure, #111827);
+    --text-muted: var(--text-pure, #111827);
+    --primary-color: var(--text-pure, #111827);
+}
+
+.mat251_tabla_dinamica .generador_dist_titulo {
+    color: var(--text-pure, #111827) !important;
+}
+
+@media (max-width: 900px) {
+    .mat251_tabla_dinamica .hojas_tabs_container {
+        padding-top: 8px;
+    }
+}

@@ -100,7 +100,9 @@ export const pruebaMediaT = (n, x_bar, s, mu0, alpha, tipoPrueba) => {
  * Calcula la prueba de hipótesis para una proporción (Z)
  */
 export const pruebaProporcionZ = (n, x, p0, alpha, tipoPrueba) => {
-    if (n <= 0 || x < 0 || x > n || p0 <= 0 || p0 >= 1 || alpha <= 0 || alpha >= 1) return { error: 'Parámetros inválidos.' };
+    if (!Number.isInteger(n) || n <= 0 || !Number.isInteger(x) || x < 0 || x > n || p0 <= 0 || p0 >= 1 || alpha <= 0 || alpha >= 1) {
+        return { error: 'Datos válidos: n entero > 0; x entero entre 0 y n; 0 < p₀ < 1.' };
+    }
 
     const p_hat = x / n;
     const q0 = 1 - p0;
@@ -249,8 +251,11 @@ export const simularPruebaHipotesis = (prueba, numSims, n, paramsGeneracion, par
         } else if (prueba === 'proporcion') {
             const { pReal } = paramsGeneracion;
             let exitos = 0;
+            const muestrasProporcion = [];
             for (let j = 0; j < n; j++) {
-                if (Math.random() < pReal) exitos++;
+                const resultado = Math.random() < pReal ? 1 : 0;
+                muestrasProporcion.push(resultado);
+                if (resultado === 1) exitos++;
             }
             res = pruebaProporcionZ(n, exitos, paramsPrueba.p0, alpha, tipoPrueba);
             if (res) {
@@ -260,7 +265,8 @@ export const simularPruebaHipotesis = (prueba, numSims, n, paramsGeneracion, par
                     p_hat: res.calculos.p_hat,
                     estadistico: res.estadistico,
                     pValor: res.pValor,
-                    decision: res.decision
+                    decision: res.decision,
+                    muestras: muestrasProporcion
                 });
             }
         }

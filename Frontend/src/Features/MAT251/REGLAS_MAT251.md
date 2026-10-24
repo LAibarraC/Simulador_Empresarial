@@ -360,3 +360,19 @@ Este documento contiene las reglas de diseño, maquetación y comportamiento exc
 * **13.2. Limpieza Inmediata ante Cambios de Datos**:
   * Al deseleccionar la variable, borrar filas en el editor, vaciar datos globales (`statsDatos.total === 0`), cambiar de columna o alternar de modo (`matriz` / `manual`), el componente debe llamar de inmediato a `onCalcular(null)` (y `setDatosDiscretos(null)`).
   * Los resultados anteriores no deben permanecer en pantalla si los datos base han sido modificados o eliminados.
+
+---
+
+## 14. Bordes y Scroll en Tablas de Resolución
+* **14.1. Borde sólido completo**: Las tablas deben conservar un marco visible de `1px solid var(--text-pure)`, incluidos los bordes superior e inferior, además de las líneas internas de filas y columnas.
+* **14.2. Sin líneas duplicadas**: Cada límite entre celdas debe dibujarse una sola vez. Si se usa `border-collapse: separate` para sostener un encabezado fijo, distribuir explícitamente los bordes entre tabla y celdas; no combinar bordes de tabla, celdas y sombras inset que creen líneas dobles.
+* **14.3. No anular bordes accidentalmente**: Evitar reglas generales como `border: 0 !important` si luego se asignan lados con reglas de menor prioridad; el shorthand puede anular el marco sólido. Declarar cada lado con prioridades consistentes y confirmar que el borde exterior superior e inferior permanezca visible.
+* **14.4. Tablas desplazables**: Cuando una tabla tenga scroll vertical y encabezado fijo, usar `position: sticky; top: 0` en las celdas del encabezado (`th`), con fondo opaco. Verificar que el encabezado conserve su borde superior e inferior mientras se desplazan las filas.
+
+---
+
+## 15. Gráficas de Convergencia de Probabilidad
+* **15.1. Inicio del eje de intentos**: En las gráficas de convergencia de probabilidad, el eje X debe comenzar en `0`, aunque el primer dato registrado corresponda al intento `1`.
+* **15.2. Etiquetas del eje X**: La etiqueta `0` debe mostrarse siempre y el eje debe incluir el primer intento registrado. Si hay hasta 40 intentos, mostrar cada número de intento; con más datos, espaciar las etiquetas para que sean legibles, conservando siempre `0` y el último intento.
+* **15.3. Escala Y de probabilidad**: El eje Y debe conservar el dominio `[0, 1]` para representar el rango completo de probabilidades.
+* **15.4. Alcance**: Estas reglas aplican a las gráficas de convergencia; no se debe forzar el inicio en cero en gráficas con valores negativos u otros dominios donde altere la representación de los datos.

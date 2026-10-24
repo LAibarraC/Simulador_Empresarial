@@ -1,5 +1,5 @@
 import React from 'react';
-import { FONT, RADIUS } from '../../../Principal/Constantes';
+import { FONT } from '../../../Principal/Constantes';
 import katex from 'katex';
 import Grafico_HNP from '../../../Graficas/Tema_6/Grafico_HNP';
 import Grafico_HNP_Signos from '../../../Graficas/Tema_6/Grafico_HNP_Signos';
@@ -25,19 +25,10 @@ export default function Resultados_HNP_Manual({ resultados }) {
 
     return (
         <div style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <h4 style={{ margin: 0, color: 'var(--text-main)' }}>Resultados:</h4>
-                <div style={{ padding: '5px 10px', background: 'var(--bg-input)', borderRadius: '5px', fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 'bold' }}>
-                    {resultados.tipo === 'chi_cuadrada' && resultados.subtipo === 'bondad' && 'Chi-cuadrada - Bondad de Ajuste'}
-                    {resultados.tipo === 'chi_cuadrada' && resultados.subtipo === 'independencia' && 'Chi-cuadrada - Prueba de Independencia'}
-                    {resultados.tipo === 'signos' && 'Prueba de Signos'}
-                    {resultados.tipo === 'rachas' && 'Prueba de Rachas'}
-                </div>
-            </div>
-
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             {resultados.tipo === 'signos' && (
-                <div style={{ padding: '5px 15px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '5px', border: '1px solid rgba(245, 158, 11, 0.3)', marginBottom: '5px' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-main)' }}>
+                <div style={{ padding: '5px 15px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '5px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                    <div className="hnp-nota-aproximacion" style={{ fontSize: '0.7rem', color: 'var(--text-main)' }}>
                         <strong style={{ color: '#d97706' }}>Nota:</strong> Se utiliza la {resultados.nEfectivo <= 25 ? (
                             <>Distribución Binomial porque la muestra efectiva es pequeña ({renderKatex('n \\le 25')}).</>
                         ) : (
@@ -48,7 +39,7 @@ export default function Resultados_HNP_Manual({ resultados }) {
             )}
 
             {/* TABLA ESTILO MINITAB */}
-            <div style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '4px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
+            <div className="minitab-table-scroll" style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
                 <style>{`
                     .minitab-table { width: 100%; text-align: center; border-collapse: collapse; table-layout: auto; }
                     .minitab-table th, .minitab-table td { padding: 4px 2px; border: 1px solid var(--text-pure); word-wrap: break-word; hyphens: auto; }
@@ -58,7 +49,7 @@ export default function Resultados_HNP_Manual({ resultados }) {
                     .minitab-table tr:last-child td { border-bottom: none; }
                     @media (max-width: 650px) { .minitab-table { font-size: 0.70rem; } .minitab-table th, .minitab-table td { padding: 4px 2px; } }
                 `}</style>
-                <table className="minitab-table">
+                <table className={`minitab-table${resultados.tipo === 'rachas' ? ' rachas-table' : ''}`}>
                     {resultados.tipo === 'chi_cuadrada' && (
                         <>
                             <thead>
@@ -152,6 +143,7 @@ export default function Resultados_HNP_Manual({ resultados }) {
                     )}
                 </table>
             </div>
+            </div>
 
             {resultados.tipo === 'chi_cuadrada' && resultados.calculos && (
                 <div style={{ width: '100%', marginTop: '0px', marginBottom: '5px' }}>
@@ -170,28 +162,40 @@ export default function Resultados_HNP_Manual({ resultados }) {
             )}
 
             {resultados.tipo === 'rachas' && resultados.calculos && (
-                <div style={{ width: '100%', marginTop: '15px', marginBottom: '15px' }}>
+                <div style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
                     <Grafico_HNP_Rachas resultados={resultados} id="grafico-hnp-rachas-z" />
                 </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div style={{ padding: '10px 15px', background: isRechazo ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', border: `2px solid ${decisionColor}`, borderRadius: '12px', textAlign: 'center', minWidth: '250px' }}>
-                    <div style={{ fontSize: '0.9em', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-pure)' }}>Decisión Estadística</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: decisionColor, marginTop: '8px', display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '5px' }}>
-                        {isRechazo ? <span>Rechazar</span> : <span>No rechazar</span>} {renderKatex('H_0')}
-                    </div>
-                    {resultados.regionRechazo && (
-                        <div style={{ fontSize: '0.7em', marginTop: '8px', color: 'var(--text-pure)' }}>
-                            Región de Rechazo: {renderKatex(resultados.regionRechazo.replace(/p-Valor/gi, 'p\\text{-Valor}'))}
-                        </div>
-                    )}
-                    {resultados.criterioRechazoMath && (
-                        <div style={{ fontSize: '0.7em', marginTop: '4px', color: 'var(--text-pure)' }}>
-                            Justificación: Como {renderKatex(resultados.criterioRechazoMath.replace(/p-Valor/gi, 'p\\text{-Valor}'))}, el estadístico {isRechazo ? 'cae en la región de rechazo.' : 'NO cae en la región de rechazo.'}
-                        </div>
-                    )}
-                </div>
+            <div style={{ width: '100%', overflowX: 'auto', marginTop: '10px' }}>
+                <table className="decision-estadistica-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--text-pure)', borderRadius: '0px', background: 'var(--bg-card)', color: 'var(--text-pure)', textAlign: 'center', fontSize: '0.8rem' }}>
+                    <tbody>
+                        <tr>
+                            <th style={{ padding: '8px', borderBottom: '1px solid var(--text-pure)', fontSize: '0.9em', textTransform: 'uppercase', letterSpacing: '1px' }} colSpan={2}>
+                                Decisión Estadística
+                            </th>
+                        </tr>
+                        <tr>
+                            <td style={{ padding: '8px', borderBottom: '1px solid var(--text-pure)', fontWeight: 'bold', color: decisionColor }} colSpan={2}>
+                                {resultados.decision === 'Rechazar H₀' ? 'Rechazar' : 'Aceptar'} {renderKatex('H_0')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style={{ width: '25%', padding: '8px', borderRight: '1px solid var(--text-pure)' }}>Región de rechazo</th>
+                            <td style={{ padding: '8px' }}>
+                                {resultados.regionRechazo ? renderKatex(resultados.regionRechazo.replace(/p-Valor/gi, 'p\\text{-Valor}')) : '—'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style={{ width: '25%', padding: '8px', borderTop: '1px solid var(--text-pure)', borderRight: '1px solid var(--text-pure)' }}>Justificación</th>
+                            <td style={{ padding: '8px', borderTop: '1px solid var(--text-pure)' }}>
+                                {resultados.criterioRechazoMath
+                                    ? <>Como {renderKatex(resultados.criterioRechazoMath.replace(/p-Valor/gi, 'p\\text{-Valor}'))}, el estadístico {resultados.decision === 'Rechazar H₀' ? 'cae en la región de rechazo.' : 'no cae en la región de rechazo.'}</>
+                                    : 'No hay un criterio de rechazo disponible.'}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </div>

@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx';
 import { api } from '../services/api';
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import ModalAlerta from '../features/MAT251/ui/ModalAlerta';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 provideGlobalGridOptions({ theme: 'legacy' });
@@ -49,6 +50,11 @@ const SimuladorMAT251 = () => {
     const [archivoActivo, setArchivoActivo] = useState(null); 
     const [_selectedApiFile, setSelectedApiFile] = useState("");
     const [modalMatrizInfo, setModalMatrizInfo] = useState(null);
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+
+    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
+        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
+    };
 
     const startVariableTour = () => {
         if (document.querySelector('#tour-datos-card-variable')) {
@@ -157,7 +163,7 @@ const SimuladorMAT251 = () => {
     const cargarDesdeAPI = async (filename) => {
         if (!filename) return;
         if (!usuario) {
-            alert("Error: No hay un usuario activo. Por favor recarga la página.");
+            mostrarAlerta("No hay un usuario activo. Por favor, recarga la página.", 'Error', 'error');
             return;
         }
         try {
@@ -170,7 +176,7 @@ const SimuladorMAT251 = () => {
             setArchivoActivo({ nombre: filename, origen: 'API' });
             handleFileUpload({ target: { files: [fileVirtual] } });
         } catch (error) {
-            alert("Error al cargar dataset: " + error.message);
+            mostrarAlerta("Error al cargar dataset: " + error.message, 'Error', 'error');
         } finally {
             setCargandoApi(false);
         }
@@ -217,7 +223,28 @@ const SimuladorMAT251 = () => {
         }
     };
 
-    // Agrupamos las acciones para pasarlas a la VariableCard
+    const nombreAutomaticoPorColumnas = (id, cantidadColumnas) => {
+        const nombreActual = variables.find(variable => variable.id === id)?.nombre || '';
+        const coincidencia = nombreActual.match(/^(?:Variable|Matriz de datos)\s+(\d+)$/i);
+        if (!coincidencia) return {};
+
+        const prefijo = cantidadColumnas > 1 ? 'Matriz de datos' : 'Variable';
+        const patronNombre = new RegExp('^' + prefijo + '\\s+(\\d+)$', 'i');
+        const numerosOcupados = new Set(
+            variables
+                .filter(variable => variable.id !== id)
+                .map(variable => Number(variable.nombre.match(patronNombre)?.[1]))
+                .filter(Number.isFinite)
+        );
+        let numero = 1;
+        while (numerosOcupados.has(numero)) numero++;
+
+        return {
+            nombre: `${prefijo} ${numero}`
+        };
+    };
+
+    // Agrupamos las acciones para pasarlas a la tarjeta de datos.
     const actions = {
         delete: eliminarVariable,
         update: actualizarVariable,
@@ -241,7 +268,10 @@ const SimuladorMAT251 = () => {
 
         capture: (id) => {
             const { start, end } = selection;
-            if (!start || !end) return alert("⚠️ Selecciona un rango en el Excel primero.");
+            if (!start || !end) {
+                mostrarAlerta('Selecciona un rango en el Excel primero.', 'Selecciona un rango');
+                return;
+            }
 
             const rMin = Math.min(start.row, end.row);
             const rMax = Math.max(start.row, end.row);
@@ -258,7 +288,8 @@ const SimuladorMAT251 = () => {
             });
 
             if (solapada) {
-                return alert(`⚠️ Error: El rango choca con la variable "${solapada.nombre}".`);
+                mostrarAlerta('El rango choca con la variable "' + solapada.nombre + '".', 'Rango no válido', 'error');
+                return;
             }
 
 
@@ -319,6 +350,7 @@ const SimuladorMAT251 = () => {
 
             // Actualizamos la variable inyectando los datos y el tipo
             actualizarVariable(id, {
+                ...nombreAutomaticoPorColumnas(id, cMax - cMin + 1),
                 rangoLabel: `${getExcelChar(cMin)}${rMin + 1}:${getExcelChar(cMax)}${rMax + 1}`,
                 coords: { rMin, rMax, cMin, cMax },
                 datos: datosValidos, // 👈 Ahora esto ya no estará vacío
@@ -405,6 +437,7 @@ const SimuladorMAT251 = () => {
                 }
 
                 actualizarVariable(id, {
+                    ...nombreAutomaticoPorColumnas(id, coords.cMax - coords.cMin + 1),
                     rangoLabel: nuevoTexto,
                     coords,
                     datos: datosValidos,
@@ -506,7 +539,7 @@ const SimuladorMAT251 = () => {
                 </div>
 
                 {sheetNames.length > 0 && (
-                    <div style={{
+                    <div className="datos-hoja-info" style={{
                         margin: '10px 10px 5px 10px',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -519,19 +552,19 @@ const SimuladorMAT251 = () => {
                         boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     }}>
 
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                        <div className="datos-archivo-info" style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
                             <strong>Archivo: </strong>
                             <span style={{ color: '#3b82f6', marginRight: '8px' }}>
                                 {archivoActivo ? archivoActivo.nombre : (workbook ? "Documento cargado" : "Sin archivo")}
                             </span>
                             {archivoActivo && (
-                                <span style={{ color: 'var(--text-muted)' }}>
+                                <span className="datos-archivo-origen" style={{ color: 'var(--text-muted)' }}>
                                     {archivoActivo.origen === 'API' ? `(${usuario?.nombre || 'Nube'})` : '(Local)'}
                                 </span>
                             )}
                         </div>
 
-                        <div>
+                        <div className="datos-hoja-selector">
                             <span style={{ marginRight: '10px', fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.8rem' }}>
                                 Hoja activa del Excel:
                             </span>
@@ -667,6 +700,13 @@ const SimuladorMAT251 = () => {
                         </div> 
                     </div>
                 )}
+                <ModalAlerta
+                    isOpen={modalAlerta.isOpen}
+                    mensaje={modalAlerta.mensaje}
+                    titulo={modalAlerta.titulo}
+                    tipo={modalAlerta.tipo}
+                    onClose={() => setModalAlerta(prev => ({ ...prev, isOpen: false }))}
+                />
             </div>
         </AgGridProvider>
     );

@@ -576,7 +576,7 @@ export default function Controles_ModelosContinuos({
                     <div className="t3-parametros-fila-manual" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '16px', flexWrap: 'nowrap', width: '100%', maxWidth: '360px', margin: '0 auto' }}>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('\\mu:')}
+                                {renderLatex('\\boldsymbol{\\mu}:')}
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="any"
@@ -588,7 +588,7 @@ export default function Controles_ModelosContinuos({
                         </div>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('\\sigma:')}
+                                {renderLatex('\\boldsymbol{\\sigma}:')}
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="any"
@@ -617,7 +617,7 @@ export default function Controles_ModelosContinuos({
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'wrap', width: '100%' }}>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', width: 'auto' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('\\mu:')}
+                                {renderLatex('\\boldsymbol{\\mu}:')}
                             </label>
                             <input
                                 type="text" className="input-mat251"
@@ -628,7 +628,7 @@ export default function Controles_ModelosContinuos({
                         </div>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', width: 'auto' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('\\sigma:')}
+                                {renderLatex('\\boldsymbol{\\sigma}:')}
                             </label>
                             <input
                                 type="text" className="input-mat251"
@@ -662,7 +662,7 @@ export default function Controles_ModelosContinuos({
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'wrap', width: '100%' }}>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', width: 'auto' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('v:')}
+                                {renderLatex('\\boldsymbol{v}:')}
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
@@ -698,7 +698,7 @@ export default function Controles_ModelosContinuos({
                     <div className="t3-parametros-fila-manual" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '16px', flexWrap: 'nowrap', width: '100%', maxWidth: '380px', margin: '0 auto' }}>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('n:')}
+                                {renderLatex('\\boldsymbol{n}:')}
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
@@ -711,7 +711,7 @@ export default function Controles_ModelosContinuos({
                         </div>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('m:')}
+                                {renderLatex('\\boldsymbol{m}:')}
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
@@ -747,7 +747,7 @@ export default function Controles_ModelosContinuos({
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'wrap', width: '100%' }}>
                         <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', width: 'auto' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                {renderLatex('n:')}
+                                {renderLatex('\\boldsymbol{n}:')}
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
@@ -789,7 +789,7 @@ export default function Controles_ModelosContinuos({
                 <div className="t3-parametros-fila-manual" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '16px', flexWrap: 'nowrap', width: '100%', maxWidth: '360px', margin: '0 auto' }}>
                     <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                         <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                            {renderLatex('a:')}
+                            {renderLatex('\\boldsymbol{a}:')}
                         </label>
                         <input
                             type="number" className="input-mat251 placeholder-small" step="any"
@@ -801,7 +801,7 @@ export default function Controles_ModelosContinuos({
                     </div>
                     <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                         <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                            {renderLatex('b:')}
+                            {renderLatex('\\boldsymbol{b}:')}
                         </label>
                         <input
                             type="number" className="input-mat251 placeholder-small" step="any"
@@ -1231,7 +1231,7 @@ export default function Controles_ModelosContinuos({
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                                     <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                        {renderLatex('\\mathbf{p}:')}
+                                        {renderLatex('\\boldsymbol{p}:')}
                                     </label>
                                     <input
                                         type="number"
@@ -1281,8 +1281,8 @@ export default function Controles_ModelosContinuos({
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                                     <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
                                         {['entre', 'intervalo', 'exterior'].includes(tipoCondicion)
-                                            ? renderLatex('\\mathbf{a}:')
-                                            : renderLatex(`\\mathbf{${modelo === 'NormalEstandar' ? 'z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 't' : 'x')))}:}`)}
+                                            ? renderLatex('\\boldsymbol{a}:')
+                                            : renderLatex(`\\boldsymbol{${modelo === 'NormalEstandar' ? 'z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 't' : 'x')))}:}`)}
                                     </label>
                                     <input
                                         type="number"
@@ -1319,7 +1319,7 @@ export default function Controles_ModelosContinuos({
                                 {['entre', 'exterior', 'intervalo'].includes(tipoCondicion) && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                                         <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                            {renderLatex('\\mathbf{b}:')}
+                                            {renderLatex('\\boldsymbol{b}:')}
                                         </label>
                                         <input
                                             type="number"

@@ -1,6 +1,6 @@
 /* const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; */
 
-/*uvicorn main:app --reload*/
+/*uvicorn main:app --reload*/ 
 
 // Detecta automáticamente si estás en localhost o en la IP del celular
 const hostActual = window.location.hostname;

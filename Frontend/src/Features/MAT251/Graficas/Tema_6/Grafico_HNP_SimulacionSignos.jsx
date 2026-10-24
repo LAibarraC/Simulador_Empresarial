@@ -212,17 +212,18 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                             </div>
                         </div>
 
-                        <div style={{ width: '100%', flex: 1, minHeight: '300px', position: 'relative' }}>
+                        <div className="hnp-simulacion-grafica-plot" style={{ width: '100%', flex: 1, minHeight: '300px', position: 'relative' }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <ComposedChart margin={{ top: 30, right: 30, left: 10, bottom: 20 }} style={{ overflow: 'visible' }}>
+                                <ComposedChart margin={{ top: 30, right: 10, left: 10, bottom: 20 }} style={{ overflow: 'visible' }}>
                                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
                                     <XAxis
                                         dataKey="x"
                                         type="number"
                                         domain={isNormalApprox ? ['dataMin', 'dataMax'] : [-0.5, n + 0.5]}
-                                        ticks={isNormalApprox ? undefined : Array.from({length: n + 1}, (_, i) => i)}
+                                        ticks={isNormalApprox ? undefined : Array.from({ length: n + 1 }, (_, i) => i).filter((i) => i % Math.max(1, Math.ceil(n / 10)) === 0 || i === n)}
+                                        interval={0}
                                         tickFormatter={(val) => Math.round(val)}
-                                        tick={{ fill: 'var(--text-pure)', fontSize: 12, fontWeight: 'normal' }}
+                                        tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
                                         axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                         tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                     />
@@ -244,7 +245,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                                             stroke="#f97316"
                                             strokeDasharray="4 4"
                                             strokeWidth={2}
-                                            label={<CustomKatexLabel position="top" offsetY={0} value={`S_{crit} = ${sCritInf.toFixed(3)}`} />}
+                                            label={<CustomKatexLabel position="top" offsetY={0} value={`\\mathbf{S}_{crit} = ${sCritInf.toFixed(3)}`} />}
                                         />
                                     )}
                                     {sCritSup != null && (
@@ -253,7 +254,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                                             stroke="#f97316"
                                             strokeDasharray="4 4"
                                             strokeWidth={2}
-                                            label={<CustomKatexLabel position="top" offsetY={0} value={`S_{crit} = ${sCritSup.toFixed(3)}`} />}
+                                            label={<CustomKatexLabel position="top" offsetY={0} value={`\\mathbf{S}_{crit} = ${sCritSup.toFixed(3)}`} />}
                                         />
                                     )}
 
@@ -270,7 +271,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                             </ResponsiveContainer>
                         </div>
 
-                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
+                        <div className="leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
                             {!isRejectionImpossible && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                                     <div style={{ width: '20px', height: '12px', background: 'rgba(220, 38, 38, 0.85)', borderRadius: '2px' }}></div>
@@ -299,9 +300,9 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                         </div>
                     )}
                     
-                    <div style={{ width: '100%', flex: 1, minHeight: '280px', position: 'relative' }}>
+                    <div className="hnp-simulacion-histograma-plot" style={{ width: '100%', flex: 1, minHeight: '280px', position: 'relative' }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart data={pureBinsData} margin={{ top: 20, right: 30, left: -10, bottom: 15 }}>
+                            <ComposedChart data={pureBinsData} margin={{ top: 20, right: 10, left: -30, bottom: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} />
                                 <XAxis 
                                     dataKey="binCenter" 
@@ -309,7 +310,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                                         if (val === '-1' || val === (n + 1).toString()) return '';
                                         return val;
                                     }}
-                                    tick={{ fontSize: 11, fill: 'var(--text-pure)' }} 
+                                    tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 'bold' }} 
                                     tickMargin={8} 
                                     axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                     tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
@@ -318,7 +319,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                                 <YAxis 
                                     yAxisId="left" 
                                     domain={[0, dataMax => Math.ceil(dataMax + 1)]}
-                                    tick={{ fontSize: 11, fill: 'var(--text-pure)' }} 
+                                    tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 'bold' }} 
                                     axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                     tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 />
@@ -355,7 +356,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                                         stroke="#f97316"
                                         strokeDasharray="4 4"
                                         strokeWidth={2}
-                                        label={<CustomKatexLabel position="top" offsetY={0} value={`S_{crit} ${isNormalApprox ? '\\approx ' + Math.round(sCritInf) : '= ' + sCritInf}`} />}
+                                        label={<CustomKatexLabel position="top" offsetY={0} value={`\\mathbf{S}_{crit} ${isNormalApprox ? '\\approx ' + Math.round(sCritInf) : '= ' + sCritInf}`} />}
                                     />
                                 )}
                                 {sCritSup != null && (
@@ -365,7 +366,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                                         stroke="#f97316"
                                         strokeDasharray="4 4"
                                         strokeWidth={2}
-                                        label={<CustomKatexLabel position="top" offsetY={0} value={`S_{crit} ${isNormalApprox ? '\\approx ' + Math.round(sCritSup) : '= ' + sCritSup}`} />}
+                                        label={<CustomKatexLabel position="top" offsetY={0} value={`\\mathbf{S}_{crit} ${isNormalApprox ? '\\approx ' + Math.round(sCritSup) : '= ' + sCritSup}`} />}
                                     />
                                 )}
 
@@ -383,7 +384,7 @@ export default function Grafico_HNP_SimulacionSignos({ resultados }) {
                         </ResponsiveContainer>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '0px', paddingBottom: '25px', flexWrap: 'wrap' }}>
+                    <div className="leyenda-grafica-tema6 hnp-simulacion-histograma-leyenda" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '0px', paddingBottom: '25px', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{ width: '14px', height: '14px', background: '#10b981', borderRadius: '3px', opacity: 0.9 }}></div>
                             <span style={{ fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 600 }}>Frecuencia: Aceptar {renderKatex('H_0')}</span>

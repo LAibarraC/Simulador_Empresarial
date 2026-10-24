@@ -196,7 +196,7 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
         return Array.from(new Set(allTicks.map(v => Number(v.toFixed(3))))).sort((a,b) => a - b);
     })();
 
-    const statSymbol = prueba === 'media_t' ? 'T' : prueba === 'varianza' ? 'χ²' : 'Z';
+    const statSymbol = prueba === 'media_t' ? '\\boldsymbol{T}' : prueba === 'varianza' ? '\\boldsymbol{\\chi^2}' : '\\boldsymbol{Z}';
 
     return (
         <MarcoWidgetMAT251 
@@ -208,7 +208,7 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
                 <div style={{ flex: 1, position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 35, left: 0, right: 0, bottom: 0 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData} margin={{ top: 30, right: 60, left: 45, bottom: 20 }} style={{ overflow: 'visible' }}>
+                            <AreaChart data={chartData} margin={{ top: 30, right: 0, left: 0, bottom: 20 }} style={{ overflow: 'visible' }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
                         <XAxis 
                             dataKey="x" 
@@ -220,7 +220,7 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
                                 if (v === 0) return '0';
                                 return parseFloat(v.toFixed(3)).toString();
                             }} 
-                            tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 'normal' }}
+                            tick={{ fill: 'var(--text-main, #333333)', fontSize: 11, fontWeight: 'bold' }}
                             axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                             tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                         />
@@ -243,6 +243,7 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
                                 if (criticalValues.length === 2) mathStr = idx === 0 ? `\\chi^2_{inf}` : `\\chi^2_{sup}`;
                                 else mathStr = `\\chi^2_\\alpha`;
                             }
+                            mathStr = `\\boldsymbol{${mathStr}}`;
                             return (
                                 <ReferenceLine 
                                     key={idx} 
@@ -264,7 +265,7 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
                         </ResponsiveContainer>
                     </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
+                <div className="leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '14px', height: '14px', background: 'rgba(220, 38, 38, 0.9)', border: '2px solid #b91c1c', borderRadius: '50%' }}></div>
                         <div style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
@@ -274,7 +275,7 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '14px', height: '14px', background: 'rgba(59, 130, 246, 0.2)', border: '2px solid #3b82f6', borderRadius: '50%' }}></div>
                         <div style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
-                            Zona de No Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
+                            Zona de Aceptación <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
                         </div>
                     </div>
                 </div>

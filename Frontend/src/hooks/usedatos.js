@@ -60,10 +60,17 @@ export const useSimuladorLogic = (usuario) => {
   const agregarVariable = () => {
     setVariables(prev => {
       const nuevocolor = generarColorAleatorio(prev.length)
+      const numerosOcupados = new Set(
+        prev
+          .map(variable => Number(variable.nombre?.match(/^Variable\s+(\d+)$/i)?.[1]))
+          .filter(Number.isFinite)
+      );
+      let numero = 1;
+      while (numerosOcupados.has(numero)) numero++;
 
       return [...prev, {
         id: Date.now(),
-        nombre: `Variable ${prev.length + 1}`,
+        nombre: `Variable ${numero}`,
         color: nuevocolor,
         datos: [],
         rangoLabel: "",

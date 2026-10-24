@@ -5,6 +5,7 @@ import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import { parse, fraction, evaluate, simplify } from 'mathjs';
 import { mat251Api } from '../../../Matematicas/services/api';
+import ModalAlerta from '../../../ui/ModalAlerta';
 
 const MATH_FONT = "'Cambria Math', 'Times New Roman', serif"; 
 
@@ -88,7 +89,14 @@ export default function ControlDistribucionContinua({ onCalcular }) {
     const [modo, setModo] = useState('densidad'); // 'densidad' | 'acumulada'
     const [limiteA, setLimiteA] = useState('');
     const [limiteB, setLimiteB] = useState('');
-    const [error, setError] = useState('');
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Error en la función', tipo: 'error' });
+    const setError = (mensaje) => {
+        if (!mensaje) {
+            setModalAlerta(actual => ({ ...actual, isOpen: false }));
+            return;
+        }
+        setModalAlerta({ isOpen: true, mensaje, titulo: 'Error en la función', tipo: 'error' });
+    };
     const [mensajeInfo, setMensajeInfo] = useState('');
     const [mensajeK, setMensajeK] = useState(null);
 
@@ -998,17 +1006,17 @@ export default function ControlDistribucionContinua({ onCalcular }) {
             } else if (bloque.tipo === 'fraccion' || bloque.tipo === 'euler' || bloque.tipo === 'absoluto') {
                 const isNum = focusSlot?.parentId === bloque.id && focusSlot?.slot === 'numerador' && activeId !== 'START_SLOT';
                 const isDen = focusSlot?.parentId === bloque.id && focusSlot?.slot === 'denominador' && activeId !== 'START_SLOT';
-                const sStyle = (focused, slotType = 'center') => ({ minWidth: '20px', minHeight: '20px', display: 'flex', alignItems: slotType === 'numerador' ? 'flex-end' : (slotType === 'denominador' ? 'flex-start' : 'center'), justifyContent: 'center', padding: '0 2px', border: focused ? '1.5px solid #3b82f6' : '1px dashed transparent', borderRadius: '3px', transition: 'all 0.15s' });
+                const sStyle = (focused, slotType = 'center') => ({ minWidth: '20px', minHeight: '20px', display: 'flex', alignItems: slotType === 'numerador' ? 'flex-end' : (slotType === 'denominador' ? 'flex-start' : 'center'), justifyContent: 'center', padding: '0 2px', border: focused ? '2px solid #2563eb' : '1px dashed transparent', borderRadius: '3px', background: focused ? 'rgba(59, 130, 246, 0.12)' : 'transparent', boxShadow: focused ? '0 0 0 2px rgba(59, 130, 246, 0.16)' : 'none', transition: 'all 0.15s' });
 
                 if (bloque.tipo === 'fraccion') {
                     blockJSX = (
                         <div key={bloque.id} className="fraction-block" onClick={clickBloque} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 4px', cursor: 'pointer', border: activeId === bloque.id && !focusSlot ? '1.5px solid #3b82f6' : '1px solid transparent' }}>
-                            <div className={`ghost-slot ${bloque.numerador.length === 0 ? 'empty-slot' : ''} ${isNum ? 'focused-slot' : ''}`} onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'numerador' }); }} style={{ ...sStyle(isNum, 'numerador'), border: isNum ? '1.5px solid #3b82f6' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
+                            <div className={`ghost-slot ${bloque.numerador.length === 0 ? 'empty-slot' : ''} ${isNum ? 'focused-slot' : ''}`} role="button" tabIndex={0} aria-label="Escribir en el numerador" title="Haz clic para escribir en el numerador" onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'numerador' }); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'numerador' }); } }} style={{ ...sStyle(isNum, 'numerador'), border: isNum ? '2px solid #2563eb' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
                                 {bloque.numerador.length === 0 ? <span className="ghost-text" style={{ transition: 'opacity 0.2s', visibility: 'hidden' }}>&nbsp;&nbsp;</span> : renderListaBloques(bloque.numerador, false, isNestedInExponent, bloque.id, 'numerador')}
                                 {isNum && <CursorMain height="16px" />}
                             </div>
                             <div style={{ width: '100%', height: '1.5px', background: isNum || isDen || activeId === bloque.id ? '#3b82f6' : 'var(--text-main)', margin: '2px 0', flexShrink: 0 }} />
-                            <div className={`ghost-slot ${bloque.denominador.length === 0 ? 'empty-slot' : ''} ${isDen ? 'focused-slot' : ''}`} onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'denominador' }); }} style={{ ...sStyle(isDen, 'denominador'), border: isDen ? '1.5px solid #3b82f6' : (bloque.denominador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
+                            <div className={`ghost-slot ${bloque.denominador.length === 0 ? 'empty-slot' : ''} ${isDen ? 'focused-slot' : ''}`} role="button" tabIndex={0} aria-label="Escribir en el denominador" title="Haz clic para escribir en el denominador" onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'denominador' }); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'denominador' }); } }} style={{ ...sStyle(isDen, 'denominador'), border: isDen ? '2px solid #2563eb' : (bloque.denominador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
                                 {bloque.denominador.length === 0 ? <span className="ghost-text" style={{ transition: 'opacity 0.2s', visibility: 'hidden' }}>&nbsp;&nbsp;</span> : renderListaBloques(bloque.denominador, false, isNestedInExponent, bloque.id, 'denominador')}
                                 {isDen && <CursorMain height="16px" />}
                             </div>
@@ -1049,6 +1057,19 @@ export default function ControlDistribucionContinua({ onCalcular }) {
             }
         });
         return elementos;
+    };
+
+    const obtenerEstadoEntrada = () => {
+        if (isTyping) return 'Editando el valor seleccionado. Escribe directamente o usa las teclas del panel.';
+        if (focusSlot) {
+            const nombreCasilla = focusSlot.slot === 'numerador' ? 'numerador' : 'denominador';
+            return `Punto de entrada: ${nombreCasilla} de la fracción seleccionada. Usa ↑/↓ para cambiar de casilla.`;
+        }
+        if (activeId === 'START') return 'Punto de entrada: inicio de la función. Usa ←/→ para moverte por la expresión.';
+        if (activeId && activeId !== 'START' && activeId !== 'START_SLOT') {
+            return 'Punto de entrada junto al elemento seleccionado. Haz clic en un valor para editarlo y usa ←/→ para moverte.';
+        }
+        return 'Punto de entrada: final de la función. Haz clic en una casilla punteada para elegir dónde escribir; usa ←/→ para moverte.';
     };
 
     return (
@@ -1146,7 +1167,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                 </h4>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div onClick={() => { setActiveIdSync(null); setFocusSlotSync(null); }} className="formula-container" style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', padding: '15px 15px', borderRadius: '5px', overflowX: 'auto', minHeight: '80px' }}>
                     <div style={{ fontSize: '1rem', marginRight: '10px', color: 'inherit', flexShrink: 0 }}><InlineMath math={'f(x) ='} /></div>
                     <div style={{ position: 'relative', display: 'inline-block', width: 'max-content', marginRight: '25px', flexShrink: 0 }}>
@@ -1169,7 +1190,12 @@ export default function ControlDistribucionContinua({ onCalcular }) {
 
 
 
-                <div className="teclado-container" style={{ padding: '10px', borderRadius: RADIUS, marginTop: '5px' }}>
+                <div role="status" aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '20px', padding: '0 4px', color: focusSlot ? '#1d4ed8' : 'var(--text-muted, #64748b)', fontSize: FS.xs }}>
+                    <span aria-hidden="true" style={{ display: 'inline-flex', width: '18px', height: '18px', flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: focusSlot ? '#dbeafe' : '#e2e8f0', color: focusSlot ? '#1d4ed8' : '#475569', fontWeight: 700 }}>i</span>
+                    <span>{obtenerEstadoEntrada()}</span>
+                </div>
+
+                <div className="teclado-container" style={{ padding: '10px', borderRadius: RADIUS, marginTop: 0 }}>
                     <div className="teclado-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                         {/* Fila 1 */}
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '(', 'paren_abre'); }}><InlineMath math="(" /></button>
@@ -1272,8 +1298,6 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                     }
                 `}</style>
 
-                {error && <div style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #f87171', padding: '12px 15px', borderRadius: RADIUS, fontSize: FS.sm }}><strong>Error: </strong>{error}</div>}
-
                 {mensajeInfo && <div style={{ backgroundColor: '#eff6ff', color: '#1e3a8a', border: '1px solid #bfdbfe', padding: '12px 15px', borderRadius: RADIUS, fontSize: FS.sm }}><strong>Info: </strong>{mensajeInfo}</div>}
 
                 {mensajeK && (
@@ -1322,6 +1346,13 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                     </button>
                 </div>
             </div>
+            <ModalAlerta
+                isOpen={modalAlerta.isOpen}
+                mensaje={modalAlerta.mensaje}
+                titulo={modalAlerta.titulo}
+                tipo={modalAlerta.tipo}
+                onClose={() => setModalAlerta(actual => ({ ...actual, isOpen: false }))}
+            />
         </div>
     );
 }

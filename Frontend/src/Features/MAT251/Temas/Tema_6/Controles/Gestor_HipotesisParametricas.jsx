@@ -3,6 +3,7 @@ import { FONT, RADIUS } from '../../../Principal/Constantes';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import '../../../styles/Temas/Tema5.css'; // Podemos reutilizar los estilos de Tema5
+import '../../../styles/Temas/Tema6.css';
 
 import Controles_HP_Manual from './Controles_HP_Manual';
 import Controles_HP_Matriz from './Controles_HP_Matriz';
@@ -34,14 +35,14 @@ export function Controles_HP_UI({ prueba, setPrueba }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '850px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '5px', border: '1px solid var(--border-color, #e2e8f0)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                         {PRUEBAS.map(p => (
                             <button
                                 key={p.id}
                                 type="button"
                                 className={`btn-mat251-modo ${prueba === p.id ? 'active' : ''}`}
                                 onClick={() => setPrueba(p.id)}
-                                style={{ width: '100%', padding: '5px 15px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '8px', fontSize: '0.75rem' }}
+                                style={{ width: '100%', padding: '5px 15px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '5px', fontSize: '0.75rem' }}
                             >
                                 {p.label}
                             </button>
@@ -57,15 +58,17 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
     const [resMatriz, setResMatriz] = useState(null);
     const [resManual, setResManual] = useState(null);
     const [resSimulacion, setResSimulacion] = useState(null);
+    const [pruebaResSimulacion, setPruebaResSimulacion] = useState(null);
 
     useEffect(() => {
         setResMatriz(null);
         setResManual(null);
         setResSimulacion(null);
-    }, [prueba, modo]);
+        setPruebaResSimulacion(null);
+    }, [prueba, modo, varSeleccionada, statsDatos?.total]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT, marginTop: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, fontFamily: FONT, marginTop: '10px' }}>
             
             {/* Selector de Modo de Trabajo */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -87,7 +90,7 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
             </div>
 
             {/* CONTENIDO PRINCIPAL SEGÚN MODO */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
                 {modo === 'matriz' && (
                     <>
                         <Controles_HP_Matriz
@@ -98,7 +101,7 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
                             abrirEditor={abrirEditor}
                             onCalcular={setResMatriz}
                         />
-                        {resMatriz && (
+                        {resMatriz && varSeleccionada && statsDatos?.total > 0 && (
                             <Resultados_HP_Matriz resultados={resMatriz} prueba={prueba} />
                         )}
                     </>
@@ -119,10 +122,14 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
                 {modo === 'simulacion' && (
                     <>
                         <Controles_HP_Simulacion
+                            key={prueba}
                             prueba={prueba}
-                            onCalcular={setResSimulacion}
+                            onCalcular={(resultado) => {
+                                setResSimulacion(resultado);
+                                setPruebaResSimulacion(prueba);
+                            }}
                         />
-                        {resSimulacion && (
+                        {resSimulacion && pruebaResSimulacion === prueba && (
                             <Resultados_HP_Simulacion resultados={resSimulacion} prueba={prueba} />
                         )}
                     </>

@@ -8,17 +8,33 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { DadoSVG, MonedaSVG, CartaSVG } from './Experimentos';
+import ExperimentosInteractivos from '../Experimentos';
 import * as XLSX from 'xlsx';
 import { api } from '../../../../../services/api';
 import { alerta } from '../../../../../utils/Notificaciones';
 import { obtenerProbabilidadTeorica, simularUnPaso } from '../../../Matematicas/logica_Tema1';
+
+const crearTicksConvergencia = (datos, clave) => {
+    const intentos = Array.from(new Set(
+        (datos || []).map(dato => Number(dato[clave])).filter(Number.isFinite)
+    )).sort((a, b) => a - b);
+
+    if (intentos.length <= 40) return Array.from(new Set([0, ...intentos]));
+
+    const maximo = intentos[intentos.length - 1];
+    const paso = Math.ceil(maximo / 18);
+    const ticks = [0];
+    for (let valor = paso; valor < maximo; valor += paso) ticks.push(valor);
+    if (maximo > 0) ticks.push(maximo);
+    return ticks;
+};
 
 export default function ResultadosProbabilidad({
     statsDatos, abrirEditor, valoresUnicos, statsEventos, setModalEvento,
     eventoFavorable, setEventoFavorable, ejecutar, resProbabilidad, setResProbabilidad, formulaProbRef, inputDatos,
     tipo = 'clasica',
     eventoCondicion = [], setModalCondicion = () => { },
-    colProbClasica, setColProbClasica, varSeleccionada,
+    colProbClasica, setColProbClasica, varSeleccionada, filas = [],
     inputMode, setInputMode, mostrarAlerta
 }) {
     const [isDropdownColOpen, setIsDropdownColOpen] = useState(false);
@@ -494,7 +510,7 @@ export default function ResultadosProbabilidad({
         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column' }}>
             {/* SELECTOR DE MODO DE ENTRADA */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                <div className="contenedor-selector-modos-mat251">
+                <div className="contenedor-selector-modos-mat251 mat251-probabilidad-selector-modos">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
@@ -527,11 +543,27 @@ export default function ResultadosProbabilidad({
                     >
                         Modo Manual
                     </button>
+                    {tipo === 'clasica' && (
+                        <button
+                            type="button"
+                            className={`btn-mat251-modo ${inputMode === 'experimentos' ? 'active' : ''}`}
+                            onClick={() => setInputMode('experimentos')}
+                            style={{ fontFamily: FONT }}
+                        >
+                            Experimentos
+                        </button>
+                    )}
                 </div>
             </div>
 
             <div style={{ marginBottom: '10px' }}>
-                {inputMode === 'manual' ? (
+                {inputMode === 'experimentos' ? (
+                    <ExperimentosInteractivos
+                        filas={filas}
+                        varSeleccionada={varSeleccionada}
+                        abrirEditor={abrirEditor}
+                    />
+                ) : inputMode === 'manual' ? (
                     /* INTERFAZ PARA MODO MANUAL */
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '15px' }}>
                         <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)' }}>Datos del Ejercicio</h4>
@@ -852,7 +884,7 @@ export default function ResultadosProbabilidad({
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'center'}}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                             <button
                                 type="button"
                                 onClick={handleEjecutarSimulacionClasica}
@@ -866,18 +898,11 @@ export default function ResultadosProbabilidad({
 
                         {(simulacionEnCurso || progresoSimulacion.intentoActual > 0) && (
                             <div style={{
-                                marginTop: '5px',
-                                padding: '20px',
-                                background: 'var(--bg-card)',
-                                border: '1px solid var(--border-color)',
-                                borderTop: 'none',
-                                borderRadius: `0 0 ${RADIUS} ${RADIUS}`,
-                                borderTopLeftRadius: 0,
-                                borderTopRightRadius: 0,
-                                borderBottomLeftRadius: RADIUS,
-                                borderBottomRightRadius: RADIUS,
+                                marginTop: '10px',
+                                padding: 0,
+                                background: 'transparent',
+                                border: 'none',
                                 position: 'relative',
-                                overflow: 'hidden'
                             }}>
                                 <style>{`
                                     @keyframes anim-spin { 100% { transform: rotate(360deg); } }
@@ -885,12 +910,12 @@ export default function ResultadosProbabilidad({
                                 `}</style>
 
                                 {/* Progress Bar Track & Fill */}
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--border-color)' }}>
-                                    <div style={{ height: '100%', background: 'var(--primary-color)', width: `${Math.min(100, (progresoSimulacion.intentoActual / Math.max(1, parseInt(iteracionesClasica) || 1)) * 100)}%`, transition: 'width 0.1s linear' }} />
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '5px', overflow: 'hidden', borderRadius: '3px', background: 'var(--border-color)' }}>
+                                    <div style={{ height: '100%', background: 'var(--primary-color)', width: `${Math.min(100, (progresoSimulacion.intentoActual / Math.max(1, parseInt(iteracionesClasica) || 1)) * 100)}%`, borderRadius: '3px', transition: 'width 0.1s linear' }} />
                                 </div>
 
                                 {/* TOP SECTION: Lanzamiento and Controls */}
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginTop: '10px', marginBottom: '20px' }}>
                                     <span className="texto-lanzamiento-simulacion" style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-pure)', fontFamily: FONT }}>Lanzamiento: {progresoSimulacion.intentoActual} / {parseInt(iteracionesClasica) || 0}</span>
 
                                     <div className="controles-simulacion-movil" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center' }}>
@@ -1306,7 +1331,7 @@ export default function ResultadosProbabilidad({
                 )}
 
                 {/* Resultado Math*/}
-                {(activeRes || (isFrec && resultadoFrecuentista && inputMode === 'simulacion') || (tipo === 'clasica' && historialSimClasica.length > 0 && inputMode === 'simulacion')) && (
+                {inputMode !== 'experimentos' && (activeRes || (isFrec && resultadoFrecuentista && inputMode === 'simulacion') || (tipo === 'clasica' && historialSimClasica.length > 0 && inputMode === 'simulacion')) && (
                     <>
                         {(inputMode !== 'simulacion' || (isFrec && resultadoFrecuentista && inputMode === 'simulacion')) && (
                             <div ref={formulaProbRef} style={{ overflowX: 'auto', marginTop: '10px' }} />
@@ -1356,7 +1381,7 @@ export default function ResultadosProbabilidad({
                                         <ResponsiveContainer width="100%" height="100%">
                                             <LineChart data={historialSimClasica} margin={{ top: 20, right: 10, left: 5, bottom: 10 }}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                                                <XAxis dataKey="intento" stroke="var(--text-muted)" fontSize={12} />
+                                                <XAxis type="number" dataKey="intento" domain={[0, 'dataMax']} ticks={crearTicksConvergencia(historialSimClasica, 'intento')} interval={0} allowDecimals={false} stroke="var(--text-muted)" fontSize={12} />
                                                 <YAxis domain={[0, 1]} stroke="var(--text-muted)" fontSize={12} width={30} />
                                                 <Tooltip
                                                     contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: RADIUS, color: 'var(--text-color)' }}
@@ -1436,7 +1461,7 @@ export default function ResultadosProbabilidad({
                                                 alerta.success("¡Guardado exitoso!", "El archivo de simulación se ha guardado en tu Espacio Personal.");
                                             } catch (error) {
                                                 console.error("Error al guardar en el espacio personal:", error);
-                                                alerta.error("Error", "No se pudo guardar el archivo en tu Espacio Personal.");
+                                                mostrarAlerta("No se pudo guardar el archivo en tu Espacio Personal.", "Error", "error");
                                             }
                                         }}
                                     >
@@ -1479,7 +1504,7 @@ export default function ResultadosProbabilidad({
                                                             <ResponsiveContainer width="100%" height="100%">
                                                                 <LineChart data={datosSimulacion} margin={{ top: 20, right: 15, left: 5, bottom: 10 }}>
                                                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                                                                    <XAxis dataKey="iteracion" stroke="var(--text-muted)" fontSize={12} />
+                                                                    <XAxis type="number" dataKey="iteracion" domain={[0, 'dataMax']} ticks={crearTicksConvergencia(datosSimulacion, 'iteracion')} interval={0} allowDecimals={false} stroke="var(--text-muted)" fontSize={12} />
                                                                     <YAxis domain={[0, 1]} stroke="var(--text-muted)" fontSize={12} width={35} />
                                                                     <Tooltip
                                                                         contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', borderRadius: RADIUS, color: 'var(--text-color)' }}

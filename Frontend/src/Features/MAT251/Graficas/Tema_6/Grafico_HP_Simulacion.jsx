@@ -7,7 +7,7 @@ import { FONT, FS } from '../../Principal/Constantes';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 
 const CustomKatexLabel = (props) => {
-    const { viewBox, value, offsetY = 0, offsetX = 0, position } = props;
+    const { viewBox, symbol, number, offsetY = 0, offsetX = 0, position } = props;
     if (!viewBox) return null;
     const { x, y } = viewBox;
 
@@ -17,16 +17,22 @@ const CustomKatexLabel = (props) => {
 
     return (
         <foreignObject x={x - 70 + finalOffsetX} y={y - 30 + offsetY} width={140} height={30} style={{ overflow: 'visible' }}>
-            <div
-                dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }}
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}
-            />
+            <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}>
+                <span dangerouslySetInnerHTML={{ __html: katex.renderToString(`\\boldsymbol{${symbol}}`, { throwOnError: false }) }} />
+                <span style={{ margin: '0 3px' }}>=</span>
+                <span dangerouslySetInnerHTML={{ __html: katex.renderToString(number, { throwOnError: false }) }} />
+            </div>
         </foreignObject>
     );
 };
 
 export default function Grafico_HP_Simulacion({ resultados, prueba }) {
-    if (!resultados || !resultados.historial) return null;
+    if (!resultados || !Array.isArray(resultados.historial)) return null;
+    const historialGrafica = resultados.historial.filter(sim =>
+        Number.isFinite(sim?.estadistico) && Number.isFinite(sim?.pValor) &&
+        (Number.isFinite(sim?.x_bar) || Number.isFinite(sim?.p_hat))
+    );
+    if (!resultados.parametrosPrueba) return null;
     const c = resultados.parametrosPrueba;
 
     const renderKatex = (math) => (
@@ -54,7 +60,7 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
     const chartData = (() => {
         const data = [];
         let maxZ = 4;
-        resultados.historial.forEach(sim => {
+        historialGrafica.forEach(sim => {
             if (Math.abs(sim.estadistico) > maxZ) maxZ = Math.abs(sim.estadistico) * 1.1;
         });
 
@@ -121,9 +127,9 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
 
     // Límite de seguridad para evitar que Recharts congele la pestaña con demasiados elementos SVG
     const MAX_PUNTOS = 800;
-    const paso = resultados.historial.length > MAX_PUNTOS ? Math.ceil(resultados.historial.length / MAX_PUNTOS) : 1;
+    const paso = historialGrafica.length > MAX_PUNTOS ? Math.ceil(historialGrafica.length / MAX_PUNTOS) : 1;
 
-    resultados.historial.forEach((sim, idx) => {
+    historialGrafica.forEach((sim, idx) => {
         // Solo graficamos 1 de cada N puntos si superamos el límite para proteger el rendimiento visual
         if (idx % paso !== 0) return;
 
@@ -162,7 +168,7 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: '12px', height: '12px', background: '#10b981', border: '1.5px solid #047857', borderRadius: '50%', opacity: 0.9 }}></div>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: No Rechazar {renderKatex('H_0')}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: Aceptar {renderKatex('H_0')}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: '12px', height: '12px', background: '#ef4444', border: '1.5px solid #b91c1c', borderRadius: '50%', opacity: 0.9 }}></div>
@@ -172,7 +178,7 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
 
                 <div style={{ width: '100%', flex: 1, minHeight: '300px', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart margin={{ top: 30, right: 60, left: 45, bottom: 20 }} style={{ overflow: 'visible' }}>
+                        <ComposedChart margin={{ top: 40, right: -20, left: 0, bottom: 20 }} style={{ overflow: 'visible' }}>
                             <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
                             <XAxis
                                 dataKey="x"
@@ -184,9 +190,9 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
                                     if (v === 0) return '0';
                                     return parseFloat(v.toFixed(3)).toString();
                                 }}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 'normal' }}
-                                axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
+                                tick={{ fill: 'var(--text-pure, #333333)', fontSize: 11, fontWeight: 'bold' }}
+                                axisLine={{ stroke: 'var(--text-pure, #333333)', strokeWidth: 2 }}
+                                tickLine={{ stroke: 'var(--text-pure, #333333)', strokeWidth: 2 }}
                                 allowDataOverflow={true}
                             />
                             <YAxis hide dataKey="y" type="number" domain={[0, 'dataMax']} />
@@ -209,7 +215,7 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
                                         stroke="#f97316"
                                         strokeDasharray="4 4"
                                         strokeWidth={2}
-                                        label={<CustomKatexLabel position="top" offsetY={0} value={`${mathStr} = ${val.toFixed(2)}`} />}
+                                        label={<CustomKatexLabel position="top" offsetY={0} symbol={mathStr} number={val.toFixed(2)} />}
                                     />
                                 );
                             })}
@@ -220,7 +226,31 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
                     </ResponsiveContainer>
                 </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
+                <style>{`
+                    @media (max-width: 640px) {
+                        .grafico-hp-simulacion-leyenda {
+                            flex-wrap: nowrap !important;
+                            gap: 4px !important;
+                            width: 100%;
+                            box-sizing: border-box;
+                        }
+                        .grafico-hp-simulacion-leyenda > div {
+                            flex: 1 1 0;
+                            min-width: 0;
+                            gap: 4px !important;
+                            padding: 4px 5px !important;
+                        }
+                        .grafico-hp-simulacion-leyenda > div > div:last-child {
+                            white-space: nowrap;
+                            font-size: 0.55rem !important;
+                            letter-spacing: 0 !important;
+                        }
+                        .grafico-hp-simulacion-leyenda .katex {
+                            font-size: 0.85em !important;
+                        }
+                    }
+                `}</style>
+                <div className="grafico-hp-simulacion-leyenda leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '20px', height: '12px', background: 'rgba(220, 38, 38, 0.85)', borderRadius: '2px' }}></div>
                         <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
@@ -230,7 +260,7 @@ export default function Grafico_HP_Simulacion({ resultados, prueba }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '20px', height: '12px', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '2px' }}></div>
                         <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
-                            Zona de No Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
+                            Zona de Aceptación <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
                         </div>
                     </div>
                 </div>

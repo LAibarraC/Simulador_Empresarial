@@ -19,18 +19,18 @@ const CustomKatexLabel = (props) => {
         <foreignObject x={x - 70 + finalOffsetX} y={y - 30 + offsetY} width={140} height={30} style={{ overflow: 'visible' }}>
             <div 
                 dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} 
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }} 
+                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}
             />
         </foreignObject>
     ); 
 };
 
 const CustomCalloutLabel = (props) => {
-    const { viewBox, value, isNegative } = props;
+    const { viewBox, value, isNegative, forceRight = false } = props;
     if (!viewBox) return null;
     const { x, y, height } = viewBox;
     
-    const direction = isNegative ? 'left' : 'right';
+    const direction = isNegative && !forceRight ? 'left' : 'right';
     
     const x0 = x;
     const y0 = y + height;
@@ -54,7 +54,7 @@ const CustomCalloutLabel = (props) => {
             <foreignObject x={direction === 'right' ? x2 + 5 : x2 - 95} y={y2 - 15} width={90} height={30} style={{ overflow: 'visible' }}>
                 <div 
                     dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} 
-                    style={{ color: 'var(--text-pure)', fontSize: '13px', fontWeight: 'normal', display: 'flex', alignItems: 'center', height: '100%', whiteSpace: 'nowrap', justifyContent: direction === 'right' ? 'flex-start' : 'flex-end' }} 
+                    style={{ color: 'var(--text-pure)', fontSize: '13px', fontWeight: 'normal', display: 'flex', alignItems: 'center', height: '100%', whiteSpace: 'nowrap', justifyContent: direction === 'right' ? 'flex-start' : 'flex-end' }}
                 />
             </foreignObject>
         </g>
@@ -75,15 +75,17 @@ export default function Grafico_HNP_Rachas({ resultados, id = "grafico-hnp-racha
     else if (tipoPrueba === 'izquierda') criticalValues = [cv];
     else if (tipoPrueba === 'derecha') criticalValues = [cv];
 
+    const maxX = Math.max(4, Math.abs(resultados.estadistico) * 1.2, ...criticalValues.map(Math.abs).map(v => v * 1.2));
+    const forceStatisticLabelRight = resultados.estadistico < 0 && Math.abs(resultados.estadistico) / maxX >= 0.78;
+
     const chartData = (() => {
         const data = [];
-        const maxVal = Math.max(4, Math.abs(resultados.estadistico) * 1.2, ...criticalValues.map(Math.abs).map(v => v * 1.2));
-        const minX = -maxVal;
-        const maxX = maxVal;
+        const minX = -maxX;
+        const maxXValue = maxX;
         
-        const step = (maxX - minX) / 200;
+        const step = (maxXValue - minX) / 200;
 
-        for (let x = minX; x <= maxX; x += step) {
+        for (let x = minX; x <= maxXValue; x += step) {
             const y = jStat.normal.pdf(x, 0, 1);
             let isReject = false;
             if (tipoPrueba === 'bilateral') {
@@ -130,12 +132,12 @@ export default function Grafico_HNP_Rachas({ resultados, id = "grafico-hnp-racha
                 <div style={{ flex: 1, position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 35, left: 0, right: 0, bottom: 0 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData} margin={{ top: 30, right: 60, left: 45, bottom: 20 }} style={{ overflow: 'visible' }}>
+                            <AreaChart data={chartData} margin={{ top: 30, right: 10, left: 10, bottom: 20 }} style={{ overflow: 'visible' }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
                                 <XAxis 
-                                    dataKey="x" type="number" domain={['dataMin', 'dataMax']} ticks={customTicks} padding={{ left: 30, right: 60 }}
+                                    dataKey="x" type="number" domain={['dataMin', 'dataMax']} ticks={customTicks} padding={{ left: 30, right: 30 }}
                                     tickFormatter={(v) => v === 0 ? '0' : parseFloat(v.toFixed(3)).toString()} 
-                                    tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 'normal' }}
+                                    tick={{ fill: 'var(--text-pure, #000000)', fontSize: 11, fontWeight: 'bold' }}
                                     axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                     tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
                                 />
@@ -149,9 +151,9 @@ export default function Grafico_HNP_Rachas({ resultados, id = "grafico-hnp-racha
                                 {criticalValues.map((val, idx) => {
                                     let labelKatex = '';
                                     if (tipoPrueba === 'bilateral') {
-                                        labelKatex = idx === 0 ? `-Z_{\\alpha/2} = ${val.toFixed(3)}` : `Z_{\\alpha/2} = ${val.toFixed(3)}`;
+                                        labelKatex = idx === 0 ? `-\\boldsymbol{Z}_{\\boldsymbol{\\alpha/2}} = ${val.toFixed(3)}` : `\\boldsymbol{Z}_{\\boldsymbol{\\alpha/2}} = ${val.toFixed(3)}`;
                                     } else {
-                                        labelKatex = `Z_{\\alpha} = ${val.toFixed(3)}`;
+                                        labelKatex = `\\boldsymbol{Z}_{\\boldsymbol{\\alpha}} = ${val.toFixed(3)}`;
                                     }
                                     return (
                                         <ReferenceLine 
@@ -163,13 +165,13 @@ export default function Grafico_HNP_Rachas({ resultados, id = "grafico-hnp-racha
 
                                 <ReferenceLine 
                                     x={resultados.estadistico} stroke="none" 
-                                    label={<CustomCalloutLabel isNegative={resultados.estadistico < 0} value={`Z = ${resultados.estadistico.toFixed(3)}`} />} 
+                                    label={<CustomCalloutLabel isNegative={resultados.estadistico < 0} forceRight={forceStatisticLabelRight} value={`\\boldsymbol{Z} = ${resultados.estadistico.toFixed(3)}`} />}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
+                <div className="leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '14px', height: '14px', background: 'rgba(220, 38, 38, 0.9)', border: '2px solid #b91c1c', borderRadius: '50%' }}></div>
                         <div style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>Zona de Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span></div>

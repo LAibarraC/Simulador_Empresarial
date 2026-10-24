@@ -93,6 +93,10 @@ export const glosarioMAT251 = {
     // ==========================================
     // TEMA 1: TEORÍA DE PROBABILIDAD
     // ==========================================
+    "Omega": {
+        texto: "Espacio muestral",
+        math: "\\Omega = \\{\\omega_1, \\omega_2, \\ldots, \\omega_n\\}"
+    },
     "P(A)": {
         texto: "Probabilidad Clásica del Evento A",
         math: "P(A) = \\frac{n(A)}{n(S)}"
@@ -531,7 +535,91 @@ export const glosarioMAT251 = {
     },
     "n_muestra": {
         texto: "Tamaño de la Muestra",
-        math: "n"
+        math: "n = \\text{número de observaciones}"
+    },
+    "frecuencia_observada": {
+        texto: "Frecuencia observada de la categoría i en los datos",
+        math: "O_i = \\text{conteo de la categoría } i"
+    },
+    "frecuencia_esperada": {
+        texto: "Frecuencia que se espera para la categoría i bajo la hipótesis nula",
+        math: "E_i = n p_i; \\quad E_i = \\frac{n}{k} \\text{ si la distribución es uniforme}"
+    },
+    "x_barra_observada": {
+        texto: "Media aritmética de la muestra observada",
+        math: "\\bar{x} = \\frac{1}{n} \\sum_{i=1}^{n} x_i"
+    },
+    "conteo_eventos": {
+        texto: "Cantidad de observaciones que cumplen la condición de éxito",
+        math: "x = n\\hat{p}"
+    },
+    "proporcion_muestral": {
+        texto: "Proporción de éxitos observada en la muestra",
+        math: "\\hat{p} = \\frac{x}{n}"
+    },
+    "varianza_muestral": {
+        texto: "Varianza calculada a partir de las observaciones de la muestra",
+        math: "S^2 = \\frac{1}{n-1}\\sum_{i=1}^{n}(x_i-\\bar{x})^2"
+    },
+    "grados_libertad": {
+        texto: "Grados de libertad de la muestra",
+        math: "gl = n - 1"
+    },
+    "error_estandar_media": {
+        texto: "Error estándar de la media muestral bajo la hipótesis nula",
+        math: "EE_{\\bar{x}} = \\frac{\\sigma}{\\sqrt{n}} \\text{ o } \\frac{S}{\\sqrt{n}}"
+    },
+    "error_estandar_proporcion": {
+        texto: "Error estándar de la proporción muestral bajo la hipótesis nula",
+        math: "EE_{\\hat{p}} = \\sqrt{\\frac{p_0(1-p_0)}{n}}"
+    },
+    "intervalo_confianza": {
+        texto: "Intervalo de confianza asociado a la prueba de hipótesis",
+        math: "IC = [LI, LS]"
+    },
+    "estadistico_prueba": {
+        texto: "Estadístico de prueba calculado con los datos muestrales para evaluar la hipótesis nula",
+        math: "Z_c = \\frac{\\bar{x}-\\mu_0}{\\sigma/\\sqrt{n}}"
+    },
+    "p_valor": {
+        texto: "Probabilidad, bajo la hipótesis nula, de obtener un resultado tan extremo o más que el observado",
+        math: "p = P(\\text{resultado tan extremo o más} \\mid H_0)"
+    },
+    "valor_referencia_signos": {
+        texto: "Valor de referencia con el que se compara cada dato en la prueba de signos",
+        math: "D_i = X_i - v_{ref}"
+    },
+    "rachas_n_efectivo": {
+        texto: "Datos que cuentan en la prueba; no incluye empates",
+        math: "n = n_1 + n_2"
+    },
+    "rachas_n1": {
+        texto: "Cantidad de datos con signo +",
+        math: "n_1 = \\text{cantidad de } +"
+    },
+    "rachas_n2": {
+        texto: "Cantidad de datos con signo −",
+        math: "n_2 = \\text{cantidad de } -"
+    },
+    "rachas_R": {
+        texto: "Cantidad de rachas observadas, donde c es el número de cambios de signo",
+        math: "R = 1 + c"
+    },
+    "rachas_media_esperada": {
+        texto: "Cantidad promedio de rachas esperada al azar",
+        math: "\\mu_R = \\frac{2n_1n_2}{n_1+n_2} + 1"
+    },
+    "rachas_desviacion": {
+        texto: "Variación esperada del número de rachas",
+        math: "\\sigma_R = \\sqrt{\\frac{2n_1n_2(2n_1n_2-n)}{n^2(n-1)}}"
+    },
+    "rachas_Z": {
+        texto: "Distancia entre las rachas observadas y esperadas",
+        math: "Z = \\frac{R \\pm 0.5 - \\mu_R}{\\sigma_R}"
+    },
+    "rachas_Zcrit": {
+        texto: "Límite de decisión según el nivel de significación",
+        math: "Z_{crit} = z_{\\alpha/2}"
     },
     "suma_muestral": {
         texto: "Suma de los Valores de la Muestra",

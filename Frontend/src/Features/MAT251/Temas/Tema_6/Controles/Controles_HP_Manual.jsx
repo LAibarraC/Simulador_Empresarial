@@ -3,6 +3,7 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { pruebaMediaZ, pruebaMediaT, pruebaProporcionZ, pruebaVarianzaChi } from '../../../Matematicas/Logica_Tema6';
 import { cardStyle, labelStyle, FS, RADIUS } from '../../../Principal/Constantes';
+import ModalAlerta from '../../../ui/ModalAlerta';
 
 export default function Controles_HP_Manual({ prueba, onCalcular }) {
     const [n, setN] = useState('');
@@ -18,7 +19,12 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
     const [tipoPrueba, setTipoPrueba] = useState('bilateral'); 
 
     const [isAlphaOpen, setIsAlphaOpen] = useState(false);
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const alphaRef = useRef(null);
+
+    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
+        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
+    };
 
     useEffect(() => {
         const handler = (e) => {
@@ -29,6 +35,18 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
     }, []);
 
     useEffect(() => {
+        setN('');
+        setXBar('');
+        setS('');
+        setS2('');
+        setSigma('');
+        setX('');
+        setMu0('');
+        setP0('');
+        setSigma02('');
+        setAlpha('0.05');
+        setTipoPrueba('bilateral');
+        setIsAlphaOpen(false);
         onCalcular?.(null);
     }, [prueba]);
 
@@ -39,7 +57,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
     ];
 
     const renderKatex = (math) => (
-        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(`\\boldsymbol{${math}}`, { throwOnError: false }) }} />
     );
 
     const paramSymbol = prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu';
@@ -61,7 +79,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
         }
 
         if (res?.error) {
-            alert(res.error);
+            mostrarAlerta(res.error, 'Error de Cálculo', 'error');
             onCalcular(null);
         } else {
             onCalcular(res);
@@ -69,12 +87,42 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
     };
 
     return (
-        <div style={cardStyle}>
-            <p style={{ fontSize: FS.sm, marginBottom: '10px' }}>
-                Ingrese directamente los valores estadísticos conocidos:
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', marginBottom: '15px' }}>
+        <div style={{ ...cardStyle, border: 'none', padding: 0, boxShadow: 'none', background: 'transparent' }}>
+            <style>{`
+                .hp-manual-input-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .hp-manual-input-grid > div {
+                    min-width: 0;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .hp-manual-input-grid input {
+                    min-width: 0;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                @media (min-width: 769px) {
+                    .hp-manual-input-centered {
+                        grid-column: 1 / -1;
+                        justify-self: center;
+                        width: 50% !important;
+                        transform: translateX(-25px);
+                    }
+                }
+                @media (max-width: 768px) {
+                    .hp-manual-input-grid {
+                        grid-template-columns: minmax(0, 1fr) !important;
+                        gap: 10px !important;
+                    }
+                    .hp-manual-input-centered {
+                        grid-column: auto;
+                        width: 100% !important;
+                        transform: none;
+                    }
+                }
+            `}</style>
+            <div className="hp-manual-input-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '15px', marginBottom: '15px', width: '100%', minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('n:')}</label>
                     <input type="number" className="input-mat251 placeholder-small" value={n} onChange={(e) => setN(e.target.value)} placeholder="Tamaño de muestra" min="1" style={{ flex: 1 }} />
@@ -113,7 +161,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('x:')}</label>
                             <input type="number" className="input-mat251 placeholder-small" value={x} onChange={(e) => setX(e.target.value)} placeholder="Casos favorables" min="0" style={{ flex: 1 }} />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="hp-manual-input-centered" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('p_0:')}</label>
                             <input type="number" className="input-mat251 placeholder-small" value={p0} onChange={(e) => setP0(e.target.value)} placeholder="Proporción hipotética" min="0" max="1" step="any" style={{ flex: 1 }} />
                         </div>
@@ -126,7 +174,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('S^2:')}</label>
                             <input type="number" className="input-mat251 placeholder-small" value={s2} onChange={(e) => setS2(e.target.value)} placeholder="Varianza muestral" min="0" step="any" style={{ flex: 1 }} />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="hp-manual-input-centered" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('\\sigma_0^2:')}</label>
                             <input type="number" className="input-mat251 placeholder-small" value={sigma02} onChange={(e) => setSigma02(e.target.value)} placeholder="Varianza hipotética" min="0" step="any" style={{ flex: 1 }} />
                         </div>
@@ -226,6 +274,13 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
                 </div>
                 <div></div>
             </div>
+            <ModalAlerta
+                isOpen={modalAlerta.isOpen}
+                onClose={() => setModalAlerta(prev => ({ ...prev, isOpen: false }))}
+                titulo={modalAlerta.titulo}
+                mensaje={modalAlerta.mensaje}
+                tipo={modalAlerta.tipo}
+            />
         </div>
     );
 }

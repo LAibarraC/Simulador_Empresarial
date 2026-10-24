@@ -317,6 +317,14 @@
   transform: translateY(0) scale(0.98);
 }
 
+@media (max-width: 600px) {
+  .modal-content-crear-tabla {
+    box-sizing: border-box;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
 /* ===== ESTILOS PARA MÓDULO RESTRINGIDO / EN DESARROLLO ===== */
 @keyframes spin-slow {
   0% { transform: rotate(0deg); }
@@ -452,6 +460,42 @@
   }
 }
 
+/* El selector principal de probabilidad se desplaza en una sola fila en móvil/tablet. */
+@media (max-width: 768px) {
+  .mat251-probabilidad-selector-modos {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: safe center;
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .mat251-probabilidad-selector-modos::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mat251-probabilidad-selector-modos > .btn-mat251-modo {
+    display: inline-flex;
+    flex: 0 0 auto !important;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    min-width: max-content;
+    max-width: none;
+    padding: 6px 12px !important;
+    font-size: 0.75rem !important;
+    line-height: 1.2;
+    white-space: nowrap !important;
+    word-break: keep-all;
+  }
+}
+
 @media (max-width: 768px) {
   /* En pantallas móviles y tablets, reposicionar el FAB para que no tape los inputs en el centro */
   .menu-flotante-radial {
@@ -531,6 +575,19 @@
 .input-mat251:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-frecuencia-esperada-mat251,
+.btn-frecuencia-esperada-mat251:hover,
+.btn-frecuencia-esperada-mat251:focus,
+.btn-frecuencia-esperada-mat251:active {
+  background: transparent !important;
+  color: var(--text-pure) !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .placeholder-small::placeholder,

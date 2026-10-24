@@ -41,6 +41,10 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
     const chartData = (() => {
         const data = [];
         let maxX = Math.max(df * 2.5, ...(criticalValues.map(v => v * 1.2)), 20);
+        const peakDensity = jStat.chisquare.pdf(Math.max(df - 2, 0.01), df);
+        while (maxX < 10000 && jStat.chisquare.pdf(maxX, df) > peakDensity * 0.001) {
+            maxX *= 1.2;
+        }
         resultados.historial.forEach(sim => {
             if (sim.estadistico > maxX) maxX = sim.estadistico * 1.1;
         });
@@ -157,7 +161,7 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
                 return (
                     <div style={{ background: 'var(--bg-card, white)', padding: '10px', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '4px', fontSize: FS.sm, color: 'var(--text-pure, black)' }}>
                         <div><strong>Simulación #{data.sim}</strong></div>
-                        <div>Estadístico {renderKatex('\\chi^2_c')}: {data.x}</div>
+                        <div>Estadístico {renderKatex('\\boldsymbol{\\chi^2_c}')}: {data.x}</div>
                         <div>p-valor: {data.pValor}</div>
                     </div>
                 );
@@ -196,20 +200,20 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', width: '100%' }}>
-            <MarcoWidgetMAT251 id="widget-grafica-hp-simulacion" titulo={<>Distribución de Estadísticos Simulados ({renderKatex('\\chi^2_c')})</>} anchoCompleto={true} alto="480px">
+            <MarcoWidgetMAT251 id="widget-grafica-hp-simulacion" titulo={<>Distribución de Estadísticos Simulados ({renderKatex('\\boldsymbol{\\chi^2_c}')})</>} anchoCompleto={true} alto="480px">
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', marginTop: '5px', fontFamily: FONT }}>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{ width: '12px', height: '12px', background: '#10b981', border: '1.5px solid #047857', borderRadius: '50%', opacity: 0.9 }}></div>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: No Rechazar {renderKatex('H_0')}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: Aceptar {renderKatex('\\boldsymbol{H_0}')}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{ width: '12px', height: '12px', background: '#ef4444', border: '1.5px solid #b91c1c', borderRadius: '50%', opacity: 0.9 }}></div>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: Rechazar {renderKatex('H_0')}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: Rechazar {renderKatex('\\boldsymbol{H_0}')}</span>
                         </div>
                     </div>
 
-                    <div style={{ width: '100%', flex: 1, minHeight: '300px', position: 'relative' }}>
+                    <div className="hnp-simulacion-grafica-plot" style={{ width: '100%', flex: 1, minHeight: '300px', position: 'relative' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart margin={{ top: 30, right: 60, left: 10, bottom: 20 }} style={{ overflow: 'visible' }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
@@ -218,12 +222,12 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
                                     type="number"
                                     domain={['dataMin', 'dataMax']}
                                     ticks={customTicks}
-                                    padding={{ left: 30, right: 60 }}
+                                    padding={{ left: 30, right: 0 }}
                                     tickFormatter={(v) => {
                                         if (v === 0) return '0';
                                         return parseFloat(v.toFixed(3)).toString();
                                     }}
-                                    tick={{ fill: 'var(--text-pure)', fontSize: 12, fontWeight: 'normal' }}
+                tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
                                     axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                     tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                     allowDataOverflow={true}
@@ -242,8 +246,8 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
 
                                 {criticalValues.map((val, idx) => {
                                     let mathStr = '';
-                                    if (criticalValues.length === 2) mathStr = idx === 0 ? `\\chi^2_{inf}` : `\\chi^2_{sup}`;
-                                    else mathStr = `\\chi^2_\\alpha`;
+                                    if (criticalValues.length === 2) mathStr = idx === 0 ? `\\boldsymbol{\\chi^2_{inf}}` : `\\boldsymbol{\\chi^2_{sup}}`;
+                                    else mathStr = `\\boldsymbol{\\chi^2_\\alpha}`;
 
                                     return (
                                         <ReferenceLine
@@ -261,17 +265,17 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
                         </ResponsiveContainer>
                     </div>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
+                    <div className="leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                             <div style={{ width: '20px', height: '12px', background: 'rgba(220, 38, 38, 0.85)', borderRadius: '2px' }}></div>
                             <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
-                                Zona de Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
+                                Zona de Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('\\boldsymbol{H_0}')})</span>
                             </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                             <div style={{ width: '20px', height: '12px', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '2px' }}></div>
                             <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
-                                Zona de No Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
+                                Zona de Aceptación <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('\\boldsymbol{H_0}')})</span>
                             </div>
                         </div>
                     </div>
@@ -280,13 +284,13 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
 
             <MarcoWidgetMAT251 id="widget-histograma-puro" titulo="Histograma de Frecuencias Absolutas" anchoCompleto={true} alto="500px">
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', marginTop: '5px', fontFamily: FONT }}>
-                    <div style={{ width: '100%', flex: 1, minHeight: '280px', position: 'relative' }}>
+                    <div className="hnp-simulacion-histograma-plot" style={{ width: '100%', flex: 1, minHeight: '280px', position: 'relative' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={pureBinsData} margin={{ top: 20, right: 30, left: -30, bottom: 15 }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} />
                                 <XAxis 
                                     dataKey="binCenter" 
-                                    tick={{ fontSize: 11, fill: 'var(--text-pure)' }} 
+                                    tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 'bold' }}
                                     tickMargin={8} 
                                     tickFormatter={(v) => Number(v).toFixed(2)}
                                     axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
@@ -295,7 +299,7 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
                                 <YAxis 
                                     yAxisId="left" 
                                     domain={[0, dataMax => Math.ceil(dataMax + 1)]}
-                                    tick={{ fontSize: 11, fill: 'var(--text-pure)' }} 
+                                    tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 'bold' }}
                                     axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                     tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 />
@@ -321,12 +325,12 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
                                 />
                                 <Bar yAxisId="left" dataKey="countRetencion" name="No Rechazo" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} opacity={0.9} />
                                 <Bar yAxisId="left" dataKey="countRechazo" name="Rechazo" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} opacity={0.9} />
-                                <Area yAxisId="right" connectNulls={true} type="monotoneX" dataKey="densityCurve" fill="rgba(59, 130, 246, 0.05)" stroke="#3b82f6" strokeWidth={2.5} isAnimationActive={false} />
+                                <Area yAxisId="right" connectNulls={true} type="monotone" dataKey="densityCurve" fill="rgba(59, 130, 246, 0.05)" stroke="#3b82f6" strokeWidth={2.5} isAnimationActive={false} />
 
                                 {closestBinsForCriticals.map((obj, idx) => {
                                     let mathStr = '';
-                                    if (criticalValues.length === 2) mathStr = idx === 0 ? `\\chi^2_{inf}` : `\\chi^2_{sup}`;
-                                    else mathStr = `\\chi^2_\\alpha`;
+                                    if (criticalValues.length === 2) mathStr = idx === 0 ? `\\boldsymbol{\\chi^2_{inf}}` : `\\boldsymbol{\\chi^2_{sup}}`;
+                                    else mathStr = `\\boldsymbol{\\chi^2_\\alpha}`;
 
                                     return (
                                         <ReferenceLine
@@ -344,18 +348,18 @@ export default function Grafico_HNP_SimulacionChi({ resultados }) {
                         </ResponsiveContainer>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '0px', paddingBottom: '25px', flexWrap: 'wrap' }}>
+                    <div className="leyenda-grafica-tema6 hnp-simulacion-histograma-leyenda" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '0px', paddingBottom: '25px', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{ width: '14px', height: '14px', background: '#10b981', borderRadius: '3px', opacity: 0.9 }}></div>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 600 }}>Frecuencia: No Rechazar {renderKatex('H_0')}</span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 600 }}>Frecuencia: Aceptar {renderKatex('\\boldsymbol{H_0}')}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{ width: '14px', height: '14px', background: '#ef4444', borderRadius: '3px', opacity: 0.9 }}></div>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 600 }}>Frecuencia: Rechazar {renderKatex('H_0')}</span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 600 }}>Frecuencia: Rechazar {renderKatex('\\boldsymbol{H_0}')}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{ width: '16px', height: '3px', background: '#3b82f6' }}></div>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 600 }}>Curva Teórica ({renderKatex('\\chi^2_c')})</span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 600 }}>Curva Teórica ({renderKatex('\\boldsymbol{\\chi^2_c}')})</span>
                         </div>
                     </div>
                 </div>

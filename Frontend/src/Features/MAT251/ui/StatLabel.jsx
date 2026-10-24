@@ -9,7 +9,7 @@ import { glosarioMAT251 } from '../utils/diccionario';
  * con la definición pedagógica y su fórmula matemática correspondiente.
  * Incluye auto-posicionamiento inteligente para respetar los bordes de la pantalla.
  */
-export default function StatLabel({ formulaKey, formulaLatex, align = 'center', position = 'bottom', customTexto, customMath }) {
+export default function StatLabel({ formulaKey, formulaLatex, labelText, align = 'center', position = 'bottom', customTexto, customMath, className = '', soloFormula = false }) {
     const info = glosarioMAT251[formulaKey] || { texto: formulaKey, math: '' };
     const textoFinal = customTexto || info.texto;
     const mathFinal = customMath !== undefined ? customMath : info.math;
@@ -35,7 +35,7 @@ export default function StatLabel({ formulaKey, formulaLatex, align = 'center', 
         const containerRect = container.getBoundingClientRect();
         const tooltipRect = tooltip.getBoundingClientRect();
         const tooltipWidth = tooltipRect.width;
-        const scrollTable = container.closest('.tema5-tabla-resolucion-scroll');
+        const scrollTable = container.closest('.tema5-tabla-resolucion-scroll, .hnp-frecuencias-esperadas-scroll, .minitab-table-scroll, .rachas-ext-table-scroll, .mat251-experimentos-formula-universo');
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         const padding = 10; // Margen de seguridad respecto al borde de la pantalla o contenedor
 
@@ -123,7 +123,7 @@ export default function StatLabel({ formulaKey, formulaLatex, align = 'center', 
             tooltip.style.display = prevDisplay;
             tooltip.style.visibility = prevVisibility;
         }
-    }, []);
+    }, [position]);
 
     useEffect(() => {
         const timer = setTimeout(updatePosition, 50);
@@ -154,14 +154,15 @@ export default function StatLabel({ formulaKey, formulaLatex, align = 'center', 
     return (
         <span
             ref={containerRef}
-            className="mat251-stat-label-container"
+            className={`mat251-stat-label-container ${className}`.trim()}
+            style={labelText !== undefined ? { textDecoration: 'none' } : undefined}
             onMouseEnter={updatePosition}
             onTouchStart={updatePosition}
             onPointerDown={updatePosition}
             onFocus={updatePosition}
             onClick={updatePosition}
         >
-            {renderKatex(formulaLatex || formulaKey)}
+            {labelText ?? renderKatex(formulaLatex || formulaKey)}
             <div
                 ref={tooltipRef}
                 className={`mat251-stat-tooltip mat251-tooltip-${align} ${position === 'top' ? 'mat251-tooltip-top' : ''}`}
@@ -183,7 +184,7 @@ export default function StatLabel({ formulaKey, formulaLatex, align = 'center', 
                         color: #ffffff !important;
                     }
                 `}</style>
-                <span className="mat251-tooltip-text" style={{ color: '#ffffff' }}>{textoFinal}</span>
+                {!soloFormula && <span className="mat251-tooltip-text" style={{ color: '#ffffff' }}>{textoFinal}</span>}
                 {mathFinal && (
                     <div className="mat251-tooltip-math" style={{ whiteSpace: 'nowrap', color: '#fbbf24' }}>
                         {renderKatex(mathFinal)}

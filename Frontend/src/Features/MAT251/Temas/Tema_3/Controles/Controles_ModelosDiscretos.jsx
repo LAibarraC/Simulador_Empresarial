@@ -526,7 +526,7 @@ export default function Controles_ModelosDiscretos({
                     <>
                         <div className="tema3-form-group" style={{ marginBottom: '0', gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                {renderLatex('\\mathbf{p}:')}
+                                {renderLatex('\\boldsymbol{p}:')}
                             </label>
                             <input
                                 type="number"
@@ -576,7 +576,7 @@ export default function Controles_ModelosDiscretos({
                         }}>
                             <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                    {renderLatex('\\mathbf{n}:')}
+                                    {renderLatex('\\boldsymbol{n}:')}
                                 </label>
                                 <input
                                     type="number"
@@ -609,7 +609,7 @@ export default function Controles_ModelosDiscretos({
                             </div>
                             <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                    {renderLatex('\\mathbf{p}:')}
+                                    {renderLatex('\\boldsymbol{p}:')}
                                 </label>
                                 <input
                                     type="number"
@@ -652,7 +652,7 @@ export default function Controles_ModelosDiscretos({
                     <>
                         <div className="tema3-form-group" style={{ marginBottom: '0', gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                {renderLatex('\\mathbf{\\lambda}:')}
+                                {renderLatex('\\boldsymbol{\\lambda}:')}
                             </label>
                             <input
                                 type="number"
@@ -691,7 +691,7 @@ export default function Controles_ModelosDiscretos({
                         <div className="t3-grid-hipergeometrica">
                             <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                    {renderLatex('\\mathbf{N}')}:
+                                    {renderLatex('\\boldsymbol{N}')}:
                                 </label>
                                 <input
                                     type="number"
@@ -723,7 +723,7 @@ export default function Controles_ModelosDiscretos({
                             </div>
                             <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                    {renderLatex('\\mathbf{N_1}')}:
+                                    {renderLatex('\\boldsymbol{N_1}')}:
                                 </label>
                                 <input
                                     type="number"
@@ -755,7 +755,7 @@ export default function Controles_ModelosDiscretos({
                             </div>
                             <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                    {renderLatex('\\mathbf{N_2}')}:
+                                    {renderLatex('\\boldsymbol{N_2}')}:
                                 </label>
                                 <input
                                     type="number"
@@ -783,7 +783,7 @@ export default function Controles_ModelosDiscretos({
                             </div>
                             <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                    {renderLatex('\\mathbf{n}')}:
+                                    {renderLatex('\\boldsymbol{n}')}:
                                 </label>
                                 <input
                                     type="number"
@@ -1008,7 +1008,7 @@ export default function Controles_ModelosDiscretos({
                                                         display: 'flex',
                                                         alignItems: 'center'
                                                     }}>
-                                                        Valor a evaluar ({renderLatex('x')}):
+                                                        Valor a evaluar ({renderLatex('\\boldsymbol{x}')}):
                                                     </label>
                                                     <div className="t3-control-input-wrapper">
                                                         <CustomSelect
@@ -1036,7 +1036,7 @@ export default function Controles_ModelosDiscretos({
                                                             display: 'flex',
                                                             alignItems: 'center'
                                                         }}>
-                                                            {renderLatex('n:')}
+                                                            {renderLatex('\\boldsymbol{n}:')}
                                                         </label>
                                                         <div className="t3-control-input-wrapper">
                                                             <input
@@ -1084,7 +1084,7 @@ export default function Controles_ModelosDiscretos({
                                                             display: 'flex',
                                                             alignItems: 'center'
                                                         }}>
-                                                            Valor a evaluar ({renderLatex('x')}):
+                                                            Valor a evaluar ({renderLatex('\\boldsymbol{x}')}):
                                                         </label>
                                                         <div className="t3-control-input-wrapper">
                                                             <CustomSelect
@@ -1112,7 +1112,7 @@ export default function Controles_ModelosDiscretos({
                                                         display: 'flex',
                                                         alignItems: 'center'
                                                     }}>
-                                                        {renderLatex('n:')}
+                                                        {renderLatex('\\boldsymbol{n}:')}
                                                     </label>
                                                     <div className="t3-control-input-wrapper">
                                                         <input
@@ -1315,8 +1315,8 @@ export default function Controles_ModelosDiscretos({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
                                     {tipoCondicion.includes('intervalo')
-                                        ? renderLatex('\\mathbf{a}:')
-                                        : renderLatex('\\mathbf{x}:')}
+                                        ? renderLatex('\\boldsymbol{a}:')
+                                        : renderLatex('\\boldsymbol{x}:')}
                                 </label>
                                 <input
                                     type="number"
@@ -1352,7 +1352,7 @@ export default function Controles_ModelosDiscretos({
                             {tipoCondicion.includes('intervalo') && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                                     <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                        {renderLatex('\\mathbf{b}:')}
+                                        {renderLatex('\\boldsymbol{b}:')}
                                     </label>
                                     <input
                                         type="number"

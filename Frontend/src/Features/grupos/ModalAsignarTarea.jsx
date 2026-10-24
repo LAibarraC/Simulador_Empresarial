@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
@@ -155,8 +156,8 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
     }
   };
 
-  return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 10000, padding: "16px" }}>
+  return createPortal(
+    <div style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 100000, padding: "16px", boxSizing: "border-box" }}>
       <div style={{ background: "var(--bg-card)", padding: "28px", borderRadius: "12px", width: "100%", maxWidth: "680px", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", border: "1px solid var(--border-color)", boxSizing: "border-box" }}>
         
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", borderBottom: "1px solid var(--border-color)", paddingBottom: "12px" }}>
@@ -372,6 +373,7 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

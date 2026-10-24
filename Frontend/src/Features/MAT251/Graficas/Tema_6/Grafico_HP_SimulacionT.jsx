@@ -26,7 +26,11 @@ const CustomKatexLabel = (props) => {
 };
 
 export default function Grafico_HP_SimulacionT({ resultados, prueba }) {
-    if (!resultados || !resultados.historial) return null;
+    if (!resultados || !Array.isArray(resultados.historial)) return null;
+    const historialGrafica = resultados.historial.filter(sim =>
+        Number.isFinite(sim?.estadistico) && Number.isFinite(sim?.x_bar) && Number.isFinite(sim?.pValor)
+    );
+    if (historialGrafica.length === 0 || !resultados.parametrosPrueba) return null;
     const c = resultados.parametrosPrueba;
 
     const renderKatex = (math) => (
@@ -55,7 +59,7 @@ export default function Grafico_HP_SimulacionT({ resultados, prueba }) {
     const chartData = (() => {
         const data = [];
         let maxT = 4;
-        resultados.historial.forEach(sim => {
+        historialGrafica.forEach(sim => {
             if (Math.abs(sim.estadistico) > maxT) maxT = Math.abs(sim.estadistico) * 1.1;
         });
 
@@ -121,9 +125,9 @@ export default function Grafico_HP_SimulacionT({ resultados, prueba }) {
     let scatterRetencion = [];
 
     const MAX_PUNTOS = 800;
-    const paso = resultados.historial.length > MAX_PUNTOS ? Math.ceil(resultados.historial.length / MAX_PUNTOS) : 1;
+    const paso = historialGrafica.length > MAX_PUNTOS ? Math.ceil(historialGrafica.length / MAX_PUNTOS) : 1;
 
-    resultados.historial.forEach((sim, idx) => {
+    historialGrafica.forEach((sim, idx) => {
         if (idx % paso !== 0) return;
 
         const isRejection = sim.decision === 'Rechazar H₀';
@@ -163,7 +167,7 @@ export default function Grafico_HP_SimulacionT({ resultados, prueba }) {
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: '12px', height: '12px', background: '#10b981', border: '1.5px solid #047857', borderRadius: '50%', opacity: 0.9 }}></div>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: No Rechazar {renderKatex('H_0')}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 600 }}>Simulación: Aceptar {renderKatex('H_0')}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: '12px', height: '12px', background: '#ef4444', border: '1.5px solid #b91c1c', borderRadius: '50%', opacity: 0.9 }}></div>
@@ -221,7 +225,7 @@ export default function Grafico_HP_SimulacionT({ resultados, prueba }) {
                     </ResponsiveContainer>
                 </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
+                <div className="leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '20px', height: '12px', background: 'rgba(220, 38, 38, 0.85)', borderRadius: '2px' }}></div>
                         <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
@@ -231,7 +235,7 @@ export default function Grafico_HP_SimulacionT({ resultados, prueba }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '20px', height: '12px', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '2px' }}></div>
                         <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
-                            Zona de No Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
+                            Zona de Aceptación <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
                         </div>
                     </div>
                 </div>

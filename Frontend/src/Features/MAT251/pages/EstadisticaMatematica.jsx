@@ -4,6 +4,8 @@ import Datos from "../../../pages/Datos";
 import { useCalculadoraExcel } from "../../MAT151/hooks/useCalculadoraExcel";
 import { useData } from "../../../components/gestion_datos/DataContext";
 import Principal from '../Principal/Principal';
+import ModalAlerta from '../ui/ModalAlerta';
+import TablaDinamicaMAT251 from '../ui/TablaDinamicaMAT251';
 import "../styles/pages/Pantalla.css";
 import "../styles/pages/CalculosMat251.css";
 
@@ -65,9 +67,11 @@ export default function Pantalla() {
   const { usuario } = useData();
   const navigate = useNavigate();
   const [mostrarDatos, setMostrarDatos] = useState(false);
+  const [mostrarCreacion, setMostrarCreacion] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [selectedFile, setSelectedFile] = useState("");
   const [selectedSheet, setSelectedSheet] = useState(0);
+  const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
 
   const _stats = useCalculadoraExcel(selectedFile, selectedSheet);
 
@@ -281,10 +285,10 @@ export default function Pantalla() {
           <span className="fab-tooltip">Gestión de Datos</span>
         </button>
 
-        {/* Botón 2: Placeholder 1 */}
+        {/* Botón 2: Creación de Tablas MAT251 */}
         <button
           className="fab-item item-2"
-          onClick={() => alert("Próximamente 1")}
+          onClick={() => { setMostrarCreacion(true); setMenuAbierto(false); }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -298,7 +302,7 @@ export default function Pantalla() {
         {/* Botón 3: Placeholder 2 */}
         <button
           className="fab-item item-3"
-          onClick={() => alert("Próximamente 2")}
+          onClick={() => setModalAlerta({ isOpen: true, mensaje: 'Esta herramienta estará disponible próximamente.', titulo: 'Próximamente', tipo: 'warning' })}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -330,6 +334,23 @@ export default function Pantalla() {
         </div>
       )}
 
+      {/* MODAL DE CREACIÓN DE TABLAS MAT251 */}
+      {mostrarCreacion && (
+        <div className="modal-overlay-datos">
+          <div className="modal-content-datos modal-content-crear-tabla">
+            <button
+              className="btn-cerrar-modal"
+              onClick={() => setMostrarCreacion(false)}
+            >
+              Cerrar
+            </button>
+            <div style={{ height: "100%" }}>
+              <TablaDinamicaMAT251 onTablaCreada={() => setMostrarCreacion(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ESTADO DEL ARCHIVO */}
       {selectedFile && (
         <div style={{
@@ -348,6 +369,13 @@ export default function Pantalla() {
           Archivo cargado: {selectedFile}
         </div>
       )}
+      <ModalAlerta
+        isOpen={modalAlerta.isOpen}
+        onClose={() => setModalAlerta(prev => ({ ...prev, isOpen: false }))}
+        titulo={modalAlerta.titulo}
+        mensaje={modalAlerta.mensaje}
+        tipo={modalAlerta.tipo}
+      />
     </div>
   );
 }

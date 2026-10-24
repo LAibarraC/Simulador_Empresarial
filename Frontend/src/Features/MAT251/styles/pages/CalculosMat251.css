@@ -988,6 +988,11 @@ html.dark .select-estilo-operacion {
   z-index: 10000;
 }
 
+.hnp-frecuencias-esperadas-scroll th:has(.mat251-stat-label-container:hover),
+.minitab-table-scroll th:has(.mat251-stat-label-container:hover) {
+  z-index: 10001 !important;
+}
+
 .mat251-stat-label-container:hover .mat251-stat-tooltip {
   display: flex;
   opacity: 1;
@@ -1027,6 +1032,10 @@ html.dark .select-estilo-operacion {
   font-weight: 600;
   color: #ffffff;
   line-height: 1.25;
+}
+
+.mat251-stat-label-container.hnp-tooltip-compact .mat251-tooltip-text {
+  font-size: 0.64rem !important;
 }
 
 .mat251-tooltip-math {

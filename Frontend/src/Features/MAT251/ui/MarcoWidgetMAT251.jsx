@@ -71,7 +71,7 @@ export default function MarcoWidgetMAT251({ id, titulo, children, anchoCompleto 
       {/* ========================================================== */}
       {/* 📦 VISTA NORMAL: LA CAJA ATRAPADA EN LA CUADRÍCULA           */}
       {/* ========================================================== */}
-      <div ref={setNodeRef} id={widgetId} style={style} className={`widget-grafico pdf-section ${isMinimized ? 'minimizada' : ''}`}>
+      <div ref={setNodeRef} id={widgetId} style={{ ...style, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className={`widget-grafico pdf-section ${isMinimized ? 'minimizada' : ''}`}>
         <div className="widget-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 15px' }}>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0, paddingRight: '8px' }}>

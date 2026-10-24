@@ -133,14 +133,14 @@ export default function Grafico_HNP_Signos({ resultados, id = "grafico-hnp-signo
 
         chartContent = (
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} margin={{ top: 30, right: 20, left: 0, bottom: 20 }}>
+                <BarChart data={data} margin={{ top: 10, right:20, left: -10, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-                    <XAxis dataKey="k" tick={{ fontSize: 11, fill: 'var(--text-pure)' }} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
-                    <YAxis tick={{ fontSize: 11, fill: 'var(--text-pure)' }} width={55} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
+                    <XAxis dataKey="k" tick={{ fontSize: 11, fontWeight: 'bold', fill: 'var(--text-pure)' }} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
+                    <YAxis tick={{ fontSize: 11, fontWeight: 'bold', fill: 'var(--text-pure)' }} width={55} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
                     <Tooltip 
                         formatter={(value) => value.toFixed(4)} 
                         labelFormatter={(label) => `S = ${label}`}
-                        contentStyle={{ borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}
+                        contentStyle={{ borderRadius: '5px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}
                     />
                     <Bar dataKey="prob" isAnimationActive={false} shape={<CustomBar />} />
                 </BarChart>
@@ -184,8 +184,8 @@ export default function Grafico_HNP_Signos({ resultados, id = "grafico-hnp-signo
             <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data} margin={{ top: 30, right: 30, left: 10, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-                    <XAxis dataKey="z" type="number" domain={[-4, 4]} tick={{ fontSize: 11, fill: 'var(--text-pure)' }} tickCount={9} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
-                    <YAxis tick={{ fontSize: 11, fill: 'var(--text-pure)' }} width={55} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
+                    <XAxis dataKey="z" type="number" domain={[-4, 4]} tick={{ fontSize: 11, fontWeight: 'bold', fill: 'var(--text-pure)' }} tickCount={9} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
+                    <YAxis tick={{ fontSize: 11, fontWeight: 'bold', fill: 'var(--text-pure)' }} width={55} axisLine={{ stroke: 'var(--text-pure)' }} tickLine={{ stroke: 'var(--text-pure)' }} />
                     <Tooltip 
                         formatter={(value, name) => [value.toFixed(4), name === 'rejectArea' ? 'Probabilidad (Rechazo)' : name === 'acceptArea' ? 'Probabilidad (Aceptación)' : 'Densidad']} 
                         labelFormatter={(label) => `Z = ${label}`}
@@ -229,7 +229,7 @@ export default function Grafico_HNP_Signos({ resultados, id = "grafico-hnp-signo
                         </div>
                     )}
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
+                <div className="leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '14px', height: '14px', background: 'rgba(220, 38, 38, 0.9)', border: '2px solid #b91c1c', borderRadius: '50%' }}></div>
                         <div style={{ color: 'var(--text-pure)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
@@ -239,7 +239,7 @@ export default function Grafico_HNP_Signos({ resultados, id = "grafico-hnp-signo
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '14px', height: '14px', background: 'rgba(59, 130, 246, 0.2)', border: '2px solid #3b82f6', borderRadius: '50%' }}></div>
                         <div style={{ color: 'var(--text-pure)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
-                            Zona de No Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
+                            Zona de Aceptación <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
                         </div>
                     </div>
                 </div>

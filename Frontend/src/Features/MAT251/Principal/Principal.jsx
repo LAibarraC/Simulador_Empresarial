@@ -47,7 +47,7 @@ import GraficoBastonesModelos from '../Graficas/Tema_3/GraficoBastonesModelos';
 import ModalProcedimientoModelos from '../Temas/Tema_3/Modales/ModalProcedimientoModelos';
 
 export default function Principal() {
-    const { variables } = useMAT251Data();
+    const { variables, actualizarVariable } = useMAT251Data();
 
     // ── UI ───────────────────────────────────────────────────────────────────────
     const [panelAbierto, setPanelAbierto] = useState(true);
@@ -137,6 +137,8 @@ export default function Principal() {
     const [modalEvento, setModalEvento] = useState(false);
     const [modalCondicion, setModalCondicion] = useState(false);
     const [filasTemp, setFilasTemp] = useState([]);   // copia editable en el modal
+    const [nombresEncabezadosTemp, setNombresEncabezadosTemp] = useState({});
+    const [nombreEncabezadoManual, setNombreEncabezadoManual] = useState('');
     const [inputModeProb, setInputModeProb] = useState('matriz');
     const formulaProbRef = useRef(null);
 
@@ -243,7 +245,19 @@ export default function Principal() {
         return { cargados, agregados, total: validas.length };
     }, [filas]);
 
-    // Detectar si hay cambios en el editor para habilitar/deshabilitar el botón Guardar
+    const nombresEncabezadosActuales = useMemo(() => {
+        if (varSeleccionada?.nombresColumnas?.length > 1) {
+            return Object.fromEntries(varSeleccionada.nombresColumnas.map((nombre, idx) => [`col_${idx}`, nombre]));
+        }
+
+        return {
+            valor: varSeleccionada?.nombre?.trim()
+                || nombreEncabezadoManual
+                || (subTipoProbabilidad === 'frecuentista' ? 'Observación' : 'Datos (Valores)')
+        };
+    }, [varSeleccionada, nombreEncabezadoManual, subTipoProbabilidad]);
+
+    // Detectar cambios en datos o encabezados para habilitar Guardar.
     const hayCambiosEditor = useMemo(() => {
         let limpiosOriginal = filas.filter(f => (f.valor || '').toString().trim() !== '').map(f => (f.valor || '').toString().trim());
         let limpiosTemp = [];
@@ -256,9 +270,15 @@ export default function Principal() {
             limpiosTemp = filasTemp.filter(f => (f.valor || '').toString().trim() !== '').map(f => (f.valor || '').toString().trim());
         }
 
-        if (limpiosOriginal.length !== limpiosTemp.length) return true;
-        return limpiosOriginal.some((val, idx) => val !== limpiosTemp[idx]);
-    }, [filas, filasTemp, varSeleccionada]);
+        const cambiaronDatos = limpiosOriginal.length !== limpiosTemp.length
+            || limpiosOriginal.some((val, idx) => val !== limpiosTemp[idx]);
+        const cambiaronEncabezados = modalEditor && Object.entries(nombresEncabezadosActuales).some(([key, nombre]) => {
+            const nombreNuevo = (nombresEncabezadosTemp[key] ?? nombre).trim();
+            return nombreNuevo !== nombre.trim();
+        });
+
+        return cambiaronDatos || cambiaronEncabezados;
+    }, [filas, filasTemp, varSeleccionada, modalEditor, nombresEncabezadosActuales, nombresEncabezadosTemp]);
 
     // Frecuencias para el selector de eventos
     const statsEventos = useMemo(() => {
@@ -343,13 +363,49 @@ export default function Principal() {
 
         base.push({
             key: 'valor',
-            name: varSeleccionada?.nombre ? ` ${varSeleccionada.nombre}` : (subTipoProbabilidad === 'frecuentista' ? 'Observación' : 'Datos (Valores)'),
+            name: varSeleccionada?.nombre ? ` ${varSeleccionada.nombre}` : (nombreEncabezadoManual || (subTipoProbabilidad === 'frecuentista' ? 'Observación' : 'Datos (Valores)')),
             renderEditCell: textEditor,
             editable: true,
             cellClass: 'rdg-cell-center'
         });
         return base;
-    }, [varSeleccionada, subTipoProbabilidad]);
+    }, [varSeleccionada, subTipoProbabilidad, nombreEncabezadoManual]);
+
+    const columnasEditor = useMemo(() => columns.map(column => {
+        if (column.key === 'id') return column;
+
+        return {
+            ...column,
+            renderHeaderCell: () => (
+                <input
+                    type="text"
+                    aria-label={`Editar encabezado ${column.name}`}
+                    title="Editar nombre de columna"
+                    value={nombresEncabezadosTemp[column.key] ?? String(column.name).trim()}
+                    onChange={event => setNombresEncabezadosTemp(prev => ({ ...prev, [column.key]: event.target.value }))}
+                    onClick={event => event.stopPropagation()}
+                    onKeyDown={event => event.stopPropagation()}
+                    style={{
+                        width: '100%',
+                        minWidth: 0,
+                        height: '100%',
+                        padding: '4px',
+                        border: '1px solid transparent',
+                        borderRadius: '4px',
+                        outline: 'none',
+                        background: 'transparent',
+                        color: 'var(--text-pure)',
+                        font: 'inherit',
+                        fontWeight: 700,
+                        textAlign: 'center',
+                        boxSizing: 'border-box'
+                    }}
+                    onFocus={event => { event.currentTarget.style.borderColor = 'var(--primary-color)'; }}
+                    onBlur={event => { event.currentTarget.style.borderColor = 'transparent'; }}
+                />
+            )
+        };
+    }), [columns, nombresEncabezadosTemp]);
 
     // Derivar inputDatos desde filas
     const inputDatos = filas.map(f => f.valor.toString().trim()).filter(Boolean).join(', ');
@@ -374,12 +430,41 @@ export default function Principal() {
             });
         }
         setFilasTemp(temp);
+        setNombresEncabezadosTemp(nombresEncabezadosActuales);
         setModalEditor(true);
     };
 
     const guardarEditor = () => {
+        const encabezadoGuardado = key => {
+            const original = nombresEncabezadosActuales[key] || '';
+            return (nombresEncabezadosTemp[key] ?? original).trim() || original;
+        };
+
         let limpias = [];
         if (varSeleccionada?.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) {
+            const nombresColumnasActualizados = varSeleccionada.nombresColumnas.map((_, idx) => encabezadoGuardado(`col_${idx}`));
+            const actualizarReferenciaColumna = setter => setter(nombreActual => {
+                if (!nombreActual) return nombreActual;
+                const idx = varSeleccionada.nombresColumnas.indexOf(nombreActual);
+                return idx >= 0 ? nombresColumnasActualizados[idx] : nombreActual;
+            });
+
+            actualizarReferenciaColumna(setColProbClasica);
+            actualizarReferenciaColumna(setColumnaParticion);
+            actualizarReferenciaColumna(setColCausa);
+            actualizarReferenciaColumna(setColEvento);
+            actualizarReferenciaColumna(setColA_Adicion);
+            actualizarReferenciaColumna(setColB_Adicion);
+            actualizarReferenciaColumna(setColA_Mult);
+            actualizarReferenciaColumna(setColB_Mult);
+            actualizarReferenciaColumna(setVarEstratificacion);
+            actualizarReferenciaColumna(setVarUniforme);
+
+            setVarSeleccionada(prev => ({ ...prev, nombresColumnas: nombresColumnasActualizados }));
+            if (!varSeleccionada.esCombinada && varSeleccionada.id) {
+                actualizarVariable(varSeleccionada.id, { nombresColumnas: nombresColumnasActualizados });
+            }
+
             limpias = filasTemp.filter(f => {
                 const isNotEmpty = varSeleccionada.nombresColumnas.some((_, idx) => (f[`col_${idx}`] || '').toString().trim() !== '');
                 if (!isNotEmpty) return false;
@@ -387,6 +472,16 @@ export default function Principal() {
                 return true;
             });
         } else {
+            const nombreColumna = encabezadoGuardado('valor');
+            if (varSeleccionada) {
+                setVarSeleccionada(prev => ({ ...prev, nombre: nombreColumna }));
+                if (!varSeleccionada.esCombinada && varSeleccionada.id) {
+                    actualizarVariable(varSeleccionada.id, { nombre: nombreColumna });
+                }
+            } else {
+                setNombreEncabezadoManual(nombreColumna);
+            }
+
             limpias = filasTemp.filter(f => (f.valor || '').toString().trim() !== '');
         }
 
@@ -402,6 +497,7 @@ export default function Principal() {
     const cargarVariable = (varsArray) => {
         const arr = Array.isArray(varsArray) ? varsArray : [varsArray];
         if (arr.length === 0) return;
+        setNombreEncabezadoManual('');
 
         if (operacion === 'distribuciones_muestrales') {
             const tieneMultiplesCols = arr.length > 1 || 
@@ -442,6 +538,7 @@ export default function Principal() {
 
     const deseleccionarVariable = () => {
         setVarSeleccionada(null);
+        setNombreEncabezadoManual('');
         setFilas([filaVacia(1), filaVacia(2), filaVacia(3)]);
         setEventoFavorable([]);
         setEventoCondicion([]);
@@ -455,7 +552,8 @@ export default function Principal() {
     useEffect(() => {
         if (!varSeleccionada) return;
         if (varSeleccionada.esCombinada) return; // Si es combinada omitimos la sincronización automática
-        const varActualizada = variables.find(v => v.nombre === varSeleccionada.nombre);
+        const varActualizada = variables.find(v => v.id === varSeleccionada.id)
+            || variables.find(v => v.nombre === varSeleccionada.nombre);
 
         if (!varActualizada) {
             setVarSeleccionada(null);
@@ -469,6 +567,8 @@ export default function Principal() {
 
         const datosViejos = JSON.stringify(varSeleccionada.datos);
         const datosNuevos = JSON.stringify(varActualizada.datos);
+        const metadatosCambiaron = varSeleccionada.nombre !== varActualizada.nombre
+            || JSON.stringify(varSeleccionada.nombresColumnas) !== JSON.stringify(varActualizada.nombresColumnas);
 
         if (datosViejos !== datosNuevos) {
             setVarSeleccionada(varActualizada);
@@ -480,6 +580,8 @@ export default function Principal() {
             setResProbabilidad(null);
             setDatosDiscretos(null);
             setDatosContinuos(null);
+        } else if (metadatosCambiaron) {
+            setVarSeleccionada(varActualizada);
         }
     }, [variables, varSeleccionada]);
 
@@ -517,12 +619,12 @@ export default function Principal() {
                 setResConteo(null);
             } else if (subTipoProbabilidad === 'total') {
                 const res = calcularProbabilidadTotalParticion(arr, varSeleccionada?.nombresColumnas, columnaParticion, eventoFavorable);
-                if (res?.error) { alert(res.error); return; }
+                if (res?.error) { mostrarAlerta(res.error, 'Error de Cálculo', 'error'); return; }
                 setResProbabilidad(res);
                 setResConteo(null);
             } else {
                 const res = calcularProbabilidadClasica(arr, eventoFavorable);
-                if (res?.error) { alert(res.error); return; }
+                if (res?.error) { mostrarAlerta(res.error, 'Error de Cálculo', 'error'); return; }
                 setResProbabilidad(res);
                 setResConteo(null);
             }
@@ -621,10 +723,10 @@ export default function Principal() {
             {/* PANEL IZQUIERDO */}
             <div className="calculadora-datos" style={{ fontFamily: FONT }}>
                 <div>
-                    {panelAbierto && <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 'bold' }}>Parámetros</h3>}
+                    {panelAbierto && <h3 style={{ fontSize: FS.lg, fontFamily: FONT, fontWeight: 'bold', margin: '0 0 -6px', lineHeight: 1 }}>Parámetros</h3>}
                 </div>
                 {panelAbierto && (
-                    <div className="panel-controles-excel" style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column' }}>
+                    <div className="panel-controles-excel" style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', marginTop: 0 }}>
                         {/* Selector de operación iterativo (Personalizado) */}
                         {/* Selector de operación iterativo (Personalizado) */}
                         <label style={{ ...labelStyle, fontSize: FS.xs }}>OPERACIÓN:</label>
@@ -655,7 +757,12 @@ export default function Principal() {
                                         <button
                                             key={tipo.id}
                                             className={`btn-mat251-modo ${subTipoProbabilidad === tipo.id ? 'active' : ''}`}
-                                            onClick={() => setSubTipoProbabilidad(tipo.id)}
+                                            onClick={() => {
+                                                setSubTipoProbabilidad(tipo.id);
+                                                if (tipo.id !== 'clasica' && inputModeProb === 'experimentos') {
+                                                    setInputModeProb('matriz');
+                                                }
+                                            }}
                                             style={{ flex: 1, padding: '5px 4px' }}
                                         >
                                             {tipo.label}
@@ -996,6 +1103,7 @@ export default function Principal() {
                             eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable}
                             ejecutar={ejecutar} resProbabilidad={resProbabilidad} setResProbabilidad={setResProbabilidad} formulaProbRef={formulaProbRef}
                             inputDatos={inputDatos}
+                            filas={filas}
                             tipo={subTipoProbabilidad}
                             eventoCondicion={eventoCondicion} setModalCondicion={setModalCondicion}
                             columnaParticion={columnaParticion} setColumnaParticion={setColumnaParticion}
@@ -1009,7 +1117,7 @@ export default function Principal() {
             </div>
 
             {/* MODALES*/}
-            <ModalEditor modalEditor={modalEditor} setModalEditor={setModalEditor} filasTemp={filasTemp} setFilasTemp={setFilasTemp} columns={columns} guardarEditor={guardarEditor} hayCambiosEditor={hayCambiosEditor} titulo={subTipoProbabilidad === 'frecuentista' ? 'Editor de Datos Históricos' : 'Editor de Espacio Muestral'} />
+            <ModalEditor modalEditor={modalEditor} setModalEditor={setModalEditor} filasTemp={filasTemp} setFilasTemp={setFilasTemp} columns={columnasEditor} guardarEditor={guardarEditor} hayCambiosEditor={hayCambiosEditor} titulo={subTipoProbabilidad === 'frecuentista' ? 'Editor de Datos Históricos' : 'Editor de Espacio Muestral'} />
             <ModalEventos modalEvento={modalEvento} setModalEvento={setModalEvento} statsEventos={statsEventos} statsEventosPorColumna={(subTipoProbabilidad === 'clasica' || subTipoProbabilidad === 'frecuentista') ? null : statsEventosPorColumnaParaA} eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable} setResProbabilidad={setResProbabilidad} titulo={subTipoProbabilidad === 'frecuentista' ? 'Seleccionar Evento de Interés' : subTipoProbabilidad === 'condicional' ? 'Seleccionar Eventos para Interés (A)' : 'Seleccionar Eventos Favorables'} mostrarFrecuencia={subTipoProbabilidad === 'condicional' || (subTipoProbabilidad === 'frecuentista' && inputModeProb === 'matriz')} />
             <ModalEventos modalEvento={modalCondicion} setModalEvento={setModalCondicion} statsEventos={statsEventos} statsEventosPorColumna={statsEventosPorColumnaParaB} eventoFavorable={eventoCondicion} setEventoFavorable={setEventoCondicion} setResProbabilidad={setResProbabilidad} titulo="Seleccionar Eventos para Condición (B)" mostrarFrecuencia={subTipoProbabilidad === 'condicional'} />
             <ModalVariables modalVars={modalVars} setModalVars={setModalVars} variables={variables} cargarVariable={cargarVariable} />

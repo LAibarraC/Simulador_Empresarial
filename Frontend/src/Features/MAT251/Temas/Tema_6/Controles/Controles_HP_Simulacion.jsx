@@ -6,8 +6,8 @@ import { cardStyle, labelStyle, FS, RADIUS } from '../../../Principal/Constantes
 import ModalAlerta from '../../../ui/ModalAlerta';
 
 export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
-    const renderKatex = (math) => (
-        <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
+    const renderKatex = (math, inheritColor = false) => (
+        <span style={{ color: inheritColor ? 'inherit' : 'var(--text-pure)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
 
     const paramSymbol = prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu';
@@ -89,58 +89,78 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
     };
 
     return (
-        <div style={cardStyle}>
-            <p style={{ fontSize: FS.sm, marginBottom: '15px', color: 'var(--text-pure)' }}>
-                Genere múltiples muestras aleatorias para observar la tasa de rechazo de la hipótesis nula:
-            </p>
-
+        <div style={{ ...cardStyle, border: 'none', padding: '0px', position: 'relative' }}>
+            <div className="tema5-simulacion-ayuda">
+                <button
+                    type="button"
+                    className="tema5-simulacion-ayuda-boton btn-mat251-ayuda-hipotesis"
+                    id="tema6-ayuda-hipotesis-simulador"
+                    aria-label="Ayuda sobre la simulación de hipótesis"
+                    aria-describedby="tema6-ayuda-hipotesis-contenido"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M9.6 9a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.8" />
+                        <path d="M12 17h.01" />
+                    </svg>
+                </button>
+                <div id="tema6-ayuda-hipotesis-contenido" className="tema5-simulacion-ayuda-panel" role="tooltip">
+                    <strong>Simulación de pruebas de hipótesis</strong>
+                    <p>Repite el experimento para observar cómo se comporta la prueba estadística.</p>
+                    <ul>
+                        <li>Genera {renderKatex('\\mathbf{N}')} muestras, cada una de tamaño {renderKatex('\\mathbf{n}')}, usando los parámetros reales elegidos.</li>
+                        <li>En cada muestra calcula el estadístico y decide si rechaza {renderKatex('\\mathbf{H}_0')} con el nivel de significación {renderKatex('\\boldsymbol{\\alpha}')} seleccionado.</li>
+                        <li>La proporción de rechazos estima la tasa de rechazo de la prueba. Si el parámetro real cumple {renderKatex('\\mathbf{H}_0')}, aproxima el error tipo I; si cumple {renderKatex('\\mathbf{H}_1')}, estima la potencia.</li>
+                    </ul>
+                </div>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '15px', borderRadius: '8px' }}>
-                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '15px', color: 'var(--text-pure)' }}>PARÁMETROS REALES</div>
+                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '5px', width: '100%', boxSizing: 'border-box' }}>
+                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-pure)', textAlign: 'center' }}>PARÁMETROS REALES</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                         {(prueba === 'media_z' || prueba === 'media_t' || prueba === 'varianza') && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'right' }}>{renderKatex('\\mu:')}</label>
-                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={muReal} onChange={e => setMuReal(e.target.value)} placeholder="Media poblacional real" step="any" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'left', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\mu}:')}</label>
+                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} value={muReal} onChange={e => setMuReal(e.target.value)} placeholder="Media poblacional real" step="any" />
                             </div>
                         )}
                         {(prueba === 'media_t' || prueba === 'varianza') && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'right' }}>
-                                    {renderKatex(prueba === 'varianza' ? '\\sigma^2:' : '\\sigma:')}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'left', flexShrink: 0 }}>
+                                    {renderKatex(prueba === 'varianza' ? '\\boldsymbol{\\sigma}^2:' : '\\boldsymbol{\\sigma}:')}
                                 </label>
-                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={sigmaReal} onChange={e => setSigmaReal(e.target.value)} min="0.001" step="any" placeholder={prueba === 'varianza' ? "Varianza poblacional real" : "Desv. est. real"} />
+                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} value={sigmaReal} onChange={e => setSigmaReal(e.target.value)} min="0.001" step="any" placeholder={prueba === 'varianza' ? "Varianza poblacional real" : "Desv. est. real"} />
                             </div>
                         )}
                         {prueba === 'proporcion' && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'right' }}>{renderKatex('p:')}</label>
-                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={pReal} onChange={e => setPReal(e.target.value)} min="0" max="1" step="any" placeholder="Proporción real" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'left', flexShrink: 0 }}>{renderKatex('\\boldsymbol{p}:')}</label>
+                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} value={pReal} onChange={e => setPReal(e.target.value)} min="0" max="1" step="any" placeholder="Proporción real" />
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '15px', borderRadius: '8px' }}>
-                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '15px', color: 'var(--text-pure)' }}>PARÁMETROS HIPOTÉTICOS</div>
+                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '5px', width: '100%', boxSizing: 'border-box' }}>
+                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-pure)', textAlign: 'center' }}>PARÁMETROS HIPOTÉTICOS</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                         {(prueba === 'media_z' || prueba === 'media_t') && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'right' }}>{renderKatex('\\mu_0:')}</label>
-                                <input type="number" className="input-mat251 placeholder-small" value={mu0} onChange={e => setMu0(e.target.value)} placeholder="Media hipotética" step="any" style={{ flex: 1 }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'left', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\mu}_0:')}</label>
+                                <input type="number" className="input-mat251 placeholder-small" value={mu0} onChange={e => setMu0(e.target.value)} placeholder="Media hipotética" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
                             </div>
                         )}
 
                         {prueba === 'proporcion' && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'right' }}>{renderKatex('p_0:')}</label>
-                                <input type="number" className="input-mat251 placeholder-small" value={p0} onChange={e => setP0(e.target.value)} placeholder="Proporción hipotética" step="any" style={{ flex: 1 }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'left', flexShrink: 0 }}>{renderKatex('\\boldsymbol{p}_0:')}</label>
+                                <input type="number" className="input-mat251 placeholder-small" value={p0} onChange={e => setP0(e.target.value)} placeholder="Proporción hipotética" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
                             </div>
                         )}
                         {prueba === 'varianza' && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'right' }}>{renderKatex('\\sigma_0^2:')}</label>
-                                <input type="number" className="input-mat251 placeholder-small" value={sigma02} onChange={e => setSigma02(e.target.value)} placeholder="Varianza hipotética" step="any" style={{ flex: 1 }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '35px', textAlign: 'left', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\sigma}_0^2:')}</label>
+                                <input type="number" className="input-mat251 placeholder-small" value={sigma02} onChange={e => setSigma02(e.target.value)} placeholder="Varianza hipotética" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
                             </div>
                         )}
                     </div>
@@ -151,7 +171,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                 {prueba === 'media_z' && (
                     <>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('\\sigma:')}</label>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('\\boldsymbol{\\sigma}:')}</label>
                         </div>
                         <div>
                             <input type="number" className="input-mat251 placeholder-small" value={sigma} onChange={e => setSigma(e.target.value)} placeholder="Desviación Estándar" step="any" style={{ width: '100%', boxSizing: 'border-box' }} />
@@ -161,7 +181,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                 )}
                 
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('\\alpha:')}</label>
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
                 </div>
                 <div ref={alphaRef} style={{ position: 'relative' }}>
                     <div
@@ -210,7 +230,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                 <div></div>
                 
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('H_1:')}</label>
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('\\mathbf{H}_1:')}</label>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                     {['bilateral', 'derecha', 'izquierda'].map(tipo => {
@@ -227,14 +247,14 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                                     border: `1px solid ${isSelected ? 'var(--accent-color)' : 'var(--border-color, #cbd5e1)'}`,
                                     borderRadius: RADIUS || '4px',
                                     background: isSelected ? 'var(--accent-color)' : 'var(--bg-input, #fff)',
-                                    color: isSelected ? '#fff' : 'var(--text-main)',
+                                    color: isSelected ? '#fff' : 'var(--text-pure)',
                                     boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
                                     transition: 'all 0.2s',
                                     display: 'flex', justifyContent: 'center', alignItems: 'center',
                                     fontSize: FS.xs,
                                 }}
                             >
-                                {renderKatex(mathStr)}
+                                {renderKatex(mathStr, true)}
                             </div>
                         );
                     })}
@@ -244,12 +264,12 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('n:')}</label>
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'left', flexShrink: 0 }}>{renderKatex('\\mathbf{n}:')}</label>
                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={n} onChange={e => setN(e.target.value)} min="2" placeholder="Tamaño de muestra" />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right', fontWeight: 'bold' }}>Simulaciones:</label>
-                    <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={numSimulaciones} onChange={e => setNumSimulaciones(e.target.value)} min="1" max="10000" placeholder="Nº Simulaciones" />
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right', flexShrink: 0 }}>{renderKatex('\\mathbf{N}:')}</label>
+                    <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} value={numSimulaciones} onChange={e => setNumSimulaciones(e.target.value)} min="1" max="10000" placeholder="Número de simulaciones" />
                 </div>
             </div>
 

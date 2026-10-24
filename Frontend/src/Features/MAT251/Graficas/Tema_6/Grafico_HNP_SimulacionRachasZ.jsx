@@ -19,7 +19,7 @@ const CustomKatexLabel = (props) => {
         <foreignObject x={x - 70 + finalOffsetX} y={y - 30 + offsetY} width={140} height={30} style={{ overflow: 'visible' }}>
             <div
                 dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }}
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}
+                style={{ color: 'var(--text-main, #1e293b)', fontSize: '11px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}
             />
         </foreignObject>
     );
@@ -114,16 +114,18 @@ export default function Grafico_HNP_SimulacionRachasZ({ resultados }) {
                     </div>
                 </div>
 
-                <div style={{ width: '100%', flex: 1, minHeight: '300px', position: 'relative' }}>
+                <div className="hnp-simulacion-grafica-plot" style={{ width: '100%', flex: 1, minHeight: '300px', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart margin={{ top: 30, right: 30, left: 10, bottom: 20 }} style={{ overflow: 'visible' }}>
+                        <ComposedChart margin={{ top: 30, right: 10, left: 10, bottom: 20 }} style={{ overflow: 'visible' }}>
                             <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
                             <XAxis
                                 dataKey="x"
                                 type="number"
                                 domain={[-4, 4]}
+                                ticks={[-4, -3, -2, -1, 0, 1, 2, 3, 4]}
+                                interval={0}
                                 tickFormatter={(val) => Math.round(val)}
-                                tick={{ fill: 'var(--text-pure)', fontSize: 12, fontWeight: 'normal' }}
+                                tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
                                 axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                                 tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                             />
@@ -142,9 +144,9 @@ export default function Grafico_HNP_SimulacionRachasZ({ resultados }) {
                             {criticalValues.map((val, idx) => {
                                 let labelKatex = '';
                                 if (tipoPrueba === 'bilateral') {
-                                    labelKatex = idx === 0 ? `-Z_{crit} = ${val.toFixed(3)}` : `Z_{crit} = ${val.toFixed(3)}`;
+                                    labelKatex = idx === 0 ? `-\\mathbf{Z}_{crit} = ${val.toFixed(3)}` : `\\mathbf{Z}_{crit} = ${val.toFixed(3)}`;
                                 } else {
-                                    labelKatex = `Z_{crit} = ${val.toFixed(3)}`;
+                                    labelKatex = `\\mathbf{Z}_{crit} = ${val.toFixed(3)}`;
                                 }
                                 return (
                                     <ReferenceLine
@@ -157,7 +159,7 @@ export default function Grafico_HNP_SimulacionRachasZ({ resultados }) {
                     </ResponsiveContainer>
                 </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
+                <div className="leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-20px', paddingBottom: '25px', position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input, #f8fafc)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '20px', height: '12px', background: 'rgba(220, 38, 38, 0.85)', borderRadius: '2px' }}></div>
                         <div style={{ color: 'var(--text-pure, #1e293b)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>

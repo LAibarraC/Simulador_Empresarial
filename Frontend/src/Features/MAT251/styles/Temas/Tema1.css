@@ -812,3 +812,2441 @@
         width: 100%;
     }
 }
+
+/* Interfaz de experimentos de probabilidad MAT251 */
+.mat251-experimentos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--text-pure);
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.mat251-experimentos button,
+.mat251-experimentos input {
+    font-family: inherit;
+}
+
+.mat251-experimentos button {
+    font-weight: 600;
+    border-radius: 5px;
+}
+
+/* Excluye estos controles del estilo global genérico de botones azules. */
+.mat251-experimentos .btn-experimentos {
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.mat251-experimentos-header,
+.mat251-experimentos-seccion-titulo,
+.mat251-experimentos-encuesta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.mat251-experimentos-condiciones-cabecera {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+}
+
+.mat251-experimentos-condiciones-cabecera > div {
+    width: 100%;
+    text-align: center;
+}
+
+.mat251-experimentos-condiciones-cabecera > button,
+.mat251-experimentos-agregar-condicion {
+    position: static;
+    margin-top: 10px;
+    align-self: center;
+    background: transparent !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    transition: all 0.18s ease;
+}
+
+.mat251-experimentos-condiciones-cabecera > button:hover:not(:disabled),
+.mat251-experimentos-agregar-condicion:hover:not(:disabled) {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+}
+
+.mat251-experimentos-card h4,
+.mat251-experimentos-card h5,
+.mat251-experimentos-header p,
+.mat251-experimentos-seccion-titulo p {
+    margin: 0;
+}
+
+.mat251-experimentos-header p,
+.mat251-experimentos-seccion-titulo p {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+.mat251-experimentos-metricas > div > span {
+    color: var(--text-pure);
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.mat251-experimentos-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.mat251-experimentos-card h4 {
+    color: var(--text-pure);
+    font-size: 0.9rem;
+}
+
+.mat251-experimentos-label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-pure);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.mat251-experimentos-tipos,
+.mat251-experimentos-componentes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    align-items: start;
+    gap: 10px;
+}
+
+.mat251-experimentos-componentes {
+    width: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    align-content: start;
+    background: transparent;
+}
+
+.mat251-experimentos-componentes.simple {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100%;
+}
+
+.mat251-experimentos-componentes.simple .mat251-experimentos-componente {
+    margin: 0 auto;
+}
+
+.mat251-experimentos-componente-titulo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.mat251-experimentos-componente-titulo strong {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2;
+    color: var(--text-pure);
+    font-size: 0.8rem;
+}
+
+.mat251-experimentos-componente-acciones {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.mat251-experimentos-componente-acciones .mat251-experimentos-quitar {
+    position: static;
+}
+
+.mat251-experimentos-componentes.compuesto {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    width: max-content;
+    min-width: 100%;
+}
+
+.mat251-experimentos-componentes.compuesto > .mat251-experimentos-componente {
+    flex: 0 0 320px;
+}
+
+.mat251-experimentos-agregar-componente {
+    position: absolute;
+    top: 6px;
+    right: auto;
+    left: 50%;
+    z-index: 2;
+    margin-top: 0;
+    min-height: 32px;
+    transform: translateX(-50%);
+    padding: 4px 16px;
+    border-radius: 5px;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--text-pure) 10%, transparent);
+    transition: all 0.18s ease;
+}
+
+.mat251-experimentos-agregar-componente:hover {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+}
+
+.mat251-experimentos-agregar-componente,
+.mat251-experimentos-agregar-componente:hover,
+.mat251-experimentos-agregar-componente:focus,
+.mat251-experimentos-agregar-componente:active {
+    transform: translateX(-50%) !important;
+}
+
+.mat251-experimentos-lienzo {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+    transition: height 0.2s ease;
+}
+
+.mat251-experimentos-lienzo.simple {
+    height: 220px;
+}
+
+.mat251-experimentos-lienzo-viewport {
+    position: absolute;
+    inset: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+    padding: 44px 14px 6px 14px;
+    background-color: var(--bg-card);
+    background-image:
+        linear-gradient(to right, color-mix(in srgb, var(--border-color) 28%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, var(--border-color) 28%, transparent) 1px, transparent 1px),
+        linear-gradient(to right, color-mix(in srgb, var(--border-color) 55%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, var(--border-color) 55%, transparent) 1px, transparent 1px);
+    background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
+
+.mat251-experimentos-lienzo-viewport.simple {
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.mat251-experimentos-lienzo-viewport,
+.mat251-experimentos-formula-universo {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.45) transparent;
+}
+
+.mat251-experimentos-lienzo-viewport::-webkit-scrollbar,
+.mat251-experimentos-formula-universo::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-track,
+.mat251-experimentos-formula-universo::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-thumb,
+.mat251-experimentos-formula-universo::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.45);
+    border: none;
+    border-radius: 10px;
+}
+
+.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-thumb:hover,
+.mat251-experimentos-formula-universo::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}
+
+.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-corner,
+.mat251-experimentos-formula-universo::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.mat251-experimentos-tipos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    justify-content: center;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    gap: 10px 14px;
+}
+
+.mat251-experimentos-tipos > div {
+    flex: 0 1 300px;
+    width: 300px;
+    min-width: 0;
+}
+
+.mat251-experimentos-tipos > div > .mat251-experimentos-label {
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.mat251-experimentos-opciones {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.mat251-experimentos-opciones .btn-mat251-modo {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 6px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.mat251-experimentos-opciones .btn-mat251-modo.active {
+    color: #fff !important;
+}
+
+.mat251-experimentos-componentes > .mat251-experimentos-secundario {
+    justify-self: start;
+    align-self: start;
+    min-height: 38px;
+    margin-top: 2px;
+}
+
+.mat251-experimentos-componente,
+.mat251-experimentos-regla {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-input);
+}
+
+.mat251-experimentos-componente {
+    position: relative;
+    width: min(100%, 320px);
+    max-width: 320px;
+    box-sizing: border-box;
+    justify-self: start;
+    padding: 12px 14px 14px 14px;
+    background: var(--bg-card);
+}
+
+.mat251-experimentos-componente-clonado {
+    transform-origin: left center;
+    animation: mat251-experimentos-entrada-clon 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes mat251-experimentos-entrada-clon {
+    0% {
+        opacity: 0;
+        transform: translateX(-18px) scale(0.94);
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    }
+    45% {
+        opacity: 1;
+        transform: translateX(0) scale(1.025);
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.28), 0 10px 24px rgba(245, 158, 11, 0.16);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        border-color: var(--border-color);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mat251-experimentos-componente-clonado {
+        animation: none;
+    }
+}
+
+.mat251-experimentos-componente label,
+.mat251-experimentos-regla-campo label {
+    display: block;
+    min-width: 0;
+}
+
+.mat251-experimentos-secundario,
+.mat251-experimentos-quitar {
+    min-height: 34px;
+    width: fit-content;
+    padding: 5px 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-pure);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.mat251-experimentos-secundario:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.mat251-experimentos-secundario:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.mat251-experimentos-quitar {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.mat251-experimentos .mat251-experimentos-quitar-icono,
+.mat251-experimentos .mat251-experimentos-clonar-icono {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 4px;
+    background: transparent !important;
+    outline: none;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.mat251-experimentos .mat251-experimentos-quitar-icono {
+    color: #ef4444 !important;
+}
+
+.mat251-experimentos .mat251-experimentos-quitar-icono:hover:not(:disabled) {
+    background: transparent !important;
+    color: #dc2626 !important;
+    box-shadow: none !important;
+    transform: scale(1.08);
+}
+
+.mat251-experimentos .mat251-experimentos-quitar-icono:focus-visible {
+    color: #b91c1c !important;
+    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5));
+}
+
+.mat251-experimentos .mat251-experimentos-quitar-icono:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.mat251-experimentos .mat251-experimentos-clonar-icono {
+    color: var(--text-muted) !important;
+}
+
+.mat251-experimentos .mat251-experimentos-clonar-icono:hover:not(:disabled) {
+    background: transparent !important;
+    color: var(--accent-color) !important;
+    box-shadow: none !important;
+    transform: scale(1.08);
+}
+
+.mat251-experimentos .mat251-experimentos-clonar-icono:focus-visible {
+    color: var(--accent-color) !important;
+    filter: drop-shadow(0 0 2px rgba(217, 119, 6, 0.4));
+}
+
+.mat251-experimentos .mat251-experimentos-clonar-icono:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.mat251-experimentos .mat251-experimentos-mover-icono {
+    position: absolute;
+    top: 8px;
+    left: 11px;
+    z-index: 2;
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 4px;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.mat251-experimentos .mat251-experimentos-mover-icono:hover:not(:disabled),
+.mat251-experimentos .mat251-experimentos-mover-icono:focus-visible {
+    color: var(--accent-color) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.mat251-experimentos .mat251-experimentos-mover-icono:active {
+    cursor: grabbing;
+}
+
+.mat251-experimentos-encuesta {
+    flex-wrap: wrap;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+}
+
+.mat251-experimentos-encuesta-config {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.mat251-experimentos-frecuencia {
+    display: block;
+    width: min(100%, 360px);
+}
+
+.mat251-experimentos-frecuencia small {
+    display: block;
+    margin-top: 5px;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+}
+
+.mat251-experimentos-encuesta > div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.mat251-experimentos-encuesta strong {
+    color: var(--text-pure);
+    font-size: 0.85rem;
+}
+
+.mat251-experimentos-datos-label {
+    color: var(--text-pure);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mat251-experimentos-encuesta .mat251-experimentos-datos-label {
+    color: var(--text-pure);
+}
+
+.mat251-experimentos .mat251-experimentos-editar {
+    background: var(--primary-color) !important;
+    border: 1px solid var(--primary-color) !important;
+    color: #fff !important;
+}
+
+.mat251-experimentos .mat251-experimentos-editar:hover:not(:disabled) {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+}
+
+.mat251-experimentos-encuesta span,
+.mat251-experimentos-encuesta p {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.mat251-experimentos-encuesta p {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.mat251-experimentos-reglas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mat251-experimentos-regla {
+    position: relative;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.mat251-experimentos-regla.con-quitar {
+    padding-right: 36px;
+}
+
+.mat251-experimentos .mat251-experimentos-quitar-regla {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    min-height: 26px;
+    padding: 0;
+}
+
+.mat251-experimentos-regla-campo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.mat251-experimentos-regla-campo label {
+    display: block;
+    flex: 1 1 140px;
+    min-width: 120px;
+}
+
+.mat251-experimentos-regla-campo label.mat251-experimentos-campo-evaluar {
+    flex: 0 0 175px;
+    width: 175px;
+    min-width: 175px;
+    max-width: 175px;
+}
+
+.mat251-experimentos-regla-campo label.mat251-experimentos-campo-operador {
+    flex: 0 0 80px;
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+}
+
+.mat251-experimentos-regla-campo label.mat251-experimentos-campo-valor {
+    flex: 0 0 110px;
+    width: 110px;
+    min-width: 85px;
+    max-width: 120px;
+}
+
+.mat251-experimentos-campo-operador .experimentos-select-trigger {
+    padding: 5px 8px;
+    justify-content: space-between;
+}
+
+.mat251-experimentos-campo-operador .experimentos-select-trigger > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    overflow: visible;
+}
+
+.mat251-experimentos-campo-operador .experimentos-select-option {
+    padding: 7px 6px;
+    text-align: center;
+}
+
+.mat251-experimentos-campo-suma {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 2 1 220px;
+    min-width: 160px;
+    max-width: 100%;
+}
+
+.mat251-experimentos-chips-suma {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-height: 38px;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 2px 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-input);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mat251-experimentos-chips-suma::-webkit-scrollbar {
+    height: 3px;
+}
+
+.mat251-experimentos-chips-suma::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mat251-experimentos-chips-suma::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.45);
+    border-radius: 10px;
+}
+
+.mat251-experimentos-chips-suma {
+    scrollbar-width: none;
+}
+
+.mat251-experimentos-chips-suma::-webkit-scrollbar {
+    display: none;
+}
+
+.mat251-experimentos-chips-suma::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .mat251-experimentos-chips-suma {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    }
+}
+
+.mat251-chip-suma {
+    flex: 1 0 115px;
+    min-width: 115px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 4px;
+    border: 1px solid var(--primary-color);
+    background: var(--bg-card);
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.mat251-chip-suma:hover {
+    background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-card));
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.mat251-chip-suma.activo {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.mat251-chip-suma.activo:hover {
+    background: color-mix(in srgb, var(--primary-color) 88%, #000) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+.mat251-experimentos-regla-campo .mat251-experimentos-label {
+    text-align: center;
+}
+
+.experimentos-select {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.experimentos-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-height: 38px;
+    box-sizing: border-box;
+    padding: 5px 5px 5px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-input);
+    color: var(--text-pure);
+    font-size: 0.8rem;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.experimentos-select-trigger:hover:not(:disabled) {
+    border-color: var(--primary-color);
+}
+
+.experimentos-select-trigger:focus-visible {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.experimentos-select-trigger > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.experimentos-select-trigger svg {
+    flex: 0 0 auto;
+    transition: transform 0.2s ease;
+}
+
+.experimentos-select-trigger.abierto svg {
+    transform: rotate(180deg);
+}
+
+.experimentos-select-trigger.abierto {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.experimentos-select-trigger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.experimentos-select-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    z-index: 1000;
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    animation: fadeInDropdown 0.2s ease;
+}
+
+.experimentos-select-option {
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-pure);
+    font-size: 0.8rem;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.experimentos-select-option:hover,
+.experimentos-select-option.seleccionada {
+    background: rgba(37, 99, 235, 0.08);
+}
+
+.experimentos-select-option:hover {
+    color: var(--text-pure);
+}
+
+.experimentos-select-option.seleccionada {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.mat251-operador-opcion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.mat251-operador-simbolo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: 700 !important;
+    font-family: KaTeX_Main, 'Times New Roman', serif;
+    line-height: 1;
+}
+
+.mat251-operador-simbolo .katex {
+    line-height: normal;
+    text-transform: none;
+    font-weight: 700 !important;
+}
+
+.mat251-experimentos-conector {
+    align-self: center;
+    width: 68px;
+}
+
+.mat251-experimentos-conector .experimentos-select-trigger {
+    padding: 5px 8px;
+    font-weight: 700;
+    justify-content: space-between;
+}
+
+.mat251-experimentos-conector .experimentos-select-option {
+    text-align: center;
+    font-weight: 700;
+    padding: 7px 6px;
+}
+
+.mat251-experimentos-ayuda,
+.mat251-experimentos-vacio {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.mat251-experimentos-aviso,
+.mat251-experimentos-error {
+    margin: 0;
+    padding: 9px 10px;
+    border: 1px solid #f59e0b;
+    border-radius: 5px;
+    background: color-mix(in srgb, #f59e0b 10%, var(--bg-card));
+    color: var(--text-pure);
+    font-size: 0.8rem;
+}
+
+.mat251-experimentos-error {
+    border-color: #ef4444;
+    background: color-mix(in srgb, #ef4444 8%, var(--bg-card));
+}
+
+.mat251-experimentos-acciones {
+    display: flex;
+    justify-content: center;
+}
+
+.mat251-experimentos-acciones .button_calcular {
+    width: fit-content;
+    padding: 5px 20px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    background: transparent !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mat251-experimentos-acciones .button_calcular:hover:not(:disabled) {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+}
+
+.mat251-experimentos-acciones .button_calcular:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.mat251-experimentos-metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+}
+
+.mat251-experimentos-metricas > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 58px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-input);
+    text-align: center;
+}
+
+.mat251-experimentos-metricas span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.mat251-experimentos-metricas strong {
+    color: var(--text-pure);
+    font-size: 0.9rem;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.mat251-experimentos-card h4.mat251-experimentos-resultados-titulo {
+    text-align: center;
+    font-size: 1rem;
+}
+
+.mat251-experimentos-resultados {
+    gap: 16px;
+}
+
+.mat251-experimentos-resultados .katex {
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-resultados .mat251-experimentos-metricas > div {
+    min-height: 68px;
+    padding: 10px 8px;
+    border-radius: 5px;
+}
+
+.mat251-experimentos-metricas strong .katex {
+    font-size: 1.05em;
+}
+
+.mat251-experimentos-formula {
+    margin: 0;
+    padding: 4px 0;
+    border: none;
+    background: transparent;
+    color: var(--text-pure);
+    font-size: 0.95rem;
+    text-align: center;
+    overflow-x: auto;
+}
+
+.mat251-experimentos-formula .katex-display {
+    margin: 0;
+}
+
+.mat251-experimentos-resultados h5 {
+    color: var(--text-pure);
+    font-size: 0.8rem;
+}
+
+.mat251-experimentos-espacio-vivo {
+    margin-top: 5px;
+    color: var(--text-pure);
+    font-family: inherit;
+}
+
+.mat251-experimentos-espacio-vivo-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.mat251-experimentos-espacio-vivo-cabecera h5 {
+    margin: 0;
+    color: var(--text-pure);
+    font-size: 0.9rem;
+    font-weight: 'bold';
+    text-align: center;
+}
+
+.mat251-experimentos-formula-universo {
+    max-width: 100%;
+    max-height: 320px;
+    overflow: auto;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0px;
+    color: var(--text-pure);
+    font-family: inherit;
+}
+
+.mat251-experimentos-formula-universo,
+.mat251-experimentos-formula-universo .katex,
+.mat251-experimentos-formula-universo .mat251-experimentos-matriz-igual,
+.mat251-experimentos-formula-universo .mat251-experimentos-matriz-celdas,
+.mat251-experimentos-formula-universo .mat251-experimentos-matriz-llave {
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-tabla-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.45) transparent;
+}
+
+.mat251-experimentos-tabla-wrap::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.mat251-experimentos-tabla-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mat251-experimentos-tabla-wrap::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.45);
+    border: none;
+    border-radius: 10px;
+}
+
+.mat251-experimentos-tabla-wrap::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}
+
+.mat251-experimentos-tabla-wrap::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.mat251-experimentos-formula-universo > p {
+    margin: 0 0 8px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.mat251-experimentos-formula-universo-math {
+    width: max-content;
+    min-width: 100%;
+    font-weight: 400;
+    text-align: left;
+}
+
+.mat251-experimentos-formula-universo-math .katex {
+    font-size: 0.85rem;
+}
+
+.mat251-experimentos-formula-universo-simple {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: max-content;
+    min-width: 100%;
+    font-size: 0.85rem;
+}
+
+.mat251-experimentos-formula-universo-simple .katex-display {
+    width: max-content;
+    margin: 0;
+}
+
+.mat251-experimentos-matriz-universo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: max-content;
+    min-width: 100%;
+    padding: 8px 0;
+    font-size: 0.85rem;
+}
+
+.mat251-experimentos-omega-label:hover {
+    z-index: 10002;
+}
+
+.mat251-experimentos-matriz-igual {
+    color: var(--text-pure);
+    font-family: KaTeX_Main, 'Times New Roman', serif;
+    font-size: 0.85rem;
+}
+
+.mat251-experimentos-omega-label .mat251-stat-tooltip.mat251-tooltip-top {
+    top: auto;
+    bottom: calc(100% + 8px);
+    z-index: 10003;
+}
+
+.mat251-experimentos-omega-label .mat251-stat-tooltip.mat251-tooltip-top::after {
+    top: 100%;
+    bottom: auto;
+    border-color: #1e293b transparent transparent transparent;
+}
+
+.mat251-experimentos-matriz-universo .katex {
+    font-size: 0.85rem;
+}
+
+.mat251-experimentos-matriz-llave {
+    display: block;
+    flex: 0 0 15px;
+    width: 5px;
+    overflow: visible;
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-matriz-llave path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.mat251-experimentos-matriz-celdas {
+    display: grid;
+    align-items: center;
+    gap: 6px 14px;
+    flex: 0 0 auto;
+    color: var(--text-pure);
+    font-size: 0.8rem;
+    font-family: KaTeX_Main, 'Times New Roman', serif;
+    text-align: center;
+}
+
+.mat251-experimentos-matriz-celdas > span {
+    white-space: nowrap;
+}
+
+.mat251-experimentos-matriz-celda-medida {
+    visibility: hidden;
+    pointer-events: none;
+    user-select: none;
+}
+
+.mat251-experimentos-tabla-wrap {
+    max-width: 100%;
+    max-height: 320px;
+    overflow: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 0px;
+    background: var(--bg-card);
+}
+
+.mat251-experimentos-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    color: var(--text-pure);
+    font-size: 0.8rem;
+}
+
+.mat251-experimentos-tabla th,
+.mat251-experimentos-tabla td {
+    min-width: 90px;
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.mat251-experimentos-tabla th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-input);
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable {
+    color: var(--success-color, #07865b);
+    font-weight: 700;
+}
+
+.mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable .katex {
+    color: var(--success-color, #07865b);
+}
+
+.mat251-experimentos-universo summary {
+    padding: 9px 0;
+    color: var(--text-pure);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+    .mat251-experimentos-header,
+    .mat251-experimentos-seccion-titulo {
+        align-items: flex-start;
+    }
+
+    .mat251-experimentos-condiciones-cabecera {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mat251-experimentos-condiciones-cabecera > button {
+        position: static;
+        align-self: center;
+    }
+
+    .mat251-experimentos-opciones {
+        width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .mat251-experimentos-opciones::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mat251-experimentos-opciones .btn-mat251-modo {
+        flex: 1;
+        min-width: 0;
+        padding: 6px 4px;
+        font-size: 0.72rem;
+        text-align: center;
+        white-space: normal;
+    }
+
+    .mat251-experimentos-componentes {
+        min-height: 100%;
+    }
+
+    .mat251-experimentos-lienzo {
+        height: 230px;
+    }
+
+    .mat251-experimentos-lienzo-viewport {
+        padding: 10px;
+    }
+
+    .mat251-experimentos-lienzo-viewport:not(.simple) {
+        padding: 44px 10px 10px;
+    }
+
+    .mat251-experimentos-regla {
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 5px;
+        padding: 8px;
+    }
+
+    .mat251-experimentos-regla.con-quitar {
+        padding-right: 32px;
+    }
+
+    .mat251-experimentos-regla-campo {
+        display: flex;
+        flex: 1 1 0;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        gap: 8px;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+    }
+
+    .mat251-experimentos-regla-campo > label {
+        flex: 0 0 170px;
+        width: 170px;
+        min-width: 170px;
+        max-width: 170px;
+    }
+
+    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-evaluar {
+        flex: 0 0 150px;
+        width: 150px;
+        min-width: 150px;
+        max-width: 150px;
+    }
+
+    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-operador {
+        flex: 0 0 78px;
+        width: 78px;
+        min-width: 78px;
+        max-width: 78px;
+    }
+
+    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-valor {
+        flex: 0 0 140px;
+        width: 140px;
+        min-width: 140px;
+        max-width: 140px;
+    }
+
+    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-valor.con-input {
+        flex: 0 0 72px;
+        width: 72px;
+        min-width: 72px;
+        max-width: 72px;
+    }
+
+    .mat251-experimentos-regla-campo > .mat251-experimentos-campo-suma {
+        flex: 0 0 250px;
+        width: 250px;
+        min-width: 250px;
+        max-width: 250px;
+    }
+
+    .mat251-experimentos-regla-campo::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mat251-experimentos-regla .experimentos-select-menu.flotante-movil {
+        position: fixed;
+        right: auto;
+        max-width: min(160px, calc(100vw - 16px));
+        min-width: 0;
+        box-sizing: border-box;
+        z-index: 5000;
+    }
+
+    .mat251-experimentos-regla .mat251-experimentos-label {
+        margin-bottom: 3px;
+        overflow: hidden;
+        font-size: 0.65rem;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mat251-experimentos-regla .experimentos-select-trigger {
+        min-height: 34px;
+        gap: 3px;
+        padding: 4px 4px 4px 6px;
+        font-size: 0.7rem;
+    }
+
+    .mat251-experimentos-regla .experimentos-select-menu {
+        right: auto;
+        left: 0;
+        width: max-content;
+        min-width: max(100%, min(128px, calc(100vw - 24px)));
+        max-width: min(160px, calc(100vw - 24px));
+        max-height: min(160px, 40vh);
+        box-sizing: border-box;
+    }
+
+    .mat251-experimentos-regla .experimentos-select-menu.alineado-derecha {
+        right: 0;
+        left: auto;
+    }
+
+    .mat251-experimentos-campo-operador .experimentos-select-menu {
+        width: 76px;
+        min-width: 76px;
+        max-width: min(76px, calc(100vw - 24px));
+    }
+
+    .mat251-experimentos-regla .experimentos-select-option {
+        min-height: 34px;
+        padding: 5px 8px;
+        font-size: 0.78rem;
+        line-height: 1.2;
+    }
+
+    .mat251-experimentos-regla .mat251-operador-simbolo {
+        font-size: 0.9rem;
+    }
+
+    .mat251-experimentos-regla .experimentos-select-trigger svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .mat251-experimentos-regla input {
+        min-height: 34px !important;
+        padding: 4px 6px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .mat251-experimentos-regla .mat251-experimentos-quitar {
+        align-self: flex-end;
+    }
+
+    .mat251-experimentos-metricas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mat251-experimentos-metricas > div:last-child:nth-child(odd) {
+        grid-column: span 2;
+    }
+
+    .mat251-experimentos-metricas > div > span {
+        font-size: 0.65rem;
+    }
+
+    .mat251-experimentos-acciones .button_calcular {
+        padding: 5px 15px;
+        font-size: 0.85rem;
+    }
+
+    .mat251-experimentos-metricas-sim > div > span {
+        font-size: 0.55rem;
+    }
+
+    .mat251-experimentos-sim-controles {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* ==========================================================================
+   SIMULACIÓN DEL EVENTO (LEY DE LOS GRANDES NÚMEROS) EN EXPERIMENTOS
+   ========================================================================== */
+.mat251-experimentos-simulacion {
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.mat251-experimentos-simulacion > .mat251-experimentos-resultados-titulo {
+    margin: 0;
+}
+
+.mat251-experimentos-repeticiones-control {
+    display: flex;
+    width: min(100%, 320px);
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto;
+}
+
+.mat251-experimentos-repeticiones-label {
+    flex: 0 0 auto;
+    margin: 0;
+    color: var(--text-pure);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.mat251-experimentos-repeticiones-input {
+    min-width: 0;
+    flex: 1 1 220px;
+}
+
+@media (max-width: 640px) {
+    .mat251-experimentos-repeticiones-input {
+        flex: 0 1 110px;
+        width: 110px !important;
+        max-width: 110px;
+    }
+}
+
+.mat251-experimentos-sim-controles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.mat251-experimentos-sim-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mat251-experimentos-sim-input-group input {
+    width: 130px;
+    height: 34px;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-input);
+    color: var(--text-pure);
+    font-size: 0.85rem;
+}
+
+.mat251-experimentos-chips-rapidos {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mat251-experimentos-chips-fila {
+    display: flex;
+    gap: 6px;
+}
+
+.mat251-chip-rapido {
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+    color: var(--text-pure);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mat251-chip-rapido:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.mat251-chip-rapido.activo {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #ffffff !important;
+}
+
+.mat251-experimentos-sim-btn-wrapper {
+    display: flex;
+    align-items: flex-end;
+}
+
+.mat251-experimentos-metricas-sim > div > span {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.mat251-experimentos-grafica-box {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+}
+
+.mat251-experimentos-grafica-titulo h5 {
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-grafica-contenedor {
+    width: 100%;
+    min-width: 0;
+}
+
+.mat251-experimentos-historial-wrap {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.mat251-btn-toggle-historial {
+    padding: 6px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mat251-btn-toggle-historial:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.mat251-experimentos-historial-tabla {
+    width: 100%;
+    max-height: 240px;
+}
+
+.mat251-tag-exito {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.mat251-tag-fallo {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: rgba(156, 163, 175, 0.12);
+    color: var(--text-muted);
+}
+
+.mat251-btn-sim-control {
+    height: 34px;
+    padding: 0 14px;
+    border: none !important;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.mat251-btn-sim-control:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.mat251-btn-sim-control.pausar {
+    background: #f59e0b !important;
+}
+
+.mat251-btn-sim-control.reanudar {
+    background: #10b981 !important;
+}
+
+.mat251-btn-sim-control.detener {
+    background: #ef4444 !important;
+}
+
+.mat251-sim-live-banner {
+    margin-top: 6px;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mat251-sim-live-banner.activo {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(217, 119, 6, 0.15);
+}
+
+.mat251-sim-live-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--text-pure);
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.mat251-sim-live-conteo strong {
+    color: var(--accent-color);
+    font-size: 0.95rem;
+}
+
+.mat251-sim-live-estado {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.mat251-experimentos-escenario {
+    display: grid;
+    grid-template-columns: minmax(130px, 1fr) minmax(220px, 1.6fr) minmax(130px, 1fr);
+    align-items: center;
+    gap: 16px;
+    margin: 14px 0 18px;
+}
+
+.mat251-experimentos-escenario-lateral {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-input);
+    color: var(--text-pure);
+    text-align: center;
+}
+
+.mat251-experimentos-escenario-lateral span,
+.mat251-experimentos-ensayo-etiqueta {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.mat251-experimentos-escenario-lateral strong {
+    font-size: 1.1rem;
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-ensayo {
+    display: flex;
+    min-height: 150px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-card);
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+}
+
+.mat251-experimentos-resultados-visual {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.mat251-experimentos-resultado-visual {
+    display: flex;
+    min-width: 76px;
+    min-height: 72px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    background: var(--bg-input);
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-resultado-visual span {
+    max-width: 140px;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mat251-experimentos-resultado-visual strong {
+    font-size: 1.3rem;
+    line-height: 1.1;
+}
+
+@media (max-width: 620px) {
+    .mat251-experimentos-escenario {
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+    }
+
+    .mat251-experimentos-ensayo {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+}
+
+.mat251-sim-progreso-track {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.mat251-sim-progreso-fill {
+    height: 100%;
+    background: var(--accent-color);
+    transition: width 0.15s ease-out;
+    border-radius: 3px;
+}
+
+.mat251-sim-ultimo-resultado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--text-pure);
+}
+
+.mat251-sim-ultimo-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.mat251-sim-ultimo-tupla {
+    font-size: 0.85rem;
+    color: var(--text-pure);
+    letter-spacing: 0.2px;
+}
+
+.mat251-experimentos-panel-simulacion {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    margin: 0;
+    padding: 20px;
+    border-radius: 5px;
+    background: var(--bg-card);
+}
+
+.mat251-experimentos-panel-simulacion .mat251-sim-progreso-track {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 4px;
+    border-radius: 0;
+}
+
+.mat251-experimentos-panel-simulacion .mat251-sim-progreso-fill {
+    background: var(--primary-color);
+}
+
+.mat251-experimentos-panel-superior {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 0 0 20px;
+}
+
+.mat251-experimentos-panel-superior .texto-lanzamiento-simulacion {
+    color: var(--text-pure);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.mat251-experimentos-panel-controles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.mat251-experimentos-velocidades {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-input);
+}
+
+.mat251-experimentos-velocidades .mat251-chip-rapido {
+    height: 28px;
+    min-width: 40px;
+    padding: 0 9px;
+    border: 0;
+    background: transparent;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.mat251-experimentos-velocidades .mat251-chip-rapido.activo {
+    border-color: var(--primary-color) !important;
+    background: var(--primary-color) !important;
+}
+
+.mat251-experimentos-layout-simulacion {
+    align-items: center;
+}
+
+.mat251-experimentos-layout-simulacion .tarjeta-probabilidad {
+    width: 100%;
+    padding: 15px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-input);
+    text-align: center;
+}
+
+.mat251-experimentos-layout-simulacion .tarjeta-prob-titulo {
+    margin: 0;
+    color: var(--text-pure);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.mat251-experimentos-layout-simulacion .tarjeta-prob-valor {
+    margin-top: 5px;
+    color: var(--text-pure);
+    font-size: 1.1rem;
+}
+
+.mat251-experimentos-ensayo-centro {
+    min-height: 100px;
+    justify-content: center;
+}
+
+.mat251-experimentos-ensayo-centro .mat251-experimentos-resultados-visual {
+    max-width: 100%;
+    align-items: center;
+}
+
+.mat251-experimentos-resultado-dinamico {
+    display: flex;
+    min-width: 70px;
+    max-width: 180px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--text-pure);
+    text-align: center;
+}
+
+.mat251-experimentos-resultado-dinamico span {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mat251-experimentos-resultado-dinamico strong {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--text-pure);
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+}
+
+.mat251-experimentos-exitos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.mat251-experimentos-exitos .texto-resultado-simulacion {
+    color: var(--text-pure);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.mat251-experimentos-resultado-linea {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-pure);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.mat251-experimentos-ultima-simulacion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%;
+    min-width: 0;
+}
+
+.mat251-experimentos-resumen-resultado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+}
+
+.mat251-experimentos-resumen-etiqueta {
+    color: var(--text-muted);
+    font-size: 0.88em;
+    font-weight: 700;
+}
+
+.mat251-experimentos-resumen-valores {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.mat251-experimentos-resumen-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 4px 9px;
+    color: var(--text-pure);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 0.88em;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.mat251-experimentos-resumen-nombre {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.mat251-experimentos-resumen-item strong {
+    color: var(--text-pure);
+    font-weight: 800;
+}
+
+.mat251-experimentos-resultado-ensayo {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.mat251-experimentos-valores-lanzamiento {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 80px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.mat251-experimentos-resultado-ensayo-nombre {
+    color: var(--text-muted);
+}
+
+.mat251-experimentos-resultado-ensayo-valor {
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-resultado-ensayo.es-favorable {
+    background: color-mix(in srgb, var(--success-color, #07865b) 12%, transparent);
+    border-color: color-mix(in srgb, var(--success-color, #07865b) 45%, var(--border-color));
+}
+
+.mat251-experimentos-resultado-ensayo.es-favorable .mat251-experimentos-resultado-ensayo-nombre,
+.mat251-experimentos-resultado-ensayo.es-favorable .mat251-experimentos-resultado-ensayo-valor {
+    color: var(--success-color, #07865b);
+}
+
+.mat251-experimentos-resumen-estado {
+    padding: 4px 9px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.mat251-experimentos-resumen-estado.es-favorable {
+    color: var(--success-color, #07865b);
+    background: color-mix(in srgb, var(--success-color, #07865b) 12%, transparent);
+}
+
+.mat251-experimentos-resumen-estado.no-favorable {
+    color: var(--text-muted);
+    background: var(--bg-input);
+}
+
+.mat251-experimentos-exitos .titulo-exitos-simulacion {
+    margin: 0;
+    color: var(--text-pure);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.mat251-experimentos-exitos .valor-exitos-simulacion {
+    margin-top: 5px;
+    color: var(--text-pure);
+    font-size: 1.3rem;
+    font-weight: 400;
+}
+
+.mat251-experimentos-metricas-clasicas .titulo-metrica-empirica,
+.mat251-experimentos-metricas-clasicas .valor-metrica-empirica {
+    color: var(--text-pure);
+}
+
+.mat251-experimentos-tabla-simulacion {
+    margin-top: 15px;
+}
+
+.mat251-experimentos-tabla-simulacion .mat251-experimentos-tabla-wrap {
+    max-height: 400px;
+    border-radius: 5px;
+}
+
+.mat251-experimentos-tabla-completa tbody tr {
+    background: var(--bg-card) !important;
+    color: var(--text-pure) !important;
+}
+
+.mat251-experimentos-tabla-completa tbody tr:nth-child(odd) {
+    background: var(--bg-input) !important;
+}
+
+.mat251-experimentos-tabla-completa tbody tr > td {
+    background: transparent !important;
+    color: var(--text-pure) !important;
+}
+
+html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable {
+    color: #6ee7b7;
+}
+
+html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable .katex {
+    color: #6ee7b7;
+}
+
+.mat251-experimentos-tabla-completa tbody tr > td.mat251-tabla-exito {
+    color: #10b981 !important;
+    font-weight: 700;
+}
+
+.mat251-experimentos-tabla-completa tbody tr > td.mat251-tabla-no-exito {
+    color: var(--text-muted) !important;
+}
+
+.mat251-experimentos-botones-tabla {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.mat251-experimentos-botones-tabla button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 5px 20px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .mat251-experimentos-simulacion .contenedor-simulacion-clasica {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 8px;
+        row-gap: 12px;
+        align-items: center;
+    }
+
+    .mat251-experimentos-simulacion .col-simulacion-lateral {
+        width: 100%;
+        min-width: 0;
+        align-items: stretch !important;
+    }
+
+    .mat251-experimentos-simulacion .col-simulacion-lateral:not(.right-side) {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .mat251-experimentos-simulacion .col-simulacion-lateral.right-side {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .mat251-experimentos-simulacion .col-simulacion-centro {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        min-width: 0;
+        flex-grow: 0;
+        align-items: center;
+    }
+
+    .contenedor-simulacion-clasica .col-simulacion-centro {
+        min-width: 0;
+    }
+
+    .mat251-experimentos-ultima-simulacion,
+    .mat251-experimentos-resumen-resultado {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .mat251-experimentos-resumen-resultado {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .mat251-experimentos-resumen-valores {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        flex-wrap: nowrap;
+        justify-content: safe center;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 5px;
+        box-sizing: border-box;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-color) transparent;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+    }
+
+    .mat251-experimentos-resumen-valores::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .mat251-experimentos-resumen-valores::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .mat251-experimentos-resumen-valores::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 999px;
+    }
+
+    .mat251-experimentos-resumen-item {
+        flex: 0 0 auto;
+    }
+
+    .mat251-experimentos-valores-lanzamiento {
+        flex-wrap: nowrap;
+        justify-content: safe center;
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-width: 100%;
+        padding: 0 2px;
+        box-sizing: border-box;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-color) transparent;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+    }
+
+    .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 999px;
+    }
+
+    .mat251-experimentos-valores-lanzamiento > .mat251-experimentos-resultado-ensayo {
+        flex: 0 0 auto;
+    }
+
+    .mat251-experimentos-resultado-ensayo-nombre {
+        white-space: nowrap;
+    }
+
+    .mat251-experimentos-panel-simulacion {
+        padding: 16px 10px;
+    }
+
+    .mat251-experimentos-panel-controles {
+        gap: 7px;
+    }
+
+    .mat251-experimentos-layout-simulacion {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .mat251-experimentos-layout-simulacion .col-simulacion-centro {
+        order: -1;
+        flex-basis: 100%;
+    }
+
+    .mat251-experimentos-layout-simulacion .col-simulacion-lateral {
+        width: calc(50% - 5px);
+    }
+
+    .mat251-experimentos-tabla-completa th,
+    .mat251-experimentos-tabla-completa td {
+        min-width: 110px;
+        padding: 8px 6px;
+    }
+}
+
+@media (max-width: 640px) {
+    .mat251-experimentos-valores-lanzamiento {
+        min-height: 70px;
+        gap: 8px;
+    }
+
+    .mat251-experimentos-valores-lanzamiento > .mat251-experimentos-resultado-ensayo {
+        min-width: 58px !important;
+        padding: 6px !important;
+    }
+
+    .mat251-experimentos-resultado-ensayo-nombre {
+        margin-bottom: 3px !important;
+        font-size: 0.62rem !important;
+    }
+
+    .mat251-experimentos-resultado-ensayo-valor {
+        font-size: 1.1rem !important;
+    }
+}
+
+
+

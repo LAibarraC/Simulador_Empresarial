@@ -13,7 +13,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
     const [n, setN] = useState('');
     const [n1Rachas, setN1Rachas] = useState('');
     const [n2Rachas, setN2Rachas] = useState('');
-    const [numSimsText, setNumSimsText] = useState('10');
+    const [numSimsText, setNumSimsText] = useState('');
 
     // Chi-cuadrada
     const [subTipoChi, setSubTipoChi] = useState('bondad');
@@ -376,30 +376,69 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
         </div>
     );
 
-    return (
-        <div style={cardStyle}>
-            <p style={{ fontSize: FS.sm, marginBottom: '15px', color: 'var(--text-pure)' }}>
-                Genere múltiples muestras aleatorias para observar la tasa de rechazo de la hipótesis nula:
-            </p>
+    const ayudaSimulacion = (
+        <div className="tema5-simulacion-ayuda" style={{ top: '5px', right: '5px' }}>
+            <button
+                type="button"
+                className="tema5-simulacion-ayuda-boton btn-mat251-ayuda-hipotesis"
+                id="tema6-ayuda-hipotesis-no-parametrica"
+                aria-label="Ayuda sobre la simulación de pruebas no paramétricas"
+                aria-describedby="tema6-ayuda-hipotesis-no-parametrica-contenido"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M9.6 9a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.8" />
+                    <path d="M12 17h.01" />
+                </svg>
+            </button>
+            <div id="tema6-ayuda-hipotesis-no-parametrica-contenido" className="tema5-simulacion-ayuda-panel" role="tooltip">
+                <strong>Simulación de pruebas no paramétricas</strong>
+                <p>Repite la prueba con muestras aleatorias para observar sus resultados.</p>
+                <ul>
+                    <li>Configura el tamaño de muestra y la cantidad de simulaciones para la prueba seleccionada.</li>
+                    <li>En cada repetición se calcula el estadístico y su p-valor, y se decide si se rechaza o se acepta {renderKatex('\\mathbf{H}_0')} con el nivel {renderKatex('\\boldsymbol{\\alpha}')} elegido.</li>
+                    <li>Consulta la distribución, el histograma y el historial; puedes guardar o descargar los resultados.</li>
+                </ul>
+            </div>
+        </div>
+    );
 
-            {prueba === 'signos' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px', maxWidth: '600px', margin: '0 auto' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('n:')}</label>
-                            <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={n} onChange={e => setN(e.target.value)} min="2" placeholder="Tamaño de muestra" />
-                        </div>
+    return (
+        <div style={{ ...cardStyle, ...(prueba === 'chi_cuadrada' || prueba === 'signos' || prueba === 'rachas' ? { padding: 0, border: 'none' } : {}) }}>
+
+            {prueba === 'signos' || prueba === 'rachas' ? (
+                <>
+                    <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: prueba === 'rachas' ? '15px 10px' : '15px', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative', marginBottom: '20px' }}>
+                        {ayudaSimulacion}
+                        <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '15px', color: 'var(--text-pure)', textAlign: 'center' }}>PARÁMETROS DE SIMULACIÓN</div>
+                        {prueba === 'signos' ? (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('\\boldsymbol{n}:')}</label>
+                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: '0 1 50%', minWidth: 0 }} value={n} onChange={e => setN(e.target.value)} min="2" placeholder="Tamaño de muestra" />
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '15px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap' }}>{renderKatex('\\boldsymbol{n_1}:')}</label>
+                                    <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: 0 }} value={n1Rachas} onChange={e => setN1Rachas(e.target.value)} min="1" placeholder="Símbolo 1" />
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap' }}>{renderKatex('\\boldsymbol{n_2}:')}</label>
+                                    <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: 0 }} value={n2Rachas} onChange={e => setN2Rachas(e.target.value)} min="1" placeholder="Símbolo 2" />
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '15px', marginBottom: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('\\alpha:')}</label>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
                             <div style={{ flex: 1 }}>
                                 {alphaSelector}
                             </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('H_1:')}</label>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('\\boldsymbol{H_1}:')}</label>
                             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
                                 {['bilateral', 'derecha', 'izquierda'].map(tipo => {
                                     const isSelected = tipoPrueba === tipo;
@@ -413,7 +452,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                                                 border: `1px solid ${isSelected ? 'var(--accent-color)' : 'var(--border-color, #cbd5e1)'}`,
                                                 borderRadius: RADIUS || '4px',
                                                 background: isSelected ? 'var(--accent-color)' : 'var(--bg-input, #fff)',
-                                                color: isSelected ? '#fff' : 'var(--text-main)',
+                                                color: isSelected ? '#fff' : 'var(--text-pure)',
                                                 boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
                                                 transition: 'all 0.2s',
                                                 display: 'flex', justifyContent: 'center', alignItems: 'center',
@@ -427,61 +466,59 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                             </div>
                         </div>
                     </div>
-                    
+
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right', fontWeight: 'bold' }}>Simulaciones:</label>
-                            <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={numSimsText} onChange={e => setNumSimsText(e.target.value)} min="1" max="10000" placeholder="10000" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{N}:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" style={{ flex: '0 1 50%', minWidth: 0 }} value={numSimsText} onChange={e => setNumSimsText(e.target.value)} min="1" max="10000" placeholder="Número de simulaciones" />
                         </div>
                     </div>
-                </div>
+                </>
             ) : (
                 <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '15px', borderRadius: '8px' }}>
-                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '15px', color: 'var(--text-pure)' }}>PARÁMETROS DE SIMULACIÓN</div>
+                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '15px', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
+                    {prueba === 'chi_cuadrada' && ayudaSimulacion}
+                    <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '15px', color: 'var(--text-pure)', textAlign: prueba === 'chi_cuadrada' ? 'center' : 'left' }}>PARÁMETROS DE SIMULACIÓN</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                         {prueba === 'chi_cuadrada' && subTipoChi === 'bondad' && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>{renderKatex('k:')}</label>
-                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={k} onChange={e => setK(e.target.value)} placeholder="Número de categorías" min="2" />
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>{renderKatex('\\boldsymbol{k}:')}</label>
+                                <input type="number" className="input-mat251 placeholder-small" style={{ flex: '0 1 50%', minWidth: 0 }} value={k} onChange={e => setK(e.target.value)} placeholder="Número de categorías" min="2" />
                             </div>
                         )}
                         {prueba === 'chi_cuadrada' && subTipoChi === 'independencia' && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>{renderKatex('f \\times c:')}</label>
-                                <div style={{ display: 'flex', gap: '5px', flex: 1, alignItems: 'center' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap' }}>{renderKatex('\\boldsymbol{F}:')}</label>
                                     <input type="number" className="input-mat251 placeholder-small" value={filasSim} onChange={e => setFilasSim(e.target.value)} placeholder="Filas" style={{ flex: 1, minWidth: '0' }} min="2" />
-                                    <span style={{color: 'var(--text-muted)'}}>{renderKatex('\\times')}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap' }}>{renderKatex('\\boldsymbol{C}:')}</label>
                                     <input type="number" className="input-mat251 placeholder-small" value={colsSim} onChange={e => setColsSim(e.target.value)} placeholder="Columnas" style={{ flex: 1, minWidth: '0' }} min="2" />
                                 </div>
                             </div>
                         )}
 
                         {prueba === 'rachas' && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('n_1:')}</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', alignItems: 'center', gap: '15px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('\\boldsymbol{n_1}:')}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: '0' }} value={n1Rachas} onChange={e => setN1Rachas(e.target.value)} min="1" placeholder="Símbolo 1" />
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('n_2:')}</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('\\boldsymbol{n_2}:')}</label>
                                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1, minWidth: '0' }} value={n2Rachas} onChange={e => setN2Rachas(e.target.value)} min="1" placeholder="Símbolo 2" />
                                 </div>
-                            </div>
-                        )}
-                        {prueba === 'chi_cuadrada' && (
-                            <div style={{ fontSize: FS.sm, color: 'var(--text-muted)' }}>
-                                Se generarán frecuencias aleatorias distribuidas uniformemente.
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+            <div className="hnp-simulacion-campos-configuracion" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('\\alpha:')}</label>
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
                     <div style={{ flex: 1 }}>
                         {alphaSelector}
                     </div>
@@ -539,7 +576,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
 
                 {prueba === 'rachas' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('H_1:')}</label>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('\\boldsymbol{H_1}:')}</label>
                         <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
                             {['bilateral', 'derecha', 'izquierda'].map(tipo => {
                                 const isSelected = tipoPrueba === tipo;
@@ -553,7 +590,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                                             border: `1px solid ${isSelected ? 'var(--accent-color)' : 'var(--border-color, #cbd5e1)'}`,
                                             borderRadius: RADIUS || '4px',
                                             background: isSelected ? 'var(--accent-color)' : 'var(--bg-input, #fff)',
-                                            color: isSelected ? '#fff' : 'var(--text-main)',
+                                            color: isSelected ? '#fff' : 'var(--text-pure)',
                                             boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
                                             transition: 'all 0.2s',
                                             display: 'flex', justifyContent: 'center', alignItems: 'center',
@@ -569,16 +606,16 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                 )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+            <div className="hnp-simulacion-campos-muestra" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                 {prueba !== 'rachas' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('n:')}</label>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{n}:')}</label>
                         <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={n} onChange={e => setN(e.target.value)} min="2" placeholder="Tamaño de muestra" />
                     </div>
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right', fontWeight: 'bold' }}>Simulaciones:</label>
-                    <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={numSimsText} onChange={e => setNumSimsText(e.target.value)} min="1" max="10000" placeholder="Nº Simulaciones" />
+                    <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>{renderKatex('\\boldsymbol{N}:')}</label>
+                    <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={numSimsText} onChange={e => setNumSimsText(e.target.value)} min="1" max="10000" placeholder="Número de simulaciones" />
                 </div>
             </div>
             </>

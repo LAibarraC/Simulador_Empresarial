@@ -4,6 +4,7 @@ import 'katex/dist/katex.min.css';
 import { cardStyle, FONT } from '../../../Principal/Constantes';
 import { jStat } from 'jstat';
 import Grafico_HP from '../../../Graficas/Tema_6/Grafico_HP';
+import StatLabel from '../../../ui/StatLabel';
 
 export default function Resultados_HP_Matriz({ resultados, prueba }) {
     if (!resultados) return null;
@@ -23,6 +24,11 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
     
     const confLevel = c ? Math.round((1 - c.alpha) * 100) : 95;
     let icLabel = `IC de ${confLevel}%`;
+    const icFormula = prueba === 'media_z'
+        ? c?.tipoPrueba === 'bilateral' ? `\\bar{x} \\pm z_{\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}` : c?.tipoPrueba === 'derecha' ? `\\left[\\bar{x} - z_{\\alpha} \\frac{\\sigma}{\\sqrt{n}}, \\, \\infty\\right)` : `\\left(-\\infty, \\, \\bar{x} + z_{\\alpha} \\frac{\\sigma}{\\sqrt{n}}\\right]`
+        : prueba === 'media_t'
+            ? c?.tipoPrueba === 'bilateral' ? `\\bar{x} \\pm t_{\\alpha/2,\\,n-1} \\frac{s}{\\sqrt{n}}` : c?.tipoPrueba === 'derecha' ? `\\left[\\bar{x} - t_{\\alpha,\\,n-1} \\frac{s}{\\sqrt{n}}, \\, \\infty\\right)` : `\\left(-\\infty, \\, \\bar{x} + t_{\\alpha,\\,n-1} \\frac{s}{\\sqrt{n}}\\right]`
+            : prueba === 'proporcion' ? `\\hat{p} \\pm z_{\\alpha/2} \\sqrt{\\frac{\\hat{p}(1-\\hat{p})}{n}}` : '';
 
     if (c) {
         if (c.tipoPrueba === 'derecha') icLabel = `Límite inferior de ${confLevel}%`;
@@ -94,8 +100,7 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
 
     return (
         <div style={{width: '100%' }}>
-            <h4 style={{ margin: '0 0 15px 0', color: 'var(--text-main, #1e293b)' }}>Resultados:</h4>
-            
+
             {/* PLANTEAMIENTO DE HIPÓTESIS */}
             {c && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px', fontSize: '0.9rem', fontFamily: FONT, color: 'var(--text-pure)' }}>
@@ -111,7 +116,7 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
 
             {/* TABLA ESTILO MINITAB */}
             {c && (
-                <div style={{ marginBottom: '20px', border: '1px solid var(--text-pure)', borderRadius: '4px', fontFamily: FONT, fontSize: '0.9rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
+                <div className="tema5-tabla-resolucion-scroll" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '20px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.9rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
                     <style>{`
                         .minitab-table {
                             width: 100%;
@@ -145,13 +150,34 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
                         /* Media query para móviles: reduce la fuente y el padding para que quepa */
                         @media (max-width: 650px) {
                             .minitab-table {
-                                font-size: 0.70rem;
+                                font-size: 0.75rem;
                             }
                             .minitab-table th, .minitab-table td {
                                 padding: 4px 2px;
                             }
+                            .minitab-table thead tr:first-child th {
+                                font-size: 0.9rem !important;
+                            }
+                            .minitab-table thead tr:last-child th,
+                            .minitab-table tbody td {
+                                font-size: 0.83rem !important;
+                            }
+                            .minitab-table .katex {
+                                font-size: 0.9em !important;
+                            }
                             .minitab-table col {
                                 width: auto !important;
+                            }
+                            .resumen-estadistico-table th,
+                            .resumen-estadistico-table td,
+                            .decision-estadistica-table th,
+                            .decision-estadistica-table td {
+                                padding: 6px 4px !important;
+                                font-size: 0.77rem !important;
+                            }
+                            .resumen-estadistico-table .katex,
+                            .decision-estadistica-table .katex {
+                                font-size: 0.9em !important;
                             }
                             .hide-on-mobile {
                                 display: none !important;
@@ -223,21 +249,23 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
                                     </th>
                                 </tr>
                             )}
-                            <tr style={{ background: 'var(--bg-input)' }}>
-                                <th>{renderKatex('n')}</th>
-                                {(prueba === 'media_z' || prueba === 'media_t') && <th>Media ({renderKatex('\\bar{x}')})</th>}
-                                {prueba === 'proporcion' && <th>Evento ({renderKatex('x')})</th>}
-                                {prueba === 'proporcion' && <th>Muestra p ({renderKatex('\\hat{p}')})</th>}
-                                {prueba === 'varianza' && <th>Varianza Muestral ({renderKatex('S^2')})</th>}
-                                {prueba === 'varianza' && <th>Grados de Libertad</th>}
-                                {eeDisplay !== null && <th style={{ whiteSpace: 'nowrap' }}>Error Estándar{prueba === 'proporcion' ? '' : ' de la media'}</th>}
-                                {icDisplay !== null && <th>{icLabel}</th>}
-                                <th>{renderKatex(prueba === 'media_t' ? 'T_c' : prueba === 'varianza' ? '\\chi_c^2' : 'Z_c')}</th>
-                                <th>{renderKatex('P')}</th>
+                            <tr style={{ background: 'var(--bg-input)', fontSize: '0.8rem' }}>
+                                <th><StatLabel formulaKey="n_muestra" formulaLatex="n" align="center" position="top" /></th>
+                                {(prueba === 'media_z' || prueba === 'media_t') && <th><StatLabel formulaKey="x_barra_observada" formulaLatex={'\\bar{x}'} align="center" position="top" customTexto="Media aritmética observada en la muestra" /></th>}
+                                {prueba === 'proporcion' && <th><StatLabel formulaKey="conteo_eventos" formulaLatex="x" align="center" position="top" /></th>}
+                                {prueba === 'proporcion' && <th><StatLabel formulaKey="proporcion_muestral" formulaLatex={'\\hat{p}'} align="center" position="top" /></th>}
+                                {prueba === 'varianza' && <th><StatLabel formulaKey="varianza_muestral" formulaLatex="S^2" align="center" position="top" /></th>}
+                                {prueba === 'varianza' && <th><StatLabel formulaKey="grados_libertad" formulaLatex="n - 1" align="center" position="top" /></th>}
+                                {eeDisplay !== null && <th style={{ whiteSpace: 'nowrap' }}><StatLabel formulaKey={prueba === 'proporcion' ? 'error_estandar_proporcion' : 'error_estandar_media'} formulaLatex={prueba === 'proporcion' ? 'EE_{\\hat{p}}' : 'EE_{\\bar{x}}'} align="center" position="top" customTexto={`Error estándar${prueba === 'proporcion' ? ' de la proporción muestral' : ' de la media muestral'}`} /></th>}
+                                {icDisplay !== null && <th>{prueba === 'varianza' ? (
+                                    <StatLabel formulaKey="IC_varianza" labelText={icLabel} align="center" position="top" customTexto={`Intervalo de confianza ${c.tipoPrueba === 'bilateral' ? 'bilateral' : 'unilateral'} para la varianza poblacional`} customMath={c.tipoPrueba === 'bilateral' ? `\\left[\\frac{(n-1)S^2}{\\chi^2_{1-\\alpha/2,\\,n-1}},\\;\\frac{(n-1)S^2}{\\chi^2_{\\alpha/2,\\,n-1}}\\right]` : c.tipoPrueba === 'derecha' ? `\\left[\\frac{(n-1)S^2}{\\chi^2_{1-\\alpha,\\,n-1}},\\;\\infty\\right)` : `\\left(0,\\;\\frac{(n-1)S^2}{\\chi^2_{\\alpha,\\,n-1}}\\right]`} />
+                                ) : <StatLabel formulaKey={prueba === 'proporcion' ? 'IC_proporcion' : 'IC_media'} labelText={icLabel} align="center" position="top" customTexto={`Intervalo de confianza ${c.tipoPrueba === 'bilateral' ? 'bilateral' : 'unilateral'} del ${confLevel}%`} customMath={icFormula} />}</th>}
+                                <th><StatLabel formulaKey="estadistico_prueba" formulaLatex={prueba === 'media_t' ? 'T_c' : prueba === 'varianza' ? '\\chi_c^2' : 'Z_c'} align="center" position="top" customTexto="Estadístico de prueba calculado a partir de la muestra" /></th>
+                                <th><StatLabel formulaKey="p_valor" formulaLatex="P" align="center" position="top" /></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr style={{ fontSize: '0.95rem' }}>
                                 <td>{renderKatex(c.n != null ? c.n.toString() : '')}</td>
                                 {(prueba === 'media_z' || prueba === 'media_t') && <td>{renderKatex(c.x_bar?.toFixed(3) || '')}</td>}
                                 {prueba === 'proporcion' && <td>{renderKatex(c.x != null ? c.x.toString() : '')}</td>}
@@ -261,52 +289,58 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '15px' }}>
-                <div style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.9em', color: 'var(--text-pure)', fontWeight: 'bold' }}>Estadístico de Prueba</div>
-                    <div style={{ fontSize: '0.95em', fontWeight: 'bold', marginTop: '5px' }}>
-                        {prueba === 'media_z' || prueba === 'proporcion' ? renderKatex(`Z_c = ${resultados.estadistico.toFixed(3)}`) :
-                         prueba === 'media_t' ? renderKatex(`T_c = ${resultados.estadistico.toFixed(3)}`) :
-                         renderKatex(`\\chi^2_c = ${resultados.estadistico.toFixed(3)}`)}
-                    </div>
-                </div>
-
-                <div style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.9em', color: 'var(--text-pure)', fontWeight: 'bold' }}>Valor Crítico</div>
-                    <div style={{ fontSize: '0.95em', fontWeight: 'bold', marginTop: '5px' }}>
-                        {resultados.valorCritico.zAlpha2 && renderKatex(`Z_{\\alpha/2} = \\pm ${Math.abs(resultados.valorCritico.zAlpha2).toFixed(3)}`)}
-                        {resultados.valorCritico.zAlpha && renderKatex(`Z_\\alpha = ${resultados.valorCritico.zAlpha.toFixed(3)}`)}
-                        {resultados.valorCritico.tAlpha2 && renderKatex(`t_{\\alpha/2} = \\pm ${Math.abs(resultados.valorCritico.tAlpha2).toFixed(3)}`)}
-                        {resultados.valorCritico.tAlpha && renderKatex(`t_\\alpha = ${resultados.valorCritico.tAlpha.toFixed(3)}`)}
-                        {resultados.valorCritico.chiInf && resultados.valorCritico.chiSup && renderKatex(`\\chi^2_{inf} = ${resultados.valorCritico.chiInf.toFixed(3)}, \\chi^2_{sup} = ${resultados.valorCritico.chiSup.toFixed(3)}`)}
-                        {resultados.valorCritico.chiInf && !resultados.valorCritico.chiSup && renderKatex(`\\chi^2_\\alpha = ${resultados.valorCritico.chiInf.toFixed(3)}`)}
-                        {resultados.valorCritico.chiSup && !resultados.valorCritico.chiInf && renderKatex(`\\chi^2_\\alpha = ${resultados.valorCritico.chiSup.toFixed(3)}`)}
-                    </div>
-                </div>
-
-                <div style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: '8px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-pure)', fontWeight: 'bold' }}>P-Valor</div>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 'bold', marginTop: '5px' }}>
-                        {renderKatex(resultados.pValor.toFixed(4))}
-                    </div>
-                </div>
-                
-
+            <div style={{ width: 'fit-content', maxWidth: '100%', overflowX: 'auto', margin: '0 auto 15px auto' }}>
+                <table className="resumen-estadistico-table" style={{ width: 'fit-content', maxWidth: '100%', borderCollapse: 'collapse', border: '1px solid var(--text-pure)', borderRadius: '0px', color: 'var(--text-pure)', textAlign: 'center', fontFamily: FONT, fontSize: '0.9rem' }}>
+                    <tbody>
+                        <tr style={{ background: 'var(--bg-input)', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                            <th style={{ padding: '8px', border: '1px solid var(--text-pure)' }}>Estadístico de Prueba</th>
+                            <th style={{ padding: '8px', border: '1px solid var(--text-pure)' }}>Valor Crítico</th>
+                            <th style={{ padding: '8px', border: '1px solid var(--text-pure)' }}>p-Valor</th>
+                        </tr>
+                        <tr style={{ fontSize: '0.95rem' }}>
+                            <td style={{ padding: '8px', border: '1px solid var(--text-pure)' }}>
+                                {prueba === 'media_z' || prueba === 'proporcion' ? renderKatex(`Z_c = ${resultados.estadistico.toFixed(3)}`) :
+                                 prueba === 'media_t' ? renderKatex(`T_c = ${resultados.estadistico.toFixed(3)}`) :
+                                 renderKatex(`\\chi^2_c = ${resultados.estadistico.toFixed(3)}`)}
+                            </td>
+                            <td style={{ padding: '8px', border: '1px solid var(--text-pure)' }}>
+                                {resultados.valorCritico.zAlpha2 && renderKatex(`Z_{\\alpha/2} = \\pm ${Math.abs(resultados.valorCritico.zAlpha2).toFixed(3)}`)}
+                                {resultados.valorCritico.zAlpha && renderKatex(`Z_\\alpha = ${resultados.valorCritico.zAlpha.toFixed(3)}`)}
+                                {resultados.valorCritico.tAlpha2 && renderKatex(`t_{\\alpha/2} = \\pm ${Math.abs(resultados.valorCritico.tAlpha2).toFixed(3)}`)}
+                                {resultados.valorCritico.tAlpha && renderKatex(`t_\\alpha = ${resultados.valorCritico.tAlpha.toFixed(3)}`)}
+                                {resultados.valorCritico.chiInf && resultados.valorCritico.chiSup && renderKatex(`\\chi^2_{inf} = ${resultados.valorCritico.chiInf.toFixed(3)}, \\chi^2_{sup} = ${resultados.valorCritico.chiSup.toFixed(3)}`)}
+                                {resultados.valorCritico.chiInf && !resultados.valorCritico.chiSup && renderKatex(`\\chi^2_\\alpha = ${resultados.valorCritico.chiInf.toFixed(3)}`)}
+                                {resultados.valorCritico.chiSup && !resultados.valorCritico.chiInf && renderKatex(`\\chi^2_\\alpha = ${resultados.valorCritico.chiSup.toFixed(3)}`)}
+                            </td>
+                            <td style={{ padding: '8px', border: '1px solid var(--text-pure)' }}>{renderKatex(resultados.pValor.toFixed(4))}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div style={{ padding: '10px 15px', background: isRechazo ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', border: `2px solid ${decisionColor}`, borderRadius: '12px', textAlign: 'center', minWidth: '250px' }}>
-                    <div style={{ fontSize: '0.9em', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-pure)' }}>Decisión Estadística</div>
-                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: decisionColor, marginTop: '8px', display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '5px' }}>
-                        {isRechazo ? <span>Rechazar</span> : <span>No rechazar</span>} {renderKatex('H_0')}
-                    </div>
-                    <div style={{ fontSize: '0.7em', marginTop: '8px', color: 'var(--text-pure)' }}>
-                        Región de Rechazo: {renderKatex(resultados.regionRechazo)}
-                    </div>
-                    <div style={{ fontSize: '0.7em', marginTop: '4px', color: 'var(--text-pure)' }}>
-                        Justificación: Como {renderKatex(resultados.criterioRechazoMath)}, el estadístico {isRechazo ? 'cae en la región de rechazo.' : 'NO cae en la región de rechazo.'}
-                    </div>
-                </div>
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+                <table className="decision-estadistica-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--text-pure)', borderRadius: '0px', background: 'var(--bg-card)', color: 'var(--text-pure)', textAlign: 'center', fontSize: '0.8rem' }}>
+                    <tbody>
+                        <tr>
+                            <th style={{ padding: '8px', borderBottom: '1px solid var(--text-pure)', fontSize: '0.9em', textTransform: 'uppercase', letterSpacing: '1px' }} colSpan={2}>Decisión Estadística</th>
+                        </tr>
+                        <tr>
+                            <td style={{ padding: '8px', borderBottom: '1px solid var(--text-pure)', fontWeight: 'bold', color: decisionColor }} colSpan={2}>
+                                {isRechazo ? <span>Rechazar</span> : <span>Aceptar</span>} {renderKatex('H_0')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style={{ padding: '8px', borderRight: '1px solid var(--text-pure)' }}>Región de rechazo</th>
+                            <td style={{ padding: '8px' }}>{renderKatex(resultados.regionRechazo)}</td>
+                        </tr>
+                        <tr>
+                            <th style={{ padding: '8px', borderTop: '1px solid var(--text-pure)', borderRight: '1px solid var(--text-pure)' }}>Justificación</th>
+                            <td style={{ padding: '8px', borderTop: '1px solid var(--text-pure)' }}>
+                                Como {renderKatex(resultados.criterioRechazoMath)}, el estadístico {isRechazo ? 'cae en la región de rechazo.' : 'no cae en la región de rechazo.'}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     );

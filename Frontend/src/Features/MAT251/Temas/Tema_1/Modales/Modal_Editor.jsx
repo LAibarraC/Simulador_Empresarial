@@ -75,9 +75,8 @@ export default function ModalEditor({ modalEditor, setModalEditor, filasTemp, se
 
     // Ajuste dinámico de ancho: si hay más de 2 columnas (matriz), expandimos hasta 900px
     const anchoModal = columns.length > 2 ? `${Math.min(950, 120 + columns.length * 180)}px` : '480px';
-
     return (
-        <div style={overlayStyle} onClick={() => setModalEditor(false)}>
+        <div style={{ ...overlayStyle, zIndex: 1000000 }} onClick={() => setModalEditor(false)}>
             <div style={{ ...modalBoxStyle, maxWidth: anchoModal, width: '90vw', padding: '30px', transition: 'max-width 0.3s ease', border: '1px solid var(--border-color)', borderRadius: RADIUS }} onClick={(e) => e.stopPropagation()}>
                 <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                     <h3 style={{ margin: '0 0 5px', fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-pure)', marginBottom: '10px' }}>
@@ -95,14 +94,18 @@ export default function ModalEditor({ modalEditor, setModalEditor, filasTemp, se
 
                 <p style={{ color: 'var(--text-muted)', fontSize: FS.xs, textAlign: 'center', marginBottom: '15px', lineHeight: '1.4', fontFamily: FONT }}>
                     Ingresa los datos manualmente o edita los existentes.<br />
-                    <span style={{ color: 'var(--primary-pure)', fontWeight: 'bold' }}>Doble clic</span> para editar una celda.
+                    <span style={{ color: 'var(--primary-pure)', fontWeight: 'bold' }}>Doble clic</span> para editar una celda; haz clic en un encabezado para cambiar su nombre.
                 </p>
 
                 <div 
+                    className="modal-editor-tabla"
                     onPaste={handlePaste}
-                    style={{ height: columns.length > 2 ? '450px' : '380px', border: '1px solid var(--border-color)', borderRadius: RADIUS, overflow: 'hidden', marginBottom: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
+                    style={{ height: columns.length > 2 ? '450px' : '380px', border: '1px solid var(--border-color)', borderRadius: '0px', overflow: 'hidden', marginBottom: '20px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
                 >
                     <style>{`
+                        .modal-editor-tabla .rdg {
+                            border-radius: 0 !important;
+                        }
                         .rdg-header-row .rdg-cell,
                         .rdg-header-row .rdg-cell * {
                             color: var(--text-pure) !important;

@@ -7,6 +7,10 @@ import Grafico_HNP_SimulacionRachasZ from '../../../Graficas/Tema_6/Grafico_HNP_
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { jStat } from 'jstat';
+import * as XLSX from 'xlsx';
+import { api } from '../../../../../services/api';
+import { alerta } from '../../../../../utils/Notificaciones';
+import { IconoGuardar, Descargar } from '../../../../../ui/iconos';
 
 export default function Resultados_HNP_Simulacion({ resultados }) {
     const [pagina, setPagina] = useState(1);
@@ -150,6 +154,72 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
         return val;
     };
 
+    const getExcelRows = () => resultados.historial.map((sim) => {
+        const row = { 'Simulación': sim.iteracion };
+
+        if (sim.matrizNum) {
+            sim.matrizNum.forEach((fila, i) => fila.forEach((frecuencia, j) => {
+                row[`F${i + 1}C${j + 1}`] = frecuencia;
+            }));
+        } else if (sim.observadas) {
+            sim.observadas.forEach((frecuencia, i) => {
+                row[`Frecuencia ${i + 1}`] = frecuencia;
+            });
+        }
+
+        if (resultados.tipo === 'signos') {
+            row['Signos positivos'] = sim.signosPositivos;
+            row['Signos negativos'] = sim.signosNegativos;
+        } else if (resultados.tipo === 'rachas') {
+            row['n₁'] = sim.n1;
+            row['n₂'] = sim.n2;
+            row['Rachas (R)'] = sim.rachas;
+        }
+
+        row[`Estadístico (${resultados.tipo === 'chi_cuadrada' ? 'χ²c' : resultados.tipo === 'rachas' ? 'Zc' : 'S'})`] = sim.estadistico;
+        if (sim.pValor != null) row['p-Valor'] = sim.pValor;
+        row['Decisión'] = sim.decision;
+        return row;
+    });
+
+    const getExcelFileName = () => {
+        const now = new Date();
+        const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}h${String(now.getMinutes()).padStart(2, '0')}`;
+        return `Simulacion_Hipotesis_No_Parametricas_${resultados.tipo}_${stamp}.xlsx`;
+    };
+
+    const createExcelWorkbook = () => {
+        const worksheet = XLSX.utils.json_to_sheet(getExcelRows());
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Simulación HNP');
+        return workbook;
+    };
+
+    const handleGuardarEnEspacio = async () => {
+        if (!resultados.historial.length) return;
+        try {
+            const excelBuffer = XLSX.write(createExcelWorkbook(), { bookType: 'xlsx', type: 'array' });
+            const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            const file = new File([new Blob([excelBuffer], { type: mimeType })], getExcelFileName(), { type: mimeType });
+            const usuario = localStorage.getItem('usuario');
+            const autor = usuario ? JSON.parse(usuario).nombre : 'Estudiante';
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('autor', autor);
+            formData.append('visibilidad', 'personal');
+            await api.subirArchivo(formData);
+            alerta.success('¡Guardado exitoso!', 'La simulación se guardó en tu Espacio Personal.');
+        } catch (error) {
+            console.error('Error al guardar la simulación en el espacio personal:', error);
+            alerta.error('Error', 'No se pudo guardar la simulación en tu Espacio Personal.');
+        }
+    };
+
+    const handleDescargarExcel = () => {
+        if (!resultados.historial.length) return;
+        XLSX.writeFile(createExcelWorkbook(), getExcelFileName());
+    };
+
 
     let isRejectionImpossible = false;
     if (resultados?.tipo === 'signos') {
@@ -165,28 +235,18 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
     }
 
     return (
-        <div style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="hnp-simulacion-resultados" style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
             {/* ENCABEZADO Y CONTROLES DE ANIMACIÓN */}
             <div style={{width: '100%', marginTop: '0px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <h4 style={{ margin: 0, color: 'var(--text-pure)'}}>Resultados:</h4>
-                    <div style={{ padding: '2px 10px', background: 'var(--bg-input)', borderRadius: '5px', fontSize: '0.7rem', color: 'var(--text-pure)', fontWeight: 'bold' }}>
-                        {resultados.tipo === 'chi_cuadrada' && resultados.subtipo === 'bondad' && 'Chi-cuadrada - Bondad de Ajuste'}
-                        {resultados.tipo === 'chi_cuadrada' && resultados.subtipo === 'independencia' && 'Chi-cuadrada - Independencia'}
-                        {resultados.tipo === 'signos' && 'Prueba de Signos'}
-                        {resultados.tipo === 'rachas' && 'Prueba de Rachas'}
-                    </div>
-                </div>
-                
                 {/* CONTROLES DE SIMULACIÓN */}
                 <div style={{ marginTop: '0px', marginBottom: '0px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${(iteracionActual / resultados.historial.length) * 100}%`, transition: 'width 0.1s linear' }} />
                     
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ fontSize: FS?.sm || '0.875rem', fontWeight: 700, color: 'var(--text-muted)' }}>Simulación: {iteracionActual} / {resultados.historial.length}</span>
+                        <span style={{ fontSize: FS?.sm || '0.875rem', fontWeight: 700, color: 'var(--text-pure)' }}>Simulación: {iteracionActual} / {resultados.historial.length}</span>
                         
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center' }}>
+                        <div className="hnp-simulacion-animacion-controles" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center' }}>
                             <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-input)', padding: '3px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
                                 {['1x', '2x', '4x', 'MAX'].map(vel => (
                                     <button
@@ -195,7 +255,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                                         onClick={() => setVelocidadSimulacion(vel)}
                                         style={{
                                             background: velocidadSimulacion === vel ? 'var(--primary-color)' : 'transparent',
-                                            color: velocidadSimulacion === vel ? '#fff' : 'var(--text-muted)',
+                                            color: velocidadSimulacion === vel ? '#fff' : 'var(--text-pure)',
                                             border: 'none', borderRadius: '5px', padding: '1px 5px', cursor: 'pointer', fontSize: '0.65rem',
                                             fontWeight: 800, transition: 'all 0.2s', boxShadow: velocidadSimulacion === vel ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
                                         }}
@@ -242,7 +302,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
 
             {/* WIDGET ADVERTENCIA DE RECHAZO IMPOSIBLE */}
             {isRejectionImpossible && (
-                <div style={{ marginBottom: '0px', padding: '10px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #f59e0b', borderRadius: RADIUS, display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+                <div className="hnp-simulacion-aviso" style={{ marginBottom: '0px', padding: '10px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #f59e0b', borderRadius: RADIUS, display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
                     <div style={{ color: '#d97706', marginTop: '8px' }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
@@ -251,10 +311,10 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                         </svg>
                     </div>
                     <div>
-                        <div style={{ color: '#b45309', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0px' }}>
+                        <div className="hnp-simulacion-aviso-titulo" style={{ color: '#b45309', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0px' }}>
                             Aviso: Rechazo Matemáticamente Imposible
                         </div>
-                        <div style={{ color: '#92400e', fontSize: '0.8rem', lineHeight: '1.4' }}>
+                        <div className="hnp-simulacion-aviso-texto" style={{ color: '#92400e', fontSize: '0.8rem', lineHeight: '1.4' }}>
                             Debido al tamaño de muestra ({renderKatex('n = ' + resultados.n)}) y el nivel de significancia ({renderKatex('\\alpha = ' + (resultados.alpha || 0.05))}), es matemáticamente imposible rechazar {renderKatex('H_0')}. No existen valores críticos ni zonas de rechazo.
                         </div>
                     </div>
@@ -262,7 +322,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
             )}
 
             {/* TABLERO DE RESUMEN ANIMADO */}
-            <div style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '4px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
+            <div className="hnp-simulacion-resumen-scroll" style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
                 <style>{`
                     .minitab-table-sim { width: 100%; text-align: center; border-collapse: collapse; table-layout: auto; }
                     .minitab-table-sim th, .minitab-table-sim td { padding: 8px 4px; border: 1px solid var(--text-pure); word-wrap: break-word; hyphens: auto; }
@@ -277,27 +337,23 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                         <>
                             <thead>
                                 <tr style={{ background: 'var(--bg-input)' }}>
-                                    <th>Simulaciones</th>
-                                    <th>Promedio Estadístico</th>
-                                    <th>Grados de Libertad</th>
-                                    <th>Valor Crítico Teórico</th>
+                                    <th>Promedio Estadístico {renderKatex('(\\overline{\\chi_c^2})')}</th>
+                                    <th>Grados de Libertad {renderKatex('(gl)')}</th>
+                                    <th>Valor Crítico Teórico {renderKatex('(\\chi_\\alpha^2)')}</th>
                                     <th>Rechazar {renderKatex('H_0')}</th>
                                     <th>Aceptar {renderKatex('H_0')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>{renderKatex(liveResultados.total.toString())}</td>
                                     <td>{renderKatex(resultados.promedioEstadistico.toFixed(4))}</td>
                                     <td>{renderKatex(resultados.df.toString())}</td>
                                     <td>{renderKatex(resultados.valorCritico.toFixed(4))}</td>
                                     <td>
-                                        <div>{renderKatex(liveResultados.rechazos.toString())}</div>
-                                        <div style={{ fontSize: '0.6rem', marginTop: '2px' }}>{renderKatex(liveResultados.pRechazo.toFixed(2) + '\\%')}</div>
+                                        {renderKatex(`${liveResultados.rechazos} \\Rightarrow ${liveResultados.pRechazo.toFixed(2)}\\%`)}
                                     </td>
                                     <td>
-                                        <div>{renderKatex(liveResultados.noRechazos.toString())}</div>
-                                        <div style={{ fontSize: '0.6rem', marginTop: '2px' }}>{renderKatex(liveResultados.pNoRechazo.toFixed(2) + '\\%')}</div>
+                                        {renderKatex(`${liveResultados.noRechazos} \\Rightarrow ${liveResultados.pNoRechazo.toFixed(2)}\\%`)}
                                     </td>
                                 </tr>
                             </tbody>
@@ -306,7 +362,6 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                         <>
                             <thead>
                                 <tr style={{ background: 'var(--bg-input)' }}>
-                                    <th>Simulaciones</th>
                                     <th>Hipótesis / Prueba</th>
                                     <th>Media Teórica {resultados.tipo === 'rachas' ? renderKatex('(\\mu_R)') : renderKatex('(\\mu)')}</th>
                                     <th>Valor Crítico {resultados.tipo === 'rachas' ? renderKatex('(Z_{crit})') : renderKatex('(S_{crit})')}</th>
@@ -316,7 +371,6 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>{renderKatex(liveResultados.total.toString())}</td>
                                     <td>
                                         <div style={{ fontWeight: 'bold' }}>
                                             {resultados.tipoPrueba === 'bilateral' ? 'Bilateral' : resultados.tipoPrueba === 'derecha' ? 'Unilateral Derecha' : 'Unilateral Izquierda'}
@@ -366,11 +420,9 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                                     </td>
                                     <td>
                                         <div>{renderKatex(liveResultados.rechazos.toString())}</div>
-                                        <div style={{ fontSize: '0.6rem', marginTop: '2px' }}>{renderKatex(liveResultados.pRechazo.toFixed(2) + '\\%')}</div>
                                     </td>
                                     <td>
                                         <div>{renderKatex(liveResultados.noRechazos.toString())}</div>
-                                        <div style={{ fontSize: '0.6rem', marginTop: '2px' }}>{renderKatex(liveResultados.pNoRechazo.toFixed(2) + '\\%')}</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -400,10 +452,10 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
             )}
 
             {/* TABLA DE RESULTADOS VIVA */}
-            <div style={{ marginTop: '5px' }}>
+                <div className="hnp-simulacion-historial" style={{ marginTop: '5px' }}>
                 <h5 style={{ margin: '0 0 15px 0', color: 'var(--text-pure)' }}>Historial de Simulaciones</h5>
-                <div style={{ overflowX: 'auto', borderRadius: '0px', border: '1px solid var(--border-color)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div className="hnp-simulacion-historial-scroll" style={{ overflowX: 'auto', borderRadius: '0px', border: '1px solid var(--border-color)' }}>
+                    <table className="hnp-simulacion-historial-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
                                 <th rowSpan={tieneMuestras || resultados.tipo === 'signos' || resultados.tipo === 'rachas' ? 2 : 1} style={{...tableHeaderStyle, width: '1%', borderRight: tieneMuestras || resultados.tipo === 'signos' || resultados.tipo === 'rachas' ? '1px solid var(--border-color)' : 'none'}}>Simulación</th>
@@ -418,9 +470,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                                 )}
 
                                 <th rowSpan={tieneMuestras || resultados.tipo === 'signos' || resultados.tipo === 'rachas' ? 2 : 1} style={{...tableHeaderStyle, width: '75px'}}>Estadístico {resultados.tipo === 'chi_cuadrada' ? renderKatex('(\\chi^2_c)') : resultados.tipo === 'rachas' ? renderKatex('(Z_c)') : renderKatex('(S)')}</th>
-                                {(resultados.tipo === 'signos' || resultados.tipo === 'rachas') && (
-                                    <th rowSpan={tieneMuestras || resultados.tipo === 'signos' || resultados.tipo === 'rachas' ? 2 : 1} style={{...tableHeaderStyle, width: '75px'}}>{renderKatex('p')}-Valor</th>
-                                )}
+                                <th rowSpan={tieneMuestras || resultados.tipo === 'signos' || resultados.tipo === 'rachas' ? 2 : 1} style={{...tableHeaderStyle, width: '75px'}}>{renderKatex('p')}-Valor</th>
                                 <th rowSpan={tieneMuestras || resultados.tipo === 'signos' || resultados.tipo === 'rachas' ? 2 : 1} style={{...tableHeaderStyle, width: '95px'}}>Decisión</th>
                             </tr>
                             {tieneMuestras && (
@@ -473,7 +523,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                                                 </>
                                             )}
                                             <td style={tableCellStyle}>&nbsp;</td>
-                                            {(resultados.tipo === 'signos' || resultados.tipo === 'rachas') && <td style={tableCellStyle}>&nbsp;</td>}
+                                            <td style={tableCellStyle}>&nbsp;</td>
                                             <td style={tableCellStyle}>&nbsp;</td>
                                         </tr>
                                     );
@@ -508,9 +558,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                                         )}
 
                                         <td style={tableCellStyle}>{sim.estadistico != null ? (resultados.tipo === 'signos' ? Math.round(sim.estadistico) : sim.estadistico.toFixed(3)) : '-'}</td>
-                                        {(resultados.tipo === 'signos' || resultados.tipo === 'rachas') && (
-                                            <td style={tableCellStyle}>{sim.pValor != null ? sim.pValor.toFixed(4) : '-'}</td>
-                                        )}
+                                        <td style={tableCellStyle}>{sim.pValor != null ? sim.pValor.toFixed(4) : '-'}</td>
                                         <td style={tableCellStyle}>
                                             <span style={{
                                                 display: 'inline-block', padding: '2px 5px', borderRadius: '5px', fontSize: '0.7em', fontWeight: 'bold',
@@ -529,7 +577,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                 </div>
 
                 {/* Controles de Paginación */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
+                <div className="hnp-simulacion-paginacion" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
                     <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                         <button 
                             disabled={pagina <= 1}
@@ -563,6 +611,26 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                             </svg>
                         </button>
                     </div>
+                </div>
+                <div className="hnp-simulacion-acciones" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                    <button
+                        type="button"
+                        className="btn-primary"
+                        style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
+                        onClick={handleGuardarEnEspacio}
+                        disabled={!resultados.historial.length}
+                    >
+                        <IconoGuardar /> Guardar
+                    </button>
+                    <button
+                        type="button"
+                        className="btn-verde"
+                        style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
+                        onClick={handleDescargarExcel}
+                        disabled={!resultados.historial.length}
+                    >
+                        <Descargar width="18" height="18" /> Descargar (.xlsx)
+                    </button>
                 </div>
             </div>
 

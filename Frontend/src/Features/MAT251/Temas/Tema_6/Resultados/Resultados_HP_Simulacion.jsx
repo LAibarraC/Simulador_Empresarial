@@ -4,9 +4,13 @@ import katex from 'katex';
 import Grafico_HP_Simulacion from '../../../Graficas/Tema_6/Grafico_HP_Simulacion';
 import Grafico_HP_SimulacionT from '../../../Graficas/Tema_6/Grafico_HP_SimulacionT';
 import Grafico_HP_SimulacionVarianza from '../../../Graficas/Tema_6/Grafico_HP_SimulacionVarianza';
+import * as XLSX from 'xlsx';
+import { api } from '../../../../../services/api';
+import { alerta } from '../../../../../utils/Notificaciones';
+import { IconoGuardar, Descargar } from '../../../../../ui/iconos';
 
 export default function Resultados_HP_Simulacion({ resultados, prueba }) {
-    const [pagina, setPagina] = useState(1);
+    const [limiteVisible, setLimiteVisible] = useState(10);
     
     if (!resultados) return null;
 
@@ -14,7 +18,6 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
         <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
 
-    const filasPorPagina = 20;
     const isMediaZ = prueba === 'media_z' && resultados.historial;
     const isMediaT = prueba === 'media_t' && resultados.historial;
     const isProporcion = prueba === 'proporcion' && resultados.historial;
@@ -26,6 +29,10 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
     const [simulacionEnCurso, setSimulacionEnCurso] = useState(false);
     const [simulacionPausada, setSimulacionPausada] = useState(false);
     const [velocidadSimulacion, setVelocidadSimulacion] = useState('1x');
+
+    useEffect(() => {
+        setLimiteVisible(10);
+    }, [resultados, prueba]);
 
     const simRef = useRef(null);
     const isPausadoRef = useRef(false);
@@ -107,21 +114,8 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
         porcentajeNoRechazos: porcentajeNoRechazosActual
     };
 
-    const totalPaginas = (isMediaZ || isMediaT || isProporcion || isVarianza) ? Math.ceil(historialVivo.length / filasPorPagina) : 0;
-    const datosPagina = (isMediaZ || isMediaT || isProporcion || isVarianza) ? historialVivo.slice((pagina - 1) * filasPorPagina, pagina * filasPorPagina) : [];
+    const datosTabla = historialVivo.slice(0, limiteVisible);
     
-    const datosTabla = [...datosPagina];
-    while (datosTabla.length > 0 && datosTabla.length < filasPorPagina) {
-        datosTabla.push({ isVacia: true, iteracion: `empty-${datosTabla.length}` });
-    }
-    if (datosTabla.length === 0) {
-        for (let i = 0; i < filasPorPagina; i++) {
-            datosTabla.push({ isVacia: true, iteracion: `empty-${i}` });
-        }
-    }
-    
-    // El auto-scroll de paginación fue removido a petición del usuario para evitar saltos.
-
     let isNullTrue = false;
     if (isMediaZ || isMediaT || isProporcion || isVarianza) {
         isNullTrue = isProporcion ? (resultados.parametrosGeneracion.pReal === resultados.parametrosPrueba.p0) : 
@@ -152,9 +146,74 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
         return Number.isInteger(val) ? val : Number(val).toFixed(2);
     };
 
+    const getExcelRows = () => resultados.historial.map((sim) => {
+        const row = { 'Simulación': sim.iteracion };
+
+        // Mantiene las muestras en columnas separadas, en el mismo orden que la tabla.
+        if (tieneMuestras && sim.muestras) {
+            sampleCols.forEach((col) => {
+                row[col === '...' ? 'Muestra …' : `Muestra ${col}`] = renderSampleValue(sim.muestras, col);
+            });
+        }
+
+        if (isProporcion) {
+            row['Casos Favorables (x)'] = sim.x;
+            row['Proporción Simulada (p̂)'] = sim.p_hat?.toFixed(3);
+        } else if (isVarianza) {
+            row['Varianza Simulada (S²)'] = sim.s !== undefined ? (sim.s * sim.s).toFixed(3) : '';
+        } else {
+            row['Media Simulada (x̄)'] = sim.x_bar?.toFixed(3);
+        }
+
+        if (isMediaT) row['Desviación Muestral (s)'] = sim.s?.toFixed(3) ?? '-';
+        if (isVarianza) row['Grados de Libertad'] = n - 1;
+        row[`Estadístico (${isMediaT ? 'T_c' : isVarianza ? 'χ²_c' : 'Z_c'})`] = sim.estadistico?.toFixed(3);
+        row['p-Valor'] = sim.pValor?.toFixed(4);
+        row['Decisión'] = sim.decision === 'Rechazar H₀' ? 'Rechazar H₀' : 'Aceptar H₀';
+        return row;
+    });
+
+    const getExcelFileName = () => {
+        const now = new Date();
+        const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}h${String(now.getMinutes()).padStart(2, '0')}`;
+        return `Simulacion_Hipotesis_${prueba}_${stamp}.xlsx`;
+    };
+
+    const createExcelWorkbook = () => {
+        const worksheet = XLSX.utils.json_to_sheet(getExcelRows());
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Simulación Hipótesis');
+        return workbook;
+    };
+
+    const handleGuardarEnEspacio = async () => {
+        if (!resultados.historial?.length) return;
+        try {
+            const excelBuffer = XLSX.write(createExcelWorkbook(), { bookType: 'xlsx', type: 'array' });
+            const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            const file = new File([new Blob([excelBuffer], { type: mimeType })], getExcelFileName(), { type: mimeType });
+            const usuario = localStorage.getItem('usuario');
+            const autor = usuario ? JSON.parse(usuario).nombre : 'Estudiante';
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('autor', autor);
+            formData.append('visibilidad', 'personal');
+            await api.subirArchivo(formData);
+            alerta.success('¡Guardado exitoso!', 'La simulación se guardó en tu Espacio Personal.');
+        } catch (error) {
+            console.error('Error al guardar la simulación en el espacio personal:', error);
+            alerta.error('Error', 'No se pudo guardar la simulación en tu Espacio Personal.');
+        }
+    };
+
+    const handleDescargarExcel = () => {
+        if (!resultados.historial?.length) return;
+        XLSX.writeFile(createExcelWorkbook(), getExcelFileName());
+    };
+
     const cardStyleBase = {
         padding: '6px', 
-        borderRadius: '8px', 
+        borderRadius: '5px',
         display: 'flex', 
         flexDirection: 'column', 
         justifyContent: 'center', 
@@ -162,10 +221,26 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
         boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
     };
 
+    const estiloBotonMostrarMas = {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '6px',
+        width: 'fit-content',
+        background: 'transparent',
+        border: '1px solid var(--primary-color)',
+        color: 'var(--primary-color)',
+        cursor: 'pointer',
+        fontWeight: 600,
+        padding: '5px 14px',
+        borderRadius: RADIUS,
+        transition: 'all 0.2s ease',
+        fontSize: FS.sm,
+        fontFamily: 'inherit'
+    };
+
     return (
         <div style={{width: '100%', marginTop: '0px' }}>
-            <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-pure)'}}>Resultados:</h4>
-            
             {/* CONTROLES DE SIMULACIÓN TIPO TEMA 5 */}
             {(isMediaZ || isMediaT || isProporcion || isVarianza) && (
                 <>
@@ -173,7 +248,7 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                         <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${(iteracionActual / resultados.historial.length) * 100}%`, transition: 'width 0.1s linear' }} />
                         
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                            <span style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-muted)' }}>Simulación: {iteracionActual} / {resultados.historial.length}</span>
+                            <span style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-pure)' }}>Simulación: {iteracionActual} / {resultados.historial.length}</span>
                             
                             <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center' }}>
                                 <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-input)', padding: '3px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
@@ -184,7 +259,7 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                                             onClick={() => setVelocidadSimulacion(vel)}
                                             style={{
                                                 background: velocidadSimulacion === vel ? 'var(--primary-color)' : 'transparent',
-                                                color: velocidadSimulacion === vel ? '#fff' : 'var(--text-muted)',
+                                                color: velocidadSimulacion === vel ? '#fff' : 'var(--text-pure)',
                                                 border: 'none', borderRadius: '5px', padding: '1px 5px', cursor: 'pointer', fontSize: '0.65rem',
                                                 fontWeight: 800, transition: 'all 0.2s', boxShadow: velocidadSimulacion === vel ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
                                             }}
@@ -266,18 +341,6 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                 
-                {/* Tarjeta: Simulaciones Totales */}
-                <div 
-                    style={{ ...cardStyleBase, background: 'var(--bg-input, #f8fafc)', border: '1px solid var(--border-color)' }}
-                >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1rem', color: 'var(--text-pure)', fontWeight: 'bold', marginBottom: '4px' }}>
-                        Simulaciones
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-pure)', fontWeight: 'bold' }}>
-                        {renderKatex(liveResultados.numSimulaciones.toString())}
-                    </div>
-                </div>
-
                 {/* Tarjeta: Rechazos */}
                 <div 
                     style={{ ...cardStyleBase, background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.12) 100%)', border: '1px solid rgba(239, 68, 68, 0.3)', boxShadow: '0 2px 4px rgba(239, 68, 68, 0.05)' }}
@@ -286,25 +349,19 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                         Rechazos {renderKatex('H_0')}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-pure)', fontWeight: 'bold' }}>
-                        {renderKatex(liveResultados.rechazos.toString())}
-                    </div>
-                    <div style={{ fontSize: '0.8em', color: 'var(--text-pure)', fontWeight: '600', marginTop: '2px' }}>
-                        {liveResultados.porcentajeRechazos.toFixed(2)}%
+                        {renderKatex(`${liveResultados.rechazos} \\Rightarrow ${liveResultados.porcentajeRechazos.toFixed(2)}\\%`)}
                     </div>
                 </div>
 
-                {/* Tarjeta: No Rechazos */}
+                {/* Tarjeta: Aceptaciones */}
                 <div 
                     style={{ ...cardStyleBase, background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.12) 100%)', border: '1px solid rgba(16, 185, 129, 0.3)', boxShadow: '0 2px 4px rgba(16, 185, 129, 0.05)' }}
                 >
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', fontSize: '1rem', color: '#059669', fontWeight: 'bold', marginBottom: '4px' }}>
-                        No Rechazos {renderKatex('H_0')}
+                        Aceptaciones {renderKatex('H_0')}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-pure)', fontWeight: 'bold' }}>
-                        {renderKatex(liveResultados.noRechazos.toString())}
-                    </div>
-                    <div style={{ fontSize: '0.8em', color: 'var(--text-pure)', fontWeight: '600', marginTop: '2px' }}>
-                        {liveResultados.porcentajeNoRechazos.toFixed(2)}%
+                        {renderKatex(`${liveResultados.noRechazos} \\Rightarrow ${liveResultados.porcentajeNoRechazos.toFixed(2)}\\%`)}
                     </div>
                 </div>
             </div>
@@ -336,9 +393,9 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                     {/* Tabla de Registro (Historial de Simulaciones) */}
                     <div style={{ marginTop: '15px' }}>
                         <h5 style={{ margin: '0 0 15px 0', color: 'var(--text-pure)' }}>Historial de Simulaciones</h5>
-                        <div style={{ overflowX: 'auto', borderRadius: '0px', border: '1px solid var(--border-color)' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead>
+                        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', border: '1px solid var(--border-color)', borderRadius: '0px', background: 'var(--bg-card)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'center', fontSize: '0.85em', whiteSpace: 'nowrap', color: 'var(--text-pure)' }}>
+                                <thead style={{ background: 'var(--bg-input)', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                                     <tr>
                                         <th rowSpan={tieneMuestras ? 2 : 1} style={{...tableHeaderStyle, borderRight: tieneMuestras ? '1px solid var(--border-color)' : 'none', width: '1%', whiteSpace: 'nowrap'}}>Simulación</th>
                                         {tieneMuestras && (
@@ -376,23 +433,6 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                                 </thead>
                                 <tbody>
                                     {datosTabla.map((sim, idx) => {
-                                        if (sim.isVacia) {
-                                            return (
-                                                <tr key={sim.iteracion} style={{ background: idx % 2 === 0 ? 'var(--bg-input)' : 'var(--bg-card)', height: '41px' }}>
-                                                    <td style={{...tableCellStyle, borderRight: tieneMuestras ? '1px solid var(--border-color)' : 'none'}}>&nbsp;</td>
-                                                    {tieneMuestras && sampleCols.map((col, idxCol) => (
-                                                        <td key={idxCol} style={{ ...tableCellStyle, borderRight: idxCol === sampleCols.length - 1 ? '1px solid var(--border-color)' : 'none' }}>&nbsp;</td>
-                                                    ))}
-                                                    <td style={tableCellStyle}>&nbsp;</td>
-                                                    {isProporcion && <td style={tableCellStyle}>&nbsp;</td>}
-                                                    {isMediaT && <td style={tableCellStyle}>&nbsp;</td>}
-                                                    {isVarianza && <td style={tableCellStyle}>&nbsp;</td>}
-                                                    <td style={tableCellStyle}>&nbsp;</td>
-                                                    <td style={tableCellStyle}>&nbsp;</td>
-                                                    <td style={tableCellStyle}>&nbsp;</td>
-                                                </tr>
-                                            );
-                                        }
                                         const isRechazo = sim.decision === 'Rechazar H₀';
                                         return (
                                             <tr key={sim.iteracion} style={{ background: idx % 2 === 0 ? 'var(--bg-input)' : 'var(--bg-card)', transition: 'background 0.2s', height: '30px' }}>
@@ -421,7 +461,7 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                                                         color: isRechazo ? '#ef4444' : '#10b981',
                                                         border: `1px solid ${isRechazo ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`
                                                     }}>
-                                                        {isRechazo ? <>Rechazar {renderKatex('H_0')}</> : 'No Rechazar'}
+                                                        {isRechazo ? <>Rechazar {renderKatex('H_0')}</> : <>Aceptar {renderKatex('H_0')}</>}
                                                     </span>
                                                 </td>
                                             </tr>
@@ -431,42 +471,69 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                             </table>
                         </div>
 
-                        {/* Controles de Paginación */}
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
-                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                                <button 
-                                    disabled={pagina <= 1}
-                                    onClick={() => setPagina(p => Math.max(1, p - 1))}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', cursor: pagina <= 1 ? 'not-allowed' : 'pointer', fontWeight: '600', padding: '5px 15px', borderRadius: '5px', transition: 'all 0.2s ease', fontSize: '0.7rem', opacity: pagina <= 1 ? 0.5 : 1 }}
-                                    onMouseEnter={(e) => { if(pagina > 1) { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(-2px)'; } }}
-                                    onMouseLeave={(e) => { if(pagina > 1) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(0)'; } }}
+                        <div style={{ display: 'flex', gap: '15px', marginTop: '20px', justifyContent: 'center', width: '100%', flexWrap: 'wrap' }}>
+                            {limiteVisible < historialVivo.length && (
+                                <button
+                                    type="button"
+                                    onClick={() => setLimiteVisible(prev => Math.min(prev + 10, historialVivo.length))}
+                                    style={estiloBotonMostrarMas}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; }}
                                 >
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'rotate(180deg)' }}>
-                                        <polyline points="13 17 18 12 13 7"></polyline>
-                                        <polyline points="6 17 11 12 6 7"></polyline>
-                                    </svg>
-                                    Anterior
-                                </button>
-                                
-                                <div style={{ fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 'bold' }}>
-                                    Pág {pagina} de {Math.max(1, totalPaginas)}
-                                </div>
-                                
-                                <button 
-                                    disabled={pagina >= totalPaginas}
-                                    onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', cursor: pagina >= totalPaginas ? 'not-allowed' : 'pointer', fontWeight: '600', padding: '5px 15px', borderRadius: '5px', transition: 'all 0.2s ease', fontSize: '0.7rem', opacity: pagina >= totalPaginas ? 0.5 : 1 }}
-                                    onMouseEnter={(e) => { if(pagina < totalPaginas) { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(-2px)'; } }}
-                                    onMouseLeave={(e) => { if(pagina < totalPaginas) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(0)'; } }}
-                                >
-                                    Siguiente
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    Mostrar 10 más
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="13 17 18 12 13 7"></polyline>
                                         <polyline points="6 17 11 12 6 7"></polyline>
                                     </svg>
                                 </button>
-                            </div>
+                            )}
+                            {limiteVisible < historialVivo.length && limiteVisible + 10 < historialVivo.length && (
+                                <button
+                                    type="button"
+                                    onClick={() => setLimiteVisible(prev => Math.min(prev + 50, historialVivo.length))}
+                                    style={estiloBotonMostrarMas}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = '#fff'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--primary-color)'; }}
+                                >
+                                    Mostrar 50 más
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="13 17 18 12 13 7"></polyline>
+                                        <polyline points="6 17 11 12 6 7"></polyline>
+                                    </svg>
+                                </button>
+                            )}
+                            {limiteVisible > 10 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setLimiteVisible(10)}
+                                    style={{ ...estiloBotonMostrarMas, border: '1.5px solid var(--border-color)', color: 'var(--text-muted, #64748b)', borderRadius: '25px', padding: '8px 20px' }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-main)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted, #64748b)'; }}
+                                >
+                                    Restablecer a 10
+                                </button>
+                            )}
                         </div>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                        <button
+                            type="button"
+                            className="btn-primary"
+                            style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
+                            onClick={handleGuardarEnEspacio}
+                            disabled={!resultados.historial.length}
+                        >
+                            <IconoGuardar /> Guardar
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-verde"
+                            style={{ padding: '5px 14px', fontSize: FS.sm, fontWeight: 600, fontFamily: 'inherit', borderRadius: RADIUS }}
+                            onClick={handleDescargarExcel}
+                            disabled={!resultados.historial.length}
+                        >
+                            <Descargar width="18" height="18" /> Descargar (.xlsx)
+                        </button>
                     </div>
                 </>
             )}

@@ -19,7 +19,7 @@ const CustomKatexLabel = (props) => {
         <foreignObject x={x - 70 + finalOffsetX} y={y - 30 + offsetY} width={140} height={30} style={{ overflow: 'visible' }}>
             <div 
                 dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} 
-                style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }} 
+                style={{ color: 'var(--text-pure)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }}
             />
         </foreignObject>
     ); 
@@ -28,9 +28,13 @@ const CustomKatexLabel = (props) => {
 const CustomCalloutLabel = (props) => {
     const { viewBox, value, isNegative } = props;
     if (!viewBox) return null;
-    const { x, y, height } = viewBox;
-    
-    const direction = isNegative ? 'left' : 'right';
+    const { x, y, height, width } = viewBox;
+
+    // Mantén la etiqueta dentro del área visible cuando el estadístico cae
+    // cerca de un borde (especialmente en pantallas estrechas).
+    const nearLeftEdge = x < 115;
+    const nearRightEdge = Number.isFinite(width) && x > width - 115;
+    const direction = nearLeftEdge ? 'right' : nearRightEdge ? 'left' : isNegative ? 'left' : 'right';
     
     // Origin at the X-axis
     const x0 = x;
@@ -194,7 +198,7 @@ export default function Grafico_HP({ resultados, prueba, id = "grafico-hp", isMa
         return Array.from(new Set(allTicks.map(v => Number(v.toFixed(3))))).sort((a,b) => a - b);
     })();
 
-    const statSymbol = prueba === 'media_t' ? 'T' : prueba === 'varianza' ? 'χ²' : 'Z';
+    const statSymbol = prueba === 'media_t' ? '\\mathbf{T}' : prueba === 'varianza' ? '\\boldsymbol{\\chi}^2' : '\\mathbf{Z}';
 
     return (
         <MarcoWidgetMAT251 
@@ -206,7 +210,7 @@ export default function Grafico_HP({ resultados, prueba, id = "grafico-hp", isMa
                 <div style={{ flex: 1, position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 35, left: 0, right: 0, bottom: 0 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData} margin={{ top: 30, right: 60, left: 45, bottom: 20 }} style={{ overflow: 'visible' }}>
+                            <AreaChart data={chartData} margin={{ top: 30, right: 5, left: 5, bottom: 20 }} style={{ overflow: 'visible' }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
                         <XAxis 
                             dataKey="x" 
@@ -218,12 +222,12 @@ export default function Grafico_HP({ resultados, prueba, id = "grafico-hp", isMa
                                 if (v === 0) return '0';
                                 return parseFloat(v.toFixed(3)).toString();
                             }} 
-                            tick={{ fill: 'var(--text-main, #333333)', fontSize: 12, fontWeight: 'normal' }}
-                            axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                            tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
+                            tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
+                            axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
+                            tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
                         />
                         <YAxis hide />
-                        <Tooltip formatter={(value, name) => [value.toFixed(3), name === 'rejectArea' ? 'Probabilidad (Rechazo)' : name === 'acceptArea' ? 'Probabilidad (Aceptación)' : 'Densidad']} labelFormatter={(l) => `X = ${l}`} />
+                        <Tooltip formatter={(value, name) => [value.toFixed(3), name === 'rejectArea' ? 'Probabilidad (Rechazo)' : name === 'acceptArea' ? 'Probabilidad (Aceptación)' : 'Densidad']} labelFormatter={(l) => `X = ${l}`} contentStyle={{ color: 'var(--text-pure)' }} itemStyle={{ color: 'var(--text-pure)' }} labelStyle={{ color: 'var(--text-pure)' }} />
                         
                         <Area type="step" dataKey="acceptArea" fill="rgba(59, 130, 246, 0.1)" stroke="none" isAnimationActive={false} />
                         <Area type="step" dataKey="rejectArea" fill="rgba(220, 38, 38, 0.85)" stroke="none" isAnimationActive={false} />
@@ -232,14 +236,14 @@ export default function Grafico_HP({ resultados, prueba, id = "grafico-hp", isMa
                         {criticalValues.map((val, idx) => {
                             let mathStr = '';
                             if (prueba === 'media_z' || prueba === 'proporcion') {
-                                if (criticalValues.length === 2) mathStr = idx === 0 ? `-Z_{\\alpha/2}` : `Z_{\\alpha/2}`;
-                                else mathStr = val < 0 ? `-Z_\\alpha` : `Z_\\alpha`;
+                                if (criticalValues.length === 2) mathStr = idx === 0 ? `-\\mathbf{Z}_{\\alpha/2}` : `\\mathbf{Z}_{\\alpha/2}`;
+                                else mathStr = val < 0 ? `-\\mathbf{Z}_\\alpha` : `\\mathbf{Z}_\\alpha`;
                             } else if (prueba === 'media_t') {
-                                if (criticalValues.length === 2) mathStr = idx === 0 ? `-t_{\\alpha/2}` : `t_{\\alpha/2}`;
-                                else mathStr = val < 0 ? `-t_\\alpha` : `t_\\alpha`;
+                                if (criticalValues.length === 2) mathStr = idx === 0 ? `-\\mathbf{t}_{\\alpha/2}` : `\\mathbf{t}_{\\alpha/2}`;
+                                else mathStr = val < 0 ? `-\\mathbf{t}_\\alpha` : `\\mathbf{t}_\\alpha`;
                             } else if (prueba === 'varianza') {
-                                if (criticalValues.length === 2) mathStr = idx === 0 ? `\\chi^2_{inf}` : `\\chi^2_{sup}`;
-                                else mathStr = `\\chi^2_\\alpha`;
+                                if (criticalValues.length === 2) mathStr = idx === 0 ? `\\boldsymbol{\\chi}^2_{inf}` : `\\boldsymbol{\\chi}^2_{sup}`;
+                                else mathStr = `\\boldsymbol{\\chi}^2_\\alpha`;
                             }
                             return (
                                 <ReferenceLine 
@@ -262,17 +266,41 @@ export default function Grafico_HP({ resultados, prueba, id = "grafico-hp", isMa
                         </ResponsiveContainer>
                     </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
+                <style>{`
+                    @media (max-width: 640px) {
+                        .grafico-hp-leyenda {
+                            flex-wrap: nowrap !important;
+                            gap: 4px !important;
+                            width: 100%;
+                            box-sizing: border-box;
+                        }
+                        .grafico-hp-leyenda > div {
+                            flex: 0 1 auto;
+                            min-width: 0;
+                            gap: 4px !important;
+                            padding: 4px 6px !important;
+                        }
+                        .grafico-hp-leyenda > div > div:last-child {
+                            font-size: 0.58rem !important;
+                            letter-spacing: 0 !important;
+                            white-space: nowrap;
+                        }
+                        .grafico-hp-leyenda .katex {
+                            font-size: 0.85em !important;
+                        }
+                    }
+                `}</style>
+                <div className="grafico-hp-leyenda leyenda-grafica-tema6" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '15px', fontFamily: FONT, marginTop: '-15px', paddingBottom: '15px', position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '14px', height: '14px', background: 'rgba(220, 38, 38, 0.9)', border: '2px solid #b91c1c', borderRadius: '50%' }}></div>
-                        <div style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
+                        <div style={{ color: 'var(--text-pure)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
                             Zona de Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '5px 15px', borderRadius: '5px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ width: '14px', height: '14px', background: 'rgba(59, 130, 246, 0.2)', border: '2px solid #3b82f6', borderRadius: '50%' }}></div>
-                        <div style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
-                            Zona de No Rechazo <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
+                        <div style={{ color: 'var(--text-pure)', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.3px' }}>
+                            Zona de Aceptación <span style={{ fontWeight: 'normal', marginLeft: '2px' }}>({renderKatex('H_0')})</span>
                         </div>
                     </div>
                 </div>
