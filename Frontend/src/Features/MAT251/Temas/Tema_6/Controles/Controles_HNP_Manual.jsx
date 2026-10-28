@@ -171,9 +171,9 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
             if (tipoChiCuadrada === 'bondad') {
                 const observadas = filasBondad.map(f => Number(f.obs) || 0);
                 const esperadas = filasBondad.map(f => Number(f.esp) || 0);
-                res = { tipo: 'chi_cuadrada', subtipo: 'bondad', ...pruebaChiCuadradaBondad(observadas, esperadas, numAlpha) };
+                res = { tipo: 'chi_cuadrada', subtipo: 'bondad', observadas, esperadas, categorias: filasBondad.map((f, i) => f.categoria || `Categoría ${i + 1}`), ...pruebaChiCuadradaBondad(observadas, esperadas, numAlpha) };
             } else {
-                res = { tipo: 'chi_cuadrada', subtipo: 'independencia', ...pruebaChiCuadradaIndependencia(matrizInd, numAlpha) };
+                res = { tipo: 'chi_cuadrada', subtipo: 'independencia', matriz: matrizInd.map(fila => [...fila]), nombresFilas: [...nombresFilas], nombresCols: [...nombresCols], ...pruebaChiCuadradaIndependencia(matrizInd, numAlpha) };
             }
         } else if (prueba === 'signos') {
             if(signosPositivos === '' || signosNegativos === '') {
@@ -259,7 +259,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                     <div style={{ gridColumn: '1 / -1' }}>
                         {tipoChiCuadrada === 'bondad' ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div className="hnp-frecuencias-esperadas-scroll" style={{ width: 'fit-content', maxWidth: '100%', height: filasBondad.length > 10 ? '350px' : 'auto', overflowY: filasBondad.length > 10 ? 'auto' : 'visible', overflowX: 'auto', margin: '0 auto', boxSizing: 'border-box' }}>
+                                <div id="tour-t6-hnp-manual-entradas" className="hnp-frecuencias-esperadas-scroll" style={{ width: 'fit-content', maxWidth: '100%', height: filasBondad.length > 10 ? '350px' : 'auto', overflowY: filasBondad.length > 10 ? 'auto' : 'visible', overflowX: 'auto', margin: '0 auto', boxSizing: 'border-box' }}>
                                     <style>{`
                                         .hnp-frecuencias-manual-table { border-collapse: separate !important; border-spacing: 0 !important; border-top: 0 !important; border-left: 1px solid var(--text-pure) !important; border-right: 1px solid var(--text-pure) !important; border-bottom: 1px solid var(--text-pure) !important; }
                                         .hnp-frecuencias-manual-table th, .hnp-frecuencias-manual-table td { border-top: 0 !important; border-left: 0 !important; border-right: 1px solid var(--text-pure) !important; border-bottom: 1px solid var(--text-pure) !important; }
@@ -300,12 +300,12 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                                         </tbody>
                                     </table>
                                 </div>
-                                <button onClick={addFilaBondad} className="btn-outline-primary btn-agregar-fila-discreta" style={{ padding: '5px 15px', alignSelf: 'center', background: 'transparent', color: 'var(--primary-color)', border: '1px dashed var(--primary-color)', borderRadius: '5px', cursor: 'pointer', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s ease', fontFamily: 'inherit' }}>
+                                <button id="tour-t6-hnp-manual-btn-agregar-fila" onClick={addFilaBondad} className="btn-outline-primary btn-agregar-fila-discreta" style={{ padding: '5px 15px', alignSelf: 'center', background: 'transparent', color: 'var(--primary-color)', border: '1px dashed var(--primary-color)', borderRadius: '5px', cursor: 'pointer', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s ease', fontFamily: 'inherit' }}>
                                     Agregar Fila
                                 </button>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div id="tour-t6-hnp-manual-entradas" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '24px', width: '100%', margin: '0 auto' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>Filas:</label>
@@ -326,7 +326,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                                     `}</style>
                                     <table className="hnp-independencia-manual-table" style={{ width: '100%', minWidth: `${Math.max(380, ((matrizInd[0]?.length || 2) + 1) * 120)}px`, tableLayout: 'fixed', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.8rem', fontFamily: FONT, textAlign: 'center', color: 'var(--text-pure)', background: 'var(--bg-card)' }}>
                                         <colgroup>
-                                            <col style={{ width: '25%' }} />
+                                             <col style={{ width: '25%' }} />
                                             {Array.from({ length: matrizInd[0]?.length || 2 }).map((_, i) => (
                                                 <col key={i} style={{ width: `${75 / (matrizInd[0]?.length || 2)}%` }} />
                                             ))}
@@ -367,7 +367,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                 )}
 
                 {prueba === 'signos' && (
-                    <>
+                    <div id="tour-t6-hnp-manual-entradas" style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', minWidth: '40px', whiteSpace: 'nowrap' }}>Signos (+):</label>
                             <input type="number" className="input-mat251 placeholder-small" value={signosPositivos} onChange={e => setSignosPositivos(e.target.value)} placeholder="Positivos" min="0" style={{ flex: 1 }} />
@@ -376,11 +376,11 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', minWidth: '40px', whiteSpace: 'nowrap' }}>Signos (-):</label>
                             <input type="number" className="input-mat251 placeholder-small" value={signosNegativos} onChange={e => setSignosNegativos(e.target.value)} placeholder="Negativos" min="0" style={{ flex: 1 }} />
                         </div>
-                    </>
+                    </div>
                 )}
 
                 {prueba === 'rachas' && (
-                    <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '15px' }}>
+                    <div id="tour-t6-hnp-manual-entradas" style={{ gridColumn: '1 / -1', display: 'flex', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flex: 1 }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('\\mathbf{n}_1')}:</label>
                             <input type="number" className="input-mat251 placeholder-small" value={n1Rachas} onChange={e => setN1Rachas(e.target.value)} placeholder="Tipo 1" min="1" style={{ flex: 1, color: 'var(--text-pure)' }} />
@@ -397,10 +397,10 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                 )}
             </div>
 
-            <div className="hnp-manual-selectores-configuracion" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '10px', marginBottom: '15px', order: 0 }}>
+            <div id="tour-t6-hnp-manual-config" className="hnp-manual-selectores-configuracion" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '10px', marginBottom: '15px', order: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div id="tour-t6-hnp-manual-alpha" style={{ flex: 1, minWidth: 0 }}>
                         {alphaSelector}
                     </div>
                 </div>
@@ -408,7 +408,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                 {prueba === 'chi_cuadrada' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>Tipo:</label>
-                        <div ref={tipoChiRef} style={{ position: 'relative', flex: 1 }}>
+                        <div id="tour-t6-hnp-manual-tipo-chi" ref={tipoChiRef} style={{ position: 'relative', flex: 1 }}>
                             <div
                                 onClick={() => setIsTipoChiOpen(!isTipoChiOpen)}
                                 style={{
@@ -458,7 +458,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                 {(prueba === 'signos' || prueba === 'rachas') && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: '45px', textAlign: 'right' }}>{renderKatex('\\mathbf{H}_1:')}</label>
-                        <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                        <div id="tour-t6-hnp-manual-h1" style={{ display: 'flex', gap: '8px', flex: 1 }}>
                             {['bilateral', 'derecha', 'izquierda'].map(tipo => {
                                 const isSelected = tipoPrueba === tipo;
                                 const mathStr = tipo === 'bilateral' ? `\\neq` : tipo === 'derecha' ? `>` : `<`;
@@ -488,7 +488,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0px', order: 2 }}>
-                <button className="button_calcular" style={{ width: 'auto', padding: '5px 15px' }} onClick={handleCalcular}>
+                <button id="tour-t6-hnp-manual-btn-calcular" className="button_calcular" style={{ width: 'auto', padding: '5px 15px' }} onClick={handleCalcular}>
                     Calcular Prueba
                 </button>
             </div>

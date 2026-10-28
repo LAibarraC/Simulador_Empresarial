@@ -37,7 +37,7 @@ export default function Calculadora() {
   );
 
   return (
-    <div className="contenedor-principal-sistema">
+    <div className="mat151 contenedor-principal-sistema">
 
       <div className="ventana-contenido-principal">
         {/* Le pasamos paramsReabrir a Calculos para que sepa qué cálculo seleccionar */}

@@ -89,7 +89,7 @@ export default function Resultados_HNP_Matriz({ resultados }) {
             )}
 
             {resultados.tipo === 'rachas' && (
-                <div className="rachas-ext-table-scroll" style={{ marginBottom: '15px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.85rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
+                <div id="tour-t6-hnp-rachas-resumen" className="rachas-ext-table-scroll" style={{ marginBottom: '15px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.85rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
                     <style>{`
                         .rachas-ext-table { width: 100%; border-collapse: collapse; text-align: center; }
                         .rachas-ext-table th, .rachas-ext-table td { border: 1px solid var(--text-pure); }
@@ -146,7 +146,7 @@ export default function Resultados_HNP_Matriz({ resultados }) {
             )}
 
             {/* TABLA ESTILO MINITAB */}
-            <div className="minitab-table-scroll" style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
+            <div id="tour-t6-hnp-tabla-minitab" className="minitab-table-scroll" style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
                 <style>{`
                     .minitab-table { width: 100%; text-align: center; border-collapse: collapse; table-layout: auto; }
                     .minitab-table.rachas-table { table-layout: fixed; }
@@ -304,29 +304,31 @@ export default function Resultados_HNP_Matriz({ resultados }) {
                 </table>
             </div>
 
-            {resultados.tipo === 'chi_cuadrada' && (
-                <div style={{ marginTop: '5px' }}>
-                    <Grafico_HNP resultados={resultados} prueba="varianza" />
-                </div>
-            )}
+            <div id="tour-t6-hnp-grafico">
+                {resultados.tipo === 'chi_cuadrada' && (
+                    <div style={{ marginTop: '5px' }}>
+                        <Grafico_HNP resultados={resultados} prueba="varianza" />
+                    </div>
+                )}
 
-            {resultados.tipo === 'signos' && resultados.calculos && (
-                <div style={{ width: '100%', marginTop: '15px', marginBottom: '15px' }}>
-                    {resultados.isNormalApprox ? (
-                        <Grafico_HP resultados={resultados} prueba="media_z" id="grafico-hnp-signos-z-matriz" />
-                    ) : (
-                        <Grafico_HNP_Signos resultados={resultados} id="grafico-hnp-signos-matriz" />
-                    )}
-                </div>
-            )}
+                {resultados.tipo === 'signos' && resultados.calculos && (
+                    <div style={{ width: '100%', marginTop: '15px', marginBottom: '15px' }}>
+                        {resultados.isNormalApprox ? (
+                            <Grafico_HP resultados={resultados} prueba="media_z" id="grafico-hnp-signos-z-matriz" />
+                        ) : (
+                            <Grafico_HNP_Signos resultados={resultados} id="grafico-hnp-signos-matriz" />
+                        )}
+                    </div>
+                )}
 
-            {resultados.tipo === 'rachas' && resultados.calculos && (
-                <div style={{ width: '100%', marginTop: '15px', marginBottom: '15px' }}>
-                    <Grafico_HNP_Rachas resultados={resultados} id="grafico-hnp-rachas-z-matriz" />
-                </div>
-            )}
+                {resultados.tipo === 'rachas' && resultados.calculos && (
+                    <div style={{ width: '100%', marginTop: '15px', marginBottom: '15px' }}>
+                        <Grafico_HNP_Rachas resultados={resultados} id="grafico-hnp-rachas-z-matriz" />
+                    </div>
+                )}
+            </div>
 
-            <div style={{ width: '100%', overflowX: 'auto', marginTop: '10px' }}>
+            <div id="tour-t6-hnp-decision" style={{ width: '100%', overflowX: 'auto', marginTop: '10px' }}>
                 <table className="decision-estadistica-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--text-pure)', borderRadius: '0px', background: 'var(--bg-card)', color: 'var(--text-pure)', textAlign: 'center', fontSize: '0.8rem' }}>
                     <tbody>
                         <tr>

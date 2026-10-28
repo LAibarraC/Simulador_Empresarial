@@ -62,7 +62,7 @@ const getOperador = (tipo) => {
     }
 };
 
-export default function GraficoBastonesModelos({ datos, condicion, resultados }) {
+export default function GraficoBastonesModelos({ datos, condicion, modoPDF = false }) {
     if (!datos || datos.length === 0) return null;
 
     const renderLatex = (str) => {
@@ -73,8 +73,6 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
     const esBernoulli = datos.length === 2 && datos[0].x === 0 && datos[1].x === 1;
 
     // --- Lógica de Recorte Dinámico del Eje X ---
-    const esperanza = resultados && resultados.esperanza !== undefined ? resultados.esperanza : null;
-    const desviacion = resultados && resultados.desviacion !== undefined ? resultados.desviacion : null;
 
     const epsilon = 0.0001;
     let minX_idx = 0;
@@ -149,106 +147,132 @@ export default function GraficoBastonesModelos({ datos, condicion, resultados })
         return null;
     };
 
+    const operadorTexto = { menor_igual: '≤', mayor_igual: '≥', menor_estricto: '<', mayor_estricto: '>' };
+    const grafico = (
+        <ComposedChart
+        width={modoPDF ? 640 : undefined}
+        height={modoPDF ? 300 : undefined}
+        data={datosRecortados}
+        margin={{ top: modoPDF ? (condicion ? 24 : 8) : 20, right: 5, left: modoPDF ? 22 : -5, bottom: modoPDF ? 0 : 20 }}
+        barCategoryGap={esBernoulli ? '15%' : '10%'}
+    >
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+
+
+
+        <XAxis
+            dataKey="x"
+            type={esBernoulli ? "category" : "number"}
+            domain={esBernoulli ? undefined : ['dataMin', 'dataMax']}
+            padding={esBernoulli ? { left: 10, right: 10 } : { left: 10, right: 10 }}
+            ticks={datosRecortados.map(d => d.x)}
+            tick={{ fill: modoPDF ? '#000000' : 'var(--text-main, #333333)', fontSize: modoPDF ? '7pt' : '0.7rem', fontWeight: 600 }}
+            axisLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main, #333333)', strokeWidth: 2 }}
+            tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main, #333333)', strokeWidth: 2 }}
+            height={modoPDF ? 20 : undefined}
+            tickMargin={modoPDF ? 2 : undefined}
+            tickSize={modoPDF ? 4 : undefined}
+            label={modoPDF ? undefined : <CustomLabelX />}
+        />
+
+        <YAxis
+            domain={esBernoulli ? [0, 1] : [0, 'auto']}
+            padding={{ top: modoPDF ? 12 : 30 }}
+            width={modoPDF ? 44 : undefined}
+            tick={{ fill: modoPDF ? '#000000' : 'var(--text-main, #333333)', fontSize: modoPDF ? '7pt' : '0.7rem', fontWeight: 600 }}
+            axisLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main, #333333)', strokeWidth: 2 }}
+            tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main, #333333)', strokeWidth: 2 }}
+            label={modoPDF ? undefined : <CustomLabelY />}
+        />
+
+        {!modoPDF && <Tooltip content={<CustomTooltip />} />}
+
+        {/* Reference lines moved to the bottom so they draw on top */}
+
+        {/* El gráfico de bastones se simula con barras muy delgadas, pero para Bernoulli es un histograma */}
+        <Bar
+            isAnimationActive={!modoPDF}
+            dataKey="p" 
+            fill="#3b82f6" 
+            stroke={esBernoulli ? "transparent" : "none"}
+            {...(esBernoulli ? {} : { barSize: 15, radius: [0, 0, 0, 0] })}
+        >
+            {datosRecortados.map((entry, index) => (
+                <Cell
+                    key={`cell-${index}`}
+                    fill="#3b82f6"
+                    fillOpacity={isResaltado(entry.x) ? 0.4 : 1}
+                />
+            ))}
+        </Bar>
+
+        {/* Línea envolvente (envelope) para mostrar la forma de la distribución (excepto en Bernoulli) */}
+        {!esBernoulli && (
+            <>
+                <Area
+                    type="linear"
+                    dataKey="p_linea"
+                    fill="#f97316"
+                    fillOpacity={0.25}
+                    stroke="none"
+                    isAnimationActive={false}
+                    connectNulls={false}
+                />
+                <Line
+                    type="linear"
+                    dataKey="p_linea"
+                    stroke={modoPDF ? '#000000' : 'var(--text-main, #334155)'}
+                    strokeWidth={1}
+                    dot={false}
+                    isAnimationActive={false}
+                    connectNulls={false}
+                />
+            </>
+        )}
+
+        {condicion && condicion.valorX !== undefined && (
+            <>
+                <ReferenceLine
+                    x={condicion.valorX}
+                    stroke="#f97316"
+                    strokeDasharray="4 4"
+                    strokeWidth={3}
+                    label={modoPDF ? { value: condicion.tipo.includes('intervalo') ? `X = ${condicion.valorX}` : `X ${operadorTexto[condicion.tipo] || '='} ${condicion.valorX}`, position: 'top', fill: '#000000', fontSize: 11 } : <CustomKatexLabel value={condicion.tipo.includes('intervalo') ? `X = ${condicion.valorX}` : `X ${getOperador(condicion.tipo)} ${condicion.valorX}`} />}
+                />
+                {condicion.tipo.includes('intervalo') && condicion.valorB !== undefined && (
+                    <ReferenceLine
+                        x={condicion.valorB}
+                        stroke="#f97316"
+                        strokeDasharray="4 4"
+                        strokeWidth={3}
+                        label={modoPDF ? { value: `X = ${condicion.valorB}`, position: 'top', fill: '#000000', fontSize: 11 } : <CustomKatexLabel value={`X = ${condicion.valorB}`} />}
+                    />
+                )}
+            </>
+        )}
+    </ComposedChart>
+    );
+
+    if (modoPDF) {
+        return (
+            <div style={{ width: '640px', maxWidth: '100%', margin: '0 auto', color: '#000000' }}>
+                <div style={{ position: 'relative', height: '300px' }}>
+                    <div style={{ position: 'absolute', left: '10px', top: `${condicion ? 24 : 8}px`, width: '20px', height: `${300 - (condicion ? 24 : 8) - 20}px`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ display: 'inline-block', transform: 'rotate(-90deg)', whiteSpace: 'nowrap', fontSize: '12px' }}>Probabilidad P(x)</span>
+                    </div>
+                    {grafico}
+                </div>
+                <div style={{ textAlign: 'center', fontSize: '12px' }}>Valor (x)</div>
+            </div>
+        );
+    }
+
     return (
-        <MarcoWidgetMAT251 titulo={<span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Gráfico de Bastones {renderLatex('P(X = x)')}</span>} anchoCompleto={true} alto="450px" id="grafico-bastones-tema3">
+        <MarcoWidgetMAT251 titulo={<span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Gráfico de Bastones {renderLatex('P(X = x)')}</span>} anchoCompleto={true} alto="450px" id="tour-t3discreta-grafico">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart
-                            data={datosRecortados}
-                            margin={{ top: 20, right: 5, left: -5, bottom: 20 }}
-                            barCategoryGap={esBernoulli ? '15%' : '10%'}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-
-
-
-                            <XAxis
-                                dataKey="x"
-                                type={esBernoulli ? "category" : "number"}
-                                domain={esBernoulli ? undefined : ['dataMin', 'dataMax']}
-                                padding={esBernoulli ? { left: 10, right: 10 } : { left: 10, right: 10 }}
-                                ticks={datosRecortados.map(d => d.x)}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: '0.7rem', fontWeight: 600 }}
-                                axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                label={<CustomLabelX />}
-                            />
-
-                            <YAxis
-                                domain={esBernoulli ? [0, 1] : [0, 'auto']}
-                                padding={{ top: 30 }}
-                                tick={{ fill: 'var(--text-main, #333333)', fontSize: '0.7rem', fontWeight: 600 }}
-                                axisLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-main, #333333)', strokeWidth: 2 }}
-                                label={<CustomLabelY />}
-                            />
-
-                            <Tooltip content={<CustomTooltip />} />
-
-                            {/* Reference lines moved to the bottom so they draw on top */}
-
-                            {/* El gráfico de bastones se simula con barras muy delgadas, pero para Bernoulli es un histograma */}
-                            <Bar 
-                                dataKey="p" 
-                                fill="#3b82f6" 
-                                stroke={esBernoulli ? "transparent" : "none"}
-                                {...(esBernoulli ? {} : { barSize: 15, radius: [0, 0, 0, 0] })}
-                            >
-                                {datosRecortados.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill="#3b82f6"
-                                        fillOpacity={isResaltado(entry.x) ? 0.4 : 1}
-                                    />
-                                ))}
-                            </Bar>
-
-                            {/* Línea envolvente (envelope) para mostrar la forma de la distribución (excepto en Bernoulli) */}
-                            {!esBernoulli && (
-                                <>
-                                    <Area
-                                        type="linear"
-                                        dataKey="p_linea"
-                                        fill="#f97316"
-                                        fillOpacity={0.25}
-                                        stroke="none"
-                                        isAnimationActive={false}
-                                        connectNulls={false}
-                                    />
-                                    <Line
-                                        type="linear"
-                                        dataKey="p_linea"
-                                        stroke="var(--text-main, #334155)"
-                                        strokeWidth={1}
-                                        dot={false}
-                                        isAnimationActive={false}
-                                        connectNulls={false}
-                                    />
-                                </>
-                            )}
-
-                            {condicion && condicion.valorX !== undefined && (
-                                <>
-                                    <ReferenceLine
-                                        x={condicion.valorX}
-                                        stroke="#f97316"
-                                        strokeDasharray="4 4"
-                                        strokeWidth={3}
-                                        label={<CustomKatexLabel value={condicion.tipo.includes('intervalo') ? `X = ${condicion.valorX}` : `X ${getOperador(condicion.tipo)} ${condicion.valorX}`} />}
-                                    />
-                                    {condicion.tipo.includes('intervalo') && condicion.valorB !== undefined && (
-                                        <ReferenceLine
-                                            x={condicion.valorB}
-                                            stroke="#f97316"
-                                            strokeDasharray="4 4"
-                                            strokeWidth={3}
-                                            label={<CustomKatexLabel value={`X = ${condicion.valorB}`} />}
-                                        />
-                                    )}
-                                </>
-                            )}
-                        </ComposedChart>
+{grafico}
                     </ResponsiveContainer>
                 </div>
             </div>

@@ -2,32 +2,16 @@ import React, { useMemo } from 'react';
 import { FONT } from '../../Principal/Constantes';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 
-function ContenidoArbolManual({ resultado, modReemplazo, svgWidth, svgHeight, numHojas, ROW_HEIGHT, topMargin, N, isMaximized }) {
-    const events = resultado.events;
-
-    // Calcular posiciones Y de las hojas (0 es la activa final, 1 a N son las inactivas)
-    const leafYs = [];
-    for (let i = 0; i <= N; i++) {
-        leafYs.push(topMargin + i * ROW_HEIGHT);
-    }
-
-    // Calcular posiciones Y de los nodos activos (padres)
-    const activeYs = new Array(N + 1);
-    activeYs[N] = leafYs[0]; // Hoja activa final
-    for (let i = N - 1; i >= 0; i--) {
-        const inactiveY = leafYs[N - i];
-        activeYs[i] = (activeYs[i + 1] + inactiveY) / 2;
-    }
-
-    const rootY = svgHeight / 2;
+function ContenidoArbolManual({ resultado, svgWidth, svgHeight, isMaximized }) {
+    const eventos = resultado.events || [];
     const rootX = 90;
-
-    const activeColor = "#10b981"; // Verde iluminado
-    const activeStroke = 3;
-    const inactiveColor = "#94a3b8"; // Gris opaco
-    const inactiveStroke = 1.5;
-
-    let accumP = 1;
+    const rootY = 72;
+    const anchoCaja = 120;
+    const colorActivo = '#10b981';
+    const colorInactivo = '#94a3b8';
+    const probabilidadTotal = eventos.reduce((producto, evento) => producto * (Number(evento.prob) || 0), 1);
+    const centroEvento = indice => 320 + indice * 220;
+    const recortar = nombre => String(nombre || '').length > 15 ? `${String(nombre).slice(0, 12)}...` : String(nombre || '');
 
     return (
         <div
@@ -82,95 +66,83 @@ function ContenidoArbolManual({ resultado, modReemplazo, svgWidth, svgHeight, nu
                 }}
             >
                 <defs>
-                    <marker id="arrow-active" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-                        <path d="M0,0 L0,6 L9,3 z" fill={activeColor} />
+                    <marker id="arrow-active-manual" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill={colorActivo} />
                     </marker>
-                    <marker id="arrow-inactive" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-                        <path d="M0,0 L0,6 L9,3 z" fill={inactiveColor} />
+                    <marker id="arrow-inactive-manual" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill={colorInactivo} />
                     </marker>
                 </defs>
 
-                {/* Raíz */}
-                <rect x={rootX - 40} y={rootY - 25} width="80" height="50" rx="8" fill="var(--bg-input, #f8fafc)" stroke={inactiveColor} strokeWidth="2" />
+                <rect x={rootX - 40} y={rootY - 25} width="80" height="50" rx="8" fill="var(--bg-input, #f8fafc)" stroke={colorInactivo} strokeWidth="2" />
                 <text x={rootX} y={rootY - 5} textAnchor="middle" fontSize="13" fill="var(--text-main, #334155)" fontWeight="bold">Total</text>
                 <text x={rootX} y={rootY + 12} textAnchor="middle" fontSize="14" fill="var(--text-main, #0f172a)" fontWeight="bold">N = 100%</text>
 
-                {events.map((ev, i) => {
-                    const startX = rootX + 40 + i * 220;
-                    const endX = startX + 140;
-                    const p = ev.prob;
-                    const pComp = 1 - p;
-                    accumP *= p;
-
-                    const startY = activeYs[i];
-                    const activeY = activeYs[i + 1];
-                    const inactiveY = leafYs[N - i];
-
-                    const nameA = ev.name;
-                    const nameComp = `No ${nameA}`;
-
-                    const isLast = i === N - 1;
+                {eventos.map((evento, indice) => {
+                    const probabilidad = Math.min(1, Math.max(0, Number(evento.prob) || 0));
+                    const complementaria = 1 - probabilidad;
+                    const xCentro = centroEvento(indice);
+                    const xInicio = indice === 0 ? rootX + 40 : centroEvento(indice - 1) + anchoCaja / 2;
+                    const yComplementaria = rootY + 80 + indice * 58;
+                    const xMedio = (xInicio + xCentro - anchoCaja / 2) / 2;
+                    const yMedioComplementaria = (rootY + yComplementaria) / 2;
+                    const nombre = String(evento.name || String.fromCharCode(65 + indice));
 
                     return (
-                        <g key={i}>
-                            {/* Rama Activa */}
-                            <line 
-                                x1={startX} y1={startY} 
-                                x2={endX - 65} y2={activeY} 
-                                stroke={activeColor} strokeWidth={activeStroke} 
-                                markerEnd="url(#arrow-active)" 
+                        <g key={`evento-manual-${indice}`}>
+                            <line
+                                x1={xInicio} y1={rootY}
+                                x2={xCentro - anchoCaja / 2 - 7} y2={rootY}
+                                stroke={colorActivo} strokeWidth="3"
+                                markerEnd="url(#arrow-active-manual)"
                                 strokeLinecap="round"
                             />
-                            <rect x={(startX + endX)/2 - 35} y={(startY + activeY)/2 - 12} width="60" height="20" fill="var(--bg-card, white)" rx="4" opacity="0.95" />
-                            <text x={(startX + endX)/2 - 5} y={(startY + activeY)/2 + 2} textAnchor="middle" fontSize="11" fill={activeColor} fontWeight="bold">
-                                P={p.toFixed(4)}
+                            <rect x={xMedio - 34} y={rootY - 31} width="68" height="19" rx="5" fill="var(--bg-card, #ffffff)" />
+                            <text x={xMedio} y={rootY - 17} textAnchor="middle" fontSize="11" fill={colorActivo} fontWeight="bold">
+                                P={probabilidad.toFixed(4)}
                             </text>
 
-                            {/* Caja Activa */}
-                            <rect 
-                                x={endX - 60} y={activeY - 25} width="120" height="50" rx="6" 
-                                fill="var(--bg-input, rgba(16, 185, 129, 0.1))" 
-                                stroke={activeColor} strokeWidth={2} 
+                            <rect
+                                x={xCentro - anchoCaja / 2} y={rootY - 25} width={anchoCaja} height="50" rx="6"
+                                fill="var(--bg-input, rgba(16, 185, 129, 0.1))"
+                                stroke={colorActivo} strokeWidth="2"
                             />
-                            <text x={endX} y={activeY - 5} textAnchor="middle" fontSize="12" fill="var(--text-main, #064e3b)" fontWeight="bold">
-                                {nameA.length > 15 ? nameA.substring(0, 15) + '...' : nameA}
+                            <text x={xCentro} y={rootY - 5} textAnchor="middle" fontSize="12" fill="var(--text-main, #064e3b)" fontWeight="bold">
+                                {recortar(nombre)}
                             </text>
-                            <text x={endX} y={activeY + 12} textAnchor="middle" fontSize="12" fill={activeColor} fontWeight="bold">
-                                P = {p.toFixed(4)}
+                            <text x={xCentro} y={rootY + 13} textAnchor="middle" fontSize="12" fill={colorActivo} fontWeight="bold">
+                                P = {probabilidad.toFixed(4)}
                             </text>
 
-                            {/* Si es el último nodo activo, agregar texto de ruta */}
-                            {isLast && (
-                                <text x={endX + 68} y={activeY + 4} textAnchor="start" fontSize="13" fill={activeColor} fontWeight="bold">
-                                    ← RUTA SELECCIONADA ({accumP.toFixed(4)})
+                            <line
+                                x1={xInicio} y1={rootY}
+                                x2={xCentro - anchoCaja / 2 - 7} y2={yComplementaria}
+                                stroke={colorInactivo} strokeWidth="1.5"
+                                markerEnd="url(#arrow-inactive-manual)"
+                                strokeLinecap="round"
+                            />
+                            <rect x={xMedio - 38} y={yMedioComplementaria - 23} width="76" height="19" rx="5" fill="var(--bg-card, #ffffff)" />
+                            <text x={xMedio} y={yMedioComplementaria - 9} textAnchor="middle" fontSize="11" fill={colorInactivo} fontWeight="bold">
+                                P={complementaria.toFixed(4)}
+                            </text>
+
+                            <rect
+                                x={xCentro - anchoCaja / 2} y={yComplementaria - 25} width={anchoCaja} height="50" rx="6"
+                                fill="var(--bg-input, #ffffff)"
+                                stroke={colorInactivo} strokeWidth="1"
+                            />
+                            <text x={xCentro} y={yComplementaria - 5} textAnchor="middle" fontSize="12" fill="var(--text-main, #475569)">
+                                {recortar(`No ${nombre}`)}
+                            </text>
+                            <text x={xCentro} y={yComplementaria + 13} textAnchor="middle" fontSize="12" fill="var(--text-muted, #64748b)" fontWeight="bold">
+                                P = {complementaria.toFixed(4)}
+                            </text>
+
+                            {indice === eventos.length - 1 && (
+                                <text x={xCentro + anchoCaja / 2 + 10} y={rootY + 5} textAnchor="start" fontSize="12" fill={colorActivo} fontWeight="bold">
+                                    ← RUTA SELECCIONADA ({probabilidadTotal.toFixed(4)})
                                 </text>
                             )}
-
-                            {/* Rama Inactiva */}
-                            <line 
-                                x1={startX} y1={startY} 
-                                x2={endX - 65} y2={inactiveY} 
-                                stroke={inactiveColor} strokeWidth={inactiveStroke} 
-                                markerEnd="url(#arrow-inactive)" 
-                                strokeLinecap="round"
-                            />
-                            <rect x={(startX + endX)/2 - 35} y={(startY + inactiveY)/2 - 12} width="60" height="20" fill="var(--bg-card, white)" rx="4" opacity="0.95" />
-                            <text x={(startX + endX)/2 - 5} y={(startY + inactiveY)/2 + 2} textAnchor="middle" fontSize="11" fill={inactiveColor} fontWeight="bold">
-                                P={pComp.toFixed(4)}
-                            </text>
-
-                            {/* Caja Inactiva */}
-                            <rect 
-                                x={endX - 60} y={inactiveY - 25} width="120" height="50" rx="6" 
-                                fill="var(--bg-input, #fff)" 
-                                stroke={inactiveColor} strokeWidth={1} 
-                            />
-                            <text x={endX} y={inactiveY - 5} textAnchor="middle" fontSize="12" fill="var(--text-main, #475569)">
-                                {nameComp.length > 15 ? nameComp.substring(0, 15) + '...' : nameComp}
-                            </text>
-                            <text x={endX} y={inactiveY + 12} textAnchor="middle" fontSize="12" fill="var(--text-muted, #64748b)" fontWeight="bold">
-                                P = {pComp.toFixed(4)}
-                            </text>
                         </g>
                     );
                 })}
@@ -342,24 +314,16 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
     if (resultado.isManualDinamic) {
         const events = resultado.events || [];
         const N = events.length;
-        const ROW_HEIGHT = 70;
-        const numHojas = N + 1;
-        const topMargin = 45;
-        const svgHeight = topMargin + Math.max(0, numHojas - 1) * ROW_HEIGHT + topMargin;
-        const svgWidth = Math.max(820, 220 * N + 360);
+        const svgHeight = Math.max(230, 207 + Math.max(0, N - 1) * 58);
+        const svgWidth = Math.max(820, 220 * N + 420);
         const altoWidget = Math.max(380, svgHeight + 85);
 
         return (
             <MarcoWidgetMAT251 id="w-flow-tree" titulo="Árbol de Probabilidades Sucesivas" anchoCompleto={true} alto={`${altoWidget}px`}>
                 <ContenidoArbolManual
                     resultado={resultado}
-                    modReemplazo={modReemplazo}
                     svgWidth={svgWidth}
                     svgHeight={svgHeight}
-                    numHojas={numHojas}
-                    ROW_HEIGHT={ROW_HEIGHT}
-                    topMargin={topMargin}
-                    N={N}
                 />
             </MarcoWidgetMAT251>
         );

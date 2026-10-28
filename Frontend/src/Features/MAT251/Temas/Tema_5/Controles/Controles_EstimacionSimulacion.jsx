@@ -132,7 +132,7 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
     return (
         <div style={{ padding: '0px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '15px' }}>
-                <div className="tema5-sim-distribucion-selector" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                <div id="tour-t5-sim-distribucion" className="tema5-sim-distribucion-selector" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <label style={{ ...localLabelStyle, margin: 0 }}>Distribución Poblacional:</label>
                     
                     <div ref={selectRef} style={{ position: 'relative', width: '220px', fontFamily: FONT }}>
@@ -242,7 +242,7 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                 </div>
 
                 {/* Parámetros de la distribución */}
-                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: '1px solid rgba(0, 0, 0, 0.12)', borderRadius: '5px' }}>
+                <div id="tour-t5-sim-parametros-dist" style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: '1px solid rgba(0, 0, 0, 0.12)', borderRadius: '5px' }}>
                     <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-pure)' }}>PARÁMETROS DE LA DISTRIBUCIÓN</div>
                     <div className="tema5-simulacion-parametros-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                         {distribucion === 'normal' && (
@@ -295,7 +295,7 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
 
                 {/* Parámetros de Simulación */}
                 <div className="tema5-simulacion-entradas-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                    <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                    <div id="tour-t5-sim-tamano-muestra" className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
                         <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:', true)}</label>
                         <input
                             type="number"
@@ -307,7 +307,7 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                             placeholder="Tamaño de muestra"
                         />
                     </div>
-                    <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                    <div id="tour-t5-sim-num-simulaciones" className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
                         <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('N:', true)}</label>
                         <input
                             type="number"
@@ -323,7 +323,7 @@ export default function Controles_EstimacionSimulacion({ parametro, onCalcular }
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+            <div id="tour-t5-sim-btn-ejecutar" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <button 
                     className="button_calcular"
                     style={{ width: 'auto', padding: '5px 15px', opacity: isCalculating ? 0.7 : 1, cursor: isCalculating ? 'wait' : 'pointer' }} 

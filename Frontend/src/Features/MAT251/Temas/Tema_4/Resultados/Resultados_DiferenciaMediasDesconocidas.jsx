@@ -10,12 +10,12 @@ export default function Resultados_DiferenciaMediasDesconocidas({ resultados }) 
     const getMathProbFinal = (cond, statType) => {
         const symbol = statType === 'T' ? 'T' : 'Z';
         if (cond === 'mayor_que') {
-            return `P(\\bar{X} - \\bar{Y} \\ge x) = 1 - P(${symbol} \\le ${symbol.toLowerCase()}_0)`;
+            return `P(\\bar{X}_1 - \\bar{X}_2 \\ge x) = 1 - P(${symbol} \\le ${symbol.toLowerCase()}_0)`;
         }
         if (cond === 'entre') {
-            return `P(x_1 \\le \\bar{X} - \\bar{Y} \\le x_2) = P(${symbol} \\le ${symbol.toLowerCase()}_2) - P(${symbol} \\le ${symbol.toLowerCase()}_1)`;
+            return `P(x_1 \\le \\bar{X}_1 - \\bar{X}_2 \\le x_2) = P(${symbol} \\le ${symbol.toLowerCase()}_2) - P(${symbol} \\le ${symbol.toLowerCase()}_1)`;
         }
-        return `P(\\bar{X} - \\bar{Y} \\le x) = P(${symbol} \\le ${symbol.toLowerCase()}_0)`;
+        return `P(\\bar{X}_1 - \\bar{X}_2 \\le x) = P(${symbol} \\le ${symbol.toLowerCase()}_0)`;
     };
 
     return (
@@ -31,7 +31,7 @@ export default function Resultados_DiferenciaMediasDesconocidas({ resultados }) 
                             formulaKey={resultados.statType === 'T' ? "TStudent" : "Z_dif_medias"}
                             formulaLatex={resultados.statType === 'T' ? "T" : "Z"}
                             customTexto={resultados.statType === 'T' ? "Estandarización t-Student para Diferencia de Medias" : "Estandarización Z para Diferencia de Medias"}
-                            customMath={resultados.formulaLaTeX || (resultados.statType === 'T' ? "T = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_1 - \\mu_2)}{S_p \\sqrt{\\frac{1}{n_1} + \\frac{1}{n_2}}}" : "Z = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_1 - \\mu_2)}{\\sqrt{\\frac{S_1^2}{n_1} + \\frac{S_2^2}{n_2}}}")}
+                            customMath={resultados.formulaLaTeX || (resultados.statType === 'T' ? "T = \\frac{(\\bar{X}_1 - \\bar{X}_2) - (\\mu_1 - \\mu_2)}{S_p \\sqrt{\\frac{1}{n_1} + \\frac{1}{n_2}}}" : "Z = \\frac{(\\bar{X}_1 - \\bar{X}_2) - (\\mu_1 - \\mu_2)}{\\sqrt{\\frac{S_1^2}{n_1} + \\frac{S_2^2}{n_2}}}")}
                             align="center"
                         />
                         <span>y Probabilidad</span>
@@ -58,7 +58,7 @@ export default function Resultados_DiferenciaMediasDesconocidas({ resultados }) 
                             <span>PROBABILIDAD FINAL</span>
                             <StatLabel
                                 formulaKey="P_dif_medias_final"
-                                formulaLatex="P(\bar{X} - \bar{Y})"
+                                formulaLatex="P(\bar{X}_1 - \bar{X}_2)"
                                 customTexto={`Cálculo de Probabilidad ${resultados.statType === 'T' ? 't-Student' : 'Normal Estándar'}`}
                                 customMath={getMathProbFinal(resultados.condicion, resultados.statType)}
                                 align="center"

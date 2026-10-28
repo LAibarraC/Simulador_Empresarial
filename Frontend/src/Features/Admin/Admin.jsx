@@ -104,7 +104,7 @@ export default function Admin() {
   const [correoEditado, setCorreoEditado] = useState(false);
   const [contrasenaCopiada, setContrasenaCopiada] = useState(false);
   const [invitacionCopiada, setInvitacionCopiada] = useState(false);
-  const [nuevaCredencial, setNuevaCredencial] = useState({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida() });
+  const [nuevaCredencial, setNuevaCredencial] = useState({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida(), modulos: [] });
   const credItemsPerPage = 6;
 
   // Estados para filtros por columna (Usuarios)
@@ -129,6 +129,12 @@ export default function Admin() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuFiltroAbierto]);
 
+  // Estados para asignación de módulos a docentes
+  const [docentesModulos, setDocentesModulos] = useState({});
+  const [modalModulosDocente, setModalModulosDocente] = useState(null);
+  const [modulosSeleccionados, setModulosSeleccionados] = useState([]);
+  const [guardandoModulos, setGuardandoModulos] = useState(false);
+
   // Modal de confirmación para eliminar usuario
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
   const [confirmarNombre, setConfirmarNombre] = useState('');
@@ -150,13 +156,47 @@ export default function Admin() {
   const cargarUsuarios = async () => {
     try {
       setCargando(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const data = await api.obtenerUsuarios();
-      setUsuarios(data);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const [dataUsuarios, dataModulos] = await Promise.all([
+        api.obtenerUsuarios(),
+        api.obtenerTodosDocentesModulos().catch(() => ({}))
+      ]);
+      setUsuarios(dataUsuarios);
+      setDocentesModulos(dataModulos || {});
     } catch (error) {
       alerta.error("Error", error.message || "No se pudieron cargar los usuarios");
     } finally {
       setCargando(false);
+    }
+  };
+
+  const handleAbrirModalModulos = (docente) => {
+    setModalModulosDocente(docente);
+    setModulosSeleccionados(docentesModulos[docente.id] || []);
+  };
+
+  const handleToggleModulo = (modKey) => {
+    setModulosSeleccionados(prev => 
+      prev.includes(modKey) ? prev.filter(m => m !== modKey) : [...prev, modKey]
+    );
+  };
+
+  const handleGuardarModulosDocente = async (e) => {
+    e.preventDefault();
+    if (!modalModulosDocente) return;
+    try {
+      setGuardandoModulos(true);
+      await api.asignarModulosDocente(modalModulosDocente.id, modulosSeleccionados);
+      setDocentesModulos(prev => ({
+        ...prev,
+        [modalModulosDocente.id]: modulosSeleccionados
+      }));
+      alerta.exito("Asignaturas actualizadas", `Asignaturas de ${modalModulosDocente.nombre} actualizadas con éxito.`);
+      setModalModulosDocente(null);
+    } catch (error) {
+      alerta.error("Error", error.message || "No se pudieron guardar las asignaturas");
+    } finally {
+      setGuardandoModulos(false);
     }
   };
 
@@ -229,18 +269,21 @@ export default function Admin() {
         email: nuevaCredencial.email.trim(),
         password: nuevaCredencial.password,
         rol: 'Docente',
+        modulos: nuevaCredencial.modulos || [],
       });
-      alerta.exito('Pre-cuenta creada', 'El docente ya puede iniciar sesión con estas credenciales.');
+      alerta.exito('Pre-cuenta creada', 'El docente ya puede iniciar sesión con estas credenciales y materias asignadas.');
       setMostrarModalCred(false);
       setInvitacionCopiada(false);
-      setNuevaCredencial({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida() });
+      setNuevaCredencial({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida(), modulos: [] });
+      cargarUsuarios();
+      cargarCredencialesLista();
     } catch (error) {
       alerta.error('Error', error.message || 'No se pudo crear el acceso docente');
     }
   };
 
   const abrirModalCredencial = () => {
-    setNuevaCredencial({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida() });
+    setNuevaCredencial({ nombre: '', apellido: '', rol: 'Docente', email: '', password: generarContrasenaSugerida(), modulos: [] });
     setCorreoEditado(false);
     setContrasenaCopiada(false);
     setInvitacionCopiada(false);
@@ -249,7 +292,10 @@ export default function Admin() {
 
   const copiarInvitacion = async () => {
     const nombreCompleto = `${nuevaCredencial.nombre.trim()} ${nuevaCredencial.apellido.trim()}`.trim();
-    const mensaje = `Estimado/a ${nombreCompleto}:\n\nSe ha creado su acceso docente al sistema.\n\nUsuario: ${nuevaCredencial.email.trim()}\nContraseña temporal: ${nuevaCredencial.password}\n\nPor seguridad, cambie su contraseña al ingresar por primera vez.`;
+    const materiasTexto = nuevaCredencial.modulos?.length
+      ? `\nAsignaturas habilitadas: ${nuevaCredencial.modulos.join(', ')}`
+      : '';
+    const mensaje = `Estimado/a ${nombreCompleto}:\n\nSe ha creado su acceso docente al sistema.${materiasTexto}\n\nUsuario: ${nuevaCredencial.email.trim()}\nContraseña temporal: ${nuevaCredencial.password}\n\nPor seguridad, cambie su contraseña al ingresar por primera vez.`;
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(mensaje);
@@ -938,6 +984,40 @@ export default function Admin() {
                                   <option value="Docente" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Docente</option>
                                   <option value="Administrador" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Administrador</option>
                                 </select>
+                                {u.rol === 'Docente' && (
+                                  <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                                    {docentesModulos[u.id] && docentesModulos[u.id].length > 0 ? (
+                                      <>
+                                        {docentesModulos[u.id].slice(0, 2).map(m => (
+                                          <span key={m} style={{ fontSize: '0.72rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', fontWeight: 'bold' }}>
+                                            {m}
+                                          </span>
+                                        ))}
+                                        {docentesModulos[u.id].length > 2 && (
+                                          <span
+                                            title={docentesModulos[u.id].join(', ')}
+                                            style={{
+                                              fontSize: '0.72rem',
+                                              padding: '2px 6px',
+                                              borderRadius: '4px',
+                                              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                              border: '1px solid rgba(59, 130, 246, 0.3)',
+                                              color: '#2563eb',
+                                              fontWeight: 'bold',
+                                              cursor: 'pointer'
+                                            }}
+                                          >
+                                            +{docentesModulos[u.id].length - 2}
+                                          </span>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                        Sin materias
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
                               </td>
                               <td data-label="Estado" className="td-mitad td-mitad-izq" style={{ padding: '15px' }}>
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold', backgroundColor: u.activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: u.activo ? '#10b981' : '#ef4444' }}>
@@ -949,9 +1029,20 @@ export default function Admin() {
                                 {u.fecha_creacion ? u.fecha_creacion.split(' ')[0] : 'N/A'}
                               </td>
                               <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
-                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
                                   {u.rol !== 'Administrador' ? (
                                     <>
+                                      {u.rol === 'Docente' && (
+                                        <button
+                                          type="button"
+                                          className="btn-azul tour-admin-materias"
+                                          onClick={() => handleAbrirModalModulos(u)}
+                                          title="Asignar Materias"
+                                          style={{ padding: '6px 10px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                        >
+                                          <GraduationCap size={14} /> Materias
+                                        </button>
+                                      )}
                                       <button className={u.activo ? "btn-amarillo tour-admin-estado" : "btn-azul tour-admin-estado"} onClick={() => handleCambiarEstado(u.email, !u.activo)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>{u.activo ? 'Suspender' : 'Activar'}</button>
                                       <button className="btn-rojo tour-admin-eliminar" onClick={() => setUsuarioAEliminar(u)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>Eliminar</button>
                                     </>
@@ -1105,12 +1196,149 @@ export default function Admin() {
                   </div>
                 </div>
               </label>
+              <div className="credencial-field">
+                <span>
+                  <GraduationCap size={16} /> Asignaturas autorizadas (Módulos)
+                  <small>Materias que gestionará el docente</small>
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '2px' }}>
+                  {[
+                    { id: 'MAT151', label: 'MAT151', desc: 'Estadística General' },
+                    { id: 'MAT251', label: 'MAT251', desc: 'Estadística Matemática' }
+                  ].map((item) => {
+                    const checkeado = (nuevaCredencial.modulos || []).includes(item.id);
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          setInvitacionCopiada(false);
+                          setNuevaCredencial(prev => {
+                            const curr = prev.modulos || [];
+                            const updated = curr.includes(item.id)
+                              ? curr.filter(m => m !== item.id)
+                              : [...curr, item.id];
+                            return { ...prev, modulos: updated };
+                          });
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: checkeado ? '1px solid var(--primary-color)' : '1px solid var(--border-color)',
+                          backgroundColor: checkeado ? 'rgba(59, 130, 246, 0.08)' : 'var(--bg-input, var(--bg-card))',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checkeado}
+                          onChange={() => {}}
+                          style={{ margin: 0, cursor: 'pointer', width: '16px', height: '16px' }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 'bold', fontSize: '0.86rem', color: checkeado ? 'var(--primary-color)' : 'var(--text-main)', lineHeight: 1.2 }}>
+                            {item.label}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.desc}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="credencial-modal-footer">
                 <span><BadgeCheck size={15} /> Se creará el acceso del docente</span>
                 <div>
                   <button type="button" className="btn-credencial-password-action credencial-password-action" onClick={copiarInvitacion} disabled={!nuevaCredencial.nombre.trim() || !nuevaCredencial.apellido.trim() || !nuevaCredencial.email.trim() || !nuevaCredencial.password}><Copy size={16} /> Copiar invitación</button>
                   <button type="submit" className="btn-azul credencial-submit" disabled={!invitacionCopiada}><Save size={16} /> Crear acceso</button>
                 </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE ASIGNACIÓN DE ASIGNATURAS A DOCENTE */}
+      {modalModulosDocente && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000, backdropFilter: 'blur(3px)' }}>
+          <div className="grafico-card" style={{ width: '95%', maxWidth: '480px', backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '25px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+              <h3 style={{ margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem' }}>
+                <GraduationCap size={20} style={{ color: '#3b82f6' }} /> Asignar Asignaturas al Docente
+              </h3>
+              <button type="button" onClick={() => setModalModulosDocente(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20} /></button>
+            </div>
+            
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              Docente: <strong style={{ color: 'var(--text-main)' }}>{modalModulosDocente.nombre}</strong> ({modalModulosDocente.email})
+            </p>
+
+            <form onSubmit={handleGuardarModulosDocente}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+                {[
+                  { id: 'MAT151', label: 'MAT151', desc: 'Estadística General' },
+                  { id: 'MAT251', label: 'MAT251', desc: 'Estadística Matemática' }
+                ].map((item) => {
+                  const checkeado = modulosSeleccionados.includes(item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => handleToggleModulo(item.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: checkeado ? '1px solid var(--primary-color)' : '1px solid var(--border-color)',
+                        backgroundColor: checkeado ? 'rgba(59, 130, 246, 0.08)' : 'var(--bg-input, var(--bg-card))',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checkeado}
+                        onChange={() => {}}
+                        style={{ margin: 0, cursor: 'pointer', width: '16px', height: '16px' }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '0.86rem', color: checkeado ? 'var(--primary-color)' : 'var(--text-main)', lineHeight: 1.2 }}>
+                          {item.label}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.desc}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', borderTop: '1px solid var(--border-color)', paddingTop: '15px' }}>
+                <button
+                  type="button"
+                  onClick={() => setModalModulosDocente(null)}
+                  className="btn-amarillo"
+                  style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn-azul"
+                  disabled={guardandoModulos}
+                  style={{ padding: '8px 16px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Save size={16} /> {guardandoModulos ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
               </div>
             </form>
           </div>

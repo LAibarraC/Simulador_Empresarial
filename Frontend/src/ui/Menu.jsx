@@ -116,6 +116,13 @@
     const navLinksRef = useRef(null);
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
+    // Detectamos permisos de módulos asignados (Sin defaults)
+    const modulosUsuario = usuario?.modulos || [];
+    const esAdmin = usuario?.rol === "Administrador";
+    const tieneMAT151 = esAdmin || modulosUsuario.includes("MAT151");
+    const tieneMAT251 = esAdmin || modulosUsuario.includes("MAT251");
+    const tieneCualquierModulo = tieneMAT151 || tieneMAT251;
+
     // Detectamos si estamos en alguna de las páginas de la calculadora
     const isCalculadoraActive = location.pathname === '/calculadora' || location.pathname === '/MAT251';
     const isGruposActive = location.pathname === '/grupos' || location.pathname === '/gestion-docente' || location.pathname === '/reportes-docente';
@@ -201,18 +208,30 @@
               </span>
 
               <ul className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
-                <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
-                  <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
-                    <IconoEstadisticaGeneral style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
-                    Estadística General
-                  </NavLink>
-                </li>
-                <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
-                  <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
-                    <IconoEstadisticaMatematica style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
-                    Estadística Matemática
-                  </NavLink>
-                </li>
+                {!tieneCualquierModulo ? (
+                  <li className="dropdown-li dropdown-empty">
+                    Sin asignaturas
+                  </li>
+                ) : (
+                  <>
+                    {tieneMAT151 && (
+                      <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
+                        <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
+                          <IconoEstadisticaGeneral style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                          Estadística General
+                        </NavLink>
+                      </li>
+                    )}
+                    {tieneMAT251 && (
+                      <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
+                        <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
+                          <IconoEstadisticaMatematica style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                          Estadística Matemática
+                        </NavLink>
+                      </li>
+                    )}
+                  </>
+                )}
               </ul>
             </li>
 

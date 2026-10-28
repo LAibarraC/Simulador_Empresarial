@@ -499,7 +499,19 @@ export default function Controles_ModelosDiscretos({
         const datosGrafico = generarDatosGrafico(modelo, params);
 
         if (isGraficarOnly) setYaCalculado(true);
-        onCalcular({ modelo, params, condicion: condicionVisual, resultados, datosGrafico });
+        onCalcular({
+            modelo, params, condicion: condicionVisual, resultados, datosGrafico,
+            modo,
+            contextoMatriz: isMatriz ? {
+                nombreVariable: varSeleccionada?.nombre,
+                columna: columnasDisponibles[columnaSeleccionada],
+                cantidadColumnas: columnasDisponibles.length,
+                valorExito,
+                modoEstimacion: modelo === 'Binomial' ? modoEstimacionBinomial : null,
+                observaciones: [...datosColumna],
+                estadisticas: statsEstimados ? { ...statsEstimados } : null
+            } : null
+        });
     };
 
     const limpiarCondicionCalculada = () => {
@@ -521,10 +533,10 @@ export default function Controles_ModelosDiscretos({
         };
 
         return (
-            <div className="tema3-grid" style={{ marginBottom: '5px', gap: '10px' }}>
+            <div id="tour-t3discreta-parametros" className="tema3-grid" style={{ marginBottom: '5px', gap: '10px' }}>
                 {modelo === 'Bernoulli' && (
                     <>
-                        <div className="tema3-form-group" style={{ marginBottom: '0', gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                        <div id="tour-t3discreta-bernoulli-p" className="tema3-form-group" style={{ marginBottom: '0', gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
                                 {renderLatex('\\boldsymbol{p}:')}
                             </label>
@@ -553,7 +565,7 @@ export default function Controles_ModelosDiscretos({
                                 }}
                             />
                         </div>
-                        <div className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
+                        <div id="tour-t3discreta-bernoulli-formula" className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
                             <div className="t3-formula-inner">
                                 {renderLatex(paramP_ber !== '' ? `P(X=x) = p^x (1 - p)^{1-x} \\quad \\implies \\quad ${paramP_ber}^x (1 - ${paramP_ber})^{1-x}` : `P(X=x) = p^x (1 - p)^{1-x}`)}
                             </div>
@@ -574,7 +586,7 @@ export default function Controles_ModelosDiscretos({
                             margin: '0 auto',
                             flexWrap: 'nowrap'
                         }}>
-                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
+                            <div id="tour-t3discreta-binomial-n" className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
                                     {renderLatex('\\boldsymbol{n}:')}
                                 </label>
@@ -607,7 +619,7 @@ export default function Controles_ModelosDiscretos({
                                     }}
                                 />
                             </div>
-                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
+                            <div id="tour-t3discreta-binomial-p" className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px', flex: '1 1 0', minWidth: 0, justifyContent: 'center' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
                                     {renderLatex('\\boldsymbol{p}:')}
                                 </label>
@@ -641,7 +653,7 @@ export default function Controles_ModelosDiscretos({
                                 />
                             </div>
                         </div>
-                        <div className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
+                        <div id="tour-t3discreta-binomial-formula" className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
                             <div className="t3-formula-inner">
                                 {renderLatex((paramN_bin !== '' && paramP_bin !== '') ? `P(X=x) = \\binom{n}{x} p^x (1 - p)^{n-x} \\quad \\implies \\quad \\binom{${paramN_bin}}{x} ${paramP_bin}^x (1 - ${paramP_bin})^{${paramN_bin}-x}` : `P(X=x) = \\binom{n}{x} p^x (1 - p)^{n-x}`)}
                             </div>
@@ -650,7 +662,7 @@ export default function Controles_ModelosDiscretos({
                 )}
                 {modelo === 'Poisson' && (
                     <>
-                        <div className="tema3-form-group" style={{ marginBottom: '0', gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                        <div id="tour-t3discreta-poisson-lambda" className="tema3-form-group" style={{ marginBottom: '0', gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                             <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
                                 {renderLatex('\\boldsymbol{\\lambda}:')}
                             </label>
@@ -679,7 +691,7 @@ export default function Controles_ModelosDiscretos({
                                 }}
                             />
                         </div>
-                        <div className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
+                        <div id="tour-t3discreta-poisson-formula" className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
                             <div className="t3-formula-inner">
                                 {renderLatex(paramLambda !== '' ? `P(X=x) = \\frac{\\lambda^x e^{-\\lambda}}{x!} \\quad \\implies \\quad \\frac{${paramLambda}^x e^{-${paramLambda}}}{x!}` : `P(X=x) = \\frac{\\lambda^x e^{-\\lambda}}{x!}`)}
                             </div>
@@ -689,7 +701,7 @@ export default function Controles_ModelosDiscretos({
                 {modelo === 'Hipergeometrica' && (
                     <>
                         <div className="t3-grid-hipergeometrica">
-                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
+                            <div id="tour-t3discreta-hiper-N" className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                                     {renderLatex('\\boldsymbol{N}')}:
                                 </label>
@@ -721,7 +733,7 @@ export default function Controles_ModelosDiscretos({
                                     }}
                                 />
                             </div>
-                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
+                            <div id="tour-t3discreta-hiper-K" className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                                     {renderLatex('\\boldsymbol{N_1}')}:
                                 </label>
@@ -753,7 +765,7 @@ export default function Controles_ModelosDiscretos({
                                     }}
                                 />
                             </div>
-                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
+                            <div id="tour-t3discreta-hiper-N2" className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                                     {renderLatex('\\boldsymbol{N_2}')}:
                                 </label>
@@ -781,7 +793,7 @@ export default function Controles_ModelosDiscretos({
                                     }}
                                 />
                             </div>
-                            <div className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
+                            <div id="tour-t3discreta-hiper-n" className="tema3-form-group" style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%' }}>
                                 <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', minWidth: '24px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                                     {renderLatex('\\boldsymbol{n}')}:
                                 </label>
@@ -812,7 +824,7 @@ export default function Controles_ModelosDiscretos({
                                 />
                             </div>
                         </div>
-                        <div className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
+                        <div id="tour-t3discreta-hiper-formula" className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
                             <div className="t3-formula-inner">
                                 {renderLatex((paramN_hip !== '' && paramK_hip !== '' && paramn_hip !== '')
                                     ? `P(X=x) = \\frac{\\binom{N_1}{x} \\binom{N_2}{n-x}}{\\binom{N}{n}} \\quad \\implies \\quad \\frac{\\binom{${paramK_hip}}{x} \\binom{${Math.max(0, parseInt(paramN_hip) - parseInt(paramK_hip))}}{${paramn_hip}-x}}{\\binom{${paramN_hip}}{${paramn_hip}}}`
@@ -833,7 +845,7 @@ export default function Controles_ModelosDiscretos({
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '10px', marginTop: '10px' }}>
 
                 {/* SELECTOR DE MODELO */}
-                <div style={{ display: 'flex', width: '100%', maxWidth: '600px', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color, #e2e8f0)' }}>
+                <div id="tour-t3discreta-modelos" style={{ display: 'flex', width: '100%', maxWidth: '600px', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color, #e2e8f0)' }}>
                     {[
                         { id: 'Bernoulli', label: 'Bernoulli' },
                         { id: 'Binomial', label: 'Binomial' },
@@ -852,7 +864,7 @@ export default function Controles_ModelosDiscretos({
                     ))}
                 </div>
 
-                <div style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color, #e2e8f0)' }}>
+                <div id="tour-t3discreta-modos-entrada" style={{ display: 'inline-flex', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: RADIUS, border: '1px solid var(--border-color, #e2e8f0)' }}>
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
@@ -878,7 +890,7 @@ export default function Controles_ModelosDiscretos({
 
                 {modo === 'matriz' && (
                     <div style={{ marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px' }}>
+                        <div id="tour-t3discreta-matriz-datos" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 15px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px' }}>
                             <div>
                                 <span style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-pure)', margin: 0, fontFamily: FONT }}>Datos:</span>
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '2px', flexWrap: 'wrap' }}>
@@ -918,7 +930,7 @@ export default function Controles_ModelosDiscretos({
                             <>
                                 {/* 1. LO PRIMERO: Selector de Columna (si hay 2 o más columnas) */}
                                 {columnasDisponibles.length > 1 && (
-                                    <div style={{
+                                    <div id="tour-t3discreta-matriz-columna" style={{
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
@@ -993,7 +1005,7 @@ export default function Controles_ModelosDiscretos({
 
                                 {/* 3. DEBAJO DE ESO: Lo demás (campos de entrada según el modelo y modo) */}
                                 {modelo !== 'Poisson' && (
-                                    <div className="t3-fila-controles-matriz">
+                                    <div id="tour-t3discreta-matriz-controles" className="t3-fila-controles-matriz">
 
                                         {(modelo === 'Hipergeometrica' || modelo === 'Bernoulli') && (
                                             <>
@@ -1149,6 +1161,7 @@ export default function Controles_ModelosDiscretos({
 
                                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                                     <button
+                                        id="tour-t3discreta-btn-estimar"
                                         className="button_calcular"
                                         onClick={estimarDesdeDatos}
                                         style={{
@@ -1166,7 +1179,7 @@ export default function Controles_ModelosDiscretos({
                                 </div>
 
                                 {statsEstimados && (
-                                    <div className="t3-tabla-estimados-wrapper">
+                                    <div id="tour-t3discreta-tabla-estimados" className="t3-tabla-estimados-wrapper">
                                         <table className="t3-tabla-estimados" style={{
                                             fontSize: FS.sm,
                                             fontFamily: FONT
@@ -1249,6 +1262,7 @@ export default function Controles_ModelosDiscretos({
 
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                             <button
+                                id="tour-t3discreta-btn-calcular"
                                 className="button_calcular"
                                 onClick={() => manejarCalculo(true)}
                                 style={{
@@ -1268,7 +1282,7 @@ export default function Controles_ModelosDiscretos({
                 )}
 
                 {yaCalculado && (modo === 'manual' || (modo === 'matriz' && statsEstimados)) && (
-                    <>
+                    <div id="tour-t3discreta-condicion">
                         <div style={{ margin: '15px 0 5px 0' }}></div>
 
                         <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT }}>Condición de Búsqueda:</h4>
@@ -1385,6 +1399,7 @@ export default function Controles_ModelosDiscretos({
 
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                             <button
+                                id="tour-t3discreta-btn-calcular-condicion"
                                 className="button_calcular"
                                 onClick={() => manejarCalculo(false)}
                                 style={{
@@ -1400,7 +1415,7 @@ export default function Controles_ModelosDiscretos({
                                 CALCULAR CONDICIÓN
                             </button>
                         </div>
-                    </>
+                    </div>
                 )}
 
 

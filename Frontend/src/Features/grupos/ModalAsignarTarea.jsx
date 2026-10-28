@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
@@ -13,7 +13,8 @@ import {
   Check, 
   CheckCheck, 
   Send, 
-  X 
+  X,
+  AlertTriangle
 } from 'lucide-react';
 import { alerta } from "../../utils/Notificaciones";
 import { BASE_URL } from "../../services/api";
@@ -31,10 +32,165 @@ const TEMAS_ESTADISTICA_GENERAL = [
   { id: "tema8", numero: "Tema 8", nombre: "Números Índices", desc: "Índices simples, compuestos y deflación.", calculoTipo: "numeros_indices" },
 ];
 
+function CustomSelectModal({ value, onChange, options = [], placeholder = "Seleccionar curso..." }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => String(opt.value) === String(value));
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative", width: "100%", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "8px 12px",
+          minHeight: "38px",
+          boxSizing: "border-box",
+          background: "var(--bg-input)",
+          border: `1px solid ${isOpen ? "var(--primary-color)" : "var(--border-color)"}`,
+          borderRadius: "5px",
+          cursor: "pointer",
+          boxShadow: isOpen ? "0 0 0 3px rgba(37, 99, 235, 0.15)" : "none",
+          transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+          color: "var(--text-main)",
+          userSelect: "none",
+          fontSize: "0.85rem",
+        }}
+      >
+        <span
+          style={{
+            fontWeight: 500,
+            fontSize: "0.85rem",
+            color: selectedOption ? "var(--text-main)" : "var(--text-muted)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s ease",
+            color: "var(--text-muted)",
+            flexShrink: 0,
+            marginLeft: "8px",
+          }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            right: 0,
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "6px",
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.25)",
+            zIndex: 100010,
+            overflowY: "auto",
+            maxHeight: "220px",
+            padding: "4px 0",
+          }}
+        >
+          {options.map((opt) => {
+            const isSelected = String(opt.value) === String(value);
+            return (
+              <div
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                style={{
+                  padding: "8px 12px",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  color: isSelected ? "var(--primary-color)" : "var(--text-main)",
+                  fontWeight: isSelected ? 600 : 400,
+                  backgroundColor: isSelected ? "rgba(37, 99, 235, 0.1)" : "transparent",
+                  transition: "background 0.15s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) e.currentTarget.style.backgroundColor = "var(--bg-hover, rgba(0,0,0,0.04))";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                <span>{opt.label}</span>
+                {opt.badge && (
+                  <span style={{
+                    fontSize: "0.72rem",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    fontWeight: 600,
+                    background: opt.badgeColor || "var(--bg-main)",
+                    color: opt.badgeTextColor || "var(--text-muted)",
+                    marginLeft: "8px"
+                  }}>
+                    {opt.badge}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTareaAsignada }) {
-  const listaCursos = cursos.length > 0 ? cursos : (curso ? [curso] : []);
-  const [cursoActualId, setCursoActualId] = useState(curso?.id || (listaCursos[0]?.id || null));
-  const cursoActivo = listaCursos.find(c => c.id === cursoActualId) || curso || null;
+  // Excluir materias que todavía no están configuradas para tareas (como MAT251)
+  const listaCursos = useMemo(() => {
+    const raw = cursos.length > 0 ? cursos : (curso ? [curso] : []);
+    return raw.filter((c) => {
+      const mod = c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+      return mod !== "MAT251";
+    });
+  }, [cursos, curso]);
+
+  const [cursoActualId, setCursoActualId] = useState(
+    listaCursos.find(c => c.id === curso?.id)?.id || (listaCursos[0]?.id || null)
+  );
+  const cursoActivo = listaCursos.find(c => c.id === cursoActualId) || listaCursos[0] || null;
+
+  const moduloCursoActivo = cursoActivo?.modulo || (
+    cursoActivo?.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : 
+    (cursoActivo?.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null)
+  );
+  const esMAT251 = moduloCursoActivo === "MAT251";
 
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -96,6 +252,10 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
     e.preventDefault();
     if (!cursoActualId) {
       alerta.error("Curso requerido", "Debe seleccionar un curso para asignar la tarea.");
+      return;
+    }
+    if (esMAT251) {
+      alerta.advertencia("Asignatura en desarrollo", "No es posible asignar tareas a grupos de MAT251 por el momento. Próximamente se integrará el catálogo de MAT251.");
       return;
     }
     if (!titulo.trim()) {
@@ -180,23 +340,71 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
         </div>
 
         <form onSubmit={handleSubmit}>
-          {listaCursos.length > 1 && !curso && (
+          {listaCursos.length > 1 && (
             <div style={{ marginBottom: "14px" }}>
               <label style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", fontWeight: "bold", fontSize: "0.9rem" }}>
                 <Layers size={15} style={{ color: "var(--primary-color)" }} /> Curso / Asignatura de Destino:
               </label>
-              <select
-                value={cursoActualId || ""}
-                onChange={(e) => setCursoActualId(parseInt(e.target.value))}
-                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border-color)", background: "var(--bg-input)", color: "var(--text-main)", boxSizing: "border-box", fontWeight: "500" }}
-                required
-              >
-                {listaCursos.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre} {c.codigo ? `(${c.codigo})` : ""}
-                  </option>
-                ))}
-              </select>
+              <CustomSelectModal
+                value={cursoActualId}
+                onChange={(val) => setCursoActualId(parseInt(val))}
+                options={listaCursos.map(c => {
+                  const mod = c.modulo || (c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+                  return {
+                    value: c.id,
+                    label: `${c.nombre} ${c.codigo ? `(${c.codigo})` : ""}`,
+                    badge: mod || "MAT151",
+                    badgeColor: "rgba(59, 130, 246, 0.1)",
+                    badgeTextColor: "var(--primary-color)"
+                  };
+                })}
+                placeholder="Seleccionar curso / asignatura..."
+              />
+            </div>
+          )}
+
+          {listaCursos.length <= 1 && cursoActivo && (
+            <div style={{ marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: "500" }}>Asignatura / Grupo:</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-main)" }}>
+                {cursoActivo.nombre}
+              </span>
+              <span style={{
+                fontSize: "0.74rem",
+                padding: "2px 8px",
+                borderRadius: "4px",
+                fontWeight: "600",
+                background: esMAT251 ? "rgba(245, 158, 11, 0.15)" : "rgba(59, 130, 246, 0.1)",
+                color: esMAT251 ? "#d97706" : "var(--primary-color)"
+              }}>
+                {moduloCursoActivo || "MAT151"}{esMAT251 ? " — No disponible" : ""}
+              </span>
+            </div>
+          )}
+
+          {/* AVISO SI EL GRUPO SELECCIONADO ES MAT251 */}
+          {esMAT251 && (
+            <div style={{
+              background: "rgba(245, 158, 11, 0.1)",
+              border: "1px solid rgba(245, 158, 11, 0.3)",
+              borderRadius: "8px",
+              padding: "12px 14px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "10px",
+              color: "var(--text-main)",
+              fontSize: "0.85rem"
+            }}>
+              <AlertTriangle size={18} style={{ color: "#f59e0b", flexShrink: 0, marginTop: "2px" }} />
+              <div>
+                <div style={{ fontWeight: 600, color: "#d97706", marginBottom: "3px" }}>
+                  Asignatura MAT251 no disponible para tareas
+                </div>
+                <div style={{ lineHeight: "1.4" }}>
+                  El grupo seleccionado pertenece a <strong>MAT251</strong>. La asignación de tareas interactivas aún no está habilitada para esta materia. Actualmente solo se pueden asignar tareas en <strong>MAT151 (Estadística General)</strong>.
+                </div>
+              </div>
             </div>
           )}
 
@@ -228,7 +436,27 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
           </div>
 
           {/* TABLA DE SELECCIÓN DE TEMAS ESTADÍSTICA GENERAL */}
-          <div style={{ marginBottom: "16px" }}>
+          {esMAT251 ? (
+            <div style={{
+              marginBottom: "16px",
+              padding: "24px 16px",
+              textAlign: "center",
+              background: "var(--bg-main)",
+              border: "1px dashed var(--border-color)",
+              borderRadius: "8px",
+              color: "var(--text-muted)",
+              fontSize: "0.88rem"
+            }}>
+              <AlertTriangle size={24} style={{ color: "#d97706", opacity: 0.8, marginBottom: "8px" }} />
+              <div style={{ fontWeight: 600, color: "var(--text-main)", marginBottom: "4px" }}>
+                Temario de MAT251 en desarrollo
+              </div>
+              <div style={{ fontSize: "0.82rem" }}>
+                El catálogo de temas y ejercicios de MAT251 (Probabilidades, Variables Aleatorias, etc.) aún no está disponible para asignación automática.
+              </div>
+            </div>
+          ) : (
+            <div style={{ marginBottom: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
               <label style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: "bold", fontSize: "0.9rem" }}>
                 <Layers size={15} style={{ color: "var(--primary-color)" }} /> Módulo: Estadística General (Seleccionar Temas):
@@ -310,6 +538,7 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
               {temasSeleccionados.length} de {TEMAS_ESTADISTICA_GENERAL.length} temas seleccionados
             </div>
           </div>
+          )}
 
           <div style={{ marginBottom: "14px" }}>
             <label style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", fontWeight: "bold", fontSize: "0.9rem" }}>
@@ -367,7 +596,17 @@ export default function ModalAsignarTarea({ curso, cursos = [], onClose, onTarea
             <button type="button" onClick={onClose} className="btn-rojo" style={{ padding: "8px 16px" }}>
               <X size={16} /> Cancelar
             </button>
-            <button type="submit" disabled={procesando} className="btn-azul" style={{ padding: "8px 20px" }}>
+            <button 
+              type="submit" 
+              disabled={procesando || esMAT251} 
+              className="btn-azul" 
+              style={{ 
+                padding: "8px 20px",
+                opacity: esMAT251 ? 0.5 : 1,
+                cursor: esMAT251 ? "not-allowed" : "pointer"
+              }}
+              title={esMAT251 ? "No disponible para grupos de MAT251" : "Asignar Tarea"}
+            >
               <Send size={16} /> {procesando ? "Asignando..." : "Asignar Tarea"}
             </button>
           </div>

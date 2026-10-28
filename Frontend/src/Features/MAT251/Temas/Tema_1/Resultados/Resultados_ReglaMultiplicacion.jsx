@@ -264,13 +264,14 @@ export default function ResultadosReglaMultiplicacion({
                 if (isNaN(e.prob) || e.prob < 0 || e.prob > 1) {
                     setAlerta({ isOpen: true, mensaje: "Todas las probabilidades deben ser numéricas y estar entre 0 y 1." });
                     setResultadoManual(null);
+                    setResultado(null);
                     return;
                 }
             }
 
             const pJoint = parsedEvents.reduce((acc, curr) => acc * curr.prob, 1);
 
-            setResultadoManual({
+            const resultadoCalculado = {
                 isManualDinamic: true,
                 events: parsedEvents,
                 pAandB: pJoint,
@@ -278,7 +279,11 @@ export default function ResultadosReglaMultiplicacion({
                 pB: parsedEvents[1]?.prob || 0,
                 nameA: parsedEvents[0]?.name || 'A',
                 nameB: parsedEvents[1]?.name || 'B',
-            });
+                modo: 'manual',
+                modReemplazo
+            };
+            setResultadoManual(resultadoCalculado);
+            setResultado(resultadoCalculado);
             setErrorManual('');
             return;
         }
@@ -314,10 +319,27 @@ export default function ResultadosReglaMultiplicacion({
             setError(res.error);
             setResultado(null);
         } else {
-            setResultado(res.resultado);
+            setResultado({
+                ...res.resultado,
+                modo: 'matriz',
+                modReemplazo,
+                colA,
+                valA,
+                colB,
+                valB
+            });
             setError('');
         }
     };
+
+    // El reporte usa el último resultado calculado; al cambiar de modo se invalida
+    // para no exportar por error el resultado del modo anterior.
+    useEffect(() => {
+        setResultado(null);
+        setResultadoManual(null);
+        setError('');
+        setErrorManual('');
+    }, [inputMode]);
 
     // Limpiar resultado de matriz cuando cambian sus datos o selecciones
     useEffect(() => {
@@ -330,14 +352,15 @@ export default function ResultadosReglaMultiplicacion({
     useEffect(() => {
         setResultadoManual(null);
         setErrorManual('');
+        if (inputMode === 'manual') setResultado(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [manualEvents, modReemplazo]);
+    }, [manualEvents, modReemplazo, inputMode]);
 
     return (
         <div style={{ marginTop: '10px', fontFamily: FONT }}>
             {/* SELECTOR DE MODO DE ENTRADA */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                <div className="contenedor-selector-modos-mat251">
+                <div id="tour-mult-modos-entrada" className="contenedor-selector-modos-mat251">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
@@ -363,7 +386,7 @@ export default function ResultadosReglaMultiplicacion({
                         <h4 style={{ margin: '0 0 0px 0', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)' }}>Datos:</h4>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <div style={{ width: '100%', background: 'var(--bg-input)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', boxSizing: 'border-box' }}>
+                            <div id="tour-mult-manual-tipo-extraccion" style={{ width: '100%', background: 'var(--bg-input)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', boxSizing: 'border-box' }}>
                                 <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>Tipo de Extracción:</label>
                                 <div style={{ maxWidth: '300px' }}>
                                     <CustomSelect
@@ -375,6 +398,7 @@ export default function ResultadosReglaMultiplicacion({
                                 </div>
                             </div>
 
+                            <div id="tour-mult-manual-eventos" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {manualEvents.map((event, index) => {
                                 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                                 const defaultLetter = letters[index % 26];
@@ -439,9 +463,11 @@ export default function ResultadosReglaMultiplicacion({
                                     </div>
                                 );
                             })}
+                            </div>
                             
                             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '5px' }}>
                                 <button
+                                    id="tour-mult-manual-btn-agregar"
                                     onClick={() => {
                                         setManualEvents([...manualEvents, { id: `e${Date.now()}`, name: '', prob: '' }]);
                                     }}
@@ -454,6 +480,7 @@ export default function ResultadosReglaMultiplicacion({
 
                             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                                 <button
+                                    id="tour-mult-manual-btn-calcular"
                                     type="button"
                                     onClick={calcular}
                                     className="button_calcular"
@@ -478,7 +505,7 @@ export default function ResultadosReglaMultiplicacion({
                 ) : (
                     <>
                         {/* ── BARRA DE DATOS Y EDITOR (Solo en Matriz) ── */}
-                        <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                        <div id="tour-mult-datos" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                             <div>
                                 <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -509,7 +536,7 @@ export default function ResultadosReglaMultiplicacion({
                         {pseudoVar && pseudoVar.nombresColumnas && pseudoVar.nombresColumnas.length > 0 ? (
                             <div style={{ background: 'var(--bg-input)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px' }}>
                                 {/* MODALIDAD */}
-                                <div style={{ width: '100%', marginBottom: '12px' }}>
+                                <div id="tour-mult-tipo-extraccion" style={{ width: '100%', marginBottom: '12px' }}>
                                     <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>Tipo de Extracción:</label>
                                     <div style={{ maxWidth: '300px' }}>
                                         <CustomSelect
@@ -523,7 +550,7 @@ export default function ResultadosReglaMultiplicacion({
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '15px', alignItems: 'flex-start' }}>
                                     {/* EXTRACCIÓN 1 (A) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div id="tour-mult-extraccion-1" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <div>
                                             <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>
                                                 Variable de <span style={{ color: 'var(--text-pure)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString('A') }} /> (Extracción 1):
@@ -565,7 +592,7 @@ export default function ResultadosReglaMultiplicacion({
                                     </div>
 
                                     {/* EXTRACCIÓN 2 (B) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div id="tour-mult-extraccion-2" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <div>
                                             <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>
                                                 Variable de <span style={{ color: 'var(--text-pure)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString('B') }} /> (Extracción 2):
@@ -609,6 +636,7 @@ export default function ResultadosReglaMultiplicacion({
 
                                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                                     <button
+                                        id="tour-mult-btn-calcular"
                                         type="button"
                                         onClick={calcular}
                                         className="button_calcular"
@@ -646,7 +674,7 @@ export default function ResultadosReglaMultiplicacion({
 
             {activeResultado && (
                 <>
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-mult-tabla-desglose" style={{ marginBottom: '20px' }}>
                         <h3 style={{ color: 'var(--text-pure)', margin: '0 0 10px 0', fontSize: FS.md, fontWeight: 'bold', textAlign: 'center' }}>
                             Desglose de Probabilidades Sucesivas
                         </h3>
@@ -704,18 +732,18 @@ export default function ResultadosReglaMultiplicacion({
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-mult-formula" style={{ marginBottom: '20px' }}>
                         <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, margin: '15px 0 10px 0', fontWeight: 'bold', textAlign: 'center' }}>
                             Regla de la Multiplicación
                         </h4>
                         <FormulaMultiplicacion resultado={activeResultado} modReemplazo={modReemplazo} inputMode={inputMode} />
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-mult-flujo" style={{ marginBottom: '20px' }}>
                         <DiagramaFlujoSucesivo resultado={activeResultado} modReemplazo={modReemplazo} />
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-mult-arbol" style={{ marginBottom: '20px' }}>
                         <ArbolProbabilidades
                             resultado={activeResultado}
                             filas={filas}

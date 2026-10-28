@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ClipboardList, 
   Plus, 
@@ -13,6 +13,7 @@ import {
   Search,
   Filter,
   AlertCircle,
+  AlertTriangle,
   BookOpen,
   GraduationCap,
   RefreshCw,
@@ -74,7 +75,138 @@ const parseEjerciciosAsignados = (texto) => {
   };
 };
 
+// --- SELECTOR PERSONALIZADO DE TAREAS (REGLAS_MAT251) ---
+function CustomSelectTareas({ value, onChange, options = [], placeholder = "Seleccionar...", minWidth = "180px", disabled = false }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => String(opt.value) === String(value));
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative", minWidth, fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <div
+        onClick={() => {
+          if (!disabled) setIsOpen(!isOpen);
+        }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "6px 12px",
+          minHeight: "36px",
+          boxSizing: "border-box",
+          background: disabled ? "var(--bg-main)" : "var(--bg-input)",
+          border: `1px solid ${isOpen ? "var(--primary-color)" : "var(--border-color)"}`,
+          borderRadius: "5px",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.7 : 1,
+          boxShadow: isOpen ? "0 0 0 3px rgba(37, 99, 235, 0.15)" : "0 1px 2px rgba(0,0,0,0.03)",
+          transition: "border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease",
+          color: disabled ? "var(--text-muted)" : "var(--text-main)",
+          userSelect: "none",
+          fontSize: "0.85rem",
+          fontWeight: 500
+        }}
+      >
+        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginRight: "6px" }}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s ease",
+            color: "var(--text-muted)",
+            flexShrink: 0,
+            opacity: disabled ? 0.4 : 1
+          }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+
+      {isOpen && !disabled && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            right: 0,
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "5px",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+            zIndex: 1000,
+            maxHeight: "260px",
+            overflowY: "auto",
+            animation: "fadeInDropdown 0.2s ease",
+            padding: "4px",
+            boxSizing: "border-box"
+          }}
+        >
+          {options.length === 0 ? (
+            <div style={{ padding: "8px 12px", color: "var(--text-muted)", fontSize: "0.85rem", fontStyle: "italic" }}>
+              Sin opciones
+            </div>
+          ) : (
+            options.map((opt) => {
+              const isSelected = String(value) === String(opt.value);
+              return (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "var(--bg-input, rgba(0,0,0,0.04))";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "transparent";
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    fontSize: "0.85rem",
+                    borderRadius: "4px",
+                    background: isSelected ? "rgba(37, 99, 235, 0.08)" : "transparent",
+                    color: isSelected ? "var(--primary-color)" : "var(--text-main)",
+                    fontWeight: isSelected ? 600 : 400,
+                    transition: "background 0.15s ease, color 0.15s ease",
+                    display: "flex",
+                    alignItems: "center"
+                  }}
+                >
+                  {opt.label}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin = false }) {
+  const [filtroMateria, setFiltroMateria] = useState("TODAS");
   const [cursoFiltro, setCursoFiltro] = useState("todos");
   const [filtroEstado, setFiltroEstado] = useState("todos"); // "todos" | "pendientes" | "entregadas"
   const [busqueda, setBusqueda] = useState("");
@@ -82,6 +214,36 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
   const [tareasPorCurso, setTareasPorCurso] = useState({}); // { [cursoId]: [tareas] }
   const [entregasPorCurso, setEntregasPorCurso] = useState({}); // { [cursoId]: { [tareaId]: entrega } }
   const [cargando, setCargando] = useState(true);
+
+  // Módulos/materias únicos presentes en los cursos
+  const modulosDisponibles = useMemo(() => {
+    const mods = new Set();
+    cursos.forEach((c) => {
+      const mod = c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+      if (mod) mods.add(mod);
+    });
+    return Array.from(mods).sort();
+  }, [cursos]);
+
+  // Cursos que pertenecen a materias configuradas para tareas (actualmente MAT151)
+  const cursosHabilitadosParaTareas = useMemo(() => {
+    return cursos.filter((c) => {
+      const mod = c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+      return mod !== "MAT251";
+    });
+  }, [cursos]);
+
+  // Cursos filtrados según la materia seleccionada
+  const cursosFiltradosPorMateria = useMemo(() => {
+    if (filtroMateria === "TODAS") return cursosHabilitadosParaTareas;
+    return cursosHabilitadosParaTareas.filter((c) => {
+      const mod = c.modulo || (c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+      return mod === filtroMateria;
+    });
+  }, [cursosHabilitadosParaTareas, filtroMateria]);
+
+  // Detección de selección de asignatura/grupo MAT251
+  const esFiltroMAT251 = filtroMateria === "MAT251";
 
   // Modales
   const [mostrarModalAsignar, setMostrarModalAsignar] = useState(false);
@@ -190,7 +352,13 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
   const todasLasTareas = useMemo(() => {
     let lista = [];
     Object.keys(tareasPorCurso).forEach(cursoId => {
-      if (cursoFiltro === "todos" || String(cursoFiltro) === String(cursoId)) {
+      const cursoObj = cursos.find(c => String(c.id) === String(cursoId));
+      const modCurso = cursoObj?.modulo || (cursoObj?.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : cursoObj?.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+
+      const matchMateria = filtroMateria === "TODAS" || modCurso === filtroMateria;
+      const matchCurso = cursoFiltro === "todos" || String(cursoFiltro) === String(cursoId);
+
+      if (matchMateria && matchCurso) {
         lista = lista.concat(tareasPorCurso[cursoId] || []);
       }
     });
@@ -228,7 +396,7 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
 
     // Ordenar: primero las más recientes o por fecha límite
     return lista.sort((a, b) => new Date(b.created_at || b.id) - new Date(a.created_at || a.id));
-  }, [tareasPorCurso, entregasPorCurso, cursoFiltro, filtroEstado, busqueda, esDocente]);
+  }, [tareasPorCurso, entregasPorCurso, cursoFiltro, filtroMateria, busqueda, esDocente, cursos]);
 
   // Contadores para estudiantes
   const contadoresEstudiante = useMemo(() => {
@@ -241,6 +409,11 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
     const ahora = new Date();
 
     Object.keys(tareasPorCurso).forEach(cursoId => {
+      const cursoObj = cursos.find(c => String(c.id) === String(cursoId));
+      const modCurso = cursoObj?.modulo || (cursoObj?.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : cursoObj?.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+      if (filtroMateria !== "TODAS" && modCurso !== filtroMateria) return;
+      if (cursoFiltro !== "todos" && String(cursoFiltro) !== String(cursoId)) return;
+
       const tareas = tareasPorCurso[cursoId] || [];
       const entregas = entregasPorCurso[cursoId] || {};
       tareas.forEach(t => {
@@ -259,12 +432,26 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
     });
 
     return { total, entregadas, pendientes, vencidas };
-  }, [tareasPorCurso, entregasPorCurso, esDocente]);
+  }, [tareasPorCurso, entregasPorCurso, esDocente, cursos, filtroMateria, cursoFiltro]);
 
   const handleAbrirAsignarTarea = () => {
     if (cursoFiltro !== "todos") {
       const cursoSeleccionado = cursos.find(c => String(c.id) === String(cursoFiltro));
+      const mod = cursoSeleccionado?.modulo || (cursoSeleccionado?.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : "MAT151");
+      if (mod === "MAT251") {
+        alerta.advertencia(
+          "Asignatura en desarrollo",
+          "El grupo seleccionado pertenece a MAT251. La asignación de tareas interactivas para MAT251 aún no está habilitada."
+        );
+        return;
+      }
       setCursoParaNuevaTarea(cursoSeleccionado || null);
+    } else if (filtroMateria === "MAT251") {
+      alerta.advertencia(
+        "Asignatura en desarrollo",
+        "Ha seleccionado la asignatura MAT251. Actualmente las tareas interactivas solo están disponibles para grupos de MAT151."
+      );
+      return;
     } else {
       setCursoParaNuevaTarea(null);
     }
@@ -376,8 +563,8 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
         flexWrap: "wrap",
       }}>
         {/* BUSCADOR */}
-        <div style={{ flex: "1 1 240px", maxWidth: esDocente ? "400px" : "320px", position: "relative" }}>
-          <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+        <div style={{ flex: "1 1 240px", maxWidth: esDocente ? "380px" : "300px", position: "relative" }}>
+          <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
           <input
             type="text"
             placeholder="Buscar por título, tema o curso..."
@@ -385,12 +572,13 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
             onChange={(e) => setBusqueda(e.target.value)}
             style={{
               width: "100%",
-              padding: "8px 32px 8px 36px",
-              borderRadius: "8px",
+              padding: "7px 32px 7px 34px",
+              minHeight: "36px",
+              borderRadius: "5px",
               border: "1px solid var(--border-color)",
               background: "var(--bg-input)",
               color: "var(--text-main)",
-              fontSize: "0.9rem",
+              fontSize: "0.85rem",
               outline: "none",
               boxSizing: "border-box"
             }}
@@ -420,31 +608,52 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
           )}
         </div>
 
-        {/* SELECTOR DE CURSO */}
+        {/* SELECTOR DE MATERIAS (Solo si el usuario tiene más de 1 materia/módulo) */}
+        {modulosDisponibles.length > 1 && (
+          <div style={{ flex: "0 0 auto", minWidth: "180px" }}>
+            <CustomSelectTareas
+              value={filtroMateria}
+              onChange={(val) => {
+                setFiltroMateria(val);
+                setCursoFiltro("todos");
+              }}
+              options={[
+                { value: "TODAS", label: "Todas las materias" },
+                ...modulosDisponibles.map((m) => ({ 
+                  value: m, 
+                  label: m === "MAT251" ? `${m} (En desarrollo)` : m 
+                }))
+              ]}
+              placeholder="Todas las materias"
+              minWidth="180px"
+            />
+          </div>
+        )}
+
+        {/* SELECTOR DE CURSO MEJORADO */}
         {cursos.length > 0 && (
           <div style={{ flex: "0 0 auto", minWidth: "180px" }}>
-            <select
+            <CustomSelectTareas
               value={cursoFiltro}
-              onChange={(e) => setCursoFiltro(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--border-color)",
-                background: "var(--bg-input)",
-                color: "var(--text-main)",
-                fontSize: "0.88rem",
-                cursor: "pointer",
-                outline: "none"
-              }}
-            >
-              <option value="todos">Todos los Cursos</option>
-              {cursos.map(curso => (
-                <option key={curso.id} value={curso.id}>
-                  {curso.nombre}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setCursoFiltro(val)}
+              disabled={filtroMateria === "MAT251" || cursosFiltradosPorMateria.length === 0}
+              options={
+                filtroMateria === "MAT251" || cursosFiltradosPorMateria.length === 0
+                  ? [{ value: "todos", label: "Sin grupos configurados" }]
+                  : [
+                      { value: "todos", label: "Todos los Cursos" },
+                      ...cursosFiltradosPorMateria.map((curso) => {
+                        const mod = curso.modulo || (curso.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+                        return {
+                          value: curso.id,
+                          label: `${curso.nombre}${filtroMateria === "TODAS" && mod ? ` (${mod})` : ""}`
+                        };
+                      })
+                    ]
+              }
+              placeholder={filtroMateria === "MAT251" ? "Sin grupos configurados" : "Todos los Cursos"}
+              minWidth="180px"
+            />
           </div>
         )}
 
@@ -513,8 +722,15 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
             title="Recargar tareas"
             className="btn-azul"
             style={{
-              padding: "7px 12px",
+              padding: "7px 14px",
+              minHeight: "36px",
+              borderRadius: "5px",
               fontSize: "0.85rem",
+              fontWeight: 600,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              boxSizing: "border-box"
             }}
           >
             <RefreshCw size={14} className={cargando ? "spin" : ""} />
@@ -527,7 +743,14 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
               className="btn-amarillo"
               style={{
                 padding: "7px 16px",
+                minHeight: "36px",
+                borderRadius: "5px",
                 fontSize: "0.85rem",
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                boxSizing: "border-box"
               }}
             >
               <Plus size={16} /> Asignar Tarea
@@ -535,6 +758,34 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
           )}
         </div>
       </div>
+
+      {/* AVISO INFORMATIVO MAT251 */}
+      {esFiltroMAT251 && (
+        <div style={{
+          background: "rgba(245, 158, 11, 0.08)",
+          border: "1px solid rgba(245, 158, 11, 0.28)",
+          borderRadius: "8px",
+          padding: "13px 16px",
+          marginBottom: "20px",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          fontSize: "0.86rem",
+          color: "var(--text-main)",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.02)"
+        }}>
+          <div style={{ background: "rgba(245, 158, 11, 0.15)", color: "#d97706", padding: "6px", borderRadius: "6px", display: "flex", alignItems: "center", flexShrink: 0 }}>
+            <AlertTriangle size={18} />
+          </div>
+          <div style={{ flex: 1, lineHeight: "1.45" }}>
+            <strong style={{ color: "#d97706" }}>Asignatura MAT251 (En desarrollo):</strong>{" "}
+            {esDocente
+              ? "La asignación de tareas interactivas para MAT251 todavía no está habilitada. Las tareas del sistema actualmente están disponibles únicamente para el temario de MAT151 (Estadística General)."
+              : "Actualmente no existen tareas interactivas disponibles para MAT251, ya que las actividades prácticas automatizadas corresponden a la materia MAT151."
+            }
+          </div>
+        </div>
+      )}
 
       {/* CONTENIDO PRINCIPAL: LISTADO DE TAREAS */}
       {cargando ? (

@@ -11,6 +11,7 @@ const getIcon = (val) => {
         case 'probabilidad': return (
             <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /></svg>
         );
+        case 'Probabilidad_Total':
         case 'simulador_total': return (
             <svg {...props}><path d="M4 10h16" /><path d="M4 14h16" /><path d="M12 4v16" /></svg>
         );
@@ -41,9 +42,15 @@ const getIcon = (val) => {
         case 'dist_discreta': return (
             <svg {...props}><line x1="4" y1="20" x2="4" y2="4" /><line x1="4" y1="20" x2="20" y2="20" /><rect x="6" y="14" width="3" height="6" /><rect x="11" y="9" width="3" height="11" /><rect x="16" y="5" width="3" height="15" /></svg>
         );
+        case 'Distribuciones_Discretas':
+        case 'discretas':
+        case 'distribuciones_discretas':
         case 'modelos_discretos': return (
             <svg {...props}><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" /><path d="M14 2v6h6" /><path d="M3 15h6" /><path d="M3 18h6" /></svg>
         );
+        case 'Distribuciones_Continuas':
+        case 'continuas':
+        case 'distribuciones_continuas':
         case 'modelos_continuos': return (
             <svg {...props}><path d="M3 20h18" /><path d="M4 20c1.5-7 3-14 8-14s6.5 7 8 14" /></svg>
         );
@@ -103,7 +110,7 @@ export default function Operacion({ operacion, handleOperacion }) {
     const toggleTema = (idx) => setTemaAbierto(p => p === idx ? null : idx);
 
     return (
-        <div ref={selectRef} style={{ position: 'relative', width: '100%', marginBottom: '15px', fontFamily: FONT }}>
+        <div id="tour-mat251-operacion" ref={selectRef} style={{ position: 'relative', width: '100%', marginBottom: '15px', fontFamily: FONT }}>
 
             {/* ── TRIGGER ── */}
             <div

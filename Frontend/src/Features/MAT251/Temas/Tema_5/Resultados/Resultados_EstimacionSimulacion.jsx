@@ -238,7 +238,7 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                 </div>
             </div>
 
-            <div style={{ 
+            <div id="tour-t5-sim-estado" style={{ 
                 background: simulacionEnCurso ? 'rgba(245, 158, 11, 0.05)' : 'rgba(37, 99, 235, 0.05)', 
                 border: simulacionEnCurso ? '1px solid rgba(245, 158, 11, 0.2)' : '1px solid rgba(37, 99, 235, 0.2)', 
                 borderRadius: '8px', 
@@ -277,71 +277,73 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '15px' }}>
-                {parametroVerdadero !== null && (
-                    <div className="card-resultado" style={{ background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.4)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
-                            <svg width="18" height="18" viewBox="0 0 640 512" fill="currentColor" style={{ color: '#ea580c' }}>
-                                <path d="M96 224c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm448 0c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm32 32h-64c-17.6 0-33.5 7.1-45.1 18.6 40.3 22.1 68.9 62 75.1 109.4h66c17.7 0 32-14.3 32-32v-32c0-35.3-28.7-64-64-64zm-256 0c61.9 0 112-50.1 112-112S381.9 32 320 32 208 82.1 208 144s50.1 112 112 112zm76.8 32h-8.3c-20.8 10-43.9 16-68.5 16s-47.6-6-68.5-16h-8.3C179.6 288 128 339.6 128 403.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-28.8c0-63.6-51.6-115.2-115.2-115.2zm-223.7-13.4C161.5 263.1 145.6 256 128 256H64c-35.3 0-64 28.7-64 64v32c0 17.7 14.3 32 32 32h66.9c6.2-47.4 34.8-87.3 75.1-109.4z"/>
+            <div id="tour-t5-sim-tarjetas-resumen">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '15px' }}>
+                    {parametroVerdadero !== null && (
+                        <div className="card-resultado" style={{ background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.4)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
+                                <svg width="18" height="18" viewBox="0 0 640 512" fill="currentColor" style={{ color: '#ea580c' }}>
+                                    <path d="M96 224c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm448 0c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm32 32h-64c-17.6 0-33.5 7.1-45.1 18.6 40.3 22.1 68.9 62 75.1 109.4h66c17.7 0 32-14.3 32-32v-32c0-35.3-28.7-64-64-64zm-256 0c61.9 0 112-50.1 112-112S381.9 32 320 32 208 82.1 208 144s50.1 112 112 112zm76.8 32h-8.3c-20.8 10-43.9 16-68.5 16s-47.6-6-68.5-16h-8.3C179.6 288 128 339.6 128 403.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-28.8c0-63.6-51.6-115.2-115.2-115.2zm-223.7-13.4C161.5 263.1 145.6 256 128 256H64c-35.3 0-64 28.7-64 64v32c0 17.7 14.3 32 32 32h66.9c6.2-47.4 34.8-87.3 75.1-109.4z"/>
+                                </svg>
+                                Parámetro Poblacional Real
+                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
+                                {renderKatex(parametroVerdadero.toFixed(4))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="card-resultado" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.4)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75em', color: 'var(--text-pure)', fontWeight: 'bold' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+                                    style={{ color: 'var(--primary-color)' }}>
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
                             </svg>
-                            Parámetro Poblacional Real
+                            Promedio de las Estimaciones
                         </div>
                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
-                            {renderKatex(parametroVerdadero.toFixed(4))}
+                            {renderKatex(`\\overline{${simbolo}} = ${resumenDinamico.promedio.toFixed(4)}`)}
                         </div>
                     </div>
-                )}
+                </div>
 
-                <div className="card-resultado" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.4)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75em', color: 'var(--text-pure)', fontWeight: 'bold' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
-                                style={{ color: 'var(--primary-color)' }}>
-                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="14"></line>
-                        </svg>
-                        Promedio de las Estimaciones
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '15px' }}>
+                    <div className="card-stat" style={{ background: 'rgba(147, 51, 234, 0.08)', border: '1px solid rgba(147, 51, 234, 0.4)' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                            style={{ color: '#9333ea' }}>
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                            Desv. Est. de Estimaciones:
+                        </span>
+                        <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.desviacion.toFixed(4))}</span>
                     </div>
-                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>
-                        {renderKatex(`\\overline{${simbolo}} = ${resumenDinamico.promedio.toFixed(4)}`)}
+                    <div className="card-stat" style={{ background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.4)' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                            style={{ color: '#dc2626' }}>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="8 12 12 16 16 12"></polyline>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                            </svg>
+                            Mínimo {renderKatex(`(${simbolo})`)}:
+                        </span>
+                        <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.min === Infinity ? '0.0000' : resumenDinamico.min.toFixed(4))}</span>
                     </div>
-                </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '15px' }}>
-                <div className="card-stat" style={{ background: 'rgba(147, 51, 234, 0.08)', border: '1px solid rgba(147, 51, 234, 0.4)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                        style={{ color: '#9333ea' }}>
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                        </svg>
-                        Desv. Est. de Estimaciones:
-                    </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.desviacion.toFixed(4))}</span>
-                </div>
-                <div className="card-stat" style={{ background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.4)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                        style={{ color: '#dc2626' }}>
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="8 12 12 16 16 12"></polyline>
-                            <line x1="12" y1="8" x2="12" y2="16"></line>
-                        </svg>
-                        Mínimo {renderKatex(`(${simbolo})`)}:
-                    </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.min === Infinity ? '0.0000' : resumenDinamico.min.toFixed(4))}</span>
-                </div>
-                <div className="card-stat" style={{ background: 'rgba(22, 163, 74, 0.08)', border: '1px solid rgba(22, 163, 74, 0.4)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                         style={{ color: '#16a34a' }}>
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="16 12 12 8 8 12"></polyline>
-                            <line x1="12" y1="16" x2="12" y2="8"></line>
-                        </svg>
-                        Máximo {renderKatex(`(${simbolo})`)}:
-                    </span>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.max === -Infinity ? '0.0000' : resumenDinamico.max.toFixed(4))}</span>
+                    <div className="card-stat" style={{ background: 'rgba(22, 163, 74, 0.08)', border: '1px solid rgba(22, 163, 74, 0.4)' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-pure)' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                             style={{ color: '#16a34a' }}>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="16 12 12 8 8 12"></polyline>
+                                <line x1="12" y1="16" x2="12" y2="8"></line>
+                            </svg>
+                            Máximo {renderKatex(`(${simbolo})`)}:
+                        </span>
+                        <span style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-pure)' }}>{renderKatex(resumenDinamico.max === -Infinity ? '0.0000' : resumenDinamico.max.toFixed(4))}</span>
+                    </div>
                 </div>
             </div>
 
@@ -351,9 +353,9 @@ export default function Resultados_EstimacionSimulacion({ resultados }) {
             </div>
 
             {/* TABLA DE RESULTADOS */}
-            <div style={{ marginTop: '20px' }}>
+            <div id="tour-t5-sim-tabla-muestras" style={{ marginTop: '20px' }}>
                 <Tabla_EstimacionSimulacion resultados={resultados} simulacionesVisibles={simulacionesVisibles} />
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                <div id="tour-t5-sim-btn-exportar" style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
                     <button
                         type="button"
                         className="btn-primary"

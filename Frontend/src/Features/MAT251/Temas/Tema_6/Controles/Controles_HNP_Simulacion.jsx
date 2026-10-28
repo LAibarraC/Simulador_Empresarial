@@ -408,7 +408,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
 
             {prueba === 'signos' || prueba === 'rachas' ? (
                 <>
-                    <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: prueba === 'rachas' ? '15px 10px' : '15px', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative', marginBottom: '20px' }}>
+                    <div id="tour-t6-hnp-sim-parametros" style={{ background: 'var(--bg-input, #f1f5f9)', padding: prueba === 'rachas' ? '15px 10px' : '15px', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative', marginBottom: '20px' }}>
                         {ayudaSimulacion}
                         <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '15px', color: 'var(--text-pure)', textAlign: 'center' }}>PARÁMETROS DE SIMULACIÓN</div>
                         {prueba === 'signos' ? (
@@ -430,7 +430,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                         )}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+                    <div id="tour-t6-hnp-sim-config" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '15px', marginBottom: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
                             <div style={{ flex: 1 }}>
@@ -467,7 +467,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                    <div id="tour-t6-hnp-sim-muestras" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{N}:')}</label>
                             <input type="number" className="input-mat251 placeholder-small" style={{ flex: '0 1 50%', minWidth: 0 }} value={numSimsText} onChange={e => setNumSimsText(e.target.value)} min="1" max="10000" placeholder="Número de simulaciones" />
@@ -477,7 +477,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
             ) : (
                 <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-                <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '15px', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
+                <div id="tour-t6-hnp-sim-parametros" style={{ background: 'var(--bg-input, #f1f5f9)', padding: '15px', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
                     {prueba === 'chi_cuadrada' && ayudaSimulacion}
                     <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '15px', color: 'var(--text-pure)', textAlign: prueba === 'chi_cuadrada' ? 'center' : 'left' }}>PARÁMETROS DE SIMULACIÓN</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
@@ -516,7 +516,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                 </div>
             </div>
 
-            <div className="hnp-simulacion-campos-configuracion" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+            <div id="tour-t6-hnp-sim-config" className="hnp-simulacion-campos-configuracion" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
                     <div style={{ flex: 1 }}>
@@ -606,7 +606,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
                 )}
             </div>
 
-            <div className="hnp-simulacion-campos-muestra" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+            <div id="tour-t6-hnp-sim-muestras" className="hnp-simulacion-campos-muestra" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                 {prueba !== 'rachas' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'right' }}>{renderKatex('\\boldsymbol{n}:')}</label>
@@ -623,6 +623,7 @@ export default function Controles_HNP_Simulacion({ prueba, setResultadosSimulaci
 
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button 
+                    id="tour-t6-hnp-sim-btn-ejecutar"
                     className="button_calcular" 
                     style={{ width: 'auto', padding: '5px 15px', opacity: isCalculating ? 0.7 : 1, cursor: isCalculating ? 'wait' : 'pointer' }} 
                     onClick={handleSimular}

@@ -48,20 +48,22 @@ export default function ControlesConteo({
 
     return (
         <>
-            <div style={{ ...cardStyle}}>
-                <label style={{ ...labelStyle, color: 'var(--text-pure)' }}>Valores:</label>
-                {[{ label: 'Total (n):', val: n, setVal: setN }, { label: 'Muestra (r):', val: r, setVal: setR }].map(({ label, val, setVal }) => (
-                    <div key={label} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', gap: '10px' }}>
-                        <label style={{ fontSize: FS.sm, fontFamily: FONT, width: '85px', flexShrink: 0, margin: 0, color: 'var(--text-pure)' }}>{label}</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
-                            <button type="button" className="btn-primary" onClick={() => ajustar(setVal, val, '-')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>−</button>
-                            <input type="number" value={val} onChange={(e) => setVal(e.target.value)} className="container_cal_input" style={{ textAlign: 'center', flex: 1, borderRadius: RADIUS, fontSize: FS.base, color: 'var(--text-pure)', backgroundColor: 'var(--bg-input)', border: '1px solid var(--border-color)', outline: 'none' }} />
-                            <button type="button" className="btn-primary" onClick={() => ajustar(setVal, val, '+')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>+</button>
+            <div style={{ ...cardStyle }}>
+                <div id="tour-conteo-valores">
+                    <label style={{ ...labelStyle, color: 'var(--text-pure)' }}>Valores:</label>
+                    {[{ label: 'Total (n):', val: n, setVal: setN }, { label: 'Muestra (r):', val: r, setVal: setR }].map(({ label, val, setVal }) => (
+                        <div key={label} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', gap: '10px' }}>
+                            <label style={{ fontSize: FS.sm, fontFamily: FONT, width: '85px', flexShrink: 0, margin: 0, color: 'var(--text-pure)' }}>{label}</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
+                                <button type="button" className="btn-primary" onClick={() => ajustar(setVal, val, '-')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>−</button>
+                                <input type="number" value={val} onChange={(e) => setVal(e.target.value)} className="container_cal_input" style={{ textAlign: 'center', flex: 1, borderRadius: RADIUS, fontSize: FS.base, color: 'var(--text-pure)', backgroundColor: 'var(--bg-input)', border: '1px solid var(--border-color)', outline: 'none' }} />
+                                <button type="button" className="btn-primary" onClick={() => ajustar(setVal, val, '+')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>+</button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
 
-                <div style={{ marginTop: '15px' }}>
+                <div id="tour-conteo-tipo-elementos" style={{ marginTop: '15px' }}>
                     <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '6px', fontWeight: 'bold', color: 'var(--text-pure)' }}>Tipo de Elementos:</label>
                     
                     {/* Contenedor relativo exclusivo para el selector */}
@@ -207,7 +209,7 @@ export default function ControlesConteo({
                 </div>
             </div>
 
-            <button onClick={ejecutar} className="button_calcular" style={{ width: 'fit-content', alignSelf: 'center', padding: '5px 20px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button id="tour-conteo-btn-calcular" onClick={ejecutar} className="button_calcular" style={{ width: 'fit-content', alignSelf: 'center', padding: '5px 20px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 CALCULAR
             </button>
         </>

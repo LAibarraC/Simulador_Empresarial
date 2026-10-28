@@ -630,11 +630,16 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                     kFracObj = { n: parseInt(partes[0]), d: parseInt(partes[1]), s: parseInt(partes[0]) < 0 ? -1 : 1 };
                 }
                 
+                const constante = {
+                    incognitaVar,
+                    latex_block,
+                    valor: k_val,
+                    valorExacto: k_str,
+                    funcionOriginal: stringMath
+                };
                 setMensajeK({
                     texto: `¡Constante encontrada! Para que el área sea 1, ${incognitaVar} = ${k_str}`,
-                    datos: {
-                        incognitaVar, latex_block
-                    }
+                    datos: constante
                 });
                 
                 // Mutar el estado para reemplazar las incógnitas por la constante o fracción
@@ -661,10 +666,9 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                 reemplazarKRecursivo(currentBloques);
                 setBloquesSync(currentBloques, true);
 
-                // Al resolver la constante 'k', SOLO mostramos el procedimiento de la constante.
-                // Limpiamos los cálculos previos para no mostrar área, esperanza, varianza ni gráfica todavía.
-                // Al presionar CALCULAR por segunda vez, se resolverá todo de forma completa y analítica con la API.
-                if (onCalcular) onCalcular(null);
+                // El procedimiento ya es exportable; los momentos se calculan
+                // al presionar CALCULAR nuevamente con la constante sustituida.
+                if (onCalcular) onCalcular({ soloConstante: true, a, b: b_v, constante });
                 
                 return; // Detener la ejecución: solo mostrar el cálculo de la constante k
                 
@@ -740,7 +744,8 @@ export default function ControlDistribucionContinua({ onCalcular }) {
             latex_area,
             esperanza_backend,
             varianza_backend,
-            area_backend
+            area_backend,
+            constante: mensajeK?.datos || null
         });
     };
 
@@ -1168,9 +1173,9 @@ export default function ControlDistribucionContinua({ onCalcular }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div onClick={() => { setActiveIdSync(null); setFocusSlotSync(null); }} className="formula-container" style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', padding: '15px 15px', borderRadius: '5px', overflowX: 'auto', minHeight: '80px' }}>
+                <div id="tour-continua-lienzo-formula" onClick={() => { setActiveIdSync(null); setFocusSlotSync(null); }} className="formula-container" style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', padding: '15px 15px', borderRadius: '5px', overflowX: 'auto', minHeight: '80px' }}>
                     <div style={{ fontSize: '1rem', marginRight: '10px', color: 'inherit', flexShrink: 0 }}><InlineMath math={'f(x) ='} /></div>
-                    <div style={{ position: 'relative', display: 'inline-block', width: 'max-content', marginRight: '25px', flexShrink: 0 }}>
+                    <div id="tour-continua-limites" style={{ position: 'relative', display: 'inline-block', width: 'max-content', marginRight: '25px', flexShrink: 0 }}>
                         <div style={{ fontSize: '1.2rem', paddingRight: '5px', lineHeight: '1' }}><InlineMath math="\displaystyle \int" /></div>
                         <input type="text" name="limiteB" className="limite-input" value={limiteB} onChange={(e) => handleLimiteChange(setLimiteB, e.target.value)} onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', top: '-10px', left: '28px', width: getAnchoInput(limiteB || 'x', 1), fontSize: '0.8rem', textAlign: 'center', outline: 'none', fontFamily: MATH_FONT, padding: '0 2px' }} onFocus={handleFocus} onBlur={handleBlur} placeholder={modo === 'acumulada' ? 'x' : 'b'} onKeyDown={(e) => {
                             if (e.key === 'ArrowDown') { e.preventDefault(); document.getElementsByName('limiteA')[0]?.focus(); }
@@ -1190,12 +1195,12 @@ export default function ControlDistribucionContinua({ onCalcular }) {
 
 
 
-                <div role="status" aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '20px', padding: '0 4px', color: focusSlot ? '#1d4ed8' : 'var(--text-muted, #64748b)', fontSize: FS.xs }}>
+                <div id="tour-continua-barra-estado" role="status" aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '20px', padding: '0 4px', color: focusSlot ? '#1d4ed8' : 'var(--text-muted, #64748b)', fontSize: FS.xs }}>
                     <span aria-hidden="true" style={{ display: 'inline-flex', width: '18px', height: '18px', flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: focusSlot ? '#dbeafe' : '#e2e8f0', color: focusSlot ? '#1d4ed8' : '#475569', fontWeight: 700 }}>i</span>
                     <span>{obtenerEstadoEntrada()}</span>
                 </div>
 
-                <div className="teclado-container" style={{ padding: '10px', borderRadius: RADIUS, marginTop: 0 }}>
+                <div id="tour-continua-teclado" className="teclado-container" style={{ padding: '10px', borderRadius: RADIUS, marginTop: 0 }}>
                     <div className="teclado-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                         {/* Fila 1 */}
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '(', 'paren_abre'); }}><InlineMath math="(" /></button>
@@ -1301,7 +1306,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                 {mensajeInfo && <div style={{ backgroundColor: '#eff6ff', color: '#1e3a8a', border: '1px solid #bfdbfe', padding: '12px 15px', borderRadius: RADIUS, fontSize: FS.sm }}><strong>Info: </strong>{mensajeInfo}</div>}
 
                 {mensajeK && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '0px' }}>
+                    <div id="tour-continua-procedimiento-k" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '0px' }}>
                         {mensajeK.datos && mensajeK.datos.latex_block ? (
                             <div>
                                 <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
@@ -1326,6 +1331,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
 
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
                     <button
+                        id="tour-continua-btn-calcular"
                         type="button"
                         className="button_calcular"
                         onClick={manejarValidacion}

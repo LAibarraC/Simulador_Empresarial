@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
-from models import Clase, ClaseQR, Inscripcion, Notificacion, Usuario
+from models import Clase, ClaseQR, Inscripcion, Notificacion, Usuario, EstudianteModulo
 
 from validators.qr import (
     GenerarQRRequest,
@@ -342,6 +342,23 @@ async def matricular_por_qr_db(
     nombre_estudiante = current_user.nombre or current_user.email
     nueva_inscripcion = Inscripcion(clase_id=clase_id, estudiante_id=current_user.id)
     db.add(nueva_inscripcion)
+
+    # Desbloqueo permanente / vitalicio del módulo para el estudiante
+    mod_clase = getattr(clase, 'modulo', None)
+    if not mod_clase:
+        nombre_upper = (clase_nombre or "").upper()
+        if "MAT251" in nombre_upper:
+            mod_clase = "MAT251"
+        elif "MAT151" in nombre_upper:
+            mod_clase = "MAT151"
+
+    if mod_clase:
+        res_em = await db.execute(select(EstudianteModulo).filter(
+            EstudianteModulo.estudiante_id == current_user.id,
+            EstudianteModulo.modulo == mod_clase
+        ))
+        if not res_em.scalars().first():
+            db.add(EstudianteModulo(estudiante_id=current_user.id, modulo=mod_clase))
 
     nueva_notificacion = Notificacion(
         tipo="matriculacion",

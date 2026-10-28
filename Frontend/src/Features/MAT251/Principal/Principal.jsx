@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import 'react-data-grid/lib/styles.css';
 import { useMAT251Data } from '../../../components/gestion_datos/DataContext';
 import { calcularTecnicasConteo, calcularProbabilidadClasica, calcularProbabilidadCondicional, calcularProbabilidadTotalParticion } from '../Matematicas/logica_Tema1';
@@ -45,15 +46,28 @@ import GraficoModelosContinuos from '../Graficas/Tema_3/GraficoModelosContinuos'
 import Resultados_ModelosContinuos from '../Temas/Tema_3/Resultados/Resultados_ModelosContinuos';
 import GraficoBastonesModelos from '../Graficas/Tema_3/GraficoBastonesModelos';
 import ModalProcedimientoModelos from '../Temas/Tema_3/Modales/ModalProcedimientoModelos';
+import ReportePDF_MAT251 from '../ui/ReportePDF_MAT251';
 
-export default function Principal() {
+export default function Principal({ usuario, selectedFile, selectedSheet }) {
     const { variables, actualizarVariable } = useMAT251Data();
+    const { operacionId } = useParams();
+    const navigate = useNavigate();
 
     // ── UI ───────────────────────────────────────────────────────────────────────
     const [panelAbierto, setPanelAbierto] = useState(true);
-    const [operacion, setOperacion] = useState('');
+    const [operacion, setOperacion] = useState(operacionId || '');
     const [subTipoProbabilidad, setSubTipoProbabilidad] = useState('clasica');
     const [columnaParticion, setColumnaParticion] = useState(''); // Para probabilidad total
+
+    // Sincronizar estado si la URL cambia externamente o por navegación
+    useEffect(() => {
+        if (operacionId && operacionId !== operacion) {
+            setOperacion(operacionId);
+            if (operacionId === 'probabilidad') setSubTipoProbabilidad('clasica');
+        } else if (!operacionId && operacion) {
+            setOperacion('');
+        }
+    }, [operacionId]);
 
     const nombreOperacion = useMemo(() => {
         if (!operacion) return '';
@@ -62,7 +76,7 @@ export default function Principal() {
             if (found) return found.label;
         }
         if (operacion === 'conteo') return 'Técnicas de Conteo';
-        if (operacion === 'simulador_total') return 'Probabilidad Total';
+        if (operacion === 'Probabilidad_Total' || operacion === 'simulador_total') return 'Teorema de Probabilidad Total';
         if (operacion === 'regla_adicion') return 'Regla de la Adición';
         if (operacion === 'regla_multiplicacion') return 'Regla de la Multiplicación';
         if (operacion === 'muestreo') return 'Introducción al Muestreo';
@@ -70,8 +84,8 @@ export default function Principal() {
         if (operacion === 'dist_discreta') return 'Variables Aleatorias Discretas';
         if (operacion === 'dist_continua') return 'Calculadora de Funciones Continuas';
         if (operacion === 'dist_continua_v2') return 'Variable Aleatoria Continua';
-        if (operacion === 'modelos_discretos') return 'Distribuciones Discretas';
-        if (operacion === 'modelos_continuos') return 'Distribuciones Continuas';
+        if (operacion === 'Distribuciones_Discretas' || operacion === 'discretas' || operacion === 'distribuciones_discretas' || operacion === 'modelos_discretos') return 'Distribuciones Discretas';
+        if (operacion === 'Distribuciones_Continuas' || operacion === 'continuas' || operacion === 'distribuciones_continuas' || operacion === 'modelos_continuos') return 'Distribuciones Continuas';
         if (operacion === 'distribuciones_muestrales') return 'Distribuciones Muestrales';
         if (operacion === 'tyf') return 'Distribuciones T y F';
         if (operacion === 'tamanio_muestra') return 'Tamaño de Muestra';
@@ -140,6 +154,7 @@ export default function Principal() {
     const [nombresEncabezadosTemp, setNombresEncabezadosTemp] = useState({});
     const [nombreEncabezadoManual, setNombreEncabezadoManual] = useState('');
     const [inputModeProb, setInputModeProb] = useState('matriz');
+    const [datosExperimento, setDatosExperimento] = useState(null);
     const formulaProbRef = useRef(null);
 
     // ── Simulador Probabilidad Total ─────────────────────────────────────────────
@@ -190,6 +205,11 @@ export default function Principal() {
     const [paramIntervalos, setParamIntervalos] = useState('media');
     const [modoIntervalos, setModoIntervalos] = useState('matriz');
     const [confianzaIntervalos, setConfianzaIntervalos] = useState(95);
+    const [resultadoEstimacion, setResultadoEstimacion] = useState(null);
+
+    useEffect(() => {
+        setResultadoEstimacion(null);
+    }, [operacion, varSeleccionada?.id]);
 
     // Estado para el Modal de Alerta Global
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
@@ -204,6 +224,11 @@ export default function Principal() {
     // Resultados Tema 3
     const [datosTema3, setDatosTema3] = useState(null);
     const [datosTema3Continuos, setDatosTema3Continuos] = useState(null);
+    const [resultadoMuestral, setResultadoMuestral] = useState(null);
+
+    useEffect(() => {
+        setResultadoMuestral(null);
+    }, [operacion, varSeleccionada?.id]);
     const [modalProcTema3, setModalProcTema3] = useState(false);
 
     // Resultados Tema 4 delegados a Gestor_CalculadoraMuestral
@@ -215,6 +240,11 @@ export default function Principal() {
     // Tema 6: Hipótesis No Paramétricas
     const [pruebaHNP, setPruebaHNP] = useState('chi_cuadrada');
     const [modoHNP, setModoHNP] = useState('matriz');
+    const [resultadoHipotesis, setResultadoHipotesis] = useState(null);
+
+    useEffect(() => {
+        setResultadoHipotesis(null);
+    }, [operacion, varSeleccionada?.id]);
 
     // ==========================================FUNCIONES //
 
@@ -595,7 +625,7 @@ export default function Principal() {
         if (operacion === 'conteo') {
             const res = calcularTecnicasConteo(n, r, finalElements);
             if (res?.error) { mostrarAlerta(res.error, 'Error de Cálculo', 'error'); return; }
-            setResConteo({ ...res, n, r });
+            setResConteo({ ...res, n, r, tipoElementos, elementosBase: finalElements });
             setResProbabilidad(null);
         } else {
             if (!inputDatos) { mostrarAlerta('Por favor, agrega datos al espacio muestral en la pestaña "Datos".', 'Faltan Datos', 'warning'); return; }
@@ -633,6 +663,11 @@ export default function Principal() {
 
     const handleOperacion = (val) => {
         setOperacion(val);
+        if (val) {
+            navigate(`/MAT251/${val}`);
+        } else {
+            navigate('/MAT251');
+        }
         if (val === 'probabilidad') setSubTipoProbabilidad('clasica');
         setResConteo(null);
         setResProbabilidad(null);
@@ -716,7 +751,7 @@ export default function Principal() {
                     filter: brightness(1.1);
                     }
             `}</style>
-            <button onClick={() => setPanelAbierto(!panelAbierto)} className={`boton-toggle-medio ${panelAbierto ? 'abierto' : 'cerrado'}`} title={panelAbierto ? 'Ocultar panel' : 'Mostrar panel'}>
+            <button id="tour-mat251-toggle-panel" onClick={() => setPanelAbierto(!panelAbierto)} className={`boton-toggle-medio ${panelAbierto ? 'abierto' : 'cerrado'}`} title={panelAbierto ? 'Ocultar panel' : 'Mostrar panel'}>
                 <span className={`icono-toggle ${panelAbierto ? 'abierto' : 'cerrado'}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: FS.base, color: '#fff', transition: 'transform 0.3s ease', lineHeight: 0, marginTop: '-2px', marginLeft: '-1px' }}>❮</span>
             </button>
 
@@ -746,7 +781,7 @@ export default function Principal() {
 
                         {/* SUB-SELECTOR DE PROBABILIDAD */}
                         {operacion === 'probabilidad' && (
-                            <div style={{ marginBottom: '15px' }}>
+                            <div id="tour-mat251-tipo-probabilidad" style={{ marginBottom: '15px' }}>
                                 <label style={{ ...labelStyle, color: 'var(--text-pure)', fontSize: '0.85rem', marginBottom: '10px' }}>Tipo de Probabilidad:</label>
                                 <div style={{ display: 'flex', gap: '5px', background: 'var(--bg-card)', padding: '3px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                     {[
@@ -815,7 +850,7 @@ export default function Principal() {
                                 setTipoElementos={setTipoElementos}
                             />
                         )}
-                        {(operacion === 'probabilidad' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'modelos_discretos' || operacion === 'modelos_continuos' || operacion === 'dist_discreta' || operacion === 'Estimacion_puntual' || operacion === 'Estimacion_intervalos' || operacion === 'Hipotesis_parametricas' || operacion === 'Hipotesis_noparametricas') && (
+                        {(operacion === 'probabilidad' || operacion === 'Probabilidad_Total' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'Distribuciones_Discretas' || operacion === 'discretas' || operacion === 'distribuciones_discretas' || operacion === 'modelos_discretos' || operacion === 'Distribuciones_Continuas' || operacion === 'continuas' || operacion === 'distribuciones_continuas' || operacion === 'modelos_continuos' || operacion === 'dist_discreta' || operacion === 'Estimacion_puntual' || operacion === 'Estimacion_intervalos' || operacion === 'Hipotesis_parametricas' || operacion === 'Hipotesis_noparametricas') && (
                             <ControlesProbabilidad
                                 setModalVars={setModalVars}
                                 varSeleccionada={varSeleccionada}
@@ -857,7 +892,7 @@ export default function Principal() {
                             </div>
 
                             {/* Tarjetas de los 6 temas */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
+                            <div id="tour-mat251-contenedor-temas" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
                                 {[
                                     { num: '01', titulo: 'Cálculo de probabilidades e introducción al muestreo', ops: 5, activo: true },
                                     { num: '02', titulo: 'Variables aleatorias', ops: 2, activo: true },
@@ -866,7 +901,7 @@ export default function Principal() {
                                     { num: '05', titulo: 'Estimación e inferencia estadística', ops: 2, activo: true }, 
                                     { num: '06', titulo: 'Pruebas de hipótesis paramétricas y no paramétricas', ops: 2, activo: true },
                                 ].map(t => (
-                                    <div key={t.num} style={{
+                                    <div key={t.num} id={`tour-mat251-card-tema${parseInt(t.num, 10)}`} style={{
                                         padding: '12px 14px',
                                         border: `1px solid ${t.activo ? 'var(--primary-color)' : 'var(--border-color)'}`,
                                         borderRadius: RADIUS,
@@ -903,13 +938,13 @@ export default function Principal() {
                                 filas={filas}
                                 statsDatos={statsDatos}
                                 abrirEditor={abrirEditor}
-                                onCalcular={(datosRaw) => {
+                                onCalcular={(datosRaw, contexto) => {
                                     if (!datosRaw) {
                                         setDatosDiscretos(null);
                                         return;
                                     }
                                     const calculos = calcularMomentosDiscreta(datosRaw);
-                                    setDatosDiscretos(calculos);
+                                    setDatosDiscretos({ ...calculos, ...contexto });
                                 }}
                             />
                             <Resultados_DistribucionDiscreta resultados={datosDiscretos} />
@@ -927,14 +962,14 @@ export default function Principal() {
                                     }}
                                 />
 
-                                {datosContinuos && (
+                                {datosContinuos && !datosContinuos.soloConstante && (
                                     <div style={{ marginTop: '20px' }}>
                                         <Resultados_DistribucionContinua resultados={datosContinuos} />
                                     </div>
                                 )}
                             </div>
                         </div>
-                    ) : operacion === 'modelos_discretos' ? (
+                    ) : (operacion === 'Distribuciones_Discretas' || operacion === 'discretas' || operacion === 'distribuciones_discretas' || operacion === 'modelos_discretos') ? (
                         <div className="tema3-container">
                             <Controles_ModelosDiscretos
                                 varSeleccionada={varSeleccionada}
@@ -963,7 +998,7 @@ export default function Principal() {
                                 )}
                             </Controles_ModelosDiscretos>
                         </div>
-                    ) : operacion === 'modelos_continuos' ? (
+                    ) : (operacion === 'Distribuciones_Continuas' || operacion === 'continuas' || operacion === 'distribuciones_continuas' || operacion === 'modelos_continuos') ? (
                         <div className="tema3-container">
                             <Controles_ModelosContinuos
                                 varSeleccionada={varSeleccionada}
@@ -1014,9 +1049,9 @@ export default function Principal() {
                             statsDatos={statsDatos} abrirEditor={abrirEditor}
                         />
                     ) : operacion === 'distribuciones_muestrales' ? (
-                        <Gestor_CalculadoraMuestral varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} />
+                        <Gestor_CalculadoraMuestral varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} onResultado={setResultadoMuestral} />
                     ) : operacion === 'tyf' ? (
-                        <Gestor_DistribucionesTyF />
+                        <Gestor_DistribucionesTyF onResultado={setResultadoMuestral} />
                     ) : operacion === 'regla_multiplicacion' ? (
                         <ResultadosReglaMultiplicacion
                             varSeleccionada={varSeleccionada} filas={filas}
@@ -1036,7 +1071,7 @@ export default function Principal() {
                             setResultado={setResultadoAdicion} setError={setErrorAdicion}
                             statsDatos={statsDatos} abrirEditor={abrirEditor}
                         />
-                    ) : operacion === 'simulador_total' ? (
+                    ) : (operacion === 'Probabilidad_Total' || operacion === 'simulador_total') ? (
                         <ResultadosSimuladorTotal
                             filas={filas} varSeleccionada={varSeleccionada}
                             colCausa={colCausa} setColCausa={setColCausa}
@@ -1057,6 +1092,7 @@ export default function Principal() {
                             modo={modoEstimacion}
                             setModo={setModoEstimacion}
                             setParametro={setParamEstimacion}
+                            onResultado={setResultadoEstimacion}
                         />
                     ) : operacion === 'Estimacion_intervalos' ? (
                         <Gestor_EstimacionIntervalos 
@@ -1070,6 +1106,7 @@ export default function Principal() {
                             setModo={setModoIntervalos}
                             confianza={confianzaIntervalos}
                             setConfianza={setConfianzaIntervalos}
+                            onResultado={setResultadoEstimacion}
                         />
                     ) : operacion === 'conteo' ? (
                         <ResultadosConteo resConteo={resConteo} hayResultado={hayResultado} />
@@ -1083,6 +1120,7 @@ export default function Principal() {
                             setPrueba={setPruebaHP}
                             modo={modoHP}
                             setModo={setModoHP}
+                            onResultado={setResultadoHipotesis}
                         />
                     ) : operacion === 'Hipotesis_noparametricas' ? (
                         <Gestor_HipotesisNoParametricas 
@@ -1094,6 +1132,7 @@ export default function Principal() {
                             setPrueba={setPruebaHNP}
                             modo={modoHNP}
                             setModo={setModoHNP}
+                            onResultado={setResultadoHipotesis}
                             variables={variables}
                         />
                     ) : (
@@ -1111,6 +1150,7 @@ export default function Principal() {
                             colProbClasica={colProbClasica} setColProbClasica={setColProbClasica}
                             inputMode={inputModeProb} setInputMode={setInputModeProb}
                             mostrarAlerta={mostrarAlerta}
+                            onResultadoExperimento={setDatosExperimento}
                         />
                     )}
                 </div>
@@ -1124,7 +1164,7 @@ export default function Principal() {
 
             {/* Modales Tema 3 */}
             {modalProcTema3 && (
-                operacion === 'modelos_discretos' && datosTema3 ? (
+                (operacion === 'Distribuciones_Discretas' || operacion === 'discretas' || operacion === 'distribuciones_discretas' || operacion === 'modelos_discretos') && datosTema3 ? (
                     <ModalProcedimientoModelos
                         modelo={datosTema3.modelo}
                         params={datosTema3.params}
@@ -1132,7 +1172,7 @@ export default function Principal() {
                         momento={modalProcTema3}
                         onClose={() => setModalProcTema3(false)}
                     />
-                ) : operacion === 'modelos_continuos' && datosTema3Continuos ? (
+                ) : (operacion === 'Distribuciones_Continuas' || operacion === 'continuas' || operacion === 'distribuciones_continuas' || operacion === 'modelos_continuos') && datosTema3Continuos ? (
                     <ModalProcedimientoModelos
                         modelo={datosTema3Continuos.modelo}
                         params={datosTema3Continuos.params}
@@ -1150,6 +1190,49 @@ export default function Principal() {
                 titulo={modalAlerta.titulo}
                 mensaje={modalAlerta.mensaje}
                 tipo={modalAlerta.tipo}
+            />
+
+            {/* Reporte Formal en PDF Off-Screen para MAT251 (Arquitectura Padre e Hijas) */}
+            <ReportePDF_MAT251
+                filas={filas}
+                usuario={usuario}
+                selectedFile={selectedFile}
+                selectedSheet={selectedSheet}
+                operacion={operacion}
+                subTipoProbabilidad={subTipoProbabilidad}
+                inputModeProb={inputModeProb}
+                varSeleccionada={varSeleccionada}
+                colProbClasica={colProbClasica}
+                eventoFavorable={eventoFavorable}
+                eventoCondicion={eventoCondicion}
+                resConteo={resConteo}
+                tipoElementos={tipoElementos}
+                elementosBase={finalElements}
+                resProbabilidad={resProbabilidad}
+                resultadoAdicion={resultadoAdicion}
+                colAAdicion={colA_Adicion}
+                valAAdicion={valA_Adicion}
+                colBAdicion={colB_Adicion}
+                valBAdicion={valB_Adicion}
+                resultadoMult={resultadoMult}
+                resultadoSimulador={resultadoSimulador}
+                datosDiscretos={datosDiscretos}
+                datosContinuos={datosContinuos}
+                datosTema3={datosTema3}
+                datosTema3Continuos={datosTema3Continuos}
+                resultadoMuestral={resultadoMuestral}
+                resultadoEstimacion={resultadoEstimacion}
+                paramEstimacion={paramEstimacion}
+                modoEstimacion={modoEstimacion}
+                paramIntervalos={paramIntervalos}
+                modoIntervalos={modoIntervalos}
+                confianzaIntervalos={confianzaIntervalos}
+                resultadoHipotesis={resultadoHipotesis}
+                pruebaHP={pruebaHP}
+                modoHP={modoHP}
+                pruebaHNP={pruebaHNP}
+                modoHNP={modoHNP}
+                datosExperimento={datosExperimento}
             />
         </div>
     );

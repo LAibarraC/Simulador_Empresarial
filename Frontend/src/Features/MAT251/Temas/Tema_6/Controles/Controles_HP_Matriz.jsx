@@ -125,7 +125,11 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
             mostrarAlerta(res.error, 'Error de Cálculo', 'error');
             onCalcular(null);
         } else {
-            onCalcular(res);
+            onCalcular({
+                ...res,
+                datosAnalizados: prueba === 'proporcion' ? [...datosCompletos] : datosCompletos.map(Number).filter(Number.isFinite),
+                valorExito: prueba === 'proporcion' ? valorExito : undefined
+            });
         }
     };
 
@@ -140,7 +144,7 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
         + ((prueba === 'media_t' || prueba === 'varianza') && statsLive?.std !== undefined ? 1 : 0)
         + (statsLive?.p_hat !== undefined ? 1 : 0);
     const tablaResumenMuestra = statsLive && (
-        <div style={{ width: `min(100%, ${columnasResumenMuestra * 120}px)`, maxWidth: '100%', margin: prueba === 'proporcion' ? '0 auto' : '15px auto', border: '1px solid var(--text-pure)', borderRadius: '0px', backgroundColor: 'var(--bg-card)' }}>
+        <div id="tour-t6-hp-tabla-resumen-muestra" style={{ width: `min(100%, ${columnasResumenMuestra * 120}px)`, maxWidth: '100%', margin: prueba === 'proporcion' ? '0 auto' : '15px auto', border: '1px solid var(--text-pure)', borderRadius: '0px', backgroundColor: 'var(--bg-card)' }}>
             <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: FS.sm, fontFamily: FONT, color: 'var(--text-pure)' }}>
                 <colgroup>
                     {Array.from({ length: columnasResumenMuestra }, (_, index) => <col key={index} style={{ width: `${100 / columnasResumenMuestra}%` }} />)}
@@ -176,7 +180,7 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
     return (
         <div style={{ padding: '0px', fontFamily: FONT }}>            
             <div style={{ marginBottom: '10px' }}>
-                <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '10px' }}>
+                <div id="tour-t6-hp-datos-resumen" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '10px' }}>
                     <div>
                         <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -208,7 +212,7 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
                 <>
             <div style={{ ...cardStyle, border: 'none', padding: '0px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '15px', marginTop: '10px', marginBottom: '15px', alignItems: 'start', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                 {prueba === 'proporcion' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', gridColumn: '1 / -1', width: 'min(100%, 480px)', justifySelf: 'center' }}>
+                    <div id="tour-t6-hp-exito-selector" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', gridColumn: '1 / -1', width: 'min(100%, 480px)', justifySelf: 'center' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)', minWidth: '40px' }}>Exito:</label>
                         <div ref={selectRef} style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
                             <button
@@ -254,35 +258,34 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
                 )}
 
                 {prueba === 'media_t' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', gridColumn: '1 / -1', width: 'min(100%, 50%)', minWidth: 0, justifySelf: 'center', boxSizing: 'border-box' }}>
+                    <div id="tour-t6-hp-param-hipotesis" style={{ display: 'flex', alignItems: 'center', gap: '10px', gridColumn: '1 / -1', width: 'min(100%, 50%)', minWidth: 0, justifySelf: 'center', boxSizing: 'border-box' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\mu}_0:')}</label>
                         <input type="number" className="input-mat251 placeholder-small" value={mu0} onChange={(e) => setMu0(e.target.value)} placeholder="Media hipotética" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
                     </div>
                 )}
 
                 {prueba === 'media_z' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\mu}_0:')}</label>
-                        <input type="number" className="input-mat251 placeholder-small" value={mu0} onChange={(e) => setMu0(e.target.value)} placeholder="Media hipotética" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
-                    </div>
-                )}
-
-                {prueba === 'media_z' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
-                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\sigma}:')}</label>
-                        <input type="number" className="input-mat251 placeholder-small" value={sigma} onChange={(e) => setSigma(e.target.value)} placeholder="Desv. est. poblacional" min="0" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
+                    <div id="tour-t6-hp-param-hipotesis" style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '15px', width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\mu}_0:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={mu0} onChange={(e) => setMu0(e.target.value)} placeholder="Media hipotética" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+                            <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\sigma}:')}</label>
+                            <input type="number" className="input-mat251 placeholder-small" value={sigma} onChange={(e) => setSigma(e.target.value)} placeholder="Desv. est. poblacional" min="0" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
+                        </div>
                     </div>
                 )}
 
                 {prueba === 'proporcion' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', gridColumn: '1 / -1', width: 'min(100%, 50%)', minWidth: 0, justifySelf: 'center', boxSizing: 'border-box' }}>
+                    <div id="tour-t6-hp-param-hipotesis" style={{ display: 'flex', alignItems: 'center', gap: '10px', gridColumn: '1 / -1', width: 'min(100%, 50%)', minWidth: 0, justifySelf: 'center', boxSizing: 'border-box' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px', flexShrink: 0 }}>{renderKatex('\\boldsymbol{p}_0:')}</label>
                         <input type="number" className="input-mat251 placeholder-small" value={p0} onChange={(e) => setP0(e.target.value)} placeholder="Proporción hipotética" min="0" max="1" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
                     </div>
                 )}
 
                 {prueba === 'varianza' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', gridColumn: '1 / -1', width: 'min(100%, 50%)', minWidth: 0, justifySelf: 'center', boxSizing: 'border-box' }}>
+                    <div id="tour-t6-hp-param-hipotesis" style={{ display: 'flex', alignItems: 'center', gap: '10px', gridColumn: '1 / -1', width: 'min(100%, 50%)', minWidth: 0, justifySelf: 'center', boxSizing: 'border-box' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('\\boldsymbol{\\sigma}_0^2:')}</label>
                         <input type="number" className="input-mat251 placeholder-small" value={sigma02} onChange={(e) => setSigma02(e.target.value)} placeholder="Varianza hipotética" min="0" step="any" style={{ flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box' }} />
                     </div>
@@ -291,7 +294,7 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', width: '100%', marginBottom: '15px' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', width: '100%', maxWidth: '360px' }}>
+                <div id="tour-t6-hp-alpha" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', width: '100%', maxWidth: '360px' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', flexShrink: 0 }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
                     <div ref={alphaRef} style={{ position: 'relative', flex: 1, minWidth: 0 }}>
                     <div
@@ -339,7 +342,7 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', width: '100%', flexWrap: 'wrap' }}>
+                <div id="tour-t6-hp-h1" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', width: '100%', flexWrap: 'wrap' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', flexShrink: 0 }}>{renderKatex('\\mathbf{H}_1:')}</label>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', width: 'auto', maxWidth: '100%' }}>
                     {['bilateral', 'derecha', 'izquierda'].map(tipo => {
@@ -371,7 +374,7 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                    <button className="button_calcular" style={{ width: 'auto', padding: '5px 15px' }} onClick={handleCalcular}>
+                    <button id="tour-t6-hp-btn-calcular" className="button_calcular" style={{ width: 'auto', padding: '5px 15px' }} onClick={handleCalcular}>
                         Calcular Prueba
                     </button>
                 </div>

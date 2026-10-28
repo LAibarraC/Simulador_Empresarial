@@ -28,17 +28,19 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
 
     if (!hayResultado && !resConteo) {
         return (
-            <p className="mensaje-instruccion-vacio" style={{ color: 'var(--text-pure)', fontSize:'0.7rem', marginTop: '10px' }}>
-                Configura los parámetros y presiona <strong>CALCULAR</strong>.
-            </p>
+            <div id="tour-conteo-resultados">
+                <p className="mensaje-instruccion-vacio" style={{ color: 'var(--text-pure)', fontSize:'0.7rem', marginTop: '10px' }}>
+                    Configura los parámetros y presiona <strong>CALCULAR</strong>.
+                </p>
+            </div>
         );
     }
     if (!resConteo) return null;
 
     const { permutacion, combinacion, n } = resConteo;
 
-    const renderPanel = (titulo, datos, ref, color, limite, setLimite) => (
-        <div style={{ flex: '1 1 290px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-color)', borderRadius: RADIUS, background: 'var(--bg-card)', overflow: 'hidden'}}>
+    const renderPanel = (titulo, datos, ref, color, limite, setLimite, panelId) => (
+        <div id={panelId} style={{ flex: '1 1 290px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-color)', borderRadius: RADIUS, background: 'var(--bg-card)', overflow: 'hidden'}}>
             <div style={{ background: color, color: '#fff', padding: '10px', textAlign: 'center', fontWeight: 'bold', fontSize: FS.md }}>
                 {titulo}
             </div>
@@ -124,9 +126,9 @@ export default function ResultadosConteo({ resConteo, hayResultado }) {
     );
 
     return (
-        <div style={{ marginTop: '10px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-            {renderPanel('PERMUTACIONES (Importa el orden)', permutacion, formulaPermRef, '#d32f2f', limitePerm, setLimitePerm)}
-            {renderPanel('COMBINACIONES (No importa el orden)', combinacion, formulaCombRef, '#1976d2', limiteComb, setLimiteComb)}
+        <div id="tour-conteo-contenedor-resultados" style={{ marginTop: '10px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            {renderPanel('PERMUTACIONES (Importa el orden)', permutacion, formulaPermRef, '#d32f2f', limitePerm, setLimitePerm, 'tour-conteo-permutaciones')}
+            {renderPanel('COMBINACIONES (No importa el orden)', combinacion, formulaCombRef, '#1976d2', limiteComb, setLimiteComb, 'tour-conteo-combinaciones')}
         </div>
     );
 }

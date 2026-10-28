@@ -6,8 +6,13 @@ import { useData } from "../../../components/gestion_datos/DataContext";
 import Principal from '../Principal/Principal';
 import ModalAlerta from '../ui/ModalAlerta';
 import TablaDinamicaMAT251 from '../ui/TablaDinamicaMAT251';
+import { iniciarGuiaMAT251 } from '../utils/Guia';
+import { IconoPDF, IconoGuardar } from "../../../ui/iconos";
+import { generarPDFReporteMAT251 } from "../utils/exportUtilsMAT251";
+import { alerta } from "../../../utils/Notificaciones";
 import "../styles/pages/Pantalla.css";
 import "../styles/pages/CalculosMat251.css";
+import "../styles/GuiaMAT251.css";
 
 const TypingTitle = () => {
   const fullText = "Estadística Matemática (MAT251)";
@@ -75,6 +80,37 @@ export default function Pantalla() {
 
   const _stats = useCalculadoraExcel(selectedFile, selectedSheet);
 
+  const [exportandoPDF, setExportandoPDF] = useState(false);
+
+  const handleExportarPDF = async () => {
+    setMenuAbierto(false);
+    if (exportandoPDF) return;
+
+    const reporteEl = document.getElementById("reporte-formal-mat251");
+    if (reporteEl && reporteEl.getAttribute("data-es-simulacion") === "true") {
+      alerta.advertencia(
+        "Reporte no disponible",
+        "La exportación de reporte en PDF no está disponible para simulaciones."
+      );
+      return;
+    }
+
+    if (!reporteEl || reporteEl.getAttribute("data-listo") !== "true") {
+      alerta.advertencia(
+        "Sin resultados para exportar",
+        "Primero debes realizar un cálculo para generar su reporte formal en PDF."
+      );
+      return;
+    }
+    const nombreArchivo = reporteEl.getAttribute("data-nombre-archivo") || "Reporte_MAT251_Tema1";
+    try {
+      setExportandoPDF(true);
+      await generarPDFReporteMAT251("reporte-formal-mat251", nombreArchivo);
+    } finally {
+      setExportandoPDF(false);
+    }
+  };
+
   const esAdmin = usuario?.rol === "Administrador" || usuario?.isAdmin === true;
   const esDocente = usuario?.rol === "Docente";
   const esEstudiante = usuario?.rol === "Estudiante";
@@ -109,7 +145,7 @@ export default function Pantalla() {
 
   if (!tieneAcceso) {
     return (
-      <div 
+      <div className="mat251"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -251,10 +287,10 @@ export default function Pantalla() {
   }
 
   return (
-    <div className="contenedor-principal-sistema">
+    <div className="mat251 contenedor-principal-sistema">
       {/* VENTANA PRINCIPAL: CÁLCULOS (Principal.jsx) */}
       <div className="ventana-contenido-principal">
-        <Principal />
+        <Principal usuario={usuario} selectedFile={selectedFile} selectedSheet={selectedSheet} />
       </div>
 
       {/* MENÚ FLOTANTE RADIAL */}
@@ -299,19 +335,48 @@ export default function Pantalla() {
           <span className="fab-tooltip">Creación de Tablas</span>
         </button>
 
-        {/* Botón 3: Placeholder 2 */}
+        {/* Botón 3: Exportar Reporte PDF (Tema 1) */}
         <button
-          className="fab-item item-3"
-          onClick={() => setModalAlerta({ isOpen: true, mensaje: 'Esta herramienta estará disponible próximamente.', titulo: 'Próximamente', tipo: 'warning' })}
+          className={`fab-item item-3-pdf ${exportandoPDF ? 'exportando' : ''}`}
+          id="tour-mat251-fab-pdf"
+          onClick={handleExportarPDF}
+          disabled={exportandoPDF}
+          title={exportandoPDF ? "Generando PDF..." : "Exportar Reporte PDF"}
+          style={exportandoPDF ? { opacity: 0.7, pointerEvents: "none" } : undefined}
+        >
+          <IconoPDF size={23} />
+          <span className="fab-tooltip">{exportandoPDF ? "Generando PDF..." : "Exportar Reporte PDF"}</span>
+        </button>
+
+        {/* Botón 4: Guardar en Historial */}
+        <button
+          type="button"
+          className="fab-item item-5-historial"
+          id="tour-mat251-fab-historial"
+          disabled
+          title="Guardar en historial"
+          aria-label="Guardar en historial"
+        >
+          <IconoGuardar />
+          <span className="fab-tooltip">Guardar en historial</span>
+        </button>
+
+        {/* Botón 5: Guía Rápida Interactiva */}
+        <button
+          className="fab-item item-4-guia"
+          id="tour-mat251-fab-guia"
+          onClick={() => {
+            setMenuAbierto(false);
+            iniciarGuiaMAT251();
+          }}
+          title="Guía Rápida"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          <span className="fab-tooltip">Reportes Extras</span>
+          <span className="fab-tooltip">Guía Rápida</span>
         </button>
       </div>
 

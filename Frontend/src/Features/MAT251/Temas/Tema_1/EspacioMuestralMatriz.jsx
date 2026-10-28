@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import StatLabel from '../../ui/StatLabel';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 const FILAS_EXTRA_VIRTUALES = 4;
 const ALTURA_FILA_EM = 1.4;
+const HTML_VACIO = katex.renderToString('\\{\\}', { throwOnError: false });
 
 function textoDeCelda(celda) {
     if (typeof celda === 'string') return celda;
@@ -31,20 +34,21 @@ function LlaveMuestral({ lado, filas }) {
     );
 }
 
-function EspacioMuestralMatriz({ celdas, columnas }) {
+function EspacioMuestralMatriz({ celdas = [], columnas = 0 }) {
     const matrizRef = useRef(null);
     const celdasRef = useRef(null);
     const [rangoFilas, setRangoFilas] = useState({ inicio: 0, fin: 24 });
-    const cantidadFilas = celdas.length;
+    const cantidadFilas = celdas?.length || 0;
 
     const textosMaximosPorColumna = useMemo(() => {
+        if (!columnas || !cantidadFilas) return [];
         const maximos = Array.from({ length: columnas }, () => '');
-        celdas.forEach(fila => fila.forEach((celda, columna) => {
+        celdas.forEach(fila => (fila || []).forEach((celda, columna) => {
             const texto = textoDeCelda(celda);
             if (texto.length > (maximos[columna]?.length ?? 0)) maximos[columna] = texto;
         }));
         return maximos;
-    }, [celdas, columnas]);
+    }, [celdas, columnas, cantidadFilas]);
 
     useEffect(() => {
         const matriz = matrizRef.current;
@@ -103,8 +107,13 @@ function EspacioMuestralMatriz({ celdas, columnas }) {
         }
     }
 
+    const hayMatriz = cantidadFilas > 0 && columnas > 0;
+
     return (
-        <div className="mat251-experimentos-matriz-universo" ref={matrizRef}>
+        <div
+            className={hayMatriz ? "mat251-experimentos-matriz-universo" : "mat251-experimentos-formula-universo-simple"}
+            ref={matrizRef}
+        >
             <StatLabel
                 formulaKey="Omega"
                 formulaLatex={'\\Omega'}
@@ -113,9 +122,9 @@ function EspacioMuestralMatriz({ celdas, columnas }) {
                 className="mat251-experimentos-omega-label"
             />
             <span className="mat251-experimentos-matriz-igual" aria-hidden="true">=</span>
-            {celdas.length && columnas ? (
+            {hayMatriz ? (
                 <>
-                    <LlaveMuestral lado="izquierdo" filas={celdas.length} />
+                    <LlaveMuestral lado="izquierdo" filas={cantidadFilas} />
                     <div
                         className="mat251-experimentos-matriz-celdas"
                         ref={celdasRef}
@@ -146,9 +155,14 @@ function EspacioMuestralMatriz({ celdas, columnas }) {
                             </span>
                         ))}
                     </div>
-                    <LlaveMuestral lado="derecho" filas={celdas.length} />
+                    <LlaveMuestral lado="derecho" filas={cantidadFilas} />
                 </>
-            ) : null}
+            ) : (
+                <span
+                    className="mat251-experimentos-formula-universo-simple-contenido"
+                    dangerouslySetInnerHTML={{ __html: HTML_VACIO }}
+                />
+            )}
         </div>
     );
 }

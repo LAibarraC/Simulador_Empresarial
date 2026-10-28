@@ -37,6 +37,11 @@ async def lifespan(app: FastAPI):
             await conn.execute(text("ALTER TABLE usuarios ADD COLUMN must_change_password BOOLEAN NOT NULL DEFAULT 0"))
         except Exception:
             pass
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE clases ADD COLUMN modulo VARCHAR(50) NULL"))
+        except Exception:
+            pass
     yield
 
 _is_production = os.getenv("ENVIRONMENT") == "production"
@@ -58,7 +63,7 @@ origins = [
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
     "https://sice.jboris.org", #enlace de temporal
     "http://10.250.52.137:5173",
-    "http://192.168.100.184:5173",
+    "http://192.168.100.179:5173",
 ]                               
 
 app.add_middleware( 

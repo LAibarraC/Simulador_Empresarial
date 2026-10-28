@@ -62,7 +62,7 @@ const XAxisKatexLabel = ({ viewBox, value }) => {
     );
 };
 
-export default function GraficoAreaContinua({ datos }) {
+export default function GraficoAreaContinua({ datos, modoPDF = false }) {
     const dataGrafica = useMemo(() => {
         if (!datos || !datos.funcion) return [];
         
@@ -74,7 +74,7 @@ export default function GraficoAreaContinua({ datos }) {
             const varName = datos.modo === 'acumulada' ? 't' : 'x';
 
             const f = (val) => {
-                try { return compiledExpr.evaluate({ [varName]: val }); } catch (e) { return 0; }
+                try { return compiledExpr.evaluate({ [varName]: val }); } catch { return 0; }
             };
 
             // Búsqueda heurística de cola visual para evitar bucles infinitos en gráficas
@@ -88,6 +88,7 @@ export default function GraficoAreaContinua({ datos }) {
                 let iters = 200;
                 while (f(a) > 1e-4 && iters > 0) { a -= 2; iters--; }
             }
+            if (!Number.isFinite(a) || !Number.isFinite(b) || a >= b) return [];
             const puntos = [];
             const N = 100;
             const step = (b - a) / N;
@@ -111,7 +112,7 @@ export default function GraficoAreaContinua({ datos }) {
                 for (let i = 0; i <= N; i++) {
                     const x = a + i * step;
                     let fxVal = 0;
-                    try { fxVal = compiledExpr.evaluate({ [varName]: x }); } catch (e) { fxVal = 0; }
+                    try { fxVal = compiledExpr.evaluate({ [varName]: x }); } catch { fxVal = 0; }
                     
                     fxVal = Math.max(0, fxVal); // Densidad no negativa
                     if (i > 0) acumulado += fxVal * step;
@@ -146,7 +147,7 @@ export default function GraficoAreaContinua({ datos }) {
                 let fxVal = 0;
                 try {
                     fxVal = compiledExpr.evaluate({ [varName]: x });
-                } catch (e) {
+                } catch {
                     fxVal = 0;
                 }
                 puntos.push({
@@ -231,6 +232,90 @@ export default function GraficoAreaContinua({ datos }) {
         return null;
     };
 
+    const esperanzaVisible = Number.isFinite(datos.eX)
+        && datos.eX >= calculatedDomainAndTicks.domain[0]
+        && datos.eX <= calculatedDomainAndTicks.domain[1];
+    const altoPDF = 288;
+    const margenSuperiorPDF = esperanzaVisible ? 24 : 8;
+
+    const grafico = (
+        <AreaChart
+        width={modoPDF ? 640 : undefined}
+        height={modoPDF ? altoPDF : undefined}
+        data={dataGrafica}
+        margin={{ top: modoPDF ? margenSuperiorPDF : 36, right: 30, left: modoPDF ? 20 : -5, bottom: modoPDF ? 0 : 25 }}
+    >
+        <CartesianGrid strokeDasharray="3 3" stroke={modoPDF ? '#d1d5db' : 'var(--border-color)'} />
+        <ReferenceLine y={0} stroke={modoPDF ? '#000000' : 'var(--text-main)'} strokeWidth={2} />
+        
+        {datos.eX !== undefined && (
+            <ReferenceLine 
+                x={datos.eX} 
+                stroke="#ef4444" 
+                strokeDasharray="5 5" 
+                strokeWidth={2}
+                label={modoPDF ? { value: `E(X) = ${datos.eX.toFixed(4)}`, position: 'top', fill: '#000000', fontSize: 11 } : <CustomKatexLabel value={`\\mathbf{E(X)} = \\mathrm{${datos.eX.toFixed(4)}}`} color="#000000" />}
+            />
+        )}
+        
+        <XAxis 
+            dataKey="x" 
+            orientation={maxFx <= 0 ? 'top' : 'bottom'}
+            tick={{ fontSize: 11, fill: modoPDF ? '#000000' : 'var(--text-pure)', fontWeight: 500 }}
+            tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main)', strokeWidth: 2 }}
+            axisLine={{ stroke: 'transparent' }}
+            type="number"
+            domain={calculatedDomainAndTicks.domain}
+            ticks={calculatedDomainAndTicks.ticks}
+            height={modoPDF ? 28 : undefined}
+            tickMargin={modoPDF ? 5 : 10}
+            minTickGap={20}
+            label={modoPDF ? undefined : <XAxisKatexLabel value="x" />}
+        />
+        
+        <YAxis 
+            tick={{ fontSize: 11, fill: modoPDF ? '#000000' : 'var(--text-pure)', fontWeight: 500 }}
+            tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main)' }}
+            axisLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main)', strokeWidth: 2 }}
+            tickFormatter={(val) => val.toFixed(2)}
+            width={55}
+            domain={yAxisConfig.domain}
+            ticks={yAxisConfig.ticks}
+            label={modoPDF ? undefined : <YAxisKatexLabel value={datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} />}
+        />
+        
+        {!modoPDF && <Tooltip content={<CustomTooltip />} />}
+        
+        {/* Curva de densidad */}
+        <Area 
+            type="linear" 
+            dataKey="fx" 
+            stroke={modoPDF ? '#2563eb' : 'var(--primary-color)'} 
+            fill={modoPDF ? '#2563eb' : 'var(--primary-color)'} 
+            fillOpacity={0.3} 
+            strokeWidth={2}
+            baseValue={0}
+            isAnimationActive={!modoPDF}
+        />
+    </AreaChart>
+    );
+
+    if (modoPDF) {
+        return (
+            <div style={{ width: '640px', maxWidth: '100%', margin: '0 auto', color: '#000000' }}>
+                <div style={{ position: 'relative', height: `${altoPDF}px` }}>
+                    <div style={{ position: 'absolute', left: '7px', top: `${margenSuperiorPDF}px`, width: '20px', height: `${altoPDF - margenSuperiorPDF - 28}px`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ display: 'inline-block', transform: 'rotate(-90deg)', whiteSpace: 'nowrap', fontSize: '12px' }}>
+                            {datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'}
+                        </span>
+                    </div>
+                    {grafico}
+                </div>
+                <div style={{ textAlign: 'center', fontSize: '12px' }}>Valor de x</div>
+            </div>
+        );
+    }
+
     return (
         <div style={{ width: '100%', fontFamily: FONT }}>
             <MarcoWidgetMAT251 
@@ -240,69 +325,14 @@ export default function GraficoAreaContinua({ datos }) {
             >
                 <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart
-                            data={dataGrafica}
-                            margin={{ top: 36, right: 30, left: -5, bottom: 25 }}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                            <ReferenceLine y={0} stroke="var(--text-main)" strokeWidth={2} />
-                            
-                            {datos.eX !== undefined && (
-                                <ReferenceLine 
-                                    x={datos.eX} 
-                                    stroke="#ef4444" 
-                                    strokeDasharray="5 5" 
-                                    strokeWidth={2}
-                                    label={<CustomKatexLabel value={`\\mathbf{E(X)} = \\mathrm{${datos.eX.toFixed(4)}}`} color="#000000" />}
-                                />
-                            )}
-                            
-                            <XAxis 
-                                dataKey="x" 
-                                orientation={maxFx <= 0 ? 'top' : 'bottom'}
-                                tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 500 }}
-                                tickLine={{ stroke: 'var(--text-main)', strokeWidth: 2 }}
-                                axisLine={{ stroke: 'transparent' }}
-                                type="number"
-                                domain={calculatedDomainAndTicks.domain}
-                                ticks={calculatedDomainAndTicks.ticks}
-                                tickMargin={10}
-                                minTickGap={20}
-                                label={<XAxisKatexLabel value="x" />}
-                            />
-                            
-                            <YAxis 
-                                tick={{ fontSize: 11, fill: 'var(--text-pure)', fontWeight: 500 }}
-                                tickLine={{ stroke: 'var(--text-main)' }}
-                                axisLine={{ stroke: 'var(--text-main)', strokeWidth: 2 }}
-                                tickFormatter={(val) => val.toFixed(2)}
-                                width={55}
-                                domain={yAxisConfig.domain}
-                                ticks={yAxisConfig.ticks}
-                                label={<YAxisKatexLabel value={datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} />}
-                            />
-                            
-                            <Tooltip content={<CustomTooltip />} />
-                            
-                            {/* Curva de densidad */}
-                            <Area 
-                                type="linear" 
-                                dataKey="fx" 
-                                stroke="var(--primary-color)" 
-                                fill="var(--primary-color)" 
-                                fillOpacity={0.3} 
-                                strokeWidth={2}
-                                baseValue={0}
-                                isAnimationActive={true}
-                            />
-                        </AreaChart>
+                        {grafico}
                     </ResponsiveContainer>
                 </div>
             </MarcoWidgetMAT251>
             
             {/* Mensaje explicativo situado debajo de la gráfica */}
             <div style={{ textAlign: 'center', fontSize: FS.sl, color: 'var(--text-main)', marginTop: '8px' }}>
-                El área sombreada bajo la curva entre <InlineMath math={`a = ${datos.a}`} /> y <InlineMath math={`b = ${datos.b}`} /> representa la probabilidad total (<InlineMath math={`\\text{Área} = ${datos.area ? datos.area.toFixed(4) : '1.0000'}`} />).
+                El área sombreada bajo la curva entre <InlineMath math={`a = ${datos.a}`} /> y <InlineMath math={`b = ${datos.b}`} /> representa la probabilidad total (<InlineMath math={`\\text{Área} = ${datos.area != null ? datos.area.toFixed(4) : '1.0000'}`} />).
             </div>
         </div>
     );

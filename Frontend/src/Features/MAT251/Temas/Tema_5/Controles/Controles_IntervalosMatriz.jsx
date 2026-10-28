@@ -87,14 +87,14 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
             onCalcular(null);
         } else {
             // Combinar la información puntual y de intervalo para el componente de Resultados
-            onCalcular({ ...resIntervalo, puntual: resPuntual });
+            onCalcular({ ...resIntervalo, puntual: resPuntual, sigmaConocida: parametro === 'media' ? sigmaConocida : undefined });
         }
     };
 
     return (
         <div style={{ padding: '0px' }}>
             <div style={{ marginBottom: '10px' }}>
-                <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '10px' }}>
+                <div id="tour-t5-intervalos-datos-resumen" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '10px' }}>
                     <div>
                         <span style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)' }}>Datos:</span>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -123,7 +123,7 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
             {hayDatosMatriz ? (
                 <>
             {parametro === 'media' && (
-                <div style={{ ...cardStyle, marginBottom: '15px', padding: '12px' }}>
+                <div id="tour-t5-intervalos-sigma-opcion" style={{ ...cardStyle, marginBottom: '15px', padding: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', textAlign: 'center' }}>Desviación Estándar:</label>
                         
@@ -200,7 +200,7 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                             </label>
                             <input
                                 type="number"
-                                className="input-mat251"
+                                className="input-mat251 placeholder-small"
                                 value={sigmaPoblacional}
                                 onChange={(e) => setSigmaPoblacional(e.target.value)}
                                 placeholder="Desviación estándar poblacional"
@@ -221,7 +221,7 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                 )];
 
                 return (
-                    <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <div id="tour-t5-intervalos-proporcion-exito" style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)', textAlign: 'center' }}>Seleccione el dato a contabilizar:</label>
                         
                         <div ref={selectRef} className="tema5-selector-proporcion" style={{ position: 'relative', maxWidth: '100%', fontFamily: FONT }}>
@@ -240,7 +240,7 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                                     transition: 'all 0.2s ease',
                                     color: 'var(--text-main, #1e293b)',
                                     userSelect: 'none',
-                                }}
+                                    }}
                             >
                                 <span style={{ fontWeight: 500, fontSize: FS.sm, flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {valorExito || '-- Seleccione un dato --'}
@@ -312,7 +312,7 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
                 );
             })()}
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+            <div id="tour-t5-intervalos-btn-calcular-matriz" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <button 
                     className="button_calcular" 
                     style={{ width: 'auto', padding: '5px 15px' }}

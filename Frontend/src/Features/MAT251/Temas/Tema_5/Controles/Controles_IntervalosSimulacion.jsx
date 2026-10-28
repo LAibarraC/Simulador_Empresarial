@@ -128,7 +128,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                 }
             `}</style>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '15px' }}>
-                <div className="tema5-sim-distribucion-selector" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                <div id="tour-t5-intervalos-sim-distribucion" className="tema5-sim-distribucion-selector" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <label style={{ ...localLabelStyle, margin: 0 }}>Distribución Poblacional:</label>
                     
                     <div ref={selectRef} style={{ position: 'relative', width: '220px', maxWidth: '100%', fontFamily: FONT }}>
@@ -232,7 +232,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                 </div>
 
                 {/* Parámetros de la distribución */}
-                <div className="tema5-sim-panel" style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: 'none', borderRadius: '5px' }}>
+                <div id="tour-t5-intervalos-sim-parametros-dist" className="tema5-sim-panel" style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: 'none', borderRadius: '5px' }}>
                     <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-pure)' }}>PARÁMETROS DE LA DISTRIBUCIÓN</div>
                     <div className="tema5-simulacion-parametros-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                         {distribucion === 'normal' && (
@@ -284,7 +284,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                 <div className="tema5-sim-panel" style={{ background: 'var(--bg-card, white)', padding: '10px', borderRadius: '5px', border: 'none' }}>
                     <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-pure)' }}>PARÁMETROS DEL EXPERIMENTO (INTERVALOS)</div>
                     <div className="tema5-simulacion-entradas-fila" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                        <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                        <div id="tour-t5-intervalos-sim-tamano-muestra" className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
                             <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('n:', true)}</label>
                             <input
                                 type="number"
@@ -296,7 +296,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                                 placeholder="Tamaño de muestra"
                             />
                         </div>
-                        <div className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+                        <div id="tour-t5-intervalos-sim-num-simulaciones" className="tema5-simulacion-campo" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
                             <label style={{ ...localLabelStyle, margin: 0, whiteSpace: 'nowrap' }}>{renderKatex('N:', true)}</label>
                             <input
                                 type="number"
@@ -311,7 +311,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                         </div>
 
                         {distribucion === 'normal' && parametro === 'media' && (
-                            <div className="tema5-sim-sigma-setting" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '15px', marginTop: '5px' }}>
+                            <div id="tour-t5-intervalos-sim-sigma-conocida" className="tema5-sim-sigma-setting" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '15px', marginTop: '5px' }}>
                                 <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '180px' }}>Para los intervalos, asumir:</label>
                                 <div className="tema5-sim-sigma-options" style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
@@ -373,7 +373,7 @@ export default function Controles_IntervalosSimulacion({ parametro, confianza, o
                 </div>
             </div>
 
-            <div className="tema5-sim-generate" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+            <div id="tour-t5-intervalos-sim-btn-ejecutar" className="tema5-sim-generate" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <button 
                     className="button_calcular"
                     style={{ width: 'auto', padding: '5px 15px', opacity: isCalculating ? 0.7 : 1, cursor: isCalculating ? 'wait' : 'pointer' }} 

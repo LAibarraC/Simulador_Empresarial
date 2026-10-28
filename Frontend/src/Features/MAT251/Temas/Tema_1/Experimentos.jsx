@@ -445,7 +445,7 @@ function convertirHistorialEnsayosAFilas(ensayos, columnas) {
     });
 }
 
-export default function Experimentos({ filas = [], varSeleccionada, abrirEditor }) {
+export default function Experimentos({ filas = [], varSeleccionada, abrirEditor, onResultadoExperimento }) {
     const [fuente, setFuente] = useState('teorico');
     const [tipoExperimento, setTipoExperimento] = useState('simple');
     const [usarFrecuencias, setUsarFrecuencias] = useState(false);
@@ -460,6 +460,27 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const siguienteComponente = useRef(2);
     const limiteUniversoAvisado = useRef(false);
+
+    useEffect(() => {
+        if (typeof onResultadoExperimento === 'function') {
+            if (resultado) {
+                onResultadoExperimento({
+                    resultado,
+                    tipoExperimento,
+                    componentes,
+                    reglas,
+                    fuente
+                });
+            } else {
+                onResultadoExperimento(null);
+            }
+        }
+        return () => {
+            if (typeof onResultadoExperimento === 'function') {
+                onResultadoExperimento(null);
+            }
+        };
+    }, [resultado, tipoExperimento, componentes, reglas, fuente, onResultadoExperimento]);
 
     const [iteracionesSim, setIteracionesSim] = useState('');
     const [resultadoSimulacion, setResultadoSimulacion] = useState(null);
@@ -1242,11 +1263,11 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                         </div>
                     )}
                     {fuente === 'teorico' && (
-                        <div>
+                        <div id="tour-exp-tipo-selector">
                             <span className="mat251-experimentos-label">Tipo de experimento</span>
                             <div className="contenedor-selector-modos-mat251" style={{ width: '100%' }} role="group" aria-label="Tipo de experimento">
-                                <button type="button" aria-pressed={tipoExperimento === 'simple'} className={`btn-mat251-modo${tipoExperimento === 'simple' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('simple')}>Simple</button>
-                                <button type="button" aria-pressed={tipoExperimento === 'compuesto'} className={`btn-mat251-modo${tipoExperimento === 'compuesto' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('compuesto')}>Compuesto</button>
+                                <button id="tour-exp-btn-tipo-simple" type="button" aria-pressed={tipoExperimento === 'simple'} className={`btn-mat251-modo${tipoExperimento === 'simple' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('simple')}>Simple</button>
+                                <button id="tour-exp-btn-tipo-compuesto" type="button" aria-pressed={tipoExperimento === 'compuesto'} className={`btn-mat251-modo${tipoExperimento === 'compuesto' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('compuesto')}>Compuesto</button>
                             </div>
                         </div>
                     )}
@@ -1270,7 +1291,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                                     items={componentes.map(componente => componente.id)}
                                     strategy={horizontalListSortingStrategy}
                                 >
-                                    <div className={`mat251-experimentos-componentes${tipoExperimento === 'simple' ? ' simple' : ' compuesto'}`}>
+                                    <div id={tipoExperimento === 'simple' ? 'tour-exp-config-simple' : 'tour-exp-config-compuesto'} className={`mat251-experimentos-componentes${tipoExperimento === 'simple' ? ' simple' : ' compuesto'}`}>
                                         {componentes.map((componente, index) => (
                                             <TarjetaExperimentoOrdenable
                                                 key={componente.id}
@@ -1290,7 +1311,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                             </DndContext>
                         </div>
                         {tipoExperimento === 'compuesto' && (
-                            <button type="button" className="btn-experimentos mat251-experimentos-secundario mat251-experimentos-agregar-componente" onClick={agregarComponente}>Agregar experimento</button>
+                            <button id="tour-exp-btn-agregar-componente" type="button" className="btn-experimentos mat251-experimentos-secundario mat251-experimentos-agregar-componente" onClick={agregarComponente}>Agregar experimento</button>
                         )}
                     </div>
                 ) : (
@@ -1348,7 +1369,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                         )}
                     </div>
                 )}
-                <section className="mat251-experimentos-espacio-vivo" aria-label="Espacio muestral actualizado en tiempo real">
+                <section id="tour-exp-espacio-muestral" className="mat251-experimentos-espacio-vivo" aria-label="Espacio muestral actualizado en tiempo real">
                     <div className="mat251-experimentos-espacio-vivo-cabecera">
                         <h5>Espacio muestral</h5>
                     </div>
@@ -1380,12 +1401,12 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                 </section>
             </section>
 
-            <section className="mat251-experimentos-card">
+            <section id="tour-exp-condiciones" className="mat251-experimentos-card">
                 <div className="mat251-experimentos-seccion-titulo mat251-experimentos-condiciones-cabecera">
                     <div>
                         <h4>Condiciones del evento</h4>
                     </div>
-                    <button type="button" className="btn-experimentos mat251-experimentos-secundario mat251-experimentos-agregar-condicion" onClick={agregarRegla} disabled={!variablesRegla.length}>Agregar condición</button>
+                    <button id="tour-exp-btn-agregar-condicion" type="button" className="btn-experimentos mat251-experimentos-secundario mat251-experimentos-agregar-condicion" onClick={agregarRegla} disabled={!variablesRegla.length}>Agregar condición</button>
                 </div>
 
                 <div className="mat251-experimentos-reglas">
@@ -1571,14 +1592,14 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
             </section>
 
             <div className="mat251-experimentos-acciones">
-                <button type="button" className="button_calcular" onClick={calcular} disabled={(fuente === 'teorico' && cantidadUniverso > LIMITE_UNIVERSO) || !variablesRegla.length}>CALCULAR PROBABILIDAD</button>
+                <button id="tour-exp-btn-calcular" type="button" className="button_calcular" onClick={calcular} disabled={(fuente === 'teorico' && cantidadUniverso > LIMITE_UNIVERSO) || !variablesRegla.length}>CALCULAR PROBABILIDAD</button>
             </div>
 
             {resultado && (
                 <>
-                    <section className="mat251-experimentos-card mat251-experimentos-resultados" aria-live="polite">
+                    <section id="tour-exp-resultados" className="mat251-experimentos-card mat251-experimentos-resultados" aria-live="polite">
                     <h4 className="mat251-experimentos-resultados-titulo">Resultado del evento</h4>
-                    <div className="mat251-experimentos-metricas">
+                    <div id="tour-exp-metricas" className="mat251-experimentos-metricas">
                         <div>
                             <span>Casos favorables</span>
                             <strong><ResultadoMath expresion={numeroParaLatex(resultado.cantidadFavorable)} /></strong>
@@ -1606,7 +1627,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                             displayMode
                         />
                     </div>
-                    <section className="mat251-experimentos-espacio-vivo" aria-label="Espacio muestral con resultados favorables">
+                    <section id="tour-exp-espacio-resultado" className="mat251-experimentos-espacio-vivo" aria-label="Espacio muestral con resultados favorables">
                         <div className="mat251-experimentos-espacio-vivo-cabecera">
                             <h5>Espacio muestral</h5>
                         </div>
@@ -1629,43 +1650,46 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                 </section>
 
                 <section className="mat251-experimentos-card mat251-experimentos-simulacion" aria-label="Simulación Monte Carlo del evento">
-                    <h4 className="mat251-experimentos-resultados-titulo">Simulación del evento</h4>
+                    <div id="tour-exp-sim-repeticiones" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <h4 className="mat251-experimentos-resultados-titulo" style={{ margin: 0 }}>Simulación del evento</h4>
 
-                    <div className="mat251-experimentos-repeticiones-control">
-                        <label htmlFor="mat251-experimentos-repeticiones" className="mat251-experimentos-repeticiones-label">
-                            <ResultadoMath expresion="N:" />
-                        </label>
-                        <input
-                            id="mat251-experimentos-repeticiones"
-                            type="number"
-                            min="1"
-                            max={LIMITE_REPETICIONES}
-                            placeholder="Número de repeticiones"
-                            className="input-mat251 placeholder-small mat251-experimentos-repeticiones-input"
-                            value={iteracionesSim}
-                            onChange={e => {
-                                detenerSimulacion();
-                                setIteracionesSim(e.target.value);
-                            }}
-                            style={{
-                                padding: '8px 12px',
-                                minHeight: '38px',
-                                borderRadius: RADIUS,
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--bg-input)',
-                                color: 'var(--text-pure)',
-                                fontSize: FS.sm,
-                                outline: 'none',
-                                fontFamily: FONT,
-                                width: '220px',
-                                maxWidth: '100%',
-                                boxSizing: 'border-box'
-                            }}
-                        />
+                        <div className="mat251-experimentos-repeticiones-control">
+                            <label htmlFor="mat251-experimentos-repeticiones" className="mat251-experimentos-repeticiones-label">
+                                <ResultadoMath expresion="N:" />
+                            </label>
+                            <input
+                                id="mat251-experimentos-repeticiones"
+                                type="number"
+                                min="1"
+                                max={LIMITE_REPETICIONES}
+                                placeholder="Número de repeticiones"
+                                className="input-mat251 placeholder-small mat251-experimentos-repeticiones-input"
+                                value={iteracionesSim}
+                                onChange={e => {
+                                    detenerSimulacion();
+                                    setIteracionesSim(e.target.value);
+                                }}
+                                style={{
+                                    padding: '8px 12px',
+                                    minHeight: '38px',
+                                    borderRadius: RADIUS,
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-pure)',
+                                    fontSize: FS.sm,
+                                    outline: 'none',
+                                    fontFamily: FONT,
+                                    width: '220px',
+                                    maxWidth: '100%',
+                                    boxSizing: 'border-box'
+                                }}
+                            />
+                        </div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <button
+                            id="tour-exp-btn-iniciar-sim"
                             type="button"
                             onClick={() => iniciarSimulacion(iteracionesSim)}
                             disabled={simulando}
@@ -1708,7 +1732,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                             </div>
 
                             {/* Cabecera: Lanzamiento y controles de velocidad / pausa */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginTop: '10px', marginBottom: '20px' }}>
+                            <div id="tour-exp-sim-progreso" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginTop: '10px', marginBottom: '20px' }}>
                                 <span className="texto-lanzamiento-simulacion" style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-pure)', fontFamily: FONT }}>
                                     Lanzamiento: {resultadoSimulacion.intentoActual} / {parseInt(iteracionesSim) || 0}
                                 </span>
@@ -1788,7 +1812,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                             </div>
 
                             {/* Sección central: Tarjetas y animación física */}
-                            <div className="contenedor-simulacion-clasica">
+                            <div id="tour-exp-sim-comparacion" className="contenedor-simulacion-clasica">
                                 {/* Lateral Izquierdo: Probabilidad Teórica */}
                                 <div className="col-simulacion-lateral">
                                     <div className="tarjeta-probabilidad" style={{ textAlign: 'center', background: 'var(--bg-input)', padding: '15px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
@@ -1839,7 +1863,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                             </div>
 
                             {/* Sección Inferior: Último resultado y Éxitos */}
-                            <div className="mat251-experimentos-ultima-simulacion">
+                            <div id="tour-exp-sim-exitos" className="mat251-experimentos-ultima-simulacion">
                                 <div className="texto-resultado-simulacion mat251-experimentos-resumen-resultado" style={{ fontSize: FS.md, fontWeight: 800, color: 'var(--text-pure)', minHeight: '24px', textAlign: 'center', fontFamily: FONT }}>
                                     {resultadoSimulacion.ultimoCaso ? (
                                         <>
@@ -1867,7 +1891,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                             </div>
 
                             {/* Grid de 3 métricas empíricas */}
-                            <div className="grid-metricas-empiricas" style={{ borderTop: 'none' }}>
+                            <div id="tour-exp-sim-metricas-empiricas" className="grid-metricas-empiricas" style={{ borderTop: 'none' }}>
                                 <div className="tarjeta-metrica-empirica">
                                     <p className="titulo-metrica-empirica" style={{ fontFamily: FONT, color: 'var(--text-pure)' }}><span>Esperanza Empírica</span> <ResultadoMath expresion="E(X)" /></p>
                                     <div className="valor-metrica-empirica" style={{ color: 'var(--text-pure)', fontWeight: 'normal' }}>
@@ -1892,7 +1916,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
 
                     {resultadoSimulacion && resultadoSimulacion.intentoActual > 0 && (
                         <>
-                            <div style={{ marginTop: '15px' }}>
+                            <div id="tour-exp-sim-grafica" style={{ marginTop: '15px' }}>
                                 <MarcoWidgetMAT251 id="experimentos-convergencia" titulo="Convergencia de la Probabilidad" anchoCompleto={true} alto="400px">
                                     <div style={{ width: '100%', height: '100%', minWidth: 0, padding: 0, boxSizing: 'border-box' }}>
                                         <ResponsiveContainer width="100%" height="100%">
@@ -1964,7 +1988,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
 
                                     return (
                                         <>
-                                            <div className="mat251-experimentos-tabla-wrap">
+                                            <div id="tour-exp-sim-tabla" className="mat251-experimentos-tabla-wrap">
                                                 <table className="mat251-experimentos-tabla mat251-experimentos-tabla-completa">
                                                     <thead>
                                                         <tr>
@@ -2026,8 +2050,9 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                                         </>
                                     );
                                 })()}
-                                <div className="mat251-experimentos-botones-tabla">
+                                <div id="tour-exp-sim-botones" className="mat251-experimentos-botones-tabla">
                                     <button
+                                        id="tour-exp-btn-guardar"
                                         type="button"
                                         className="btn-primary"
                                         onClick={async () => {
@@ -2057,6 +2082,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor 
                                         <IconoGuardar /> Guardar
                                     </button>
                                     <button
+                                        id="tour-exp-btn-descargar"
                                         type="button"
                                         className="btn-verde"
                                         onClick={() => {

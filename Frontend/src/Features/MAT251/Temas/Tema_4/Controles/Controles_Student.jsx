@@ -224,7 +224,7 @@ export default function Controles_Student({ onCalcular }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {/* Fila 1: μ y S / S² */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '15px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div id="tour-t4tyf-student-media-poblacional" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{\mu} =" /></label>
                         <input
                             type="number"
@@ -248,7 +248,7 @@ export default function Controles_Student({ onCalcular }) {
                             }}
                         />
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div id="tour-t4tyf-student-dispersion" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '85px', flexShrink: 0 }}>
                             <CustomSelect
                                 value={tipoDispersion}
@@ -283,7 +283,7 @@ export default function Controles_Student({ onCalcular }) {
                     </div>
                 </div>
                 {/* Fila 2: n centrado */}
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div id="tour-t4tyf-student-tamano-muestra" style={{ display: 'flex', justifyContent: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '50%' }}>
                         <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0, width: 'fit-content', whiteSpace: 'nowrap' }}><Latex formula="\boldsymbol{n} =" /></label>
                         <input
@@ -311,7 +311,7 @@ export default function Controles_Student({ onCalcular }) {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
+            <div id="tour-t4tyf-student-btn-calcular" style={{ display: 'flex', justifyContent: 'center', marginTop: '5px' }}>
                 <button
                     type="button"
                     onClick={generarDistribucion}
@@ -324,7 +324,7 @@ export default function Controles_Student({ onCalcular }) {
 
             {distribucionGenerada && (
                 <div style={{ marginTop: '15px', animation: 'fadeIn 0.5s ease-out' }}>
-                    <div style={{ background: 'var(--bg-card)', padding: '14px 16px', borderRadius: RADIUS, border: 'none', boxShadow: 'none', textAlign: 'center', marginTop: '10px', marginBottom: '10px', overflow: 'visible' }}>
+                    <div id="tour-t4tyf-student-parametros-estimados" style={{ background: 'var(--bg-card)', padding: '14px 16px', borderRadius: RADIUS, border: 'none', boxShadow: 'none', textAlign: 'center', marginTop: '10px', marginBottom: '10px', overflow: 'visible' }}>
                         <div className="tema4-tarjeta-titulo-unificado" style={{ marginBottom: '10px', color: 'var(--text-pure)', fontSize: '0.8rem', fontWeight: 700, fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Parámetros de la Distribución t-Student</div>
                         <div className="formula-responsive" style={{ width: '100%', overflow: 'visible', padding: '4px', color: 'var(--text-pure)', fontWeight: 'normal', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                             <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
@@ -350,53 +350,106 @@ export default function Controles_Student({ onCalcular }) {
                     </div>
 
                     {/* Sección Condición de Búsqueda */}
-                    <div style={{ margin: '15px 0 5px 0' }}></div>
+                    <div id="tour-t4tyf-student-condicion-busqueda">
+                        <div style={{ margin: '15px 0 5px 0' }}></div>
 
-                    <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT, fontWeight: 'bold' }}>
-                        Condición de Búsqueda:
-                    </h4>
+                        <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT, fontWeight: 'bold' }}>
+                            Condición de Búsqueda:
+                        </h4>
 
-                    {/* FILA 1: Condición lógica y su dropdown en una sola fila centrada */}
-                    <div className="tema4-condicion-fila">
-                        <label className="tema4-condicion-label">
-                            Condición lógica:
-                        </label>
-                        <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '210px' : '170px' }}>
-                            <CustomSelect
-                                value={condicion}
-                                onChange={(val) => { setCondicion(val); }}
-                                options={[
-                                    { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X} \le x)" /></div> },
-                                    { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X} \ge x)" /></div> },
-                                    { value: 'entre', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(x_1 \le \bar{X} \le x_2)" /></div> }
-                                ]}
-                            />
+                        {/* FILA 1: Condición lógica y su dropdown en una sola fila centrada */}
+                        <div className="tema4-condicion-fila">
+                            <label className="tema4-condicion-label">
+                                Condición lógica:
+                            </label>
+                            <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '210px' : '170px' }}>
+                                <CustomSelect
+                                    value={condicion}
+                                    onChange={(val) => { setCondicion(val); }}
+                                    options={[
+                                        { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X} \le x)" /></div> },
+                                        { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X} \ge x)" /></div> },
+                                        { value: 'entre', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(x_1 \le \bar{X} \le x_2)" /></div> }
+                                    ]}
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    {/* FILA 2: Valor(es) x (y x2 si entre) */}
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        flexWrap: 'nowrap',
-                        justifyContent: 'center',
-                        gap: '10px',
-                        marginBottom: '14px',
-                        width: '100%',
-                        maxWidth: condicion === 'entre' ? '360px' : '200px',
-                        margin: '0 auto 14px auto',
-                        boxSizing: 'border-box'
-                    }}>
-                        {condicion === 'entre' ? (
-                            <>
+                        {/* FILA 2: Valor(es) x (y x2 si entre) */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            flexWrap: 'nowrap',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            marginBottom: '14px',
+                            width: '100%',
+                            maxWidth: condicion === 'entre' ? '360px' : '200px',
+                            margin: '0 auto 14px auto',
+                            boxSizing: 'border-box'
+                        }}>
+                            {condicion === 'entre' ? (
+                                <>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                        <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                            <Latex formula="\mathbf{x}_1:" />
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="input-mat251 placeholder-small"
+                                            placeholder="Límite inferior"
+                                            value={valorX1}
+                                            onChange={(e) => setValorX1(e.target.value)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontSize: FS.sm,
+                                                fontFamily: FONT,
+                                                borderRadius: RADIUS,
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-input)',
+                                                color: 'var(--text-pure)',
+                                                height: '36px',
+                                                flex: 1,
+                                                minWidth: 0,
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                        <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                            <Latex formula="\mathbf{x}_2:" />
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="input-mat251 placeholder-small"
+                                            placeholder="Límite superior"
+                                            value={valorX2}
+                                            onChange={(e) => setValorX2(e.target.value)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontSize: FS.sm,
+                                                fontFamily: FONT,
+                                                borderRadius: RADIUS,
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-input)',
+                                                color: 'var(--text-pure)',
+                                                height: '36px',
+                                                flex: 1,
+                                                minWidth: 0,
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                </>
+                            ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                                     <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                        <Latex formula="\mathbf{x}_1:" />
+                                        <Latex formula="\mathbf{x}:" />
                                     </label>
                                     <input
                                         type="number"
                                         className="input-mat251 placeholder-small"
-                                        placeholder="Límite inferior"
+                                        placeholder="Valor x"
                                         value={valorX1}
                                         onChange={(e) => setValorX1(e.target.value)}
                                         style={{
@@ -414,63 +467,12 @@ export default function Controles_Student({ onCalcular }) {
                                         }}
                                     />
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
-                                    <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                        <Latex formula="\mathbf{x}_2:" />
-                                    </label>
-                                    <input
-                                        type="number"
-                                        className="input-mat251 placeholder-small"
-                                        placeholder="Límite superior"
-                                        value={valorX2}
-                                        onChange={(e) => setValorX2(e.target.value)}
-                                        style={{
-                                            padding: '6px 12px',
-                                            fontSize: FS.sm,
-                                            fontFamily: FONT,
-                                            borderRadius: RADIUS,
-                                            border: '1px solid var(--border-color)',
-                                            background: 'var(--bg-input)',
-                                            color: 'var(--text-pure)',
-                                            height: '36px',
-                                            flex: 1,
-                                            minWidth: 0,
-                                            boxSizing: 'border-box'
-                                        }}
-                                    />
-                                </div>
-                            </>
-                        ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
-                                <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                    <Latex formula="\mathbf{x}:" />
-                                </label>
-                                <input
-                                    type="number"
-                                    className="input-mat251 placeholder-small"
-                                    placeholder="Valor x"
-                                    value={valorX1}
-                                    onChange={(e) => setValorX1(e.target.value)}
-                                    style={{
-                                        padding: '6px 12px',
-                                        fontSize: FS.sm,
-                                        fontFamily: FONT,
-                                        borderRadius: RADIUS,
-                                        border: '1px solid var(--border-color)',
-                                        background: 'var(--bg-input)',
-                                        color: 'var(--text-pure)',
-                                        height: '36px',
-                                        flex: 1,
-                                        minWidth: 0,
-                                        boxSizing: 'border-box'
-                                    }}
-                                />
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
                     {/* Botón GRAFICAR */}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                    <div id="tour-t4tyf-student-btn-graficar" style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                         <button
                             type="button"
                             onClick={calcularProbabilidad}

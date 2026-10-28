@@ -170,3 +170,46 @@ export function calcularMomentosDiscreta(matrizDatos) {
         curtosis
     };
 }
+
+// Resumen de funciones continuas compartido por la página y el reporte PDF.
+const integrarSimpson = (fn, a, b, n = 1000) => {
+    const h = (b - a) / n;
+    let suma = fn(a) + fn(b);
+    for (let i = 1; i < n; i++) suma += fn(a + i * h) * (i % 2 === 0 ? 2 : 4);
+    return suma * h / 3;
+};
+
+// Resumen común para la página y el reporte: conserva la resolución simbólica
+// y usa el mismo cálculo numérico si no hay resultados del servidor.
+export function calcularResumenContinua(resultados) {
+    const { funcionFx, a, b, esperanza_backend, varianza_backend, area_backend } = resultados;
+    try {
+        let resumen;
+        if (esperanza_backend !== undefined && esperanza_backend !== null) {
+            resumen = {
+                eX: esperanza_backend,
+                eX2: varianza_backend + esperanza_backend ** 2,
+                varX: varianza_backend,
+                stdDev: Math.sqrt(Math.max(0, varianza_backend)),
+                area: area_backend ?? 1
+            };
+        } else {
+            if (!Number.isFinite(a) || !Number.isFinite(b)) {
+                return { error: 'No se puede integrar numéricamente con límites infinitos. La resolución simbólica falló.' };
+            }
+            const expresion = compile(funcionFx);
+            const f = x => expresion.evaluate({ x });
+            const area = integrarSimpson(f, a, b);
+            const eX = integrarSimpson(x => x * f(x), a, b);
+            const eX2 = integrarSimpson(x => x ** 2 * f(x), a, b);
+            const varX = eX2 - eX ** 2;
+            resumen = { area, eX, eX2, varX, stdDev: Math.sqrt(Math.max(0, varX)) };
+        }
+        if (Object.values(resumen).some(valor => !Number.isFinite(valor))) {
+            return { error: 'No se obtuvieron resultados finitos para la función en el intervalo indicado.' };
+        }
+        return resumen;
+    } catch {
+        return { error: 'Error al procesar la función. Verifique la sintaxis.' };
+    }
+}

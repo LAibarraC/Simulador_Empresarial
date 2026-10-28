@@ -54,7 +54,7 @@ export default function ControlesProbabilidad({ variables, varSeleccionada, setV
                 }
             `}</style>
 
-            <div style={{ border: '1px solid var(--border-color)', borderRadius: RADIUS, padding: '10px', background: 'var(--bg-card)', marginBottom: '15px' }}>
+            <div id="tour-mat251-variables" style={{ border: '1px solid var(--border-color)', borderRadius: RADIUS, padding: '10px', background: 'var(--bg-card)', marginBottom: '15px' }}>
                 <h4 style={{ margin: '0 0 10px', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)' }}>Selecciona una Variable:</h4>
                 {variables && variables.filter(v => v.datos && v.datos.length > 0).length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto', marginBottom: '5px' }}>

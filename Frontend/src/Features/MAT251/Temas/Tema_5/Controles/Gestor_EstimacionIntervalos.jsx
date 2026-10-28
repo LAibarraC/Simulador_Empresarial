@@ -40,7 +40,7 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             {/* Selector de Parámetro */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div id="tour-t5-parametro-intervalos" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
                     <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {PARAMETROS.map(p => (
@@ -59,7 +59,7 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
             </div>
 
             {/* Selector de Nivel de Confianza */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '0px' }}>
+            <div id="tour-t5-nivel-confianza" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '0px' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-pure)', marginBottom: '5px', fontWeight: 'bold'}}>NIVEL DE CONFIANZA</div>
 
                 <div style={{
@@ -91,7 +91,7 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
     );
 }
 
-export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, setParametro, modo, setModo, confianza, setConfianza }) {
+export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, setParametro, modo, setModo, confianza, setConfianza, onResultado }) {
     const variableKey = varSeleccionada?.nombre ?? null;
 
     // Estados para almacenar resultados de cada modo
@@ -109,12 +109,20 @@ export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, st
     const resultadoMatrizActual = resMatriz?.parametro === parametro && resMatriz?.confianza === confianza && resMatriz?.variableKey === variableKey ? resMatriz.resultado : null;
     const resultadoManualActual = resManual?.parametro === parametro && resManual?.confianza === confianza && resManual?.variableKey === variableKey ? resManual.resultado : null;
     const resultadoSimulacionActual = resSimulacion?.parametro === parametro && resSimulacion?.confianza === confianza && resSimulacion?.variableKey === variableKey ? resSimulacion.resultado : null;
+    const resultadoExportable = modo === 'matriz' ? resultadoMatrizActual : modo === 'manual' ? resultadoManualActual : null;
+
+    useEffect(() => {
+        onResultado?.(resultadoExportable ? {
+            operacion: 'Estimacion_intervalos', parametro, modo, confianza,
+            nombreVariable: variableKey, resultados: resultadoExportable
+        } : null);
+    }, [resultadoExportable, parametro, modo, confianza, variableKey, onResultado]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT, '--text-main': 'var(--text-pure)' }}>
 
             {/* Selector de Modo de Trabajo */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
+            <div id="tour-t5-modos-intervalos" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
                     <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '5px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {MODOS.map(m => (

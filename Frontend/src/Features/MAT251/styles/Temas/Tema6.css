@@ -1,108 +1,108 @@
 /* Ajustes responsive para el Tema 6. */
 @media (max-width: 800px) {
-  .tema6-hnp-responsive .hnp-simulacion-campos-configuracion,
-  .tema6-hnp-responsive .hnp-simulacion-campos-muestra,
-  .tema6-hnp-responsive .hnp-manual-selectores-configuracion {
+  :where(.mat251) .tema6-hnp-responsive .hnp-simulacion-campos-configuracion,
+:where(.mat251) .tema6-hnp-responsive .hnp-simulacion-campos-muestra,
+:where(.mat251) .tema6-hnp-responsive .hnp-manual-selectores-configuracion {
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 8px !important;
     margin-bottom: 10px !important;
   }
 
-  .tema6-hnp-responsive .hnp-simulacion-campos-configuracion > div,
-  .tema6-hnp-responsive .hnp-simulacion-campos-muestra > div {
+  :where(.mat251) .tema6-hnp-responsive .hnp-simulacion-campos-configuracion > div,
+:where(.mat251) .tema6-hnp-responsive .hnp-simulacion-campos-muestra > div {
     min-width: 0;
   }
 
-  .tema6-hnp-responsive .hnp-simulacion-campos-configuracion .input-mat251,
-  .tema6-hnp-responsive .hnp-simulacion-campos-muestra .input-mat251 {
+  :where(.mat251) .tema6-hnp-responsive .hnp-simulacion-campos-configuracion .input-mat251,
+:where(.mat251) .tema6-hnp-responsive .hnp-simulacion-campos-muestra .input-mat251 {
     min-width: 0;
     font-size: 0.78rem;
   }
 }
 
 @media (max-width: 600px) {
-  .tema6-hnp-responsive,
-  .tema6-hnp-responsive * {
+  :where(.mat251) .tema6-hnp-responsive,
+:where(.mat251) .tema6-hnp-responsive * {
     min-width: 0;
     box-sizing: border-box;
   }
 
-  .tema6-hnp-responsive {
+  :where(.mat251) .tema6-hnp-responsive {
     width: 100%;
     max-width: 100%;
     gap: 8px !important;
     font-size: 0.67rem !important;
   }
 
-  .tema6-hnp-responsive .rachas-ext-table-scroll,
-  .tema6-hnp-responsive .rachas-ext-table,
-  .tema6-hnp-responsive .rachas-ext-table th,
-  .tema6-hnp-responsive .rachas-ext-table td {
+  :where(.mat251) .tema6-hnp-responsive .rachas-ext-table-scroll,
+:where(.mat251) .tema6-hnp-responsive .rachas-ext-table,
+:where(.mat251) .tema6-hnp-responsive .rachas-ext-table th,
+:where(.mat251) .tema6-hnp-responsive .rachas-ext-table td {
     font-size: 0.7rem !important;
   }
 
-  .tema6-hnp-responsive .rachas-ext-table thead tr:first-child th {
+  :where(.mat251) .tema6-hnp-responsive .rachas-ext-table thead tr:first-child th {
     text-align: center !important;
   }
 
-  .tema6-hnp-responsive label,
-  .tema6-hnp-responsive small,
-  .tema6-hnp-responsive p {
+  :where(.mat251) .tema6-hnp-responsive label,
+:where(.mat251) .tema6-hnp-responsive small,
+:where(.mat251) .tema6-hnp-responsive p {
     font-size: 0.63rem !important;
   }
 
-  .tema6-hnp-responsive .contenedor-selector-modos-mat251 {
+  :where(.mat251) .tema6-hnp-responsive .contenedor-selector-modos-mat251 {
     gap: 2px !important;
     padding: 3px !important;
   }
 
-  .tema6-hnp-responsive .contenedor-selector-modos-mat251 .btn-mat251-modo {
+  :where(.mat251) .tema6-hnp-responsive .contenedor-selector-modos-mat251 .btn-mat251-modo {
     padding: 7px 3px !important;
     font-size: 0.63rem !important;
     line-height: 1.2;
     white-space: normal;
   }
 
-  .tema6-hnp-data-summary {
+  :where(.mat251) .tema6-hnp-data-summary {
     align-items: center !important;
     gap: 8px;
     padding: 8px !important;
     margin-bottom: 10px !important;
   }
 
-  .tema6-hnp-data-summary > div {
+  :where(.mat251) .tema6-hnp-data-summary > div {
     flex: 1 1 170px;
   }
 
-  .tema6-hnp-data-summary > div > div {
+  :where(.mat251) .tema6-hnp-data-summary > div > div {
     flex-wrap: wrap;
     column-gap: 7px !important;
     row-gap: 2px !important;
   }
 
-  .tema6-hnp-data-summary button {
+  :where(.mat251) .tema6-hnp-data-summary button {
     flex: 0 1 auto;
     padding: 6px 9px !important;
     font-size: 0.67rem !important;
   }
 
-  .tema6-hnp-data-summary small,
-  .tema6-hnp-data-summary strong,
-  .tema6-hnp-data-summary button {
+  :where(.mat251) .tema6-hnp-data-summary small,
+:where(.mat251) .tema6-hnp-data-summary strong,
+:where(.mat251) .tema6-hnp-data-summary button {
     font-size: 0.61rem !important;
   }
 
-  .tema6-hnp-responsive .hnp-parametros-superiores {
+  :where(.mat251) .tema6-hnp-responsive .hnp-parametros-superiores {
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 8px !important;
     margin-bottom: 10px !important;
   }
 
-  .tema6-hnp-responsive .hnp-parametros-superiores > div {
+  :where(.mat251) .tema6-hnp-responsive .hnp-parametros-superiores > div {
     width: 100%;
   }
 
-  .tema6-hnp-responsive .hnp-frecuencias-esperadas-scroll {
+  :where(.mat251) .tema6-hnp-responsive .hnp-frecuencias-esperadas-scroll {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto;
@@ -110,23 +110,23 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .tema6-hnp-responsive .hnp-frecuencias-esperadas-table {
+  :where(.mat251) .tema6-hnp-responsive .hnp-frecuencias-esperadas-table {
     min-width: 540px;
     font-size: 0.63rem !important;
   }
 
-  .tema6-hnp-responsive .hnp-frecuencias-esperadas-table th,
-  .tema6-hnp-responsive .hnp-frecuencias-esperadas-table td {
+  :where(.mat251) .tema6-hnp-responsive .hnp-frecuencias-esperadas-table th,
+:where(.mat251) .tema6-hnp-responsive .hnp-frecuencias-esperadas-table td {
     font-size: 0.61rem !important;
     padding: 5px 4px !important;
   }
 
-  .tema6-hnp-responsive .hnp-frecuencias-esperadas-scroll .hnp-frecuencias-manual-table {
+  :where(.mat251) .tema6-hnp-responsive .hnp-frecuencias-esperadas-scroll .hnp-frecuencias-manual-table {
     margin-left: auto !important;
     margin-right: auto !important;
   }
 
-  .tema6-hnp-responsive .hnp-signos-detalle-scroll {
+  :where(.mat251) .tema6-hnp-responsive .hnp-signos-detalle-scroll {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto !important;
@@ -135,7 +135,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .tema6-hnp-responsive .signos-detalle-table {
+  :where(.mat251) .tema6-hnp-responsive .signos-detalle-table {
     width: max-content !important;
     min-width: max-content !important;
     table-layout: auto !important;
@@ -143,15 +143,15 @@
     margin-right: auto !important;
   }
 
-  .tema6-hnp-responsive .signos-detalle-table col:nth-child(4) {
+  :where(.mat251) .tema6-hnp-responsive .signos-detalle-table col:nth-child(4) {
     width: max-content !important;
   }
 
-  .tema6-hnp-responsive .signos-detalle-table th {
+  :where(.mat251) .tema6-hnp-responsive .signos-detalle-table th {
     white-space: nowrap;
   }
 
-  .tema6-hnp-responsive .hnp-matriz-contingencia-scroll {
+  :where(.mat251) .tema6-hnp-responsive .hnp-matriz-contingencia-scroll {
     width: 100%;
     max-width: 100%;
     overflow-x: auto !important;
@@ -160,24 +160,24 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .tema6-hnp-responsive .hnp-matriz-contingencia-table {
+  :where(.mat251) .tema6-hnp-responsive .hnp-matriz-contingencia-table {
     width: max-content !important;
     min-width: 100% !important;
     table-layout: auto !important;
   }
 
-  .tema6-hnp-responsive .hnp-matriz-contingencia-table th,
-  .tema6-hnp-responsive .hnp-matriz-contingencia-table td {
+  :where(.mat251) .tema6-hnp-responsive .hnp-matriz-contingencia-table th,
+:where(.mat251) .tema6-hnp-responsive .hnp-matriz-contingencia-table td {
     min-width: 64px;
     padding: 6px 8px !important;
     white-space: nowrap;
   }
 
-  .tema6-hnp-responsive .hnp-matriz-contingencia-table th:first-child {
+  :where(.mat251) .tema6-hnp-responsive .hnp-matriz-contingencia-table th:first-child {
     min-width: 145px;
   }
 
-  .tema6-hnp-responsive .minitab-table-scroll {
+  :where(.mat251) .tema6-hnp-responsive .minitab-table-scroll {
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
@@ -185,83 +185,83 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .tema6-hnp-responsive .minitab-table-scroll > .minitab-table {
+  :where(.mat251) .tema6-hnp-responsive .minitab-table-scroll > .minitab-table {
     min-width: 360px;
     font-size: 0.66rem !important;
   }
 
-  .tema6-hnp-responsive .minitab-table-scroll > .minitab-table.rachas-table {
+  :where(.mat251) .tema6-hnp-responsive .minitab-table-scroll > .minitab-table.rachas-table {
     width: max-content !important;
     min-width: 700px !important;
     table-layout: auto !important;
   }
 
-  .tema6-hnp-responsive .minitab-table-scroll > .minitab-table.rachas-table th,
-  .tema6-hnp-responsive .minitab-table-scroll > .minitab-table.rachas-table td {
+  :where(.mat251) .tema6-hnp-responsive .minitab-table-scroll > .minitab-table.rachas-table th,
+:where(.mat251) .tema6-hnp-responsive .minitab-table-scroll > .minitab-table.rachas-table td {
     white-space: nowrap !important;
     overflow-wrap: normal !important;
     word-break: keep-all;
   }
 
-  .tema6-hnp-responsive .minitab-table-scroll > .minitab-table:not(.signos-table):not(.rachas-table) {
+  :where(.mat251) .tema6-hnp-responsive .minitab-table-scroll > .minitab-table:not(.signos-table):not(.rachas-table) {
     width: 100% !important;
     min-width: 0 !important;
     table-layout: fixed;
   }
 
-  .tema6-hnp-responsive .minitab-table th,
-  .tema6-hnp-responsive .minitab-table td {
+  :where(.mat251) .tema6-hnp-responsive .minitab-table th,
+:where(.mat251) .tema6-hnp-responsive .minitab-table td {
     overflow-wrap: anywhere;
     font-size: 0.64rem !important;
     padding: 3px 2px !important;
   }
 
-  .tema6-hnp-responsive .minitab-table th[colspan] {
+  :where(.mat251) .tema6-hnp-responsive .minitab-table th[colspan] {
     font-size: 0.70rem !important;
   }
 
-  .tema6-hnp-responsive .signos-detalle-table {
+  :where(.mat251) .tema6-hnp-responsive .signos-detalle-table {
     font-size: 0.75rem !important;
   }
 
-  .tema6-hnp-responsive .rachas-detalle-table {
+  :where(.mat251) .tema6-hnp-responsive .rachas-detalle-table {
     font-size: 0.75rem !important;
   }
 
-  .tema6-hnp-responsive h5 {
+  :where(.mat251) .tema6-hnp-responsive h5 {
     font-size: 0.85rem !important;
   }
 
-  .tema6-hnp-responsive .hnp-nota-aproximacion {
+  :where(.mat251) .tema6-hnp-responsive .hnp-nota-aproximacion {
     font-size: 0.6rem !important;
   }
 
-  .tema6-hnp-responsive .hnp-columna-evaluar-label,
-  .tema6-hnp-responsive .hnp-punto-corte-label {
+  :where(.mat251) .tema6-hnp-responsive .hnp-columna-evaluar-label,
+:where(.mat251) .tema6-hnp-responsive .hnp-punto-corte-label {
     font-size: 0.7rem !important;
   }
 
-  .tema6-hnp-responsive .widget-grafico {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico {
     width: 100% !important;
     max-width: 100% !important;
     height: 390px !important;
     min-width: 0 !important;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-header {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-header {
     flex-wrap: wrap;
     gap: 6px;
     padding: 8px 10px !important;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-header > div:first-child {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-header > div:first-child {
     flex: 1 1 220px !important;
     width: auto;
     min-width: 0 !important;
     overflow: visible;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-header .widget-titulo {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-header .widget-titulo {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     overflow-x: auto !important;
@@ -274,44 +274,44 @@
     touch-action: pan-x;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-header .widget-titulo > span:last-child {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-header .widget-titulo > span:last-child {
     flex: 0 0 auto;
     width: max-content;
     min-width: max-content;
     white-space: nowrap !important;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-header .widget-titulo > span:last-child::-webkit-scrollbar {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-header .widget-titulo > span:last-child::-webkit-scrollbar {
     display: none;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-header .widget-controles {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-header .widget-controles {
     gap: 4px !important;
     margin-left: auto;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-header .widget-btn {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-header .widget-btn {
     width: 28px;
     height: 28px;
     padding: 4px;
   }
 
-  .tema6-hnp-responsive .widget-grafico > .widget-body {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico > .widget-body {
     flex: 1 1 auto !important;
     min-height: 300px !important;
   }
 
-  .hnp-simulacion-resultados .hnp-simulacion-grafica-plot {
+  :where(.mat251) .hnp-simulacion-resultados .hnp-simulacion-grafica-plot {
     flex: 1 1 220px !important;
     min-height: 220px !important;
   }
 
-  .hnp-simulacion-resultados .hnp-simulacion-histograma-plot {
+  :where(.mat251) .hnp-simulacion-resultados .hnp-simulacion-histograma-plot {
     flex: 1 1 190px !important;
     min-height: 190px !important;
   }
 
-  .hnp-simulacion-resultados .hnp-simulacion-histograma-leyenda {
+  :where(.mat251) .hnp-simulacion-resultados .hnp-simulacion-histograma-leyenda {
     width: 100%;
     max-width: 100%;
     flex: 0 0 auto;
@@ -326,55 +326,55 @@
     white-space: nowrap;
   }
 
-  .tema6-hnp-responsive #widget-histograma-simulacion-rachas .hnp-simulacion-histograma-leyenda {
+  :where(.mat251) .tema6-hnp-responsive #widget-histograma-simulacion-rachas .hnp-simulacion-histograma-leyenda {
     justify-content: center !important;
     overflow-x: visible !important;
   }
 
-  .tema6-hnp-responsive #widget-histograma-simulacion-rachas .hnp-simulacion-histograma-leyenda > div > span {
+  :where(.mat251) .tema6-hnp-responsive #widget-histograma-simulacion-rachas .hnp-simulacion-histograma-leyenda > div > span {
     font-size: 0.6rem !important;
   }
 
-  .hnp-simulacion-resultados .hnp-simulacion-histograma-leyenda > div {
+  :where(.mat251) .hnp-simulacion-resultados .hnp-simulacion-histograma-leyenda > div {
     flex: 0 0 auto;
     white-space: nowrap;
   }
 
-  .hnp-simulacion-resultados .hnp-simulacion-histograma-leyenda > div > span {
+  :where(.mat251) .hnp-simulacion-resultados .hnp-simulacion-histograma-leyenda > div > span {
     font-size: 0.52rem !important;
     white-space: nowrap;
   }
 
-  .hnp-simulacion-resultados .widget-grafico .recharts-cartesian-axis-tick-value {
+  :where(.mat251) .hnp-simulacion-resultados .widget-grafico .recharts-cartesian-axis-tick-value {
     font-size: calc(9px - 0.05rem) !important;
   }
 
-  .hnp-simulacion-resultados .widget-grafico .katex {
+  :where(.mat251) .hnp-simulacion-resultados .widget-grafico .katex {
     font-size: calc(0.85em - 0.05rem) !important;
   }
 
-  .tema6-hnp-responsive .decision-estadistica-table {
+  :where(.mat251) .tema6-hnp-responsive .decision-estadistica-table {
     width: 100% !important;
     min-width: 0 !important;
     table-layout: fixed;
     font-size: 0.68rem !important;
   }
 
-  .tema6-hnp-responsive .decision-estadistica-table th,
-  .tema6-hnp-responsive .decision-estadistica-table td {
+  :where(.mat251) .tema6-hnp-responsive .decision-estadistica-table th,
+:where(.mat251) .tema6-hnp-responsive .decision-estadistica-table td {
     overflow-wrap: anywhere;
     padding: 5px 3px !important;
   }
 
-  .tema6-hnp-responsive .widget-grafico .recharts-cartesian-axis-tick-value {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico .recharts-cartesian-axis-tick-value {
     font-size: 9px !important;
   }
 
-  .tema6-hnp-responsive .widget-grafico .katex {
+  :where(.mat251) .tema6-hnp-responsive .widget-grafico .katex {
     font-size: 0.85em;
   }
 
-  .leyenda-grafica-tema6 {
+  :where(.mat251) .leyenda-grafica-tema6 {
     width: 100%;
     max-width: 100%;
     flex-wrap: nowrap !important;
@@ -386,7 +386,7 @@
     overflow: visible;
   }
 
-  .leyenda-grafica-tema6 > div {
+  :where(.mat251) .leyenda-grafica-tema6 > div {
     flex: 0 1 auto;
     min-width: 0;
     gap: 4px !important;
@@ -394,80 +394,80 @@
     white-space: nowrap;
   }
 
-  .leyenda-grafica-tema6 > div > div:first-child {
+  :where(.mat251) .leyenda-grafica-tema6 > div > div:first-child {
     width: 11px !important;
     height: 11px !important;
     flex: 0 0 11px;
     border-width: 1px !important;
   }
 
-  .leyenda-grafica-tema6 > div > div:first-child[style*="height: 3px"] {
+  :where(.mat251) .leyenda-grafica-tema6 > div > div:first-child[style*="height: 3px"] {
     height: 3px !important;
     flex-basis: 16px;
   }
 
-  .leyenda-grafica-tema6 > div > div:last-child,
-  .leyenda-grafica-tema6 > div > span {
+  :where(.mat251) .leyenda-grafica-tema6 > div > div:last-child,
+:where(.mat251) .leyenda-grafica-tema6 > div > span {
     font-size: 0.55rem !important;
     line-height: 1.05 !important;
     letter-spacing: 0 !important;
     white-space: nowrap;
   }
 
-  .leyenda-grafica-tema6 .katex {
+  :where(.mat251) .leyenda-grafica-tema6 .katex {
     font-size: 0.82em !important;
   }
 
-  .hnp-simulacion-resultados {
+  :where(.mat251) .hnp-simulacion-resultados {
     width: 100%;
     max-width: 100%;
     gap: 10px !important;
     font-size: 0.68rem;
   }
 
-  .hnp-simulacion-resultados .hnp-simulacion-aviso-titulo,
-  .hnp-simulacion-resultados .hnp-simulacion-aviso-texto {
+  :where(.mat251) .hnp-simulacion-resultados .hnp-simulacion-aviso-titulo,
+:where(.mat251) .hnp-simulacion-resultados .hnp-simulacion-aviso-texto {
     font-size: 0.6rem !important;
   }
 
-  .hnp-simulacion-animacion-controles {
+  :where(.mat251) .hnp-simulacion-animacion-controles {
     flex-wrap: wrap !important;
     gap: 6px !important;
   }
 
-  .hnp-simulacion-resumen-scroll {
+  :where(.mat251) .hnp-simulacion-resumen-scroll {
     width: 100%;
     max-width: 100%;
     overflow-x: auto !important;
     overflow-y: hidden;
   }
 
-  .hnp-simulacion-resumen-scroll .minitab-table-sim {
+  :where(.mat251) .hnp-simulacion-resumen-scroll .minitab-table-sim {
     width: max-content !important;
     min-width: 600px !important;
     table-layout: auto !important;
     font-size: 0.62rem !important;
   }
 
-  .hnp-simulacion-resumen-scroll .minitab-table-sim th,
-  .hnp-simulacion-resumen-scroll .minitab-table-sim td {
+  :where(.mat251) .hnp-simulacion-resumen-scroll .minitab-table-sim th,
+:where(.mat251) .hnp-simulacion-resumen-scroll .minitab-table-sim td {
     white-space: nowrap;
   }
 
-  .hnp-simulacion-resumen-scroll .minitab-table-sim th,
-  .hnp-simulacion-resumen-scroll .minitab-table-sim td {
+  :where(.mat251) .hnp-simulacion-resumen-scroll .minitab-table-sim th,
+:where(.mat251) .hnp-simulacion-resumen-scroll .minitab-table-sim td {
     padding: 3px 2px !important;
     font-size: 0.62rem !important;
     overflow-wrap: anywhere;
     white-space: normal;
   }
 
-  .hnp-simulacion-historial h5 {
+  :where(.mat251) .hnp-simulacion-historial h5 {
     margin-bottom: 8px !important;
     font-size: 0.72rem !important;
   }
 
-  .hnp-simulacion-historial-scroll {
+  :where(.mat251) .hnp-simulacion-historial-scroll {
     width: 100%;
     max-width: 100%;
     overflow-x: auto !important;
@@ -476,37 +476,37 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .hnp-simulacion-historial-table {
+  :where(.mat251) .hnp-simulacion-historial-table {
     width: max-content !important;
     min-width: 100%;
   }
 
-  .hnp-simulacion-historial-table th,
-  .hnp-simulacion-historial-table td {
+  :where(.mat251) .hnp-simulacion-historial-table th,
+:where(.mat251) .hnp-simulacion-historial-table td {
     padding: 4px 5px !important;
     font-size: 0.62rem !important;
   }
 
-  .hnp-simulacion-paginacion > div {
+  :where(.mat251) .hnp-simulacion-paginacion > div {
     gap: 6px !important;
   }
 
-  .hnp-simulacion-paginacion button {
+  :where(.mat251) .hnp-simulacion-paginacion button {
     gap: 3px !important;
     padding: 4px 7px !important;
     font-size: 0.62rem !important;
   }
 
-  .hnp-simulacion-paginacion > div > div {
+  :where(.mat251) .hnp-simulacion-paginacion > div > div {
     font-size: 0.68rem !important;
   }
 
-  .hnp-simulacion-acciones {
+  :where(.mat251) .hnp-simulacion-acciones {
     gap: 6px !important;
     margin-top: 12px !important;
   }
 
-  .hnp-simulacion-acciones button {
+  :where(.mat251) .hnp-simulacion-acciones button {
     gap: 4px !important;
     padding: 5px 8px !important;
     font-size: 0.68rem !important;

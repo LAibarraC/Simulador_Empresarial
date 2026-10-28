@@ -252,6 +252,28 @@ async def registrar_usuario_logic(usuario: UsuarioRegistro, db: AsyncSession):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno al registrar usuario: {str(e)}")
 
+async def obtener_modulos_usuario_logic(usuario: models.Usuario, db: AsyncSession) -> list[str]:
+    if not usuario:
+        return []
+    if usuario.rol == "Administrador":
+        return ["MAT151", "MAT251"]
+    if usuario.rol == "Docente":
+        result = await db.execute(
+            select(models.DocenteModulo).filter(
+                models.DocenteModulo.docente_id == usuario.id,
+                models.DocenteModulo.activo == True
+            )
+        )
+        return [m.modulo for m in result.scalars().all()]
+    if usuario.rol == "Estudiante":
+        result = await db.execute(
+            select(models.EstudianteModulo).filter(
+                models.EstudianteModulo.estudiante_id == usuario.id
+            )
+        )
+        return [m.modulo for m in result.scalars().all()]
+    return []
+
 async def login_local_logic(credentials: UsuarioLogin, db: AsyncSession):
     result = await db.execute(select(models.Usuario).filter(models.Usuario.email == credentials.email))
     user_info = result.scalars().first()
@@ -265,12 +287,14 @@ async def login_local_logic(credentials: UsuarioLogin, db: AsyncSession):
     access_token = create_access_token(data={"id": user_info.id, "email": user_info.email, "rol": user_info.rol})
     
     requiere_rol = (not user_info.rol or user_info.rol == "Pendiente")
+    modulos = await obtener_modulos_usuario_logic(user_info, db)
     return {
         "token": access_token, "id": user_info.email, "nombre": user_info.nombre,
         "rol": user_info.rol, "email": user_info.email, "perfil": user_info.perfil,
         "institucion": user_info.institucion, "requiere_rol": requiere_rol,
         "requiere_configuracion": getattr(user_info, "must_change_password", False),
-        "foto_perfil": getattr(user_info, 'foto_perfil', None)
+        "foto_perfil": getattr(user_info, 'foto_perfil', None),
+        "modulos": modulos
     }
 
 async def configurar_precuenta_logic(datos: ConfigurarPrecuenta, usuario: models.Usuario, db: AsyncSession):
@@ -373,13 +397,15 @@ async def login_google_logic(req: GoogleLoginRequest, db: AsyncSession):
             
         access_token = create_access_token(data={"id": user_info.id, "email": user_info.email, "rol": user_info.rol})
         requiere_rol = (not user_info.rol or user_info.rol == "Pendiente" or es_nuevo)
+        modulos = await obtener_modulos_usuario_logic(user_info, db)
         
         return {
             "token": access_token, "id": user_info.email, "nombre": user_info.nombre,
             "rol": user_info.rol, "email": user_info.email, "perfil": user_info.perfil,
             "institucion": user_info.institucion, "requiere_rol": requiere_rol, "es_nuevo": es_nuevo,
             "requiere_configuracion": getattr(user_info, "must_change_password", False),
-            "foto_perfil": getattr(user_info, 'foto_perfil', None)
+            "foto_perfil": getattr(user_info, 'foto_perfil', None),
+            "modulos": modulos
         }
 
     except ValueError as e:

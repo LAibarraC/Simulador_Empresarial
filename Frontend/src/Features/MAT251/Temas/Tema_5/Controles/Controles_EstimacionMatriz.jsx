@@ -53,7 +53,7 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
     return (
         <div style={{ padding: '0px' }}>
             <div style={{ marginBottom: '10px' }}>
-                <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', padding: '10px' }}>
+                <div id="tour-t5-datos-resumen" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', padding: '10px' }}>
                     <div>
                         <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -89,7 +89,7 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                 )];
 
                 return (
-                    <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <div id="tour-t5-proporcion-exito" style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)', textAlign: 'center' }}>Seleccione el dato a contabilizar:</label>
                         
                         <div ref={selectRef} className="tema5-selector-proporcion" style={{ position: 'relative', maxWidth: '100%', fontFamily: FONT }}>
@@ -188,7 +188,7 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
                 );
             })()}
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
+            <div id="tour-t5-btn-calcular-matriz" style={{ display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                 <button 
                     className="button_calcular"
                     style={{ width: 'auto', padding: '5px 20px' }} 

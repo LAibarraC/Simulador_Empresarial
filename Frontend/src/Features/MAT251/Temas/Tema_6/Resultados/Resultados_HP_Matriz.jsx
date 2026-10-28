@@ -103,20 +103,20 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
 
             {/* PLANTEAMIENTO DE HIPÓTESIS */}
             {c && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px', fontSize: '0.9rem', fontFamily: FONT, color: 'var(--text-pure)' }}>
+                <div id="tour-t6-hp-planteamiento" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px', fontSize: '0.9rem', fontFamily: FONT, color: 'var(--text-pure)' }}>
                     <div style={{ fontWeight: 'bold', marginBottom: '8px', padding: '4px 12px', background: 'var(--bg-input, #f1f5f9)', borderRadius: '5px', border: '1px solid var(--border-color, #cbd5e1)', fontSize: '0.8rem'}}>
                         {c.tipoPrueba === 'bilateral' ? 'Hipótesis Bilateral' : c.tipoPrueba === 'derecha' ? 'Hipótesis Unilateral Derecha' : 'Hipótesis Unilateral Izquierda'}
                     </div>
                     <div style={{ textAlign: 'left' }}>
-                        <div style={{ marginBottom: '0px' }}>{renderKatex(`H_0: ${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} = ${c.p0 || c.mu0 || c.sigma02}`)}</div>
-                        <div>{renderKatex(`H_1: ${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} ${c.tipoPrueba === 'bilateral' ? '\\neq' : c.tipoPrueba === 'derecha' ? '>' : '<'} ${c.p0 || c.mu0 || c.sigma02}`)}</div>
+                        <div style={{ marginBottom: '0px' }}>{renderKatex(`H_0: ${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} = ${c.p0 ?? c.mu0 ?? c.sigma02}`)}</div>
+                        <div>{renderKatex(`H_1: ${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} ${c.tipoPrueba === 'bilateral' ? '\\neq' : c.tipoPrueba === 'derecha' ? '>' : '<'} ${c.p0 ?? c.mu0 ?? c.sigma02}`)}</div>
                     </div>
                 </div>
             )}
 
             {/* TABLA ESTILO MINITAB */}
             {c && (
-                <div className="tema5-tabla-resolucion-scroll" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '20px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.9rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
+                <div id="tour-t6-hp-tabla-minitab" className="tema5-tabla-resolucion-scroll" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '20px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.9rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
                     <style>{`
                         .minitab-table {
                             width: 100%;
@@ -228,7 +228,7 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
                             {/* VISTA PC: 1 fila con 2 columnas */}
                             <tr className="hide-on-mobile">
                                 <th colSpan={prueba === 'media_z' ? 3 : colCount} style={{ padding: '5px 10px', textAlign: 'left', borderBottom: '1px solid var(--text-pure)', borderRight: prueba === 'media_z' ? '1px solid var(--text-pure)' : 'none', fontWeight: 'normal' }}>
-                                    Prueba de {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} = ${c.p0 || c.mu0 || c.sigma02}`)} vs {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} ${c.tipoPrueba === 'bilateral' ? '\\neq' : c.tipoPrueba === 'derecha' ? '>' : '<'} ${c.p0 || c.mu0 || c.sigma02}`)}
+                                    Prueba de {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} = ${c.p0 ?? c.mu0 ?? c.sigma02}`)} vs {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} ${c.tipoPrueba === 'bilateral' ? '\\neq' : c.tipoPrueba === 'derecha' ? '>' : '<'} ${c.p0 ?? c.mu0 ?? c.sigma02}`)}
                                 </th>
                                 {prueba === 'media_z' && (
                                     <th colSpan={3} style={{ padding: '5px 10px', textAlign: 'left', borderBottom: '1px solid var(--text-pure)', fontWeight: 'normal' }}>
@@ -239,7 +239,7 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
                             {/* VISTA MÓVIL: 2 filas (apiladas) */}
                             <tr className="hide-on-pc">
                                 <th colSpan={colCount} style={{ padding: '5px 10px', textAlign: 'left', borderBottom: '1px solid var(--text-pure)', fontWeight: 'normal' }}>
-                                    Prueba de {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} = ${c.p0 || c.mu0 || c.sigma02}`)} vs {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} ${c.tipoPrueba === 'bilateral' ? '\\neq' : c.tipoPrueba === 'derecha' ? '>' : '<'} ${c.p0 || c.mu0 || c.sigma02}`)}
+                                    Prueba de {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} = ${c.p0 ?? c.mu0 ?? c.sigma02}`)} vs {renderKatex(`${prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu'} ${c.tipoPrueba === 'bilateral' ? '\\neq' : c.tipoPrueba === 'derecha' ? '>' : '<'} ${c.p0 ?? c.mu0 ?? c.sigma02}`)}
                                 </th>
                             </tr>
                             {prueba === 'media_z' && (
@@ -284,12 +284,12 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
 
             {/* GRÁFICA DE DISTRIBUCIÓN */}
             {c && (
-                <div style={{ width: '100%', marginTop: '20px', marginBottom: '20px' }}>
+                <div id="tour-t6-hp-grafico" style={{ width: '100%', marginTop: '20px', marginBottom: '20px' }}>
                     <Grafico_HP resultados={resultados} prueba={prueba} id="widget-grafica-hp-matriz" />
                 </div>
             )}
 
-            <div style={{ width: 'fit-content', maxWidth: '100%', overflowX: 'auto', margin: '0 auto 15px auto' }}>
+            <div id="tour-t6-hp-resumen-estadistico" style={{ width: 'fit-content', maxWidth: '100%', overflowX: 'auto', margin: '0 auto 15px auto' }}>
                 <table className="resumen-estadistico-table" style={{ width: 'fit-content', maxWidth: '100%', borderCollapse: 'collapse', border: '1px solid var(--text-pure)', borderRadius: '0px', color: 'var(--text-pure)', textAlign: 'center', fontFamily: FONT, fontSize: '0.9rem' }}>
                     <tbody>
                         <tr style={{ background: 'var(--bg-input)', fontWeight: 'bold', fontSize: '0.8rem' }}>
@@ -318,7 +318,7 @@ export default function Resultados_HP_Matriz({ resultados, prueba }) {
                 </table>
             </div>
 
-            <div style={{ width: '100%', overflowX: 'auto' }}>
+            <div id="tour-t6-hp-decision" style={{ width: '100%', overflowX: 'auto' }}>
                 <table className="decision-estadistica-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--text-pure)', borderRadius: '0px', background: 'var(--bg-card)', color: 'var(--text-pure)', textAlign: 'center', fontSize: '0.8rem' }}>
                     <tbody>
                         <tr>

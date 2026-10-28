@@ -8,7 +8,7 @@ import StatLabel from '../../../ui/StatLabel';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import '../../../styles/Temas/Tema4.css';
 
-export default function Resultados_DistribucionesMuestrales({ varSeleccionada, filas, abrirEditor }) {
+export default function Resultados_DistribucionesMuestrales({ varSeleccionada, filas, abrirEditor, onCalcular }) {
     const [poblacion, setPoblacion] = useState('');
     const [n, setN] = useState('');
     const [conReemplazo, setConReemplazo] = useState(true);
@@ -23,6 +23,10 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
     const [cargando, setCargando] = useState(false);
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const filasPorPagina = 10;
+
+    useEffect(() => {
+        onCalcular?.(resDistMuestrales);
+    }, [resDistMuestrales, onCalcular]);
 
     const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
         setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
@@ -203,7 +207,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
     return (
         <div style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', marginTop: '0px' }}>
             {/* ── DATOS Y EDITAR DATOS (Barra de Datos Canónica) ── */}
-            <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+            <div id="tour-t4-datos-resumen" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                 <div>
                     <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                     <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -219,6 +223,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                     </div>
                 </div>
                 <button
+                    id="tour-t4-btn-editar-datos"
                     onClick={abrirEditor}
                     className="btn-primary"
                     style={{ padding: '5px 14px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, cursor: 'pointer', border: 'none' }}
@@ -231,7 +236,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
             {/* Controles */}
             <div>
                 <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'flex-end', background: 'var(--bg-input)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                    <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                    <div id="tour-t4-parametro-calculo" style={{ flex: '1 1 200px', textAlign: 'center' }}>
                         <label style={labelStyle}>Parámetro a Calcular:</label>
                         <div ref={paramSelectRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
                             <div
@@ -307,7 +312,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                     </div>
 
                     {parametroCalculo === 'proporcion' && (
-                        <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                        <div id="tour-t4-atributo-exito" style={{ flex: '1 1 200px', textAlign: 'center' }}>
                             <label style={labelStyle}>Atributo de Éxito:</label>
                             <div ref={atributoSelectRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
                                 <div
@@ -384,7 +389,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                         </div>
                     )}
 
-                    <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                    <div id="tour-t4-tamano-muestra" style={{ flex: '1 1 200px', textAlign: 'center' }}>
                         <label style={labelStyle}>Tamaño de la Muestra (n):</label>
                         <input
                             type="number"
@@ -412,7 +417,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                         />
                     </div>
 
-                    <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                    <div id="tour-t4-tipo-muestreo" style={{ flex: '1 1 200px', textAlign: 'center' }}>
                         <label style={labelStyle}>Tipo de Muestreo:</label>
                         <div style={{ display: 'flex', justifyContent: 'center' }}>
                             <div className="contenedor-selector-modos-mat251" style={{ display: 'inline-flex', alignItems: 'center', minHeight: '38px', boxSizing: 'border-box' }}>
@@ -444,6 +449,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
                     <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                         <button
+                            id="tour-t4-btn-calcular"
                             type="button"
                             onClick={ejecutar}
                             disabled={cargando}
@@ -500,7 +506,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                         </div>
 
                                         {resDistMuestrales.resultado?.length <= 5000 && (
-                                            <div className="thin-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+                                            <div id="tour-t4-tabla-muestras" className="thin-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
                                                     <table className="tabla-academica" style={{ width: '100%', margin: 0, borderCollapse: 'collapse', textAlign: 'center', fontFamily: FONT, whiteSpace: 'nowrap' }}>
                                                         <thead>
                                                             <tr>
@@ -567,7 +573,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
                                             {/* Nueva Tabla de Distribución Muestral */}
                                             {resDistMuestrales.distribucion && (
-                                                <div style={{ marginTop: '25px' }}>
+                                                <div id="tour-t4-tabla-distribucion" style={{ marginTop: '25px' }}>
                                                     <div className="tema4-titulo-seccion" style={{ color: 'var(--text-pure)', margin: '0 0 12px 0', fontFamily: FONT, textAlign: 'center' }}>
                                                         Distribución Muestral de {parametroCalculado === 'media' ? 'Medias' : (parametroCalculado === 'varianza' ? 'Varianzas' : 'Proporciones')}
                                                     </div>
@@ -606,89 +612,107 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '15px' }}>
                                                         {parametroCalculado === 'media' ? (
                                                             <>
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                                    Esperanza Muestral <Latex formula="E(\bar{X})" />
-                                                                </div>
-                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                                                                    <Latex formula={`\\begin{aligned} E(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} \\bar{x}_i p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} \\end{aligned}`} />
-                                                                </div>
-                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', marginBottom: '5px', textAlign: 'center', fontSize:'0.75rem' }}>
-                                                                    Obsérvese que: <Latex formula={`E(\\bar{X}) = \\mu = ${Number(resDistMuestrales.calculosFinales.mediaPoblacional).toFixed(2)}`} />
-                                                                </div>
-
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                                    Varianza Muestral <Latex formula="V(\bar{X})" />
-                                                                </div>
-                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                                                                    <Latex formula={`\\begin{aligned} V(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} (\\bar{x}_i - E(\\bar{X}))^2 p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)} - ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)})^2`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(2)} \\end{aligned}`} />
-                                                                </div>
-                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize:'0.75rem' }}>
-                                                                    Obsérvese que: <Latex formula={`V(\\bar{X}) = \\frac{\\sigma^2}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''} = \\frac{${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(2)}}{${resDistMuestrales.calculosFinales.n}} ${!resDistMuestrales.calculosFinales.conReemplazo ? `\\left(\\frac{${resDistMuestrales.calculosFinales.N}-${resDistMuestrales.calculosFinales.n}}{${resDistMuestrales.calculosFinales.N}-1}\\right)` : ''} = ${varianzaTeoricaMediaStr}`} />
+                                                                <div id="tour-t4-esperanza-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Esperanza Muestral <Latex formula="E(\bar{X})" />
+                                                                    </div>
+                                                                    <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                        <Latex formula={`\\begin{aligned} E(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} \\bar{x}_i p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} \\end{aligned}`} />
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-pure)', marginTop: '5px', marginBottom: '5px', textAlign: 'center', fontSize:'0.75rem' }}>
+                                                                        Obsérvese que: <Latex formula={`E(\\bar{X}) = \\mu = ${Number(resDistMuestrales.calculosFinales.mediaPoblacional).toFixed(2)}`} />
+                                                                    </div>
                                                                 </div>
 
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                    Distribución Normal Aproximada
+                                                                <div id="tour-t4-varianza-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Varianza Muestral <Latex formula="V(\bar{X})" />
+                                                                    </div>
+                                                                    <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                        <Latex formula={`\\begin{aligned} V(\\bar{X}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} (\\bar{x}_i - E(\\bar{X}))^2 p_i \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(2)} - ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)})^2`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(2)} \\end{aligned}`} />
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize:'0.75rem' }}>
+                                                                        Obsérvese que: <Latex formula={`V(\\bar{X}) = \\frac{\\sigma^2}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''} = \\frac{${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(2)}}{${resDistMuestrales.calculosFinales.n}} ${!resDistMuestrales.calculosFinales.conReemplazo ? `\\left(\\frac{${resDistMuestrales.calculosFinales.N}-${resDistMuestrales.calculosFinales.n}}{${resDistMuestrales.calculosFinales.N}-1}\\right)` : ''} = ${varianzaTeoricaMediaStr}`} />
+                                                                    </div>
                                                                 </div>
-                                                                <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
-                                                                    <Latex formula={`\\bar{X} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} ; ${varianzaTeoricaMediaStr})`} />
+
+                                                                <div id="tour-t4-distribucion-aproximada">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                        Distribución Normal Aproximada
+                                                                    </div>
+                                                                    <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                        <Latex formula={`\\bar{X} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} ; ${varianzaTeoricaMediaStr})`} />
+                                                                    </div>
                                                                 </div>
                                                             </>
                                                         ) : parametroCalculado === 'varianza' ? (
                                                             <>
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                                    Varianza Poblacional <Latex formula="(\sigma^2)" />
-                                                                </div>
-                                                                <div style={{ padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
-                                                                    <Latex formula={`\\sigma^2 = \\frac{\\sum (x_i - \\mu)^2}{N} = ${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(4)}`} />
-                                                                </div>
-
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                                    Esperanza de la Varianza Muestral <Latex formula="E(S^2)" />
-                                                                </div>
-                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                                                                    <Latex formula={`\\begin{aligned} E(S^2) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} S_i^2 P(S_i^2) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} \\end{aligned}`} />
-                                                                </div>
-                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
-                                                                    Obsérvese que: <Latex formula={`E(S^2) = \\sigma^2 = ${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(4)}`} />
-                                                                </div>
-
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                    Distribución Chi-cuadrada
-                                                                </div>
-                                                                <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
-                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                                                                        La variable aleatoria sigue una distribución Chi-cuadrada con <Latex formula={`n-1 = ${resDistMuestrales.calculosFinales.n}-1 = ${resDistMuestrales.calculosFinales.n - 1}`} /> grados de libertad:
+                                                                <div id="tour-t4-esperanza-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Varianza Poblacional <Latex formula="(\sigma^2)" />
                                                                     </div>
-                                                                    <Latex formula={`\\frac{(${resDistMuestrales.calculosFinales.n}-1)S^2}{\\sigma^2} \\sim \\chi^2_{${resDistMuestrales.calculosFinales.n}-1}`} />
+                                                                    <div style={{ padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                        <Latex formula={`\\sigma^2 = \\frac{\\sum (x_i - \\mu)^2}{N} = ${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(4)}`} />
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="tour-t4-varianza-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Esperanza de la Varianza Muestral <Latex formula="E(S^2)" />
+                                                                    </div>
+                                                                    <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                        <Latex formula={`\\begin{aligned} E(S^2) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} S_i^2 P(S_i^2) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} \\end{aligned}`} />
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                        Obsérvese que: <Latex formula={`E(S^2) = \\sigma^2 = ${Number(resDistMuestrales.calculosFinales.varianzaPoblacional).toFixed(4)}`} />
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="tour-t4-distribucion-aproximada">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                        Distribución Chi-cuadrada
+                                                                    </div>
+                                                                    <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                                                                            La variable aleatoria sigue una distribución Chi-cuadrada con <Latex formula={`n-1 = ${resDistMuestrales.calculosFinales.n}-1 = ${resDistMuestrales.calculosFinales.n - 1}`} /> grados de libertad:
+                                                                        </div>
+                                                                        <Latex formula={`\\frac{(${resDistMuestrales.calculosFinales.n}-1)S^2}{\\sigma^2} \\sim \\chi^2_{${resDistMuestrales.calculosFinales.n}-1}`} />
+                                                                    </div>
                                                                 </div>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                                    Esperanza Muestral <Latex formula="E(\hat{p})" />
-                                                                </div>
-                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                                                                    <Latex formula={`\\begin{aligned} E(\\hat{p}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} \\hat{p}_i P(\\hat{p}_i) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} \\end{aligned}`} />
-                                                                </div>
-                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', marginBottom: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
-                                                                    Obsérvese que: <Latex formula={`E(\\hat{p}) = P = ${Number(resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)}`} />
-                                                                </div>
-
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                                    Varianza Muestral <Latex formula="V(\hat{p})" />
-                                                                </div>
-                                                                <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                                                                    <Latex formula={`\\begin{aligned} V(\\hat{p}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} (\\hat{p}_i - E(\\hat{p}))^2 P(\\hat{p}_i) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)} - ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)})^2`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(6)} \\end{aligned}`} />
-                                                                </div>
-                                                                <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
-                                                                    Obsérvese que: <Latex formula={`V(\\hat{p}) = \\frac{P \\cdot Q}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''} = \\frac{${Number(resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)} \\cdot ${(1 - resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)}}{${resDistMuestrales.calculosFinales.n}} ${!resDistMuestrales.calculosFinales.conReemplazo ? `\\left(\\frac{${resDistMuestrales.calculosFinales.N}-${resDistMuestrales.calculosFinales.n}}{${resDistMuestrales.calculosFinales.N}-1}\\right)` : ''} = ${varianzaTeoricaPropStr}`} />
+                                                                <div id="tour-t4-esperanza-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Esperanza Muestral <Latex formula="E(\hat{p})" />
+                                                                    </div>
+                                                                    <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                        <Latex formula={`\\begin{aligned} E(\\hat{p}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} \\hat{p}_i P(\\hat{p}_i) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)})`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} \\end{aligned}`} />
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-pure)', marginTop: '5px', marginBottom: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                        Obsérvese que: <Latex formula={`E(\\hat{p}) = P = ${Number(resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)}`} />
+                                                                    </div>
                                                                 </div>
 
-                                                                <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                    Distribución Normal Aproximada
+                                                                <div id="tour-t4-varianza-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Varianza Muestral <Latex formula="V(\hat{p})" />
+                                                                    </div>
+                                                                    <div className="thin-scrollbar" style={{ padding: '10px 15px 4px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', color: 'var(--text-pure)', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                                                                        <Latex formula={`\\begin{aligned} V(\\hat{p}) &= \\sum_{i=1}^{${resDistMuestrales.distribucion.length}} (\\hat{p}_i - E(\\hat{p}))^2 P(\\hat{p}_i) \\\\ &= ${resDistMuestrales.distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${Number(d.valor).toFixed(4)} - ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)})^2`).join(' + ')} = ${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(6)} \\end{aligned}`} />
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                        Obsérvese que: <Latex formula={`V(\\hat{p}) = \\frac{P \\cdot Q}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''} = \\frac{${Number(resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)} \\cdot ${(1 - resDistMuestrales.calculosFinales.proporcionPoblacional).toFixed(4)}}{${resDistMuestrales.calculosFinales.n}} ${!resDistMuestrales.calculosFinales.conReemplazo ? `\\left(\\frac{${resDistMuestrales.calculosFinales.N}-${resDistMuestrales.calculosFinales.n}}{${resDistMuestrales.calculosFinales.N}-1}\\right)` : ''} = ${varianzaTeoricaPropStr}`} />
+                                                                    </div>
                                                                 </div>
-                                                                <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
-                                                                    <Latex formula={`\\hat{p} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} ; ${varianzaTeoricaPropStr})`} />
+
+                                                                <div id="tour-t4-distribucion-aproximada">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                        Distribución Normal Aproximada
+                                                                    </div>
+                                                                    <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
+                                                                        <Latex formula={`\\hat{p} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} ; ${varianzaTeoricaPropStr})`} />
+                                                                    </div>
                                                                 </div>
                                                             </>
                                                         )}

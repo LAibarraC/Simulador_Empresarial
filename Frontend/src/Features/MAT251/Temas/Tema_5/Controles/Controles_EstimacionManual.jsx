@@ -38,13 +38,13 @@ export default function Controles_EstimacionManual({ parametro, onCalcular }) {
     return (
         <div className="tema5-manual-card" style={['proporcion', 'varianza'].includes(parametro) ? { ...cardStyle, border: 'none', paddingBottom: '5px' } : cardStyle}>
             <div className={`tema5-manual-fields ${['proporcion', 'varianza'].includes(parametro) ? 'tema5-manual-fields-compact' : ''}`}>
-                <div className="tema5-manual-field">
+                <div id="tour-t5-manual-tamano-muestra" className="tema5-manual-field">
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', minWidth: 0, whiteSpace: 'nowrap' }}>
                         {['proporcion', 'varianza'].includes(parametro) ? renderKatex('n:', true) : <>Tamaño de la muestra ({renderKatex('n', true)}):</>}
                     </label>
                     <input
                         type="number"
-                        className="input-mat251"
+                        className="input-mat251 placeholder-small"
                         value={n}
                         onChange={(e) => setN(e.target.value)}
                         placeholder={['proporcion', 'varianza'].includes(parametro) ? 'Tamaño de muestra' : 'Ej. 50'}
@@ -54,11 +54,11 @@ export default function Controles_EstimacionManual({ parametro, onCalcular }) {
                 </div>
 
                 {parametro === 'media' && (
-                    <div className="tema5-manual-field">
+                    <div id="tour-t5-manual-valor-parametro" className="tema5-manual-field">
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Media Muestral ({renderKatex('\\bar{X}', true)}):</label>
                         <input
                             type="number"
-                            className="input-mat251"
+                            className="input-mat251 placeholder-small"
                             value={xBar}
                             onChange={(e) => setXBar(e.target.value)}
                             placeholder="Ej. 120.5"
@@ -69,11 +69,11 @@ export default function Controles_EstimacionManual({ parametro, onCalcular }) {
                 )}
 
                 {parametro === 'proporcion' && (
-                    <div className="tema5-manual-field">
+                    <div id="tour-t5-manual-valor-parametro" className="tema5-manual-field">
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('x:', true)}</label>
                         <input
                             type="number"
-                            className="input-mat251"
+                            className="input-mat251 placeholder-small"
                             value={x}
                             onChange={(e) => setX(e.target.value)}
                             placeholder="Casos favorables"
@@ -84,11 +84,11 @@ export default function Controles_EstimacionManual({ parametro, onCalcular }) {
                 )}
 
                 {parametro === 'varianza' && (
-                    <div className="tema5-manual-field">
+                    <div id="tour-t5-manual-valor-parametro" className="tema5-manual-field">
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('S^2:', true)}</label>
                         <input
                             type="number"
-                            className="input-mat251"
+                            className="input-mat251 placeholder-small"
                             value={s2}
                             onChange={(e) => setS2(e.target.value)}
                             placeholder="Varianza muestral"
@@ -100,7 +100,7 @@ export default function Controles_EstimacionManual({ parametro, onCalcular }) {
                 )}
             </div>
 
-            <div className="tema5-manual-submit-wrap" style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
+            <div id="tour-t5-btn-calcular-manual" className="tema5-manual-submit-wrap" style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
                 <button
                     type="button"
                     className="button_calcular"

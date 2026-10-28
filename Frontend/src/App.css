@@ -834,6 +834,54 @@ button[data-sileo-toast]:active,
   font-weight: 700 !important;
 }
 
+/* Colores y animación fluida para el estado de carga (loading) */
+[data-sileo-toast][data-state="loading"] [data-sileo-title],
+[data-sileo-title][data-state="loading"] {
+  color: #38bdf8 !important;
+  font-weight: 700 !important;
+}
+
+/* Spinner continuo de carga para Sileo (acelerado por GPU en compositor layer sin congelarse) */
+[data-sileo-toast][data-state="loading"] [data-sileo-badge] {
+  color: #38bdf8 !important;
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  animation: sileo-spin-badge 0.85s linear infinite !important;
+  will-change: transform;
+  transform-origin: center center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@keyframes sileo-spin-badge {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Desactivar la animación interna de SVG para evitar conflicto y congelamientos en CPU */
+[data-sileo-toast][data-state="loading"] [data-sileo-icon="spin"] {
+  animation: none !important;
+}
+
+/* Ocultar de inmediato el mensaje anterior para que nunca se superpongan dos textos a la vez */
+[data-sileo-toast] [data-sileo-header-inner][data-layer="prev"],
+[data-sileo-toast] [data-sileo-header-inner][data-exiting="true"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* El mensaje actual siempre se muestra nítido, sin superposiciones ni desenfoque */
+[data-sileo-toast][data-state="loading"] [data-sileo-header-inner][data-layer="current"] {
+  filter: none !important;
+  opacity: 1 !important;
+  animation: none !important;
+}
+
 /* Descripción siempre de color blanco */
 [data-sileo-toast] [data-sileo-description],
 [data-sileo-description],

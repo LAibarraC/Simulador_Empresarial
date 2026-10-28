@@ -122,7 +122,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
                     }
                 }
             `}</style>
-            <div className="hp-manual-input-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '15px', marginBottom: '15px', width: '100%', minWidth: 0 }}>
+            <div id="tour-t6-hp-manual-entradas" className="hp-manual-input-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '15px', marginBottom: '15px', width: '100%', minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)', minWidth: '40px' }}>{renderKatex('n:')}</label>
                     <input type="number" className="input-mat251 placeholder-small" value={n} onChange={(e) => setN(e.target.value)} placeholder="Tamaño de muestra" min="1" style={{ flex: 1 }} />
@@ -188,7 +188,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)' }}>{renderKatex('\\alpha:')}</label>
                 </div>
-                <div ref={alphaRef} style={{ position: 'relative' }}>
+                <div id="tour-t6-hp-manual-alpha" ref={alphaRef} style={{ position: 'relative' }}>
                     <div
                         onClick={() => setIsAlphaOpen(!isAlphaOpen)}
                         style={{
@@ -237,7 +237,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main)' }}>{renderKatex('H_1:')}</label>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div id="tour-t6-hp-manual-h1" style={{ display: 'flex', gap: '8px' }}>
                     {['bilateral', 'derecha', 'izquierda'].map(tipo => {
                         const isSelected = tipoPrueba === tipo;
                         const mathStr = tipo === 'bilateral' ? `${paramSymbol} \\neq ${paramHypo}` :
@@ -268,7 +268,7 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
 
                 <div></div>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                    <button className="button_calcular" style={{ width: 'auto', padding: '5px 15px' }} onClick={handleCalcular}>
+                    <button id="tour-t6-hp-manual-btn-calcular" className="button_calcular" style={{ width: 'auto', padding: '5px 15px' }} onClick={handleCalcular}>
                         Calcular Prueba
                     </button>
                 </div>

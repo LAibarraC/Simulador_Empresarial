@@ -1,4 +1,4 @@
-.dashboard-card {
+:where(.mat251) .dashboard-card {
   background: #1e1e1e; /* Fondo oscuro tipo profesional */
   color: #e0e0e0;
   border-radius: 12px;
@@ -11,13 +11,13 @@
   font-family: inherit;
 }
 
-.input-section {
+:where(.mat251) .input-section {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.visual-section {
+:where(.mat251) .visual-section {
   background: #252525;
   border-radius: 8px;
   padding: 20px;
@@ -28,7 +28,7 @@
   border: 1px solid #333;
 }
 
-.stat-badge {
+:where(.mat251) .stat-badge {
   background: #2c3e50;
   padding: 10px;
   border-radius: 6px;
@@ -36,7 +36,7 @@
   border-bottom: 3px solid #3498db;
 }
 
-.custom-input {
+:where(.mat251) .custom-input {
   background: #333;
   border: 1px solid #444;
   color: white;
@@ -45,19 +45,19 @@
   transition: border 0.3s;
 }
 
-.custom-input:focus {
+:where(.mat251) .custom-input:focus {
   border-color: #3498db;
   outline: none;
 }
 
-.n-result {
+:where(.mat251) .n-result {
   font-size: 3rem;
   font-weight: bold;
   color: #3498db;
   margin: 0;
 }
 
-.formula-box {
+:where(.mat251) .formula-box {
   grid-column: 1 / span 2;
   background: #151515;
   padding: 15px;
@@ -69,14 +69,14 @@
 }
 
 /* ===== BARRA DE NAVEGACIÓN MAT-251 (igual a Calculadora) ===== */
-.mat251-contenedor {
+:where(.mat251) .mat251-contenedor {
   margin-top: -15px; /* Contrarresta el padding de 20px del contenedor global .content */
   min-height: 100vh;
   background-color: var(--bg-body);
   color: var(--text-main);
 }
 
-.mat251-navegacion {
+:where(.mat251) .mat251-navegacion {
   display: flex;
   justify-content: center;
   gap: 5px;
@@ -87,7 +87,7 @@
 }
 
 /* Hereda el fondo azul (var(--primary-color)) y texto blanco del global button{} */
-.mat251-tab-btn {
+:where(.mat251) .mat251-tab-btn {
   font-weight: bold;
   cursor: pointer;
   border-radius: 5px;
@@ -97,20 +97,20 @@
   white-space: nowrap;
 }
 
-.mat251-tab-btn.active {
+:where(.mat251) .mat251-tab-btn.active {
   background-color: var(--accent-color);
   color: white;
   border-bottom: none;
 }
 
 @media (max-width: 600px) {
-  .mat251-navegacion {
+  :where(.mat251) .mat251-navegacion {
     flex-direction: row;
     width: 100%;
     padding: 5px;
   }
 
-  .mat251-tab-btn {
+  :where(.mat251) .mat251-tab-btn {
     min-width: 0;
     flex: 1;
     font-size: 0.75rem;
@@ -122,19 +122,19 @@
 /* ========================================= */
 /* LAYOUT PRINCIPAL (Basado en Calculadora) */
 /* ========================================= */
-.contenedor-principal-sistema {
+:where(.mat251).contenedor-principal-sistema {
   margin-top: -15px; /* Contrarresta el padding de 20px del contenedor global .content */
   min-height: 100vh;
 }
 
-.ventana-contenido-principal {
+:where(.mat251) .ventana-contenido-principal {
   min-height: 600px;
 }
 
 /* ========================================= */
 /* MENÚ FLOTANTE RADIAL                      */
 /* ========================================= */
-.menu-flotante-radial {
+:where(.mat251) .menu-flotante-radial {
   position: fixed;
   top: 50%;
   right: 5px;
@@ -144,7 +144,7 @@
   height: 50px;
 }
 
-.fab-main {
+:where(.mat251) .fab-main {
   position: absolute;
   top: 0;
   right: 0;
@@ -164,11 +164,11 @@
   align-items: center;
 }
 
-.menu-flotante-radial.abierto .fab-main {
+:where(.mat251) .menu-flotante-radial.abierto .fab-main {
   transform: rotate(45deg);
 }
 
-.fab-item {
+:where(.mat251) .fab-item {
   position: absolute;
   top: 5px; /* (50-40)/2 */
   right: 5px;
@@ -190,54 +190,40 @@
   pointer-events: none;
 }
 
-.fab-item svg {
+:where(.mat251) .fab-item svg {
   padding: 3px;
 }
 
 
-.fab-item:hover {
+:where(.mat251) .fab-item:hover {
   background-color: var(--accent-color, #FF7000);
   box-shadow: 0 5px 15px rgba(255, 112, 0, 0.4);
 }
 
-/* Animaciones del menú radial al abrirse (Arco hacia la izquierda) */
-/* Botón 1: Arriba-Izquierda (Gestión de Datos) */
-.fab-item.item-1 {
-  background-color: #10b981; /* Verde esmeralda */
-}
-.menu-flotante-radial.abierto .item-1 {
-  transform: translate(-45px, -55px);
-  opacity: 1;
-  pointer-events: auto;
-  transition-delay: 0.1s;
-}
+/* Cinco herramientas compactas, con la misma posición al deshabilitarlas. */
+:where(.mat251) .fab-item.item-1 {--fab-x:-5px;--fab-y:-76px;background-color:#10b981;transition-delay:0.15s;}
+:where(.mat251) .fab-item.item-2 {--fab-x:-57px;--fab-y:-50px;background-color:#8b5cf6;transition-delay:0.1s;}
+:where(.mat251) .fab-item.item-3-pdf {--fab-x:-76px;--fab-y:0px;background-color:#ef4444;transition-delay:0.05s;}
+:where(.mat251) .fab-item.item-5-historial {--fab-x:-57px;--fab-y:50px;background-color:#07865b;transition-delay:0.025s;}
+:where(.mat251) .fab-item.item-4-guia,
+:where(.mat251) .fab-item.item-3 {--fab-x:-5px;--fab-y:76px;background-color:var(--primary-color,#2563eb);transition-delay:0s;}
 
-/* Botón 2: Izquierda (Creación de Tablas) */
-.fab-item.item-2 {
-  background-color: #8b5cf6; /* Violeta/Púrpura */
+:where(.mat251) .menu-flotante-radial.abierto .fab-item {
+  transform:translate(var(--fab-x),var(--fab-y))!important;
+  opacity:1;
+  pointer-events:auto;
 }
-.menu-flotante-radial.abierto .item-2 {
-  transform: translate(-70px, 0px);
-  opacity: 1;
-  pointer-events: auto;
-  transition-delay: 0.05s;
+:where(.mat251) .menu-flotante-radial.abierto .fab-item:hover:not(:disabled) {
+  transform:translate(var(--fab-x),var(--fab-y)) scale(1.1)!important;
 }
-
-/* Botón 3: Abajo-Izquierda */
-.menu-flotante-radial.abierto .item-3 {
-  transform: translate(-45px, 55px);
-  opacity: 1;
-  pointer-events: auto;
-  transition-delay: 0s;
-}
-
-/* Ajuste de hover para evitar sobrescribir el translate */
-.menu-flotante-radial.abierto .item-1:hover { transform: translate(-45px, -55px) scale(1.15); }
-.menu-flotante-radial.abierto .item-2:hover { transform: translate(-70px, 0px) scale(1.15); }
-.menu-flotante-radial.abierto .item-3:hover { transform: translate(-45px, 55px) scale(1.15); }
+:where(.mat251) .menu-flotante-radial .fab-item:disabled {opacity:0!important;}
+:where(.mat251) .menu-flotante-radial.abierto .fab-item:disabled {opacity:0.75!important;}
+:where(.mat251) .fab-item.item-3-pdf svg {width:23px;height:23px;}
+:where(.mat251) .fab-item.item-5-historial svg {width:24px;height:24px;padding:1px;}
+:where(.mat251) .fab-item.item-5-historial:disabled:hover {background-color:#07865b;}
 
 /* Tooltips dinámicos para los botones flotantes */
-.fab-tooltip {
+:where(.mat251) .fab-tooltip {
   position: absolute;
   right: 50px;
   background-color: #222;
@@ -254,7 +240,11 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-.fab-item:hover .fab-tooltip {
+:where(.mat251) .menu-flotante-radial.abierto .item-1:hover {
+  z-index:1003;
+}
+
+:where(.mat251) .fab-item:hover .fab-tooltip {
   opacity: 1;
   transform: translateX(0);
 }
@@ -262,7 +252,7 @@
 /* ========================================= */
 /* PANTALLA EMERGENTE DE DATOS (MODAL)       */
 /* ========================================= */
-.modal-overlay-datos {
+:where(.mat251) .modal-overlay-datos {
   position: fixed;
   top: 0;
   left: 0;
@@ -275,7 +265,7 @@
   align-items: center;
 }
 
-.modal-content-datos {
+:where(.mat251) .modal-content-datos {
   background-color: var(--bg-body, #ffffff);
   width: 95%;
   height: 95%;
@@ -286,7 +276,7 @@
   padding-top: 0;
 }
 
-.btn-cerrar-modal {
+:where(.mat251) .btn-cerrar-modal {
   position: absolute;
   top: 15px;
   right: 20px;
@@ -307,18 +297,18 @@
   backdrop-filter: blur(4px);
 }
 
-.btn-cerrar-modal:hover {
+:where(.mat251) .btn-cerrar-modal:hover {
   background-color: #ef4444;
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
 
-.btn-cerrar-modal:active {
+:where(.mat251) .btn-cerrar-modal:active {
   transform: translateY(0) scale(0.98);
 }
 
 @media (max-width: 600px) {
-  .modal-content-crear-tabla {
+  :where(.mat251) .modal-content-crear-tabla {
     box-sizing: border-box;
     max-width: 100vw;
     overflow-x: hidden;
@@ -326,58 +316,58 @@
 }
 
 /* ===== ESTILOS PARA MÓDULO RESTRINGIDO / EN DESARROLLO ===== */
-@keyframes spin-slow {
+@keyframes mat251-spin-slow {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-@keyframes pulse-soft {
+@keyframes mat251-pulse-soft {
   0%, 100% { opacity: 0.6; transform: scale(0.98); }
   50% { opacity: 1; transform: scale(1.02); }
 }
 
 @media (max-width: 480px) {
-  .restricted-card {
+  :where(.mat251) .restricted-card {
     padding: 30px 15px !important;
     width: 95% !important;
   }
-  .restricted-buttons {
+  :where(.mat251) .restricted-buttons {
     flex-direction: column !important;
     gap: 10px !important;
   }
-  .restricted-title {
+  :where(.mat251) .restricted-title {
     font-size: 1.3rem !important;
     min-height: 3.8rem;
   }
-  .restricted-countdown {
+  :where(.mat251) .restricted-countdown {
     gap: 6px !important;
   }
-  .countdown-unit {
+  :where(.mat251) .countdown-unit {
     min-width: 50px !important;
     padding: 8px 4px !important;
   }
-  .countdown-value {
+  :where(.mat251) .countdown-value {
     font-size: 1.1rem !important;
   }
-  .countdown-label {
+  :where(.mat251) .countdown-label {
     font-size: 0.6rem !important;
   }
 }
 
 /* ===== EFECTO DE ESCRITURA (TYPING EFFECT) ===== */
-@keyframes cursor-blink {
+@keyframes mat251-cursor-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 
-.typing-cursor {
+:where(.mat251) .typing-cursor {
   font-weight: 300;
   margin-left: 3px;
   color: var(--accent-color, #f39c12);
-  animation: cursor-blink 1s step-end infinite;
+  animation: mat251-cursor-blink 1s step-end infinite;
 }
 
-.restricted-title {
+:where(.mat251) .restricted-title {
   text-align: center;
   min-height: 2.5rem;
   word-wrap: break-word;
@@ -386,7 +376,7 @@
 /* ========================================= */
 /* BOTONES SELECTORES DE MODO (TEMA 1)       */
 /* ========================================= */
-.contenedor-selector-modos-mat251 {
+:where(.mat251) .contenedor-selector-modos-mat251 {
   display: inline-flex;
   background: var(--bg-input, #f1f5f9);
   padding: 4px;
@@ -396,7 +386,7 @@
   box-sizing: border-box;
 }
 
-.btn-mat251-modo {
+:where(.mat251) .btn-mat251-modo {
   font-family: inherit;
   padding: 5px 20px;
   border-radius: 5px;
@@ -409,17 +399,17 @@
   white-space: nowrap;
 }
 
-.contenedor-selector-modos-mat251 .btn-mat251-modo {
+:where(.mat251) .contenedor-selector-modos-mat251 .btn-mat251-modo {
   flex: 1;
   text-align: center;
 }
 
-.btn-mat251-modo:hover:not(.active) {
+:where(.mat251) .btn-mat251-modo:hover:not(.active) {
   background-color: rgba(217, 119, 6, 0.1);
   color: var(--accent-color);
 }
 
-.btn-mat251-modo.active {
+:where(.mat251) .btn-mat251-modo.active {
   background-color: var(--accent-color);
   color: #ffffff;
   border-color: var(--accent-color);
@@ -427,7 +417,7 @@
 }
 
 @media (max-width: 640px) {
-  .contenedor-selector-modos-mat251 {
+  :where(.mat251) .contenedor-selector-modos-mat251 {
     display: flex;
     width: 100%;
     box-sizing: border-box;
@@ -436,16 +426,16 @@
     scrollbar-width: none;
   }
 
-  .contenedor-selector-modos-mat251::-webkit-scrollbar {
+  :where(.mat251) .contenedor-selector-modos-mat251::-webkit-scrollbar {
     display: none;
   }
 
-  .btn-mat251-modo {
+  :where(.mat251) .btn-mat251-modo {
     padding: 5px 8px;
     font-size: 0.74rem;
   }
 
-  .contenedor-selector-modos-mat251 .btn-mat251-modo {
+  :where(.mat251) .contenedor-selector-modos-mat251 .btn-mat251-modo {
     flex: 1;
     min-width: 0;
     padding: 6px 4px !important;
@@ -462,7 +452,7 @@
 
 /* El selector principal de probabilidad se desplaza en una sola fila en móvil/tablet. */
 @media (max-width: 768px) {
-  .mat251-probabilidad-selector-modos {
+  :where(.mat251) .mat251-probabilidad-selector-modos {
     display: flex;
     flex-wrap: nowrap;
     justify-content: safe center;
@@ -476,11 +466,11 @@
     scrollbar-width: none;
   }
 
-  .mat251-probabilidad-selector-modos::-webkit-scrollbar {
+  :where(.mat251) .mat251-probabilidad-selector-modos::-webkit-scrollbar {
     display: none;
   }
 
-  .mat251-probabilidad-selector-modos > .btn-mat251-modo {
+  :where(.mat251) .mat251-probabilidad-selector-modos > .btn-mat251-modo {
     display: inline-flex;
     flex: 0 0 auto !important;
     align-items: center;
@@ -497,30 +487,22 @@
 }
 
 @media (max-width: 768px) {
-  /* En pantallas móviles y tablets, reposicionar el FAB para que no tape los inputs en el centro */
-  .menu-flotante-radial {
-    top: auto !important;
-    bottom: 25px !important;
-    right: 15px !important;
-    transform: none !important;
+  :where(.mat251) .menu-flotante-radial {
+    top:auto!important;
+    bottom:25px!important;
+    right:15px!important;
+    transform:none!important;
   }
-
-  .menu-flotante-radial.abierto .item-1 {
-    transform: translate(-50px, -45px);
-  }
-  .menu-flotante-radial.abierto .item-2 {
-    transform: translate(-65px, 0px);
-  }
-  .menu-flotante-radial.abierto .item-3 {
-    transform: translate(0px, -65px);
-  }
-
-  .menu-flotante-radial.abierto .item-1:hover { transform: translate(-50px, -45px) scale(1.15); }
-  .menu-flotante-radial.abierto .item-2:hover { transform: translate(-65px, 0px) scale(1.15); }
-  .menu-flotante-radial.abierto .item-3:hover { transform: translate(0px, -65px) scale(1.15); }
+  :where(.mat251) .menu-flotante-radial .item-1 {--fab-x:0px;--fab-y:-120px;}
+  :where(.mat251) .menu-flotante-radial .item-2 {--fab-x:-46px;--fab-y:-111px;}
+  :where(.mat251) .menu-flotante-radial .item-3-pdf {--fab-x:-85px;--fab-y:-85px;}
+  :where(.mat251) .menu-flotante-radial .item-5-historial {--fab-x:-111px;--fab-y:-46px;}
+  :where(.mat251) .menu-flotante-radial .item-4-guia,
+:where(.mat251) .menu-flotante-radial .item-3 {--fab-x:-120px;--fab-y:0px;}
+  :where(.mat251) .menu-flotante-radial .fab-tooltip {right:0;bottom:calc(100% + 8px);}
 }
 
-.btn-mat251-confianza {
+:where(.mat251) .btn-mat251-confianza {
   padding: 6px 16px;
   border-radius: 5px;
   border: 1px solid transparent !important;
@@ -533,13 +515,13 @@
   white-space: nowrap;
 }
 
-.btn-mat251-confianza:hover:not(.active) {
+:where(.mat251) .btn-mat251-confianza:hover:not(.active) {
   background-color: rgba(37, 99, 235, 0.1) !important;
   color: var(--primary-color) !important;
   border: 1px solid transparent !important;
 }
 
-.btn-mat251-confianza.active {
+:where(.mat251) .btn-mat251-confianza.active {
   background-color: var(--primary-color) !important;
   color: #ffffff !important;
   border: 1px solid var(--primary-color) !important;
@@ -547,7 +529,7 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
 }
 
-@keyframes fadeInDropdown {
+@keyframes mat251-fadeInDropdown {
   from {
     opacity: 0;
     transform: translateY(-4px);
@@ -561,7 +543,7 @@
 /* ========================================= */
 /* INPUTS Y PLACEHOLDERS ESTANDARIZADOS MAT251 */
 /* ========================================= */
-.input-mat251 {
+:where(.mat251) .input-mat251 {
   border-radius: 5px;
   border: 1px solid var(--border-color);
   background-color: var(--bg-card);
@@ -572,15 +554,15 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.input-mat251:focus {
+:where(.mat251) .input-mat251:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.btn-frecuencia-esperada-mat251,
-.btn-frecuencia-esperada-mat251:hover,
-.btn-frecuencia-esperada-mat251:focus,
-.btn-frecuencia-esperada-mat251:active {
+:where(.mat251) .btn-frecuencia-esperada-mat251,
+:where(.mat251) .btn-frecuencia-esperada-mat251:hover,
+:where(.mat251) .btn-frecuencia-esperada-mat251:focus,
+:where(.mat251) .btn-frecuencia-esperada-mat251:active {
   background: transparent !important;
   color: var(--text-pure) !important;
   border: none !important;
@@ -590,9 +572,9 @@
   -webkit-user-select: none;
 }
 
-.placeholder-small::placeholder,
-.input-mat251.placeholder-small::placeholder,
-.input-mat251::placeholder {
+:where(.mat251) .placeholder-small::placeholder,
+:where(.mat251) .input-mat251.placeholder-small::placeholder,
+:where(.mat251) .input-mat251::placeholder {
   font-size: 0.72rem !important;
   opacity: 0.65;
   color: var(--text-muted);

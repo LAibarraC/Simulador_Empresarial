@@ -13,7 +13,7 @@ export const OPERACIONES = [
     operaciones: [
       { value: 'conteo', label: 'Técnicas de Conteo' },
       { value: 'probabilidad', label: 'Cálculo de Probabilidad' },
-      { value: 'simulador_total', label: 'Teorema de Probabilidad Total' },
+      { value: 'Probabilidad_Total', label: 'Teorema de Probabilidad Total' },
       { value: 'regla_adicion', label: 'Axiomas y Regla de la Adición' },
       { value: 'regla_multiplicacion', label: 'Regla de la Multiplicación' },
     ],
@@ -30,8 +30,8 @@ export const OPERACIONES = [
     tema: 'Tema 3',
     titulo: 'Distribuciones discretas y continuas importantes',
     operaciones: [
-      { value: 'modelos_discretos', label: 'Distribuciones Discretas' },
-      { value: 'modelos_continuos', label: 'Distribuciones Continuas' }
+      { value: 'Distribuciones_Discretas', label: 'Distribuciones Discretas' },
+      { value: 'Distribuciones_Continuas', label: 'Distribuciones Continuas' }
     ],
   },
   {

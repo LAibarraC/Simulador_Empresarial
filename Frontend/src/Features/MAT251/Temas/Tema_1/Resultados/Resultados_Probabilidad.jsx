@@ -35,7 +35,7 @@ export default function ResultadosProbabilidad({
     tipo = 'clasica',
     eventoCondicion = [], setModalCondicion = () => { },
     colProbClasica, setColProbClasica, varSeleccionada, filas = [],
-    inputMode, setInputMode, mostrarAlerta
+    inputMode, setInputMode, mostrarAlerta, onResultadoExperimento
 }) {
     const [isDropdownColOpen, setIsDropdownColOpen] = useState(false);
     const dropdownColRef = useRef(null);
@@ -204,6 +204,12 @@ export default function ResultadosProbabilidad({
         }
         return resProbabilidad;
     })();
+
+    useEffect(() => {
+        if (inputMode === 'manual' && setResProbabilidad) {
+            setResProbabilidad(activeRes);
+        }
+    }, [inputMode, activeRes]);
 
     const handleEjecutarSimulacion = () => {
         if (eventoFavorable.length === 0) {
@@ -510,7 +516,7 @@ export default function ResultadosProbabilidad({
         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column' }}>
             {/* SELECTOR DE MODO DE ENTRADA */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                <div className="contenedor-selector-modos-mat251 mat251-probabilidad-selector-modos">
+                <div id="tour-mat251-modos-entrada" className="contenedor-selector-modos-mat251 mat251-probabilidad-selector-modos">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
@@ -562,13 +568,14 @@ export default function ResultadosProbabilidad({
                         filas={filas}
                         varSeleccionada={varSeleccionada}
                         abrirEditor={abrirEditor}
+                        onResultadoExperimento={onResultadoExperimento}
                     />
                 ) : inputMode === 'manual' ? (
                     /* INTERFAZ PARA MODO MANUAL */
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '15px' }}>
                         <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)' }}>Datos del Ejercicio</h4>
                         <div className="panel-inputs" style={{ display: 'flex', flexWrap: 'wrap', gap: '25px', marginTop: 0, marginBottom: '15px', background: 'var(--bg-input)', padding: '20px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '250px' }}>
+                            <div id="tour-mat251-manual-numerador" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '250px' }}>
                                 <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>{labels.numerador.text.trim()}</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, fontSize: FS.md, color: 'var(--text-main)', whiteSpace: 'nowrap' }}><InlineMath math={labels.numerador.math} />:</span>
@@ -594,7 +601,7 @@ export default function ResultadosProbabilidad({
                                     />
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '250px' }}>
+                            <div id="tour-mat251-manual-denominador" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '250px' }}>
                                 <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>{labels.denominador.text.trim()}</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, fontSize: FS.md, color: 'var(--text-main)', whiteSpace: 'nowrap' }}><InlineMath math={labels.denominador.math} />:</span>
@@ -633,7 +640,7 @@ export default function ResultadosProbabilidad({
                         <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)', fontFamily: FONT }}>Configuración:</h4>
                         <div className="panel-inputs" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: 0, marginBottom: '5px', background: 'var(--bg-card)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                             {/* Selector personalizado de Experimento */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
+                            <div id="tour-sim-selector-exp" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
                                 <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>Experimento</label>
                                 <div ref={dropdownExpRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
                                     {(() => {
@@ -748,7 +755,7 @@ export default function ResultadosProbabilidad({
                             </div>
 
                             {/* Selector personalizado de Evento de Interés */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
+                            <div id="tour-sim-selector-evento" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
                                 <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>Evento de Interés</label>
                                 <div ref={dropdownEventoRef} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
                                     {(() => {
@@ -867,7 +874,7 @@ export default function ResultadosProbabilidad({
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
+                            <div id="tour-sim-repeticiones" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '200px' }}>
                                 <label style={{ ...labelStyle, color: 'var(--text-pure)', marginBottom: 0 }}>Repeticiones (<InlineMath math="N" />)</label>
                                 <input
                                     type="number"
@@ -886,6 +893,7 @@ export default function ResultadosProbabilidad({
 
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                             <button
+                                id="tour-sim-btn-iniciar"
                                 type="button"
                                 onClick={handleEjecutarSimulacionClasica}
                                 disabled={simulacionEnCurso}
@@ -915,7 +923,7 @@ export default function ResultadosProbabilidad({
                                 </div>
 
                                 {/* TOP SECTION: Lanzamiento and Controls */}
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginTop: '10px', marginBottom: '20px' }}>
+                                <div id="tour-sim-progreso-controles" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginTop: '10px', marginBottom: '20px' }}>
                                     <span className="texto-lanzamiento-simulacion" style={{ fontSize: FS.sm, fontWeight: 700, color: 'var(--text-pure)', fontFamily: FONT }}>Lanzamiento: {progresoSimulacion.intentoActual} / {parseInt(iteracionesClasica) || 0}</span>
 
                                     <div className="controles-simulacion-movil" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap', justifyContent: 'center' }}>
@@ -986,7 +994,7 @@ export default function ResultadosProbabilidad({
                                 </div>
 
                                 {/* MIDDLE SECTION: Coin and Side Cards */}
-                                <div className="contenedor-simulacion-clasica">
+                                <div id="tour-sim-comparacion" className="contenedor-simulacion-clasica">
                                     {/* Left Side: Probabilidad Teórica */}
                                     <div className="col-simulacion-lateral">
                                         {resSimulacionClasica && (
@@ -1045,7 +1053,7 @@ export default function ResultadosProbabilidad({
                                     </div>
 
                                     {resSimulacionClasica && (
-                                        <div className="bloque-exitos-simulacion" style={{ textAlign: 'center' }}>
+                                        <div id="tour-sim-exitos" className="bloque-exitos-simulacion" style={{ textAlign: 'center' }}>
                                             <p className="titulo-exitos-simulacion" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>ÉXITOS OBTENIDOS</p>
                                             <div className="valor-exitos-simulacion" style={{ margin: '5px 0 0', fontSize: '1.3rem', color: 'var(--text-pure)', fontWeight: 'normal' }}>{renderKatexValue(resSimulacionClasica.exitos)}</div>
                                         </div>
@@ -1054,7 +1062,7 @@ export default function ResultadosProbabilidad({
 
                                 {/* Nuevas métricas empíricas */}
                                 {resSimulacionClasica && (
-                                    <div className="grid-metricas-empiricas" style={{ borderTop: 'none' }}>
+                                    <div id="tour-sim-metricas-empiricas" className="grid-metricas-empiricas" style={{ borderTop: 'none' }}>
                                         <div className="tarjeta-metrica-empirica">
                                             <p className="titulo-metrica-empirica" style={{ fontFamily: FONT, color: 'var(--text-pure)' }}><span>Esperanza Empírica</span> <InlineMath math="E(X)" /></p>
                                             <div className="valor-metrica-empirica" style={{ color: 'var(--text-pure)', fontWeight: 'normal' }}>
@@ -1081,7 +1089,7 @@ export default function ResultadosProbabilidad({
                 ) : (
                     /* INTERFAZ PARA MODO MATRIZ */
                     <>
-                        <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                        <div id="tour-mat251-espacio-muestral" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                             <div>
                                 <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -1181,7 +1189,7 @@ export default function ResultadosProbabilidad({
                         <div className="grid-resultados-probabilidad">
                             {/* Evento Condicion (Solo Condicional) */}
                             {isCond && (
-                                <div style={{ ...cardStyle, marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                                <div id="tour-mat251-evento-condicion" style={{ ...cardStyle, marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
                                     <label style={{ ...labelStyle, color: 'var(--text-pure)' }}>Condición Dada (Evento <InlineMath math="B" />):</label>
                                     {statsEventos.length > 0 ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexGrow: 1 }}>
@@ -1225,7 +1233,7 @@ export default function ResultadosProbabilidad({
                             )}
 
                             {/* Evento Favorable*/}
-                            <div style={{ ...cardStyle, marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
+                            <div id="tour-mat251-evento-favorable" style={{ ...cardStyle, marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                                 <label style={{ ...labelStyle, color: 'var(--text-pure)' }}>
                                     {isFrec ? <>Evento de Interés <InlineMath math="A" />:</> : isCond ? <>Evento de Interés <InlineMath math="A" />:</> : <>Evento Favorable <InlineMath math="E" />:</>}
                                 </label>
@@ -1301,6 +1309,7 @@ export default function ResultadosProbabilidad({
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0px' }}>
                             <button
+                                id="tour-mat251-btn-calcular"
                                 onClick={isFrec && inputMode === 'simulacion' ? handleEjecutarSimulacion : ejecutar}
                                 className="button_calcular"
                                 style={{
@@ -1334,10 +1343,10 @@ export default function ResultadosProbabilidad({
                 {inputMode !== 'experimentos' && (activeRes || (isFrec && resultadoFrecuentista && inputMode === 'simulacion') || (tipo === 'clasica' && historialSimClasica.length > 0 && inputMode === 'simulacion')) && (
                     <>
                         {(inputMode !== 'simulacion' || (isFrec && resultadoFrecuentista && inputMode === 'simulacion')) && (
-                            <div ref={formulaProbRef} style={{ overflowX: 'auto', marginTop: '10px' }} />
+                            <div id="tour-mat251-formula" ref={formulaProbRef} style={{ overflowX: 'auto', marginTop: '10px' }} />
                         )}
                         {(inputMode !== 'simulacion' || (isFrec && resultadoFrecuentista && inputMode === 'simulacion')) && (
-                            <div className="grid-metricas-probabilidad">
+                            <div id="tour-mat251-resultados" className="grid-metricas-probabilidad">
                                 {isFrec && resultadoFrecuentista && inputMode === 'simulacion' ? (
                                     <>
                                         <div style={{ padding: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: RADIUS, textAlign: 'center' }}>
@@ -1375,7 +1384,7 @@ export default function ResultadosProbabilidad({
                         )}
 
                         {tipo === 'clasica' && historialSimClasica.length > 0 && inputMode === 'simulacion' && (
-                            <div style={{ marginTop: '10px' }}>
+                            <div id="tour-sim-grafica" style={{ marginTop: '10px' }}>
                                 <MarcoWidgetMAT251 titulo="Convergencia de la Probabilidad" anchoCompleto={true} alto="400px">
                                     <div style={{ width: '100%', height: '100%', minWidth: 0, padding: 0, boxSizing: 'border-box' }}>
                                         <ResponsiveContainer width="100%" height="100%">
@@ -1401,7 +1410,7 @@ export default function ResultadosProbabilidad({
                         {tipo === 'clasica' && historialSimulacionMoneda.length > 0 && inputMode === 'simulacion' && (experimentoClasico === 'moneda' || experimentoClasico === 'dado' || experimentoClasico === 'baraja') && (
                             <div style={{ marginTop: '15px' }}>
                                 {/* Tabla de datos de la simulación directamente visible */}
-                                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
+                                <div id="tour-sim-tabla-historial" style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: RADIUS, position: 'relative' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: FS.sm, color: 'var(--text-color)' }}>
                                         <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 1, boxShadow: '0 1px 0 var(--border-color)' }}>
                                             <tr>
@@ -1427,8 +1436,9 @@ export default function ResultadosProbabilidad({
                                 </div>
 
                                 {/* Botones centrados debajo de la tabla */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'center', marginTop: '15px' }}>
+                                <div id="tour-sim-botones-exportar" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'center', marginTop: '15px' }}>
                                     <button
+                                        id="tour-sim-btn-guardar"
                                         type="button"
                                         className="btn-primary"
                                         style={{ padding: '5px 20px', fontSize: FS.sm, fontWeight: 600, fontFamily: FONT, borderRadius: RADIUS, display: 'flex', alignItems: 'center', gap: '6px' }}
@@ -1468,6 +1478,7 @@ export default function ResultadosProbabilidad({
                                         <IconoGuardar /> Guardar
                                     </button>
                                     <button
+                                        id="tour-sim-btn-descargar"
                                         type="button"
                                         className="btn-verde"
                                         style={{ padding: '5px 20px', fontSize: FS.sm, fontWeight: 600, fontFamily: FONT, borderRadius: RADIUS, display: 'flex', alignItems: 'center', gap: '6px' }}

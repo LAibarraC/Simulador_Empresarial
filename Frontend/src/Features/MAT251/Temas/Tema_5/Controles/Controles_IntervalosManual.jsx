@@ -49,7 +49,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
             setModalAlerta({ isOpen: true, mensaje: res.error, titulo: 'Dato inválido', tipo: 'warning' });
             onCalcular(null);
         } else {
-            onCalcular(res);
+            onCalcular(res ? { ...res, sigmaConocida: parametro === 'media' ? sigmaConocida : undefined } : null);
         }
     };
 
@@ -59,7 +59,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
             <div className="tema5-manual-content">
                 
                 <div className={`tema5-manual-fields ${parametro === 'media' ? 'tema5-manual-fields-media' : ''} ${['proporcion', 'varianza'].includes(parametro) ? 'tema5-manual-fields-compact' : ''}`}>
-                    <div className={`tema5-manual-field ${parametro === 'media' ? 'tema5-manual-field-inline' : ''}`}>
+                    <div id="tour-t5-intervalos-manual-n" className={`tema5-manual-field ${parametro === 'media' ? 'tema5-manual-field-inline' : ''}`}>
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex(['proporcion', 'varianza'].includes(parametro) ? 'n:' : 'n =', true)}</label>
                         <input
                             type="number"
@@ -73,7 +73,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                     </div>
 
                     {parametro === 'media' && (
-                        <div className="tema5-manual-field tema5-manual-field-inline">
+                        <div id="tour-t5-intervalos-manual-param-val" className="tema5-manual-field tema5-manual-field-inline">
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('\\bar{X} =', true)}</label>
                             <input
                                 type="number"
@@ -88,7 +88,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                     )}
 
                     {parametro === 'proporcion' && (
-                        <div className="tema5-manual-field">
+                        <div id="tour-t5-intervalos-manual-param-val" className="tema5-manual-field">
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('x:', true)}</label>
                             <input
                                 type="number"
@@ -103,7 +103,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                     )}
 
                     {parametro === 'varianza' && (
-                        <div className="tema5-manual-field">
+                        <div id="tour-t5-intervalos-manual-param-val" className="tema5-manual-field">
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>{renderKatex('S^2:', true)}</label>
                             <input
                                 type="number"
@@ -120,7 +120,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
                 </div>
 
                 {parametro === 'media' && (
-                    <div className="tema5-manual-media-extra">
+                    <div id="tour-t5-intervalos-manual-sigma-selector" className="tema5-manual-media-extra">
                         <div className="tema5-manual-sigma-selector">
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', whiteSpace: 'nowrap' }}>Desviación Estándar:</label>
                             
@@ -201,7 +201,7 @@ export default function Controles_IntervalosManual({ parametro, confianza, onCal
 
             </div>
 
-            <div className="tema5-manual-submit-wrap" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+            <div id="tour-t5-intervalos-btn-calcular-manual" className="tema5-manual-submit-wrap" style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <button 
                     type="button"
                     className="button_calcular" 

@@ -15,9 +15,18 @@ export default function Resultados_DiferenciaMedias({ resultados }) {
     let z2Val = typeof resultados.z2 === 'number' && !isNaN(resultados.z2) ? resultados.z2 : null;
 
     if (z1Val === null && resultados.strDesarrollo) {
-        const matches = [...resultados.strDesarrollo.matchAll(/P\(\s*Z\s*(?:\\le|\\ge|<=|>=|<|>)\s*([-\d.,]+)\s*\)/gi)];
-        if (matches.length > 0) z1Val = parseFloat(matches[0][1].replace(',', '.'));
-        if (matches.length > 1) z2Val = parseFloat(matches[1][1].replace(',', '.'));
+        const matches = [...resultados.strDesarrollo.matchAll(/P\(\s*Z\s*(?:\\le|\\ge|<=|>=|<|>)\s*([-\d.,{}]+)\s*\)/gi)];
+        if (matches.length > 0) z1Val = parseFloat(matches[0][1].replace(/[{}]/g, '').replace(',', '.'));
+        if (matches.length > 1) z2Val = parseFloat(matches[1][1].replace(/[{}]/g, '').replace(',', '.'));
+    }
+
+    if (z1Val === null && resultados.x1 !== undefined && (resultados.esperanza !== undefined || resultados.p !== undefined) && resultados.se) {
+        const esp = resultados.esperanza !== undefined ? resultados.esperanza : resultados.p;
+        z1Val = (parseFloat(resultados.x1) - parseFloat(esp)) / parseFloat(resultados.se);
+    }
+    if (z2Val === null && resultados.x2 !== undefined && (resultados.esperanza !== undefined || resultados.p !== undefined) && resultados.se) {
+        const esp = resultados.esperanza !== undefined ? resultados.esperanza : resultados.p;
+        z2Val = (parseFloat(resultados.x2) - parseFloat(esp)) / parseFloat(resultados.se);
     }
 
     z1Val = z1Val !== null && !isNaN(z1Val) ? z1Val : 0;
@@ -25,12 +34,12 @@ export default function Resultados_DiferenciaMedias({ resultados }) {
 
     const getMathProbFinal = (cond) => {
         if (cond === 'mayor_que') {
-            return "P(\\bar{X} - \\bar{Y} \\ge x) = 1 - P(Z \\le z)";
+            return "P(\\bar{X}_1 - \\bar{X}_2 \\ge x) = 1 - P(Z \\le z)";
         }
         if (cond === 'entre') {
-            return "P(x_1 \\le \\bar{X} - \\bar{Y} \\le x_2) = P(Z \\le z_2) - P(Z \\le z_1)";
+            return "P(x_1 \\le \\bar{X}_1 - \\bar{X}_2 \\le x_2) = P(Z \\le z_2) - P(Z \\le z_1)";
         }
-        return "P(\\bar{X} - \\bar{Y} \\le x) = P(Z \\le z)";
+        return "P(\\bar{X}_1 - \\bar{X}_2 \\le x) = P(Z \\le z)";
     };
 
     return (
@@ -46,7 +55,7 @@ export default function Resultados_DiferenciaMedias({ resultados }) {
                             formulaKey="Z_dif_medias"
                             formulaLatex="Z"
                             customTexto="Estandarización de la Diferencia de Medias"
-                            customMath="Z = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sqrt{\frac{\sigma_X^2}{n_X} + \frac{\sigma_Y^2}{n_Y}}}"
+                            customMath="Z = \frac{(\bar{X}_1 - \bar{X}_2) - (\mu_1 - \mu_2)}{\sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}}}"
                             align="center"
                         />
                         <span>y Probabilidad</span>
@@ -109,7 +118,7 @@ export default function Resultados_DiferenciaMedias({ resultados }) {
                             <span>PROBABILIDAD FINAL</span>
                             <StatLabel
                                 formulaKey="P_dif_medias_final"
-                                formulaLatex="P(\bar{X} - \bar{Y})"
+                                formulaLatex="P(\bar{X}_1 - \bar{X}_2)"
                                 customTexto="Cálculo de Probabilidad Normal Estándar"
                                 customMath={getMathProbFinal(resultados.condicion)}
                                 align="center"

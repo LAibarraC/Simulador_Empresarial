@@ -1073,7 +1073,7 @@ export default function ModalEntregasDocente({ tarea, onClose }) {
   };
 
   return createPortal(
-    <div style={{
+    <div className="mat151" style={{
       position: "fixed",
       top: 0,
       left: 0,

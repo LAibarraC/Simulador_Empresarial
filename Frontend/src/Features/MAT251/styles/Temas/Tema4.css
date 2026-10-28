@@ -1,26 +1,26 @@
 /* Custom Select Herramienta */
-.tema4-select-container {
+:where(.mat251) .tema4-select-container {
     position: relative;
     width: 100%;
     max-width: 520px;
     margin: 0 auto;
 }
 
-.tema4-select-container.tema4-select-tyf {
+:where(.mat251) .tema4-select-container.tema4-select-tyf {
     width: min(100%, 460px);
     max-width: 460px;
     margin-inline: auto;
 }
 
-.tema4-select-tyf .tema4-select-header {
+:where(.mat251) .tema4-select-tyf .tema4-select-header {
     width: 100%;
 }
 
-.tema4-select-tyf .tema4-select-text {
+:where(.mat251) .tema4-select-tyf .tema4-select-text {
     flex: 0 1 auto;
 }
 
-.tema4-select-header {
+:where(.mat251) .tema4-select-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -39,22 +39,22 @@
     width: 100%;
 }
 
-.tema4-select-header.open {
+:where(.mat251) .tema4-select-header.open {
     border-color: var(--primary-color, #3b82f6);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.tema4-select-header-content {
+:where(.mat251) .tema4-select-header-content {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.tema4-select-icon-primary {
+:where(.mat251) .tema4-select-icon-primary {
     color: var(--primary-color, #3b82f6);
 }
 
-.tema4-select-text {
+:where(.mat251) .tema4-select-text {
     font-weight: 500;
     font-size: 0.84rem;
     color: var(--text-pure);
@@ -65,17 +65,17 @@
     flex: 1;
 }
 
-.tema4-select-chevron {
+:where(.mat251) .tema4-select-chevron {
     color: var(--text-muted, #64748b);
     flex-shrink: 0;
     transition: transform 0.2s ease;
 }
 
-.tema4-select-chevron.open {
+:where(.mat251) .tema4-select-chevron.open {
     transform: rotate(180deg);
 }
 
-.tema4-select-dropdown {
+:where(.mat251) .tema4-select-dropdown {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
@@ -89,10 +89,10 @@
     overflow: hidden;
     max-height: 260px;
     overflow-y: auto;
-    animation: fadeInDropdown 0.2s ease;
+    animation: mat251-fadeInDropdown 0.2s ease;
 }
 
-.tema4-select-option { 
+:where(.mat251) .tema4-select-option { 
     padding: 9px 14px;
     cursor: pointer;
     background: transparent;
@@ -107,30 +107,30 @@
     text-align: left;
 }
 
-.tema4-select-option:hover {
+:where(.mat251) .tema4-select-option:hover {
     background: var(--bg-input, rgba(0, 0, 0, 0.04));
 }
 
-.tema4-select-option.selected {
+:where(.mat251) .tema4-select-option.selected {
     background: rgba(37, 99, 235, 0.08);
     color: var(--primary-color, #3b82f6);
     font-weight: 600;
 }
 
 /* Calculadora Wrapper */
-.tema4-calculadora-wrapper {
+:where(.mat251) .tema4-calculadora-wrapper {
     display: flex;
     flex-direction: column;
     gap: 20px;
     align-items: stretch;
 }
 
-.tema4-calculadora-resultados {
+:where(.mat251) .tema4-calculadora-resultados {
     margin-top: 10px;
 }
 
 /* Condición Lógica / Selector Responsivo Tema 4 */
-.tema4-condicion-fila {
+:where(.mat251) .tema4-condicion-fila {
     display: flex;
     flex-direction: row !important;
     align-items: center;
@@ -142,7 +142,7 @@
     flex-wrap: nowrap !important;
 }
 
-.tema4-condicion-label {
+:where(.mat251) .tema4-condicion-label {
     font-size: 0.85rem;
     font-family: inherit;
     color: var(--text-pure);
@@ -152,7 +152,7 @@
     flex-shrink: 0;
 }
 
-.tema4-condicion-select-wrapper {
+:where(.mat251) .tema4-condicion-select-wrapper {
     box-sizing: border-box;
     display: flex;
     justify-content: center;
@@ -161,21 +161,21 @@
 }
 
 @media (max-width: 520px) {
-    .tema4-condicion-fila {
+    :where(.mat251) .tema4-condicion-fila {
         gap: 6px !important;
     }
 
-    .tema4-condicion-label {
+    :where(.mat251) .tema4-condicion-label {
         font-size: 0.78rem !important;
     }
 
-    .tema4-condicion-select-wrapper {
+    :where(.mat251) .tema4-condicion-select-wrapper {
         flex: 1 1 auto !important;
         max-width: 220px !important;
     }
 }
 
-.tema4-en-construccion {
+:where(.mat251) .tema4-en-construccion {
     padding: 40px 20px;
     text-align: center;
     background: var(--bg-card, #ffffff);
@@ -184,20 +184,20 @@
     margin: 20px;
 }
 
-.tema4-en-construccion h3 {
+:where(.mat251) .tema4-en-construccion h3 {
     color: var(--text-pure);
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 10px;
 }
 
-.tema4-en-construccion p {
+:where(.mat251) .tema4-en-construccion p {
     color: var(--text-muted, #64748b);
     font-size: 1rem;
 }
 
 /* Keyframes for dropdown animation */
-@keyframes fadeInDropdown {
+@keyframes mat251-fadeInDropdown {
     from {
         opacity: 0;
         transform: translateY(-4px);
@@ -209,36 +209,36 @@
 }
 
 /* Responsive formulas y valores de resolución */
-.formula-responsive {
+:where(.mat251) .formula-responsive {
     font-size: 0.95rem !important;
     color: var(--text-pure);
 }
 
-.formula-responsive,
-.formula-responsive .katex,
-.formula-responsive .katex-display,
-.formula-responsive .katex .mord,
-.formula-responsive .katex .mrel,
-.formula-responsive .katex .mbin,
-.formula-responsive .katex .mopen,
-.formula-responsive .katex .mclose,
-.formula-responsive .katex .mpunct {
+:where(.mat251) .formula-responsive,
+:where(.mat251) .formula-responsive .katex,
+:where(.mat251) .formula-responsive .katex-display,
+:where(.mat251) .formula-responsive .katex .mord,
+:where(.mat251) .formula-responsive .katex .mrel,
+:where(.mat251) .formula-responsive .katex .mbin,
+:where(.mat251) .formula-responsive .katex .mopen,
+:where(.mat251) .formula-responsive .katex .mclose,
+:where(.mat251) .formula-responsive .katex .mpunct {
     color: var(--text-pure) !important;
 }
 
-.formula-responsive .katex {
+:where(.mat251) .formula-responsive .katex {
     font-size: 0.95rem !important;
 }
 
 /* Mantiene 5px de espacio lateral en las tarjetas de parámetros combinados. */
-.tema4-difference-calculation-card {
+:where(.mat251) .tema4-difference-calculation-card {
     padding-left: 5px !important;
     padding-right: 5px !important;
 }
 
 /* Scroll acotado a los cálculos de parámetros que aparecen antes de la gráfica. */
-.tema4-parametros-scroll,
-.tema4-difference-calculation-summary {
+:where(.mat251) .tema4-parametros-scroll,
+:where(.mat251) .tema4-difference-calculation-summary {
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;
@@ -246,18 +246,18 @@
     overflow-y: hidden !important;
 }
 
-.tema4-parametros-scroll {
+:where(.mat251) .tema4-parametros-scroll {
     width: 100%;
     align-items: center !important;
 }
 
-.tema4-difference-calculation-summary {
+:where(.mat251) .tema4-difference-calculation-summary {
     width: fit-content;
     margin-inline: auto;
     align-items: stretch !important;
 }
 
-.tema4-difference-calculation-summary .tema4-difference-calculation-row {
+:where(.mat251) .tema4-difference-calculation-summary .tema4-difference-calculation-row {
     display: grid !important;
     grid-template-columns: 130px max-content;
     width: 100% !important;
@@ -267,90 +267,90 @@
     text-align: left;
 }
 
-.tema4-difference-calculation-summary .tema4-difference-calculation-row > .mat251-stat-label-container {
+:where(.mat251) .tema4-difference-calculation-summary .tema4-difference-calculation-row > .mat251-stat-label-container {
     width: max-content;
     justify-self: end;
 }
 
-.tema4-difference-calculation-summary .tema4-difference-calculation-row.formula-bold::before {
+:where(.mat251) .tema4-difference-calculation-summary .tema4-difference-calculation-row.formula-bold::before {
     content: '';
 }
 
 @media (max-width: 600px) {
-    .tema4-difference-calculation-summary {
+    :where(.mat251) .tema4-difference-calculation-summary {
         width: 100%;
         margin-inline: 0;
         align-items: flex-start !important;
     }
 
-    .tema4-difference-calculation-summary .tema4-difference-calculation-row {
+    :where(.mat251) .tema4-difference-calculation-summary .tema4-difference-calculation-row {
         justify-content: start !important;
     }
 }
 
 /* En móvil se compactan solo las etiquetas de los límites, sin alterar la gráfica. */
-.tema4-etiqueta-limite {
+:where(.mat251) .tema4-etiqueta-limite {
     font-size: 12px;
 }
 
 @media (max-width: 600px) {
-    .tema4-etiqueta-limite {
+    :where(.mat251) .tema4-etiqueta-limite {
         font-size: 9px !important;
     }
 }
 
 @media (min-width: 768px) {
-    .formula-responsive {
+    :where(.mat251) .formula-responsive {
         font-size: 1rem !important;
     }
-    .formula-responsive .katex {
+    :where(.mat251) .formula-responsive .katex {
         font-size: 1rem !important;
     }
 }
 
-.formula-bold,
-.formula-bold .katex,
-.formula-bold .katex-html,
-.formula-bold .katex * {
+:where(.mat251) .formula-bold,
+:where(.mat251) .formula-bold .katex,
+:where(.mat251) .formula-bold .katex-html,
+:where(.mat251) .formula-bold .katex * {
     font-weight: bold !important;
 }
 
-.formula-responsive .katex .mathbf,
-.formula-responsive .katex .mathbf *,
-.formula-responsive .katex .textbf,
-.formula-responsive .katex .textbf *,
-.formula-responsive .katex .boldsymbol,
-.formula-responsive .katex .boldsymbol * {
+:where(.mat251) .formula-responsive .katex .mathbf,
+:where(.mat251) .formula-responsive .katex .mathbf *,
+:where(.mat251) .formula-responsive .katex .textbf,
+:where(.mat251) .formula-responsive .katex .textbf *,
+:where(.mat251) .formula-responsive .katex .boldsymbol,
+:where(.mat251) .formula-responsive .katex .boldsymbol * {
     font-weight: bold !important;
 }
 
 /* Blindaje universal de Tooltip StatLabel para evitar que fórmulas matemáticas salgan en negro */
-.mat251-stat-tooltip .mat251-tooltip-text,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-text {
+:where(.mat251) .mat251-stat-tooltip .mat251-tooltip-text,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-text {
     color: #ffffff !important;
 }
 
-.mat251-stat-tooltip .mat251-tooltip-math,
-.mat251-stat-tooltip .mat251-tooltip-math *,
-.mat251-stat-tooltip .mat251-tooltip-math .katex,
-.mat251-stat-tooltip .mat251-tooltip-math .katex *,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math *,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex *,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mord,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mrel,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mbin,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mopen,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mclose,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mpunct,
-.formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .text {
+:where(.mat251) .mat251-stat-tooltip .mat251-tooltip-math,
+:where(.mat251) .mat251-stat-tooltip .mat251-tooltip-math *,
+:where(.mat251) .mat251-stat-tooltip .mat251-tooltip-math .katex,
+:where(.mat251) .mat251-stat-tooltip .mat251-tooltip-math .katex *,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math *,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex *,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mord,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mrel,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mbin,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mopen,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mclose,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .mpunct,
+:where(.mat251) .formula-responsive .mat251-stat-tooltip .mat251-tooltip-math .katex .text {
     color: #fbbf24 !important;
     white-space: nowrap !important;
 }
 
 /* Tabla de Distribución Muestral (Permite desplegar tooltips sin recortes) */
-.tema4-distribucion-tabla-wrapper {
+:where(.mat251) .tema4-distribucion-tabla-wrapper {
     background: transparent;
     border: none;
     overflow: visible;
@@ -359,7 +359,7 @@
 }
 
 @media (max-width: 768px) {
-    .tema4-distribucion-tabla-wrapper {
+    :where(.mat251) .tema4-distribucion-tabla-wrapper {
         overflow-x: auto;
         padding-bottom: 0;
         margin-bottom: 15px;
@@ -367,40 +367,40 @@
 }
 
 /* Unificación de tamaño estricto a 0.8rem para todo el contenido de la tabla */
-.tema4-distribucion-tabla-wrapper table td {
+:where(.mat251) .tema4-distribucion-tabla-wrapper table td {
     font-size: 0.9rem !important;
 }
 
-.tema4-distribucion-tabla-wrapper .katex {
+:where(.mat251) .tema4-distribucion-tabla-wrapper .katex {
     font-size: 0.9rem !important;
 }
 
-.tema4-distribucion-tabla-wrapper .katex .mfrac .mord {
+:where(.mat251) .tema4-distribucion-tabla-wrapper .katex .mfrac .mord {
     font-size: 0.9rem !important;
 }
 
 /* Unificación de títulos de sección y conclusiones en Tema 4 */
-.tema4-titulo-seccion {
+:where(.mat251) .tema4-titulo-seccion {
     font-size: 0.95rem !important;
     font-weight: 700 !important;
 }
 
-.tema4-titulo-seccion .katex {
+:where(.mat251) .tema4-titulo-seccion .katex {
     text-transform: none;
     font-size: 0.95rem !important;
 }
 
 @media (max-width: 768px) {
-    .tema4-titulo-seccion {
+    :where(.mat251) .tema4-titulo-seccion {
         font-size: 0.85rem !important;
     }
-    .tema4-titulo-seccion .katex {
+    :where(.mat251) .tema4-titulo-seccion .katex {
         font-size: 0.85rem !important;
     }
 }
 
 /* Títulos unificados de tarjetas en Tema 4 (0.8rem fijo universal para Desktop y Mobile) */
-.tema4-tarjeta-titulo-unificado {
+:where(.mat251) .tema4-tarjeta-titulo-unificado {
     font-size: 0.8rem !important;
     font-weight: 700 !important;
     color: var(--text-pure) !important;
@@ -412,48 +412,48 @@
     margin: 0;
 }
 
-.tema4-tarjeta-titulo-unificado .katex,
-.tema4-tarjeta-titulo-unificado .katex-html,
-.tema4-tarjeta-titulo-unificado .mat251-stat-label-container {
+:where(.mat251) .tema4-tarjeta-titulo-unificado .katex,
+:where(.mat251) .tema4-tarjeta-titulo-unificado .katex-html,
+:where(.mat251) .tema4-tarjeta-titulo-unificado .mat251-stat-label-container {
     font-size: 0.8rem !important;
     text-transform: none;
 }
 
 @media (max-width: 900px) {
-    .tema4-tarjeta-titulo-unificado,
-    .tema4-tarjeta-titulo-unificado .katex,
-    .tema4-tarjeta-titulo-unificado .katex-html,
-    .tema4-tarjeta-titulo-unificado .mat251-stat-label-container {
+    :where(.mat251) .tema4-tarjeta-titulo-unificado,
+:where(.mat251) .tema4-tarjeta-titulo-unificado .katex,
+:where(.mat251) .tema4-tarjeta-titulo-unificado .katex-html,
+:where(.mat251) .tema4-tarjeta-titulo-unificado .mat251-stat-label-container {
         font-size: 0.8rem !important;
     }
 }
 
 /* Tarjetas de parámetros de poblaciones en los módulos de Tema 4 */
-.tema4-population-grid {
+:where(.mat251) .tema4-population-grid {
     align-items: stretch;
 }
 
-.tema4-population-card {
+:where(.mat251) .tema4-population-card {
     position: relative;
     border-radius: 5px !important;
 }
 
-.tema4-population-card > h4 {
+:where(.mat251) .tema4-population-card > h4 {
     text-align: center;
 }
 
 @media (max-width: 700px) {
-    .tema4-population-grid {
+    :where(.mat251) .tema4-population-grid {
         grid-template-columns: minmax(0, 1fr) !important;
     }
 }
 
 /* Fórmulas de los parámetros combinados: más legibles sin ampliar sus tooltips. */
-.tema4-difference-calculation-row > span:not(.mat251-stat-label-container) .katex,
-.tema4-difference-calculation-row .mat251-stat-label-container > span > .katex {
+:where(.mat251) .tema4-difference-calculation-row > span:not(.mat251-stat-label-container) .katex,
+:where(.mat251) .tema4-difference-calculation-row .mat251-stat-label-container > span > .katex {
     font-size: 1rem !important;
 }
 
-.tema4-difference-calculation-row .mat251-stat-tooltip .katex {
+:where(.mat251) .tema4-difference-calculation-row .mat251-stat-tooltip .katex {
     font-size: 1rem !important;
 }

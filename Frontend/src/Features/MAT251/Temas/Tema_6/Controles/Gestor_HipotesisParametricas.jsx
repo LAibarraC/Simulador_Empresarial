@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FONT, RADIUS } from '../../../Principal/Constantes';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -35,7 +35,7 @@ export function Controles_HP_UI({ prueba, setPrueba }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '850px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
+                    <div id="tour-t6-hp-selector-prueba" style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)' }}>
                         {PRUEBAS.map(p => (
                             <button
                                 key={p.id}
@@ -54,11 +54,24 @@ export function Controles_HP_UI({ prueba, setPrueba }) {
     );
 }
 
-export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, modo, setModo }) {
+export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, modo, setModo, onResultado }) {
     const [resMatriz, setResMatriz] = useState(null);
     const [resManual, setResManual] = useState(null);
     const [resSimulacion, setResSimulacion] = useState(null);
     const [pruebaResSimulacion, setPruebaResSimulacion] = useState(null);
+    const variableKey = `${varSeleccionada?.id ?? ''}:${varSeleccionada?.nombre ?? ''}:${statsDatos?.total ?? 0}`;
+    const guardarMatriz = useCallback(resultados => setResMatriz(resultados ? { prueba, variableKey, resultados } : null), [prueba, variableKey]);
+    const guardarManual = useCallback(resultados => setResManual(resultados ? { prueba, resultados } : null), [prueba]);
+    const matrizActual = resMatriz?.prueba === prueba && resMatriz?.variableKey === variableKey ? resMatriz.resultados : null;
+    const manualActual = resManual?.prueba === prueba ? resManual.resultados : null;
+    const exportable = modo === 'matriz' ? matrizActual : modo === 'manual' ? manualActual : null;
+
+    useEffect(() => {
+        onResultado?.(exportable ? {
+            operacion: 'Hipotesis_parametricas', prueba, modo,
+            nombreVariable: varSeleccionada?.nombre, resultados: exportable
+        } : null);
+    }, [exportable, prueba, modo, varSeleccionada?.nombre, onResultado]);
 
     useEffect(() => {
         setResMatriz(null);
@@ -73,7 +86,7 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
             {/* Selector de Modo de Trabajo */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
-                    <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '5px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
+                    <div id="tour-t6-hp-modos" style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '5px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {MODOS.map(m => (
                             <button
                                 key={m.id}
@@ -99,10 +112,10 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
                             filas={filas}
                             statsDatos={statsDatos}
                             abrirEditor={abrirEditor}
-                            onCalcular={setResMatriz}
+                            onCalcular={guardarMatriz}
                         />
-                        {resMatriz && varSeleccionada && statsDatos?.total > 0 && (
-                            <Resultados_HP_Matriz resultados={resMatriz} prueba={prueba} />
+                        {matrizActual && varSeleccionada && statsDatos?.total > 0 && (
+                            <Resultados_HP_Matriz resultados={matrizActual} prueba={prueba} />
                         )}
                     </>
                 )}
@@ -111,10 +124,10 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
                     <>
                         <Controles_HP_Manual
                             prueba={prueba}
-                            onCalcular={setResManual}
+                            onCalcular={guardarManual}
                         />
-                        {resManual && (
-                            <Resultados_HP_Manual resultados={resManual} prueba={prueba} />
+                        {manualActual && (
+                            <Resultados_HP_Manual resultados={manualActual} prueba={prueba} />
                         )}
                     </>
                 )}

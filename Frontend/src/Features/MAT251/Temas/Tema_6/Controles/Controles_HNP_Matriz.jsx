@@ -346,7 +346,13 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
             }
             
             const referenciaReal = isDosColumnas ? 0 : valRef;
-            res = { tipo: 'signos', ...pruebaSignos(datosDiferencia, referenciaReal, alpha, tipoPrueba) };
+            res = {
+                tipo: 'signos', datosAnalizados: [...datosDiferencia], valorReferencia: referenciaReal,
+                detalleSignos: signosDetalle.map(detalle => ({ ...detalle })),
+                columnasPareadas: isDosColumnas ? [...varSeleccionada.nombresColumnas] : undefined,
+                columnaEvaluada: !isDosColumnas && varSeleccionada?.nombresColumnas?.length > 1 ? varSeleccionada.nombresColumnas[columnaSeleccionada] : undefined,
+                ...pruebaSignos(datosDiferencia, referenciaReal, alpha, tipoPrueba)
+            };
 
         } else if (prueba === 'rachas') {
             setResultadosMatriz(null);
@@ -475,6 +481,10 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                 nIgnorados,
                 valorCorteFinal,
                 secuenciaDicotomica: secuenciaDicotomica.join(' '),
+                detalleRachas: rachasDetalle.map(detalle => ({ ...detalle })),
+                rachasCuantitativa: isCuantitativaUI,
+                rachasUsaCorte: isCuantitativaUI && hasMoreThanTwoNumericValues,
+                columnaEvaluada: isMatrix ? varSeleccionada.nombresColumnas[columnaSeleccionada] : undefined,
                 ...pruebaRachas(n1, n2, R, alpha, tipoPrueba) 
             };
         }
@@ -670,7 +680,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
     return (
         <div style={{ padding: '0px', fontFamily: FONT }}>
             <div style={{ marginBottom: 0 }}>
-                <div className="tema6-hnp-data-summary" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', padding: '10px' }}>
+                <div id="tour-t6-hnp-datos-resumen" className="tema6-hnp-data-summary" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', padding: '10px' }}>
                     <div>
                         <span style={{ ...labelStyle, margin: 0, fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)' }}>Datos:</span>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -706,7 +716,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                         (prueba === 'rachas' ||
                         (prueba === 'signos' && varSeleccionada?.nombresColumnas?.length !== 2))
                     ) && (
-                        <div style={{ width: '100%', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <div id="tour-t6-hnp-columna-evaluar" style={{ width: '100%', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
                             <label className="hnp-columna-evaluar-label" style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', fontSize: FS.sm }}>Columna a evaluar:</label>
                             <div ref={columnaRef} style={{ position: 'relative', width: '270px', maxWidth: '100%', minWidth: '180px' }}>
                                 <button
@@ -745,7 +755,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                                 {categoriasExtraidas.length > 0 && (
                                     <div>
                                         <h5 style={{ margin: '0 0 8px', color: 'var(--text-pure)', fontSize: '0.9rem', textAlign: 'center' }}>Frecuencias Esperadas</h5>
-                                        <div className="hnp-frecuencias-esperadas-scroll" style={{ width: '620px', maxWidth: '100%', height: categoriasExtraidas.length > 10 ? '350px' : 'auto', overflowY: categoriasExtraidas.length > 10 ? 'auto' : 'visible', overflowX: 'auto', margin: '0 auto', alignSelf: 'center', boxSizing: 'border-box' }}>
+                                        <div id="tour-t6-hnp-tabla-esperadas" className="hnp-frecuencias-esperadas-scroll" style={{ width: '620px', maxWidth: '100%', height: categoriasExtraidas.length > 10 ? '350px' : 'auto', overflowY: categoriasExtraidas.length > 10 ? 'auto' : 'visible', overflowX: 'auto', margin: '0 auto', alignSelf: 'center', boxSizing: 'border-box' }}>
                                             <style>{`
                                                 .hnp-frecuencias-esperadas-table { border-collapse: separate !important; border-spacing: 0 !important; border-top: 0 !important; border-left: 1px solid var(--text-pure) !important; border-right: 1px solid var(--text-pure) !important; border-bottom: 1px solid var(--text-pure) !important; }
                                                 .hnp-frecuencias-esperadas-table th, .hnp-frecuencias-esperadas-table td { border-top: 0 !important; border-left: 0 !important; border-right: 1px solid var(--text-pure) !important; border-bottom: 1px solid var(--text-pure) !important; }
@@ -818,7 +828,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                         {prueba === 'rachas' && rachasDatosValidos && (
                             <div style={{ gridColumn: '1 / -1', fontSize: '0.85rem', color: 'var(--text-pure)' }}>
                                 {isCuantitativaUI && hasMoreThanTwoNumericValues && (
-                                    <div style={{ padding: '0', background: 'transparent', border: 'none', marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div id="tour-t6-hnp-rachas-corte" style={{ padding: '0', background: 'transparent', border: 'none', marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <label className="hnp-punto-corte-label" style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', color: 'var(--text-pure)', fontSize: '0.85rem', textAlign: 'center' }}>Punto de Corte:</label>
                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                                             {[{ id: 'mediana', label: 'Mediana' }, { id: 'media', label: 'Media Aritmética' }, { id: 'personalizado', label: 'Personalizado' }].map(opt => {
@@ -867,10 +877,10 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                         )}
                     </div>
 
-                    {(prueba !== 'rachas' || rachasDatosValidos) && <div className="hnp-parametros-superiores" style={{ order: -1, display: 'grid', gridTemplateColumns: prueba === 'signos' || prueba === 'rachas' ? 'minmax(0, 380px)' : 'repeat(2, minmax(0, 1fr))', justifyContent: prueba === 'signos' || prueba === 'rachas' ? 'center' : 'stretch', width: '100%', maxWidth: prueba === 'signos' || prueba === 'rachas' ? '380px' : 'none', margin: '0 auto 15px', boxSizing: 'border-box', gap: '15px' }}>
+                    {(prueba !== 'rachas' || rachasDatosValidos) && <div id="tour-t6-hnp-parametros-superiores" className="hnp-parametros-superiores" style={{ order: -1, display: 'grid', gridTemplateColumns: prueba === 'signos' || prueba === 'rachas' ? 'minmax(0, 380px)' : 'repeat(2, minmax(0, 1fr))', justifyContent: prueba === 'signos' || prueba === 'rachas' ? 'center' : 'stretch', width: '100%', maxWidth: prueba === 'signos' || prueba === 'rachas' ? '380px' : 'none', margin: '0 auto 15px', boxSizing: 'border-box', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: prueba === 'signos' || prueba === 'rachas' ? 'center' : 'flex-start', gap: '10px', minWidth: 0, padding: 0 }}>
                             <label style={{ ...labelStyle, display: 'inline-flex', alignItems: 'center', margin: 0, padding: 0, color: 'var(--text-pure)', fontWeight: 'bold', width: 'fit-content', minWidth: 0, flex: '0 0 auto', textAlign: 'left' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
-                            <div style={{ flex: 1, minWidth: 0 }}>
+                            <div id="tour-t6-hnp-alpha" style={{ flex: 1, minWidth: 0 }}>
                                 {alphaSelector}
                             </div>
                         </div>
@@ -878,7 +888,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                         {prueba === 'chi_cuadrada' && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                                 <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>Tipo:</label>
-                                <div ref={tipoChiRef} style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+                                <div id="tour-t6-hnp-subtipo-chi" ref={tipoChiRef} style={{ position: 'relative', flex: 1, minWidth: 0 }}>
                                     <div
                                         onClick={() => setIsTipoChiOpen(!isTipoChiOpen)}
                                         style={{
@@ -928,7 +938,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                         {(prueba === 'signos' || prueba === 'rachas') && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', maxWidth: prueba === 'signos' || prueba === 'rachas' ? '300px' : 'none', justifySelf: prueba === 'signos' || prueba === 'rachas' ? 'center' : 'stretch' }}>
                                 <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', fontWeight: 'bold', width: '45px', textAlign: 'right' }}>{renderKatex('\\boldsymbol{H_1}:')}</label>
-                                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                                <div id="tour-t6-hnp-h1" style={{ display: 'flex', gap: '8px', flex: 1 }}>
                                     {['bilateral', 'derecha', 'izquierda'].map(tipo => {
                                         const isSelected = tipoPrueba === tipo;
                                         const mathStr = tipo === 'bilateral' ? `\\neq` : tipo === 'derecha' ? `>` : `<`;
@@ -964,7 +974,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                     )}
 
                     {prueba === 'signos' && varSeleccionada?.nombresColumnas?.length !== 2 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', width: '100%', maxWidth: '340px', marginLeft: 'auto', marginRight: 'auto' }}>
+                        <div id="tour-t6-hnp-signos-vref" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', width: '100%', maxWidth: '340px', marginLeft: 'auto', marginRight: 'auto' }}>
                             <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', fontWeight: 'bold', width: '45px', textAlign: 'right' }}>
                                 <StatLabel formulaKey="valor_referencia_signos" formulaLatex="\boldsymbol{v_{ref}}:" align="center" position="top" />
                             </label>
@@ -980,7 +990,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                     )}
 
                     {prueba === 'signos' && signosDetalle.length > 0 && (
-                        <div style={{ order: 3, width: '100%', overflowX: 'auto', textAlign: 'center', margin: '0 0 10px' }}>
+                        <div id="tour-t6-hnp-signos-tabla" style={{ order: 3, width: '100%', overflowX: 'auto', textAlign: 'center', margin: '0 0 10px' }}>
                             <h5 style={{ margin: '0 0 8px', color: 'var(--text-pure)', fontSize: '0.9rem' }}>Datos y resolución de la Prueba de Signos</h5>
                             <div className="hnp-signos-detalle-scroll" style={{ width: '620px', maxWidth: '100%', height: signosDetalle.length > 10 ? '350px' : 'auto', overflowY: signosDetalle.length > 10 ? 'auto' : 'visible', overflowX: 'auto', margin: '0 auto', alignSelf: 'center', boxSizing: 'border-box' }}>
                             <style>{`
@@ -1038,7 +1048,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                     )}
 
                     {prueba === 'chi_cuadrada' && subTipoChi === 'independencia' && varSeleccionada?.nombresColumnas?.length === 2 && matrizPreview?.categoriasFila.length > 0 && matrizPreview?.categoriasCol.length > 0 && (
-                        <div style={{ order: 3, width: '100%', overflowX: 'visible', textAlign: 'center', marginTop: '-5px' }}>
+                        <div id="tour-t6-hnp-matriz-contingencia" style={{ order: 3, width: '100%', overflowX: 'visible', textAlign: 'center', marginTop: '-5px' }}>
                             <h5 style={{ margin: '0 0 10px', color: 'var(--text-pure)', fontSize: '0.9rem' }}>Matriz de Contingencia</h5>
                             <div style={{ margin: '-5px 0 8px', color: 'var(--text-main)', fontSize: '0.75rem', fontWeight: 400 }}>
                                 {renderKatex(`r = ${matrizPreview.categoriasFila.length}`)} categorías de filas · {renderKatex(`c = ${matrizPreview.categoriasCol.length}`)} categorías de columnas
@@ -1071,7 +1081,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                     )}
 
                     {prueba === 'rachas' && rachasDetalle.length > 0 && (
-                        <div style={{ order: 3, width: '100%', overflow: 'visible', textAlign: 'center', margin: '10px 0 10px' }}>
+                        <div id="tour-t6-hnp-rachas-tabla" style={{ order: 3, width: '100%', overflow: 'visible', textAlign: 'center', margin: '10px 0 10px' }}>
                             <h5 style={{ margin: '0 0 8px', color: 'var(--text-pure)', fontSize: '0.9rem' }}>Datos y resolución de la Prueba de Rachas</h5>
                             <div style={{ width: '620px', maxWidth: '100%', height: rachasDetalle.length > 10 ? '350px' : 'auto', overflowY: rachasDetalle.length > 10 ? 'auto' : 'visible', overflowX: 'visible', margin: '0 auto', boxSizing: 'border-box' }}>
                                 <style>{`
@@ -1128,7 +1138,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
 
                     {!(prueba === 'chi_cuadrada' && subTipoChi === 'bondad' && errorFormatoBondad) && (prueba !== 'rachas' || rachasDatosValidos) && (
                         <div style={{ order: 4, display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                            <button className="button_calcular" style={{ width: 'auto', padding: '5px 15px', marginTop: '10px' }} onClick={handleCalcular} disabled={!varSeleccionada}>
+                            <button id="tour-t6-hnp-btn-calcular" className="button_calcular" style={{ width: 'auto', padding: '5px 15px', marginTop: '10px' }} onClick={handleCalcular} disabled={!varSeleccionada}>
                                 Calcular Prueba
                             </button>
                         </div>

@@ -320,7 +320,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
             <div className="tema4-population-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px', width: '100%', marginBottom: '15px' }}>
                 {/* Población 1 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                <div id="tour-t4tyf-difmed-poblacion1" className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
                     <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, margin: '0 0 10px 0', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 1</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -399,7 +399,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                 </div>
 
                 {/* Población 2 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                <div id="tour-t4tyf-difmed-poblacion2" className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
                     <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, margin: '0 0 10px 0', fontWeight: 700, fontFamily: FONT }}>POBLACIÓN 2</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -479,7 +479,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
             </div>
 
             {/* Escenario de Evaluación */}
-            <div style={{ marginBottom: '15px' }}>
+            <div id="tour-t4tyf-difmed-escenario" style={{ marginBottom: '15px' }}>
                 <label style={{ ...labelStyle, display: 'block', marginBottom: '8px' }}>Escenario de Evaluación</label>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <CustomSelect
@@ -496,7 +496,8 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
             </div>
 
             {/* Sección Condición de Búsqueda */}
-            <div style={{ margin: '15px 0 5px 0' }}></div>
+            <div id="tour-t4tyf-difmed-condicion-busqueda">
+                <div style={{ margin: '15px 0 5px 0' }}></div>
 
             <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT, fontWeight: 'bold' }}>
                 Condición de Búsqueda:
@@ -615,7 +616,9 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                 )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+            </div>
+
+            <div id="tour-t4tyf-difmed-btn-graficar" style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                 <button
                     onClick={calcular}
                     className="button_calcular"

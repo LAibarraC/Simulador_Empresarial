@@ -254,11 +254,19 @@ export default function ResultadosReglaAdicion({
                 setError(res.error);
                 setResultado(null);
             } else {
-                setResultado(res.resultado);
+                setResultado({
+                    ...res.resultado,
+                    modo: 'matriz',
+                    colA,
+                    valA,
+                    colB,
+                    valB
+                });
                 setError('');
             }
         } else {
             // Calcular Modo Manual
+            setResultado(null);
             const pA = parseFloat(manualPA);
             const pB = parseFloat(manualPB);
             const pAandB = parseFloat(manualPAndB);
@@ -289,15 +297,18 @@ export default function ResultadosReglaAdicion({
                 return;
             }
 
-            setResultadoManual({
+            const resultadoCalculado = {
                 nameA: manualNameA || 'A',
                 nameB: manualNameB || 'B',
                 pA: pA,
                 pB: pB,
                 pAandB: pAandB,
                 pAorB: pAorB,
-                countA: '-', countB: '-', countAandB: '-', total: '-' 
-            });
+                countA: '-', countB: '-', countAandB: '-', total: '-',
+                modo: 'manual'
+            };
+            setResultadoManual(resultadoCalculado);
+            setResultado(resultadoCalculado);
             setErrorManual('');
         }
     };
@@ -313,19 +324,31 @@ export default function ResultadosReglaAdicion({
     useEffect(() => {
         setResultadoManual(null);
         setErrorManual('');
+        setResultado(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [manualPA, manualPB, manualPAndB, manualNameA, manualNameB]);
+
+    const cambiarModo = (nuevoModo) => {
+        setInputMode(nuevoModo);
+        if (nuevoModo === 'manual') {
+            setResultado(resultadoManual ? { ...resultadoManual, modo: 'manual' } : null);
+        } else {
+            setResultado(resultado
+                ? { ...resultado, modo: 'matriz', colA, valA, colB, valB }
+                : null);
+        }
+    };
 
     return (
         <div style={{ marginTop: '10px', fontFamily: FONT }}>
 
             {/* SELECTOR DE MODO DE ENTRADA */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                <div className="contenedor-selector-modos-mat251">
+                <div id="tour-adicion-modos-entrada" className="contenedor-selector-modos-mat251">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
-                        onClick={() => setInputMode('matriz')}
+                        onClick={() => cambiarModo('matriz')}
                         style={{ fontFamily: FONT }}
                     >
                         Análisis de Matriz
@@ -333,7 +356,7 @@ export default function ResultadosReglaAdicion({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
-                        onClick={() => setInputMode('manual')}
+                        onClick={() => cambiarModo('manual')}
                         style={{ fontFamily: FONT }}
                     >
                         Modo Manual
@@ -347,7 +370,7 @@ export default function ResultadosReglaAdicion({
                 {inputMode === 'matriz' ? (
                     <>
                         {/* ── BARRA DE DATOS Y EDITOR (Solo en Matriz) ── */}
-                        <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <div id="tour-adicion-datos" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                             <div>
                                 <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -386,7 +409,7 @@ export default function ResultadosReglaAdicion({
                             <div style={{ background: 'var(--bg-input)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '15px', alignItems: 'flex-start' }}>
                                     {/* EVENTO A */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div id="tour-adicion-evento-a" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <div>
                                             <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>
                                                 Variable Evento <span style={{ color: 'var(--text-pure)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString('A') }} />:
@@ -428,7 +451,7 @@ export default function ResultadosReglaAdicion({
                                     </div>
 
                                     {/* EVENTO B */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div id="tour-adicion-evento-b" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <div>
                                             <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>
                                                 Variable Evento <span style={{ color: 'var(--text-pure)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString('B') }} />:
@@ -472,6 +495,7 @@ export default function ResultadosReglaAdicion({
 
                                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                                     <button
+                                        id="tour-adicion-btn-calcular"
                                         type="button"
                                         onClick={calcular}
                                         className="button_calcular"
@@ -506,7 +530,7 @@ export default function ResultadosReglaAdicion({
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {/* EVENTO A */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                                <div id="tour-adicion-manual-evento-a" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                     <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                         <label style={labelStyle}>Evento <span dangerouslySetInnerHTML={{ __html: katex.renderToString('A') }} />:</label>
                                         <input
@@ -553,7 +577,7 @@ export default function ResultadosReglaAdicion({
                                 </div>
 
                                 {/* EVENTO B */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                                <div id="tour-adicion-manual-evento-b" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                     <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                         <label style={labelStyle}>Evento <span dangerouslySetInnerHTML={{ __html: katex.renderToString('B') }} />:</label>
                                         <input
@@ -600,7 +624,7 @@ export default function ResultadosReglaAdicion({
                                 </div>
 
                                 {/* INTERSECCIÓN */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
+                                <div id="tour-adicion-manual-interseccion" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                     <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                         <label style={labelStyle}>Probabilidad de la Intersección <span dangerouslySetInnerHTML={{ __html: katex.renderToString('P(A \\cap B)') }} />:</label>
                                         <input
@@ -629,6 +653,7 @@ export default function ResultadosReglaAdicion({
 
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0px', width: '100%' }}>
                                 <button
+                                    id="tour-adicion-manual-btn-calcular"
                                     type="button"
                                     onClick={calcular}
                                     className="button_calcular"
@@ -661,7 +686,7 @@ export default function ResultadosReglaAdicion({
 
             {activeResultado && (
                 <>
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-adicion-tabla-desglose" style={{ marginBottom: '20px' }}>
                         <h3 style={{ color: 'var(--text-pure)', margin: '15px 0 10px 0', fontSize: FS.md, fontWeight: 'bold', textAlign: 'center' }}>
                             Desglose de {inputMode === 'matriz' ? 'Frecuencias' : 'Probabilidades'}
                         </h3>
@@ -723,18 +748,20 @@ export default function ResultadosReglaAdicion({
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-adicion-formula" style={{ marginBottom: '20px' }}>
                         <h4 style={{ color: 'var(--text-pure)', fontSize: FS.sm, margin: '15px 0 10px 0', fontWeight: 'bold', textAlign: 'center' }}>
                             Desarrollo Matemático
                         </h4>
                         <FormulaAdicion resultado={activeResultado} />
                     </div>
 
-                    <MarcoWidgetMAT251 id="w-venn" titulo="Diagrama de Venn (Unión de Eventos)" anchoCompleto={true} alto="380px">
-                        <div style={{ width: '100%', height: '100%', minWidth: 0, padding: '20px' }}>
-                            <DiagramaVenn resultado={activeResultado} />
-                        </div>
-                    </MarcoWidgetMAT251>
+                    <div id="tour-adicion-venn" style={{ width: '100%', minWidth: 0 }}>
+                        <MarcoWidgetMAT251 id="w-venn" titulo="Diagrama de Venn (Unión de Eventos)" anchoCompleto={true} alto="380px">
+                            <div style={{ width: '100%', height: '100%', minWidth: 0, padding: '20px' }}>
+                                <DiagramaVenn resultado={activeResultado} />
+                            </div>
+                        </MarcoWidgetMAT251>
+                    </div>
                 </>
             )}
 

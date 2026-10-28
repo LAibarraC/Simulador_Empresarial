@@ -64,7 +64,7 @@ export default function Resultados_EstimacionMatriz({ resultados, parametro }) {
 
     return (
         <div className="tema5-resultados-pure" style={{ width: '100%' }}>
-            <div className="tema5-tabla-estimacion-wrapper">
+            <div id="tour-t5-resultados-matriz" className="tema5-tabla-estimacion-wrapper">
                 <table className="tema5-tabla-estimacion">
                     <thead>
                         <tr>
@@ -86,7 +86,7 @@ export default function Resultados_EstimacionMatriz({ resultados, parametro }) {
             </div>
 
             {datosMedia && (
-                <section className="tema5-resolucion-estimacion">
+                <section id="tour-t5-resolucion-paso-a-paso" className="tema5-resolucion-estimacion">
                     <h4>Desarrollo paso a paso de la media muestral</h4>
                     <div className={`tema5-tabla-estimacion-wrapper${datosMedia.length > 10 ? ' tema5-tabla-resolucion-scroll' : ''}`}>
                         <table className="tema5-tabla-estimacion tema5-tabla-resolucion">
@@ -121,7 +121,7 @@ export default function Resultados_EstimacionMatriz({ resultados, parametro }) {
             )}
 
             {datosVarianza && (
-                <section className="tema5-resolucion-estimacion">
+                <section id="tour-t5-resolucion-paso-a-paso" className="tema5-resolucion-estimacion">
                     <h4>Desarrollo paso a paso de la varianza muestral</h4>
                     <div className={`tema5-tabla-estimacion-wrapper${datosVarianza.length > 10 ? ' tema5-tabla-resolucion-scroll' : ''}`}>
                         <table className="tema5-tabla-estimacion tema5-tabla-resolucion">
@@ -165,7 +165,7 @@ export default function Resultados_EstimacionMatriz({ resultados, parametro }) {
             )}
 
             {datosProporcion && (
-                <section className="tema5-resolucion-estimacion">
+                <section id="tour-t5-resolucion-paso-a-paso" className="tema5-resolucion-estimacion">
                     <h4>Desarrollo paso a paso de la proporción muestral</h4>
                     <div className={`tema5-tabla-estimacion-wrapper${datosProporcion.length > 10 ? ' tema5-tabla-resolucion-scroll' : ''}`}>
                         <table className="tema5-tabla-estimacion tema5-tabla-resolucion">

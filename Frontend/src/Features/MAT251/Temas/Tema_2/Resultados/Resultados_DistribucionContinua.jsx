@@ -2,77 +2,19 @@ import React, { useMemo } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
-import { compile, simplify, parse } from 'mathjs';
+import { simplify } from 'mathjs';
+import { calcularResumenContinua } from '../../../Matematicas/logica_Tema2';
 import GraficoAreaContinua from '../../../Graficas/Tema_2/GraficoAreaContinua';
-import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { FONT, FS, RADIUS } from '../../../Principal/Constantes';
 import StatLabel from '../../../ui/StatLabel';
 import '../../../styles/Temas/Tema2.css';
 
-// Integración numérica mediante la Regla de Simpson 1/3
-const simpsonIntegrate = (fn, a, b, n = 1000) => {
-    if (n % 2 !== 0) n++; // n debe ser par
-    const h = (b - a) / n;
-    let sum = fn(a) + fn(b);
-
-    for (let i = 1; i < n; i++) {
-        const x = a + i * h;
-        sum += fn(x) * (i % 2 === 0 ? 2 : 4);
-    }
-    return (sum * h) / 3;
-};
-
 export default function Resultados_DistribucionContinua({ resultados }) {
     const { funcionFx, a, b, latexString, latex_esperanza, latex_varianza, latex_area, esperanza_backend, varianza_backend, area_backend } = resultados;
 
-    const calculos = useMemo(() => {
-        try {
-            const compiledExpr = compile(funcionFx);
-            const f = (x) => {
-                try {
-                    return compiledExpr.evaluate({ x });
-                } catch {
-                    return 0;
-                }
-            };
-
-            // 1. Usar resultados simbólicos del backend si están disponibles (Vital para límites infinitos)
-            if (esperanza_backend !== undefined && esperanza_backend !== null) {
-                return {
-                    eX: esperanza_backend,
-                    eX2: varianza_backend + (esperanza_backend * esperanza_backend), // Despejado de V(X) = E(X^2) - E(X)^2
-                    varX: varianza_backend,
-                    stdDev: Math.sqrt(Math.max(0, varianza_backend)),
-                    area: area_backend !== undefined && area_backend !== null ? area_backend : 1
-                };
-            }
-
-            // 2. Si el backend falló, intentar fallback numérico
-            if (a === Infinity || a === -Infinity || b === Infinity || b === -Infinity) {
-                return { error: 'No se puede integrar numéricamente con límites infinitos. La resolución simbólica falló.' };
-            }
-
-            // Paso 1: Validar Área numéricamente (solo límites finitos)
-            const area = simpsonIntegrate(f, a, b);
-
-            // Paso 2: E[X] = integral(x * f(x))
-            const eX_fn = (x) => x * f(x);
-            const eX = simpsonIntegrate(eX_fn, a, b);
-
-            // Paso 3: E[X^2] = integral(x^2 * f(x))
-            const eX2_fn = (x) => (x * x) * f(x);
-            const eX2 = simpsonIntegrate(eX2_fn, a, b);
-
-            // Paso 4: V[X]
-            const varX = eX2 - (eX * eX);
-            const stdDev = Math.sqrt(Math.max(0, varX));
-
-            return { eX, eX2, varX, stdDev, area };
-
-        } catch (err) {
-            return { error: 'Error al procesar la función. Verifique la sintaxis.' };
-        }
-    }, [funcionFx, a, b, esperanza_backend, varianza_backend, area_backend]);
+    const calculos = useMemo(() => calcularResumenContinua({
+        funcionFx, a, b, esperanza_backend, varianza_backend, area_backend
+    }), [funcionFx, a, b, esperanza_backend, varianza_backend, area_backend]);
 
     const renderLatex = (str) => {
         return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
@@ -119,7 +61,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
             {/* Tarjetas de Resultados */}
-            <div className="resultados-grid-continua">
+            <div id="tour-continua-metricas" className="resultados-grid-continua">
                 <div className="tarjeta-calculo-mat251" style={{ background: 'var(--bg-card)', padding: '12px 10px', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center' }}>
                     <p className="tarjeta-calculo-titulo" style={{ margin: 0, fontSize: FS.sl, color: 'var(--text-pure)', fontWeight: 'bold', fontFamily: FONT }}>
                         Esperanza <StatLabel formulaKey="E_continua" formulaLatex="E[X]" align="center" />
@@ -154,7 +96,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {/* Cuadro Validación de Área */}
                         {latex_area && (
-                            <div>
+                            <div id="tour-continua-desarrollo-area">
                                 <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                     Validación de Área
                                 </h4>
@@ -174,7 +116,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
                         )}
 
                         {/* Cuadro Esperanza */}
-                        <div>
+                        <div id="tour-continua-desarrollo-esperanza">
                             <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                 Esperanza Matemática {renderLatex('E(X)')}
                             </h4>
@@ -184,7 +126,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
                         </div>
                         
                         {/* Cuadro Varianza */}
-                        <div>
+                        <div id="tour-continua-desarrollo-varianza">
                             <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                 Varianza {renderLatex('V(X)')}
                             </h4>
@@ -196,7 +138,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {/* Cuadro Validación de Área Fallback */}
-                        <div>
+                        <div id="tour-continua-desarrollo-area">
                             <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                 Validación de Área
                             </h4>
@@ -216,7 +158,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
                             )}
                         </div>
 
-                        <div>
+                        <div id="tour-continua-desarrollo-esperanza">
                             <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                 Esperanza Matemática {renderLatex('E(X)')}
                             </h4>
@@ -226,7 +168,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div id="tour-continua-desarrollo-varianza">
                             <h4 style={{ margin: '0 0 8px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                 Varianza {renderLatex('V(X)')}
                             </h4>
@@ -243,7 +185,7 @@ export default function Resultados_DistribucionContinua({ resultados }) {
             </div>
 
             {/* Gráfica */}
-            <div style={{ width: '100%', marginTop: '20px' }}>
+            <div id="tour-continua-grafica" style={{ width: '100%', marginTop: '20px' }}>
                 <GraficoAreaContinua 
                     datos={{ funcion: funcionFx, a, b, modo: 'densidad', eX, area: calculos.area }} 
                 />

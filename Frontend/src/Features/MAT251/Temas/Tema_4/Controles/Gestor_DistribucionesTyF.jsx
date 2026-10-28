@@ -66,12 +66,19 @@ function CustomSelectHerramienta({ value, onChange }) {
     );
 }
 
-export default function Gestor_DistribucionesTyF() {
+export default function Gestor_DistribucionesTyF({ onResultado }) {
     const [distribucionActiva, setDistribucionActiva] = useState('student');
 
     const [datosStudent, setDatosStudent] = useState(null);
     const [datosDifMediasDesc, setDatosDifMediasDesc] = useState(null);
     const [datosRazonVarianzas, setDatosRazonVarianzas] = useState(null);
+    const resultadoActivo = { student: datosStudent, dif_medias_desc: datosDifMediasDesc, razon_varianzas: datosRazonVarianzas }[distribucionActiva];
+
+    useEffect(() => {
+        onResultado?.(resultadoActivo ? {
+            operacion: 'tyf', distribucion: distribucionActiva, resultados: resultadoActivo
+        } : null);
+    }, [resultadoActivo, distribucionActiva, onResultado]);
 
     const cambiarDistribucion = (nuevaDistribucion) => {
         if (nuevaDistribucion === distribucionActiva) return;
@@ -84,16 +91,24 @@ export default function Gestor_DistribucionesTyF() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop:'10px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <CustomSelectHerramienta value={distribucionActiva} onChange={cambiarDistribucion} />
+                <div id="tour-t4tyf-selector" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <CustomSelectHerramienta value={distribucionActiva} onChange={cambiarDistribucion} />
+                </div>
                 
                 {distribucionActiva === 'student' ? (
                     <div className="tema4-calculadora-wrapper">
                         <Controles_Student onCalcular={setDatosStudent} />
                         <div>
-                            <GraficoStudent resultados={datosStudent} />
-                            <div className="tema4-calculadora-resultados">
-                                <Resultados_Student resultados={datosStudent} />
-                            </div>
+                            {datosStudent && (
+                                <div id="tour-t4tyf-student-grafica">
+                                    <GraficoStudent resultados={datosStudent} />
+                                </div>
+                            )}
+                            {datosStudent && (
+                                <div id="tour-t4tyf-student-resultados" className="tema4-calculadora-resultados">
+                                    <Resultados_Student resultados={datosStudent} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : distribucionActiva === 'dif_medias_desc' ? (
@@ -101,25 +116,35 @@ export default function Gestor_DistribucionesTyF() {
                         <Controles_DiferenciaMediasDesconocidas onCalcular={setDatosDifMediasDesc} />
                         <div>
                             {datosDifMediasDesc && (
-                                datosDifMediasDesc.escenario === 'grandes' ? (
-                                    <GraficoDiferenciaMedias resultados={datosDifMediasDesc} />
-                                ) : (
-                                    <GraficoStudent resultados={datosDifMediasDesc} esDiferenciaMedias={true} />
-                                )
+                                <div id="tour-t4tyf-difmed-grafica">
+                                    {datosDifMediasDesc.escenario === 'grandes' ? (
+                                        <GraficoDiferenciaMedias resultados={datosDifMediasDesc} />
+                                    ) : (
+                                        <GraficoStudent resultados={datosDifMediasDesc} esDiferenciaMedias={true} />
+                                    )}
+                                </div>
                             )}
-                            <div className="tema4-calculadora-resultados">
-                                <Resultados_DiferenciaMediasDesconocidas resultados={datosDifMediasDesc} />
-                            </div>
+                            {datosDifMediasDesc && (
+                                <div id="tour-t4tyf-difmed-resultados" className="tema4-calculadora-resultados">
+                                    <Resultados_DiferenciaMediasDesconocidas resultados={datosDifMediasDesc} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : distribucionActiva === 'razon_varianzas' ? (
                     <div className="tema4-calculadora-wrapper">
                         <Controles_RazonVarianzas onCalcular={setDatosRazonVarianzas} />
                         <div>
-                            <GraficoFisher resultados={datosRazonVarianzas} />
-                            <div className="tema4-calculadora-resultados">
-                                <Resultados_RazonVarianzas resultados={datosRazonVarianzas} />
-                            </div>
+                            {datosRazonVarianzas && (
+                                <div id="tour-t4tyf-fisher-grafica">
+                                    <GraficoFisher resultados={datosRazonVarianzas} />
+                                </div>
+                            )}
+                            {datosRazonVarianzas && (
+                                <div id="tour-t4tyf-fisher-resultados" className="tema4-calculadora-resultados">
+                                    <Resultados_RazonVarianzas resultados={datosRazonVarianzas} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : (

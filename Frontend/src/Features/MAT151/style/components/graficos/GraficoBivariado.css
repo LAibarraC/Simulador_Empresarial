@@ -1,4 +1,4 @@
-.container_bivariado {
+:where(.mat151) .container_bivariado {
     width: 100%;
     height: 450;
     background: var(--bg-card);
@@ -9,7 +9,7 @@
     box-Shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.container_bivariado h4 {
+:where(.mat151) .container_bivariado h4 {
     text-Align: center;
     margin-Bottom: 25px;
     font-Family: "Times New Roman", serif;
@@ -19,7 +19,7 @@
     color: var(--text-main);
 }
 
-.container_bivariado_label {
+:where(.mat151) .container_bivariado_label {
     font-Family: Arial;
     font-Size: 11px;
     font-Weight: bold;

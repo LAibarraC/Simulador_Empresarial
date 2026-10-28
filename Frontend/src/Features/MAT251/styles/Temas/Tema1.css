@@ -1,4 +1,4 @@
-.tema1-container {
+:where(.mat251) .tema1-container {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -7,7 +7,7 @@
     overflow: hidden;
 }
 
-.area-trabajo-cuadriculada {
+:where(.mat251) .area-trabajo-cuadriculada {
     flex: 1;
     width: 100%;
     background-color: var(--bg-body);
@@ -15,14 +15,14 @@
     overflow-y: auto;
 }
 
-.contenedor-flotante-menu {
+:where(.mat251) .contenedor-flotante-menu {
     position: absolute;
     top: 20px;
     left: 20px;
     z-index: 500;
 }
 
-.btn-hamburguesa-simple {
+:where(.mat251) .btn-hamburguesa-simple {
     width: 28px;
     height: 24px;
     background: none;
@@ -36,7 +36,7 @@
     transition: all 0.4s ease;
 }
 
-.btn-hamburguesa-simple span {
+:where(.mat251) .btn-hamburguesa-simple span {
     display: block;
     width: 100%;
     height: 4px;
@@ -44,23 +44,23 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-hamburguesa-simple span:nth-child(1) {
+:where(.mat251) .btn-hamburguesa-simple span:nth-child(1) {
     transform-origin: left center;
 }
 
-.btn-hamburguesa-simple span:nth-child(2) {
+:where(.mat251) .btn-hamburguesa-simple span:nth-child(2) {
     transform-origin: right center;
 }
 
-.btn-hamburguesa-simple span:nth-child(3) {
+:where(.mat251) .btn-hamburguesa-simple span:nth-child(3) {
     transform-origin: right center;
 }
 
-.btn-hamburguesa-simple span:nth-child(4) {
+:where(.mat251) .btn-hamburguesa-simple span:nth-child(4) {
     transform-origin: left center;
 }
 
-.btn-hamburguesa-simple.abierto {
+:where(.mat251) .btn-hamburguesa-simple.abierto {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
@@ -69,28 +69,28 @@
     height: 24px;
 }
 
-.btn-hamburguesa-simple.abierto span {
+:where(.mat251) .btn-hamburguesa-simple.abierto span {
     width: 10px;
     height: 10px;
 }
 
-.btn-hamburguesa-simple.abierto span:nth-child(1) {
+:where(.mat251) .btn-hamburguesa-simple.abierto span:nth-child(1) {
     grid-area: 1 / 1;
 }
 
-.btn-hamburguesa-simple.abierto span:nth-child(2) {
+:where(.mat251) .btn-hamburguesa-simple.abierto span:nth-child(2) {
     grid-area: 1 / 2;
 }
 
-.btn-hamburguesa-simple.abierto span:nth-child(3) {
+:where(.mat251) .btn-hamburguesa-simple.abierto span:nth-child(3) {
     grid-area: 2 / 2;
 }
 
-.btn-hamburguesa-simple.abierto span:nth-child(4) {
+:where(.mat251) .btn-hamburguesa-simple.abierto span:nth-child(4) {
     grid-area: 2 / 1;
 }
 
-.menu-desplegable-pro {
+:where(.mat251) .menu-desplegable-pro {
     position: absolute;
     top: 0px;
     left: 30px;
@@ -105,16 +105,16 @@
     gap: 5px;
 }
 
-.btn-off {
+:where(.mat251) .btn-off {
     background-color: #cbd5e1 !important;
     cursor: not-allowed !important;
 }
 
-.contenido-real {
+:where(.mat251) .contenido-real {
     padding: 70px 40px 40px 40px;
 }
 
-.vacio-mensaje {
+:where(.mat251) .vacio-mensaje {
     text-align: center;
     margin-top: 100px;
     color: #94a3b8;
@@ -125,20 +125,20 @@
 
 
 
-.panel-inputs {
+:where(.mat251) .panel-inputs {
     display: flex;
     gap: 10px;
     margin: 20px 0;
 }
 
-.panel-inputs input {
+:where(.mat251) .panel-inputs input {
     width: 80px;
     padding: 8px;
     border: 1px solid var(--text-muted);
     border-radius: 4px;
 }
 
-.pizarra-resultado {
+:where(.mat251) .pizarra-resultado {
     margin-top: 30px;
     padding: 15px;
     background: var(--bg-body);
@@ -146,7 +146,7 @@
 }
 
 /* KaTeX usa clases específicas, podemos darles estilo si queremos */
-.katex-display {
+:where(.mat251) .katex-display {
     margin: 1em 0;
     overflow-x: auto;
     overflow-y: hidden;
@@ -154,7 +154,7 @@
 
 
 /* DISEÑO DE LA INTERFAZ DE ENTRADA */
-.interfaz-conteo {
+:where(.mat251) .interfaz-conteo {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -163,20 +163,20 @@
     margin: 20px 0;
 }
 
-.fila-controles {
+:where(.mat251) .fila-controles {
     display: flex;
     gap: 30px;
     justify-content: center;
 }
 
-.control-numero {
+:where(.mat251) .control-numero {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
 }
 
-.control-numero label {
+:where(.mat251) .control-numero label {
     font-weight: bold;
     color: var(--text-variable);
     font-size: 0.9rem;
@@ -184,7 +184,7 @@
 }
 
 /* EL SELECTOR CON +/- */
-.selector-numerico {
+:where(.mat251) .selector-numerico {
     display: flex;
     align-items: center;
     background: var(--bg-body);
@@ -192,7 +192,7 @@
     overflow: hidden;
 }
 
-.selector-numerico button {
+:where(.mat251) .selector-numerico button {
     background: #e2e8f0;
     border: none;
     padding: 10px 15px;
@@ -203,11 +203,11 @@
     transition: background 0.2s;
 }
 
-.selector-numerico button:hover {
+:where(.mat251) .selector-numerico button:hover {
     background: #cbd5e1;
 }
 
-.selector-numerico input {
+:where(.mat251) .selector-numerico input {
     width: 60px;
     text-align: center;
     border: none;
@@ -218,19 +218,19 @@
 }
 
 /* Quitar flechas por defecto del input number */
-.selector-numerico input::-webkit-inner-spin-button,
-.selector-numerico input::-webkit-outer-spin-button {
+:where(.mat251) .selector-numerico input::-webkit-inner-spin-button,
+:where(.mat251) .selector-numerico input::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
 /* BOTONES ABAJO EN EL MEDIO */
-.acciones-principales {
+:where(.mat251) .acciones-principales {
     display: flex;
     gap: 15px;
 }
 
-.acciones-principales button {
+:where(.mat251) .acciones-principales button {
     padding: 8px 20px;
     background-color: #2563eb;
     color: white;
@@ -241,14 +241,14 @@
     transition: transform 0.1s;
 }
 
-.acciones-principales button:active {
+:where(.mat251) .acciones-principales button:active {
     transform: scale(0.95);
 }
 
 
 
 
-.interfaz-probabilidad {
+:where(.mat251) .interfaz-probabilidad {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -259,7 +259,7 @@
     margin: 0 auto 30px auto;
 }
 
-.grupo-entrada {
+:where(.mat251) .grupo-entrada {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -269,8 +269,8 @@
     /* Hace que el grupo ocupe todo el ancho disponible del contenedor */
 }
 
-.grupo-entrada textarea,
-.grupo-entrada input {
+:where(.mat251) .grupo-entrada textarea,
+:where(.mat251) .grupo-entrada input {
     width: 100%;
     /* Expande los campos de texto de lado a lado */
     box-sizing: border-box;
@@ -284,12 +284,12 @@
     font-size: 0.8rem;
 }
 
-.grupo-entrada textarea {
+:where(.mat251) .grupo-entrada textarea {
     resize: vertical;
     min-height: 80px;
 }
 
-.detalles-probabilidad {
+:where(.mat251) .detalles-probabilidad {
     margin-top: 15px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -299,7 +299,7 @@
     padding-top: 15px;
 }
 
-.selector-tarjetas {
+:where(.mat251) .selector-tarjetas {
     padding: 12px;
     border: 2px solid #2563eb;
     /* Borde azul para destacar que es importante */
@@ -313,7 +313,7 @@
     transition: all 0.2s ease;
 }
 
-.selector-tarjetas:hover {
+:where(.mat251) .selector-tarjetas:hover {
     border-color: #1d4ed8;
     background: #eff6ff;
 }
@@ -323,7 +323,7 @@
 
 /* --- NUEVOS ESTILOS PARA LA SELECCIÓN DE VARIABLES --- */
 
-.panel-seleccion-variable {
+:where(.mat251) .panel-seleccion-variable {
     display: flex;
     align-items: center;
     gap: 15px;
@@ -331,7 +331,7 @@
     /* Por si la pantalla es pequeña */
 }
 
-.btn-abrir-modal {
+:where(.mat251) .btn-abrir-modal {
     padding: 8px 15px;
     background-color: var(--bg-body);
     color: #2563eb;
@@ -342,11 +342,11 @@
     transition: all 0.2s ease;
 }
 
-.btn-abrir-modal:hover {
+:where(.mat251) .btn-abrir-modal:hover {
     background-color: #eff6ff;
 }
 
-.info-variable-seleccionada {
+:where(.mat251) .info-variable-seleccionada {
     display: flex;
     flex-direction: column;
     padding: 8px 10px;
@@ -355,20 +355,20 @@
     gap: 2px;
 }
 
-.info-titulo {
+:where(.mat251) .info-titulo {
     font-size: 0.8rem;
     color: var(--text-variable);
     padding-right: 5px;
 }
 
-.info-detalle {
+:where(.mat251) .info-detalle {
     font-size: 0.8rem;
     color: var(--text-variable);
 }
 
 /* --- ESTILOS DEL MODAL --- */
 
-.overlay-modal {
+:where(.mat251) .overlay-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -382,7 +382,7 @@
     backdrop-filter: blur(2px);
 }
 
-.contenido-modal {
+:where(.mat251) .contenido-modal {
     background: var(--bg-body, #ffffff);
     padding: 25px;
     border-radius: 12px;
@@ -391,7 +391,7 @@
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.lista-variables-modal {
+:where(.mat251) .lista-variables-modal {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -401,7 +401,7 @@
     padding-right: 5px;
 }
 
-.tarjeta-variable-modal {
+:where(.mat251) .tarjeta-variable-modal {
     padding: 15px;
     border: 1px solid var(--text-muted, #cbd5e1);
     border-radius: 5px;
@@ -409,23 +409,23 @@
     transition: border-color 0.2s, background-color 0.2s;
 }
 
-.tarjeta-variable-modal h4 {
+:where(.mat251) .tarjeta-variable-modal h4 {
     margin: 0 0 5px 0;
     color: #2563eb;
 }
 
-.tarjeta-variable-modal p {
+:where(.mat251) .tarjeta-variable-modal p {
     margin: 0;
     font-size: 0.85rem;
     color: #64748b;
 }
 
-.tarjeta-variable-modal:hover {
+:where(.mat251) .tarjeta-variable-modal:hover {
     border-color: #2563eb;
     background-color: #f8fafc;
 }
 
-.btn-cerrar-modal {
+:where(.mat251) .btn-cerrar-modal {
     padding: 8px 15px;
     background: transparent;
     color: #ef4444;
@@ -436,12 +436,12 @@
     transition: background 0.2s;
 }
 
-.btn-cerrar-modal:hover {
+:where(.mat251) .btn-cerrar-modal:hover {
     background: #fef2f2;
 }
 
 /* --- CONTENEDOR DE 2 COLUMNAS PARA LOS DATOS --- */
-.contenedor-datos-doble {
+:where(.mat251) .contenedor-datos-doble {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
@@ -453,32 +453,32 @@
 }
 
 @media (max-width: 800px) {
-    .contenedor-datos-doble {
+    :where(.mat251) .contenedor-datos-doble {
         grid-template-columns: 1fr;
     }
 }
 
-.columna-variable,
-.columna-editor {
+:where(.mat251) .columna-variable,
+:where(.mat251) .columna-editor {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-.etiqueta-paso {
+:where(.mat251) .etiqueta-paso {
     font-weight: bold;
     color: var(--text-variable);
     font-size: 1rem;
 }
 
 /* --- ESTILOS DEL EDITOR MANUAL --- */
-.cabecera-editor {
+:where(.mat251) .cabecera-editor {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.btn-limpiar {
+:where(.mat251) .btn-limpiar {
     background: transparent;
     border: none;
     color: #ef4444;
@@ -489,11 +489,11 @@
     transition: color 0.2s;
 }
 
-.btn-limpiar:hover {
+:where(.mat251) .btn-limpiar:hover {
     color: #b91c1c;
 }
 
-.editor-datos {
+:where(.mat251) .editor-datos {
     flex: 1;
     min-height: 120px;
     padding: 15px;
@@ -507,7 +507,7 @@
     transition: border-color 0.3s ease;
 }
 
-.editor-datos:focus {
+:where(.mat251) .editor-datos:focus {
     border-color: #2563eb;
     outline: none;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
@@ -518,13 +518,13 @@
 
 
 /* --- ESTILOS PARA LA COLUMNA EDITOR Y BOTONES --- */
-.panel-entrada-datos {
+:where(.mat251) .panel-entrada-datos {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.input-datos-principal {
+:where(.mat251) .input-datos-principal {
     padding: 12px;
     border: 2px solid var(--text-muted);
     border-radius: 5px;
@@ -535,13 +535,13 @@
     box-sizing: border-box;
 }
 
-.acciones-editor {
+:where(.mat251) .acciones-editor {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.btn-abrir-excel {
+:where(.mat251) .btn-abrir-excel {
     padding: 8px 15px;
     background-color: #10b981;
     /* Verde tipo Excel */
@@ -554,18 +554,18 @@
     font-size: 0.9rem;
 }
 
-.btn-abrir-excel:hover {
+:where(.mat251) .btn-abrir-excel:hover {
     background-color: #059669;
 }
 
 /* --- ESTILOS ESPECÍFICOS DEL MODAL EXCEL --- */
-.modal-ancho {
+:where(.mat251) .modal-ancho {
     width: 600px !important;
     /* Más ancho para que el grid se vea bien */
     max-width: 95% !important;
 }
 
-.cabecera-modal-excel {
+:where(.mat251) .cabecera-modal-excel {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -574,12 +574,12 @@
     margin-bottom: 10px;
 }
 
-.cabecera-modal-excel h3 {
+:where(.mat251) .cabecera-modal-excel h3 {
     margin: 0;
     color: var(--text-primary);
 }
 
-.contador-datos-excel {
+:where(.mat251) .contador-datos-excel {
     background: #e2e8f0;
     padding: 4px 10px;
     border-radius: 12px;
@@ -588,7 +588,7 @@
     color: #475569;
 }
 
-.contenedor-grid {
+:where(.mat251) .contenedor-grid {
     height: 350px;
     /* Altura fija para que haga scroll interno si hay muchos datos */
     border: 1px solid #cbd5e1;
@@ -596,14 +596,14 @@
     overflow: hidden;
 }
 
-.acciones-modal-excel {
+:where(.mat251) .acciones-modal-excel {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
 }
 
-.btn-secundario {
+:where(.mat251) .btn-secundario {
     padding: 8px 15px;
     background: transparent;
     color: #475569;
@@ -614,12 +614,12 @@
     transition: all 0.2s;
 }
 
-.btn-secundario:hover {
+:where(.mat251) .btn-secundario:hover {
     background: #f1f5f9;
     color: #1e293b;
 }
 
-.btn-guardar-excel {
+:where(.mat251) .btn-guardar-excel {
     padding: 8px 20px;
     background-color: #2563eb;
     color: white;
@@ -630,23 +630,23 @@
     transition: background-color 0.2s;
 }
 
-.btn-guardar-excel:hover {
+:where(.mat251) .btn-guardar-excel:hover {
     background-color: #1d4ed8;
 }
 
 /* Ajuste rápido para react-data-grid dentro del modal */
-.rdg {
+:where(.mat251) .rdg {
     height: 100% !important;
     border: none !important;
 }
 
-.rdg-header-row .rdg-cell,
-.rdg-header-row .rdg-cell * {
+:where(.mat251) .rdg-header-row .rdg-cell,
+:where(.mat251) .rdg-header-row .rdg-cell * {
     color: var(--text-pure) !important;
     font-weight: 700 !important;
 }
 
-.rdg-cell {
+:where(.mat251) .rdg-cell {
     color: var(--text-pure) !important;
 }
 
@@ -654,48 +654,74 @@
    ESTILOS DARK MODE PARA BOTONES (Tema 1)
    Borde de color #ff6e00 igual al tema 3
 ========================================= */
-[data-theme='dark'] .btn-tema1-borde, .dark .btn-tema1-borde, [data-bs-theme='dark'] .btn-tema1-borde {
+[data-theme='dark'] :where(.mat251) .btn-tema1-borde,
+.dark :where(.mat251) .btn-tema1-borde,
+[data-bs-theme='dark'] :where(.mat251) .btn-tema1-borde {
     border: 1px solid #ff6e00 !important;
 }
 
-[data-theme='dark'] .btn-tema1-borde, .dark .btn-tema1-borde, [data-bs-theme='dark'] .btn-tema1-borde {
+[data-theme='dark'] :where(.mat251) .btn-tema1-borde,
+.dark :where(.mat251) .btn-tema1-borde,
+[data-bs-theme='dark'] :where(.mat251) .btn-tema1-borde {
     border: 1px solid transparent !important;
     background-color: transparent !important;
 }
 
-[data-theme='dark'] .btn-tema1-borde.active, .dark .btn-tema1-borde.active, [data-bs-theme='dark'] .btn-tema1-borde.active {
+[data-theme='dark'] :where(.mat251) .btn-tema1-borde.active,
+.dark :where(.mat251) .btn-tema1-borde.active,
+[data-bs-theme='dark'] :where(.mat251) .btn-tema1-borde.active {
     border: 1px solid #ff6e00 !important;
     background-color: transparent !important;
     color: white !important;
 }
 
-[data-theme='dark'] .border-tema1, .dark .border-tema1, [data-bs-theme='dark'] .border-tema1 {
+[data-theme='dark'] :where(.mat251) .border-tema1,
+.dark :where(.mat251) .border-tema1,
+[data-bs-theme='dark'] :where(.mat251) .border-tema1 {
     border-color: #ff6e00 !important;
 }
 
-[data-theme='dark'] .text-tema1, .dark .text-tema1, [data-bs-theme='dark'] .text-tema1 {
+[data-theme='dark'] :where(.mat251) .text-tema1,
+.dark :where(.mat251) .text-tema1,
+[data-bs-theme='dark'] :where(.mat251) .text-tema1 {
     color: #ff6e00 !important;
 }
 
-[data-theme='dark'] .tema1-container .button_calcular, .dark .tema1-container .button_calcular, [data-bs-theme='dark'] .tema1-container .button_calcular,
-[data-theme='dark'] .tema1-container .btn-icon, .dark .tema1-container .btn-icon, [data-bs-theme='dark'] .tema1-container .btn-icon,
-[data-theme='dark'] .tema1-container .btn-abrir-modal, .dark .tema1-container .btn-abrir-modal, [data-bs-theme='dark'] .tema1-container .btn-abrir-modal,
-[data-theme='dark'] .tema1-container .btn-abrir-excel, .dark .tema1-container .btn-abrir-excel, [data-bs-theme='dark'] .tema1-container .btn-abrir-excel,
-[data-theme='dark'] .tema1-container .btn-guardar-excel, .dark .tema1-container .btn-guardar-excel, [data-bs-theme='dark'] .tema1-container .btn-guardar-excel,
-[data-theme='dark'] .btn-tema1-active, .dark .btn-tema1-active, [data-bs-theme='dark'] .btn-tema1-active {
+[data-theme='dark'] :where(.mat251) .tema1-container .button_calcular,
+.dark :where(.mat251) .tema1-container .button_calcular,
+[data-bs-theme='dark'] :where(.mat251) .tema1-container .button_calcular,
+[data-theme='dark'] :where(.mat251) .tema1-container .btn-icon,
+.dark :where(.mat251) .tema1-container .btn-icon,
+[data-bs-theme='dark'] :where(.mat251) .tema1-container .btn-icon,
+[data-theme='dark'] :where(.mat251) .tema1-container .btn-abrir-modal,
+.dark :where(.mat251) .tema1-container .btn-abrir-modal,
+[data-bs-theme='dark'] :where(.mat251) .tema1-container .btn-abrir-modal,
+[data-theme='dark'] :where(.mat251) .tema1-container .btn-abrir-excel,
+.dark :where(.mat251) .tema1-container .btn-abrir-excel,
+[data-bs-theme='dark'] :where(.mat251) .tema1-container .btn-abrir-excel,
+[data-theme='dark'] :where(.mat251) .tema1-container .btn-guardar-excel,
+.dark :where(.mat251) .tema1-container .btn-guardar-excel,
+[data-bs-theme='dark'] :where(.mat251) .tema1-container .btn-guardar-excel,
+[data-theme='dark'] :where(.mat251) .btn-tema1-active,
+.dark :where(.mat251) .btn-tema1-active,
+[data-bs-theme='dark'] :where(.mat251) .btn-tema1-active {
     background: #2c2c2c !important;
     border: 1px solid #ff6e00 !important;
     color: white !important;
     box-shadow: none !important;
 }
 
-[data-theme='dark'] .tema1-container .button_calcular:hover, .dark .tema1-container .button_calcular:hover, [data-bs-theme='dark'] .tema1-container .button_calcular:hover,
-[data-theme='dark'] .tema1-container .btn-icon:hover, .dark .tema1-container .btn-icon:hover, [data-bs-theme='dark'] .tema1-container .btn-icon:hover {
+[data-theme='dark'] :where(.mat251) .tema1-container .button_calcular:hover,
+.dark :where(.mat251) .tema1-container .button_calcular:hover,
+[data-bs-theme='dark'] :where(.mat251) .tema1-container .button_calcular:hover,
+[data-theme='dark'] :where(.mat251) .tema1-container .btn-icon:hover,
+.dark :where(.mat251) .tema1-container .btn-icon:hover,
+[data-bs-theme='dark'] :where(.mat251) .tema1-container .btn-icon:hover {
     background: #3a3a3a !important;
 }
 
 /* --- CUSTOM SELECT TEMA 1 --- */
-.custom-select-tema1 {
+:where(.mat251) .custom-select-tema1 {
     width: 100%;
     padding: 10px 14px;
     border-radius: 5px;
@@ -716,23 +742,30 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.custom-select-tema1:hover {
+:where(.mat251) .custom-select-tema1:hover {
     border-color: #ff6e00;
 }
 
-.custom-select-tema1:focus {
+:where(.mat251) .custom-select-tema1:focus {
     border-color: #ff6e00;
     box-shadow: 0 0 0 2px rgba(255, 110, 0, 0.2);
 }
 
-[data-theme='dark'] .custom-select-tema1, .dark .custom-select-tema1, [data-bs-theme='dark'] .custom-select-tema1 {
+[data-theme='dark'] :where(.mat251) .custom-select-tema1,
+.dark :where(.mat251) .custom-select-tema1,
+[data-bs-theme='dark'] :where(.mat251) .custom-select-tema1 {
     background-color: #2c2c2c;
     border-color: #4a4a4a;
     color: white;
     background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
 }
 
-[data-theme='dark'] .custom-select-tema1:hover, .dark .custom-select-tema1:hover, [data-theme='dark'] .custom-select-tema1:focus, .dark .custom-select-tema1:focus, [data-bs-theme='dark'] .custom-select-tema1:hover, [data-bs-theme='dark'] .custom-select-tema1:focus {
+[data-theme='dark'] :where(.mat251) .custom-select-tema1:hover,
+.dark :where(.mat251) .custom-select-tema1:hover,
+[data-theme='dark'] :where(.mat251) .custom-select-tema1:focus,
+.dark :where(.mat251) .custom-select-tema1:focus,
+[data-bs-theme='dark'] :where(.mat251) .custom-select-tema1:hover,
+[data-bs-theme='dark'] :where(.mat251) .custom-select-tema1:focus {
     border-color: #ff6e00;
     box-shadow: 0 0 0 2px rgba(255, 110, 0, 0.2);
 }
@@ -743,16 +776,16 @@
 
 /* Para Tablets y pantallas medianas */
 @media (max-width: 900px) {
-    .fila-controles {
+    :where(.mat251) .fila-controles {
         gap: 15px;
         flex-wrap: wrap;
     }
     
-    .panel-seleccion-variable {
+    :where(.mat251) .panel-seleccion-variable {
         justify-content: center;
     }
     
-    .acciones-editor {
+    :where(.mat251) .acciones-editor {
         flex-wrap: wrap;
         gap: 10px;
     }
@@ -760,61 +793,61 @@
 
 /* Para Celulares y pantallas pequeñas */
 @media (max-width: 600px) {
-    .fila-controles {
+    :where(.mat251) .fila-controles {
         flex-direction: column;
         align-items: center;
         gap: 20px;
     }
     
-    .panel-seleccion-variable {
+    :where(.mat251) .panel-seleccion-variable {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .btn-abrir-modal {
+    :where(.mat251) .btn-abrir-modal {
         width: 100%;
     }
     
-    .acciones-principales {
+    :where(.mat251) .acciones-principales {
         flex-direction: column;
         width: 100%;
     }
     
-    .acciones-principales button {
+    :where(.mat251) .acciones-principales button {
         width: 100%;
     }
     
-    .contenido-modal {
+    :where(.mat251) .contenido-modal {
         padding: 15px;
     }
     
-    .panel-inputs {
+    :where(.mat251) .panel-inputs {
         flex-direction: column;
         width: 100%;
     }
     
-    .panel-inputs input {
+    :where(.mat251) .panel-inputs input {
         width: 100%;
     }
     
-    .cabecera-editor {
+    :where(.mat251) .cabecera-editor {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
     
-    .acciones-modal-excel {
+    :where(.mat251) .acciones-modal-excel {
         flex-direction: column;
         gap: 10px;
     }
     
-    .acciones-modal-excel button {
+    :where(.mat251) .acciones-modal-excel button {
         width: 100%;
     }
 }
 
 /* Interfaz de experimentos de probabilidad MAT251 */
-.mat251-experimentos {
+:where(.mat251) .mat251-experimentos {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -822,32 +855,32 @@
     font-family: system-ui, -apple-system, sans-serif;
 }
 
-.mat251-experimentos button,
-.mat251-experimentos input {
+:where(.mat251) .mat251-experimentos button,
+:where(.mat251) .mat251-experimentos input {
     font-family: inherit;
 }
 
-.mat251-experimentos button {
+:where(.mat251) .mat251-experimentos button {
     font-weight: 600;
     border-radius: 5px;
 }
 
 /* Excluye estos controles del estilo global genérico de botones azules. */
-.mat251-experimentos .btn-experimentos {
+:where(.mat251) .mat251-experimentos .btn-experimentos {
     font-family: inherit;
     font-weight: 600;
 }
 
-.mat251-experimentos-header,
-.mat251-experimentos-seccion-titulo,
-.mat251-experimentos-encuesta {
+:where(.mat251) .mat251-experimentos-header,
+:where(.mat251) .mat251-experimentos-seccion-titulo,
+:where(.mat251) .mat251-experimentos-encuesta {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
 }
 
-.mat251-experimentos-condiciones-cabecera {
+:where(.mat251) .mat251-experimentos-condiciones-cabecera {
     margin-top: 15px;
     display: flex;
     flex-direction: column;
@@ -857,13 +890,13 @@
     gap: 0;
 }
 
-.mat251-experimentos-condiciones-cabecera > div {
+:where(.mat251) .mat251-experimentos-condiciones-cabecera > div {
     width: 100%;
     text-align: center;
 }
 
-.mat251-experimentos-condiciones-cabecera > button,
-.mat251-experimentos-agregar-condicion {
+:where(.mat251) .mat251-experimentos-condiciones-cabecera > button,
+:where(.mat251) .mat251-experimentos-agregar-condicion {
     position: static;
     margin-top: 10px;
     align-self: center;
@@ -873,34 +906,34 @@
     transition: all 0.18s ease;
 }
 
-.mat251-experimentos-condiciones-cabecera > button:hover:not(:disabled),
-.mat251-experimentos-agregar-condicion:hover:not(:disabled) {
+:where(.mat251) .mat251-experimentos-condiciones-cabecera > button:hover:not(:disabled),
+:where(.mat251) .mat251-experimentos-agregar-condicion:hover:not(:disabled) {
     background: var(--accent-color) !important;
     border-color: var(--accent-color) !important;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
 }
 
-.mat251-experimentos-card h4,
-.mat251-experimentos-card h5,
-.mat251-experimentos-header p,
-.mat251-experimentos-seccion-titulo p {
+:where(.mat251) .mat251-experimentos-card h4,
+:where(.mat251) .mat251-experimentos-card h5,
+:where(.mat251) .mat251-experimentos-header p,
+:where(.mat251) .mat251-experimentos-seccion-titulo p {
     margin: 0;
 }
 
-.mat251-experimentos-header p,
-.mat251-experimentos-seccion-titulo p {
+:where(.mat251) .mat251-experimentos-header p,
+:where(.mat251) .mat251-experimentos-seccion-titulo p {
     color: var(--text-muted);
     font-size: 0.75rem;
 }
-.mat251-experimentos-metricas > div > span {
+:where(.mat251) .mat251-experimentos-metricas > div > span {
     color: var(--text-pure);
     font-size: 0.8rem;
     font-weight: 700;
     font-family: system-ui, -apple-system, sans-serif;
 }
 
-.mat251-experimentos-card {
+:where(.mat251) .mat251-experimentos-card {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -911,12 +944,12 @@
     background: transparent;
 }
 
-.mat251-experimentos-card h4 {
+:where(.mat251) .mat251-experimentos-card h4 {
     color: var(--text-pure);
     font-size: 0.9rem;
 }
 
-.mat251-experimentos-label {
+:where(.mat251) .mat251-experimentos-label {
     display: block;
     margin-bottom: 5px;
     color: var(--text-pure);
@@ -924,15 +957,15 @@
     font-weight: 600;
 }
 
-.mat251-experimentos-tipos,
-.mat251-experimentos-componentes {
+:where(.mat251) .mat251-experimentos-tipos,
+:where(.mat251) .mat251-experimentos-componentes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
     align-items: start;
     gap: 10px;
 }
 
-.mat251-experimentos-componentes {
+:where(.mat251) .mat251-experimentos-componentes {
     width: 100%;
     min-height: 100%;
     box-sizing: border-box;
@@ -943,7 +976,7 @@
     background: transparent;
 }
 
-.mat251-experimentos-componentes.simple {
+:where(.mat251) .mat251-experimentos-componentes.simple {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -951,11 +984,11 @@
     min-height: 100%;
 }
 
-.mat251-experimentos-componentes.simple .mat251-experimentos-componente {
+:where(.mat251) .mat251-experimentos-componentes.simple .mat251-experimentos-componente {
     margin: 0 auto;
 }
 
-.mat251-experimentos-componente-titulo {
+:where(.mat251) .mat251-experimentos-componente-titulo {
     position: relative;
     display: flex;
     align-items: center;
@@ -967,7 +1000,7 @@
     line-height: 1.2;
 }
 
-.mat251-experimentos-componente-titulo strong {
+:where(.mat251) .mat251-experimentos-componente-titulo strong {
     margin: 0 !important;
     padding: 0 !important;
     line-height: 1.2;
@@ -975,7 +1008,7 @@
     font-size: 0.8rem;
 }
 
-.mat251-experimentos-componente-acciones {
+:where(.mat251) .mat251-experimentos-componente-acciones {
     position: absolute;
     right: 0;
     top: 50%;
@@ -985,11 +1018,11 @@
     gap: 2px;
 }
 
-.mat251-experimentos-componente-acciones .mat251-experimentos-quitar {
+:where(.mat251) .mat251-experimentos-componente-acciones .mat251-experimentos-quitar {
     position: static;
 }
 
-.mat251-experimentos-componentes.compuesto {
+:where(.mat251) .mat251-experimentos-componentes.compuesto {
     display: flex;
     flex-wrap: nowrap;
     align-items: flex-start;
@@ -998,11 +1031,11 @@
     min-width: 100%;
 }
 
-.mat251-experimentos-componentes.compuesto > .mat251-experimentos-componente {
+:where(.mat251) .mat251-experimentos-componentes.compuesto > .mat251-experimentos-componente {
     flex: 0 0 320px;
 }
 
-.mat251-experimentos-agregar-componente {
+:where(.mat251) .mat251-experimentos-agregar-componente {
     position: absolute;
     top: 6px;
     right: auto;
@@ -1022,21 +1055,21 @@
     transition: all 0.18s ease;
 }
 
-.mat251-experimentos-agregar-componente:hover {
+:where(.mat251) .mat251-experimentos-agregar-componente:hover {
     background: var(--accent-color) !important;
     border-color: var(--accent-color) !important;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
 }
 
-.mat251-experimentos-agregar-componente,
-.mat251-experimentos-agregar-componente:hover,
-.mat251-experimentos-agregar-componente:focus,
-.mat251-experimentos-agregar-componente:active {
+:where(.mat251) .mat251-experimentos-agregar-componente,
+:where(.mat251) .mat251-experimentos-agregar-componente:hover,
+:where(.mat251) .mat251-experimentos-agregar-componente:focus,
+:where(.mat251) .mat251-experimentos-agregar-componente:active {
     transform: translateX(-50%) !important;
 }
 
-.mat251-experimentos-lienzo {
+:where(.mat251) .mat251-experimentos-lienzo {
     position: relative;
     width: 100%;
     height: 250px;
@@ -1048,11 +1081,11 @@
     transition: height 0.2s ease;
 }
 
-.mat251-experimentos-lienzo.simple {
+:where(.mat251) .mat251-experimentos-lienzo.simple {
     height: 220px;
 }
 
-.mat251-experimentos-lienzo-viewport {
+:where(.mat251) .mat251-experimentos-lienzo-viewport {
     position: absolute;
     inset: 0;
     overflow-x: auto;
@@ -1068,7 +1101,7 @@
     background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
 }
 
-.mat251-experimentos-lienzo-viewport.simple {
+:where(.mat251) .mat251-experimentos-lienzo-viewport.simple {
     padding: 14px;
     display: flex;
     align-items: center;
@@ -1076,41 +1109,41 @@
     overflow: hidden;
 }
 
-.mat251-experimentos-lienzo-viewport,
-.mat251-experimentos-formula-universo {
+:where(.mat251) .mat251-experimentos-lienzo-viewport,
+:where(.mat251) .mat251-experimentos-formula-universo {
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.45) transparent;
 }
 
-.mat251-experimentos-lienzo-viewport::-webkit-scrollbar,
-.mat251-experimentos-formula-universo::-webkit-scrollbar {
+:where(.mat251) .mat251-experimentos-lienzo-viewport::-webkit-scrollbar,
+:where(.mat251) .mat251-experimentos-formula-universo::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
-.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-track,
-.mat251-experimentos-formula-universo::-webkit-scrollbar-track {
+:where(.mat251) .mat251-experimentos-lienzo-viewport::-webkit-scrollbar-track,
+:where(.mat251) .mat251-experimentos-formula-universo::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-thumb,
-.mat251-experimentos-formula-universo::-webkit-scrollbar-thumb {
+:where(.mat251) .mat251-experimentos-lienzo-viewport::-webkit-scrollbar-thumb,
+:where(.mat251) .mat251-experimentos-formula-universo::-webkit-scrollbar-thumb {
     background: rgba(156, 163, 175, 0.45);
     border: none;
     border-radius: 10px;
 }
 
-.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-thumb:hover,
-.mat251-experimentos-formula-universo::-webkit-scrollbar-thumb:hover {
+:where(.mat251) .mat251-experimentos-lienzo-viewport::-webkit-scrollbar-thumb:hover,
+:where(.mat251) .mat251-experimentos-formula-universo::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
 }
 
-.mat251-experimentos-lienzo-viewport::-webkit-scrollbar-corner,
-.mat251-experimentos-formula-universo::-webkit-scrollbar-corner {
+:where(.mat251) .mat251-experimentos-lienzo-viewport::-webkit-scrollbar-corner,
+:where(.mat251) .mat251-experimentos-formula-universo::-webkit-scrollbar-corner {
     background: transparent;
 }
 
-.mat251-experimentos-tipos {
+:where(.mat251) .mat251-experimentos-tipos {
     display: flex;
     flex-wrap: wrap;
     align-items: start;
@@ -1121,18 +1154,18 @@
     gap: 10px 14px;
 }
 
-.mat251-experimentos-tipos > div {
+:where(.mat251) .mat251-experimentos-tipos > div {
     flex: 0 1 300px;
     width: 300px;
     min-width: 0;
 }
 
-.mat251-experimentos-tipos > div > .mat251-experimentos-label {
+:where(.mat251) .mat251-experimentos-tipos > div > .mat251-experimentos-label {
     font-size: 0.85rem;
     text-align: center;
 }
 
-.mat251-experimentos-opciones {
+:where(.mat251) .mat251-experimentos-opciones {
     display: flex;
     width: 100%;
     max-width: 100%;
@@ -1140,7 +1173,7 @@
     box-sizing: border-box;
 }
 
-.mat251-experimentos-opciones .btn-mat251-modo {
+:where(.mat251) .mat251-experimentos-opciones .btn-mat251-modo {
     flex: 1 1 0;
     min-width: 0;
     padding: 6px 8px;
@@ -1151,19 +1184,19 @@
     white-space: nowrap;
 }
 
-.mat251-experimentos-opciones .btn-mat251-modo.active {
+:where(.mat251) .mat251-experimentos-opciones .btn-mat251-modo.active {
     color: #fff !important;
 }
 
-.mat251-experimentos-componentes > .mat251-experimentos-secundario {
+:where(.mat251) .mat251-experimentos-componentes > .mat251-experimentos-secundario {
     justify-self: start;
     align-self: start;
     min-height: 38px;
     margin-top: 2px;
 }
 
-.mat251-experimentos-componente,
-.mat251-experimentos-regla {
+:where(.mat251) .mat251-experimentos-componente,
+:where(.mat251) .mat251-experimentos-regla {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -1174,7 +1207,7 @@
     background: var(--bg-input);
 }
 
-.mat251-experimentos-componente {
+:where(.mat251) .mat251-experimentos-componente {
     position: relative;
     width: min(100%, 320px);
     max-width: 320px;
@@ -1184,7 +1217,7 @@
     background: var(--bg-card);
 }
 
-.mat251-experimentos-componente-clonado {
+:where(.mat251) .mat251-experimentos-componente-clonado {
     transform-origin: left center;
     animation: mat251-experimentos-entrada-clon 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -1211,19 +1244,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .mat251-experimentos-componente-clonado {
+    :where(.mat251) .mat251-experimentos-componente-clonado {
         animation: none;
     }
 }
 
-.mat251-experimentos-componente label,
-.mat251-experimentos-regla-campo label {
+:where(.mat251) .mat251-experimentos-componente label,
+:where(.mat251) .mat251-experimentos-regla-campo label {
     display: block;
     min-width: 0;
 }
 
-.mat251-experimentos-secundario,
-.mat251-experimentos-quitar {
+:where(.mat251) .mat251-experimentos-secundario,
+:where(.mat251) .mat251-experimentos-quitar {
     min-height: 34px;
     width: fit-content;
     padding: 5px 14px;
@@ -1236,23 +1269,23 @@
     cursor: pointer;
 }
 
-.mat251-experimentos-secundario:hover {
+:where(.mat251) .mat251-experimentos-secundario:hover {
     border-color: var(--accent-color);
     color: var(--accent-color);
 }
 
-.mat251-experimentos-secundario:disabled {
+:where(.mat251) .mat251-experimentos-secundario:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.mat251-experimentos-quitar {
+:where(.mat251) .mat251-experimentos-quitar {
     border-color: #ef4444;
     color: #ef4444;
 }
 
-.mat251-experimentos .mat251-experimentos-quitar-icono,
-.mat251-experimentos .mat251-experimentos-clonar-icono {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-quitar-icono,
+:where(.mat251) .mat251-experimentos .mat251-experimentos-clonar-icono {
     display: inline-grid;
     place-items: center;
     width: 24px;
@@ -1269,49 +1302,49 @@
     transition: color 0.18s ease, transform 0.18s ease;
 }
 
-.mat251-experimentos .mat251-experimentos-quitar-icono {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-quitar-icono {
     color: #ef4444 !important;
 }
 
-.mat251-experimentos .mat251-experimentos-quitar-icono:hover:not(:disabled) {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-quitar-icono:hover:not(:disabled) {
     background: transparent !important;
     color: #dc2626 !important;
     box-shadow: none !important;
     transform: scale(1.08);
 }
 
-.mat251-experimentos .mat251-experimentos-quitar-icono:focus-visible {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-quitar-icono:focus-visible {
     color: #b91c1c !important;
     filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5));
 }
 
-.mat251-experimentos .mat251-experimentos-quitar-icono:disabled {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-quitar-icono:disabled {
     opacity: 0.25;
     cursor: not-allowed;
 }
 
-.mat251-experimentos .mat251-experimentos-clonar-icono {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-clonar-icono {
     color: var(--text-muted) !important;
 }
 
-.mat251-experimentos .mat251-experimentos-clonar-icono:hover:not(:disabled) {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-clonar-icono:hover:not(:disabled) {
     background: transparent !important;
     color: var(--accent-color) !important;
     box-shadow: none !important;
     transform: scale(1.08);
 }
 
-.mat251-experimentos .mat251-experimentos-clonar-icono:focus-visible {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-clonar-icono:focus-visible {
     color: var(--accent-color) !important;
     filter: drop-shadow(0 0 2px rgba(217, 119, 6, 0.4));
 }
 
-.mat251-experimentos .mat251-experimentos-clonar-icono:disabled {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-clonar-icono:disabled {
     opacity: 0.25;
     cursor: not-allowed;
 }
 
-.mat251-experimentos .mat251-experimentos-mover-icono {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-mover-icono {
     position: absolute;
     top: 8px;
     left: 11px;
@@ -1334,18 +1367,18 @@
     transition: color 0.18s ease, transform 0.18s ease;
 }
 
-.mat251-experimentos .mat251-experimentos-mover-icono:hover:not(:disabled),
-.mat251-experimentos .mat251-experimentos-mover-icono:focus-visible {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-mover-icono:hover:not(:disabled),
+:where(.mat251) .mat251-experimentos .mat251-experimentos-mover-icono:focus-visible {
     color: var(--accent-color) !important;
     background: transparent !important;
     box-shadow: none !important;
 }
 
-.mat251-experimentos .mat251-experimentos-mover-icono:active {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-mover-icono:active {
     cursor: grabbing;
 }
 
-.mat251-experimentos-encuesta {
+:where(.mat251) .mat251-experimentos-encuesta {
     flex-wrap: wrap;
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -1353,88 +1386,88 @@
     background: var(--bg-card);
 }
 
-.mat251-experimentos-encuesta-config {
+:where(.mat251) .mat251-experimentos-encuesta-config {
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-width: 0;
 }
 
-.mat251-experimentos-frecuencia {
+:where(.mat251) .mat251-experimentos-frecuencia {
     display: block;
     width: min(100%, 360px);
 }
 
-.mat251-experimentos-frecuencia small {
+:where(.mat251) .mat251-experimentos-frecuencia small {
     display: block;
     margin-top: 5px;
     color: var(--text-muted);
     font-size: 0.7rem;
 }
 
-.mat251-experimentos-encuesta > div {
+:where(.mat251) .mat251-experimentos-encuesta > div {
     display: flex;
     flex-direction: column;
     gap: 3px;
 }
 
-.mat251-experimentos-encuesta strong {
+:where(.mat251) .mat251-experimentos-encuesta strong {
     color: var(--text-pure);
     font-size: 0.85rem;
 }
 
-.mat251-experimentos-datos-label {
+:where(.mat251) .mat251-experimentos-datos-label {
     color: var(--text-pure);
     font-size: 0.85rem;
     font-weight: 600;
 }
 
-.mat251-experimentos-encuesta .mat251-experimentos-datos-label {
+:where(.mat251) .mat251-experimentos-encuesta .mat251-experimentos-datos-label {
     color: var(--text-pure);
 }
 
-.mat251-experimentos .mat251-experimentos-editar {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-editar {
     background: var(--primary-color) !important;
     border: 1px solid var(--primary-color) !important;
     color: #fff !important;
 }
 
-.mat251-experimentos .mat251-experimentos-editar:hover:not(:disabled) {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-editar:hover:not(:disabled) {
     background: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
     color: #fff !important;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
 }
 
-.mat251-experimentos-encuesta span,
-.mat251-experimentos-encuesta p {
+:where(.mat251) .mat251-experimentos-encuesta span,
+:where(.mat251) .mat251-experimentos-encuesta p {
     color: var(--text-muted);
     font-size: 0.75rem;
 }
 
-.mat251-experimentos-encuesta p {
+:where(.mat251) .mat251-experimentos-encuesta p {
     flex-basis: 100%;
     margin: 0;
 }
 
-.mat251-experimentos-reglas {
+:where(.mat251) .mat251-experimentos-reglas {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.mat251-experimentos-regla {
+:where(.mat251) .mat251-experimentos-regla {
     position: relative;
     flex-direction: row;
     align-items: flex-end;
     justify-content: space-between;
 }
 
-.mat251-experimentos-regla.con-quitar {
+:where(.mat251) .mat251-experimentos-regla.con-quitar {
     padding-right: 36px;
 }
 
-.mat251-experimentos .mat251-experimentos-quitar-regla {
+:where(.mat251) .mat251-experimentos .mat251-experimentos-quitar-regla {
     position: absolute;
     top: 6px;
     right: 6px;
@@ -1445,7 +1478,7 @@
     padding: 0;
 }
 
-.mat251-experimentos-regla-campo {
+:where(.mat251) .mat251-experimentos-regla-campo {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
@@ -1454,39 +1487,39 @@
     min-width: 0;
 }
 
-.mat251-experimentos-regla-campo label {
+:where(.mat251) .mat251-experimentos-regla-campo label {
     display: block;
     flex: 1 1 140px;
     min-width: 120px;
 }
 
-.mat251-experimentos-regla-campo label.mat251-experimentos-campo-evaluar {
+:where(.mat251) .mat251-experimentos-regla-campo label.mat251-experimentos-campo-evaluar {
     flex: 0 0 175px;
     width: 175px;
     min-width: 175px;
     max-width: 175px;
 }
 
-.mat251-experimentos-regla-campo label.mat251-experimentos-campo-operador {
+:where(.mat251) .mat251-experimentos-regla-campo label.mat251-experimentos-campo-operador {
     flex: 0 0 80px;
     width: 80px;
     min-width: 80px;
     max-width: 80px;
 }
 
-.mat251-experimentos-regla-campo label.mat251-experimentos-campo-valor {
+:where(.mat251) .mat251-experimentos-regla-campo label.mat251-experimentos-campo-valor {
     flex: 0 0 110px;
     width: 110px;
     min-width: 85px;
     max-width: 120px;
 }
 
-.mat251-experimentos-campo-operador .experimentos-select-trigger {
+:where(.mat251) .mat251-experimentos-campo-operador .experimentos-select-trigger {
     padding: 5px 8px;
     justify-content: space-between;
 }
 
-.mat251-experimentos-campo-operador .experimentos-select-trigger > span {
+:where(.mat251) .mat251-experimentos-campo-operador .experimentos-select-trigger > span {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1494,12 +1527,12 @@
     overflow: visible;
 }
 
-.mat251-experimentos-campo-operador .experimentos-select-option {
+:where(.mat251) .mat251-experimentos-campo-operador .experimentos-select-option {
     padding: 7px 6px;
     text-align: center;
 }
 
-.mat251-experimentos-campo-suma {
+:where(.mat251) .mat251-experimentos-campo-suma {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -1508,7 +1541,7 @@
     max-width: 100%;
 }
 
-.mat251-experimentos-chips-suma {
+:where(.mat251) .mat251-experimentos-chips-suma {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1527,39 +1560,39 @@
     -webkit-overflow-scrolling: touch;
 }
 
-.mat251-experimentos-chips-suma::-webkit-scrollbar {
+:where(.mat251) .mat251-experimentos-chips-suma::-webkit-scrollbar {
     height: 3px;
 }
 
-.mat251-experimentos-chips-suma::-webkit-scrollbar-track {
+:where(.mat251) .mat251-experimentos-chips-suma::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.mat251-experimentos-chips-suma::-webkit-scrollbar-thumb {
+:where(.mat251) .mat251-experimentos-chips-suma::-webkit-scrollbar-thumb {
     background: rgba(156, 163, 175, 0.45);
     border-radius: 10px;
 }
 
-.mat251-experimentos-chips-suma {
+:where(.mat251) .mat251-experimentos-chips-suma {
     scrollbar-width: none;
 }
 
-.mat251-experimentos-chips-suma::-webkit-scrollbar {
+:where(.mat251) .mat251-experimentos-chips-suma::-webkit-scrollbar {
     display: none;
 }
 
-.mat251-experimentos-chips-suma::-webkit-scrollbar-thumb:hover {
+:where(.mat251) .mat251-experimentos-chips-suma::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color);
 }
 
 @supports not selector(::-webkit-scrollbar) {
-    .mat251-experimentos-chips-suma {
+    :where(.mat251) .mat251-experimentos-chips-suma {
         scrollbar-width: thin;
         scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
     }
 }
 
-.mat251-chip-suma {
+:where(.mat251) .mat251-chip-suma {
     flex: 1 0 115px;
     min-width: 115px;
     height: 28px;
@@ -1583,37 +1616,37 @@
     box-sizing: border-box;
 }
 
-.mat251-chip-suma:hover {
+:where(.mat251) .mat251-chip-suma:hover {
     background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-card));
     border-color: var(--primary-color);
     color: var(--primary-color);
 }
 
-.mat251-chip-suma.activo {
+:where(.mat251) .mat251-chip-suma.activo {
     background: var(--primary-color) !important;
     color: #ffffff !important;
     border-color: var(--primary-color) !important;
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
 }
 
-.mat251-chip-suma.activo:hover {
+:where(.mat251) .mat251-chip-suma.activo:hover {
     background: color-mix(in srgb, var(--primary-color) 88%, #000) !important;
     border-color: var(--primary-color) !important;
     color: #ffffff !important;
 }
 
-.mat251-experimentos-regla-campo .mat251-experimentos-label {
+:where(.mat251) .mat251-experimentos-regla-campo .mat251-experimentos-label {
     text-align: center;
 }
 
-.experimentos-select {
+:where(.mat251) .experimentos-select {
     position: relative;
     width: 100%;
     min-width: 0;
     font-family: system-ui, -apple-system, sans-serif;
 }
 
-.experimentos-select-trigger {
+:where(.mat251) .experimentos-select-trigger {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1633,41 +1666,41 @@
     transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.experimentos-select-trigger:hover:not(:disabled) {
+:where(.mat251) .experimentos-select-trigger:hover:not(:disabled) {
     border-color: var(--primary-color);
 }
 
-.experimentos-select-trigger:focus-visible {
+:where(.mat251) .experimentos-select-trigger:focus-visible {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.experimentos-select-trigger > span {
+:where(.mat251) .experimentos-select-trigger > span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.experimentos-select-trigger svg {
+:where(.mat251) .experimentos-select-trigger svg {
     flex: 0 0 auto;
     transition: transform 0.2s ease;
 }
 
-.experimentos-select-trigger.abierto svg {
+:where(.mat251) .experimentos-select-trigger.abierto svg {
     transform: rotate(180deg);
 }
 
-.experimentos-select-trigger.abierto {
+:where(.mat251) .experimentos-select-trigger.abierto {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.experimentos-select-trigger:disabled {
+:where(.mat251) .experimentos-select-trigger:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.experimentos-select-menu {
+:where(.mat251) .experimentos-select-menu {
     position: absolute;
     top: calc(100% + 4px);
     right: 0;
@@ -1679,10 +1712,10 @@
     border-radius: 5px;
     background: var(--bg-card);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    animation: fadeInDropdown 0.2s ease;
+    animation: mat251-fadeInDropdown 0.2s ease;
 }
 
-.experimentos-select-option {
+:where(.mat251) .experimentos-select-option {
     display: block;
     width: 100%;
     padding: 9px 12px;
@@ -1696,28 +1729,28 @@
     cursor: pointer;
 }
 
-.experimentos-select-option:hover,
-.experimentos-select-option.seleccionada {
+:where(.mat251) .experimentos-select-option:hover,
+:where(.mat251) .experimentos-select-option.seleccionada {
     background: rgba(37, 99, 235, 0.08);
 }
 
-.experimentos-select-option:hover {
+:where(.mat251) .experimentos-select-option:hover {
     color: var(--text-pure);
 }
 
-.experimentos-select-option.seleccionada {
+:where(.mat251) .experimentos-select-option.seleccionada {
     color: var(--primary-color);
     font-weight: 600;
 }
 
-.mat251-operador-opcion {
+:where(.mat251) .mat251-operador-opcion {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 100%;
 }
 
-.mat251-operador-simbolo {
+:where(.mat251) .mat251-operador-simbolo {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1727,37 +1760,37 @@
     line-height: 1;
 }
 
-.mat251-operador-simbolo .katex {
+:where(.mat251) .mat251-operador-simbolo .katex {
     line-height: normal;
     text-transform: none;
     font-weight: 700 !important;
 }
 
-.mat251-experimentos-conector {
+:where(.mat251) .mat251-experimentos-conector {
     align-self: center;
     width: 68px;
 }
 
-.mat251-experimentos-conector .experimentos-select-trigger {
+:where(.mat251) .mat251-experimentos-conector .experimentos-select-trigger {
     padding: 5px 8px;
     font-weight: 700;
     justify-content: space-between;
 }
 
-.mat251-experimentos-conector .experimentos-select-option {
+:where(.mat251) .mat251-experimentos-conector .experimentos-select-option {
     text-align: center;
     font-weight: 700;
     padding: 7px 6px;
 }
 
-.mat251-experimentos-ayuda,
-.mat251-experimentos-vacio {
+:where(.mat251) .mat251-experimentos-ayuda,
+:where(.mat251) .mat251-experimentos-vacio {
     color: var(--text-muted);
     font-size: 0.75rem;
 }
 
-.mat251-experimentos-aviso,
-.mat251-experimentos-error {
+:where(.mat251) .mat251-experimentos-aviso,
+:where(.mat251) .mat251-experimentos-error {
     margin: 0;
     padding: 9px 10px;
     border: 1px solid #f59e0b;
@@ -1767,17 +1800,17 @@
     font-size: 0.8rem;
 }
 
-.mat251-experimentos-error {
+:where(.mat251) .mat251-experimentos-error {
     border-color: #ef4444;
     background: color-mix(in srgb, #ef4444 8%, var(--bg-card));
 }
 
-.mat251-experimentos-acciones {
+:where(.mat251) .mat251-experimentos-acciones {
     display: flex;
     justify-content: center;
 }
 
-.mat251-experimentos-acciones .button_calcular {
+:where(.mat251) .mat251-experimentos-acciones .button_calcular {
     width: fit-content;
     padding: 5px 20px;
     border-radius: 5px;
@@ -1792,25 +1825,25 @@
     justify-content: center;
 }
 
-.mat251-experimentos-acciones .button_calcular:hover:not(:disabled) {
+:where(.mat251) .mat251-experimentos-acciones .button_calcular:hover:not(:disabled) {
     background: var(--accent-color) !important;
     border-color: var(--accent-color) !important;
     color: #fff !important;
     box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
 }
 
-.mat251-experimentos-acciones .button_calcular:disabled {
+:where(.mat251) .mat251-experimentos-acciones .button_calcular:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.mat251-experimentos-metricas {
+:where(.mat251) .mat251-experimentos-metricas {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 8px;
 }
 
-.mat251-experimentos-metricas > div {
+:where(.mat251) .mat251-experimentos-metricas > div {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1824,43 +1857,43 @@
     text-align: center;
 }
 
-.mat251-experimentos-metricas span {
+:where(.mat251) .mat251-experimentos-metricas span {
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-secondary);
 }
 
-.mat251-experimentos-metricas strong {
+:where(.mat251) .mat251-experimentos-metricas strong {
     color: var(--text-pure);
     font-size: 0.9rem;
     font-weight: 400;
     white-space: nowrap;
 }
 
-.mat251-experimentos-card h4.mat251-experimentos-resultados-titulo {
+:where(.mat251) .mat251-experimentos-card h4.mat251-experimentos-resultados-titulo {
     text-align: center;
     font-size: 1rem;
 }
 
-.mat251-experimentos-resultados {
+:where(.mat251) .mat251-experimentos-resultados {
     gap: 16px;
 }
 
-.mat251-experimentos-resultados .katex {
+:where(.mat251) .mat251-experimentos-resultados .katex {
     color: var(--text-pure);
 }
 
-.mat251-experimentos-resultados .mat251-experimentos-metricas > div {
+:where(.mat251) .mat251-experimentos-resultados .mat251-experimentos-metricas > div {
     min-height: 68px;
     padding: 10px 8px;
     border-radius: 5px;
 }
 
-.mat251-experimentos-metricas strong .katex {
+:where(.mat251) .mat251-experimentos-metricas strong .katex {
     font-size: 1.05em;
 }
 
-.mat251-experimentos-formula {
+:where(.mat251) .mat251-experimentos-formula {
     margin: 0;
     padding: 4px 0;
     border: none;
@@ -1871,29 +1904,29 @@
     overflow-x: auto;
 }
 
-.mat251-experimentos-formula .katex-display {
+:where(.mat251) .mat251-experimentos-formula .katex-display {
     margin: 0;
 }
 
-.mat251-experimentos-resultados h5 {
+:where(.mat251) .mat251-experimentos-resultados h5 {
     color: var(--text-pure);
     font-size: 0.8rem;
 }
 
-.mat251-experimentos-espacio-vivo {
+:where(.mat251) .mat251-experimentos-espacio-vivo {
     margin-top: 5px;
     color: var(--text-pure);
     font-family: inherit;
 }
 
-.mat251-experimentos-espacio-vivo-cabecera {
+:where(.mat251) .mat251-experimentos-espacio-vivo-cabecera {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 8px;
 }
 
-.mat251-experimentos-espacio-vivo-cabecera h5 {
+:where(.mat251) .mat251-experimentos-espacio-vivo-cabecera h5 {
     margin: 0;
     color: var(--text-pure);
     font-size: 0.9rem;
@@ -1901,7 +1934,7 @@
     text-align: center;
 }
 
-.mat251-experimentos-formula-universo {
+:where(.mat251) .mat251-experimentos-formula-universo {
     max-width: 100%;
     max-height: 320px;
     overflow: auto;
@@ -1913,60 +1946,60 @@
     font-family: inherit;
 }
 
-.mat251-experimentos-formula-universo,
-.mat251-experimentos-formula-universo .katex,
-.mat251-experimentos-formula-universo .mat251-experimentos-matriz-igual,
-.mat251-experimentos-formula-universo .mat251-experimentos-matriz-celdas,
-.mat251-experimentos-formula-universo .mat251-experimentos-matriz-llave {
+:where(.mat251) .mat251-experimentos-formula-universo,
+:where(.mat251) .mat251-experimentos-formula-universo .katex,
+:where(.mat251) .mat251-experimentos-formula-universo .mat251-experimentos-matriz-igual,
+:where(.mat251) .mat251-experimentos-formula-universo .mat251-experimentos-matriz-celdas,
+:where(.mat251) .mat251-experimentos-formula-universo .mat251-experimentos-matriz-llave {
     color: var(--text-pure);
 }
 
-.mat251-experimentos-tabla-wrap {
+:where(.mat251) .mat251-experimentos-tabla-wrap {
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.45) transparent;
 }
 
-.mat251-experimentos-tabla-wrap::-webkit-scrollbar {
+:where(.mat251) .mat251-experimentos-tabla-wrap::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
-.mat251-experimentos-tabla-wrap::-webkit-scrollbar-track {
+:where(.mat251) .mat251-experimentos-tabla-wrap::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.mat251-experimentos-tabla-wrap::-webkit-scrollbar-thumb {
+:where(.mat251) .mat251-experimentos-tabla-wrap::-webkit-scrollbar-thumb {
     background: rgba(156, 163, 175, 0.45);
     border: none;
     border-radius: 10px;
 }
 
-.mat251-experimentos-tabla-wrap::-webkit-scrollbar-thumb:hover {
+:where(.mat251) .mat251-experimentos-tabla-wrap::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
 }
 
-.mat251-experimentos-tabla-wrap::-webkit-scrollbar-corner {
+:where(.mat251) .mat251-experimentos-tabla-wrap::-webkit-scrollbar-corner {
     background: transparent;
 }
 
-.mat251-experimentos-formula-universo > p {
+:where(.mat251) .mat251-experimentos-formula-universo > p {
     margin: 0 0 8px;
     color: var(--text-muted);
     font-size: 0.8rem;
 }
 
-.mat251-experimentos-formula-universo-math {
+:where(.mat251) .mat251-experimentos-formula-universo-math {
     width: max-content;
     min-width: 100%;
     font-weight: 400;
     text-align: left;
 }
 
-.mat251-experimentos-formula-universo-math .katex {
+:where(.mat251) .mat251-experimentos-formula-universo-math .katex {
     font-size: 0.85rem;
 }
 
-.mat251-experimentos-formula-universo-simple {
+:where(.mat251) .mat251-experimentos-formula-universo-simple {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1976,12 +2009,12 @@
     font-size: 0.85rem;
 }
 
-.mat251-experimentos-formula-universo-simple .katex-display {
+:where(.mat251) .mat251-experimentos-formula-universo-simple .katex-display {
     width: max-content;
     margin: 0;
 }
 
-.mat251-experimentos-matriz-universo {
+:where(.mat251) .mat251-experimentos-matriz-universo {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1992,33 +2025,33 @@
     font-size: 0.85rem;
 }
 
-.mat251-experimentos-omega-label:hover {
+:where(.mat251) .mat251-experimentos-omega-label:hover {
     z-index: 10002;
 }
 
-.mat251-experimentos-matriz-igual {
+:where(.mat251) .mat251-experimentos-matriz-igual {
     color: var(--text-pure);
     font-family: KaTeX_Main, 'Times New Roman', serif;
     font-size: 0.85rem;
 }
 
-.mat251-experimentos-omega-label .mat251-stat-tooltip.mat251-tooltip-top {
+:where(.mat251) .mat251-experimentos-omega-label .mat251-stat-tooltip.mat251-tooltip-top {
     top: auto;
     bottom: calc(100% + 8px);
     z-index: 10003;
 }
 
-.mat251-experimentos-omega-label .mat251-stat-tooltip.mat251-tooltip-top::after {
+:where(.mat251) .mat251-experimentos-omega-label .mat251-stat-tooltip.mat251-tooltip-top::after {
     top: 100%;
     bottom: auto;
     border-color: #1e293b transparent transparent transparent;
 }
 
-.mat251-experimentos-matriz-universo .katex {
+:where(.mat251) .mat251-experimentos-matriz-universo .katex {
     font-size: 0.85rem;
 }
 
-.mat251-experimentos-matriz-llave {
+:where(.mat251) .mat251-experimentos-matriz-llave {
     display: block;
     flex: 0 0 15px;
     width: 5px;
@@ -2026,7 +2059,7 @@
     color: var(--text-pure);
 }
 
-.mat251-experimentos-matriz-llave path {
+:where(.mat251) .mat251-experimentos-matriz-llave path {
     fill: none;
     stroke: currentColor;
     stroke-width: 1.3;
@@ -2034,7 +2067,7 @@
     stroke-linejoin: round;
 }
 
-.mat251-experimentos-matriz-celdas {
+:where(.mat251) .mat251-experimentos-matriz-celdas {
     display: grid;
     align-items: center;
     gap: 6px 14px;
@@ -2045,17 +2078,17 @@
     text-align: center;
 }
 
-.mat251-experimentos-matriz-celdas > span {
+:where(.mat251) .mat251-experimentos-matriz-celdas > span {
     white-space: nowrap;
 }
 
-.mat251-experimentos-matriz-celda-medida {
+:where(.mat251) .mat251-experimentos-matriz-celda-medida {
     visibility: hidden;
     pointer-events: none;
     user-select: none;
 }
 
-.mat251-experimentos-tabla-wrap {
+:where(.mat251) .mat251-experimentos-tabla-wrap {
     max-width: 100%;
     max-height: 320px;
     overflow: auto;
@@ -2064,7 +2097,7 @@
     background: var(--bg-card);
 }
 
-.mat251-experimentos-tabla {
+:where(.mat251) .mat251-experimentos-tabla {
     width: 100%;
     border-collapse: collapse;
     background: var(--bg-card);
@@ -2072,31 +2105,31 @@
     font-size: 0.8rem;
 }
 
-.mat251-experimentos-tabla th,
-.mat251-experimentos-tabla td {
+:where(.mat251) .mat251-experimentos-tabla th,
+:where(.mat251) .mat251-experimentos-tabla td {
     min-width: 90px;
     padding: 7px 10px;
     border-bottom: 1px solid var(--border-color);
     text-align: center;
 }
 
-.mat251-experimentos-tabla th {
+:where(.mat251) .mat251-experimentos-tabla th {
     position: sticky;
     top: 0;
     background: var(--bg-input);
     color: var(--text-pure);
 }
 
-.mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable {
+:where(.mat251) .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable {
     color: var(--success-color, #07865b);
     font-weight: 700;
 }
 
-.mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable .katex {
+:where(.mat251) .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable .katex {
     color: var(--success-color, #07865b);
 }
 
-.mat251-experimentos-universo summary {
+:where(.mat251) .mat251-experimentos-universo summary {
     padding: 9px 0;
     color: var(--text-pure);
     font-size: 0.8rem;
@@ -2105,32 +2138,32 @@
 }
 
 @media (max-width: 640px) {
-    .mat251-experimentos-header,
-    .mat251-experimentos-seccion-titulo {
+    :where(.mat251) .mat251-experimentos-header,
+:where(.mat251) .mat251-experimentos-seccion-titulo {
         align-items: flex-start;
     }
 
-    .mat251-experimentos-condiciones-cabecera {
+    :where(.mat251) .mat251-experimentos-condiciones-cabecera {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .mat251-experimentos-condiciones-cabecera > button {
+    :where(.mat251) .mat251-experimentos-condiciones-cabecera > button {
         position: static;
         align-self: center;
     }
 
-    .mat251-experimentos-opciones {
+    :where(.mat251) .mat251-experimentos-opciones {
         width: 100%;
         overflow-x: auto;
         scrollbar-width: none;
     }
 
-    .mat251-experimentos-opciones::-webkit-scrollbar {
+    :where(.mat251) .mat251-experimentos-opciones::-webkit-scrollbar {
         display: none;
     }
 
-    .mat251-experimentos-opciones .btn-mat251-modo {
+    :where(.mat251) .mat251-experimentos-opciones .btn-mat251-modo {
         flex: 1;
         min-width: 0;
         padding: 6px 4px;
@@ -2139,34 +2172,34 @@
         white-space: normal;
     }
 
-    .mat251-experimentos-componentes {
+    :where(.mat251) .mat251-experimentos-componentes {
         min-height: 100%;
     }
 
-    .mat251-experimentos-lienzo {
+    :where(.mat251) .mat251-experimentos-lienzo {
         height: 230px;
     }
 
-    .mat251-experimentos-lienzo-viewport {
+    :where(.mat251) .mat251-experimentos-lienzo-viewport {
         padding: 10px;
     }
 
-    .mat251-experimentos-lienzo-viewport:not(.simple) {
+    :where(.mat251) .mat251-experimentos-lienzo-viewport:not(.simple) {
         padding: 44px 10px 10px;
     }
 
-    .mat251-experimentos-regla {
+    :where(.mat251) .mat251-experimentos-regla {
         flex-direction: row;
         align-items: flex-end;
         gap: 5px;
         padding: 8px;
     }
 
-    .mat251-experimentos-regla.con-quitar {
+    :where(.mat251) .mat251-experimentos-regla.con-quitar {
         padding-right: 32px;
     }
 
-    .mat251-experimentos-regla-campo {
+    :where(.mat251) .mat251-experimentos-regla-campo {
         display: flex;
         flex: 1 1 0;
         flex-wrap: nowrap;
@@ -2183,53 +2216,53 @@
         overscroll-behavior-x: contain;
     }
 
-    .mat251-experimentos-regla-campo > label {
+    :where(.mat251) .mat251-experimentos-regla-campo > label {
         flex: 0 0 170px;
         width: 170px;
         min-width: 170px;
         max-width: 170px;
     }
 
-    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-evaluar {
+    :where(.mat251) .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-evaluar {
         flex: 0 0 150px;
         width: 150px;
         min-width: 150px;
         max-width: 150px;
     }
 
-    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-operador {
+    :where(.mat251) .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-operador {
         flex: 0 0 78px;
         width: 78px;
         min-width: 78px;
         max-width: 78px;
     }
 
-    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-valor {
+    :where(.mat251) .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-valor {
         flex: 0 0 140px;
         width: 140px;
         min-width: 140px;
         max-width: 140px;
     }
 
-    .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-valor.con-input {
+    :where(.mat251) .mat251-experimentos-regla-campo > label.mat251-experimentos-campo-valor.con-input {
         flex: 0 0 72px;
         width: 72px;
         min-width: 72px;
         max-width: 72px;
     }
 
-    .mat251-experimentos-regla-campo > .mat251-experimentos-campo-suma {
+    :where(.mat251) .mat251-experimentos-regla-campo > .mat251-experimentos-campo-suma {
         flex: 0 0 250px;
         width: 250px;
         min-width: 250px;
         max-width: 250px;
     }
 
-    .mat251-experimentos-regla-campo::-webkit-scrollbar {
+    :where(.mat251) .mat251-experimentos-regla-campo::-webkit-scrollbar {
         display: none;
     }
 
-    .mat251-experimentos-regla .experimentos-select-menu.flotante-movil {
+    :where(.mat251) .mat251-experimentos-regla .experimentos-select-menu.flotante-movil {
         position: fixed;
         right: auto;
         max-width: min(160px, calc(100vw - 16px));
@@ -2238,7 +2271,7 @@
         z-index: 5000;
     }
 
-    .mat251-experimentos-regla .mat251-experimentos-label {
+    :where(.mat251) .mat251-experimentos-regla .mat251-experimentos-label {
         margin-bottom: 3px;
         overflow: hidden;
         font-size: 0.65rem;
@@ -2247,14 +2280,14 @@
         white-space: nowrap;
     }
 
-    .mat251-experimentos-regla .experimentos-select-trigger {
+    :where(.mat251) .mat251-experimentos-regla .experimentos-select-trigger {
         min-height: 34px;
         gap: 3px;
         padding: 4px 4px 4px 6px;
         font-size: 0.7rem;
     }
 
-    .mat251-experimentos-regla .experimentos-select-menu {
+    :where(.mat251) .mat251-experimentos-regla .experimentos-select-menu {
         right: auto;
         left: 0;
         width: max-content;
@@ -2264,65 +2297,65 @@
         box-sizing: border-box;
     }
 
-    .mat251-experimentos-regla .experimentos-select-menu.alineado-derecha {
+    :where(.mat251) .mat251-experimentos-regla .experimentos-select-menu.alineado-derecha {
         right: 0;
         left: auto;
     }
 
-    .mat251-experimentos-campo-operador .experimentos-select-menu {
+    :where(.mat251) .mat251-experimentos-campo-operador .experimentos-select-menu {
         width: 76px;
         min-width: 76px;
         max-width: min(76px, calc(100vw - 24px));
     }
 
-    .mat251-experimentos-regla .experimentos-select-option {
+    :where(.mat251) .mat251-experimentos-regla .experimentos-select-option {
         min-height: 34px;
         padding: 5px 8px;
         font-size: 0.78rem;
         line-height: 1.2;
     }
 
-    .mat251-experimentos-regla .mat251-operador-simbolo {
+    :where(.mat251) .mat251-experimentos-regla .mat251-operador-simbolo {
         font-size: 0.9rem;
     }
 
-    .mat251-experimentos-regla .experimentos-select-trigger svg {
+    :where(.mat251) .mat251-experimentos-regla .experimentos-select-trigger svg {
         width: 14px;
         height: 14px;
     }
 
-    .mat251-experimentos-regla input {
+    :where(.mat251) .mat251-experimentos-regla input {
         min-height: 34px !important;
         padding: 4px 6px !important;
         font-size: 0.7rem !important;
     }
 
-    .mat251-experimentos-regla .mat251-experimentos-quitar {
+    :where(.mat251) .mat251-experimentos-regla .mat251-experimentos-quitar {
         align-self: flex-end;
     }
 
-    .mat251-experimentos-metricas {
+    :where(.mat251) .mat251-experimentos-metricas {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .mat251-experimentos-metricas > div:last-child:nth-child(odd) {
+    :where(.mat251) .mat251-experimentos-metricas > div:last-child:nth-child(odd) {
         grid-column: span 2;
     }
 
-    .mat251-experimentos-metricas > div > span {
+    :where(.mat251) .mat251-experimentos-metricas > div > span {
         font-size: 0.65rem;
     }
 
-    .mat251-experimentos-acciones .button_calcular {
+    :where(.mat251) .mat251-experimentos-acciones .button_calcular {
         padding: 5px 15px;
         font-size: 0.85rem;
     }
 
-    .mat251-experimentos-metricas-sim > div > span {
+    :where(.mat251) .mat251-experimentos-metricas-sim > div > span {
         font-size: 0.55rem;
     }
 
-    .mat251-experimentos-sim-controles {
+    :where(.mat251) .mat251-experimentos-sim-controles {
         flex-direction: column;
         align-items: center;
     }
@@ -2331,17 +2364,17 @@
 /* ==========================================================================
    SIMULACIÓN DEL EVENTO (LEY DE LOS GRANDES NÚMEROS) EN EXPERIMENTOS
    ========================================================================== */
-.mat251-experimentos-simulacion {
+:where(.mat251) .mat251-experimentos-simulacion {
     gap: 10px;
     margin-top: 10px;
     padding-top: 10px;
 }
 
-.mat251-experimentos-simulacion > .mat251-experimentos-resultados-titulo {
+:where(.mat251) .mat251-experimentos-simulacion > .mat251-experimentos-resultados-titulo {
     margin: 0;
 }
 
-.mat251-experimentos-repeticiones-control {
+:where(.mat251) .mat251-experimentos-repeticiones-control {
     display: flex;
     width: min(100%, 320px);
     align-items: center;
@@ -2350,7 +2383,7 @@
     margin: 0 auto;
 }
 
-.mat251-experimentos-repeticiones-label {
+:where(.mat251) .mat251-experimentos-repeticiones-label {
     flex: 0 0 auto;
     margin: 0;
     color: var(--text-pure);
@@ -2360,20 +2393,20 @@
     white-space: nowrap;
 }
 
-.mat251-experimentos-repeticiones-input {
+:where(.mat251) .mat251-experimentos-repeticiones-input {
     min-width: 0;
     flex: 1 1 220px;
 }
 
 @media (max-width: 640px) {
-    .mat251-experimentos-repeticiones-input {
+    :where(.mat251) .mat251-experimentos-repeticiones-input {
         flex: 0 1 110px;
         width: 110px !important;
         max-width: 110px;
     }
 }
 
-.mat251-experimentos-sim-controles {
+:where(.mat251) .mat251-experimentos-sim-controles {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
@@ -2382,13 +2415,13 @@
     margin-bottom: 16px;
 }
 
-.mat251-experimentos-sim-input-group {
+:where(.mat251) .mat251-experimentos-sim-input-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.mat251-experimentos-sim-input-group input {
+:where(.mat251) .mat251-experimentos-sim-input-group input {
     width: 130px;
     height: 34px;
     box-sizing: border-box;
@@ -2400,18 +2433,18 @@
     font-size: 0.85rem;
 }
 
-.mat251-experimentos-chips-rapidos {
+:where(.mat251) .mat251-experimentos-chips-rapidos {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.mat251-experimentos-chips-fila {
+:where(.mat251) .mat251-experimentos-chips-fila {
     display: flex;
     gap: 6px;
 }
 
-.mat251-chip-rapido {
+:where(.mat251) .mat251-chip-rapido {
     height: 34px;
     padding: 0 10px;
     border: 1px solid var(--border-color);
@@ -2427,30 +2460,30 @@
     justify-content: center;
 }
 
-.mat251-chip-rapido:hover {
+:where(.mat251) .mat251-chip-rapido:hover {
     border-color: var(--accent-color);
     color: var(--accent-color);
 }
 
-.mat251-chip-rapido.activo {
+:where(.mat251) .mat251-chip-rapido.activo {
     background: var(--accent-color) !important;
     border-color: var(--accent-color) !important;
     color: #ffffff !important;
 }
 
-.mat251-experimentos-sim-btn-wrapper {
+:where(.mat251) .mat251-experimentos-sim-btn-wrapper {
     display: flex;
     align-items: flex-end;
 }
 
-.mat251-experimentos-metricas-sim > div > span {
+:where(.mat251) .mat251-experimentos-metricas-sim > div > span {
     font-size: 0.7rem;
     text-transform: uppercase;
     font-weight: 700;
     color: var(--text-secondary);
 }
 
-.mat251-experimentos-grafica-box {
+:where(.mat251) .mat251-experimentos-grafica-box {
     margin-top: 16px;
     padding: 12px 14px;
     border: 1px solid var(--border-color);
@@ -2458,7 +2491,7 @@
     background: var(--bg-card);
 }
 
-.mat251-experimentos-grafica-titulo h5 {
+:where(.mat251) .mat251-experimentos-grafica-titulo h5 {
     margin: 0 0 10px 0;
     text-align: center;
     font-size: 0.85rem;
@@ -2466,12 +2499,12 @@
     color: var(--text-pure);
 }
 
-.mat251-experimentos-grafica-contenedor {
+:where(.mat251) .mat251-experimentos-grafica-contenedor {
     width: 100%;
     min-width: 0;
 }
 
-.mat251-experimentos-historial-wrap {
+:where(.mat251) .mat251-experimentos-historial-wrap {
     margin-top: 14px;
     display: flex;
     flex-direction: column;
@@ -2479,7 +2512,7 @@
     gap: 10px;
 }
 
-.mat251-btn-toggle-historial {
+:where(.mat251) .mat251-btn-toggle-historial {
     padding: 6px 16px;
     border: 1px solid var(--border-color);
     border-radius: 5px;
@@ -2491,17 +2524,17 @@
     transition: all 0.18s ease;
 }
 
-.mat251-btn-toggle-historial:hover {
+:where(.mat251) .mat251-btn-toggle-historial:hover {
     border-color: var(--accent-color);
     color: var(--accent-color);
 }
 
-.mat251-experimentos-historial-tabla {
+:where(.mat251) .mat251-experimentos-historial-tabla {
     width: 100%;
     max-height: 240px;
 }
 
-.mat251-tag-exito {
+:where(.mat251) .mat251-tag-exito {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 4px;
@@ -2511,7 +2544,7 @@
     color: #10b981;
 }
 
-.mat251-tag-fallo {
+:where(.mat251) .mat251-tag-fallo {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 4px;
@@ -2521,7 +2554,7 @@
     color: var(--text-muted);
 }
 
-.mat251-btn-sim-control {
+:where(.mat251) .mat251-btn-sim-control {
     height: 34px;
     padding: 0 14px;
     border: none !important;
@@ -2537,24 +2570,24 @@
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.mat251-btn-sim-control:hover {
+:where(.mat251) .mat251-btn-sim-control:hover {
     opacity: 0.9;
     transform: translateY(-1px);
 }
 
-.mat251-btn-sim-control.pausar {
+:where(.mat251) .mat251-btn-sim-control.pausar {
     background: #f59e0b !important;
 }
 
-.mat251-btn-sim-control.reanudar {
+:where(.mat251) .mat251-btn-sim-control.reanudar {
     background: #10b981 !important;
 }
 
-.mat251-btn-sim-control.detener {
+:where(.mat251) .mat251-btn-sim-control.detener {
     background: #ef4444 !important;
 }
 
-.mat251-sim-live-banner {
+:where(.mat251) .mat251-sim-live-banner {
     margin-top: 6px;
     margin-bottom: 14px;
     padding: 12px 14px;
@@ -2567,12 +2600,12 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.mat251-sim-live-banner.activo {
+:where(.mat251) .mat251-sim-live-banner.activo {
     border-color: var(--accent-color);
     box-shadow: 0 0 10px rgba(217, 119, 6, 0.15);
 }
 
-.mat251-sim-live-info {
+:where(.mat251) .mat251-sim-live-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -2582,18 +2615,18 @@
     gap: 6px;
 }
 
-.mat251-sim-live-conteo strong {
+:where(.mat251) .mat251-sim-live-conteo strong {
     color: var(--accent-color);
     font-size: 0.95rem;
 }
 
-.mat251-sim-live-estado {
+:where(.mat251) .mat251-sim-live-estado {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--accent-color);
 }
 
-.mat251-experimentos-escenario {
+:where(.mat251) .mat251-experimentos-escenario {
     display: grid;
     grid-template-columns: minmax(130px, 1fr) minmax(220px, 1.6fr) minmax(130px, 1fr);
     align-items: center;
@@ -2601,7 +2634,7 @@
     margin: 14px 0 18px;
 }
 
-.mat251-experimentos-escenario-lateral {
+:where(.mat251) .mat251-experimentos-escenario-lateral {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2614,20 +2647,20 @@
     text-align: center;
 }
 
-.mat251-experimentos-escenario-lateral span,
-.mat251-experimentos-ensayo-etiqueta {
+:where(.mat251) .mat251-experimentos-escenario-lateral span,
+:where(.mat251) .mat251-experimentos-ensayo-etiqueta {
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--text-secondary);
 }
 
-.mat251-experimentos-escenario-lateral strong {
+:where(.mat251) .mat251-experimentos-escenario-lateral strong {
     font-size: 1.1rem;
     color: var(--text-pure);
 }
 
-.mat251-experimentos-ensayo {
+:where(.mat251) .mat251-experimentos-ensayo {
     display: flex;
     min-height: 150px;
     flex-direction: column;
@@ -2641,14 +2674,14 @@
     box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
 }
 
-.mat251-experimentos-resultados-visual {
+:where(.mat251) .mat251-experimentos-resultados-visual {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
 }
 
-.mat251-experimentos-resultado-visual {
+:where(.mat251) .mat251-experimentos-resultado-visual {
     display: flex;
     min-width: 76px;
     min-height: 72px;
@@ -2663,7 +2696,7 @@
     color: var(--text-pure);
 }
 
-.mat251-experimentos-resultado-visual span {
+:where(.mat251) .mat251-experimentos-resultado-visual span {
     max-width: 140px;
     overflow: hidden;
     color: var(--text-muted);
@@ -2672,24 +2705,24 @@
     white-space: nowrap;
 }
 
-.mat251-experimentos-resultado-visual strong {
+:where(.mat251) .mat251-experimentos-resultado-visual strong {
     font-size: 1.3rem;
     line-height: 1.1;
 }
 
 @media (max-width: 620px) {
-    .mat251-experimentos-escenario {
+    :where(.mat251) .mat251-experimentos-escenario {
         grid-template-columns: 1fr 1fr;
         gap: 9px;
     }
 
-    .mat251-experimentos-ensayo {
+    :where(.mat251) .mat251-experimentos-ensayo {
         grid-column: 1 / -1;
         grid-row: 1;
     }
 }
 
-.mat251-sim-progreso-track {
+:where(.mat251) .mat251-sim-progreso-track {
     width: 100%;
     height: 6px;
     background: var(--border-color);
@@ -2697,14 +2730,14 @@
     overflow: hidden;
 }
 
-.mat251-sim-progreso-fill {
+:where(.mat251) .mat251-sim-progreso-fill {
     height: 100%;
     background: var(--accent-color);
     transition: width 0.15s ease-out;
     border-radius: 3px;
 }
 
-.mat251-sim-ultimo-resultado {
+:where(.mat251) .mat251-sim-ultimo-resultado {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2718,18 +2751,18 @@
     color: var(--text-pure);
 }
 
-.mat251-sim-ultimo-label {
+:where(.mat251) .mat251-sim-ultimo-label {
     color: var(--text-muted);
     font-size: 0.75rem;
 }
 
-.mat251-sim-ultimo-tupla {
+:where(.mat251) .mat251-sim-ultimo-tupla {
     font-size: 0.85rem;
     color: var(--text-pure);
     letter-spacing: 0.2px;
 }
 
-.mat251-experimentos-panel-simulacion {
+:where(.mat251) .mat251-experimentos-panel-simulacion {
     position: relative;
     display: block;
     overflow: hidden;
@@ -2739,7 +2772,7 @@
     background: var(--bg-card);
 }
 
-.mat251-experimentos-panel-simulacion .mat251-sim-progreso-track {
+:where(.mat251) .mat251-experimentos-panel-simulacion .mat251-sim-progreso-track {
     position: absolute;
     top: 0;
     right: 0;
@@ -2748,11 +2781,11 @@
     border-radius: 0;
 }
 
-.mat251-experimentos-panel-simulacion .mat251-sim-progreso-fill {
+:where(.mat251) .mat251-experimentos-panel-simulacion .mat251-sim-progreso-fill {
     background: var(--primary-color);
 }
 
-.mat251-experimentos-panel-superior {
+:where(.mat251) .mat251-experimentos-panel-superior {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2760,13 +2793,13 @@
     margin: 0 0 20px;
 }
 
-.mat251-experimentos-panel-superior .texto-lanzamiento-simulacion {
+:where(.mat251) .mat251-experimentos-panel-superior .texto-lanzamiento-simulacion {
     color: var(--text-pure);
     font-size: 1rem;
     font-weight: 700;
 }
 
-.mat251-experimentos-panel-controles {
+:where(.mat251) .mat251-experimentos-panel-controles {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -2774,7 +2807,7 @@
     gap: 10px;
 }
 
-.mat251-experimentos-velocidades {
+:where(.mat251) .mat251-experimentos-velocidades {
     display: flex;
     gap: 4px;
     padding: 3px;
@@ -2783,7 +2816,7 @@
     background: var(--bg-input);
 }
 
-.mat251-experimentos-velocidades .mat251-chip-rapido {
+:where(.mat251) .mat251-experimentos-velocidades .mat251-chip-rapido {
     height: 28px;
     min-width: 40px;
     padding: 0 9px;
@@ -2793,16 +2826,16 @@
     font-weight: 800;
 }
 
-.mat251-experimentos-velocidades .mat251-chip-rapido.activo {
+:where(.mat251) .mat251-experimentos-velocidades .mat251-chip-rapido.activo {
     border-color: var(--primary-color) !important;
     background: var(--primary-color) !important;
 }
 
-.mat251-experimentos-layout-simulacion {
+:where(.mat251) .mat251-experimentos-layout-simulacion {
     align-items: center;
 }
 
-.mat251-experimentos-layout-simulacion .tarjeta-probabilidad {
+:where(.mat251) .mat251-experimentos-layout-simulacion .tarjeta-probabilidad {
     width: 100%;
     padding: 15px 10px;
     border: 1px solid var(--border-color);
@@ -2811,30 +2844,30 @@
     text-align: center;
 }
 
-.mat251-experimentos-layout-simulacion .tarjeta-prob-titulo {
+:where(.mat251) .mat251-experimentos-layout-simulacion .tarjeta-prob-titulo {
     margin: 0;
     color: var(--text-pure);
     font-size: 0.7rem;
     font-weight: 700;
 }
 
-.mat251-experimentos-layout-simulacion .tarjeta-prob-valor {
+:where(.mat251) .mat251-experimentos-layout-simulacion .tarjeta-prob-valor {
     margin-top: 5px;
     color: var(--text-pure);
     font-size: 1.1rem;
 }
 
-.mat251-experimentos-ensayo-centro {
+:where(.mat251) .mat251-experimentos-ensayo-centro {
     min-height: 100px;
     justify-content: center;
 }
 
-.mat251-experimentos-ensayo-centro .mat251-experimentos-resultados-visual {
+:where(.mat251) .mat251-experimentos-ensayo-centro .mat251-experimentos-resultados-visual {
     max-width: 100%;
     align-items: center;
 }
 
-.mat251-experimentos-resultado-dinamico {
+:where(.mat251) .mat251-experimentos-resultado-dinamico {
     display: flex;
     min-width: 70px;
     max-width: 180px;
@@ -2846,7 +2879,7 @@
     text-align: center;
 }
 
-.mat251-experimentos-resultado-dinamico span {
+:where(.mat251) .mat251-experimentos-resultado-dinamico span {
     max-width: 100%;
     overflow: hidden;
     color: var(--text-muted);
@@ -2855,7 +2888,7 @@
     white-space: nowrap;
 }
 
-.mat251-experimentos-resultado-dinamico strong {
+:where(.mat251) .mat251-experimentos-resultado-dinamico strong {
     max-width: 100%;
     overflow: hidden;
     color: var(--text-pure);
@@ -2865,7 +2898,7 @@
     text-overflow: ellipsis;
 }
 
-.mat251-experimentos-exitos {
+:where(.mat251) .mat251-experimentos-exitos {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2874,13 +2907,13 @@
     text-align: center;
 }
 
-.mat251-experimentos-exitos .texto-resultado-simulacion {
+:where(.mat251) .mat251-experimentos-exitos .texto-resultado-simulacion {
     color: var(--text-pure);
     font-size: 1rem;
     font-weight: 800;
 }
 
-.mat251-experimentos-resultado-linea {
+:where(.mat251) .mat251-experimentos-resultado-linea {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -2891,7 +2924,7 @@
     text-align: center;
 }
 
-.mat251-experimentos-ultima-simulacion {
+:where(.mat251) .mat251-experimentos-ultima-simulacion {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2901,7 +2934,7 @@
     min-width: 0;
 }
 
-.mat251-experimentos-resumen-resultado {
+:where(.mat251) .mat251-experimentos-resumen-resultado {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -2909,13 +2942,13 @@
     gap: 8px 12px;
 }
 
-.mat251-experimentos-resumen-etiqueta {
+:where(.mat251) .mat251-experimentos-resumen-etiqueta {
     color: var(--text-muted);
     font-size: 0.88em;
     font-weight: 700;
 }
 
-.mat251-experimentos-resumen-valores {
+:where(.mat251) .mat251-experimentos-resumen-valores {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -2923,7 +2956,7 @@
     gap: 6px;
 }
 
-.mat251-experimentos-resumen-item {
+:where(.mat251) .mat251-experimentos-resumen-item {
     display: inline-flex;
     align-items: baseline;
     gap: 5px;
@@ -2937,23 +2970,23 @@
     white-space: nowrap;
 }
 
-.mat251-experimentos-resumen-nombre {
+:where(.mat251) .mat251-experimentos-resumen-nombre {
     color: var(--text-muted);
     font-weight: 500;
 }
 
-.mat251-experimentos-resumen-item strong {
+:where(.mat251) .mat251-experimentos-resumen-item strong {
     color: var(--text-pure);
     font-weight: 800;
 }
 
-.mat251-experimentos-resultado-ensayo {
+:where(.mat251) .mat251-experimentos-resultado-ensayo {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     transition: background-color 160ms ease, border-color 160ms ease;
 }
 
-.mat251-experimentos-valores-lanzamiento {
+:where(.mat251) .mat251-experimentos-valores-lanzamiento {
     display: flex;
     width: 100%;
     min-width: 0;
@@ -2964,25 +2997,25 @@
     gap: 12px;
 }
 
-.mat251-experimentos-resultado-ensayo-nombre {
+:where(.mat251) .mat251-experimentos-resultado-ensayo-nombre {
     color: var(--text-muted);
 }
 
-.mat251-experimentos-resultado-ensayo-valor {
+:where(.mat251) .mat251-experimentos-resultado-ensayo-valor {
     color: var(--text-pure);
 }
 
-.mat251-experimentos-resultado-ensayo.es-favorable {
+:where(.mat251) .mat251-experimentos-resultado-ensayo.es-favorable {
     background: color-mix(in srgb, var(--success-color, #07865b) 12%, transparent);
     border-color: color-mix(in srgb, var(--success-color, #07865b) 45%, var(--border-color));
 }
 
-.mat251-experimentos-resultado-ensayo.es-favorable .mat251-experimentos-resultado-ensayo-nombre,
-.mat251-experimentos-resultado-ensayo.es-favorable .mat251-experimentos-resultado-ensayo-valor {
+:where(.mat251) .mat251-experimentos-resultado-ensayo.es-favorable .mat251-experimentos-resultado-ensayo-nombre,
+:where(.mat251) .mat251-experimentos-resultado-ensayo.es-favorable .mat251-experimentos-resultado-ensayo-valor {
     color: var(--success-color, #07865b);
 }
 
-.mat251-experimentos-resumen-estado {
+:where(.mat251) .mat251-experimentos-resumen-estado {
     padding: 4px 9px;
     border-radius: 5px;
     font-size: 0.8em;
@@ -2991,76 +3024,76 @@
     white-space: nowrap;
 }
 
-.mat251-experimentos-resumen-estado.es-favorable {
+:where(.mat251) .mat251-experimentos-resumen-estado.es-favorable {
     color: var(--success-color, #07865b);
     background: color-mix(in srgb, var(--success-color, #07865b) 12%, transparent);
 }
 
-.mat251-experimentos-resumen-estado.no-favorable {
+:where(.mat251) .mat251-experimentos-resumen-estado.no-favorable {
     color: var(--text-muted);
     background: var(--bg-input);
 }
 
-.mat251-experimentos-exitos .titulo-exitos-simulacion {
+:where(.mat251) .mat251-experimentos-exitos .titulo-exitos-simulacion {
     margin: 0;
     color: var(--text-pure);
     font-size: 0.8rem;
     font-weight: 700;
 }
 
-.mat251-experimentos-exitos .valor-exitos-simulacion {
+:where(.mat251) .mat251-experimentos-exitos .valor-exitos-simulacion {
     margin-top: 5px;
     color: var(--text-pure);
     font-size: 1.3rem;
     font-weight: 400;
 }
 
-.mat251-experimentos-metricas-clasicas .titulo-metrica-empirica,
-.mat251-experimentos-metricas-clasicas .valor-metrica-empirica {
+:where(.mat251) .mat251-experimentos-metricas-clasicas .titulo-metrica-empirica,
+:where(.mat251) .mat251-experimentos-metricas-clasicas .valor-metrica-empirica {
     color: var(--text-pure);
 }
 
-.mat251-experimentos-tabla-simulacion {
+:where(.mat251) .mat251-experimentos-tabla-simulacion {
     margin-top: 15px;
 }
 
-.mat251-experimentos-tabla-simulacion .mat251-experimentos-tabla-wrap {
+:where(.mat251) .mat251-experimentos-tabla-simulacion .mat251-experimentos-tabla-wrap {
     max-height: 400px;
     border-radius: 5px;
 }
 
-.mat251-experimentos-tabla-completa tbody tr {
+:where(.mat251) .mat251-experimentos-tabla-completa tbody tr {
     background: var(--bg-card) !important;
     color: var(--text-pure) !important;
 }
 
-.mat251-experimentos-tabla-completa tbody tr:nth-child(odd) {
+:where(.mat251) .mat251-experimentos-tabla-completa tbody tr:nth-child(odd) {
     background: var(--bg-input) !important;
 }
 
-.mat251-experimentos-tabla-completa tbody tr > td {
+:where(.mat251) .mat251-experimentos-tabla-completa tbody tr > td {
     background: transparent !important;
     color: var(--text-pure) !important;
 }
 
-html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable {
+html.dark :where(.mat251) .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable {
     color: #6ee7b7;
 }
 
-html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable .katex {
+html.dark :where(.mat251) .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda-favorable .katex {
     color: #6ee7b7;
 }
 
-.mat251-experimentos-tabla-completa tbody tr > td.mat251-tabla-exito {
+:where(.mat251) .mat251-experimentos-tabla-completa tbody tr > td.mat251-tabla-exito {
     color: #10b981 !important;
     font-weight: 700;
 }
 
-.mat251-experimentos-tabla-completa tbody tr > td.mat251-tabla-no-exito {
+:where(.mat251) .mat251-experimentos-tabla-completa tbody tr > td.mat251-tabla-no-exito {
     color: var(--text-muted) !important;
 }
 
-.mat251-experimentos-botones-tabla {
+:where(.mat251) .mat251-experimentos-botones-tabla {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -3068,7 +3101,7 @@ html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda
     margin-top: 15px;
 }
 
-.mat251-experimentos-botones-tabla button {
+:where(.mat251) .mat251-experimentos-botones-tabla button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3080,7 +3113,7 @@ html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda
 }
 
 @media (max-width: 768px) {
-    .mat251-experimentos-simulacion .contenedor-simulacion-clasica {
+    :where(.mat251) .mat251-experimentos-simulacion .contenedor-simulacion-clasica {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         column-gap: 8px;
@@ -3088,23 +3121,23 @@ html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda
         align-items: center;
     }
 
-    .mat251-experimentos-simulacion .col-simulacion-lateral {
+    :where(.mat251) .mat251-experimentos-simulacion .col-simulacion-lateral {
         width: 100%;
         min-width: 0;
         align-items: stretch !important;
     }
 
-    .mat251-experimentos-simulacion .col-simulacion-lateral:not(.right-side) {
+    :where(.mat251) .mat251-experimentos-simulacion .col-simulacion-lateral:not(.right-side) {
         grid-column: 1;
         grid-row: 1;
     }
 
-    .mat251-experimentos-simulacion .col-simulacion-lateral.right-side {
+    :where(.mat251) .mat251-experimentos-simulacion .col-simulacion-lateral.right-side {
         grid-column: 2;
         grid-row: 1;
     }
 
-    .mat251-experimentos-simulacion .col-simulacion-centro {
+    :where(.mat251) .mat251-experimentos-simulacion .col-simulacion-centro {
         grid-column: 1 / -1;
         grid-row: 2;
         width: 100%;
@@ -3113,24 +3146,24 @@ html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda
         align-items: center;
     }
 
-    .contenedor-simulacion-clasica .col-simulacion-centro {
+    :where(.mat251) .contenedor-simulacion-clasica .col-simulacion-centro {
         min-width: 0;
     }
 
-    .mat251-experimentos-ultima-simulacion,
-    .mat251-experimentos-resumen-resultado {
+    :where(.mat251) .mat251-experimentos-ultima-simulacion,
+:where(.mat251) .mat251-experimentos-resumen-resultado {
         width: 100%;
         max-width: 100%;
         min-width: 0;
     }
 
-    .mat251-experimentos-resumen-resultado {
+    :where(.mat251) .mat251-experimentos-resumen-resultado {
         flex-direction: column;
         flex-wrap: nowrap;
         gap: 8px;
     }
 
-    .mat251-experimentos-resumen-valores {
+    :where(.mat251) .mat251-experimentos-resumen-valores {
         width: 100%;
         max-width: 100%;
         min-width: 0;
@@ -3146,24 +3179,24 @@ html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda
         overscroll-behavior-x: contain;
     }
 
-    .mat251-experimentos-resumen-valores::-webkit-scrollbar {
+    :where(.mat251) .mat251-experimentos-resumen-valores::-webkit-scrollbar {
         height: 4px;
     }
 
-    .mat251-experimentos-resumen-valores::-webkit-scrollbar-track {
+    :where(.mat251) .mat251-experimentos-resumen-valores::-webkit-scrollbar-track {
         background: transparent;
     }
 
-    .mat251-experimentos-resumen-valores::-webkit-scrollbar-thumb {
+    :where(.mat251) .mat251-experimentos-resumen-valores::-webkit-scrollbar-thumb {
         background: var(--border-color);
         border-radius: 999px;
     }
 
-    .mat251-experimentos-resumen-item {
+    :where(.mat251) .mat251-experimentos-resumen-item {
         flex: 0 0 auto;
     }
 
-    .mat251-experimentos-valores-lanzamiento {
+    :where(.mat251) .mat251-experimentos-valores-lanzamiento {
         flex-wrap: nowrap;
         justify-content: safe center;
         overflow-x: auto;
@@ -3177,73 +3210,73 @@ html.dark .mat251-experimentos-matriz-celdas > .mat251-experimentos-matriz-celda
         overscroll-behavior-x: contain;
     }
 
-    .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar {
+    :where(.mat251) .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar {
         height: 4px;
     }
 
-    .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar-track {
+    :where(.mat251) .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar-track {
         background: transparent;
     }
 
-    .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar-thumb {
+    :where(.mat251) .mat251-experimentos-valores-lanzamiento::-webkit-scrollbar-thumb {
         background: var(--border-color);
         border-radius: 999px;
     }
 
-    .mat251-experimentos-valores-lanzamiento > .mat251-experimentos-resultado-ensayo {
+    :where(.mat251) .mat251-experimentos-valores-lanzamiento > .mat251-experimentos-resultado-ensayo {
         flex: 0 0 auto;
     }
 
-    .mat251-experimentos-resultado-ensayo-nombre {
+    :where(.mat251) .mat251-experimentos-resultado-ensayo-nombre {
         white-space: nowrap;
     }
 
-    .mat251-experimentos-panel-simulacion {
+    :where(.mat251) .mat251-experimentos-panel-simulacion {
         padding: 16px 10px;
     }
 
-    .mat251-experimentos-panel-controles {
+    :where(.mat251) .mat251-experimentos-panel-controles {
         gap: 7px;
     }
 
-    .mat251-experimentos-layout-simulacion {
+    :where(.mat251) .mat251-experimentos-layout-simulacion {
         flex-wrap: wrap;
         align-items: flex-start;
     }
 
-    .mat251-experimentos-layout-simulacion .col-simulacion-centro {
+    :where(.mat251) .mat251-experimentos-layout-simulacion .col-simulacion-centro {
         order: -1;
         flex-basis: 100%;
     }
 
-    .mat251-experimentos-layout-simulacion .col-simulacion-lateral {
+    :where(.mat251) .mat251-experimentos-layout-simulacion .col-simulacion-lateral {
         width: calc(50% - 5px);
     }
 
-    .mat251-experimentos-tabla-completa th,
-    .mat251-experimentos-tabla-completa td {
+    :where(.mat251) .mat251-experimentos-tabla-completa th,
+:where(.mat251) .mat251-experimentos-tabla-completa td {
         min-width: 110px;
         padding: 8px 6px;
     }
 }
 
 @media (max-width: 640px) {
-    .mat251-experimentos-valores-lanzamiento {
+    :where(.mat251) .mat251-experimentos-valores-lanzamiento {
         min-height: 70px;
         gap: 8px;
     }
 
-    .mat251-experimentos-valores-lanzamiento > .mat251-experimentos-resultado-ensayo {
+    :where(.mat251) .mat251-experimentos-valores-lanzamiento > .mat251-experimentos-resultado-ensayo {
         min-width: 58px !important;
         padding: 6px !important;
     }
 
-    .mat251-experimentos-resultado-ensayo-nombre {
+    :where(.mat251) .mat251-experimentos-resultado-ensayo-nombre {
         margin-bottom: 3px !important;
         font-size: 0.62rem !important;
     }
 
-    .mat251-experimentos-resultado-ensayo-valor {
+    :where(.mat251) .mat251-experimentos-resultado-ensayo-valor {
         font-size: 1.1rem !important;
     }
 }

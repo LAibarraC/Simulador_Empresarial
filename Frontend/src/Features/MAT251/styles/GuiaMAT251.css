@@ -1,0 +1,381 @@
+/**
+ * ==============================================================================
+ * ESTILOS EXCLUSIVOS: GUÍA INTERACTIVA MAT251 (DRIVER.JS)
+ * ==============================================================================
+ * Reglas de diseño MAT251:
+ * - Radio universal: 5px (border-radius: 5px)
+ * - Color de texto: var(--text-pure)
+ * - Aislamiento estricto: .mat251-driver-popover
+ * ==============================================================================
+ */
+
+/* ─── Contenedor Principal del Popover ─── */
+.driver-popover.mat251-driver-popover,
+#driver-popover-content.mat251-driver-popover {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    font-family: var(--font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+    background-color: var(--bg-card, #ffffff) !important;
+    color: var(--text-pure, #0f172a) !important;
+    z-index: 1000000000 !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    border-radius: 5px !important;
+    padding: 18px 20px 15px !important;
+    min-width: 300px !important;
+    max-width: 440px !important;
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ─── Título del Paso ─── */
+.driver-popover.mat251-driver-popover .driver-popover-title,
+#driver-popover-content.mat251-driver-popover .driver-popover-title {
+    text-align: center !important;
+    margin: 0 0 10px 0 !important;
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    letter-spacing: -0.01em !important;
+    color: var(--text-pure, #0f172a) !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-title .katex,
+#driver-popover-content.mat251-driver-popover .driver-popover-title .katex {
+    text-transform: none !important;
+    font-weight: 600 !important;
+}
+
+.driver-popover.mat251-driver-popover .katex,
+#driver-popover-content.mat251-driver-popover .katex {
+    text-transform: none !important;
+    font-size: 1.05em;
+    color: inherit;
+}
+
+.driver-popover.mat251-driver-popover .katex-display,
+#driver-popover-content.mat251-driver-popover .katex-display {
+    margin: 6px 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+/* ─── Botón Cerrar (X) Sin Bordes Azules ─── */
+.driver-popover.mat251-driver-popover .driver-popover-close-btn,
+#driver-popover-content.mat251-driver-popover .driver-popover-close-btn {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: var(--text-muted, #94a3b8) !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    position: absolute !important;
+    top: 3px !important;
+    right: 3px !important;
+    transition: all 0.2s ease !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-close-btn:hover,
+#driver-popover-content.mat251-driver-popover .driver-popover-close-btn:hover {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+    color: #ef4444 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* ─── Descripción del Paso ─── */
+.driver-popover.mat251-driver-popover .driver-popover-description,
+#driver-popover-content.mat251-driver-popover .driver-popover-description {
+    margin: 0 0 14px 0 !important;
+    font-size: 0.8rem !important;
+    line-height: 1.55 !important;
+    color: var(--text-pure, #1e293b) !important;
+    white-space: pre-line !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-description b,
+.driver-popover.mat251-driver-popover .driver-popover-description strong,
+#driver-popover-content.mat251-driver-popover .driver-popover-description b,
+#driver-popover-content.mat251-driver-popover .driver-popover-description strong {
+    font-weight: 700 !important;
+    display: inline-block !important;
+    margin-right: 2px !important;
+}
+
+/* ─── Footer: Progreso y Botones ─── */
+.driver-popover.mat251-driver-popover .driver-popover-footer,
+#driver-popover-content.mat251-driver-popover .driver-popover-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-top: 6px !important;
+    margin-top: 0 !important;
+    border-top: none !important;
+}
+
+/* ─── Contador de Pasos (Limpio y Sutil, sin recuadro) ─── */
+.driver-popover.mat251-driver-popover .driver-popover-progress-text,
+#driver-popover-content.mat251-driver-popover .driver-popover-progress-text {
+    font-size: 0.65rem !important;
+    font-weight: 500 !important;
+    color: var(--text-pure, #0f172a) !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    display: inline-block !important;
+}
+
+/* ─── Botones de Navegación ─── */
+.driver-popover.mat251-driver-popover .driver-popover-navigation-btns,
+#driver-popover-content.mat251-driver-popover .driver-popover-navigation-btns {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-footer-btn,
+#driver-popover-content.mat251-driver-popover .driver-popover-footer-btn {
+    cursor: pointer !important;
+    font-family: inherit !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    border-radius: 5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    line-height: 1.2 !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-footer-btn svg,
+#driver-popover-content.mat251-driver-popover .driver-popover-footer-btn svg {
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+}
+
+/* Botón Anterior (Ghost / Outlined) */
+.driver-popover.mat251-driver-popover .driver-popover-prev-btn,
+#driver-popover-content.mat251-driver-popover .driver-popover-prev-btn {
+    background: transparent !important;
+    color: var(--text-pure, #334155) !important;
+    border: 1px solid var(--border-color, #cbd5e1) !important;
+    border-radius: 5px !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-prev-btn:hover,
+#driver-popover-content.mat251-driver-popover .driver-popover-prev-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border-color: var(--text-muted, #94a3b8) !important;
+}
+
+/* Botón Siguiente / Entendido */
+.driver-popover.mat251-driver-popover .driver-popover-next-btn,
+#driver-popover-content.mat251-driver-popover .driver-popover-next-btn {
+    background-color: var(--primary-color, #0284c7) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--primary-color, #0284c7) !important;
+    border-radius: 5px !important;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-next-btn:hover,
+#driver-popover-content.mat251-driver-popover .driver-popover-next-btn:hover {
+    filter: brightness(1.1) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4) !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-next-btn:active,
+#driver-popover-content.mat251-driver-popover .driver-popover-next-btn:active {
+    transform: translateY(0) !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-btn-disabled,
+#driver-popover-content.mat251-driver-popover .driver-popover-btn-disabled {
+    opacity: 0.35 !important;
+    pointer-events: none !important;
+}
+
+/* ─── Flechas del Popover ─── */
+.driver-popover.mat251-driver-popover .driver-popover-arrow,
+#driver-popover-content.mat251-driver-popover .driver-popover-arrow {
+    content: "" !important;
+    border: 6px solid var(--bg-card, #ffffff) !important;
+    position: absolute !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-arrow-side-left,
+#driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-left {
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    border-right-color: transparent !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-arrow-side-right,
+#driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-right {
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-arrow-side-top,
+#driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-top {
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+}
+
+.driver-popover.mat251-driver-popover .driver-popover-arrow-side-bottom,
+#driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-bottom {
+    border-top-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+}
+
+/* ─── Línea del cuadro/caja del tour (la caja que cambia de posición en cada paso) ─── */
+body:has(.mat251-driver-popover) .driver-overlay path {
+    stroke: rgba(0, 0, 0, 0.45) !important;
+    stroke-width: 1px !important;
+}
+
+[data-theme='dark'] body:has(.mat251-driver-popover) .driver-overlay path,
+.dark body:has(.mat251-driver-popover) .driver-overlay path,
+[data-bs-theme='dark'] body:has(.mat251-driver-popover) .driver-overlay path {
+    stroke: rgba(255, 255, 255, 0.65) !important;
+    stroke-width: 1px !important;
+}
+
+/* Dejar intactos los elementos que se muestran dentro (sin crear cajas ni modificar sus colores) */
+body:has(.mat251-driver-popover) .driver-active-element {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   MODO OSCURO (BLINDADO PARA MAT251)
+   ══════════════════════════════════════════════════════════════════════════════ */
+[data-theme='dark'] .driver-popover.mat251-driver-popover,
+.dark .driver-popover.mat251-driver-popover,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover,
+.dark #driver-popover-content.mat251-driver-popover,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover {
+    background-color: var(--bg-card, #1e293b) !important;
+    color: var(--text-pure, #f8fafc) !important;
+    border-color: var(--border-color, #334155) !important;
+    box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-title,
+.dark .driver-popover.mat251-driver-popover .driver-popover-title,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-title,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-title,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-title,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-title {
+    color: var(--text-pure, #f8fafc) !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-description,
+.dark .driver-popover.mat251-driver-popover .driver-popover-description,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-description,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-description,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-description,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-description {
+    color: var(--text-pure, #f1f5f9) !important;
+}
+
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-progress-text,
+.dark .driver-popover.mat251-driver-popover .driver-popover-progress-text,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-progress-text,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-progress-text,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-progress-text,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-progress-text {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-pure, #f8fafc) !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-prev-btn,
+.dark .driver-popover.mat251-driver-popover .driver-popover-prev-btn,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-prev-btn,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-prev-btn,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-prev-btn,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-prev-btn {
+    border-color: #475569 !important;
+    color: var(--text-pure, #f1f5f9) !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-next-btn,
+.dark .driver-popover.mat251-driver-popover .driver-popover-next-btn,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-next-btn,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-next-btn,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-next-btn,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-next-btn {
+    background-color: var(--primary-color, #0284c7) !important;
+    color: #ffffff !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-left,
+.dark .driver-popover.mat251-driver-popover .driver-popover-arrow-side-left,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-left,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-left,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-left,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-left {
+    border-left-color: var(--bg-card, #1e293b) !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    border-right-color: transparent !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-right,
+.dark .driver-popover.mat251-driver-popover .driver-popover-arrow-side-right,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-right,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-right,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-right,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-right {
+    border-right-color: var(--bg-card, #1e293b) !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-top,
+.dark .driver-popover.mat251-driver-popover .driver-popover-arrow-side-top,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-top,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-top,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-top,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-top {
+    border-top-color: var(--bg-card, #1e293b) !important;
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+}
+
+[data-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-bottom,
+.dark .driver-popover.mat251-driver-popover .driver-popover-arrow-side-bottom,
+[data-bs-theme='dark'] .driver-popover.mat251-driver-popover .driver-popover-arrow-side-bottom,
+[data-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-bottom,
+.dark #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-bottom,
+[data-bs-theme='dark'] #driver-popover-content.mat251-driver-popover .driver-popover-arrow-side-bottom {
+    border-bottom-color: var(--bg-card, #1e293b) !important;
+    border-top-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+}

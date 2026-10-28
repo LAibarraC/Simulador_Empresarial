@@ -240,7 +240,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
             {/* ENCABEZADO Y CONTROLES DE ANIMACIÓN */}
             <div style={{width: '100%', marginTop: '0px' }}>
                 {/* CONTROLES DE SIMULACIÓN */}
-                <div style={{ marginTop: '0px', marginBottom: '0px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
+                <div id="tour-t6-hnp-sim-progreso" style={{ marginTop: '0px', marginBottom: '0px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${(iteracionActual / resultados.historial.length) * 100}%`, transition: 'width 0.1s linear' }} />
                     
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
@@ -322,7 +322,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
             )}
 
             {/* TABLERO DE RESUMEN ANIMADO */}
-            <div className="hnp-simulacion-resumen-scroll" style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
+            <div id="tour-t6-hnp-sim-resumen" className="hnp-simulacion-resumen-scroll" style={{ marginBottom: '10px', border: '1px solid var(--text-pure)', borderRadius: '0px', fontFamily: FONT, fontSize: '0.8rem', color: 'var(--text-pure)', overflowX: 'auto', background: 'var(--bg-card)' }}>
                 <style>{`
                     .minitab-table-sim { width: 100%; text-align: center; border-collapse: collapse; table-layout: auto; }
                     .minitab-table-sim th, .minitab-table-sim td { padding: 8px 4px; border: 1px solid var(--text-pure); word-wrap: break-word; hyphens: auto; }
@@ -446,13 +446,17 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
 
             {resultados.tipo === 'rachas' && (
                 <div style={{ marginTop: '0px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <Grafico_HNP_SimulacionRachasZ resultados={liveResultados} />
-                    <Grafico_HNP_SimulacionRachas resultados={liveResultados} />
+                    <div id="tour-t6-hnp-sim-grafico-rachas-z">
+                        <Grafico_HNP_SimulacionRachasZ resultados={liveResultados} />
+                    </div>
+                    <div id="tour-t6-hnp-sim-grafico-rachas-r">
+                        <Grafico_HNP_SimulacionRachas resultados={liveResultados} />
+                    </div>
                 </div>
             )}
 
             {/* TABLA DE RESULTADOS VIVA */}
-                <div className="hnp-simulacion-historial" style={{ marginTop: '5px' }}>
+                <div id="tour-t6-hnp-sim-tabla" className="hnp-simulacion-historial" style={{ marginTop: '5px' }}>
                 <h5 style={{ margin: '0 0 15px 0', color: 'var(--text-pure)' }}>Historial de Simulaciones</h5>
                     <div className="hnp-simulacion-historial-scroll" style={{ overflowX: 'auto', borderRadius: '0px', border: '1px solid var(--border-color)' }}>
                     <table className="hnp-simulacion-historial-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -577,7 +581,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                 </div>
 
                 {/* Controles de Paginación */}
-                <div className="hnp-simulacion-paginacion" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
+                <div id="tour-t6-hnp-sim-paginacion" className="hnp-simulacion-paginacion" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
                     <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                         <button 
                             disabled={pagina <= 1}
@@ -612,7 +616,7 @@ export default function Resultados_HNP_Simulacion({ resultados }) {
                         </button>
                     </div>
                 </div>
-                <div className="hnp-simulacion-acciones" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                <div id="tour-t6-hnp-sim-acciones" className="hnp-simulacion-acciones" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
                     <button
                         type="button"
                         className="btn-primary"

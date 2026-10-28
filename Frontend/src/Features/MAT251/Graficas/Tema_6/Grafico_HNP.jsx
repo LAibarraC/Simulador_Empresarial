@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { jStat } from 'jstat';
@@ -7,7 +7,7 @@ import { FONT } from '../../Principal/Constantes';
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 
 const CustomKatexLabel = (props) => {
-    const { viewBox, value, offsetY = 0, offsetX = 0, position } = props;
+    const { viewBox, value, offsetY = 0, offsetX = 0, position, anchoGrafica = 640 } = props;
     if (!viewBox) return null;
     const { x, y } = viewBox;
     
@@ -16,12 +16,15 @@ const CustomKatexLabel = (props) => {
     if (position === 'insideTopRight') finalOffsetX = 25;
 
     return (
-        <foreignObject x={x - 70 + finalOffsetX} y={y - 30 + offsetY} width={140} height={30} style={{ overflow: 'visible' }}>
+        <g>
+            {offsetY < 0 && <line x1={x} y1={y + offsetY} x2={x} y2={y} stroke="#f97316" strokeWidth={2} strokeDasharray="4 4" />}
+        <foreignObject x={Math.max(0, Math.min(anchoGrafica - 140, x - 70 + finalOffsetX))} y={y - 30 + offsetY} width={140} height={30} style={{ overflow: 'visible' }}>
             <div 
                 dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} 
                 style={{ color: 'var(--text-main, #1e293b)', fontSize: '12px', fontWeight: 'normal', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: '100%' }} 
             />
         </foreignObject>
+        </g>
     ); 
 };
 
@@ -87,6 +90,7 @@ const CustomCalloutLabel = (props) => {
 };
 
 export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", isMaximized }) {
+    const [anchoGrafica, setAnchoGrafica] = useState(640);
     if (!resultados || !resultados.calculos) return null;
     const c = resultados.calculos;
 
@@ -175,6 +179,14 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
         return data;
     })();
 
+    // Separar en dos alturas cuando los valores críticos están próximos en pantalla.
+    const minGrafica = chartData[0]?.x ?? 0;
+    const rangoGrafica = (chartData[chartData.length - 1]?.x ?? 1) - minGrafica || 1;
+    const centroEtiqueta = valor => Math.max(70, Math.min(anchoGrafica - 70,
+        35 + (valor - minGrafica) / rangoGrafica * Math.max(0, anchoGrafica - 100)));
+    const etiquetasJuntas = criticalValues.length === 2
+        && Math.abs(centroEtiqueta(criticalValues[1]) - centroEtiqueta(criticalValues[0])) < 150;
+
     const customTicks = (() => {
         const minX = chartData.length > 0 ? chartData[0].x : -4;
         const maxX = chartData.length > 0 ? chartData[chartData.length - 1].x : 4;
@@ -207,8 +219,8 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 35, left: 0, right: 0, bottom: 0 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData} margin={{ top: 30, right: 0, left: 0, bottom: 20 }} style={{ overflow: 'visible' }}>
+                        <ResponsiveContainer width="100%" height="100%" onResize={width => setAnchoGrafica(width)}>
+                            <AreaChart data={chartData} margin={{ top: etiquetasJuntas ? 64 : 30, right: 0, left: 0, bottom: 20 }} style={{ overflow: 'visible' }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} stroke="#e2e8f0" />
                         <XAxis 
                             dataKey="x" 
@@ -251,7 +263,7 @@ export default function Grafico_HNP({ resultados, prueba, id = "grafico-hnp", is
                                     stroke="#f97316" 
                                     strokeDasharray="4 4" 
                                     strokeWidth={2}
-                                    label={<CustomKatexLabel position="top" offsetY={0} value={`${mathStr} = ${val.toFixed(3)}`} />} 
+                                    label={<CustomKatexLabel position="top" anchoGrafica={anchoGrafica} offsetY={etiquetasJuntas && idx === 0 ? -34 : 0} value={`${mathStr} = ${val.toFixed(3)}`} />} 
                                 />
                             );
                         })}

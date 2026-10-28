@@ -223,7 +223,7 @@ export function calcularProbabilidadDiferenciaProporciones(parametrosPrevios, co
     let probFinal = 0;
     let statValue = 0; 
     let strDesarrollo = '';
-    const formulaLaTeX = `F = \\left( \\frac{S_1^2}{S_2^2} \\right) \\cdot \\left( \\frac{\\sigma_2^2}{\\sigma_1^2} \\right) \\sim F(${v1}, ${v2})`;
+    const formulaLaTeX = 'Z = \\frac{(\\hat{p}_1-\\hat{p}_2)-(p_1-p_2)}{\\sqrt{\\frac{p_1q_1}{n_1}+\\frac{p_2q_2}{n_2}}}';
 
     if (condicion === 'menor_que') {
         statValue = (x1 - esperanza) / se;
@@ -459,24 +459,27 @@ export function calcularProbabilidadDiferenciaMedias(datosParciales, condicion, 
 
     if (condicion === 'menor_que') {
         probFinal = cdfNormal(z1);
-        strDesarrollo = `\\begin{aligned} P(\\bar{X} - \\bar{Y} \\le ${formatNumber(x1)}) &= P\\left( Z \\le \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${denomStr}} \\right) \\\\ &= P(Z \\le ${formatNumber(z1, 2)}) \\\\ &= ${formatNumber(probFinal, 4)} \\end{aligned}`;
+        strDesarrollo = `\\begin{aligned} P(\\bar{X}_1 - \\bar{X}_2 \\le ${formatNumber(x1)}) &= P\\Biggl( Z \\le \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${denomStr}} \\Biggr) \\\\[12pt] &= P(Z \\le ${formatNumber(z1, 2)}) \\\\[6pt] &= ${formatNumber(probFinal, 4)} \\end{aligned}`;
     } else if (condicion === 'mayor_que') {
         probFinal = 1 - cdfNormal(z1);
-        strDesarrollo = `\\begin{aligned} P(\\bar{X} - \\bar{Y} \\ge ${formatNumber(x1)}) &= P\\left( Z \\ge \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${denomStr}} \\right) \\\\ &= P(Z \\ge ${formatNumber(z1, 2)}) \\\\ &= 1 - P(Z \\le ${formatNumber(z1, 2)}) = ${formatNumber(probFinal, 4)} \\end{aligned}`;
+        strDesarrollo = `\\begin{aligned} P(\\bar{X}_1 - \\bar{X}_2 \\ge ${formatNumber(x1)}) &= P\\Biggl( Z \\ge \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${denomStr}} \\Biggr) \\\\[12pt] &= P(Z \\ge ${formatNumber(z1, 2)}) \\\\[6pt] &= 1 - P(Z \\le ${formatNumber(z1, 2)}) = ${formatNumber(probFinal, 4)} \\end{aligned}`;
     } else if (condicion === 'entre') {
         let z2 = (x2 - esperanza) / se;
         let probZ2 = cdfNormal(z2);
         let probZ1 = cdfNormal(z1);
         probFinal = probZ2 - probZ1;
-        strDesarrollo = `\\begin{aligned} P(${formatNumber(x1)} \\le \\bar{X} - \\bar{Y} \\le ${formatNumber(x2)}) &= P\\left( \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${denomStr}} \\le Z \\le \\frac{${formatNumber(x2)} - ${formatNumber(esperanza)}}{${denomStr}} \\right) \\\\ &= P(${formatNumber(z1, 2)} \\le Z \\le ${formatNumber(z2, 2)}) \\\\ &= P(Z \\le ${formatNumber(z2, 2)}) - P(Z \\le ${formatNumber(z1, 2)}) = ${formatNumber(probFinal, 4)} \\end{aligned}`;
+        strDesarrollo = `\\begin{aligned} P(${formatNumber(x1)} \\le \\bar{X}_1 - \\bar{X}_2 \\le ${formatNumber(x2)}) &= P\\Biggl( \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${denomStr}} \\le Z \\le \\frac{${formatNumber(x2)} - ${formatNumber(esperanza)}}{${denomStr}} \\Biggr) \\\\[12pt] &= P(${formatNumber(z1, 2)} \\le Z \\le ${formatNumber(z2, 2)}) \\\\[6pt] &= P(Z \\le ${formatNumber(z2, 2)}) - P(Z \\le ${formatNumber(z1, 2)}) = ${formatNumber(probFinal, 4)} \\end{aligned}`;
     }
 
     return {
         strDesarrollo,
         probFinal,
+        z1,
+        z2: condicion === 'entre' ? (x2 - esperanza) / se : null,
         x1,
         x2,
         condicion,
+        esperanza,
         p: esperanza, 
         se: se
     };
@@ -534,14 +537,14 @@ export function calcularProbabilidadDiferenciaMediasDesconocidas(parametrosPrevi
         se = Math.sqrt((s1Sq / nn1) + (s2Sq / nn2));
         statValue = (x1 - esperanza) / se;
         statType = 'Z';
-        formulaLaTeX = `Z = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_X - \\mu_Y)}{\\sqrt{\\frac{S_X^2}{n} + \\frac{S_Y^2}{m}}}`;
+        formulaLaTeX = `Z = \\frac{(\\bar{X}_1 - \\bar{X}_2) - (\\mu_1 - \\mu_2)}{\\sqrt{\\frac{S_1^2}{n_1} + \\frac{S_2^2}{n_2}}}`;
     } else if (escenario === 'iguales') {
         v = nn1 + nn2 - 2;
         const sp2 = ((nn1 - 1) * s1Sq + (nn2 - 1) * s2Sq) / v;
         se = Math.sqrt(sp2 * ((1 / nn1) + (1 / nn2)));
         statValue = (x1 - esperanza) / se;
         statType = 'T';
-        formulaLaTeX = `T = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_X - \\mu_Y)}{\\sqrt{\\frac{(n-1)S_X^2 + (m-1)S_Y^2}{n+m-2} \\left(\\frac{1}{n} + \\frac{1}{m}\\right)}}`;
+        formulaLaTeX = `T = \\frac{(\\bar{X}_1 - \\bar{X}_2) - (\\mu_1 - \\mu_2)}{\\sqrt{\\frac{(n_1-1)S_1^2 + (n_2-1)S_2^2}{n_1+n_2-2} \\left(\\frac{1}{n_1} + \\frac{1}{n_2}\\right)}}`;
     } else if (escenario === 'distintas') {
         se = Math.sqrt((s1Sq / nn1) + (s2Sq / nn2));
         const num = Math.pow((s1Sq / nn1) + (s2Sq / nn2), 2);
@@ -550,7 +553,7 @@ export function calcularProbabilidadDiferenciaMediasDesconocidas(parametrosPrevi
         v = Math.round(v * 100) / 100;
         statValue = (x1 - esperanza) / se;
         statType = 'T';
-        formulaLaTeX = `T = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_X - \\mu_Y)}{\\sqrt{\\frac{S_X^2}{n} + \\frac{S_Y^2}{m}}}`;
+        formulaLaTeX = `T = \\frac{(\\bar{X}_1 - \\bar{X}_2) - (\\mu_1 - \\mu_2)}{\\sqrt{\\frac{S_1^2}{n_1} + \\frac{S_2^2}{n_2}}}`;
     }
 
     let probFinal = 0;

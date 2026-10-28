@@ -7,10 +7,18 @@ import {
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
 
 const CustomKatexLabel = (props) => {
-    const { viewBox, value, offsetY = 0, offsetX = 0 } = props;
+    const { viewBox, value, offsetY = 0, offsetX = 0, modoPDF = false } = props;
     if (!viewBox) return null;
     const { x, y } = viewBox;
     
+    if (modoPDF) {
+        const texto = value.replace(/\\(?:boldsymbol|mathrm)/g, '')
+            .replace(/\\chi/g, 'χ').replace(/\^2/g, '²')
+            .replace(/\\geq?/g, '≥').replace(/\\leq?/g, '≤').replace(/[{}]/g, '')
+            .replace(/_(\d+)/g, (_, indice) => [...indice].map(digito => '₀₁₂₃₄₅₆₇₈₉'[Number(digito)]).join(''));
+        return <text x={Math.max(70, Math.min(570, x + offsetX))} y={Math.max(12, y - 8 + offsetY)} textAnchor="middle" fill="#000000" fontSize={10}>{texto}</text>;
+    }
+
     return (
         <foreignObject x={x - 50 + offsetX} y={y - 30 + offsetY} width={100} height={30} style={{ overflow: 'visible' }}>
             <div 
@@ -22,7 +30,7 @@ const CustomKatexLabel = (props) => {
 };
 
 const SmartAnnotation = (props) => {
-    const { viewBox, value } = props;
+    const { viewBox, value, modoPDF = false } = props;
     if (!viewBox || viewBox.x === undefined || viewBox.y === undefined) return null;
 
     const cx = viewBox.x;
@@ -56,13 +64,14 @@ const SmartAnnotation = (props) => {
             <path
                 d={`M ${cx},${cy} L ${midX},${midY} L ${lineEndX},${lineEndY}`}
                 fill="none"
-                stroke="var(--text-main, #3b82f6)"
+                stroke={modoPDF ? '#000000' : 'var(--text-main, #3b82f6)'}
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />
-            <circle cx={cx} cy={cy} r={5} fill="var(--text-main, #3b82f6)" />
+            <circle cx={cx} cy={cy} r={5} fill={modoPDF ? '#000000' : 'var(--text-main, #3b82f6)'} />
 
+            {modoPDF ? <text x={lineEndX} y={lineEndY + 4} textAnchor={toRight ? 'start' : 'end'} fill="#000000" fontSize={11}>{value}</text> : (
             <foreignObject x={boxX} y={boxY} width={boxWidth} height={boxHeight} style={{ overflow: 'visible' }}>
                 <div style={{
                     color: 'var(--text-pure)',
@@ -78,6 +87,7 @@ const SmartAnnotation = (props) => {
                     {value}
                 </div>
             </foreignObject>
+            )}
         </g>
     );
 };
@@ -94,8 +104,12 @@ const getOperador = (tipo) => {
     }
 };
 
-export default function GraficoModelosContinuos({ datos, condicion, resultados, modelo }) {
-    if (!datos || datos.length === 0) return null;
+export default function GraficoModelosContinuos(props) {
+    if (!props.datos || props.datos.length === 0) return null;
+    return <GraficoModelosContinuosContenido {...props} />;
+}
+
+function GraficoModelosContinuosContenido({ datos, condicion, resultados, modelo, modoPDF = false }) {
 
     // --- Calcular los valores exactos que queremos mostrar en el eje X ---
     const customTicks = [];
@@ -239,8 +253,161 @@ export default function GraficoModelosContinuos({ datos, condicion, resultados, 
         });
     }, [datos, resultados]); 
 
+    const etiquetaVariable = modelo === 'NormalEstandar' ? 'z' : modelo === 'ChiCuadrado' ? 'χ²' : modelo === 'FFisher' ? 'F' : modelo === 'TStudent' ? 't' : 'x';
+    const altoPDF = 260;
+    const grafico = (
+        <AreaChart width={modoPDF ? 640 : undefined} height={modoPDF ? altoPDF : undefined} data={datos} margin={{ top: modoPDF ? 24 : 20, right: 5, left: modoPDF ? 22 : -5, bottom: modoPDF ? 0 : 20 }}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+        
+            <XAxis 
+                dataKey="x" 
+                type="number"
+                domain={[dMin, dMax]}
+                allowDataOverflow={true}
+                ticks={finalTicks}
+                padding={{ left: 20, right: 20 }}
+                tick={{ fill: modoPDF ? '#000000' : 'var(--text-pure)', fontSize: modoPDF ? '7pt' : 11, fontWeight: 'bold' }}
+                axisLine={{ stroke: modoPDF ? '#000000' : 'var(--text-pure)', strokeWidth: 2 }}
+                tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-pure)', strokeWidth: 2 }}
+                tickFormatter={(val) => {
+                    if (val === 0) return '0';
+                    if (Math.abs(val) < 0.001) return val.toExponential(2);
+                    return parseFloat(val.toFixed(2)).toString();
+                }}
+                height={modoPDF ? 20 : undefined}
+                tickSize={modoPDF ? 4 : undefined}
+                tickMargin={modoPDF ? 2 : undefined}
+                label={modoPDF ? undefined : { value: modelo === 'NormalEstandar' ? 'Valor (z)' : (modelo === 'ChiCuadrado' ? 'Valor (χ²)' : (modelo === 'FFisher' ? 'Valor (F)' : (modelo === 'TStudent' ? 'Valor (t)' : 'Valor (x)'))), position: 'insideBottom', offset: -10, fill: modoPDF ? '#000000' : 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+            />
+        
+        <YAxis 
+            width={modoPDF ? 50 : undefined}
+            padding={{ top: modoPDF ? 12 : 30 }}
+            tick={{ fill: modoPDF ? '#000000' : 'var(--text-pure)', fontSize: modoPDF ? '7pt' : 11, fontWeight: 'bold' }}
+            axisLine={{ stroke: modoPDF ? '#000000' : 'var(--text-pure)', strokeWidth: 2 }}
+            tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-pure)', strokeWidth: 2 }}
+            tickFormatter={(val) => {
+                if (val === 0) return '0';
+                if (Math.abs(val) < 0.001) return val.toExponential(2);
+                return parseFloat(val.toFixed(4)).toString();
+            }}
+            label={modoPDF ? undefined : { value: modelo === 'NormalEstandar' ? 'Densidad f(z)' : (modelo === 'ChiCuadrado' ? 'Densidad f(χ²)' : (modelo === 'FFisher' ? 'Densidad f(F)' : (modelo === 'TStudent' ? 'Densidad f(t)' : 'Densidad f(x)'))), angle: -90, position: 'insideLeft', offset: 15, fill: modoPDF ? '#000000' : 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
+        />
+        
+        {!modoPDF && <Tooltip 
+            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+            formatter={(value, name) => [value.toFixed(6), name === 'y' ? (modelo === 'NormalEstandar' ? 'f(z)' : (modelo === 'ChiCuadrado' ? 'f(χ²)' : (modelo === 'FFisher' ? 'f(F)' : (modelo === 'TStudent' ? 'f(t)' : 'f(x)')))) : 'P']}
+            labelFormatter={(label) => `${modelo === 'NormalEstandar' ? 'z' : (modelo === 'TStudent' ? 't' : (modelo === 'FFisher' ? 'F' : (modelo === 'ChiCuadrado' ? 'χ²' : 'x')))} = ${Number(label).toFixed(4)}`}
+        />}
+        
+        <Area 
+            type="monotone" 
+            dataKey="y" 
+            stroke="#3b82f6" 
+            fill="transparent"
+            strokeWidth={3}
+            isAnimationActive={false}
+        />
+        
+        {condicion && (
+            <Area 
+                type="monotone" 
+                dataKey="fillY" 
+                stroke="none" 
+                fill="rgba(59, 130, 246, 0.4)" 
+                isAnimationActive={false}
+            />
+        )}
+
+        {(() => {
+            if (!condicion || !condicion.tipo) return null;
+            const tipo = condicion.tipo;
+            const refs = [];
+            
+            const valX = condicion.valX !== undefined ? condicion.valX : condicion.valorX;
+            const valX2 = condicion.valX2 !== undefined ? condicion.valX2 : condicion.valorB;
+
+            const umbralChoque = (maxX - minX) * 0.15;
+
+            if (tipo === 'menor' || tipo === 'menor_igual' || tipo === 'mayor' || tipo === 'mayor_igual') {
+                if (valX !== undefined) {
+                    refs.push(
+                        <ReferenceLine key="line1" x={valX} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3}
+                            label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'Z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'X')))} ${getOperador(tipo)} ${valX}}`} />} />
+                    );
+                }
+            } else if (tipo === 'entre' || tipo === 'intervalo' || tipo === 'exterior') {
+                if (valX !== undefined && valX2 !== undefined) {
+                    let offX1 = 0; let offX2 = 0;
+                    if (Math.abs(valX2 - valX) < umbralChoque) { offX1 = -45; offX2 = 45; }
+                    refs.push(
+                        <ReferenceLine key="line1" x={valX} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3}
+                            label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'Z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'X')))}_1 = ${valX}}`} offsetX={offX1} />} />
+                    );
+                    refs.push(
+                        <ReferenceLine key="line2" x={valX2} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3}
+                            label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'Z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'X')))}_2 = ${valX2}}`} offsetX={offX2} />} />
+                    );
+                }
+            } else if (tipo === 'suma_intervalos' && condicion.intervals) {
+                condicion.intervals.forEach((intv, idx) => {
+                    const min = parseFloat(intv.min);
+                    const max = parseFloat(intv.max);
+                    if (!isNaN(min) && !isNaN(max)) {
+                        refs.push(<ReferenceLine key={`min-${idx}`} x={min} stroke="#f97316" strokeDasharray="4 4" strokeWidth={2} label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'x')))}_{${idx*2+1}}}`} />} />);
+                        refs.push(<ReferenceLine key={`max-${idx}`} x={max} stroke="#f97316" strokeDasharray="4 4" strokeWidth={2} label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'x')))}_{${idx*2+2}}}`} />} />);
+                    }
+                });
+            } else if (tipo === 'inversa_menor' || tipo === 'inversa_mayor') {
+                if (resultados?.c !== undefined) {
+                    refs.push(
+                        <ReferenceLine key="lineC" x={resultados.c} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={3}
+                            label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{c = ${resultados.c.toFixed(4)}}`} />} />
+                    );
+                }
+            } else if (tipo === 'inversa_exterior' || tipo === 'inversa_entre') {
+                if (resultados?.c1 !== undefined && resultados?.c2 !== undefined) {
+                    let offX1 = 0; let offX2 = 0;
+                    if (Math.abs(resultados.c2 - resultados.c1) < umbralChoque) { offX1 = -45; offX2 = 45; }
+                    refs.push(
+                        <ReferenceLine key="lineC1" x={resultados.c1} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={3}
+                            label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{c_1 = ${resultados.c1.toFixed(4)}}`} offsetX={offX1} />} />
+                    );
+                    refs.push(
+                        <ReferenceLine key="lineC2" x={resultados.c2} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={3}
+                            label={<CustomKatexLabel modoPDF={modoPDF} value={`\\boldsymbol{c_2 = ${resultados.c2.toFixed(4)}}`} offsetX={offX2} />} />
+                    );
+                }
+            }
+            return refs;
+        })()}
+        
+        {annotationDataArray.map((ann, idx) => (
+            <ReferenceDot 
+                key={`ann-${idx}`}
+                x={ann.x} 
+                y={ann.y} 
+                r={0} 
+                label={<SmartAnnotation modoPDF={modoPDF} value={ann.text} />} 
+            />
+        ))}
+    </AreaChart>
+    );
+
+    if (modoPDF) {
+        return <div style={{ width: '640px', maxWidth: '100%', margin: '0 auto', color: '#000000' }}>
+            <div style={{ position: 'relative', height: `${altoPDF}px` }}>
+                <div style={{ position: 'absolute', left: '8px', top: '24px', width: '20px', height: `${altoPDF - 44}px`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ transform: 'rotate(-90deg)', whiteSpace: 'nowrap', fontSize: '12px' }}>Densidad f({etiquetaVariable})</span>
+                </div>
+                {grafico}
+            </div>
+            <div style={{ textAlign: 'center', fontSize: '12px' }}>Valor ({etiquetaVariable})</div>
+        </div>;
+    }
+
     return (
-        <MarcoWidgetMAT251 titulo={<span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Gráfica de Densidad de Probabilidad {modelo === 'NormalEstandar' ? 'f(z)' : (modelo === 'ChiCuadrado' ? 'f(χ²)' : (modelo === 'FFisher' ? 'f(F)' : (modelo === 'TStudent' ? 'f(t)' : 'f(x)')))}</span>} anchoCompleto={true} alto="450px" id="grafico-area-tema3">
+        <MarcoWidgetMAT251 titulo={<span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Gráfica de Densidad de Probabilidad {modelo === 'NormalEstandar' ? 'f(z)' : (modelo === 'ChiCuadrado' ? 'f(χ²)' : (modelo === 'FFisher' ? 'f(F)' : (modelo === 'TStudent' ? 'f(t)' : 'f(x)')))}</span>} anchoCompleto={true} alto="450px" id="tour-t3continua-grafico">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, minHeight: 0, width: '100%', overflow: 'hidden', position: 'relative' }}>
                     {condicion && (condicion.tipo === 'exterior' || condicion.tipo === 'suma_intervalos' || condicion.tipo === 'inversa_exterior') && resultados?.probabilidadFinal > 0 && (
@@ -249,138 +416,7 @@ export default function GraficoModelosContinuos({ datos, condicion, resultados, 
                         </div>
                     )}
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={datos} margin={{ top: 20, right: 5, left: -5, bottom: 20 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            
-                                <XAxis 
-                                    dataKey="x" 
-                                    type="number"
-                                    domain={[dMin, dMax]}
-                                    allowDataOverflow={true}
-                                    ticks={finalTicks}
-                                    padding={{ left: 20, right: 20 }}
-                                    tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
-                                    axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
-                                    tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
-                                    tickFormatter={(val) => {
-                                        if (val === 0) return '0';
-                                        if (Math.abs(val) < 0.001) return val.toExponential(2);
-                                        return parseFloat(val.toFixed(2)).toString();
-                                    }}
-                                    label={{ value: modelo === 'NormalEstandar' ? 'Valor (z)' : (modelo === 'ChiCuadrado' ? 'Valor (χ²)' : (modelo === 'FFisher' ? 'Valor (F)' : (modelo === 'TStudent' ? 'Valor (t)' : 'Valor (x)'))), position: 'insideBottom', offset: -10, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
-                                />
-                            
-                            <YAxis 
-                                padding={{ top: 30 }}
-                                tick={{ fill: 'var(--text-pure)', fontSize: 11, fontWeight: 'bold' }}
-                                axisLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
-                                tickLine={{ stroke: 'var(--text-pure)', strokeWidth: 2 }}
-                                tickFormatter={(val) => {
-                                    if (val === 0) return '0';
-                                    if (Math.abs(val) < 0.001) return val.toExponential(2);
-                                    return parseFloat(val.toFixed(4)).toString();
-                                }}
-                                label={{ value: modelo === 'NormalEstandar' ? 'Densidad f(z)' : (modelo === 'ChiCuadrado' ? 'Densidad f(χ²)' : (modelo === 'FFisher' ? 'Densidad f(F)' : (modelo === 'TStudent' ? 'Densidad f(t)' : 'Densidad f(x)'))), angle: -90, position: 'insideLeft', offset: 15, fill: 'var(--text-pure)', fontSize: 13, fontWeight: 'bold', textAnchor: 'middle' }}
-                            />
-                            
-                            <Tooltip 
-                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                                formatter={(value, name) => [value.toFixed(6), name === 'y' ? (modelo === 'NormalEstandar' ? 'f(z)' : (modelo === 'ChiCuadrado' ? 'f(χ²)' : (modelo === 'FFisher' ? 'f(F)' : (modelo === 'TStudent' ? 'f(t)' : 'f(x)')))) : 'P']}
-                                labelFormatter={(label) => `${modelo === 'NormalEstandar' ? 'z' : (modelo === 'TStudent' ? 't' : (modelo === 'FFisher' ? 'F' : (modelo === 'ChiCuadrado' ? 'χ²' : 'x')))} = ${Number(label).toFixed(4)}`}
-                            />
-                            
-                            <Area 
-                                type="monotone" 
-                                dataKey="y" 
-                                stroke="#3b82f6" 
-                                fill="transparent"
-                                strokeWidth={3}
-                                isAnimationActive={false}
-                            />
-                            
-                            {condicion && (
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="fillY" 
-                                    stroke="none" 
-                                    fill="rgba(59, 130, 246, 0.4)" 
-                                    isAnimationActive={false}
-                                />
-                            )}
-
-                            {(() => {
-                                if (!condicion || !condicion.tipo) return null;
-                                const tipo = condicion.tipo;
-                                const refs = [];
-                                
-                                const valX = condicion.valX !== undefined ? condicion.valX : condicion.valorX;
-                                const valX2 = condicion.valX2 !== undefined ? condicion.valX2 : condicion.valorB;
-
-                                const umbralChoque = (maxX - minX) * 0.15;
-
-                                if (tipo === 'menor' || tipo === 'menor_igual' || tipo === 'mayor' || tipo === 'mayor_igual') {
-                                    if (valX !== undefined) {
-                                        refs.push(
-                                            <ReferenceLine key="line1" x={valX} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3}
-                                                label={<CustomKatexLabel value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'Z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'X')))} ${getOperador(tipo)} ${valX}}`} />} />
-                                        );
-                                    }
-                                } else if (tipo === 'entre' || tipo === 'intervalo' || tipo === 'exterior') {
-                                    if (valX !== undefined && valX2 !== undefined) {
-                                        let offX1 = 0; let offX2 = 0;
-                                        if (Math.abs(valX2 - valX) < umbralChoque) { offX1 = -45; offX2 = 45; }
-                                        refs.push(
-                                            <ReferenceLine key="line1" x={valX} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3}
-                                                label={<CustomKatexLabel value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'Z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'X')))}_1 = ${valX}}`} offsetX={offX1} />} />
-                                        );
-                                        refs.push(
-                                            <ReferenceLine key="line2" x={valX2} stroke="#f97316" strokeDasharray="4 4" strokeWidth={3}
-                                                label={<CustomKatexLabel value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'Z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'X')))}_2 = ${valX2}}`} offsetX={offX2} />} />
-                                        );
-                                    }
-                                } else if (tipo === 'suma_intervalos' && condicion.intervals) {
-                                    condicion.intervals.forEach((intv, idx) => {
-                                        const min = parseFloat(intv.min);
-                                        const max = parseFloat(intv.max);
-                                        if (!isNaN(min) && !isNaN(max)) {
-                                            refs.push(<ReferenceLine key={`min-${idx}`} x={min} stroke="#f97316" strokeDasharray="4 4" strokeWidth={2} label={<CustomKatexLabel value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'x')))}_{${idx*2+1}}}`} />} />);
-                                            refs.push(<ReferenceLine key={`max-${idx}`} x={max} stroke="#f97316" strokeDasharray="4 4" strokeWidth={2} label={<CustomKatexLabel value={`\\boldsymbol{${modelo === 'NormalEstandar' ? 'z' : (modelo === 'ChiCuadrado' ? '\\chi^2' : (modelo === 'FFisher' ? 'F' : (modelo === 'TStudent' ? 'T' : 'x')))}_{${idx*2+2}}}`} />} />);
-                                        }
-                                    });
-                                } else if (tipo === 'inversa_menor' || tipo === 'inversa_mayor') {
-                                    if (resultados?.c !== undefined) {
-                                        refs.push(
-                                            <ReferenceLine key="lineC" x={resultados.c} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={3}
-                                                label={<CustomKatexLabel value={`\\boldsymbol{c = ${resultados.c.toFixed(4)}}`} />} />
-                                        );
-                                    }
-                                } else if (tipo === 'inversa_exterior' || tipo === 'inversa_entre') {
-                                    if (resultados?.c1 !== undefined && resultados?.c2 !== undefined) {
-                                        let offX1 = 0; let offX2 = 0;
-                                        if (Math.abs(resultados.c2 - resultados.c1) < umbralChoque) { offX1 = -45; offX2 = 45; }
-                                        refs.push(
-                                            <ReferenceLine key="lineC1" x={resultados.c1} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={3}
-                                                label={<CustomKatexLabel value={`\\boldsymbol{c_1 = ${resultados.c1.toFixed(4)}}`} offsetX={offX1} />} />
-                                        );
-                                        refs.push(
-                                            <ReferenceLine key="lineC2" x={resultados.c2} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={3}
-                                                label={<CustomKatexLabel value={`\\boldsymbol{c_2 = ${resultados.c2.toFixed(4)}}`} offsetX={offX2} />} />
-                                        );
-                                    }
-                                }
-                                return refs;
-                            })()}
-                            
-                            {annotationDataArray.map((ann, idx) => (
-                                <ReferenceDot 
-                                    key={`ann-${idx}`}
-                                    x={ann.x} 
-                                    y={ann.y} 
-                                    r={0} 
-                                    label={<SmartAnnotation value={ann.text} />} 
-                                />
-                            ))}
-                        </AreaChart>
+                        {grafico}
                     </ResponsiveContainer>
                 </div>
             </div>

@@ -1,34 +1,34 @@
 /* Estilos para Tema 5: Estimación Puntual */
 
-@keyframes fadeInDropdown {
+@keyframes mat251-fadeInDropdown {
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 640px) {
-    .hnp-parametros-superiores {
+    :where(.mat251) .hnp-parametros-superiores {
         grid-template-columns: minmax(0, 1fr) !important;
     }
 }
 
-.placeholder-small::placeholder {
+:where(.mat251) .placeholder-small::placeholder {
     font-size: 0.65rem;
     opacity: 0.7;
 }
 
-.tema5-selector-proporcion {
+:where(.mat251) .tema5-selector-proporcion {
     width: 50%;
     box-sizing: border-box;
 }
 
-.tema5-simulacion-ayuda {
+:where(.mat251) .tema5-simulacion-ayuda {
     position: absolute;
     top: 0;
     right: 0;
     z-index: 1100;
 }
 
-.tema5-simulacion-ayuda-boton {
+:where(.mat251) .tema5-simulacion-ayuda-boton {
     display: grid;
     place-items: center;
     width: 24px;
@@ -45,16 +45,16 @@
     cursor: pointer;
 }
 
-#tema5-ayuda-simulador,
-#tema5-ayuda-intervalos-simulador,
-#tema5-ayuda-simulador:hover,
-#tema5-ayuda-intervalos-simulador:hover,
-#tema5-ayuda-simulador:focus,
-#tema5-ayuda-intervalos-simulador:focus,
-#tema5-ayuda-simulador:focus-visible,
-#tema5-ayuda-intervalos-simulador:focus-visible,
-#tema5-ayuda-simulador:active,
-#tema5-ayuda-intervalos-simulador:active {
+:where(.mat251) #tema5-ayuda-simulador,
+:where(.mat251) #tema5-ayuda-intervalos-simulador,
+:where(.mat251) #tema5-ayuda-simulador:hover,
+:where(.mat251) #tema5-ayuda-intervalos-simulador:hover,
+:where(.mat251) #tema5-ayuda-simulador:focus,
+:where(.mat251) #tema5-ayuda-intervalos-simulador:focus,
+:where(.mat251) #tema5-ayuda-simulador:focus-visible,
+:where(.mat251) #tema5-ayuda-intervalos-simulador:focus-visible,
+:where(.mat251) #tema5-ayuda-simulador:active,
+:where(.mat251) #tema5-ayuda-intervalos-simulador:active {
     border: 0 !important;
     outline: 0 !important;
     box-shadow: none !important;
@@ -63,14 +63,14 @@
     transform: none !important;
 }
 
-.tema5-simulacion-ayuda-boton:hover,
-.tema5-simulacion-ayuda-boton:focus-visible {
+:where(.mat251) .tema5-simulacion-ayuda-boton:hover,
+:where(.mat251) .tema5-simulacion-ayuda-boton:focus-visible {
     color: var(--accent-color);
     outline: none !important;
     box-shadow: none !important;
 }
 
-.tema5-simulacion-ayuda-boton svg {
+:where(.mat251) .tema5-simulacion-ayuda-boton svg {
     width: 24px;
     height: 24px;
     fill: none;
@@ -80,7 +80,7 @@
     stroke-linejoin: round;
 }
 
-.tema5-simulacion-ayuda-panel {
+:where(.mat251) .tema5-simulacion-ayuda-panel {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
@@ -98,45 +98,45 @@
     line-height: 1.4;
 }
 
-.tema5-simulacion-ayuda:hover .tema5-simulacion-ayuda-panel {
+:where(.mat251) .tema5-simulacion-ayuda:hover .tema5-simulacion-ayuda-panel {
     display: block;
 }
 
-.tema5-simulacion-ayuda-panel > strong {
+:where(.mat251) .tema5-simulacion-ayuda-panel > strong {
     display: block;
     margin-bottom: 6px;
     font-size: 0.86rem;
 }
 
-.tema5-simulacion-ayuda-panel p {
+:where(.mat251) .tema5-simulacion-ayuda-panel p {
     margin: 0 0 6px;
     color: var(--text-pure);
 }
 
-.tema5-simulacion-ayuda-panel ul {
+:where(.mat251) .tema5-simulacion-ayuda-panel ul {
     margin: 0;
     padding: 0;
     list-style: none;
     color: var(--text-pure);
 }
 
-.tema5-simulacion-ayuda-panel li {
+:where(.mat251) .tema5-simulacion-ayuda-panel li {
     position: relative;
     padding-left: 12px;
 }
 
-.tema5-simulacion-ayuda-panel li::before {
+:where(.mat251) .tema5-simulacion-ayuda-panel li::before {
     position: absolute;
     left: 0;
     content: '-';
     font-weight: 700;
 }
 
-.tema5-simulacion-ayuda-panel li + li {
+:where(.mat251) .tema5-simulacion-ayuda-panel li + li {
     margin-top: 3px;
 }
 
-.card-resultado {
+:where(.mat251) .card-resultado {
     border-radius: 8px;
     padding: 10px 0px;
     text-align: center;
@@ -148,7 +148,7 @@
     gap: 5px;
 }
 
-.card-stat {
+:where(.mat251) .card-stat {
     border-radius: 8px;
     padding: 10px 15px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
@@ -156,34 +156,34 @@
     align-items: center;
     justify-content: space-between;
 }
-.tema5-matematica-negrita .katex,
-.tema5-matematica-negrita .katex * {
+:where(.mat251) .tema5-matematica-negrita .katex,
+:where(.mat251) .tema5-matematica-negrita .katex * {
     font-weight: 700 !important;
 }
 
-.tema5-resultados-pure {
+:where(.mat251) .tema5-resultados-pure {
     --text-main: var(--text-pure);
     --text-muted: var(--text-pure);
 }
 
-.tema5-resultados-pure .katex {
+:where(.mat251) .tema5-resultados-pure .katex {
     color: var(--text-pure) !important;
 }
 
-.tema5-manual-card {
+:where(.mat251) .tema5-manual-card {
     width: 100%;
     box-sizing: border-box;
 }
 
-.tema5-manual-content {
+:where(.mat251) .tema5-manual-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
     margin-bottom: 16px;
 }
 
-.tema5-manual-fields,
-.tema5-manual-media-extra {
+:where(.mat251) .tema5-manual-fields,
+:where(.mat251) .tema5-manual-media-extra {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
@@ -191,11 +191,11 @@
     min-width: 0;
 }
 
-.tema5-manual-fields-media {
+:where(.mat251) .tema5-manual-fields-media {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.tema5-intervalos-manual-form .tema5-manual-fields-compact {
+:where(.mat251) .tema5-intervalos-manual-form .tema5-manual-fields-compact {
     display: grid !important;
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -203,20 +203,20 @@
     gap: 16px;
 }
 
-.tema5-intervalos-manual-form .tema5-manual-fields-compact > .tema5-manual-field {
+:where(.mat251) .tema5-intervalos-manual-form .tema5-manual-fields-compact > .tema5-manual-field {
     display: flex;
     width: 100%;
     min-width: 0;
 }
 
-.tema5-intervalos-manual-form .tema5-manual-fields-compact > .tema5-manual-field > .input-mat251 {
+:where(.mat251) .tema5-intervalos-manual-form .tema5-manual-fields-compact > .tema5-manual-field > .input-mat251 {
     flex: 1 1 0 !important;
     width: 0 !important;
     max-width: none !important;
     min-width: 0 !important;
 }
 
-.tema5-manual-field {
+:where(.mat251) .tema5-manual-field {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -224,43 +224,43 @@
     min-width: 0;
 }
 
-.tema5-manual-field > label {
+:where(.mat251) .tema5-manual-field > label {
     flex: 0 0 auto;
     min-width: 0 !important;
     white-space: nowrap !important;
     color: var(--text-pure) !important;
 }
 
-.tema5-manual-field-inline {
+:where(.mat251) .tema5-manual-field-inline {
     flex-direction: row;
     align-items: center;
     gap: 8px;
 }
 
-.tema5-manual-field-inline > label {
+:where(.mat251) .tema5-manual-field-inline > label {
     flex: 0 0 auto;
     white-space: nowrap !important;
 }
 
-.tema5-manual-field-inline .input-mat251 {
+:where(.mat251) .tema5-manual-field-inline .input-mat251 {
     flex: 1;
 }
 
-.tema5-manual-media-extra {
+:where(.mat251) .tema5-manual-media-extra {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
 }
 
-.tema5-manual-field .input-mat251 {
+:where(.mat251) .tema5-manual-field .input-mat251 {
     flex: 1 1 0;
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
 }
 
-.tema5-manual-sigma-selector {
+:where(.mat251) .tema5-manual-sigma-selector {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -273,19 +273,19 @@
     border: 0;
 }
 
-.tema5-manual-sigma-selector > label {
+:where(.mat251) .tema5-manual-sigma-selector > label {
     margin: 0;
     color: var(--text-pure) !important;
 }
 
-.tema5-manual-sigma-options {
+:where(.mat251) .tema5-manual-sigma-options {
     flex-direction: row !important;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px 16px !important;
 }
 
-.tema5-manual-deviation-input {
+:where(.mat251) .tema5-manual-deviation-input {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -295,74 +295,74 @@
     margin: 0 auto;
 }
 
-.tema5-manual-deviation-input > label {
+:where(.mat251) .tema5-manual-deviation-input > label {
     flex: 0 0 auto;
     white-space: nowrap !important;
 }
 
-.tema5-manual-deviation-input .input-mat251 {
+:where(.mat251) .tema5-manual-deviation-input .input-mat251 {
     flex: 0 1 420px;
     width: auto !important;
 }
 
 @media (max-width: 700px) {
-    .tema5-manual-fields,
-    .tema5-manual-media-extra {
+    :where(.mat251) .tema5-manual-fields,
+:where(.mat251) .tema5-manual-media-extra {
         grid-template-columns: minmax(0, 1fr);
         gap: 12px;
     }
 
-    .tema5-manual-fields-media {
+    :where(.mat251) .tema5-manual-fields-media {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
     }
 
-    .tema5-manual-fields-compact {
+    :where(.mat251) .tema5-manual-fields-compact {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 8px;
     }
 
-    .tema5-intervalos-manual-form .tema5-manual-fields-compact {
+    :where(.mat251) .tema5-intervalos-manual-form .tema5-manual-fields-compact {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 8px;
     }
 
-    .tema5-manual-field-inline {
+    :where(.mat251) .tema5-manual-field-inline {
         gap: 5px;
     }
 
-    .tema5-manual-field-inline > label {
+    :where(.mat251) .tema5-manual-field-inline > label {
         font-size: 0.78rem !important;
     }
 
-    .tema5-manual-deviation-input {
+    :where(.mat251) .tema5-manual-deviation-input {
         width: min(100%, 460px);
     }
 
-    .tema5-manual-deviation-input .input-mat251 {
+    :where(.mat251) .tema5-manual-deviation-input .input-mat251 {
         flex: 1 1 0;
         width: 100% !important;
     }
 
-    .tema5-manual-card {
+    :where(.mat251) .tema5-manual-card {
         padding: 12px !important;
     }
 
-    .tema5-manual-sigma-selector {
+    :where(.mat251) .tema5-manual-sigma-selector {
         padding: 10px;
     }
 
-    .tema5-manual-submit-wrap {
+    :where(.mat251) .tema5-manual-submit-wrap {
         margin-top: 12px !important;
     }
 
-    .tema5-manual-submit-wrap .button_calcular {
+    :where(.mat251) .tema5-manual-submit-wrap .button_calcular {
         width: auto !important;
         max-width: none;
     }
 }
 
-.tema5-tabla-estimacion-wrapper {
+:where(.mat251) .tema5-tabla-estimacion-wrapper {
     display: flex;
     justify-content: center;
     width: 100%;
@@ -370,7 +370,7 @@
     overflow: visible;
 }
 
-.tema5-tabla-estimacion {
+:where(.mat251) .tema5-tabla-estimacion {
     width: fit-content;
     margin: 0 auto;
     border-collapse: collapse;
@@ -380,8 +380,8 @@
     font-size: 0.85rem;
 }
 
-.tema5-tabla-estimacion th,
-.tema5-tabla-estimacion td {
+:where(.mat251) .tema5-tabla-estimacion th,
+:where(.mat251) .tema5-tabla-estimacion td {
     padding: 10px 28px;
     border: 1px solid var(--text-pure);
     color: var(--text-pure);
@@ -389,128 +389,128 @@
     white-space: nowrap;
 }
 
-.tema5-tabla-estimacion th {
+:where(.mat251) .tema5-tabla-estimacion th {
     background: var(--bg-input);
     font-weight: 700;
 }
 
-.tema5-tabla-estimacion th .mat251-stat-label-container > span .katex,
-.tema5-tabla-estimacion th .mat251-stat-label-container > span .katex * {
+:where(.mat251) .tema5-tabla-estimacion th .mat251-stat-label-container > span .katex,
+:where(.mat251) .tema5-tabla-estimacion th .mat251-stat-label-container > span .katex * {
     font-weight: 400 !important;
     -webkit-text-stroke: 0;
     text-shadow: none;
 }
 
-.tema5-tabla-estimacion td {
+:where(.mat251) .tema5-tabla-estimacion td {
     background: var(--bg-card);
     font-size: 0.9rem;
 }
 
 @media (max-width: 600px) {
-    .tema5-sim-distribucion-selector {
+    :where(.mat251) .tema5-sim-distribucion-selector {
         flex-direction: column !important;
         align-items: flex-start !important;
         gap: 8px !important;
     }
 
-    .tema5-tabla-resumen-intervalo td {
+    :where(.mat251) .tema5-tabla-resumen-intervalo td {
         padding: 8px 12px;
         font-size: 0.7rem !important;
     }
 
-    .tema5-tabla-intervalo-detalle th,
-    .tema5-tabla-intervalo-detalle tbody td {
+    :where(.mat251) .tema5-tabla-intervalo-detalle th,
+:where(.mat251) .tema5-tabla-intervalo-detalle tbody td {
         padding: 8px 12px;
         font-size: 0.7rem !important;
     }
 
-    .tema5-selector-proporcion {
+    :where(.mat251) .tema5-selector-proporcion {
         width: 90%;
         max-width: 320px;
         margin: 0 auto;
     }
 
-    .tema5-simulacion-parametros-fila {
+    :where(.mat251) .tema5-simulacion-parametros-fila {
         flex-wrap: nowrap !important;
         gap: 8px !important;
     }
 
-    .tema5-simulacion-entradas-fila {
+    :where(.mat251) .tema5-simulacion-entradas-fila {
         flex-wrap: wrap !important;
         gap: 8px !important;
     }
 
-    .tema5-simulacion-campo {
+    :where(.mat251) .tema5-simulacion-campo {
         flex: 1 1 0 !important;
         min-width: 0 !important;
     }
 
-    .tema5-simulacion-campo.tema5-simulacion-campo-centrado {
+    :where(.mat251) .tema5-simulacion-campo.tema5-simulacion-campo-centrado {
         flex: 0 1 50% !important;
         max-width: 50%;
         margin: 0 auto;
     }
 
-    .tema5-simulacion-entradas-fila .tema5-simulacion-campo {
+    :where(.mat251) .tema5-simulacion-entradas-fila .tema5-simulacion-campo {
         flex: 1 1 100% !important;
     }
 
-    .tema5-simulacion-campo .input-mat251 {
+    :where(.mat251) .tema5-simulacion-campo .input-mat251 {
         box-sizing: border-box;
         min-width: 0;
         padding-left: 7px;
         padding-right: 7px;
     }
 
-    .tema5-tabla-estimacion {
+    :where(.mat251) .tema5-tabla-estimacion {
         width: 100%;
         max-width: 100%;
         margin: 0 auto;
     }
 
-    .tema5-tabla-estimacion th,
-    .tema5-tabla-estimacion td {
+    :where(.mat251) .tema5-tabla-estimacion th,
+:where(.mat251) .tema5-tabla-estimacion td {
         padding: 6px 6px !important;
         font-size: 0.78rem;
     }
 }
 
-.tema5-resolucion-estimacion {
+:where(.mat251) .tema5-resolucion-estimacion {
     margin: 22px auto 0;
     color: var(--text-pure);
     text-align: center;
 }
 
-.tema5-resolucion-estimacion h4 {
+:where(.mat251) .tema5-resolucion-estimacion h4 {
     margin: 0 0 12px;
     color: var(--text-pure);
     font-size: 0.95rem;
 }
 
-.tema5-tabla-resolucion {
+:where(.mat251) .tema5-tabla-resolucion {
     font-size: 0.85rem;
 }
 
-.tema5-tabla-resolucion th,
-.tema5-tabla-resolucion td {
+:where(.mat251) .tema5-tabla-resolucion th,
+:where(.mat251) .tema5-tabla-resolucion td {
     padding: 8px 18px;
 }
 
-.tema5-tabla-resolucion tbody td {
+:where(.mat251) .tema5-tabla-resolucion tbody td {
     font-size: 0.7rem;
 }
 
-.tema5-tabla-intervalo-detalle tbody td {
+:where(.mat251) .tema5-tabla-intervalo-detalle tbody td {
     font-size: 0.85rem;
 }
 
-.tema5-tabla-resolucion .mat251-stat-label-container,
-.tema5-tabla-resolucion .mat251-stat-label-container > span {
+:where(.mat251) .tema5-tabla-resolucion .mat251-stat-label-container,
+:where(.mat251) .tema5-tabla-resolucion .mat251-stat-label-container > span {
     flex-shrink: 0;
     white-space: nowrap;
 }
 
-.tema5-tabla-resolucion-scroll {
+:where(.mat251) .tema5-tabla-resolucion-scroll {
     width: fit-content;
     max-width: 100%;
     margin: 0 auto;
@@ -519,45 +519,45 @@
     overflow-y: auto;
 }
 
-.tema5-tabla-resolucion-scroll .tema5-tabla-resolucion {
+:where(.mat251) .tema5-tabla-resolucion-scroll .tema5-tabla-resolucion {
     border-collapse: separate;
     border-spacing: 0;
     border: 0;
 }
 
-.tema5-tabla-resolucion-scroll .tema5-tabla-resolucion th,
-.tema5-tabla-resolucion-scroll .tema5-tabla-resolucion td {
+:where(.mat251) .tema5-tabla-resolucion-scroll .tema5-tabla-resolucion th,
+:where(.mat251) .tema5-tabla-resolucion-scroll .tema5-tabla-resolucion td {
     border: 0;
     border-right: 1px solid var(--text-pure);
     border-bottom: 1px solid var(--text-pure);
 }
 
-.tema5-tabla-resolucion-scroll .tema5-tabla-resolucion tr > :first-child {
+:where(.mat251) .tema5-tabla-resolucion-scroll .tema5-tabla-resolucion tr > :first-child {
     border-left: 1px solid var(--text-pure);
 }
 
-.tema5-tabla-resolucion-scroll .tema5-tabla-resolucion thead th {
+:where(.mat251) .tema5-tabla-resolucion-scroll .tema5-tabla-resolucion thead th {
     border-top: 1px solid var(--text-pure);
     background: var(--bg-input);
 }
 
-.tema5-tabla-resolucion-scroll .tema5-tabla-resolucion thead th {
+:where(.mat251) .tema5-tabla-resolucion-scroll .tema5-tabla-resolucion thead th {
     position: sticky;
     top: 0;
     z-index: 2;
 }
 
-.tema5-fila-suma td {
+:where(.mat251) .tema5-fila-suma td {
     border-top: 1px solid var(--text-pure);
 }
 
-.tema5-fila-suma td:first-child .katex,
-.tema5-fila-suma td:first-child .katex * {
+:where(.mat251) .tema5-fila-suma td:first-child .katex,
+:where(.mat251) .tema5-fila-suma td:first-child .katex * {
     font-weight: 700 !important;
     -webkit-text-stroke: 0.6px currentColor;
 }
 
-.tema5-formula-resolucion {
+:where(.mat251) .tema5-formula-resolucion {
     display: flex;
     justify-content: center;
     align-items: baseline;
@@ -567,17 +567,17 @@
     font-size: 1rem;
 }
 
-.tema5-formula-resolucion .katex {
+:where(.mat251) .tema5-formula-resolucion .katex {
     font-size: 1rem !important;
 }
 
-.tema5-resultado-final {
+:where(.mat251) .tema5-resultado-final {
     margin-top: 24px;
     color: var(--text-pure);
     text-align: center;
 }
 
-.tema5-resultado-final h5 {
+:where(.mat251) .tema5-resultado-final h5 {
     margin: 0;
     color: var(--text-pure);
     font-size: 0.95rem;
@@ -585,15 +585,15 @@
 }
 
 @media (max-width: 600px) {
-    .tema5-tabla-resolucion th,
-    .tema5-tabla-resolucion td {
+    :where(.mat251) .tema5-tabla-resolucion th,
+:where(.mat251) .tema5-tabla-resolucion td {
         padding: 6px 6px !important;
         font-size: 0.78rem !important;
     }
 }
 
 @media (max-width: 600px) {
-    .tema5-tabla-intervalo-wrapper {
+    :where(.mat251) .tema5-tabla-intervalo-wrapper {
         justify-content: flex-start;
         width: 100%;
         max-width: 100%;
@@ -601,15 +601,15 @@
         margin-right: 0;
     }
 
-    .tema5-tabla-intervalo-detalle {
+    :where(.mat251) .tema5-tabla-intervalo-detalle {
         width: max-content;
         min-width: 560px;
         max-width: none;
         margin: 0;
     }
 
-    .tema5-tabla-intervalo-detalle th:first-child,
-    .tema5-tabla-intervalo-detalle tbody td:first-child {
+    :where(.mat251) .tema5-tabla-intervalo-detalle th:first-child,
+:where(.mat251) .tema5-tabla-intervalo-detalle tbody td:first-child {
         position: sticky;
         left: 0;
         z-index: 2;
@@ -621,21 +621,21 @@
         box-shadow: 1px 0 var(--text-pure);
     }
 
-    .tema5-tabla-intervalo-detalle thead th:first-child {
+    :where(.mat251) .tema5-tabla-intervalo-detalle thead th:first-child {
         z-index: 3;
         background: var(--bg-input);
     }
 }
 
 @media (max-width: 600px) {
-    .tema5-intervalos-resumen {
+    :where(.mat251) .tema5-intervalos-resumen {
         width: 100%;
         max-width: 100%;
         padding: 0 4px;
         box-sizing: border-box;
     }
 
-    .tema5-intervalos-resumen-principal {
+    :where(.mat251) .tema5-intervalos-resumen-principal {
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -647,11 +647,11 @@
         white-space: nowrap;
     }
 
-    .tema5-intervalos-resumen-principal > span {
+    :where(.mat251) .tema5-intervalos-resumen-principal > span {
         white-space: nowrap;
     }
 
-    .tema5-intervalos-resumen-secundario {
+    :where(.mat251) .tema5-intervalos-resumen-secundario {
         max-width: 340px;
         margin: 0 auto 10px !important;
         font-size: clamp(0.5rem, 2.2vw, 0.58rem) !important;
@@ -659,7 +659,7 @@
         white-space: nowrap;
     }
 
-    .tema5-intervalos-cobertura-leyenda {
+    :where(.mat251) .tema5-intervalos-cobertura-leyenda {
         display: inline-flex !important;
         flex-wrap: nowrap;
         justify-content: center;
@@ -671,11 +671,11 @@
         white-space: nowrap;
     }
 
-    .tema5-intervalos-cobertura-leyenda > span {
+    :where(.mat251) .tema5-intervalos-cobertura-leyenda > span {
         text-align: center;
     }
 
-    .tema5-intervalos-cobertura-item {
+    :where(.mat251) .tema5-intervalos-cobertura-item {
         justify-content: center;
         min-width: 0;
         gap: 3px !important;
@@ -683,18 +683,18 @@
         white-space: nowrap;
     }
 
-    .tema5-intervalos-cobertura-item > div {
+    :where(.mat251) .tema5-intervalos-cobertura-item > div {
         flex: 0 0 10px;
         width: 10px !important;
         height: 10px !important;
     }
 
-    .tema5-intervalos-cobertura-item > span {
+    :where(.mat251) .tema5-intervalos-cobertura-item > span {
         display: inline;
         text-align: left;
     }
 
-    .tema5-intervalos-grafico-scroll {
+    :where(.mat251) .tema5-intervalos-grafico-scroll {
         justify-content: flex-start !important;
         overflow-x: auto;
         overflow-y: hidden;
@@ -702,7 +702,7 @@
         scrollbar-width: thin;
     }
 
-    .tema5-intervalos-grafico-svg {
+    :where(.mat251) .tema5-intervalos-grafico-svg {
         flex: 0 0 800px;
         width: 800px !important;
         min-width: 800px;

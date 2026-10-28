@@ -99,11 +99,7 @@ export const generarPDFReporte = async (elementId, nombreArchivo = "Reporte_Esta
             scale: 2,
             useCORS: true,
             backgroundColor: "#ffffff",
-            logging: false,
-            onclone: (clonedDoc) => {
-                const mathmls = clonedDoc.querySelectorAll('.katex-mathml');
-                mathmls.forEach(el => el.remove());
-            }
+            logging: false
         });
 
         const imgData = canvas.toDataURL('image/jpeg', 1.00);
@@ -190,11 +186,7 @@ export const copiarGrafico = async (graficoId) => {
             scale: 2, // Mayor resolución
             useCORS: true,
             backgroundColor: "#ffffff", // Fondo blanco
-            logging: false,
-            onclone: (clonedDoc) => {
-                const mathmls = clonedDoc.querySelectorAll('.katex-mathml');
-                mathmls.forEach(el => el.remove());
-            }
+            logging: false
         });
 
         // Convertimos el canvas a blob

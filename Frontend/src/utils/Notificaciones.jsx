@@ -8,21 +8,37 @@ const estilosAdvertencia = { title: "toast-titulo-advertencia", description: "to
 const estilosInfo = { title: "toast-titulo-info", description: "toast-descripcion" };
 
 export const alerta = {
-  exito: (titulo, descripcion) => {
+  exito: (titulo, descripcion, id) => {
     sileo.success({
+      ...(id ? { id } : {}),
       title: titulo,
       description: descripcion,
       fill: "#171717",
       styles: estilosExito
     });
   },
-  error: (titulo, descripcion) => {
+  error: (titulo, descripcion, id) => {
     sileo.error({
+      ...(id ? { id } : {}),
       title: titulo,
       description: descripcion,
       fill: "#171717",
       styles: estilosError
     });
+  },
+  cargando: (titulo, descripcion, id = "sileo-cargando") => {
+    return sileo.show({
+      id,
+      title: titulo,
+      description: descripcion,
+      type: "loading",
+      fill: "#171717",
+      duration: null,
+      styles: estilosInfo
+    });
+  },
+  cerrar: (id) => {
+    if (id) sileo.dismiss(id);
   },
   advertencia: (titulo, descripcion) => {
     sileo.warning({

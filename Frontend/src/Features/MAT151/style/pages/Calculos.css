@@ -1,4 +1,4 @@
-.editor_text {
+:where(.mat151) .editor_text {
   width: 100%;
   border: none;
   padding: 0 5px;
@@ -7,7 +7,7 @@
   color: inherit;
 }
 
-.calculadora-layout {
+:where(.mat151) .calculadora-layout {
   display: grid;
   grid-template-columns: 350px minmax(0, 1fr);
   gap: 10px;
@@ -16,12 +16,12 @@
   position: relative;
 }
 
-.calculadora-layout.colapsado {
+:where(.mat151) .calculadora-layout.colapsado {
   grid-template-columns: 0px minmax(0, 1fr);
   gap: 0px;
 }
 
-.boton-toggle-medio {
+:where(.mat151) .boton-toggle-medio {
   position: fixed;
   top: 50%;
   left: 0;
@@ -42,7 +42,7 @@
   transition: transform 0.2s, background-color 0.2s;
 }
 
-.boton-toggle-medio:hover {
+:where(.mat151) .boton-toggle-medio:hover {
   background-color: #e65c00;
   transform: translateY(-50%) scale(1.08);
 }
@@ -52,15 +52,15 @@
 /* ANIMACIÓN DEL ICONO (+ a -)               */
 /* ========================================= */
 
-.icono-animado {
+:where(.mat151) .icono-animado {
   position: relative;
   width: 12px;
   height: 12px;
   display: block;
 }
 
-.icono-animado::before,
-.icono-animado::after {
+:where(.mat151) .icono-animado::before,
+:where(.mat151) .icono-animado::after {
   content: '';
   position: absolute;
   background-color: white;
@@ -70,23 +70,23 @@
   transition: transform 0.3s ease;
 }
 
-.icono-animado::before {
+:where(.mat151) .icono-animado::before {
   width: 12px;
   height: 2px;
   transform: translate(-50%, -50%);
 }
 
-.icono-animado::after {
+:where(.mat151) .icono-animado::after {
   width: 2px;
   height: 12px;
   transform: translate(-50%, -50%) rotate(0deg);
 }
 
-.boton-toggle-medio.abierto .icono-animado::after {
+:where(.mat151) .boton-toggle-medio.abierto .icono-animado::after {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
-.calculadora-datos {
+:where(.mat151) .calculadora-datos {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -99,7 +99,7 @@
   transition: all 0.3s ease;
 }
 
-.btn-icon {
+:where(.mat151) .btn-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -109,13 +109,13 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-icon:hover {
+:where(.mat151) .btn-icon:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
   filter: brightness(1.1);
 }
 
-.contenedor-resultados-vacio {
+:where(.mat151) .contenedor-resultados-vacio {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -124,7 +124,7 @@
   flex-direction: column;
 }
 
-.barra-acciones-final {
+:where(.mat151) .barra-acciones-final {
   margin-top: 30px;
   padding: 25px;
   border-top: 1px dashed var(--border-color);
@@ -135,7 +135,7 @@
   background-color: rgba(128, 128, 128, 0.03);
 }
 
-.calculadora-layout.colapsado .calculadora-datos {
+:where(.mat151) .calculadora-layout.colapsado .calculadora-datos {
   padding: 0px;
   border: none;
   opacity: 0;
@@ -143,17 +143,17 @@
   width: 0px;
 }
 
-.etiqueta {
+:where(.mat151) .etiqueta {
   font-size: 0.9rem;
   font-weight: bold;
 }
 
-.selector-archivo {
+:where(.mat151) .selector-archivo {
   margin-Bottom: 15px;
   width: 100%;
 }
 
-.panel-controles-excel {
+:where(.mat151) .panel-controles-excel {
   margin-Top: 20px;
   padding: 15px;
   border: 1px solid var(--border-color);
@@ -161,13 +161,13 @@
   background: var(--bg-card);
 }
 
-.panel-controles-excel_h3 {
+:where(.mat151) .panel-controles-excel_h3 {
   font-Size: 1.1em;
   margin-Bottom: 10px;
   border-Bottom: 1px solid var(--border-color);
 }
 
-.container_operaciones {
+:where(.mat151) .container_operaciones {
   width: 100%;
   padding: 8px;
   border-Radius: 4px;
@@ -177,76 +177,76 @@
   margin-Bottom: 15px;
 }
 
-.container_dataset {
+:where(.mat151) .container_dataset {
   margin-Bottom: 15px;
   height: 350px;
   display: flex;
   flex-Direction: column;
 }
 
-.info_vista {
+:where(.mat151) .info_vista {
   font-Size: 0.8em;
   font-Weight: bold;
   margin-Bottom: 5px;
   color: var(--text-muted);
 }
 
-.container_intervalos {
+:where(.mat151) .container_intervalos {
   padding: 10px;
   border: 1px solid var(--border-color);
   border-Radius: 4px;
   margin-Bottom: 15px;
 }
 
-.container_select {
+:where(.mat151) .container_select {
   width: 100%;
   margin-Bottom: 8px;
 }
 
-.container_cal_input {
+:where(.mat151) .container_cal_input {
   width: 100%;
   margin-Top: 5px;
 }
 
-.container_cal_percentil {
+:where(.mat151) .container_cal_percentil {
   padding: 10px;
   border: 1px solid var(--border-color);
   border-Radius: 4px;
   margin-Bottom: 15px;
 }
 
-.container_cal_percentil label {
+:where(.mat151) .container_cal_percentil label {
   display: block;
   margin-Bottom: 5px;
 }
 
-.container_cal_percentil input {
+:where(.mat151) .container_cal_percentil input {
   width: 100%;
   padding: 5px;
 }
 
-.container_cal_percentil small {
+:where(.mat151) .container_cal_percentil small {
   color: var(--text-muted);
 }
 
-.container_tendencia_posicion {
+:where(.mat151) .container_tendencia_posicion {
   padding: 10px;
   border: 1px solid var(--border-color);
   border-Radius: 4px;
   margin-Bottom: 15px;
 }
 
-.container_tendencia_posicion label {
+:where(.mat151) .container_tendencia_posicion label {
   display: block;
   margin-Bottom: 5px;
 }
 
-.container_tendencia_posicion input {
+:where(.mat151) .container_tendencia_posicion input {
   width: 100%;
   padding: 5px;
 }
 
-.button_calcular {
+:where(.mat151) .button_calcular {
   width: 100%;
   padding: 10px 16px;
   margin-top: 15px;
@@ -264,7 +264,7 @@
   box-sizing: border-box;
 }
 
-.button_calcular:hover:not(:disabled) {
+:where(.mat151) .button_calcular:hover:not(:disabled) {
   background-color: var(--accent-color, #d97706) !important;
   color: #ffffff !important;
   border-color: var(--accent-color, #d97706) !important;
@@ -272,12 +272,12 @@
   transform: translateY(-1px);
 }
 
-.info_cargando {
+:where(.mat151) .info_cargando {
   text-Align: center;
   color: var(--text-muted);
 }
 
-.button_resultados {
+:where(.mat151) .button_resultados {
   width: 100%;
   padding: 10px;
   margin-Bottom: 20px;
@@ -285,31 +285,31 @@
   font-Size: 1em;
 }
 
-.button_resultados_manual {
+:where(.mat151) .button_resultados_manual {
   width: 100%;
   padding: 8px;
   background: #6b7280;
 }
 
-.frecuencias {
+:where(.mat151) .frecuencias {
   background-Color: var(--bg-card);
   border: 1px solid var(--border-color);
   padding: 15px;
   border-Radius: 8px;
 }
 
-.tendencias {
+:where(.mat151) .tendencias {
   color: var(--primary-color);
   border-Bottom: 2px solid var(--border-color);
   padding-Bottom: 5px;
 }
 
-.container_tablas_academica {
+:where(.mat151) .container_tablas_academica {
   overflow-X: auto;
   margin-Bottom: 30px;
 }
 
-.tabla-academica {
+:where(.mat151) .tabla-academica {
   width: 100%;
   border-collapse: collapse;
   font-family: "Times New Roman", serif;
@@ -317,20 +317,20 @@
   margin-top: 10px;
 }
 
-.tabla-academica th,
-.tabla-academica td {
+:where(.mat151) .tabla-academica th,
+:where(.mat151) .tabla-academica td {
   border: 1px solid var(--border-color);
   padding: 8px;
   text-align: center;
   color: var(--text-main);
 }
 
-.tabla-academica th {
+:where(.mat151) .tabla-academica th {
   background-color: var(--header-bg);
   font-weight: bold;
 }
 
-.container_tendencia_posicion {
+:where(.mat151) .container_tendencia_posicion {
   display: flex;
   justify-Content: space-between;
   align-Items: center;
@@ -339,18 +339,18 @@
   margin-Bottom: 10px;
 }
 
-.container_tendencia_posicion h4 {
+:where(.mat151) .container_tendencia_posicion h4 {
   color: var(--primary-color);
   margin: 0;
 }
 
-.container_subtendencia {
+:where(.mat151) .container_subtendencia {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.button_subtendencia {
+:where(.mat151) .button_subtendencia {
   padding: 6px 14px;
   cursor: pointer;
   border-radius: 6px;
@@ -368,14 +368,14 @@
   box-sizing: border-box;
 }
 
-.button_subtendencia.active {
+:where(.mat151) .button_subtendencia.active {
   background-color: var(--accent-color, #d97706) !important;
   color: #ffffff !important;
   border-color: var(--accent-color, #d97706) !important;
   font-weight: bold;
 }
 
-.button_subtendencia:hover:not(:disabled) {
+:where(.mat151) .button_subtendencia:hover:not(:disabled) {
   background-color: var(--accent-color, #d97706) !important;
   color: #ffffff !important;
   border-color: var(--accent-color, #d97706) !important;
@@ -383,13 +383,13 @@
   transform: translateY(-1px);
 }
 
-.contenedor-variabilidad-forma h4 {
+:where(.mat151) .contenedor-variabilidad-forma h4 {
   color: var(--primary-color);
   border-Bottom: 2px solid var(--border-color);
   padding-Bottom: 5px;
 }
 
-.contenedor-bivariada-avanzada h4 {
+:where(.mat151) .contenedor-bivariada-avanzada h4 {
   color: var(--primary-color);
   border-Bottom: 2px solid var(--border-color);
   padding-Bottom: 5px;
@@ -397,7 +397,7 @@
 
 
 /* Estilos para la pantalla de espera con el logo */
-.contenedor-espera-logo {
+:where(.mat151) .contenedor-espera-logo {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -406,7 +406,7 @@
   width: 100%;
 }
 
-.logo-espera {
+:where(.mat151) .logo-espera {
   width: 550px;
   max-width: 80%;
   /* Para que sea responsivo */
@@ -418,7 +418,7 @@
 }
 
 /* Si tu app usa una clase "dark" en el body o contenedor para el modo oscuro */
-body.dark-mode .logo-espera {
+body.dark-mode :where(.mat151) .logo-espera {
   /* En modo oscuro, le damos un brillo sutil en lugar de sombra negra */
   filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.2));
 }
@@ -427,31 +427,31 @@ body.dark-mode .logo-espera {
 /* MAGIA RESPONSIVA PARA TABLAS EN CELULARES               */
 /* ======================================================= */
 @media (max-width: 768px) {
-  .tabla-academica {
+  :where(.mat151) .tabla-academica {
     font-size: 0.85em;
     /* Achicamos la letra de las tablas en celulares */
   }
 
-  .tabla-academica th,
-  .tabla-academica td {
+  :where(.mat151) .tabla-academica th,
+:where(.mat151) .tabla-academica td {
     padding: 4px;
     /* Reducimos el relleno interno para que quepan más datos */
     font-size: 0.9em;
   }
 
-  .frecuencias {
+  :where(.mat151) .frecuencias {
     padding: 10px;
     /* Reducimos el relleno del contenedor blanco de resultados */
   }
 
-  .container_tablas_academica {
+  :where(.mat151) .container_tablas_academica {
     margin-bottom: 15px;
     /* Menos espacio muerto debajo de las tablas */
   }
 }
 
 /* Estilos para la tabla de historial */
-.tabla-historial-container {
+:where(.mat151) .tabla-historial-container {
   margin-top: 20px;
   background-color: var(--bg-card);
   border-radius: 8px;
@@ -460,12 +460,12 @@ body.dark-mode .logo-espera {
   box-shadow: var(--shadow-soft);
 }
 
-.fila-historial:hover {
+:where(.mat151) .fila-historial:hover {
   background-color: rgba(255, 255, 255, 0.03);
   transition: background 0.2s;
 }
 
-.badge-calculo {
+:where(.mat151) .badge-calculo {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -477,7 +477,7 @@ body.dark-mode .logo-espera {
 /* =========================================
    TOOLTIPS ESTADÍSTICOS (StatLabel)
 ========================================= */
-.stat-label-container {
+:where(.mat151) .stat-label-container {
   position: relative;
   cursor: help;
   border-bottom: 1px dashed #666;
@@ -486,7 +486,7 @@ body.dark-mode .logo-espera {
 }
 
 /* El globo oculto por defecto */
-.stat-tooltip {
+:where(.mat151) .stat-tooltip {
   position: absolute;
   top: 150%;
   background-color: #2c3e50;
@@ -512,23 +512,23 @@ body.dark-mode .logo-espera {
 }
 
 /* Mostrar al pasar el mouse */
-.stat-label-container:hover .stat-tooltip {
+:where(.mat151) .stat-label-container:hover .stat-tooltip {
   opacity: 1;
   visibility: visible;
 }
 
-.tooltip-math {
+:where(.mat151) .tooltip-math {
   color: #f1c40f;
   font-size: 1.1rem;
 }
 
 /* --- POSICIÓN: CENTRO (Por defecto) --- */
-.tooltip-center {
+:where(.mat151) .tooltip-center {
   left: 50%;
   transform: translateX(-50%);
 }
 
-.tooltip-center::after {
+:where(.mat151) .tooltip-center::after {
   content: "";
   position: absolute;
   bottom: 100%;
@@ -540,11 +540,11 @@ body.dark-mode .logo-espera {
 }
 
 /* --- POSICIÓN: IZQUIERDA (Para la primera columna) --- */
-.tooltip-left {
+:where(.mat151) .tooltip-left {
   left: 0;
 }
 
-.tooltip-left::after {
+:where(.mat151) .tooltip-left::after {
   content: "";
   position: absolute;
   bottom: 100%;
@@ -556,11 +556,11 @@ body.dark-mode .logo-espera {
 }
 
 /* --- POSICIÓN: DERECHA (Para las últimas columnas) --- */
-.tooltip-right {
+:where(.mat151) .tooltip-right {
   right: 0;
 }
 
-.tooltip-right::after {
+:where(.mat151) .tooltip-right::after {
   content: "";
   position: absolute;
   bottom: 100%;
@@ -574,15 +574,15 @@ body.dark-mode .logo-espera {
 /* =========================================
    FORZAR FLECHAS DEL INPUT DE PERCENTIL
 ========================================= */
-.input-percentil::-webkit-outer-spin-button,
-.input-percentil::-webkit-inner-spin-button {
+:where(.mat151) .input-percentil::-webkit-outer-spin-button,
+:where(.mat151) .input-percentil::-webkit-inner-spin-button {
   -webkit-appearance: always !important;
   opacity: 1 !important;
   display: block !important;
   cursor: pointer;
 }
 
-.input-percentil {
+:where(.mat151) .input-percentil {
   -moz-appearance: number-input !important;
   /* Para Firefox */
 }
@@ -590,12 +590,12 @@ body.dark-mode .logo-espera {
 /* =========================================
    SISTEMA DE TOOLTIPS PARA VISTA PREVIA
 ========================================= */
-.col-btn-container {
+:where(.mat151) .col-btn-container {
   position: relative;
   display: inline-block;
 }
 
-.col-btn-tooltip {
+:where(.mat151) .col-btn-tooltip {
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -617,13 +617,13 @@ body.dark-mode .logo-espera {
   font-weight: 500;
 }
 
-.col-btn-container:hover .col-btn-tooltip {
+:where(.mat151) .col-btn-container:hover .col-btn-tooltip {
   opacity: 1;
   visibility: visible;
 }
 
 /* Estilos de botones minimalistas */
-.col-btn-minimal {
+:where(.mat151) .col-btn-minimal {
   width: 32px;
   height: 32px;
   border-radius: 6px;
@@ -640,21 +640,21 @@ body.dark-mode .logo-espera {
   line-height: 0;
 }
 
-.col-btn-minimal:hover {
+:where(.mat151) .col-btn-minimal:hover {
   background-color: rgba(100, 116, 139, 0.12);
   border-color: rgba(100, 116, 139, 0.25);
 }
 
-.col-btn-blue:hover {
+:where(.mat151) .col-btn-blue:hover {
   color: #3b82f6;
   /* azul visible en ambos modos */
 }
 
-.col-btn-green:hover {
+:where(.mat151) .col-btn-green:hover {
   color: #10b981;
   /* verde esmeralda */
 }
 
-.col-btn-minimal:active {
+:where(.mat151) .col-btn-minimal:active {
   transform: scale(0.92);
 }

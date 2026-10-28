@@ -1,5 +1,5 @@
 from .usuarios import Usuario, CredencialAutorizada
-from .asignatura import Clase
+from .asignatura import Clase, DocenteModulo, EstudianteModulo
 from .inscripcion import Inscripcion
 from .archivo import Archivo
 from .historial_calculo import HistorialCalculo

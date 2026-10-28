@@ -223,7 +223,7 @@ export default function Grafico_HNP_Signos({ resultados, id = "grafico-hnp-signo
                         {chartContent}
                     </div>
                     {!useNormalApprox && (
-                        <div style={{ position: 'absolute', top: 15, right: 30, background: 'var(--bg-input)', padding: '5px 12px', borderRadius: '5px', border: '1px solid var(--border-color)', fontSize: '0.7rem', color: 'var(--text-pure)', zIndex: 50, display: 'flex', gap: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                        <div className="parametros-grafica-signos" style={{ position: 'absolute', top: 15, right: 30, background: 'var(--bg-input)', padding: '5px 12px', borderRadius: '5px', border: '1px solid var(--border-color)', fontSize: '0.7rem', color: 'var(--text-pure)', zIndex: 50, display: 'flex', gap: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                             <span>{renderKatex(`\\mathbf{n} = ${nEfectivo}`)}</span>
                             <span>{renderKatex(`\\mathbf{p} = 0.5`)}</span>
                         </div>

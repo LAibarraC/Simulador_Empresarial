@@ -114,7 +114,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                     </ul>
                 </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+            <div id="tour-t6-hp-sim-parametros" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                 <div style={{ background: 'var(--bg-input, #f1f5f9)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '5px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ fontSize: FS.xs, fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-pure)', textAlign: 'center' }}>PARÁMETROS REALES</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
@@ -183,7 +183,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('\\boldsymbol{\\alpha}:')}</label>
                 </div>
-                <div ref={alphaRef} style={{ position: 'relative' }}>
+                <div id="tour-t6-hp-sim-alpha" ref={alphaRef} style={{ position: 'relative' }}>
                     <div
                         onClick={() => setIsAlphaOpen(!isAlphaOpen)}
                         style={{
@@ -232,7 +232,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>{renderKatex('\\mathbf{H}_1:')}</label>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div id="tour-t6-hp-sim-h1" style={{ display: 'flex', gap: '8px' }}>
                     {['bilateral', 'derecha', 'izquierda'].map(tipo => {
                         const isSelected = tipoPrueba === tipo;
                         const mathStr = tipo === 'bilateral' ? `${paramSymbol} \\neq ${paramHypo}` :
@@ -262,7 +262,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
                 <div></div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+            <div id="tour-t6-hp-sim-muestras" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', textAlign: 'left', flexShrink: 0 }}>{renderKatex('\\mathbf{n}:')}</label>
                     <input type="number" className="input-mat251 placeholder-small" style={{ flex: 1 }} value={n} onChange={e => setN(e.target.value)} min="2" placeholder="Tamaño de muestra" />
@@ -275,6 +275,7 @@ export default function Controles_HP_Simulacion({ prueba, onCalcular }) {
 
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button 
+                    id="tour-t6-hp-sim-btn-ejecutar"
                     className="button_calcular" 
                     style={{ width: 'auto', padding: '5px 15px', opacity: isCalculating ? 0.7 : 1, cursor: isCalculating ? 'wait' : 'pointer' }} 
                     onClick={handleCalcular}

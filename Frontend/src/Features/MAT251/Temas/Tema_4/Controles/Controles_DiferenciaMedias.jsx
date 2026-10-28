@@ -229,7 +229,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent', marginTop: '10px' }}>
             <div className="tema4-population-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px' }}>
                 {/* Población 1 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                <div id="tour-t4difmed-poblacion1" className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
                     <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>
                         POBLACIÓN 1
                     </h4>
@@ -310,7 +310,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                 </div>
 
                 {/* Población 2 */}
-                <div className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
+                <div id="tour-t4difmed-poblacion2" className="tema4-population-card" style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)', minWidth: 0 }}>
                     <h4 style={{ margin: '0 0 10px 0', fontSize: FS.sm, color: 'var(--text-pure)', fontWeight: 700, fontFamily: FONT }}>
                         POBLACIÓN 2
                     </h4>
@@ -391,7 +391,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', marginBottom: '10px' }}>
+            <div id="tour-t4difmed-btn-calcular" style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', marginBottom: '10px' }}>
                 <button
                     type="button"
                     onClick={generarDistribucion}
@@ -404,75 +404,128 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
 
             {distribucionGenerada && (
                 <div style={{ marginTop: '10px', animation: 'fadeIn 0.5s ease-out' }}>
-                    <div className="tema4-difference-calculation-card" style={{ background: 'var(--bg-card)', padding: '14px 16px', borderRadius: RADIUS, border: 'none', boxShadow: 'none', marginTop: '10px', marginBottom: '10px', textAlign: 'center' }}>
+                    <div id="tour-t4difmed-parametros-estimados" className="tema4-difference-calculation-card" style={{ background: 'var(--bg-card)', padding: '14px 16px', borderRadius: RADIUS, border: 'none', boxShadow: 'none', marginTop: '10px', marginBottom: '10px', textAlign: 'center' }}>
                         <h4 style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: 'var(--text-pure)', textAlign: 'center', fontWeight: 700, fontFamily: FONT }}>Parámetros Combinados</h4>
                         <div className="thin-scrollbar formula-responsive tema4-difference-calculation-summary" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px', alignItems: 'center', overflow: 'visible', paddingBottom: '4px', color: 'var(--text-pure)' }}>
                             <div className="tema4-difference-calculation-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', width: '100%', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-                                <StatLabel formulaKey="E_dif_medias" formulaLatex="E(\bar{X} - \bar{Y})" align="center" />
-                                <Latex formula={`= \\mu_X - \\mu_Y = ${formatMathNumber(datosParciales.m1)} - ${formatMathNumber(datosParciales.m2)} = ${formatMathNumber(datosParciales.esperanza)}`} />
+                                <StatLabel formulaKey="E_dif_medias" formulaLatex="E(\bar{X}_1 - \bar{X}_2)" align="center" />
+                                <Latex formula={`= \\mu_1 - \\mu_2 = ${formatMathNumber(datosParciales.m1)} - ${formatMathNumber(datosParciales.m2)} = ${formatMathNumber(datosParciales.esperanza)}`} />
                             </div>
                             <div className="tema4-difference-calculation-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', width: '100%', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-                                <StatLabel formulaKey="V_dif_medias" formulaLatex="V(\bar{X} - \bar{Y})" align="center" />
-                                <Latex formula={`= \\frac{\\sigma_X^2}{n_X} + \\frac{\\sigma_Y^2}{n_Y} = \\frac{${formatMathNumber(datosParciales.s1)}^2}{${datosParciales.nn1}} + \\frac{${formatMathNumber(datosParciales.s2)}^2}{${datosParciales.nn2}} = ${datosParciales.varFracDen === 1 ? datosParciales.varFracNum : `\\frac{${datosParciales.varFracNum}}{${datosParciales.varFracDen}}`} = ${formatMathNumber(datosParciales.varianza)}`} />
+                                <StatLabel formulaKey="V_dif_medias" formulaLatex="V(\bar{X}_1 - \bar{X}_2)" align="center" />
+                                <Latex formula={`= \\frac{\\sigma_1^2}{n_1} + \\frac{\\sigma_2^2}{n_2} = \\frac{${formatMathNumber(datosParciales.s1)}^2}{${datosParciales.nn1}} + \\frac{${formatMathNumber(datosParciales.s2)}^2}{${datosParciales.nn2}} = ${datosParciales.varFracDen === 1 ? datosParciales.varFracNum : `\\frac{${datosParciales.varFracNum}}{${datosParciales.varFracDen}}`} = ${formatMathNumber(datosParciales.varianza)}`} />
                             </div>
                             <div className="tema4-difference-calculation-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', width: '100%', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-                                <StatLabel formulaKey="sigma_dif_medias" formulaLatex="\sigma_{\bar{X} - \bar{Y}}" align="center" />
-                                <Latex formula={`= \\sqrt{V(\\bar{X} - \\bar{Y})} = \\sqrt{${formatMathNumber(datosParciales.varianza)}} = ${formatMathNumber(datosParciales.se)}`} />
+                                <StatLabel formulaKey="sigma_dif_medias" formulaLatex="\sigma_{\bar{X}_1 - \bar{X}_2}" align="center" />
+                                <Latex formula={`= \\sqrt{V(\\bar{X}_1 - \\bar{X}_2)} = \\sqrt{${formatMathNumber(datosParciales.varianza)}} = ${formatMathNumber(datosParciales.se)}`} />
                             </div>
                             <div className="formula-bold tema4-difference-calculation-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', width: '100%', flexWrap: 'nowrap', whiteSpace: 'nowrap', fontWeight: 'bold' }}>
-                                <Latex formula={`\\mathbf{\\bar{X} - \\bar{Y} \\sim N\\left(${formatMathNumber(datosParciales.esperanza)} ; ${datosParciales.varFracDen === 1 ? datosParciales.varFracNum : `\\frac{${datosParciales.varFracNum}}{${datosParciales.varFracDen}}`}\\right)}`} />
+                                <Latex formula={`\\mathbf{\\bar{X}_1 - \\bar{X}_2 \\sim N\\left(${formatMathNumber(datosParciales.esperanza)} ; ${datosParciales.varFracDen === 1 ? datosParciales.varFracNum : `\\frac{${datosParciales.varFracNum}}{${datosParciales.varFracDen}}`}\\right)}`} />
                             </div>
                         </div>
                     </div>
 
                     {/* Sección Condición de Búsqueda */}
-                    <div style={{ margin: '15px 0 5px 0' }}></div>
+                    <div id="tour-t4difmed-condicion-busqueda">
+                        <div style={{ margin: '15px 0 5px 0' }}></div>
 
-                    <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT, fontWeight: 'bold' }}>
-                        Condición de Búsqueda:
-                    </h4>
+                        <h4 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 12px 0', fontFamily: FONT, fontWeight: 'bold' }}>
+                            Condición de Búsqueda:
+                        </h4>
 
-                    {/* FILA 1: Condición lógica y su dropdown en una sola fila centrada */}
-                    <div className="tema4-condicion-fila">
-                        <label className="tema4-condicion-label">
-                            Condición lógica:
-                        </label>
-                        <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '250px' : '200px' }}>
-                            <CustomSelect
-                                value={condicion}
-                                onChange={(val) => { setCondicion(val); }}
-                                options={[
-                                    { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X} - \bar{Y} \le x)" /></div> },
-                                    { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X} - \bar{Y} \ge x)" /></div> },
-                                    { value: 'entre', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(x_1 \le \bar{X} - \bar{Y} \le x_2)" /></div> }
-                                ]}
-                            />
+                        {/* FILA 1: Condición lógica y su dropdown en una sola fila centrada */}
+                        <div className="tema4-condicion-fila">
+                            <label className="tema4-condicion-label">
+                                Condición lógica:
+                            </label>
+                            <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '250px' : '200px' }}>
+                                <CustomSelect
+                                    value={condicion}
+                                    onChange={(val) => { setCondicion(val); }}
+                                    options={[
+                                        { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X}_1 - \bar{X}_2 \le x)" /></div> },
+                                        { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X}_1 - \bar{X}_2 \ge x)" /></div> },
+                                        { value: 'entre', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(x_1 \le \bar{X}_1 - \bar{X}_2 \le x_2)" /></div> }
+                                    ]}
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    {/* FILA 2: Valor(es) x (y x2 si entre) */}
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        flexWrap: 'nowrap',
-                        justifyContent: 'center',
-                        gap: '10px',
-                        marginBottom: '14px',
-                        width: '100%',
-                        maxWidth: condicion === 'entre' ? '360px' : '200px',
-                        margin: '0 auto 14px auto',
-                        boxSizing: 'border-box'
-                    }}>
-                        {condicion === 'entre' ? (
-                            <>
+                        {/* FILA 2: Valor(es) x (y x2 si entre) */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            flexWrap: 'nowrap',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            marginBottom: '14px',
+                            width: '100%',
+                            maxWidth: condicion === 'entre' ? '360px' : '200px',
+                            margin: '0 auto 14px auto',
+                            boxSizing: 'border-box'
+                        }}>
+                            {condicion === 'entre' ? (
+                                <>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                        <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                            <Latex formula="\mathbf{x}_1:" />
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="input-mat251 placeholder-small"
+                                            placeholder="Límite inferior"
+                                            value={valorX1}
+                                            onChange={(e) => { setValorX1(e.target.value); }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontSize: FS.sm,
+                                                fontFamily: FONT,
+                                                borderRadius: RADIUS,
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-input)',
+                                                color: 'var(--text-pure)',
+                                                height: '36px',
+                                                flex: 1,
+                                                minWidth: 0,
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                        <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                            <Latex formula="\mathbf{x}_2:" />
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="input-mat251 placeholder-small"
+                                            placeholder="Límite superior"
+                                            value={valorX2}
+                                            onChange={(e) => { setValorX2(e.target.value); }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontSize: FS.sm,
+                                                fontFamily: FONT,
+                                                borderRadius: RADIUS,
+                                                border: '1px solid var(--border-color)',
+                                                background: 'var(--bg-input)',
+                                                color: 'var(--text-pure)',
+                                                height: '36px',
+                                                flex: 1,
+                                                minWidth: 0,
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                </>
+                            ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                                     <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                        <Latex formula="\mathbf{x}_1:" />
+                                        <Latex formula="\mathbf{x}:" />
                                     </label>
                                     <input
                                         type="number"
                                         className="input-mat251 placeholder-small"
-                                        placeholder="Límite inferior"
+                                        placeholder="Valor x"
                                         value={valorX1}
                                         onChange={(e) => { setValorX1(e.target.value); }}
                                         style={{
@@ -490,62 +543,11 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                                         }}
                                     />
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
-                                    <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                        <Latex formula="\mathbf{x}_2:" />
-                                    </label>
-                                    <input
-                                        type="number"
-                                        className="input-mat251 placeholder-small"
-                                        placeholder="Límite superior"
-                                        value={valorX2}
-                                        onChange={(e) => { setValorX2(e.target.value); }}
-                                        style={{
-                                            padding: '6px 12px',
-                                            fontSize: FS.sm,
-                                            fontFamily: FONT,
-                                            borderRadius: RADIUS,
-                                            border: '1px solid var(--border-color)',
-                                            background: 'var(--bg-input)',
-                                            color: 'var(--text-pure)',
-                                            height: '36px',
-                                            flex: 1,
-                                            minWidth: 0,
-                                            boxSizing: 'border-box'
-                                        }}
-                                    />
-                                </div>
-                            </>
-                        ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
-                                <label style={{ fontSize: FS.md, fontWeight: 700, color: 'var(--text-pure)', margin: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                    <Latex formula="\mathbf{x}:" />
-                                </label>
-                                <input
-                                    type="number"
-                                    className="input-mat251 placeholder-small"
-                                    placeholder="Valor x"
-                                    value={valorX1}
-                                    onChange={(e) => { setValorX1(e.target.value); }}
-                                    style={{
-                                        padding: '6px 12px',
-                                        fontSize: FS.sm,
-                                        fontFamily: FONT,
-                                        borderRadius: RADIUS,
-                                        border: '1px solid var(--border-color)',
-                                        background: 'var(--bg-input)',
-                                        color: 'var(--text-pure)',
-                                        height: '36px',
-                                        flex: 1,
-                                        minWidth: 0,
-                                        boxSizing: 'border-box'
-                                    }}
-                                />
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                    <div id="tour-t4difmed-btn-graficar" style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                         <button
                             type="button"
                             onClick={calcularProbabilidad}

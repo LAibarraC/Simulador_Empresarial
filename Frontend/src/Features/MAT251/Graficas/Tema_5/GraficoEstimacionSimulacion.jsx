@@ -79,9 +79,9 @@ export default function GraficoEstimacionSimulacion({ resultados, simulacionesVi
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-
             {/* GRÁFICO DE EVOLUCIÓN */}
-            <MarcoWidgetMAT251 titulo={tituloEstimador} anchoCompleto={true} alto="450px">
+            <div id="tour-t5-sim-grafico-evolucion">
+                <MarcoWidgetMAT251 titulo={tituloEstimador} anchoCompleto={true} alto="450px">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={datosLinea} margin={{ top: 20, right: 30, left: -10, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color, #e2e8f0)" />
@@ -146,8 +146,10 @@ export default function GraficoEstimacionSimulacion({ resultados, simulacionesVi
                     </LineChart>
                 </ResponsiveContainer>
             </MarcoWidgetMAT251>
+            </div>
 
             {/* HISTOGRAMA */}
+            <div id="tour-t5-sim-grafico-distribucion">
             <MarcoWidgetMAT251 titulo={tituloDistribucion} anchoCompleto={true} alto="450px">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={datosHistograma} margin={{ top: 20, right: 30, left: -10, bottom: 0 }} barCategoryGap="0%" barGap={0}>
@@ -206,6 +208,7 @@ export default function GraficoEstimacionSimulacion({ resultados, simulacionesVi
                     </BarChart>
                 </ResponsiveContainer>
             </MarcoWidgetMAT251>
+            </div>
         </div>
     );
 }

@@ -83,7 +83,7 @@ function CustomSelectHerramienta({ value, onChange }) {
     );
 }
 
-export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abrirEditor }) {
+export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abrirEditor, onResultado }) {
     const [modoMuestral, setModoMuestral] = useState('empirica');
     const [distribucionActiva, setDistribucionActiva] = useState('normal');
 
@@ -96,8 +96,27 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
     const [datosRazonVarianzas, setDatosRazonVarianzas] = useState(null);
     const [datosDiferenciaProporciones, setDatosDiferenciaProporciones] = useState(null);
     const [datosStudent, setDatosStudent] = useState(null);
+    const [datosEmpiricos, setDatosEmpiricos] = useState(null);
+
+    const resultadoActivo = modoMuestral === 'empirica' ? datosEmpiricos : {
+        normal: datosProbMuestral, proporcion: datosProporcion, chi: datosChiCuadrada,
+        dif_medias: datosDiferenciaMedias, dif_proporciones: datosDiferenciaProporciones,
+        student: datosStudent, dif_medias_desc: datosDifMediasDesc,
+        razon_varianzas: datosRazonVarianzas, fisher: datosFisher
+    }[distribucionActiva];
+
+    useEffect(() => {
+        onResultado?.(resultadoActivo ? {
+            operacion: 'distribuciones_muestrales',
+            distribucion: modoMuestral === 'empirica' ? 'empirica' : distribucionActiva,
+            resultados: resultadoActivo,
+            nombreVariable: varSeleccionada?.nombre,
+            poblacion: modoMuestral === 'empirica' ? (filas || []).map(f => String(f.valor ?? '').trim()).filter(Boolean) : undefined
+        } : null);
+    }, [resultadoActivo, distribucionActiva, modoMuestral, onResultado, varSeleccionada?.nombre, filas]);
 
     const limpiarResultados = () => {
+        setDatosEmpiricos(null);
         setDatosProbMuestral(null);
         setDatosChiCuadrada(null);
         setDatosFisher(null);
@@ -124,7 +143,7 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', fontFamily: FONT }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px' }}>
-                <div className="contenedor-selector-modos-mat251" style={{ width: '100%', maxWidth: '420px', display: 'flex' }}>
+                <div id="tour-t4-modos-muestrales" className="contenedor-selector-modos-mat251" style={{ width: '100%', maxWidth: '420px', display: 'flex' }}>
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modoMuestral === 'empirica' ? 'active' : ''}`}
@@ -144,18 +163,20 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
                 </div>
             </div>
             {modoMuestral === 'empirica' ? (
-                <Resultados_DistribucionesMuestrales varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} />
+                <Resultados_DistribucionesMuestrales varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} onCalcular={setDatosEmpiricos} />
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <div id="tour-t4-selector-distribucion-teorica" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                         <CustomSelectHerramienta value={distribucionActiva} onChange={cambiarDistribucion} />
                     </div>
                     {distribucionActiva === 'normal' ? (
                 <div className="tema4-calculadora-wrapper">
                     <Controles_ProbabilidadMuestral onCalcular={setDatosProbMuestral} />
                     <div>
-                        <GraficoProbabilidadMuestral resultados={datosProbMuestral} />
-                        <div className="tema4-calculadora-resultados">
+                        <div id="tour-t4calc-grafica">
+                            <GraficoProbabilidadMuestral resultados={datosProbMuestral} />
+                        </div>
+                        <div id="tour-t4calc-resultados" className="tema4-calculadora-resultados">
                             <Resultados_ProbabilidadMuestral resultados={datosProbMuestral} />
                         </div>
                     </div>
@@ -164,8 +185,10 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
                 <div className="tema4-calculadora-wrapper">
                     <Controles_Proporcion onCalcular={setDatosProporcion} />
                     <div>
-                        <GraficoProporcion resultados={datosProporcion} />
-                        <div className="tema4-calculadora-resultados">
+                        <div id="tour-t4prop-grafica">
+                            <GraficoProporcion resultados={datosProporcion} />
+                        </div>
+                        <div id="tour-t4prop-resultados" className="tema4-calculadora-resultados">
                             <Resultados_Proporcion resultados={datosProporcion} />
                         </div>
                     </div>
@@ -174,8 +197,10 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
                 <div className="tema4-calculadora-wrapper">
                     <Controles_DiferenciaMedias onCalcular={setDatosDiferenciaMedias} />
                     <div>
-                        <GraficoDiferenciaMedias resultados={datosDiferenciaMedias} />
-                        <div className="tema4-calculadora-resultados">
+                        <div id="tour-t4difmed-grafica">
+                            <GraficoDiferenciaMedias resultados={datosDiferenciaMedias} />
+                        </div>
+                        <div id="tour-t4difmed-resultados" className="tema4-calculadora-resultados">
                             <Resultados_DiferenciaMedias resultados={datosDiferenciaMedias} />
                         </div>
                     </div>
@@ -194,8 +219,10 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
                 <div className="tema4-calculadora-wrapper">
                     <Controles_ChiCuadrada onCalcular={setDatosChiCuadrada} />
                     <div>
-                        <GraficoChiCuadrada resultados={datosChiCuadrada} />
-                        <div className="tema4-calculadora-resultados">
+                        <div id="tour-t4chi-grafica">
+                            <GraficoChiCuadrada resultados={datosChiCuadrada} />
+                        </div>
+                        <div id="tour-t4chi-resultados" className="tema4-calculadora-resultados">
                             <Resultados_ChiCuadrada resultados={datosChiCuadrada} />
                         </div>
                     </div>
@@ -230,8 +257,10 @@ export default function Gestor_CalculadoraMuestral({ varSeleccionada, filas, abr
                 <div className="tema4-calculadora-wrapper">
                     <Controles_DiferenciaProporciones onCalcular={setDatosDiferenciaProporciones} />
                     <div>
-                        <GraficoDiferenciaProporciones resultados={datosDiferenciaProporciones} />
-                        <div className="tema4-calculadora-resultados">
+                        <div id="tour-t4difprop-grafica">
+                            <GraficoDiferenciaProporciones resultados={datosDiferenciaProporciones} />
+                        </div>
+                        <div id="tour-t4difprop-resultados" className="tema4-calculadora-resultados">
                             <Resultados_DiferenciaProporciones resultados={datosDiferenciaProporciones} />
                         </div>
                     </div>

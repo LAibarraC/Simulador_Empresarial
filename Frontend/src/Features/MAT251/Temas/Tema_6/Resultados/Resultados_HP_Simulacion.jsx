@@ -244,7 +244,7 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
             {/* CONTROLES DE SIMULACIÓN TIPO TEMA 5 */}
             {(isMediaZ || isMediaT || isProporcion || isVarianza) && (
                 <>
-                    <div style={{ marginTop: '0px', marginBottom: '5px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
+                    <div id="tour-t6-hp-sim-progreso" style={{ marginTop: '0px', marginBottom: '5px', padding: '5px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
                         <div style={{ position: 'absolute', top: 0, left: 0, height: '4px', background: 'var(--primary-color)', width: `${(iteracionActual / resultados.historial.length) * 100}%`, transition: 'width 0.1s linear' }} />
                         
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
@@ -339,7 +339,7 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                 </>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+            <div id="tour-t6-hp-sim-metricas" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                 
                 {/* Tarjeta: Rechazos */}
                 <div 
@@ -369,13 +369,15 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
             {(isMediaZ || isMediaT || isProporcion || isVarianza) && (
                 <>
                     {/* Gráfica Principal Delegada a su propio componente */}
-                    {(isMediaZ || isProporcion) ? (
-                        <Grafico_HP_Simulacion resultados={liveResultados} prueba={prueba} />
-                    ) : isVarianza ? (
-                        <Grafico_HP_SimulacionVarianza resultados={liveResultados} prueba={prueba} />
-                    ) : (
-                        <Grafico_HP_SimulacionT resultados={liveResultados} prueba={prueba} />
-                    )}
+                    <div id="tour-t6-hp-sim-grafico">
+                        {(isMediaZ || isProporcion) ? (
+                            <Grafico_HP_Simulacion resultados={liveResultados} prueba={prueba} />
+                        ) : isVarianza ? (
+                            <Grafico_HP_SimulacionVarianza resultados={liveResultados} prueba={prueba} />
+                        ) : (
+                            <Grafico_HP_SimulacionT resultados={liveResultados} prueba={prueba} />
+                        )}
+                    </div>
 
                     {/* Caja de Conclusión Didáctica (Alerta de Error Tipo I) */}
                     {false && isNullTrue && (
@@ -391,7 +393,7 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                     )}
 
                     {/* Tabla de Registro (Historial de Simulaciones) */}
-                    <div style={{ marginTop: '15px' }}>
+                    <div id="tour-t6-hp-sim-tabla" style={{ marginTop: '15px' }}>
                         <h5 style={{ margin: '0 0 15px 0', color: 'var(--text-pure)' }}>Historial de Simulaciones</h5>
                         <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', border: '1px solid var(--border-color)', borderRadius: '0px', background: 'var(--bg-card)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
                             <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'center', fontSize: '0.85em', whiteSpace: 'nowrap', color: 'var(--text-pure)' }}>
@@ -515,7 +517,7 @@ export default function Resultados_HP_Simulacion({ resultados, prueba }) {
                             )}
                         </div>
                     </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                    <div id="tour-t6-hp-sim-acciones" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
                         <button
                             type="button"
                             className="btn-primary"

@@ -295,19 +295,40 @@ export default function ResultadosSimuladorTotal({
     const activeCausasBayes = inputMode === 'manual' ? causasBayesManual : causasBayesMatriz;
     const setActiveCausasBayes = inputMode === 'manual' ? setCausasBayesManual : setCausasBayesMatriz;
 
+    const cambiarModo = (nuevoModo) => {
+        if (nuevoModo === inputMode) return;
+        setInputMode(nuevoModo);
+        setResultadoSimulador(null);
+        setResultadoManual(null);
+        setCausasBayesMatriz([]);
+        setCausasBayesManual([]);
+        setErrorManual('');
+        setErrorSimulador('');
+    };
+
+    const handleBayesChange = (val) => {
+        setActiveCausasBayes(val);
+        setResultadoSimulador(prev => {
+            if (!prev) return prev;
+            return { ...prev, causasBayes: val };
+        });
+    };
+
     const agregarRama = () => {
         const nextId = manualBranches.length > 0 ? Math.max(...manualBranches.map(b => b.id)) + 1 : 1;
         setManualBranches([...manualBranches, { id: nextId, name: `Causa ${nextId}`, pA: '', pBA: '' }]);
+        setResultadoManual(null);
+        setResultadoSimulador(null);
+        setCausasBayesManual([]);
     };
 
     const eliminarRama = (id) => {
         if (manualBranches.length <= 2) return;
         const filtradas = manualBranches.filter(b => b.id !== id);
         setManualBranches(filtradas);
-        const eliminada = manualBranches.find(b => b.id === id);
-        if (eliminada && causasBayesManual.includes(eliminada.name)) {
-            setCausasBayesManual(causasBayesManual.filter(c => c !== eliminada.name));
-        }
+        setResultadoManual(null);
+        setResultadoSimulador(null);
+        setCausasBayesManual([]);
     };
 
     const handleBranchChange = (id, field, value) => {
@@ -317,6 +338,9 @@ export default function ResultadosSimuladorTotal({
             }
             return b;
         }));
+        setResultadoManual(null);
+        setResultadoSimulador(null);
+        setCausasBayesManual([]);
     };
 
     const sumPA = useMemo(() => {
@@ -406,7 +430,14 @@ export default function ResultadosSimuladorTotal({
             setResultadoSimulador(null);
         } else {
             setRamas(res.resultado.desglose);
-            setResultadoSimulador(res.resultado);
+            setResultadoSimulador({
+                ...res.resultado,
+                modo: 'matriz',
+                colCausa,
+                colEvento,
+                valExito,
+                causasBayes: []
+            });
             setErrorSimulador('');
             setCausasBayesMatriz([]); // Reset Bayes de matriz
         }
@@ -418,11 +449,13 @@ export default function ResultadosSimuladorTotal({
             if (!nombre) {
                 setAlerta({ isOpen: true, mensaje: "Todas las causas deben tener un nombre asignado." });
                 setResultadoManual(null);
+                setResultadoSimulador(null);
                 return;
             }
             if (b.pA === '' || b.pBA === '') {
                 setAlerta({ isOpen: true, mensaje: `Debes ingresar las probabilidades P(${nombre}) y P(A|${nombre}).` });
                 setResultadoManual(null);
+                setResultadoSimulador(null);
                 return;
             }
             const pA = parseFloat(b.pA);
@@ -430,11 +463,13 @@ export default function ResultadosSimuladorTotal({
             if (isNaN(pA) || pA < 0 || pA > 1) {
                 setAlerta({ isOpen: true, mensaje: `La probabilidad P(${nombre}) debe ser un número entre 0 y 1.` });
                 setResultadoManual(null);
+                setResultadoSimulador(null);
                 return;
             }
             if (isNaN(pBA) || pBA < 0 || pBA > 1) {
                 setAlerta({ isOpen: true, mensaje: `La probabilidad condicional P(A|${nombre}) debe ser un número entre 0 y 1.` });
                 setResultadoManual(null);
+                setResultadoSimulador(null);
                 return;
             }
         }
@@ -446,6 +481,7 @@ export default function ResultadosSimuladorTotal({
                 mensaje: `La suma de las probabilidades marginales P(B_i) es ${(totalPA * 100).toFixed(2)}%. Recuerde que para constituir una partición completa del espacio muestral, la suma debe ser igual al 100% (1.0).`
             });
             setResultadoManual(null);
+            setResultadoSimulador(null);
             return;
         }
 
@@ -465,7 +501,14 @@ export default function ResultadosSimuladorTotal({
         });
 
         const probB = desglose.reduce((acc, r) => acc + r.mult, 0);
-        setResultadoManual({ probB, desglose });
+        const resMan = {
+            probB,
+            desglose,
+            modo: 'manual',
+            causasBayes: []
+        };
+        setResultadoManual(resMan);
+        setResultadoSimulador(resMan);
         setCausasBayesManual([]);
         setErrorManual('');
     };
@@ -483,11 +526,11 @@ export default function ResultadosSimuladorTotal({
         <div style={{ marginTop: '10px' }}>
             {/* SELECTOR DE MODO DE ENTRADA */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                <div className="contenedor-selector-modos-mat251">
+                <div id="tour-total-modos-entrada" className="contenedor-selector-modos-mat251">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
-                        onClick={() => setInputMode('matriz')}
+                        onClick={() => cambiarModo('matriz')}
                         style={{ fontFamily: FONT }}
                     >
                         Análisis de Matriz
@@ -495,7 +538,7 @@ export default function ResultadosSimuladorTotal({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
-                        onClick={() => setInputMode('manual')}
+                        onClick={() => cambiarModo('manual')}
                         style={{ fontFamily: FONT }}
                     >
                         Modo Manual
@@ -509,7 +552,7 @@ export default function ResultadosSimuladorTotal({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '0px' }}>
                         <h4 style={{ marginBottom: '5px', fontSize: FS.sm, fontWeight: 'bold', color: 'var(--text-pure)' }}>Datos:</h4>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}> 
+                        <div id="tour-total-manual-ramas" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}> 
                             {manualBranches.map((rama) => (
                                 <div key={rama.id} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '10px', borderRadius: RADIUS, border: '1px solid var(--border-color)' }}>
                                     <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -630,6 +673,7 @@ export default function ResultadosSimuladorTotal({
 
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', width: '100%' }}>
                             <button
+                                id="tour-total-manual-btn-agregar"
                                 type="button"
                                 onClick={agregarRama}
                                 className="btn-primary"
@@ -666,6 +710,7 @@ export default function ResultadosSimuladorTotal({
 
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0px', width: '100%' }}>
                             <button
+                                id="tour-total-manual-btn-calcular"
                                 type="button"
                                 onClick={calcularManual}
                                 className="button_calcular"
@@ -696,7 +741,7 @@ export default function ResultadosSimuladorTotal({
                     /* MODO MATRIZ */
                     <>
                         {/* ── BARRA DE DATOS Y EDITOR ── */}
-                        <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                        <div id="tour-total-datos" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                             <div>
                                 <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
@@ -733,7 +778,7 @@ export default function ResultadosSimuladorTotal({
                         {varSeleccionada && varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 ? (
                             <div style={{ background: 'var(--bg-input)', padding: '12px', borderRadius: RADIUS, border: '1px solid var(--border-color)', marginBottom: '15px' }}>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'flex-end' }}>
-                                    <div style={{ flex: 1, minWidth: '200px' }}>
+                                    <div id="tour-total-causa" style={{ flex: 1, minWidth: '200px' }}>
                                         <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>
                                             Variable Causa <span style={{ color: 'var(--text-pure)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString('B_i') }} />:
                                         </label>
@@ -754,7 +799,7 @@ export default function ResultadosSimuladorTotal({
                                         />
                                     </div>
 
-                                    <div style={{ flex: 1, minWidth: '200px' }}>
+                                    <div id="tour-total-evento" style={{ flex: 1, minWidth: '200px' }}>
                                         <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontWeight: 600, color: 'var(--text-pure)' }}>
                                             Variable Evento <span style={{ color: 'var(--text-pure)' }} dangerouslySetInnerHTML={{ __html: katex.renderToString('A') }} />:
                                         </label>
@@ -776,7 +821,7 @@ export default function ResultadosSimuladorTotal({
                                     </div>
 
                                     {colEvento && valoresUnicosEvento.length > 0 && (
-                                        <div style={{ flex: 1, minWidth: '200px' }}>
+                                        <div id="tour-total-exito" style={{ flex: 1, minWidth: '200px' }}>
                                             <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', color: 'var(--text-pure)', fontWeight: 600 }}>Valor de "Éxito":</label>
                                             <CustomSelect
                                                 value={valExito}
@@ -790,6 +835,7 @@ export default function ResultadosSimuladorTotal({
 
                                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
                                     <button
+                                        id="tour-total-btn-calcular"
                                         type="button"
                                         onClick={calcular}
                                         className="button_calcular"
@@ -831,7 +877,7 @@ export default function ResultadosSimuladorTotal({
 
             {activeResultado && (
                 <>
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-total-tabla-desglose" style={{ marginBottom: '20px' }}>
                         <h3 style={{ color: 'var(--text-pure)', margin: '0 0 10px 0', fontSize: FS.md, fontWeight: 'bold', textAlign: 'center' }}>
                             {inputMode === 'matriz' ? 'Desglose de la Matriz' : 'Desglose de Probabilidades'}
                         </h3>
@@ -896,7 +942,7 @@ export default function ResultadosSimuladorTotal({
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
+                    <div id="tour-total-formula" style={{ marginBottom: '20px' }}>
                         <h3 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 0px 0', fontWeight: 700, textAlign: 'center' }}>
                             PROBABILIDAD TOTAL
                         </h3>
@@ -904,7 +950,7 @@ export default function ResultadosSimuladorTotal({
                     </div>
 
                     {/* SECCIÓN BAYES */}
-                    <div style={{ marginBottom: '20px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+                    <div id="tour-total-bayes" style={{ marginBottom: '20px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
                         <h3 style={{ color: 'var(--text-pure)', fontSize: FS.md, margin: '0 0 0px 0', fontWeight: 700, textAlign: 'center' }}>
                             TEOREMA DE BAYES
                         </h3>
@@ -929,7 +975,7 @@ export default function ResultadosSimuladorTotal({
                             <div style={{ maxWidth: '400px', width: '100%' }}>
                                 <CustomSelect
                                     value={activeCausasBayes}
-                                    onChange={(val) => setActiveCausasBayes(val)}
+                                    onChange={handleBayesChange}
                                     options={[
                                         { value: 'ALL', label: 'Seleccionar Todas' },
                                         { value: '', label: 'Limpiar Selección' },
@@ -954,7 +1000,7 @@ export default function ResultadosSimuladorTotal({
 
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={ordenWidgets} strategy={rectSortingStrategy}>
-                            <div style={{ width: '100%', minWidth: 0 }}>
+                            <div id="tour-total-arbol" style={{ width: '100%', minWidth: 0 }}>
                                 {ordenWidgets.map((id) => {
                                     if (id === 'w-arbol') {
                                         return (

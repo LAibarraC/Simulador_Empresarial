@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import katex from 'katex';
 import "katex/dist/katex.min.css";
 import MarcoWidgetMAT251 from '../../ui/MarcoWidgetMAT251';
@@ -36,7 +36,8 @@ export default function GraficoBastonesDiscreta({
     id = "grafico-bastones-discreta", 
     titulo = "Función de Masa de Probabilidad - f(x)", 
     anchoCompleto = true, 
-    alto = "400px" 
+    alto = "400px",
+    modoPDF = false 
 }) {
     if (!datos || datos.length === 0) return null;
 
@@ -49,62 +50,58 @@ export default function GraficoBastonesDiscreta({
     const maxProb = Math.max(...datosGrafica.map(d => d.prob));
     const yAxisDomain = [0, Math.min(1, Math.ceil(maxProb * 1.2 * 10) / 10)]; // Ligero margen arriba
 
-    return (
-        <MarcoWidgetMAT251 
-            id={id} 
-            titulo={titulo} 
-            anchoCompleto={anchoCompleto} 
-            alto={alto}
+    const grafico = (
+        <ComposedChart
+            width={modoPDF ? 640 : undefined}
+            height={modoPDF ? 300 : undefined}
+            data={datosGrafica}
+            margin={{ top: 20, right: 5, left: -10, bottom: 0 }}
         >
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-                <div style={{ display: 'flex', flex: 1, position: 'relative', paddingLeft: '0px', minHeight: 0 }}>
-                    <div style={{ 
-                        position: 'absolute', 
-                        left: '-40px', 
-                        top: '50%', 
-                        transform: 'translateY(-50%) rotate(-90deg)', 
-                        fontSize: '12px', 
-                        fontWeight: 'bold', 
-                        color: 'var(--text-pure, var(--text-main, #000000ff))',
-                        whiteSpace: 'nowrap'
-                    }}>
-                        Probabilidad <LatexText math="P(x)" />
-                    </div>
-                    
-                    <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={datosGrafica} margin={{ top: 20, right: 5, left:-10, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.15)" />
-                            <XAxis 
-                                dataKey="x" 
-                                tick={{ fill: 'var(--text-variable, #ffffffff)', fontSize: 11 }} 
-                                stroke="var(--text-variable, #ffffffff)" 
-                            />
-                            <YAxis 
-                                domain={yAxisDomain} 
-                                tick={{ fill: 'var(--text-variable, #ffffffff)', fontSize: 11 }} 
-                                stroke="var(--text-variable, #ffffffff)" 
-                                tickFormatter={(value) => value.toFixed(2)}
-                            />
-                            <Tooltip
-                                cursor={{ fill: 'rgba(255, 255, 255, 0.03)' }}
-                                content={<CustomTooltip />}
-                            />
-                            <Bar dataKey="prob" maxBarSize={60} fill="#0ea5e9" radius={[0, 0, 0, 0]} />
-                        </ComposedChart>
-                    </ResponsiveContainer>
-                </div>
-                <div style={{ 
-                    textAlign: 'center', 
-                    fontSize: '12px', 
-                    fontWeight: 'bold', 
-                    color: 'var(--text-pure, var(--text-main, #000000ff))',
-                    paddingTop: '0px',
-                    paddingBottom: '0px',
-                    paddingLeft: '0px'
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.15)" />
+            <XAxis
+                dataKey="x"
+                tick={{ fill: modoPDF ? '#000000' : 'var(--text-variable, #ffffffff)', fontSize: 11 }}
+                stroke={modoPDF ? '#000000' : 'var(--text-variable, #ffffffff)'}
+            />
+            <YAxis
+                domain={yAxisDomain}
+                tick={{ fill: modoPDF ? '#000000' : 'var(--text-variable, #ffffffff)', fontSize: 11 }}
+                stroke={modoPDF ? '#000000' : 'var(--text-variable, #ffffffff)'}
+                tickFormatter={(value) => value.toFixed(2)}
+            />
+            {!modoPDF && <Tooltip
+                cursor={{ fill: 'rgba(255, 255, 255, 0.03)' }}
+                content={<CustomTooltip />}
+            />}
+            <Bar isAnimationActive={!modoPDF} dataKey="prob" maxBarSize={60} fill="#0ea5e9" radius={[0, 0, 0, 0]} />
+        </ComposedChart>
+    );
+
+    const contenido = (
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+            <div style={{ display: 'flex', flex: 1, position: 'relative', paddingLeft: modoPDF ? '20px' : '0px', minHeight: 0 }}>
+                <div style={{
+                    position: 'absolute', left: modoPDF ? '-35px' : '-40px', top: '50%',
+                    transform: 'translateY(-50%) rotate(-90deg)', fontSize: '12px', fontWeight: 'bold',
+                    color: modoPDF ? '#000000' : 'var(--text-pure, var(--text-main, #000000ff))', whiteSpace: 'nowrap'
                 }}>
-                    Valores <LatexText math="(x)" />
+                    Probabilidad <LatexText math="P(x)" />
                 </div>
+                {modoPDF ? grafico : <ResponsiveContainer width="100%" height="100%">{grafico}</ResponsiveContainer>}
             </div>
+            <div style={{ textAlign: 'center', fontSize: '12px', fontWeight: 'bold', color: modoPDF ? '#000000' : 'var(--text-pure, var(--text-main, #000000ff))' }}>
+                Valores <LatexText math="(x)" />
+            </div>
+        </div>
+    );
+
+    if (modoPDF) {
+        return <div id={id} style={{ width: '660px', maxWidth: '100%', height: '325px', margin: '0 auto' }}>{contenido}</div>;
+    }
+
+    return (
+        <MarcoWidgetMAT251 id={id} titulo={titulo} anchoCompleto={anchoCompleto} alto={alto}>
+            {contenido}
         </MarcoWidgetMAT251>
     );
 }

@@ -101,7 +101,7 @@ export default function Resultados_IntervalosMatriz({ resultados, parametro }) {
 
     return (
         <div className="tema5-resultados-pure" style={{ width: '100%' }}>
-            <div className="tema5-tabla-estimacion-wrapper tema5-tabla-resolucion-scroll">
+            <div id="tour-t5-intervalos-resultados-resumen" className="tema5-tabla-estimacion-wrapper tema5-tabla-resolucion-scroll">
                 <table className="tema5-tabla-estimacion tema5-tabla-resumen-intervalo" style={{ width: 'fit-content', maxWidth: '100%', tableLayout: 'auto' }}>
                     <colgroup>{Array.from({ length: 6 }, (_, indice) => <col key={indice} />)}</colgroup>
                     <tbody>
@@ -129,7 +129,7 @@ export default function Resultados_IntervalosMatriz({ resultados, parametro }) {
                 </table>
             </div>
 
-            <section className="tema5-resolucion-estimacion">
+            <section id="tour-t5-intervalos-resolucion-detalle" className="tema5-resolucion-estimacion">
                 <h4>Desarrollo del intervalo de confianza</h4>
                 <div className="tema5-tabla-estimacion-wrapper tema5-tabla-resolucion-scroll tema5-tabla-intervalo-wrapper">
                     <table className="tema5-tabla-estimacion tema5-tabla-resolucion tema5-tabla-intervalo-detalle">
@@ -151,16 +151,16 @@ export default function Resultados_IntervalosMatriz({ resultados, parametro }) {
                 </div>
             </section>
 
-            {parametro !== 'varianza' ? (
-                <div style={{ marginTop: '20px' }}>
-                    {parametro === 'media' && <Grafica_IntervalosMatriz resultados={resultados} parametro={parametro} />}
-                    {parametro === 'proporcion' && <Grafica_IntervalosProporcion resultados={resultados} parametro={parametro} />}
-                </div>
-            ) : (
-                <div style={{ marginTop: '20px' }}>
+            <div id="tour-t5-intervalos-grafico" style={{ marginTop: '20px' }}>
+                {parametro !== 'varianza' ? (
+                    <>
+                        {parametro === 'media' && <Grafica_IntervalosMatriz resultados={resultados} parametro={parametro} />}
+                        {parametro === 'proporcion' && <Grafica_IntervalosProporcion resultados={resultados} parametro={parametro} />}
+                    </>
+                ) : (
                     <Grafica_IntervalosVarianza resultados={resultados} />
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

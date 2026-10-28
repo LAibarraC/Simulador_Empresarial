@@ -711,23 +711,23 @@ export const glosarioMAT251 = {
     },
     "E_dif_medias": {
         texto: "Esperanza de la diferencia de medias muestrales",
-        math: "E(\\bar{X} - \\bar{Y}) = \\mu_X - \\mu_Y"
+        math: "E(\\bar{X}_1 - \\bar{X}_2) = \\mu_1 - \\mu_2"
     },
     "V_dif_medias": {
         texto: "Varianza de la diferencia de medias muestrales independientes",
-        math: "V(\\bar{X} - \\bar{Y}) = \\frac{\\sigma_X^2}{n_X} + \\frac{\\sigma_Y^2}{n_Y}"
+        math: "V(\\bar{X}_1 - \\bar{X}_2) = \\frac{\\sigma_1^2}{n_1} + \\frac{\\sigma_2^2}{n_2}"
     },
     "sigma_dif_medias": {
         texto: "Error estándar de la diferencia de medias muestrales",
-        math: "\\sigma_{\\bar{X} - \\bar{Y}} = \\sqrt{\\frac{\\sigma_X^2}{n_X} + \\frac{\\sigma_Y^2}{n_Y}}"
+        math: "\\sigma_{\\bar{X}_1 - \\bar{X}_2} = \\sqrt{\\frac{\\sigma_1^2}{n_1} + \\frac{\\sigma_2^2}{n_2}}"
     },
     "Z_dif_medias": {
         texto: "Estandarización de la Diferencia de Medias",
-        math: "Z = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_X - \\mu_Y)}{\\sqrt{\\frac{\\sigma_X^2}{n_X} + \\frac{\\sigma_Y^2}{n_Y}}}"
+        math: "Z = \\frac{(\\bar{X}_1 - \\bar{X}_2) - (\\mu_1 - \\mu_2)}{\\sqrt{\\frac{\\sigma_1^2}{n_1} + \\frac{\\sigma_2^2}{n_2}}}"
     },
     "P_dif_medias_final": {
         texto: "Cálculo de Probabilidad Diferencia de Medias",
-        math: "P(\\bar{X} - \\bar{Y} \\le x) = P(Z \\le z)"
+        math: "P(\\bar{X}_1 - \\bar{X}_2 \\le x) = P(Z \\le z)"
     },
     "E_dif_proporciones": {
         texto: "Esperanza de la diferencia de proporciones muestrales",

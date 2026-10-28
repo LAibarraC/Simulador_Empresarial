@@ -211,7 +211,7 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
             </div>
 
 
-            <div style={{ 
+            <div id="tour-t5-intervalos-sim-estado" style={{ 
                 background: simulacionEnCurso ? 'rgba(245, 158, 11, 0.05)' : 'rgba(37, 99, 235, 0.05)', 
                 border: simulacionEnCurso ? '1px solid rgba(245, 158, 11, 0.2)' : '1px solid rgba(37, 99, 235, 0.2)', 
                 borderRadius: '8px', 
@@ -250,7 +250,7 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '15px' }}>
+            <div id="tour-t5-intervalos-sim-tarjetas-resumen" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '15px' }}>
                 {parametroVerdadero !== null && (
                     <div className="card-resultado" style={{ background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.4)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', fontWeight: 'bold' }}>
@@ -288,15 +288,15 @@ export default function Resultados_IntervalosSimulacion({ resultados }) {
             </div>
 
             {/* Gráfico Visual */}
-            <div style={{ marginTop: '20px' }}>
+            <div id="tour-t5-intervalos-sim-grafico" style={{ marginTop: '20px' }}>
                 <GraficoEstimacionIntervalos resultados={resultados} simulacionesVisibles={simulacionesVisibles} />
             </div>
 
             {/* Tabla de Resultados */}
-            <div style={{ marginTop: '20px' }}>
+            <div id="tour-t5-intervalos-sim-tabla" style={{ marginTop: '20px' }}>
                 <Tabla_IntervalosSimulacion resultados={resultados} simulacionesVisibles={simulacionesVisibles} />
                 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+                <div id="tour-t5-intervalos-sim-btn-exportar" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
                     <button
                         type="button"
                         className="btn-primary"

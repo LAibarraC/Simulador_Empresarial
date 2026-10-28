@@ -34,7 +34,7 @@ export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             {/* Selector de Parámetro */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div id="tour-t5-parametro-estimacion" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
                     <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '5px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {PARAMETROS.map(p => (
@@ -55,7 +55,7 @@ export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, 
     );
 }
 
-export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, modo, setModo }) {
+export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, modo, setModo, onResultado }) {
     const variableKey = varSeleccionada?.nombre ?? null;
     // Estados para almacenar resultados de cada modo
     const [resMatriz, setResMatriz] = useState(null);
@@ -77,12 +77,20 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
     const resultadoMatrizActual = resMatriz?.parametro === parametro && resMatriz?.variableKey === variableKey ? resMatriz.resultado : null;
     const resultadoManualActual = resManual?.parametro === parametro && resManual?.variableKey === variableKey ? resManual.resultado : null;
     const resultadoSimulacionActual = resSimulacion?.parametro === parametro && resSimulacion?.variableKey === variableKey ? resSimulacion.resultado : null;
+    const resultadoExportable = modo === 'matriz' ? resultadoMatrizActual : modo === 'manual' && parametro !== 'media' ? resultadoManualActual : null;
+
+    useEffect(() => {
+        onResultado?.(resultadoExportable ? {
+            operacion: 'Estimacion_puntual', parametro, modo,
+            nombreVariable: variableKey, resultados: resultadoExportable
+        } : null);
+    }, [resultadoExportable, parametro, modo, variableKey, onResultado]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT, '--text-main': 'var(--text-pure)' }}>
             
             {/* Selector de Modo de Trabajo */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
+            <div id="tour-t5-modos-estimacion" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
                 <div style={{ width: '100%', maxWidth: '550px' }}>
                     <div style={{ display: 'flex', width: '100%', background: 'var(--bg-input, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', overflowX: 'auto' }}>
                         {MODOS.filter(m => !(parametro === 'media' && m.id === 'manual')).map(m => (

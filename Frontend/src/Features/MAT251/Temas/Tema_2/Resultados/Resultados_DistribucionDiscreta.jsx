@@ -68,7 +68,7 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', paddingRight: '5px' }}>
 
                 {/* Tabla de Distribución y Desglose (Combinada) */}
-                <div style={{ marginBottom: '10px' }}>
+                <div id="tour-discreta-tabla-probabilidad" style={{ marginBottom: '10px' }}>
                     <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                         Distribución de Probabilidad:
                     </h4>
@@ -147,7 +147,7 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                 </div>
 
                 {/* Esperanza Matemática */}
-                <div style={{ marginBottom: '15px' }}>
+                <div id="tour-discreta-esperanza" style={{ marginBottom: '15px' }}>
                     <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                         Esperanza Matemática {renderLatex('E(X)')}
                     </h4>
@@ -173,7 +173,7 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                 {/* Varianza y Desviación */}
                 <div style={{ marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-                        <div style={{ flex: 1, minWidth: '200px' }}>
+                        <div id="tour-discreta-varianza" style={{ flex: 1, minWidth: '200px' }}>
                             <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                 Varianza {renderLatex('V(X)')}
                             </h4>
@@ -195,7 +195,7 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                                 </div>
                             </div>
                         </div>
-                        <div style={{ flex: 1, minWidth: '200px' }}>
+                        <div id="tour-discreta-desviacion" style={{ flex: 1, minWidth: '200px' }}>
                             <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                                 Desviación Estándar {renderLatex('\\sigma')}
                             </h4>
@@ -221,7 +221,7 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                 </div>
 
                 {/* Momentos de la Variable Aleatoria */}
-                <div style={{ marginBottom: '20px' }}>
+                <div id="tour-discreta-momentos" style={{ marginBottom: '20px' }}>
                     <h4 style={{ margin: '0 0 10px 0', textAlign: 'center', color: 'var(--text-pure)', fontSize: FS.sm, fontWeight: 700, fontFamily: FONT }}>
                         Momentos de la Variable Aleatoria {renderLatex('\\mu\'_r')}
                     </h4>
@@ -317,7 +317,7 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                 )}
 
                 {/* Gráfico de Función de Masa de Probabilidad (Bastones) */}
-                <div style={{ marginTop: '0px' }}>
+                <div id="tour-discreta-grafico" style={{ marginTop: '0px' }}>
                     <GraficoBastonesDiscreta datos={resultados.datos} />
                 </div>
 

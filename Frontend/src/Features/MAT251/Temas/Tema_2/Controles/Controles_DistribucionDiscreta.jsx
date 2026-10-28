@@ -252,7 +252,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
         const datos = Array.from(mapDatos.entries()).map(([x, p]) => ({ x, p }));
         datos.sort((a, b) => a.x - b.x);
 
-        onCalcular(datos); 
+        onCalcular(datos, { modo: 'manual' });
     };
 
     const renderLatex = (str) => {
@@ -302,7 +302,12 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
             };
         }).sort((a, b) => a.x - b.x);
 
-        onCalcular(datosGenerados);
+        onCalcular(datosGenerados, {
+            modo: 'matriz',
+            nombreVariable: varSeleccionada?.nombre,
+            columna: columnasDisponibles[colAEvaluar],
+            observaciones: [...datosColumna]
+        });
     };
 
     const inputStyle = {
@@ -385,7 +390,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
             `}</style>
             {/* SELECTOR DE MODOS PRINCIPAL (REGLA 6) */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                <div className="contenedor-selector-modos-mat251">
+                <div id="tour-discreta-modos-entrada" className="contenedor-selector-modos-mat251">
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
@@ -408,7 +413,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
             {modo === 'matriz' && (
                 <div style={{ marginBottom: '20px' }}>
                     {/* BARRA DE DATOS Y EDICIÓN (REGLA 4) */}
-                    <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                    <div id="tour-discreta-matriz-datos" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                         <div>
                             <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
                             <div style={{ display: 'flex', gap: '10px', marginTop: '2px', flexWrap: 'wrap' }}>
@@ -449,7 +454,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                         <>
                             {/* SELECTOR DESPLEGABLE CUANDO HAY MÁS DE 1 COLUMNA */}
                             {columnasDisponibles.length > 1 && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+                                <div id="tour-discreta-matriz-columna" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
                                     <label style={{ ...labelStyle, margin: 0, whiteSpace: 'nowrap' }}>Columna a evaluar:</label>
                                     <div style={{ flex: 1 }}>
                                         <CustomSelect
@@ -465,6 +470,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                             {/* BOTÓN CALCULAR (REGLA 8) */}
                             <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '0px' }}>
                                 <button
+                                    id="tour-discreta-matriz-btn-calcular"
                                     type="button"
                                     className="button_calcular"
                                     onClick={procesarMatriz}
@@ -495,7 +501,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
 
             {modo === 'manual' && (
                 <>
-                    <div style={{
+                    <div id="tour-discreta-manual-tabla" style={{
                         width: '55%',
                         minWidth: '340px',
                         maxWidth: '520px',
@@ -625,6 +631,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
 
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
                         <button
+                            id="tour-discreta-manual-btn-agregar"
                             type="button"
                             onClick={agregarFila}
                             className="btn-primary btn-agregar-fila-discreta"
@@ -648,6 +655,7 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
 
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '0px' }}>
                         <button
+                            id="tour-discreta-manual-btn-calcular"
                             type="button"
                             className="button_calcular"
                             onClick={handleCalcular}

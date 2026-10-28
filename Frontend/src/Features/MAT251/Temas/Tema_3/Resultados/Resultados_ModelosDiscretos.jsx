@@ -4,9 +4,8 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { FONT, FS, RADIUS } from '../../../Principal/Constantes';
 import StatLabel from '../../../ui/StatLabel';
-import { IconoProcedimiento } from '../../../ui/Iconos';
 
-export default function Resultados_ModelosDiscretos({ resultados, modelo, params, condicion, onOpenProcedimiento }) {
+export default function Resultados_ModelosDiscretos({ resultados, modelo, params, condicion }) {
     if (!resultados) return null;
 
     const renderLatex = (str) => {
@@ -34,24 +33,17 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
 
     const renderResolucionDiscreta = () => {
         if (!condicion || !params || !condicion.tipo) return null;
-        
+
         let alignedStr = '';
         const { tipo, valorX, valorB } = condicion;
         const pFinal = typeof resultados.probabilidadFinal === 'number' ? formatSmart(resultados.probabilidadFinal, 4) : resultados.probabilidadFinal;
-
         const getFormulaX = (x) => {
-            if (modelo === 'Bernoulli') {
-                return `(${params.p})^{${x}}(1 - ${params.p})^{1 - ${x}}`;
-            } else if (modelo === 'Binomial') {
-                return `\\binom{${params.n}}{${x}}(${params.p})^{${x}}(1 - ${params.p})^{${params.n} - ${x}}`;
-            } else if (modelo === 'Poisson') {
-                return `\\frac{e^{-${params.lambda}} ${params.lambda}^{${x}}}{${x}!}`;
-            } else if (modelo === 'Hipergeometrica') {
-                return `\\frac{\\binom{${params.K}}{${x}} \\binom{${params.N} - ${params.K}}{${params.n} - ${x}}}{\\binom{${params.N}}{${params.n}}}`;
-            }
+            if (modelo === 'Bernoulli') return `(${params.p})^{${x}}(1 - ${params.p})^{1 - ${x}}`;
+            if (modelo === 'Binomial') return `\\binom{${params.n}}{${x}}(${params.p})^{${x}}(1 - ${params.p})^{${params.n} - ${x}}`;
+            if (modelo === 'Poisson') return `\\frac{e^{-${params.lambda}} ${params.lambda}^{${x}}}{${x}!}`;
+            if (modelo === 'Hipergeometrica') return `\\frac{\\binom{${params.K}}{${x}} \\binom{${params.N} - ${params.K}}{${params.n} - ${x}}}{\\binom{${params.N}}{${params.n}}}`;
             return '';
         };
-
         if (tipo === 'exacta') {
             alignedStr = `\\begin{aligned} P(X = ${valorX}) &= ${getFormulaX(valorX)} \\\\[10px] &= \\mathbf{${pFinal}} \\end{aligned}`;
         } else if (tipo === 'menor_igual') {
@@ -67,12 +59,9 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
         } else if (tipo === 'intervalo_estricto') {
             alignedStr = `\\begin{aligned} P(${valorX} < X < ${valorB}) &= P(${valorX + 1} \\le X \\le ${valorB - 1}) \\\\[10px] &= \\mathbf{${pFinal}} \\end{aligned}`;
         }
-
         return (
             <div className="t3-formula-scroll" style={{ color: 'var(--text-pure)', fontSize: '0.85rem', margin: '10px 0 0' }}>
-                <div className="t3-formula-inner">
-                    {renderLatex(alignedStr)}
-                </div>
+                <div className="t3-formula-inner">{renderLatex(alignedStr)}</div>
             </div>
         );
     };
@@ -114,6 +103,7 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
 
             {/* Tarjeta Superior: Probabilidad Calculada */}
             <div
+                id="tour-t3discreta-resultado-probabilidad"
                 className="tarjeta-calculo-mat251"
                 style={{
                     background: 'var(--bg-card)',
@@ -142,6 +132,7 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
             {/* Fila de Tarjetas Estadísticas: Esperanza, Varianza, Desviación */}
             <div className="t3-stats-container">
                 <div
+                    id="tour-t3discreta-esperanza"
                     className="tarjeta-calculo-mat251 t3-stats-card"
                     style={{
                         background: 'var(--bg-card)',
@@ -175,6 +166,7 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
                 </div>
 
                 <div
+                    id="tour-t3discreta-varianza"
                     className="tarjeta-calculo-mat251 t3-stats-card"
                     style={{
                         background: 'var(--bg-card)',
@@ -208,6 +200,7 @@ export default function Resultados_ModelosDiscretos({ resultados, modelo, params
                 </div>
 
                 <div
+                    id="tour-t3discreta-desviacion"
                     className="tarjeta-calculo-mat251 t3-stats-card"
                     style={{
                         background: 'var(--bg-card)',

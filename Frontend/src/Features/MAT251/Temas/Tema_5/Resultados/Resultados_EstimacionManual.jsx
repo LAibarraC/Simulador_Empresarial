@@ -11,7 +11,7 @@ export default function Resultados_EstimacionManual({ resultados, parametro }) {
     );
 
     return (
-        <div className="tema5-resultados-pure" style={{ width: '100%' }}>
+        <div id="tour-t5-resultados-manual" className="tema5-resultados-pure" style={{ width: '100%' }}>
             {!['proporcion', 'varianza'].includes(parametro) && (
                 <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-main, #1e293b)' }}>Resultados (Estimación Puntual)</h4>
             )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
@@ -30,6 +30,142 @@ const dateAFechaIso = (fecha) => {
   const day = String(fecha.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+
+function CustomSelectGrupos({ value, onChange, options = [], placeholder = "Seleccionar asignatura..." }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative", width: "100%", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "8px 12px",
+          minHeight: "38px",
+          boxSizing: "border-box",
+          background: "var(--bg-input)",
+          border: `1px solid ${isOpen ? "var(--primary-color)" : "var(--border-color)"}`,
+          borderRadius: "5px",
+          cursor: "pointer",
+          boxShadow: isOpen ? "0 0 0 3px rgba(37, 99, 235, 0.15)" : "none",
+          transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+          color: "var(--text-main)",
+          userSelect: "none",
+          fontSize: "0.85rem",
+        }}
+      >
+        <span
+          style={{
+            fontWeight: selectedOption ? 500 : 400,
+            fontSize: "0.85rem",
+            color: selectedOption ? "var(--text-main)" : "var(--text-muted)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s ease",
+            color: "var(--text-muted)",
+            flexShrink: 0,
+            marginLeft: "8px",
+          }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            right: 0,
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "5px",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+            zIndex: 1000,
+            maxHeight: "260px",
+            overflowY: "auto",
+            animation: "fadeInDropdown 0.2s ease",
+          }}
+        >
+          {options.length === 0 ? (
+            <div style={{ padding: "9px 12px", color: "var(--text-muted)", fontSize: "0.85rem", fontStyle: "italic" }}>
+              Sin opciones
+            </div>
+          ) : (
+            options.map((opt, idx) => {
+              const isSelected = value === opt.value;
+              return (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.background = "var(--bg-input, rgba(0,0,0,0.04))";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.background = "transparent";
+                    }
+                  }}
+                  style={{
+                    padding: "9px 12px",
+                    cursor: "pointer",
+                    fontSize: "0.85rem",
+                    background: isSelected ? "rgba(37, 99, 235, 0.08)" : "transparent",
+                    color: isSelected ? "var(--primary-color)" : "var(--text-main)",
+                    fontWeight: isSelected ? 600 : 400,
+                    transition: "background 0.15s ease, color 0.15s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    borderBottom: idx < options.length - 1 ? "1px solid var(--border-color)" : "none",
+                  }}
+                >
+                  {opt.label}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Grupos() {
   const { usuario } = useData();
@@ -166,6 +302,7 @@ export default function Grupos() {
   const [codigoBusqueda, setCodigoBusqueda] = useState("");
   const [mostrarModal, setMostrarModal] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState("");
+  const [nuevoModulo, setNuevoModulo] = useState("");
   const [fechaLimiteMatriculacion, setFechaLimiteMatriculacion] = useState("");
   const [hoveredCursoId, setHoveredCursoId] = useState(null);
 
@@ -188,6 +325,7 @@ export default function Grupos() {
 
   // --- ESTADOS PARA BÚSQUEDA Y PAGINACIÓN ---
   const [searchTerm, setSearchTerm] = useState("");
+  const [filtroMateria, setFiltroMateria] = useState("TODAS");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6; // Cantidad de cursos por página (ideal para diseño en grid)
 
@@ -202,6 +340,7 @@ export default function Grupos() {
   const esAdmin = usuario.rol === "Administrador" || usuario.isAdmin === true;
   const esDocente = usuario.rol === "Docente";
   const esEstudiante = usuario.rol === "Estudiante";
+  const modulosDocente = esAdmin ? ["MAT151", "MAT251"] : (usuario?.modulos || []);
 
   // 1. CARGAR DATOS DESDE MYSQL AL ABRIR LA PÁGINA
   const cargarCursos = async () => {
@@ -210,10 +349,14 @@ export default function Grupos() {
         const res = await fetch(`${BASE_URL}/mis_clases/${correoUsuario}`);
         if (res.ok) {
           const data = await res.json();
-          setMisCursos(data);
+          const dataConModulo = (data || []).map((c) => ({
+            ...c,
+            modulo: c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null)
+          }));
+          setMisCursos(dataConModulo);
           setCursoParaGestionar((prev) => {
             if (!prev) return null;
-            const updated = data.find((c) => c.id === prev.id);
+            const updated = dataConModulo.find((c) => c.id === prev.id);
             return updated ? { ...prev, ...updated } : prev;
           });
         } else {
@@ -223,7 +366,11 @@ export default function Grupos() {
         const res = await fetch(`${BASE_URL}/mis_inscripciones/${correoUsuario}`);
         if (res.ok) {
           const data = await res.json();
-          setCursosInscritos(data);
+          const dataConModulo = (data || []).map((c) => ({
+            ...c,
+            modulo: c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null)
+          }));
+          setCursosInscritos(dataConModulo);
         } else {
           console.error("Error loading student classes:", res.status, res.statusText);
         }
@@ -304,10 +451,24 @@ export default function Grupos() {
   // --- LÓGICA DE BÚSQUEDA Y PAGINACIÓN ---
   const listaBase = (esDocente || esAdmin) ? misCursos : cursosInscritos;
 
+  const modulosDisponibles = useMemo(() => {
+    const mods = new Set();
+    listaBase.forEach((c) => {
+      const mod = c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+      if (mod) mods.add(mod);
+    });
+    return Array.from(mods).sort();
+  }, [listaBase]);
+
   const filteredCursos = listaBase.filter((curso) => {
     const nombreMatch = curso.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
-    const codigoMatch = curso.codigo?.toLowerCase().includes(searchTerm.toLowerCase());
-    return nombreMatch || codigoMatch;
+    const codigoMatch = (curso.codigo || curso.codigo_acceso || "")?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchBusqueda = nombreMatch || codigoMatch;
+
+    const mod = curso.modulo || (curso.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : curso.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
+    const matchMateria = filtroMateria === "TODAS" || mod === filtroMateria;
+
+    return matchBusqueda && matchMateria;
   });
 
   const totalPages = Math.ceil(filteredCursos.length / itemsPerPage);
@@ -334,6 +495,13 @@ export default function Grupos() {
       return;
     }
 
+    if (esDocente && modulosDocente.length === 0) {
+      alerta.error("Sin asignaturas", "No tienes asignaturas autorizadas por el Administrador para crear clases.");
+      return;
+    }
+
+    const moduloFinal = nuevoModulo || (modulosDocente.length > 0 ? modulosDocente[0] : null);
+
     try {
       const res = await fetch(`${BASE_URL}/crear_clase`, {
         method: "POST",
@@ -341,6 +509,7 @@ export default function Grupos() {
         body: JSON.stringify({
           nombre: nuevoNombre,
           docente_email: correoUsuario,
+          modulo: moduloFinal,
           fecha_limite_matriculacion: fechaLimiteMatriculacion || null
         })
       });
@@ -350,6 +519,7 @@ export default function Grupos() {
       if (res.ok) {
         alerta.success("Curso creado", `El código para tus alumnos es: ${data.codigo_acceso}`);
         setNuevoNombre("");
+        setNuevoModulo("");
         setFechaLimiteMatriculacion("");
         setMostrarModal(false);
         await cargarCursos(); // Recargamos la lista desde la BD
@@ -626,7 +796,7 @@ export default function Grupos() {
 
         {/* BUSCADOR INTEGRADO */}
         {(listaBase.length > 0 || searchTerm !== "") && (
-          <div style={{ flex: "1 1 280px", maxWidth: "480px", position: "relative" }}>
+          <div style={{ flex: "1 1 260px", maxWidth: "420px", position: "relative" }}>
             <span
               style={{
                 position: "absolute",
@@ -652,13 +822,14 @@ export default function Grupos() {
               style={{
                 width: "100%",
                 padding: "8px 34px 8px 36px",
-                borderRadius: "8px",
+                borderRadius: "5px",
                 border: "1px solid var(--border-color)",
                 backgroundColor: "var(--bg-input)",
                 color: "var(--text-main)",
                 outline: "none",
-                fontSize: "0.9rem",
+                fontSize: "0.85rem",
                 boxSizing: "border-box",
+                minHeight: "38px"
               }}
             />
             {searchTerm && (
@@ -684,6 +855,24 @@ export default function Grupos() {
                 ✕
               </button>
             )}
+          </div>
+        )}
+
+        {/* SELECTOR DE MATERIAS (Solo si hay más de 1 materia/módulo) */}
+        {modulosDisponibles.length > 1 && (
+          <div style={{ flex: "0 0 auto", minWidth: "200px" }}>
+            <CustomSelectGrupos
+              value={filtroMateria}
+              onChange={(val) => {
+                setFiltroMateria(val);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: "TODAS", label: "Todas las materias" },
+                ...modulosDisponibles.map((m) => ({ value: m, label: m }))
+              ]}
+              placeholder="Todas las materias"
+            />
           </div>
         )}
 
@@ -739,7 +928,14 @@ export default function Grupos() {
                     <div key={curso.id} style={{ background: "var(--bg-card)", padding: "20px", borderRadius: "10px", border: "1px solid var(--border-color)", boxShadow: "0 4px 10px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>
                         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "12px" }}>
-                          <h3 style={{ margin: 0, color: "var(--text-main)", lineHeight: 1.3, fontSize: "1.1rem", overflowWrap: "anywhere" }}>{curso.nombre}</h3>
+                          <div>
+                            <h3 style={{ margin: 0, color: "var(--text-main)", lineHeight: 1.3, fontSize: "1.1rem", overflowWrap: "anywhere" }}>{curso.nombre}</h3>
+                            {curso.modulo && (
+                              <span style={{ display: 'inline-block', marginTop: '5px', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', fontWeight: 'bold' }}>
+                                {curso.modulo}
+                              </span>
+                            )}
+                          </div>
                           {puedeGestionar && (
                             qrHabilitado ? (
                               <button
@@ -1020,13 +1216,32 @@ export default function Grupos() {
 
             <form onSubmit={handleCrearCurso}>
               <div style={{ marginBottom: "20px" }}>
+                <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", color: "var(--text-main)" }}>Asignatura (Módulo):</label>
+                {modulosDocente.length === 0 ? (
+                  <div style={{ padding: "10px", borderRadius: "6px", backgroundColor: "rgba(239, 68, 68, 0.1)", color: "#ef4444", fontSize: "0.85rem", lineHeight: "1.4" }}>
+                    No tienes asignaturas autorizadas por el Administrador. Contacta a un administrador para que te asigne materias antes de crear clases.
+                  </div>
+                ) : (
+                  <CustomSelectGrupos
+                    value={nuevoModulo || (modulosDocente.length > 0 ? modulosDocente[0] : "")}
+                    onChange={(val) => setNuevoModulo(val)}
+                    options={modulosDocente.map((mod) => ({
+                      value: mod,
+                      label: mod === 'MAT151' ? 'MAT151 - Estadística General' : mod === 'MAT251' ? 'MAT251 - Estadística Matemática' : mod
+                    }))}
+                  />
+                )}
+              </div>
+
+              <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", color: "var(--text-main)" }}>Nombre de la Materia:</label>
                 <input
                   type="text"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   placeholder="Ej. Estadística Empresarial I"
-                  style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border-color)", boxSizing: "border-box", background: "var(--bg-input)", color: "var(--text-main)" }}
+                  className="input-mat251 placeholder-small"
+                  style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid var(--border-color)", boxSizing: "border-box", background: "var(--bg-input)", color: "var(--text-main)" }}
                   autoFocus
                 />
               </div>
@@ -1049,7 +1264,7 @@ export default function Grupos() {
                 <button type="button" onClick={() => setMostrarModal(false)} className="btn-rojo">
                   Cancelar
                 </button>
-                <button type="submit" className="btn-azul">
+                <button type="submit" className="btn-azul" disabled={esDocente && modulosDocente.length === 0}>
                   Generar Clase
                 </button>
               </div>

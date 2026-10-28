@@ -4,13 +4,15 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { jStat } from 'jstat';
 import { FONT, FS, RADIUS } from '../../../Principal/Constantes';
-import StatLabel from '../../../ui/StatLabel';
+import StatLabelInteractivo from '../../../ui/StatLabel';
 import ModalTablaNormalZ from '../Modales/ModalTablaNormalZ';
 
-export default function Resultados_ModelosContinuos({ resultados, modelo, condicion, params }) {
-    if (!resultados) return null;
+const EtiquetaPDF = ({ formulaLatex, formulaKey }) => <span dangerouslySetInnerHTML={{ __html: katex.renderToString(formulaLatex || formulaKey, { throwOnError: false }) }} />;
 
+export default function Resultados_ModelosContinuos({ resultados, modelo, condicion, params, modoPDF = false }) {
     const [modalTablaZ, setModalTablaZ] = useState({ isOpen: false, z: 0, detalleCalculo: '' });
+    if (!resultados) return null;
+    const StatLabel = modoPDF ? EtiquetaPDF : StatLabelInteractivo;
 
     const renderLatex = (str) => {
         return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
@@ -566,9 +568,8 @@ export default function Resultados_ModelosContinuos({ resultados, modelo, condic
             const tipElements = condicion.intervals.map((inv, idx) => (
                 <span key={idx} style={{ display: 'inline-flex', alignItems: 'center' }}>
                     {idx > 0 && <span style={{ margin: '0 6px' }}>;</span>}
-                    {renderLatex(`\\tfrac{${inv.min}-${mu}}{${sigma}}=`)}
-                    <StatLabel formulaKey="Z" formulaLatex="Z" align="center" />
-                    {renderLatex(`_{${idx + 1}}=${Z(inv.min)}`)}
+                    <StatLabel formulaKey="Z" formulaLatex={`Z_{${idx + 1}}`} align="center" />
+                    {renderLatex(`=\\tfrac{${inv.min}-${mu}}{${sigma}}=${Z(inv.min)}`)}
                 </span>
             ));
             const sumLabels = condicion.intervals.map(inv =>
@@ -1315,10 +1316,83 @@ export default function Resultados_ModelosContinuos({ resultados, modelo, condic
         ? resultados.desviacion 
         : (typeof resultados.varianza === 'number' ? Math.sqrt(resultados.varianza) : undefined);
 
+    if (modoPDF) {
+        const inversa = resultados.c !== undefined || resultados.c1 !== undefined;
+        const renderResolucion = () => {
+            if (modelo === 'Uniforme') return renderResolucionUniforme();
+            if (modelo === 'Normal') return renderResolucionNormal();
+            if (modelo === 'NormalEstandar') return renderResolucionNormalEstandar();
+            if (modelo === 'ChiCuadrado') return renderResolucionChiCuadrado();
+            if (modelo === 'FFisher') return renderResolucionFFisher();
+            if (modelo === 'TStudent') return renderResolucionTStudent();
+            return null;
+        };
+
+        return (
+            <div className="pdf-section pdf-probabilidad-continua" style={{ textAlign: 'center', breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+                <style>{`
+                    #reporte-formal-mat251 .pdf-probabilidad-continua .btn-abrir-tabla-z {
+                        display: none !important;
+                    }
+                    #reporte-formal-mat251 .pdf-probabilidad-continua .tarjeta-calculo-titulo {
+                        font-size: 9.5pt !important;
+                        font-weight: bold !important;
+                        margin: 8px 0 6px !important;
+                        text-align: center !important;
+                        color: #000000 !important;
+                    }
+                    #reporte-formal-mat251 .pdf-probabilidad-continua .t3-formula-scroll {
+                        overflow: visible !important;
+                        margin-top: 6px !important;
+                        text-align: center !important;
+                        color: #000000 !important;
+                    }
+                    #reporte-formal-mat251 .pdf-probabilidad-continua .t3-formula-inner {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+                    #reporte-formal-mat251 .pdf-probabilidad-continua .tarjeta-calculo-valor {
+                        font-size: 10.5pt !important;
+                        font-weight: bold !important;
+                        margin-top: 6px !important;
+                        display: flex !important;
+                        justify-content: center !important;
+                        color: #000000 !important;
+                    }
+                `}</style>
+                <div className="tarjeta-calculo-titulo">
+                    {inversa ? 'Desarrollo del Cálculo Inverso' : 'Desarrollo de la Probabilidad Calculada'}
+                </div>
+                {condicion && params && condicion.tipo && renderResolucion()}
+                <div className="tarjeta-calculo-valor">
+                    {resultados.c1 !== undefined && resultados.c2 !== undefined ? (
+                        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                            <div>{renderLatex(`c_1 = \\mathbf{${formatNum(resultados.c1)}}`)}</div>
+                            <div>{renderLatex(`c_2 = \\mathbf{${formatNum(resultados.c2)}}`)}</div>
+                        </div>
+                    ) : resultados.c !== undefined ? (
+                        <div>
+                            {renderLatex(`${modelo === 'NormalEstandar' ? 'z' : 'c'} = \\mathbf{${formatNum(resultados.c)}}`)}
+                        </div>
+                    ) : (
+                        <div>
+                            {typeof resultados.probabilidadFinal === 'number'
+                                ? renderLatex(`\\mathbf{${resultados.probabilidadFinal.toFixed(4)}} \\quad \\Longleftrightarrow \\quad \\mathbf{${(resultados.probabilidadFinal * 100).toFixed(2)}\\%}`)
+                                : '-'}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="tema3-card" style={{ marginTop: '20px' }}>
             {(resultados.probabilidadFinal !== null || resultados.c !== undefined || resultados.c1 !== undefined) && (
                 <div
+                    id="tour-t3continua-resultado-probabilidad"
                     className="tarjeta-calculo-mat251"
                     style={{
                         background: 'var(--bg-card)',
@@ -1397,6 +1471,7 @@ export default function Resultados_ModelosContinuos({ resultados, modelo, condic
 
             <div className="t3-stats-container">
                 <div
+                    id="tour-t3continua-esperanza"
                     className="tarjeta-calculo-mat251 t3-stats-card"
                     style={{
                         background: 'var(--bg-card)',
@@ -1425,6 +1500,7 @@ export default function Resultados_ModelosContinuos({ resultados, modelo, condic
                 </div>
 
                 <div
+                    id="tour-t3continua-varianza"
                     className="tarjeta-calculo-mat251 t3-stats-card"
                     style={{
                         background: 'var(--bg-card)',
@@ -1453,6 +1529,7 @@ export default function Resultados_ModelosContinuos({ resultados, modelo, condic
                 </div>
 
                 <div
+                    id="tour-t3continua-desviacion"
                     className="tarjeta-calculo-mat251 t3-stats-card"
                     style={{
                         background: 'var(--bg-card)',
