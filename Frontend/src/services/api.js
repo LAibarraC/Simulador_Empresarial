@@ -331,10 +331,10 @@ export const api = {
     }
   },
 
-  descargarArchivoBinario: async (filename, autor) => {
+  descargarArchivoBinario: async (filename, autor, curso = "") => {
     try {
       const res = await fetch(
-        `${BASE_URL}/files/${encodeURIComponent(filename)}?autor=${encodeURIComponent(autor)}`,
+        `${BASE_URL}/files/${encodeURIComponent(filename)}?autor=${encodeURIComponent(autor)}${curso ? `&curso=${encodeURIComponent(curso)}` : ""}`,
       );
       if (!res.ok)
         throw new Error("No se pudo obtener el archivo del servidor");
