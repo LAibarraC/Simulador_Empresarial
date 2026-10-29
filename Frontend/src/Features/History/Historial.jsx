@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useData } from "../../components/gestion_datos/DataContext";
 import { api } from "../../services/api";
 import { alerta } from "../../utils/Notificaciones";
@@ -11,6 +11,103 @@ import "driver.js/dist/driver.css";
 import escudoAdmin from "../../assets/images/escudoAdmin.png";
 
 import Modal from "../../utils/Modal";
+
+function SelectorModuloHistorial({ id, value, onChange, options, disabled, placeholder }) {
+  const [abierto, setAbierto] = useState(false);
+  const contenedor = useRef(null);
+  const boton = useRef(null);
+  const lista = useRef(null);
+  const seleccionada = options.find((opcion) => opcion.value === String(value));
+
+  useEffect(() => {
+    if (!abierto) return;
+    const cerrarFuera = (event) => {
+      if (!contenedor.current?.contains(event.target)) setAbierto(false);
+    };
+    document.addEventListener("pointerdown", cerrarFuera);
+    return () => document.removeEventListener("pointerdown", cerrarFuera);
+  }, [abierto]);
+
+  useEffect(() => {
+    if (disabled) setAbierto(false);
+  }, [disabled]);
+
+  useEffect(() => {
+    if (abierto) {
+      const opciones = lista.current?.querySelectorAll('[role="option"]');
+      const indice = options.findIndex((opcion) => opcion.value === String(value));
+      opciones?.[Math.max(0, indice)]?.focus();
+    }
+  }, [abierto]);
+
+  const elegir = (nuevoValor) => {
+    onChange(nuevoValor);
+    setAbierto(false);
+    boton.current?.focus();
+  };
+
+  const manejarTeclado = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setAbierto(false);
+      boton.current?.focus();
+      return;
+    }
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key) || disabled) return;
+    event.preventDefault();
+    if (!abierto) {
+      setAbierto(true);
+      return;
+    }
+    const opciones = Array.from(lista.current?.querySelectorAll('[role="option"]') || []);
+    const actual = opciones.indexOf(document.activeElement);
+    let siguiente = event.key === "ArrowUp" ? actual - 1 : actual + 1;
+    if (event.key === "Home") siguiente = 0;
+    if (event.key === "End") siguiente = opciones.length - 1;
+    opciones[(siguiente + opciones.length) % opciones.length]?.focus();
+  };
+
+  return (
+    <div ref={contenedor} className="historial-select-container" onKeyDown={manejarTeclado}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setAbierto(false);
+      }}>
+      <button ref={boton} id={id} type="button" disabled={disabled}
+        className={`btn-historial-select-header ${abierto ? "open" : ""}`}
+        aria-haspopup="listbox" aria-expanded={abierto} aria-controls={`${id}-opciones`}
+        onClick={() => setAbierto(!abierto)}>
+        <span className="historial-select-text">{seleccionada?.label || placeholder}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          className={`historial-select-chevron ${abierto ? "open" : ""}`}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {abierto && !disabled && (
+        <div ref={lista} id={`${id}-opciones`} role="listbox" aria-labelledby={id}
+          className="historial-select-dropdown">
+          {options.map((opcion) => (
+            <button key={opcion.value} type="button" role="option" tabIndex={-1}
+              aria-selected={opcion.value === String(value)}
+              className={`btn-historial-select-option ${opcion.value === String(value) ? "selected" : ""}`}
+              onClick={() => elegir(opcion.value)}>
+              {opcion.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const obtenerModuloHistorial = (registro) => {
+  let snapshot = registro.snapshot || registro.resultados_json || {};
+  if (typeof snapshot === "string") {
+    try { snapshot = JSON.parse(snapshot); } catch { snapshot = {}; }
+  }
+  // Antes de incluir el módulo explícito, solo MAT151 guardaba historial.
+  return String(registro.modulo || snapshot?.modulo || snapshot?.configuracion?.modulo || "MAT151").toUpperCase();
+};
 
 export default function Historial() {
   const { usuario } = useData();
@@ -26,6 +123,7 @@ export default function Historial() {
 
   // --- ESTADOS PARA BÚSQUEDA Y PAGINACIÓN ---
   const [searchTerm, setSearchTerm] = useState("");
+  const [filtroModulo, setFiltroModulo] = useState("TODOS");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // 10 registros por página
 
@@ -107,7 +205,7 @@ export default function Historial() {
       // Retraso artificial de 1 segundo para ver el Skeleton (¡Bórralo luego si deseas!)
       await new Promise(resolve => setTimeout(resolve, 1000));
       const data = await api.obtenerHistorial(usuario.nombre);
-      setRegistros(data.historial || []);
+      setRegistros((data.historial || []).map((registro) => ({ ...registro, modulo: obtenerModuloHistorial(registro) })));
     } catch (error) {
       alerta.error("Error", "No se pudo cargar el historial.");
     } finally {
@@ -151,7 +249,8 @@ export default function Historial() {
     const matchCalculo = reg.calculo?.toLowerCase().includes(term);
     const matchArchivo = reg.archivo_origen?.toLowerCase().includes(term);
     const matchFecha = reg.fecha?.toLowerCase().includes(term);
-    return matchCalculo || matchArchivo || matchFecha;
+    const matchModulo = filtroModulo === "TODOS" || reg.modulo === filtroModulo;
+    return matchModulo && (matchCalculo || matchArchivo || matchFecha || reg.modulo?.toLowerCase().includes(term));
   });
 
   const totalPages = Math.ceil(filteredRegistros.length / itemsPerPage);
@@ -174,7 +273,7 @@ export default function Historial() {
   const ControlesPaginacion = () => {
     if (totalPages <= 1) return null;
     return (
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px" }}>
+      <div className="historial-paginacion" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px" }}>
         <button
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
@@ -219,7 +318,7 @@ export default function Historial() {
   };
 
   return (
-    <div className="page-container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+    <div className="page-container historial-page" style={{ maxWidth: '100%', margin: '0 auto', padding: '15px' }}>
 
       {/* Marca de agua de fondo */}
       <div
@@ -240,7 +339,7 @@ export default function Historial() {
         }}
       />
       {/* CABECERA CON BOTÓN DE TOUR */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 3vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0, flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
           <button
             onClick={iniciarTour}
             className="guia-rapida-flotante"
@@ -255,33 +354,72 @@ export default function Historial() {
       </div>
 
 
+      {(cargando || registros.length > 0) && (
+        <div className="historial-buscador historial-filtros">
+          <input
+            type="text"
+            placeholder="Buscar por operación, archivo o fecha..."
+            aria-label="Buscar en el historial"
+            value={searchTerm}
+            onChange={handleSearch}
+            disabled={cargando}
+            style={{ width: "100%", padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-input)", color: "var(--text-main)", outline: "none", fontSize: "0.95rem" }}
+          />
+          <SelectorModuloHistorial
+            id="historial-filtro-modulo"
+            value={filtroModulo}
+            onChange={(modulo) => {
+              setFiltroModulo(modulo);
+              setCurrentPage(1);
+            }}
+            disabled={cargando}
+            options={[
+              { value: "TODOS", label: "Todos los módulos" },
+              { value: "MAT151", label: "MAT151" },
+              { value: "MAT251", label: "MAT251" },
+            ]}
+          />
+        </div>
+      )}
+
       {cargando ? (
-        <div className="historial-container">
+        <div className="historial-container" aria-busy="true" aria-label="Cargando historial">
           <table className="historial-tabla">
+                <colgroup>
+                  <col className="historial-col-fecha" />
+                  <col className="historial-col-calculo" />
+                  <col className="historial-col-modulo" />
+                  <col className="historial-col-archivo" />
+                  <col className="historial-col-acciones" />
+                </colgroup>
             <thead>
               <tr>
                 <th>Fecha / Hora</th>
                 <th>Tipo de Cálculo</th>
-                <th>Archivo Fuente</th>
+                <th>Módulo</th>
+                    <th>Archivo Fuente</th>
                 <th style={{ textAlign: "center" }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {[1, 2, 3, 4, 5].map(i => (
-                <tr key={i} className="historial-fila" style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td className="historial-celda">
+                <tr key={i} className="historial-fila historial-fila-cargando">
+                  <td className="historial-celda historial-celda-fecha" data-label="Fecha / Hora">
                     <div className="fecha-col">
-                      <Skeleton height="18px" width="100px" style={{ marginBottom: '5px' }} />
-                      <Skeleton height="12px" width="70px" />
+                      <Skeleton height="1.5em" width="100px" />
+                      <Skeleton height="1.25em" width="70px" />
                     </div>
                   </td>
-                  <td className="historial-celda">
+                  <td className="historial-celda historial-celda-calculo" data-label="Tipo de Cálculo">
                     <Skeleton height="24px" width="180px" borderRadius="12px" />
                   </td>
-                  <td className="historial-celda">
+                  <td className="historial-celda historial-celda-modulo" data-label="Módulo">
+                    <Skeleton height="20px" width="62px" />
+                  </td>
+                  <td className="historial-celda historial-celda-archivo" data-label="Archivo Fuente">
                     <Skeleton height="16px" width="120px" />
                   </td>
-                  <td className="historial-celda">
+                  <td className="historial-celda historial-celda-acciones" data-label="Acciones">
                     <div className="acciones-container" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                       <Skeleton height="32px" width="80px" borderRadius="6px" />
                       <Skeleton height="32px" width="80px" borderRadius="6px" />
@@ -298,29 +436,28 @@ export default function Historial() {
         </div>
       ) : (
         <>
-          {/* BUSCADOR */}
-          <div style={{ marginBottom: "20px" }}>
-            <input
-              type="text"
-              placeholder="Buscar por operación, archivo o fecha..."
-              value={searchTerm}
-              onChange={handleSearch}
-              style={{ width: "100%", padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-input)", color: "var(--text-main)", outline: "none", fontSize: "0.95rem" }}
-            />
-          </div>
+
 
           {/* TABLA Y PAGINACIÓN */}
           {filteredRegistros.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-              No se encontraron registros que coincidan con "{searchTerm}".
+              No se encontraron registros{filtroModulo !== "TODOS" ? ` de ${filtroModulo}` : ""}{searchTerm ? ` que coincidan con "${searchTerm}"` : ""}.
             </div>
           ) : (
             <div className="historial-container" id="tour-historial-tabla">
               <table className="historial-tabla">
+                <colgroup>
+                  <col className="historial-col-fecha" />
+                  <col className="historial-col-calculo" />
+                  <col className="historial-col-modulo" />
+                  <col className="historial-col-archivo" />
+                  <col className="historial-col-acciones" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Fecha / Hora</th>
                     <th>Tipo de Cálculo</th>
+                    <th>Módulo</th>
                     <th>Archivo Fuente</th>
                     <th style={{ textAlign: "center" }}>Acciones</th>
                   </tr>
@@ -328,22 +465,27 @@ export default function Historial() {
                 <tbody>
                   {currentRegistros.map((reg) => (
                     <tr key={reg.id} className="historial-fila">
-                      <td className="historial-celda" data-label="Fecha / Hora">
+                      <td className="historial-celda historial-celda-fecha" data-label="Fecha / Hora">
                         <div className="fecha-col">
                           <strong>{reg.fecha}</strong>
                           <small className="text-muted">{reg.hora}</small>
                         </div>
                       </td>
-                      <td className="historial-celda" data-label="Tipo de Cálculo">
+                      <td className="historial-celda historial-celda-calculo" data-label="Tipo de Cálculo">
                         <span className="tipo-calculo tour-tipo-calculo">
                           {reg.calculo.replace(/_/g, " ").toUpperCase()}
                         </span>
                       </td>
-                      <td className="historial-celda" data-label="Archivo Fuente">
+                      <td className="historial-celda historial-celda-modulo" data-label="Módulo">
+                        <span className={`historial-modulo ${reg.modulo === "MAT251" ? "historial-modulo-mat251" : ""}`}>
+                          {reg.modulo}
+                        </span>
+                      </td>
+                      <td className="historial-celda historial-celda-archivo" data-label="Archivo Fuente">
                         <span className="archivo-origen tour-archivo-origen">{reg.archivo_origen}</span>
                       </td>
 
-                      <td className="historial-celda" data-label="Acciones">
+                      <td className="historial-celda historial-celda-acciones" data-label="Acciones">
                         <div className="acciones-container" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                           <button
                             className="btn-reabrir tour-btn-reabrir"
@@ -358,6 +500,14 @@ export default function Historial() {
                                   archivoReabrir: reg.archivo_origen,
                                   calculoReabrir: reg.calculo,
                                   snapshot: snapshotListo,
+                                  historialOrigen: {
+                                    id: reg.id,
+                                    fecha: reg.fecha,
+                                    hora: reg.hora,
+                                    modulo: reg.modulo,
+                                    calculo: reg.calculo,
+                                    archivo: reg.archivo_origen,
+                                  },
                                 },
                               });
                             }}

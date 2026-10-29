@@ -65,7 +65,7 @@
 }
 
 :where(.mat151).contenedor-principal-sistema {
-  margin-top: 5px;
+  margin-top: 0;
   min-height: 100vh;
 }
 
@@ -470,4 +470,71 @@
 :where(.mat151) #reporte-formal-pdf .widget-body {
   padding: 10px !important;
   background-color: white !important;
+}
+:where(.mat151) .aviso-origen-historial {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 5px 15px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+
+  border-radius: 8px;
+  color: var(--text-main);
+}
+
+:where(.mat151) .aviso-origen-historial-icono {
+  flex-shrink: 0;
+  color: var(--primary-color, #3b82f6);
+}
+
+:where(.mat151) .aviso-origen-historial-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+:where(.mat151) .aviso-origen-historial-info > * {
+  flex-shrink: 0;
+}
+
+:where(.mat151) .aviso-origen-historial-modulo {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--primary-color, #3b82f6);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+:where(.mat151) .aviso-origen-historial-detalle,
+:where(.mat151) .aviso-origen-historial-archivo {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+:where(.mat151) .btn-volver-historial {
+  flex-shrink: 0;
+  padding: 5px 20px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 600px) {
+  :where(.mat151) .aviso-origen-historial {
+    gap: 8px;
+    padding: 5px 10px;
+  }
+
+  :where(.mat151) .btn-volver-historial {
+    white-space: nowrap;
+    min-height: 44px;
+  }
 }

@@ -996,6 +996,7 @@ export default function Calculos() {
       const activeTareaTitulo = tareaContexto?.titulo || tareaContexto?.tareaTitulo || null;
 
       const snapshotCompleto = {
+        modulo: "MAT151",
         datosSnapshot: excelData,
         configuracion: {
           calculo, tipoIntervalo, metodoK, kPersonalizado, percentilK,

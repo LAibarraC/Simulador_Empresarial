@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Datos from "../../../pages/Datos";
 import Calculos from "../pages/Calculos";
 import TablaDinamica from "../../../components/excel/TablaDinamica";
@@ -11,6 +11,8 @@ import "../style/pages/Calculadora.css";
 export default function Calculadora() {
   const location = useLocation(); // 👈 2. CAPTURAMOS LOS DATOS DEL HISTORIAL
   const paramsReabrir = location.state || {};
+  const navigate = useNavigate();
+  const historialOrigen = paramsReabrir.historialOrigen;
   
   // 👈 3. EXTRAEMOS EL SNAPSHOT EXACTAMENTE COMO LO ENVIASTE DESDE HISTORIAL.JSX
   const { archivoReabrir, calculoReabrir, snapshot } = paramsReabrir;
@@ -38,6 +40,31 @@ export default function Calculadora() {
 
   return (
     <div className="mat151 contenedor-principal-sistema">
+
+      {historialOrigen && (
+        <section className="aviso-origen-historial" aria-label="Cálculo reabierto del historial">
+          <svg className="aviso-origen-historial-icono" width="22" height="22" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 11a9 9 0 1 1 2.8 7" />
+            <polyline points="3 4 3 11 10 11" />
+            <polyline points="12 7 12 12 15 14" />
+          </svg>
+          <div className="aviso-origen-historial-info">
+            <span className="aviso-origen-historial-modulo">{historialOrigen.modulo || "MAT151"}</span>
+            <p className="aviso-origen-historial-detalle">
+              {[historialOrigen.fecha && `Guardado el ${historialOrigen.fecha}`, historialOrigen.hora].filter(Boolean).join(" · ")}
+              {(historialOrigen.fecha || historialOrigen.hora) && historialOrigen.calculo && " · "}
+              {historialOrigen.calculo?.replace(/_/g, " ")}
+            </p>
+            {historialOrigen.archivo && (
+              <p className="aviso-origen-historial-archivo">Archivo original: {historialOrigen.archivo}</p>
+            )}
+          </div>
+          <button type="button" className="btn-azul btn-volver-historial" onClick={() => navigate("/historial")}>
+            Volver al Historial
+          </button>
+        </section>
+      )}
 
       <div className="ventana-contenido-principal">
         {/* Le pasamos paramsReabrir a Calculos para que sepa qué cálculo seleccionar */}

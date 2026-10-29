@@ -74,7 +74,7 @@
     min-width: 320px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     box-sizing: border-box;
 }
 
@@ -202,4 +202,170 @@
         flex-direction: column;
         gap: 10px;
     }
+}
+/* Módulo y curso mantienen separado el material académico. */
+.archivos-selectores-curso {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.archivos-campo-curso {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.archivos-campo-modulo {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+}
+
+.archivos-campo-curso label {
+    font-weight: bold;
+}
+
+/* Custom Select Herramienta */
+.archivos-select-container {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+}
+
+
+
+.btn-archivos-select-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 5px;
+    min-height: 38px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-pure);
+    font-family: inherit;
+    user-select: none;
+    width: 100%;
+}
+
+.btn-archivos-select-header.open {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-archivos-select-header-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.archivos-select-icon-primary {
+    color: var(--primary-color, #3b82f6);
+}
+
+.archivos-select-text {
+    font-weight: 500;
+    font-size: 0.84rem;
+    color: var(--text-pure);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    flex: 1;
+}
+
+.archivos-select-chevron {
+    color: var(--text-muted, #64748b);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.archivos-select-chevron.open {
+    transform: rotate(180deg);
+}
+
+.archivos-select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 5px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    z-index: 1000; 
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+    animation: archivos-fadeInDropdown 0.2s ease;
+}
+
+.btn-archivos-select-option { 
+    padding: 9px 14px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-pure);
+    font-weight: 400;
+    font-size: 0.84rem;
+    font-family: inherit;
+    transition: background 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.btn-archivos-select-option:hover {
+    background: var(--bg-input, rgba(0, 0, 0, 0.04));
+}
+
+.btn-archivos-select-option.selected {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--primary-color, #3b82f6);
+    font-weight: 600;
+}
+
+.btn-archivos-select-header {
+    margin: 0;
+    font-size: 0.84rem;
+    font-weight: 500;
+    outline: none;
+    transform: none;
+}
+
+.btn-archivos-select-header:focus-visible {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-archivos-select-option {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    transform: none;
+}
+
+.btn-archivos-select-option:focus-visible {
+    background: var(--bg-input, rgba(0, 0, 0, 0.04));
+    outline: 2px solid var(--primary-color, #3b82f6);
+    outline-offset: -2px;
+}
+
+.btn-archivos-select-option.selected:focus-visible {
+    background: rgba(37, 99, 235, 0.08);
+}
+
+@keyframes archivos-fadeInDropdown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
 }

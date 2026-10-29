@@ -125,50 +125,386 @@ html.dark .historial-fila:hover {
 /* DISEÑO RESPONSIVO (MÓVIL)                */
 /* ========================================= */
 
-@media (max-width: 768px) {
-    .historial-header {
-        flex-direction: column;
-        align-items: flex-start;
+/* La carga y los datos comparten la misma distribución. */
+.historial-buscador {
+    margin-bottom: 20px;
+}
+
+.historial-buscador + .historial-container {
+    margin-top: 0;
+}
+
+.historial-fila-cargando .skeleton-box {
+    max-width: 100%;
+}
+
+@media (min-width: 901px) {
+    .historial-tabla {
+        table-layout: fixed;
+    }
+
+    .historial-col-fecha { width: 16%; }
+    .historial-col-calculo { width: 28%; }
+    .historial-col-modulo { width: 10%; }
+    .historial-col-archivo { width: 24%; }
+    .historial-col-acciones { width: 22%; }
+
+    .historial-tabla .historial-celda {
+        overflow-wrap: anywhere;
+    }
+
+    .historial-tabla .acciones-container {
+        flex-wrap: wrap;
+    }
+}
+
+
+/* Tarjetas compactas para celulares y tabletas pequeñas. */
+@media (max-width: 900px) {
+    .historial-page .historial-buscador {
+        margin-bottom: 14px;
+    }
+
+    .historial-page .historial-buscador input {
+        min-height: 44px;
+        font-size: 16px !important;
+    }
+
+    .historial-page .historial-container {
+        margin-top: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    .historial-tabla,
+    .historial-tabla tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .historial-tabla thead,
+    .historial-tabla colgroup {
+        display: none;
+    }
+
+    .historial-tabla tbody {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .historial-tabla .historial-fila {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "calculo" "fecha" "modulo" "archivo" "acciones";
+        align-content: start;
+        gap: 10px;
+        min-width: 0;
+        padding: 14px;
+        margin: 0;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .historial-tabla .historial-celda {
+        display: block;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        text-align: left;
+    }
+
+    .historial-celda-calculo { grid-area: calculo; }
+    .historial-celda-fecha { grid-area: fecha; }
+    .historial-celda-modulo { grid-area: modulo; display: flex !important; align-items: center; gap: 8px; }
+    .historial-celda-modulo::before { content: "Módulo"; font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+    .historial-celda-archivo { grid-area: archivo; }
+    .historial-celda-acciones { grid-area: acciones; }
+
+    .historial-tabla .tipo-calculo {
+        display: block;
+        font-size: 0.95rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .historial-tabla .fecha-col {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+
+    .historial-tabla .fecha-col strong {
+        font-weight: 500;
+    }
+
+    .historial-tabla .fecha-col small {
+        font-size: inherit;
+        border-left: 1px solid var(--border-color);
+        padding-left: 12px;
+    }
+
+    .historial-tabla .historial-celda-archivo {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 3px 8px;
+        padding: 8px 10px;
+        background: var(--bg-input);
+        border-radius: 6px;
+    }
+
+    .historial-celda-archivo::before {
+        content: "Archivo";
+        color: var(--text-muted);
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .historial-tabla .archivo-origen {
+        min-width: 0;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+        color: var(--text-main);
+    }
+
+    .historial-tabla .acciones-container {
+        width: 100%;
+        margin: 2px 0 0;
+        align-items: center;
+    }
+
+    .historial-tabla .acciones-container button {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 44px;
+        padding: 5px 20px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        justify-content: center;
+    }
+
+    .historial-tabla .btn-reabrir {
+        background: rgba(37, 99, 235, 0.08);
+        font-weight: 600;
+    }
+
+    .historial-fila-cargando .acciones-container .skeleton-box {
+        flex: 1 1 0;
+        min-height: 44px;
+    }
+
+    .historial-paginacion {
+        flex-wrap: wrap;
+        justify-content: center !important;
+        gap: 10px;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .historial-paginacion button {
+        min-height: 44px;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 900px) {
+    .historial-tabla tbody {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+}
+.historial-select-container {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+}
+
+
+
+.btn-historial-select-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 5px;
+    min-height: 38px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-pure);
+    font-family: inherit;
+    user-select: none;
+    width: 100%;
+}
+
+.btn-historial-select-header.open {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-historial-select-header-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.historial-select-icon-primary {
+    color: var(--primary-color, #3b82f6);
+}
+
+.historial-select-text {
+    font-weight: 500;
+    font-size: 0.84rem;
+    color: var(--text-pure);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    flex: 1;
+}
+
+.historial-select-chevron {
+    color: var(--text-muted, #64748b);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.historial-select-chevron.open {
+    transform: rotate(180deg);
+}
+
+.historial-select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 5px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    z-index: 1000; 
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+    animation: historial-fadeInDropdown 0.2s ease;
+}
+
+.btn-historial-select-option { 
+    padding: 9px 14px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-pure);
+    font-weight: 400;
+    font-size: 0.84rem;
+    font-family: inherit;
+    transition: background 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.btn-historial-select-option:hover {
+    background: var(--bg-input, rgba(0, 0, 0, 0.04));
+}
+
+.btn-historial-select-option.selected {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--primary-color, #3b82f6);
+    font-weight: 600;
+}
+
+.btn-historial-select-header {
+    margin: 0;
+    font-size: 0.84rem;
+    font-weight: 500;
+    outline: none;
+    transform: none;
+}
+
+.btn-historial-select-header:focus-visible {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-historial-select-option {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    transform: none;
+}
+
+.btn-historial-select-option:focus-visible {
+    background: var(--bg-input, rgba(0, 0, 0, 0.04));
+    outline: 2px solid var(--primary-color, #3b82f6);
+    outline-offset: -2px;
+}
+
+.btn-historial-select-option.selected:focus-visible {
+    background: rgba(37, 99, 235, 0.08);
+}
+
+@keyframes historial-fadeInDropdown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.historial-filtros {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.historial-filtros .btn-historial-select-header {
+    height: 100%;
+    min-height: 44px;
+    background: var(--bg-input);
+    padding: 8px 12px;
+}
+
+.historial-modulo {
+    display: table;
+    margin-bottom: 0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.historial-modulo-mat251 {
+    color: var(--primary-color, #3b82f6);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+@media (max-width: 600px) {
+    .historial-filtros {
+        grid-template-columns: minmax(0, 1fr);
         gap: 10px;
     }
 
-    /* Convertimos la tabla en tarjetas para móviles */
-    .historial-tabla thead {
-        display: none; /* Ocultamos los encabezados de la tabla */
-    }
-
-    .historial-fila {
-        display: block;
-        padding: 15px;
-        position: relative;
-        margin-bottom: 10px;
-        border-bottom: 4px solid var(--border-color);
-    }
-
-    .historial-celda {
-        display: block;
-        padding: 5px 0;
-        text-align: left !important;
-    }
-
-    .historial-celda::before {
-        content: attr(data-label);
-        font-weight: bold;
-        display: block;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        margin-bottom: 2px;
-    }
-
-    .acciones-container {
-        margin-top: 10px;
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .acciones-container button {
-        flex: 1;
-        text-align: center;
+    .historial-filtros .btn-historial-select-option {
+        min-height: 44px;
     }
 }

@@ -63,7 +63,7 @@ origins = [
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
     "https://sice.jboris.org", #enlace de temporal
     "http://10.250.52.137:5173",
-    "http://192.168.100.179:5173",
+    "http://192.168.100.180:5173",
 ]                               
 
 app.add_middleware( 

@@ -219,8 +219,8 @@
 }
 
 :where(.mat251) .calculadora-layout.colapsado {
-  grid-template-columns: 15px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 0 minmax(0, 1fr);
+  gap: 0;
 }
 
 :where(.mat251) .boton-toggle-medio {
@@ -260,7 +260,7 @@
 }
 
 :where(.mat251) .calculadora-layout.colapsado .boton-toggle-medio {
-  left: 20px;
+  left: 0;
 }
 
 /* Desktop: el panel está al lado — flecha apunta ◀ (abierto) o ▶ (cerrado) */
