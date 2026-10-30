@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { generarDistribucionDiferenciaProporciones, calcularProbabilidadDiferenciaProporciones } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 import '../../../styles/Temas/Tema3.css';
@@ -155,62 +154,38 @@ const CustomSelect = ({ value, onChange, options = [], placeholder = 'Selecciona
     );
 };
 
-export default function Controles_DiferenciaProporciones({ onCalcular }) {
+export default function Controles_DiferenciaProporciones({ configuracion, onEditar, onGenerar, baseCalculada }) {
     // Muestra 1
-    const [p1, setP1] = useState('');
-    const [n1, setN1] = useState('');
+    const p1 = configuracion.p1;
+    const setP1 = valor => onEditar('p1', valor);
+    const n1 = configuracion.n1;
+    const setN1 = valor => onEditar('n1', valor);
 
     // Muestra 2
-    const [p2, setP2] = useState('');
-    const [n2, setN2] = useState('');
+    const p2 = configuracion.p2;
+    const setP2 = valor => onEditar('p2', valor);
+    const n2 = configuracion.n2;
+    const setN2 = valor => onEditar('n2', valor);
 
-    const [condicion, setCondicion] = useState('menor_que');
-    const [valorX1, setValorX1] = useState('');
-    const [valorX2, setValorX2] = useState('');
+    const condicion = configuracion.condicion;
+    const setCondicion = valor => onEditar('condicion', valor);
+    const valorX1 = configuracion.valorX1;
+    const setValorX1 = valor => onEditar('valorX1', valor);
+    const valorX2 = configuracion.valorX2;
+    const setValorX2 = valor => onEditar('valorX2', valor);
     
     // Estado para guardar los parámetros calculados antes de graficar
-    const [parametrosPrevios, setParametrosPrevios] = useState(null);
+    const parametrosPrevios = baseCalculada;
 
     // Alertas
     const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
 
-    const resetValues = () => {
-        setParametrosPrevios(null);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(null);
+    const ejecutarCalculo = evaluarCondicion => {
+        const calculo = onGenerar(evaluarCondicion);
+        setAlertaModal({ isOpen: !!calculo.error, mensaje: calculo.error || '', tipo: 'warning' });
     };
-
-    const calcularParametros = () => {
-        const result = generarDistribucionDiferenciaProporciones(p1, n1, p2, n2);
-        if (result.error) {
-            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            return;
-        }
-        setParametrosPrevios(result);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(result);
-    };
-
-    const calcular = () => {
-        const result = calcularProbabilidadDiferenciaProporciones(parametrosPrevios, condicion, valorX1, valorX2);
-        if (result.error) {
-            if (result.error !== 'Faltan parámetros previos.') {
-                setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            }
-            return;
-        }
-
-        onCalcular(result);
-    };
-
-    const mostrarDistribucionBase = () => {
-        // Mantiene visible la curva al editar límites y descarta la probabilidad anterior.
-        onCalcular(parametrosPrevios);
-    };
+    const calcularParametros = () => ejecutarCalculo(false);
+    const calcular = () => ejecutarCalculo(true);
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
@@ -229,7 +204,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Prop. Pob. 1"
                                 value={p1}
-                                onChange={(e) => { setP1(e.target.value); resetValues(); }}
+                                onChange={(e) => { setP1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -253,7 +228,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Muestra 1"
                                 value={n1}
-                                onChange={(e) => { setN1(e.target.value); resetValues(); }}
+                                onChange={(e) => { setN1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -287,7 +262,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Prop. Pob. 2"
                                 value={p2}
-                                onChange={(e) => { setP2(e.target.value); resetValues(); }}
+                                onChange={(e) => { setP2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -311,7 +286,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Muestra 2"
                                 value={n2}
-                                onChange={(e) => { setN2(e.target.value); resetValues(); }}
+                                onChange={(e) => { setN2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -384,7 +359,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                             <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '250px' : '200px' }}>
                                 <CustomSelect
                                     value={condicion}
-                                    onChange={(val) => { setCondicion(val); mostrarDistribucionBase(); }}
+                                    onChange={(val) => { setCondicion(val); }}
                                     options={[
                                         { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\hat{p}_1 - \hat{p}_2 \le x)" /></div> },
                                         { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\hat{p}_1 - \hat{p}_2 \ge x)" /></div> },
@@ -419,7 +394,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                                             className="input-mat251 placeholder-small"
                                             placeholder="Límite inferior"
                                             value={valorX1}
-                                            onChange={(e) => { setValorX1(e.target.value); mostrarDistribucionBase(); }}
+                                            onChange={(e) => { setValorX1(e.target.value); }}
                                             style={{
                                                 padding: '6px 12px',
                                                 fontSize: FS.sm,
@@ -445,7 +420,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                                             className="input-mat251 placeholder-small"
                                             placeholder="Límite superior"
                                             value={valorX2}
-                                            onChange={(e) => { setValorX2(e.target.value); mostrarDistribucionBase(); }}
+                                            onChange={(e) => { setValorX2(e.target.value); }}
                                             style={{
                                                 padding: '6px 12px',
                                                 fontSize: FS.sm,
@@ -473,7 +448,7 @@ export default function Controles_DiferenciaProporciones({ onCalcular }) {
                                         className="input-mat251 placeholder-small"
                                         placeholder="Valor x"
                                         value={valorX1}
-                                        onChange={(e) => { setValorX1(e.target.value); mostrarDistribucionBase(); }}
+                                        onChange={(e) => { setValorX1(e.target.value); }}
                                         style={{
                                             padding: '6px 12px',
                                             fontSize: FS.sm,

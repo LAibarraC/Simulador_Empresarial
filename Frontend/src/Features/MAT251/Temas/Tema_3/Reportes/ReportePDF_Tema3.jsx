@@ -4,7 +4,7 @@ import 'katex/dist/katex.min.css';
 import GraficoBastonesModelos from '../../../Graficas/Tema_3/GraficoBastonesModelos';
 import GraficoModelosContinuos from '../../../Graficas/Tema_3/GraficoModelosContinuos';
 import Resultados_ModelosContinuos from '../Resultados/Resultados_ModelosContinuos';
-import { desarrollarProbabilidadDiscreta, modeloContinuoPDF, desarrolloContinuoPDF, numeroContinuo, decimalContinuo } from '../../../Matematicas/logica_Tema3';
+import { desarrollarProbabilidadDiscreta, modeloContinuoPDF, desarrolloContinuoPDF, numeroContinuo, decimalContinuo, formatearParametroDiscreto, formatearResultadoDiscreto } from '../../../Matematicas/logica_Tema3';
 
 const k = (str, display = false) => {
     try {
@@ -24,14 +24,9 @@ const centrado = { textAlign: 'center', breakInside: 'avoid', pageBreakInside: '
 const celda = { textAlign: 'center' };
 const alineado = filas => `\\begin{aligned}${filas.map(fila => `&${fila}`).join(' \\\\[3pt] ')}\\end{aligned}`;
 const numeroLatex = valor => Number.isFinite(valor)
-    ? String(valor).replace(/e([+-]?\d+)/i, '\\times 10^{$1}')
+    ? formatearParametroDiscreto(valor).replace(/e([+-]?\d+)/i, '\\times 10^{$1}')
     : '\\text{—}';
-const formato = valor => {
-    if (!Number.isFinite(valor)) return '—';
-    const decimales = valor !== 0 && Math.abs(valor) < 0.001
-        ? Math.min(10, Math.max(4, -Math.floor(Math.log10(Math.abs(valor))) + 1)) : 4;
-    return valor.toFixed(decimales);
-};
+const formato = formatearResultadoDiscreto;
 
 /* ══════════════════════════════════════════════════════════════════
    SECCIÓN 1: MODELOS DISCRETOS

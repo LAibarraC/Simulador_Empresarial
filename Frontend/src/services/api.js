@@ -360,7 +360,7 @@ export const api = {
     }
   },
 
-  guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto) => {
+  guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto, modulo = "MAT151") => {
     try {
       const token = localStorage.getItem("token");
       const headers = { 
@@ -374,6 +374,7 @@ export const api = {
           autor: autor,
           calculo: calculo,
           archivo_origen: archivo,
+          modulo: modulo,
           snapshot: snapshotCompleto,
         }),
       });
@@ -388,12 +389,33 @@ export const api = {
     }
   },
 
-  obtenerHistorial: async (autor) => {
+  actualizarHistorial: async (registroId, datos) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/actualizar_historial/${registroId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(datos),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "No se pudieron guardar los cambios.");
+    }
+    return await res.json();
+  },
+
+  obtenerHistorial: async (autor, modulo = null) => {
     try {
       const token = localStorage.getItem("token");
       const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+      const params = new URLSearchParams();
+      if (autor) params.append("autor", autor);
+      if (modulo && modulo !== "TODOS") params.append("modulo", modulo);
+      const queryString = params.toString() ? `?${params.toString()}` : "";
       const res = await fetch(
-        `${BASE_URL}/obtener_historial?autor=${encodeURIComponent(autor || "")}`,
+        `${BASE_URL}/obtener_historial${queryString}`,
         { headers }
       );
       if (!res.ok)
@@ -472,7 +494,7 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Error al eliminar la cuenta");
+    if (!res.ok) throw new Error(data.error || data.detail || "Error al eliminar la cuenta");
     return data;
   },
 
@@ -525,7 +547,7 @@ export const api = {
       headers,
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Error al eliminar el usuario");
+    if (!res.ok) throw new Error(data.error || data.detail || "Error al eliminar el usuario");
     return data;
   },
 
@@ -697,6 +719,11 @@ export const api = {
 
 
   // --- SISTEMA DE NOTIFICACIONES ---
+  abrirFlujoNotificaciones: ({ token, signal }) => fetch(BASE_URL + "/notificaciones/eventos", {
+    headers: { Accept: "text/event-stream", Authorization: "Bearer " + token },
+    cache: "no-store",
+    signal,
+  }),
   obtenerNotificaciones: async () => {
     const token = localStorage.getItem("token");
     const headers = { "Content-Type": "application/json" };

@@ -241,11 +241,21 @@ export default function Admin() {
       return;
     }
     try {
-      await api.eliminarUsuario(usuarioAEliminar.email);
-      alerta.exito("Usuario eliminado", "La cuenta y todos los datos asociados han sido eliminados.");
+      const resultado = await api.eliminarUsuario(usuarioAEliminar.email);
+      if (resultado.advertencia) {
+        alerta.advertencia("Usuario eliminado: limpieza pendiente", resultado.advertencia);
+      } else {
+        alerta.exito("Usuario eliminado", "La cuenta y todos los datos asociados han sido eliminados.");
+      }
       setUsuarios(prev => prev.filter(u => u.email !== usuarioAEliminar.email));
+      setDocentesModulos(prev => {
+        const siguientes = { ...prev };
+        delete siguientes[usuarioAEliminar.id];
+        return siguientes;
+      });
       setUsuarioAEliminar(null);
       setConfirmarNombre('');
+      cargarCredencialesLista();
     } catch (error) {
       alerta.error("Error", error.message || "No se pudo eliminar el usuario");
     }
@@ -984,40 +994,6 @@ export default function Admin() {
                                   <option value="Docente" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Docente</option>
                                   <option value="Administrador" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)' }}>Administrador</option>
                                 </select>
-                                {u.rol === 'Docente' && (
-                                  <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
-                                    {docentesModulos[u.id] && docentesModulos[u.id].length > 0 ? (
-                                      <>
-                                        {docentesModulos[u.id].slice(0, 2).map(m => (
-                                          <span key={m} style={{ fontSize: '0.72rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', fontWeight: 'bold' }}>
-                                            {m}
-                                          </span>
-                                        ))}
-                                        {docentesModulos[u.id].length > 2 && (
-                                          <span
-                                            title={docentesModulos[u.id].join(', ')}
-                                            style={{
-                                              fontSize: '0.72rem',
-                                              padding: '2px 6px',
-                                              borderRadius: '4px',
-                                              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                              border: '1px solid rgba(59, 130, 246, 0.3)',
-                                              color: '#2563eb',
-                                              fontWeight: 'bold',
-                                              cursor: 'pointer'
-                                            }}
-                                          >
-                                            +{docentesModulos[u.id].length - 2}
-                                          </span>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                        Sin materias
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
                               </td>
                               <td data-label="Estado" className="td-mitad td-mitad-izq" style={{ padding: '15px' }}>
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold', backgroundColor: u.activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: u.activo ? '#10b981' : '#ef4444' }}>
@@ -1028,8 +1004,8 @@ export default function Admin() {
                               <td data-label="Registro" className="td-mitad" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                                 {u.fecha_creacion ? u.fecha_creacion.split(' ')[0] : 'N/A'}
                               </td>
-                              <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
-                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+                              <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
                                   {u.rol !== 'Administrador' ? (
                                     <>
                                       {u.rol === 'Docente' && (
@@ -1350,7 +1326,7 @@ export default function Admin() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000, backdropFilter: 'blur(3px)' }}>
           <div className="grafico-card" style={{ width: '95%', maxWidth: '500px', backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '30px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
             <h3 style={{ margin: '0 0 15px 0', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}><IconoAlerta width="24" height="24" /> Confirmar Eliminación Permanente</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', marginBottom: '20px' }}>Estás a punto de eliminar al usuario <strong>{usuarioAEliminar.nombre}</strong> ({usuarioAEliminar.email}). Esto borrará permanentemente su cuenta, archivos, historial de cálculos e inscripciones. Esta acción no se puede deshacer.</p>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5', marginBottom: '20px' }}>Estás a punto de eliminar al usuario <strong>{usuarioAEliminar.nombre}</strong> ({usuarioAEliminar.email}). Esto borrará permanentemente su cuenta, asignaciones a módulos, credenciales vinculadas, archivos, historial, clases propias, tareas, entregas e inscripciones. Esta acción no se puede deshacer.</p>
             <form onSubmit={handleEliminarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ textAlign: 'left' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>Escribe el nombre del usuario para confirmar (<strong>{usuarioAEliminar.nombre}</strong>):</label>

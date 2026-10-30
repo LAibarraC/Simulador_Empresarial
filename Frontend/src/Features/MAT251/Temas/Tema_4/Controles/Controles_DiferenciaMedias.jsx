@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { generarDistribucionDiferenciaMedias, calcularProbabilidadDiferenciaMedias } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 import '../../../styles/Temas/Tema3.css';
@@ -155,75 +154,43 @@ const CustomSelect = ({ value, onChange, options = [], placeholder = 'Selecciona
     );
 };
 
-export default function Controles_DiferenciaMedias({ onCalcular }) {
+export default function Controles_DiferenciaMedias({ configuracion, onEditar, onGenerar, baseCalculada }) {
     // Poblacion 1
-    const [mu1, setMu1] = useState('');
-    const [sigma1, setSigma1] = useState('');
-    const [n1, setN1] = useState('');
+    const mu1 = configuracion.mu1;
+    const setMu1 = valor => onEditar('mu1', valor);
+    const sigma1 = configuracion.sigma1;
+    const setSigma1 = valor => onEditar('sigma1', valor);
+    const n1 = configuracion.n1;
+    const setN1 = valor => onEditar('n1', valor);
 
     // Poblacion 2
-    const [mu2, setMu2] = useState('');
-    const [sigma2, setSigma2] = useState('');
-    const [n2, setN2] = useState('');
+    const mu2 = configuracion.mu2;
+    const setMu2 = valor => onEditar('mu2', valor);
+    const sigma2 = configuracion.sigma2;
+    const setSigma2 = valor => onEditar('sigma2', valor);
+    const n2 = configuracion.n2;
+    const setN2 = valor => onEditar('n2', valor);
 
-    const [distribucionGenerada, setDistribucionGenerada] = useState(false);
-    const [datosParciales, setDatosParciales] = useState(null);
+    const distribucionGenerada = !!baseCalculada;
+    const datosParciales = baseCalculada;
 
     // Inputs de objetivo
-    const [condicion, setCondicion] = useState('menor_que');
-    const [valorX1, setValorX1] = useState('');
-    const [valorX2, setValorX2] = useState('');
+    const condicion = configuracion.condicion;
+    const setCondicion = valor => onEditar('condicion', valor);
+    const valorX1 = configuracion.valorX1;
+    const setValorX1 = valor => onEditar('valorX1', valor);
+    const valorX2 = configuracion.valorX2;
+    const setValorX2 = valor => onEditar('valorX2', valor);
 
     // Alertas
     const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
 
-    const generarDistribucion = () => {
-        const result = generarDistribucionDiferenciaMedias(mu1, sigma1, n1, mu2, sigma2, n2);
-        if (result.error) {
-            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            return;
-        }
-
-        const parciales = { ...result };
-        delete parciales.error;
-
-        setDatosParciales(parciales);
-        setDistribucionGenerada(true);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(parciales);
+    const ejecutarCalculo = evaluarCondicion => {
+        const calculo = onGenerar(evaluarCondicion);
+        setAlertaModal({ isOpen: !!calculo.error, mensaje: calculo.error || '', tipo: 'warning' });
     };
-
-    const calcularProbabilidad = () => {
-        const result = calcularProbabilidadDiferenciaMedias(datosParciales, condicion, valorX1, valorX2);
-        if (result.error) {
-            if (result.error !== 'Faltan parámetros previos.') {
-                setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            }
-            return;
-        }
-
-        onCalcular({
-            ...datosParciales,
-            strDesarrollo: result.strDesarrollo,
-            probFinal: result.probFinal,
-            z1: result.z1,
-            z2: result.z2,
-            x1: result.x1,
-            x2: result.x2,
-            condicion: result.condicion
-        });
-    };
-
-    const resetDistribucion = () => {
-        setDistribucionGenerada(false);
-        setDatosParciales(null);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(null);
-    };
+    const generarDistribucion = () => ejecutarCalculo(false);
+    const calcularProbabilidad = () => ejecutarCalculo(true);
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent', marginTop: '10px' }}>
@@ -241,7 +208,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Media Pob. X"
                                 value={mu1}
-                                onChange={(e) => { setMu1(e.target.value); resetDistribucion(); }}
+                                onChange={(e) => { setMu1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -265,7 +232,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Desv. Est. Pob. X"
                                 value={sigma1}
-                                onChange={(e) => { setSigma1(e.target.value); resetDistribucion(); }}
+                                onChange={(e) => { setSigma1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -289,7 +256,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Muestra X"
                                 value={n1}
-                                onChange={(e) => { setN1(e.target.value); resetDistribucion(); }}
+                                onChange={(e) => { setN1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -322,7 +289,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Media Pob. Y"
                                 value={mu2}
-                                onChange={(e) => { setMu2(e.target.value); resetDistribucion(); }}
+                                onChange={(e) => { setMu2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -346,7 +313,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Desv. Est. Pob. Y"
                                 value={sigma2}
-                                onChange={(e) => { setSigma2(e.target.value); resetDistribucion(); }}
+                                onChange={(e) => { setSigma2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -370,7 +337,7 @@ export default function Controles_DiferenciaMedias({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Muestra Y"
                                 value={n2}
-                                onChange={(e) => { setN2(e.target.value); resetDistribucion(); }}
+                                onChange={(e) => { setN2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',

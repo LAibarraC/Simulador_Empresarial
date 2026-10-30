@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useData } from "../../components/gestion_datos/DataContext";
 import { api } from "../../services/api";
+import {
+  obtenerNombreCalculoHistorial,
+} from '../MAT251/Historial/historialMAT251';
+import { obtenerOrigenHistorial } from "./origenHistorial";
 import { alerta } from "../../utils/Notificaciones";
 import Skeleton from "../../ui/Skeleton";
 
@@ -133,7 +137,7 @@ export default function Historial() {
         element: '#tour-historial-tabla',
         popover: {
           title: 'Historial de Cálculos',
-          description: '¡Bienvenido! Aquí verás el registro detallado con fecha, hora, el tipo de análisis y el archivo Excel de origen para cada cálculo guardado.',
+          description: 'Aquí verás la fecha, hora, tipo de cálculo, módulo, archivo fuente y modo de cada registro guardado.',
           side: "top",
           align: 'start'
         }
@@ -157,13 +161,24 @@ export default function Historial() {
         element: '.tour-archivo-origen',
         popover: {
           title: 'Base de Datos de Origen',
-          description: 'Identifica cuál libro de Excel contiene los datos que procesaste.',
+          description: 'Muestra el nombre del archivo utilizado. Si el cálculo no utilizó un archivo o no se conservó su nombre, indica «Sin archivo».',
           side: "right",
           align: 'center'
         }
       });
     }
 
+    if (document.querySelector('.tour-modo-historial')) {
+      tourSteps.push({
+        element: '.tour-modo-historial',
+        popover: {
+          title: 'Modo del Cálculo',
+          description: 'En MAT251 muestra el modo guardado, como Análisis de Matriz, Manual o Experimentos. Para MAT151 indica «No aplica».',
+          side: "right",
+          align: 'center'
+        }
+      });
+    }
     if (document.querySelector('.tour-btn-reabrir')) {
       tourSteps.push({
         element: '.tour-btn-reabrir',
@@ -205,7 +220,10 @@ export default function Historial() {
       // Retraso artificial de 1 segundo para ver el Skeleton (¡Bórralo luego si deseas!)
       await new Promise(resolve => setTimeout(resolve, 1000));
       const data = await api.obtenerHistorial(usuario.nombre);
-      setRegistros((data.historial || []).map((registro) => ({ ...registro, modulo: obtenerModuloHistorial(registro) })));
+      setRegistros((data.historial || []).map((registro) => {
+        const normalizado = { ...registro, modulo: obtenerModuloHistorial(registro) };
+        return { ...normalizado, ...obtenerOrigenHistorial(normalizado) };
+      }));
     } catch (error) {
       alerta.error("Error", "No se pudo cargar el historial.");
     } finally {
@@ -246,11 +264,17 @@ export default function Historial() {
   // --- LÓGICA DE BÚSQUEDA Y PAGINACIÓN ---
   const filteredRegistros = registros.filter((reg) => {
     const term = searchTerm.toLowerCase();
-    const matchCalculo = reg.calculo?.toLowerCase().includes(term);
-    const matchArchivo = reg.archivo_origen?.toLowerCase().includes(term);
+    const nombreCalculoMAT251 = reg.modulo === "MAT251"
+      ? obtenerNombreCalculoHistorial(reg).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+      : "";
+    const terminoCalculo = term.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const matchCalculo = reg.calculo?.toLowerCase().includes(term)
+      || (reg.modulo === "MAT251" && nombreCalculoMAT251.includes(terminoCalculo));
+    const matchArchivo = reg.archivoFuente?.toLowerCase().includes(term);
+    const matchModo = reg.modoHistorial?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(terminoCalculo);
     const matchFecha = reg.fecha?.toLowerCase().includes(term);
     const matchModulo = filtroModulo === "TODOS" || reg.modulo === filtroModulo;
-    return matchModulo && (matchCalculo || matchArchivo || matchFecha || reg.modulo?.toLowerCase().includes(term));
+    return matchModulo && (matchCalculo || matchArchivo || matchModo || matchFecha || reg.modulo?.toLowerCase().includes(term));
   });
 
   const totalPages = Math.ceil(filteredRegistros.length / itemsPerPage);
@@ -358,7 +382,8 @@ export default function Historial() {
         <div className="historial-buscador historial-filtros">
           <input
             type="text"
-            placeholder="Buscar por operación, archivo o fecha..."
+            className="input-mat251 placeholder-small"
+            placeholder="Buscar por operación, archivo, modo o fecha..."
             aria-label="Buscar en el historial"
             value={searchTerm}
             onChange={handleSearch}
@@ -387,28 +412,32 @@ export default function Historial() {
           <table className="historial-tabla">
                 <colgroup>
                   <col className="historial-col-fecha" />
+                  <col className="historial-col-hora" />
                   <col className="historial-col-calculo" />
                   <col className="historial-col-modulo" />
                   <col className="historial-col-archivo" />
+                  <col className="historial-col-modo" />
                   <col className="historial-col-acciones" />
                 </colgroup>
             <thead>
               <tr>
-                <th>Fecha / Hora</th>
+                <th>Fecha</th>
+                    <th>Hora</th>
                 <th>Tipo de Cálculo</th>
                 <th>Módulo</th>
                     <th>Archivo Fuente</th>
+                    <th>Modo</th>
                 <th style={{ textAlign: "center" }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {[1, 2, 3, 4, 5].map(i => (
                 <tr key={i} className="historial-fila historial-fila-cargando">
-                  <td className="historial-celda historial-celda-fecha" data-label="Fecha / Hora">
-                    <div className="fecha-col">
-                      <Skeleton height="1.5em" width="100px" />
-                      <Skeleton height="1.25em" width="70px" />
-                    </div>
+                  <td className="historial-celda historial-celda-fecha" data-label="Fecha">
+                    <Skeleton height="1.5em" width="100px" />
+                  </td>
+                  <td className="historial-celda historial-celda-hora" data-label="Hora">
+                    <Skeleton height="1.25em" width="70px" />
                   </td>
                   <td className="historial-celda historial-celda-calculo" data-label="Tipo de Cálculo">
                     <Skeleton height="24px" width="180px" borderRadius="12px" />
@@ -418,6 +447,9 @@ export default function Historial() {
                   </td>
                   <td className="historial-celda historial-celda-archivo" data-label="Archivo Fuente">
                     <Skeleton height="16px" width="120px" />
+                  </td>
+                  <td className="historial-celda historial-celda-modo" data-label="Modo">
+                    <Skeleton height="16px" width="100px" />
                   </td>
                   <td className="historial-celda historial-celda-acciones" data-label="Acciones">
                     <div className="acciones-container" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
@@ -448,32 +480,38 @@ export default function Historial() {
               <table className="historial-tabla">
                 <colgroup>
                   <col className="historial-col-fecha" />
+                  <col className="historial-col-hora" />
                   <col className="historial-col-calculo" />
                   <col className="historial-col-modulo" />
                   <col className="historial-col-archivo" />
+                  <col className="historial-col-modo" />
                   <col className="historial-col-acciones" />
                 </colgroup>
                 <thead>
                   <tr>
-                    <th>Fecha / Hora</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
                     <th>Tipo de Cálculo</th>
                     <th>Módulo</th>
                     <th>Archivo Fuente</th>
+                    <th>Modo</th>
                     <th style={{ textAlign: "center" }}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentRegistros.map((reg) => (
                     <tr key={reg.id} className="historial-fila">
-                      <td className="historial-celda historial-celda-fecha" data-label="Fecha / Hora">
-                        <div className="fecha-col">
-                          <strong>{reg.fecha}</strong>
-                          <small className="text-muted">{reg.hora}</small>
-                        </div>
+                      <td className="historial-celda historial-celda-fecha" data-label="Fecha">
+                        <strong>{reg.fecha}</strong>
+                      </td>
+                      <td className="historial-celda historial-celda-hora" data-label="Hora">
+                        <span className="text-muted">{reg.hora}</span>
                       </td>
                       <td className="historial-celda historial-celda-calculo" data-label="Tipo de Cálculo">
                         <span className="tipo-calculo tour-tipo-calculo">
-                          {reg.calculo.replace(/_/g, " ").toUpperCase()}
+                                                    {reg.modulo === "MAT251"
+                            ? obtenerNombreCalculoHistorial(reg).replace(/[a-záéíóúüñ]/g, letra => letra.toUpperCase())
+                            : reg.calculo.replace(/_/g, " ").toUpperCase()}
                         </span>
                       </td>
                       <td className="historial-celda historial-celda-modulo" data-label="Módulo">
@@ -482,7 +520,10 @@ export default function Historial() {
                         </span>
                       </td>
                       <td className="historial-celda historial-celda-archivo" data-label="Archivo Fuente">
-                        <span className="archivo-origen tour-archivo-origen">{reg.archivo_origen}</span>
+                        <span className="archivo-origen tour-archivo-origen">{reg.archivoFuente}</span>
+                      </td>
+                      <td className="historial-celda historial-celda-modo" data-label="Modo">
+                        <span className="modo-historial tour-modo-historial">{reg.modoHistorial}</span>
                       </td>
 
                       <td className="historial-celda historial-celda-acciones" data-label="Acciones">
@@ -494,8 +535,8 @@ export default function Historial() {
                               const datosBrutos = reg.snapshot || reg.resultados_json;
                               // 2. Nos aseguramos de que sea un objeto real
                               const snapshotListo = typeof datosBrutos === "string" ? JSON.parse(datosBrutos) : datosBrutos;
-                              // 3. Enviamos a la calculadora
-                              navigate("/calculadora", {
+                              const destino = reg.modulo === "MAT251" ? "/MAT251" : "/calculadora";
+                              navigate(destino, {
                                 state: {
                                   archivoReabrir: reg.archivo_origen,
                                   calculoReabrir: reg.calculo,

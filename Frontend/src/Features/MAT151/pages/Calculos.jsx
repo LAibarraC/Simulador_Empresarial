@@ -1011,7 +1011,7 @@ export default function Calculos() {
         resultadoFinal: resultado,
         tarea_id: activeTareaId,
       };
-      await api.guardarEnHistorial(usuario.nombre, calculo, selectedFile, snapshotCompleto);
+      await api.guardarEnHistorial(usuario.nombre, calculo, selectedFile, snapshotCompleto, "MAT151");
       if (activeTareaId) {
         alerta.exito("¡Cálculo Guardado para la Tarea!", `El cálculo se guardó y vinculó exclusivamente a «${activeTareaTitulo || 'esta tarea'}».`);
         // Actualizar el estado de la tarea en la barra superior de inmediato

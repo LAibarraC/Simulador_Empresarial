@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { pruebaMediaZ, pruebaMediaT, pruebaProporcionZ, pruebaVarianzaChi } from '../../../Matematicas/Logica_Tema6';
 import { cardStyle, FS, labelStyle, RADIUS, FONT } from '../../../Principal/Constantes';
 import { EditarDatos } from '../../../../../ui/iconos';
 import ModalAlerta from '../../../ui/ModalAlerta';
@@ -8,14 +7,15 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { jStat } from 'jstat';
 
-export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, statsDatos, abrirEditor, onCalcular }) {
-    const [valorExito, setValorExito] = useState('');
-    const [sigma, setSigma] = useState('');
-    const [mu0, setMu0] = useState('');
-    const [p0, setP0] = useState('');
-    const [sigma02, setSigma02] = useState('');
-    const [alpha, setAlpha] = useState('0.05');
-    const [tipoPrueba, setTipoPrueba] = useState('bilateral');
+export default function Controles_HP_Matriz({ prueba, filas, statsDatos, abrirEditor, configuracion, onEditar, onCalcular }) {
+    const { valorExito, sigma, mu0, p0, sigma02, alpha, tipoPrueba } = configuracion;
+    const setValorExito = valor => onEditar('valorExito', valor);
+    const setSigma = valor => onEditar('sigma', valor);
+    const setMu0 = valor => onEditar('mu0', valor);
+    const setP0 = valor => onEditar('p0', valor);
+    const setSigma02 = valor => onEditar('sigma02', valor);
+    const setAlpha = valor => onEditar('alpha', valor);
+    const setTipoPrueba = valor => onEditar('tipoPrueba', valor);
 
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const [isSelectOpen, setIsSelectOpen] = useState(false);
@@ -32,19 +32,6 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
-
-    useEffect(() => {
-        if (!varSeleccionada || statsDatos?.total === 0) {
-            setValorExito('');
-            setSigma('');
-            setMu0('');
-            setP0('');
-            setSigma02('');
-            setAlpha('0.05');
-            setTipoPrueba('bilateral');
-            onCalcular(null);
-        }
-    }, [varSeleccionada, statsDatos?.total, onCalcular]);
 
     const alphaOptions = [
         { value: '0.10', label: '0.10 (90%) - Significación' },
@@ -63,15 +50,15 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
     const paramSymbol = prueba === 'proporcion' ? 'p' : prueba === 'varianza' ? '\\sigma^2' : '\\mu';
     const paramHypo = prueba === 'proporcion' ? 'p_0' : prueba === 'varianza' ? '\\sigma_0^2' : '\\mu_0';
 
-    const datosCompletos = (varSeleccionada && Array.isArray(filas) ? filas : [])
+    const datosCompletos = (Array.isArray(filas) ? filas : [])
         .map(f => f.valor)
         .filter(v => v !== undefined && v !== null && v.toString().trim() !== '');
 
     let statsLive = null;
     if (datosCompletos.length > 0) {
         if (prueba === 'media_z' || prueba === 'media_t' || prueba === 'varianza') {
-            const numDatos = datosCompletos.map(Number).filter(d => !isNaN(d));
-            if (numDatos.length > 0) {
+            const numDatos = datosCompletos.map(Number);
+            if (numDatos.length > 0 && numDatos.every(Number.isFinite)) {
                 const x_barLive = jStat.mean(numDatos);
                 const s2Live = numDatos.length > 1 ? jStat.variance(numDatos, true) : 0;
                 statsLive = { n: numDatos.length, mean: x_barLive, std: Math.sqrt(s2Live) };
@@ -84,53 +71,8 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
     }
 
     const handleCalcular = () => {
-        if (!datosCompletos || datosCompletos.length === 0) {
-            mostrarAlerta('Por favor, selecciona o agrega una variable con datos válidos.', 'Faltan Datos', 'warning');
-            return;
-        }
-
-        const numAlpha = Number(alpha);
-        let res = null;
-
-        if (prueba === 'media_z' || prueba === 'media_t' || prueba === 'varianza') {
-            const numDatos = datosCompletos.map(Number).filter(d => !isNaN(d));
-            if (numDatos.length === 0) {
-                mostrarAlerta('No hay datos numéricos válidos en la matriz para esta prueba.', 'Error', 'error');
-                return;
-            }
-
-            const n = numDatos.length;
-            const x_bar = jStat.mean(numDatos);
-            const s2_val = numDatos.length > 1 ? jStat.variance(numDatos, true) : 0;
-            const s_val = Math.sqrt(s2_val);
-
-            if (prueba === 'media_z') {
-                res = pruebaMediaZ(n, x_bar, Number(sigma), Number(mu0), numAlpha, tipoPrueba);
-            } else if (prueba === 'media_t') {
-                res = pruebaMediaT(n, x_bar, s_val, Number(mu0), numAlpha, tipoPrueba);
-            } else if (prueba === 'varianza') {
-                res = pruebaVarianzaChi(n, s2_val, Number(sigma02), numAlpha, tipoPrueba);
-            }
-        } else if (prueba === 'proporcion') {
-            if (!valorExito || valorExito.trim() === '') {
-                mostrarAlerta('Por favor, seleccione el valor considerado como éxito.', 'Faltan Datos', 'warning');
-                return;
-            }
-            const n = datosCompletos.length;
-            const x = datosCompletos.filter(d => String(d).trim() === String(valorExito).trim()).length;
-            res = pruebaProporcionZ(n, x, Number(p0), numAlpha, tipoPrueba);
-        }
-
-        if (res?.error) {
-            mostrarAlerta(res.error, 'Error de Cálculo', 'error');
-            onCalcular(null);
-        } else {
-            onCalcular({
-                ...res,
-                datosAnalizados: prueba === 'proporcion' ? [...datosCompletos] : datosCompletos.map(Number).filter(Number.isFinite),
-                valorExito: prueba === 'proporcion' ? valorExito : undefined
-            });
-        }
+        const calculo = onCalcular();
+        if (calculo?.error) mostrarAlerta(calculo.error, 'Datos inválidos', 'warning');
     };
 
     const valoresUnicos = prueba === 'proporcion' ? [...new Set(filas
@@ -208,7 +150,7 @@ export default function Controles_HP_Matriz({ prueba, varSeleccionada, filas, st
                 {prueba !== 'proporcion' && tablaResumenMuestra}
             </div>
 
-            {varSeleccionada && datosCompletos.length > 0 ? (
+            {datosCompletos.length > 0 ? (
                 <>
             <div style={{ ...cardStyle, border: 'none', padding: '0px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '15px', marginTop: '10px', marginBottom: '15px', alignItems: 'start', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                 {prueba === 'proporcion' && (

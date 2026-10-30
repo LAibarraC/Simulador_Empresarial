@@ -7,6 +7,7 @@ import { IconoBasura, IconoMas, EditarDatos } from '../../../../../ui/iconos';
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
+import { columnasDiscreta } from '../../../Historial/historial_Tema2';
 
 // COMPONENTE SELECTOR PERSONALIZADO (REGLA 2)
 function CustomSelect({ value, onChange, options, placeholder = 'Selecciona una opción...' }) {
@@ -140,175 +141,40 @@ function CustomSelect({ value, onChange, options, placeholder = 'Selecciona una 
     );
 }
 
-export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccionada, filas, statsDatos, abrirEditor }) {
-    const [modo, setModo] = useState('matriz'); // 'manual' | 'matriz'
-    const [columnaSeleccionada, setColumnaSeleccionada] = useState('');
+export default function Controles_DistribucionDiscreta({
+    onCalcular, varSeleccionada, filas, statsDatos, abrirEditor,
+    modo, setModo, columnaSeleccionada, setColumnaSeleccionada, tabla, setTabla, bloquearModo = false,
+}) {
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
-
-    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
-        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
-    };
-
-    const [tabla, setTabla] = useState([
-        { id: 1, x: '', p: '' },
-        { id: 2, x: '', p: '' }
-    ]);
-
-    // Lógica para Gestión de Datos
-    const columnasDisponibles = useMemo(() => {
-        return (varSeleccionada?.nombresColumnas && varSeleccionada.nombresColumnas.length > 0)
-            ? varSeleccionada.nombresColumnas
-            : (varSeleccionada ? [varSeleccionada.nombre || 'Datos'] : []);
-    }, [varSeleccionada]);
-
-    const opcionesColumnas = useMemo(() => {
-        return columnasDisponibles.map((col, idx) => ({
-            value: idx,
-            label: col
-        }));
-    }, [columnasDisponibles]);
+    const columnasDisponibles = useMemo(() => columnasDiscreta(varSeleccionada, filas), [varSeleccionada, filas]);
+    const opcionesColumnas = useMemo(() => columnasDisponibles.map((col, idx) => ({ value: idx, label: col })), [columnasDisponibles]);
 
     useEffect(() => {
+        if (modo !== 'matriz') return;
         if (columnasDisponibles.length === 1) {
-            setColumnaSeleccionada(0);
-        } else {
+            if (columnaSeleccionada !== 0) setColumnaSeleccionada(0);
+        } else if (columnaSeleccionada !== '' && (!Number.isInteger(columnaSeleccionada)
+            || columnaSeleccionada < 0 || columnaSeleccionada >= columnasDisponibles.length)) {
             setColumnaSeleccionada('');
         }
-    }, [columnasDisponibles]);
+    }, [modo, columnasDisponibles, columnaSeleccionada, setColumnaSeleccionada]);
 
-    // Reseteos al cambiar de modo, columna, variable seleccionada o datos globales
-    useEffect(() => {
-        onCalcular(null);
-    }, [modo, columnaSeleccionada, varSeleccionada, statsDatos?.total]);
-
-    // Si estamos en modo matriz y no hay variable o los datos son 0, limpiar cálculos inmediatamente
-    useEffect(() => {
-        if (modo === 'matriz' && (!varSeleccionada || !statsDatos || statsDatos.total === 0)) {
-            onCalcular(null);
-        }
-    }, [modo, varSeleccionada, statsDatos?.total]);
-
-    const agregarFila = () => {
-        setTabla([...tabla, { id: Date.now(), x: '', p: '' }]);
-        onCalcular(null);
-    };
-
-    const eliminarFila = (id) => {
+    const agregarFila = () => setTabla(prev => [...prev, { id: Date.now(), x: '', p: '' }]);
+    const eliminarFila = id => {
         if (tabla.length <= 1) return;
-        setTabla(tabla.filter(fila => fila.id !== id));
-        onCalcular(null);
+        setTabla(prev => prev.filter(fila => fila.id !== id));
     };
+    const actualizarFila = (id, campo, valor) => setTabla(prev => prev.map(fila => (
+        fila.id === id ? { ...fila, [campo]: valor } : fila
+    )));
 
-    const actualizarFila = (id, campo, valor) => {
-        setTabla(tabla.map(fila => fila.id === id ? { ...fila, [campo]: valor } : fila));
-        onCalcular(null);
+    const calcular = () => {
+        const calculo = onCalcular();
+        setModalAlerta({ isOpen: !!calculo.error, mensaje: calculo.error || '', titulo: 'Revisa los datos', tipo: 'warning' });
     };
-
-    const sumaProbabilidades = useMemo(() => {
-        return tabla.reduce((acc, curr) => {
-            const val = parseFloat(curr.p);
-            return acc + (isNaN(val) ? 0 : val);
-        }, 0);
-    }, [tabla]);
-
-    const hayProbabilidadesNegativas = tabla.some(fila => parseFloat(fila.p) < 0);
-    const esSumaValida = Math.abs(sumaProbabilidades - 1) < 0.0001 && !hayProbabilidadesNegativas;
-    const hayCamposVacios = tabla.some(fila => fila.x === '' || fila.p === '');
-
-    const handleCalcular = () => {
-        if (tabla.length === 0) {
-            mostrarAlerta('Debes ingresar al menos una fila en la tabla.', 'Tabla Vacía', 'warning');
-            return;
-        }
-
-        if (hayCamposVacios) {
-            mostrarAlerta('Por favor completa todos los campos de Valor (X) y Probabilidad P(X) en la tabla.', 'Campos Incompletos', 'warning');
-            return;
-        }
-
-        if (hayProbabilidadesNegativas) {
-            mostrarAlerta('Las probabilidades P(X) no pueden ser negativas.', 'Valores Inválidos', 'error');
-            return;
-        }
-
-        if (!esSumaValida) {
-            mostrarAlerta(`La suma de las probabilidades es ${sumaProbabilidades.toFixed(4)}. La suma total de P(X) debe ser exactamente igual a 1.0.`, 'Suma Inválida', 'warning');
-            return;
-        }
-
-        const mapDatos = new Map();
-        tabla.forEach(fila => {
-            const xVal = parseFloat(fila.x);
-            const pVal = parseFloat(fila.p);
-            if (!isNaN(xVal) && !isNaN(pVal)) {
-                if (mapDatos.has(xVal)) {
-                    mapDatos.set(xVal, mapDatos.get(xVal) + pVal);
-                } else {
-                    mapDatos.set(xVal, pVal);
-                }
-            }
-        });
-
-        const datos = Array.from(mapDatos.entries()).map(([x, p]) => ({ x, p }));
-        datos.sort((a, b) => a.x - b.x);
-
-        onCalcular(datos, { modo: 'manual' });
-    };
-
-    const renderLatex = (str) => {
-        return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
-    };
-
-    const colAEvaluar = useMemo(() => {
-        return columnasDisponibles.length === 1 ? 0 : columnaSeleccionada;
-    }, [columnasDisponibles.length, columnaSeleccionada]);
-
-    const datosColumna = useMemo(() => {
-        if (!varSeleccionada || !filas || filas.length === 0 || colAEvaluar === '') return [];
-        const validas = filas.filter(f => (f.valor || '').toString().trim() !== '');
-
-        return validas.map(f => {
-            if (varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) {
-                const partes = (f.valor || '').toString().split(' | ');
-                return partes[colAEvaluar] ? partes[colAEvaluar].trim() : '';
-            }
-            return (f.valor || '').toString().trim();
-        }).map(v => parseFloat(v)).filter(v => !isNaN(v));
-    }, [varSeleccionada, filas, colAEvaluar]);
-
-    const procesarMatriz = () => {
-        if (colAEvaluar === '') {
-            mostrarAlerta('Por favor selecciona la columna a evaluar.', 'Columna no seleccionada', 'warning');
-            return;
-        }
-        if (datosColumna.length === 0) {
-            mostrarAlerta('No hay datos numéricos válidos en la columna seleccionada.', 'Datos no válidos', 'error');
-            return;
-        }
-
-        const counts = {};
-        datosColumna.forEach(val => {
-            counts[val] = (counts[val] || 0) + 1;
-        });
-
-        const totalDatos = datosColumna.length;
-        const datosGenerados = Object.keys(counts).map(key => {
-            const val = parseFloat(key);
-            const freq = counts[key];
-            return {
-                x: val,
-                p: freq / totalDatos,
-                f: freq
-            };
-        }).sort((a, b) => a.x - b.x);
-
-        onCalcular(datosGenerados, {
-            modo: 'matriz',
-            nombreVariable: varSeleccionada?.nombre,
-            columna: columnasDisponibles[colAEvaluar],
-            observaciones: [...datosColumna]
-        });
-    };
+    const handleCalcular = calcular;
+    const procesarMatriz = calcular;
+    const renderLatex = str => <span dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
 
     const inputStyle = {
         width: '100%',
@@ -394,6 +260,8 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
+                        disabled={bloquearModo && modo !== 'matriz'}
+                        title={bloquearModo && modo !== 'matriz' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => setModo('matriz')}
                         style={{ fontFamily: FONT }}
                     >
@@ -402,6 +270,8 @@ export default function Controles_DistribucionDiscreta({ onCalcular, varSeleccio
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modo === 'manual' ? 'active' : ''}`}
+                        disabled={bloquearModo && modo !== 'manual'}
+                        title={bloquearModo && modo !== 'manual' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => setModo('manual')}
                         style={{ fontFamily: FONT }}
                     >

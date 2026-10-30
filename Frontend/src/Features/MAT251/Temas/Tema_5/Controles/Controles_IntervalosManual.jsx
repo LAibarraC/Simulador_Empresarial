@@ -1,56 +1,26 @@
 import React, { useState } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import { calcularIntervaloMedia, calcularIntervaloProporcion, calcularIntervaloVarianza } from '../../../Matematicas/logica_Tema5';
 import { cardStyle, labelStyle, FS } from '../../../Principal/Constantes';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
-export default function Controles_IntervalosManual({ parametro, confianza, onCalcular }) {
+export default function Controles_IntervalosManual({ parametro, configuracion, onEditar, onCalcular }) {
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Dato inválido', tipo: 'warning' });
-    const [n, setN] = useState('');
-    
-    // Para media
-    const [xBar, setXBar] = useState('');
-    const [sigmaConocida, setSigmaConocida] = useState(false);
-    const [desviacion, setDesviacion] = useState(''); // Representa sigma o s
-    
-    // Para proporcion
-    const [x, setX] = useState('');
-    
-    // Para varianza
-    const [s2, setS2] = useState('');
+    const { n, xBar, sigmaConocida, desviacion, x, s2 } = configuracion;
+    const setN = valor => onEditar('n', valor);
+    const setXBar = valor => onEditar('xBar', valor);
+    const setSigmaConocida = valor => onEditar('sigmaConocida', valor);
+    const setDesviacion = valor => onEditar('desviacion', valor);
+    const setX = valor => onEditar('x', valor);
+    const setS2 = valor => onEditar('s2', valor);
 
     const renderKatex = (math, negrita = false) => (
         <span className={negrita ? 'tema5-matematica-negrita' : undefined} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
 
     const handleCalcular = () => {
-        if ((parametro === 'proporcion' && (n === '' || x === '')) || (parametro === 'varianza' && (n === '' || s2 === ''))) {
-            const mensaje = parametro === 'proporcion'
-                ? 'Ingrese el tamaño de la muestra y los casos favorables.'
-                : 'Ingrese el tamaño de la muestra y la varianza muestral.';
-            setModalAlerta({ isOpen: true, mensaje, titulo: 'Faltan datos', tipo: 'warning' });
-            onCalcular(null);
-            return;
-        }
-
-        let res = null;
-        const numN = parseFloat(n);
-
-        if (parametro === 'media') {
-            res = calcularIntervaloMedia(parseFloat(xBar), parseFloat(desviacion), numN, confianza, sigmaConocida);
-        } else if (parametro === 'proporcion') {
-            res = calcularIntervaloProporcion(parseFloat(x), numN, confianza);
-        } else if (parametro === 'varianza') {
-            res = calcularIntervaloVarianza(parseFloat(s2), numN, confianza);
-        }
-
-        if (res && res.error) {
-            setModalAlerta({ isOpen: true, mensaje: res.error, titulo: 'Dato inválido', tipo: 'warning' });
-            onCalcular(null);
-        } else {
-            onCalcular(res ? { ...res, sigmaConocida: parametro === 'media' ? sigmaConocida : undefined } : null);
-        }
+        const calculo = onCalcular();
+        if (calculo?.error) setModalAlerta({ isOpen: true, mensaje: calculo.error, titulo: 'Dato inválido', tipo: 'warning' });
     };
 
     return (

@@ -364,7 +364,7 @@ export default function ArbolProbabilidades({ resultado, filas, varSeleccionada,
                 if (modReemplazo === 'sin_reemplazo') {
                     const nA_and_B = datosParseados.filter(d => d.valA === valA && d.valB === valB).length;
                     const reduccion = countA > 0 ? (nA_and_B / countA) : 0;
-                    countB = Number(Math.max(0, countB - reduccion).toFixed(2));
+                    countB = Math.max(0, countB - reduccion);
                 }
 
                 const pB = totalB > 0 ? countB / totalB : 0;

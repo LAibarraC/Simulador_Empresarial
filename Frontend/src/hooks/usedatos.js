@@ -7,6 +7,7 @@ import {alerta} from "../utils/Notificaciones";
 
 export const useSimuladorLogic = (usuario) => {
   const [workbook, setWorkbook] = useState(null);
+  const [nombreArchivoOrigen, setNombreArchivoOrigen] = useState('');
   const [sheetNames, setSheetNames] = useState([]);
   const [currentSheet, setCurrentSheet] = useState("");
   const [rowData, setRowData] = useState([]);
@@ -15,6 +16,7 @@ export const useSimuladorLogic = (usuario) => {
 
   useEffect(() => {
     setWorkbook(null);
+    setNombreArchivoOrigen('');
     setSheetNames([]);
     setCurrentSheet("");
     setRowData([]);
@@ -43,6 +45,7 @@ export const useSimuladorLogic = (usuario) => {
       try {
         const wb = XLSX.read(evt.target.result, { type: 'binary' });
         setWorkbook(wb);
+        setNombreArchivoOrigen(file.name);
         setSheetNames(wb.SheetNames);
         setVariables([]); // Limpiamos variables al cargar nuevo archivo
         cargarHoja(wb, wb.SheetNames[0], 50);
@@ -94,6 +97,7 @@ export const useSimuladorLogic = (usuario) => {
 
   return {
     workbook,
+    nombreArchivoOrigen,
     sheetNames,
     currentSheet,
     rowData,

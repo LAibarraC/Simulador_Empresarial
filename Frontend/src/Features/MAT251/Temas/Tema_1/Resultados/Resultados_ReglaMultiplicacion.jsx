@@ -4,7 +4,6 @@ import katex from 'katex';
 import DiagramaFlujoSucesivo from '../../../Graficas/Tema_1/DiagramaFlujoSucesivo';
 import ArbolProbabilidades from '../../../Graficas/Tema_1/ArbolProbabilidades';
 import { EditarDatos } from '../../../../../ui/iconos';
-import { calcularReglaMultiplicacion } from '../../../Matematicas/logica_Tema1';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
 const InlineMath = ({ math }) => (
@@ -75,7 +74,7 @@ const FormulaMultiplicacion = ({ resultado, modReemplazo, inputMode }) => {
 };
 
 // COMPONENTE SELECTOR PERSONALIZADO
-const CustomSelect = ({ value, onChange, options, placeholder }) => {
+const CustomSelect = ({ value, onChange, options, placeholder, disabled = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const ref = useRef(null);
 
@@ -96,14 +95,16 @@ const CustomSelect = ({ value, onChange, options, placeholder }) => {
     return (
         <div ref={ref} style={{ position: 'relative', width: '100%', fontFamily: FONT }}>
             <div
-                onClick={() => setIsOpen(!isOpen)}
+                aria-disabled={disabled}
+                title={disabled ? 'El tipo de extracción está fijado por el historial' : undefined}
+                onClick={() => { if (!disabled) setIsOpen(!isOpen); }}
                 style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     minHeight: '38px',
                     padding: '8px 12px',
                     background: 'var(--bg-input)',
                     border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                    borderRadius: RADIUS, cursor: 'pointer',
+                    borderRadius: RADIUS, cursor: disabled ? 'not-allowed' : 'pointer',
                     boxShadow: isOpen ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : 'none',
                     transition: 'all 0.2s ease',
                     color: 'var(--text-pure)',
@@ -118,7 +119,7 @@ const CustomSelect = ({ value, onChange, options, placeholder }) => {
                 <svg style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', flexShrink: 0, color: 'var(--text-muted)' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </div>
 
-            {isOpen && (
+            {isOpen && !disabled && (
                 <div style={{
                     position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
                     background: 'var(--bg-card)',
@@ -180,22 +181,14 @@ export default function ResultadosReglaMultiplicacion({
     modReemplazo, setModReemplazo,
     colA, setColA, valA, setValA,
     colB, setColB, valB, setValB,
-    resultado, setResultado,
-    error, setError,
-    statsDatos, abrirEditor
+    resultado,
+    error,
+    statsDatos, abrirEditor,
+    inputMode, setInputMode, manualEvents, setManualEvents, onCalcular, bloquearModo = false
 }) {
     const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
-    const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
-    const [manualEvents, setManualEvents] = useState([
-        { id: 'e1', name: 'A', prob: '' },
-        { id: 'e2', name: 'B', prob: '' }
-    ]);
-    const [resultadoManual, setResultadoManual] = useState(null);
-    const [errorManual, setErrorManual] = useState('');
-
-    // Segregación total entre modo matriz y modo manual
-    const activeResultado = inputMode === 'manual' ? resultadoManual : resultado;
-    const activeError = inputMode === 'manual' ? errorManual : error;
+    const activeResultado = resultado;
+    const activeError = error;
 
     const opcionesModoReemplazo = [
         { value: 'con_reemplazo', label: 'Con reemplazo (Independientes)' },
@@ -231,14 +224,6 @@ export default function ResultadosReglaMultiplicacion({
         return [...new Set(vals)].sort();
     }, [pseudoVar, colB, filas]);
 
-    // Garantizar exclusión mutua estricta: si colA y colB coinciden, limpiar colB
-    useEffect(() => {
-        if (colA && colB && colA === colB) {
-            setColB('');
-            setValB('');
-        }
-    }, [colA, colB, setColB, setValB]);
-
     // Si cambian las columnas y la selección ya no existe en la matriz, limpiarla
     useEffect(() => {
         if (pseudoVar && pseudoVar.nombresColumnas) {
@@ -254,107 +239,15 @@ export default function ResultadosReglaMultiplicacion({
     }, [pseudoVar, colA, colB, setColA, setValA, setColB, setValB]);
 
     const calcular = () => {
-        if (inputMode === 'manual') {
-            const parsedEvents = manualEvents.map(e => ({
-                name: e.name.trim() || 'X',
-                prob: parseFloat(e.prob)
-            }));
-
-            for (const e of parsedEvents) {
-                if (isNaN(e.prob) || e.prob < 0 || e.prob > 1) {
-                    setAlerta({ isOpen: true, mensaje: "Todas las probabilidades deben ser numéricas y estar entre 0 y 1." });
-                    setResultadoManual(null);
-                    setResultado(null);
-                    return;
-                }
-            }
-
-            const pJoint = parsedEvents.reduce((acc, curr) => acc * curr.prob, 1);
-
-            const resultadoCalculado = {
-                isManualDinamic: true,
-                events: parsedEvents,
-                pAandB: pJoint,
-                pA: parsedEvents[0]?.prob || 0,
-                pB: parsedEvents[1]?.prob || 0,
-                nameA: parsedEvents[0]?.name || 'A',
-                nameB: parsedEvents[1]?.name || 'B',
-                modo: 'manual',
-                modReemplazo
-            };
-            setResultadoManual(resultadoCalculado);
-            setResultado(resultadoCalculado);
-            setErrorManual('');
-            return;
-        }
-
-        if (!pseudoVar) {
-            setAlerta({ isOpen: true, mensaje: "Importa una Matriz o agrega datos en el editor primero." });
-            setResultado(null);
-            return;
-        }
-        if (!colA) {
-            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable de <InlineMath math="A" /> (Extracción 1) antes de calcular.</span> });
-            setResultado(null);
-            return;
-        }
-        if (!valA) {
-            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Condición de <InlineMath math="A" /> antes de calcular.</span> });
-            setResultado(null);
-            return;
-        }
-        if (!colB) {
-            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable de <InlineMath math="B" /> (Extracción 2) antes de calcular.</span> });
-            setResultado(null);
-            return;
-        }
-        if (!valB) {
-            setAlerta({ isOpen: true, mensaje: <span>Selecciona la Condición de <InlineMath math="B" /> antes de calcular.</span> });
-            setResultado(null);
-            return;
-        }
-
-        const res = calcularReglaMultiplicacion(filas, pseudoVar.nombresColumnas, colA, valA, colB, valB, modReemplazo);
-        if (res.error) {
-            setError(res.error);
-            setResultado(null);
-        } else {
-            setResultado({
-                ...res.resultado,
-                modo: 'matriz',
-                modReemplazo,
-                colA,
-                valA,
-                colB,
-                valB
-            });
-            setError('');
-        }
+        const calculo = onCalcular();
+        setAlerta({ isOpen: !!calculo.error, mensaje: calculo.error || '' });
     };
 
-    // El reporte usa el último resultado calculado; al cambiar de modo se invalida
-    // para no exportar por error el resultado del modo anterior.
     useEffect(() => {
-        setResultado(null);
-        setResultadoManual(null);
-        setError('');
-        setErrorManual('');
-    }, [inputMode]);
-
-    // Limpiar resultado de matriz cuando cambian sus datos o selecciones
-    useEffect(() => {
-        setResultado(null);
-        setError('');
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [colA, valA, colB, valB, modReemplazo, pseudoVar, filas]);
-
-    // Limpiar resultado manual cuando cambian sus datos
-    useEffect(() => {
-        setResultadoManual(null);
-        setErrorManual('');
-        if (inputMode === 'manual') setResultado(null);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [manualEvents, modReemplazo, inputMode]);
+        if (inputMode !== 'matriz') return;
+        if (valA && !valoresUnicosA.includes(String(valA))) setValA('');
+        if (valB && !valoresUnicosB.includes(String(valB))) setValB('');
+    }, [inputMode, valA, valB, valoresUnicosA, valoresUnicosB, setValA, setValB]);
 
     return (
         <div style={{ marginTop: '10px', fontFamily: FONT }}>
@@ -364,6 +257,8 @@ export default function ResultadosReglaMultiplicacion({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
+                        disabled={bloquearModo && inputMode !== 'matriz'}
+                        title={bloquearModo && inputMode !== 'matriz' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => setInputMode('matriz')}
                         style={{ fontFamily: FONT }}
                     >
@@ -372,6 +267,8 @@ export default function ResultadosReglaMultiplicacion({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
+                        disabled={bloquearModo && inputMode !== 'manual'}
+                        title={bloquearModo && inputMode !== 'manual' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => setInputMode('manual')}
                         style={{ fontFamily: FONT }}
                     >
@@ -430,9 +327,8 @@ export default function ResultadosReglaMultiplicacion({
                                                 type="text"
                                                 value={event.name}
                                                 onChange={(e) => {
-                                                    const newEvents = [...manualEvents];
-                                                    newEvents[index].name = e.target.value;
-                                                    setManualEvents(newEvents);
+                                                    const name = e.target.value;
+                                                    setManualEvents(prev => prev.map((item, i) => i === index ? { ...item, name } : item));
                                                 }}
                                                 placeholder={`Ej. ${defaultLetter}`}
                                                 className="input-mat251 placeholder-small"
@@ -442,7 +338,7 @@ export default function ResultadosReglaMultiplicacion({
                                         <div style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ ...labelStyle, marginBottom: 0 }}>Probabilidad</label>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, fontSize: FS.sm, color: 'var(--text-pure)', whiteSpace: 'nowrap' }} dangerouslySetInnerHTML={{ __html: katex.renderToString(labelMath) + ':' }} />
+                                                <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, fontSize: FS.sm, color: 'var(--text-pure)', whiteSpace: 'nowrap' }} dangerouslySetInnerHTML={{ __html: katex.renderToString(labelMath, { throwOnError: false }) + ':' }} />
                                                 <input
                                                     type="number"
                                                     step="0.01"
@@ -450,9 +346,8 @@ export default function ResultadosReglaMultiplicacion({
                                                     max="1"
                                                     value={event.prob}
                                                     onChange={(e) => {
-                                                        const newEvents = [...manualEvents];
-                                                        newEvents[index].prob = e.target.value;
-                                                        setManualEvents(newEvents);
+                                                        const prob = e.target.value;
+                                                        setManualEvents(prev => prev.map((item, i) => i === index ? { ...item, prob } : item));
                                                     }}
                                                     placeholder="0.00"
                                                     className="input-mat251 placeholder-small"
@@ -542,7 +437,7 @@ export default function ResultadosReglaMultiplicacion({
                                         <CustomSelect
                                             value={modReemplazo}
                                             onChange={(val) => setModReemplazo(val)}
-                                            options={opcionesModoReemplazo}
+                                                options={opcionesModoReemplazo}
                                             placeholder="-- Seleccionar Tipo --"
                                         />
                                     </div>
@@ -560,14 +455,10 @@ export default function ResultadosReglaMultiplicacion({
                                                 onChange={(val) => {
                                                     setColA(val);
                                                     setValA('');
-                                                    if (val && val === colB) {
-                                                        setColB('');
-                                                        setValB('');
-                                                    }
                                                 }}
                                                 options={[
                                                     { value: '', label: '-- Seleccionar Variable --' },
-                                                    ...pseudoVar.nombresColumnas.filter(col => !colB || col !== colB).map(col => ({ value: col, label: col }))
+                                                    ...pseudoVar.nombresColumnas.map(col => ({ value: col, label: col }))
                                                 ]}
                                                 placeholder="-- Seleccionar Variable --"
                                             />
@@ -602,14 +493,10 @@ export default function ResultadosReglaMultiplicacion({
                                                 onChange={(val) => {
                                                     setColB(val);
                                                     setValB('');
-                                                    if (val && val === colA) {
-                                                        setColA('');
-                                                        setValA('');
-                                                    }
                                                 }}
                                                 options={[
                                                     { value: '', label: '-- Seleccionar Variable --' },
-                                                    ...pseudoVar.nombresColumnas.filter(col => !colA || col !== colA).map(col => ({ value: col, label: col }))
+                                                    ...pseudoVar.nombresColumnas.map(col => ({ value: col, label: col }))
                                                 ]}
                                                 placeholder="-- Seleccionar Variable --"
                                             />

@@ -1,5 +1,6 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useCallback } from 'react';
 import { useSimuladorLogic } from '../../hooks/usedatos';
+import { api } from '../../services/api';
 
 const DataContext = createContext(null);
 
@@ -10,7 +11,27 @@ export const MAT251DataContext      = createContext(null);
 // Provider global: solo usuario/setUsuario
 export const DataProvider = ({ children, usuario, setUsuario }) => {
     const pDatos = useSimuladorLogic(usuario);
-    const contextoGlobal = { ...pDatos, usuario, setUsuario };
+    const identidadUsuario = usuario?.email || usuario?.id;
+    const actualizarModulosUsuario = useCallback(async () => {
+        const token = localStorage.getItem("token");
+        if (!identidadUsuario || !token) return false;
+        try {
+            const perfil = await api.obtenerPerfilActual();
+            if (!Array.isArray(perfil.modulos)) {
+                throw new Error("El perfil no contiene la lista de módulos");
+            }
+            if (localStorage.getItem("token") !== token) return false;
+            setUsuario(actual => {
+                if (!actual || (actual.email || actual.id) !== identidadUsuario) return actual;
+                return { ...actual, modulos: perfil.modulos };
+            });
+            return true;
+        } catch (error) {
+            console.error("No se pudieron actualizar los módulos de la sesión:", error);
+            return false;
+        }
+    }, [identidadUsuario, setUsuario]);
+    const contextoGlobal = { ...pDatos, usuario, setUsuario, actualizarModulosUsuario };
     return (
         <DataContext.Provider value={contextoGlobal}>
             {children}

@@ -26,7 +26,7 @@ const SimuladorMAT251 = () => {
     const moduloContexto = useContext(ActiveModuleContext);
     const moduloActivo = moduloContexto === "mat251" ? "MAT251" : "MAT151";
     const {
-        workbook, sheetNames, currentSheet, rowData, variables, limiteFilas,
+        workbook, nombreArchivoOrigen, sheetNames, currentSheet, rowData, variables, limiteFilas,
         handleFileUpload, cargarHoja, agregarVariable, eliminarVariable, actualizarVariable, setLimiteFilas,
         usuario
     } = useModuleData();
@@ -323,7 +323,8 @@ const SimuladorMAT251 = () => {
                     rangoLabel: '',
                     coords: null,
                     datos: [],
-                    sheet: null
+                    sheet: null,
+                    ...(moduloActivo === 'MAT251' ? { archivoOrigen: null, hojaOrigen: null } : {})
                 });
             }
         },
@@ -417,6 +418,7 @@ const SimuladorMAT251 = () => {
                 coords: { rMin, rMax, cMin, cMax },
                 datos: datosValidos, // 👈 Ahora esto ya no estará vacío
                 sheet: currentSheet,
+                ...(moduloActivo === 'MAT251' ? { archivoOrigen: nombreArchivoOrigen || null, hojaOrigen: sheetNames.indexOf(currentSheet) } : {}),
                 tipo: tipoDetectado,
                 nombresColumnas: nombresColumnas
             });
@@ -504,6 +506,7 @@ const SimuladorMAT251 = () => {
                     coords,
                     datos: datosValidos,
                     sheet: currentSheet,
+                    ...(moduloActivo === 'MAT251' ? { archivoOrigen: nombreArchivoOrigen || null, hojaOrigen: sheetNames.indexOf(currentSheet) } : {}),
                     tipo: tipoDetectado, // Inyectamos el tipo también aquí
                     nombresColumnas: nombresColumnas
                 });

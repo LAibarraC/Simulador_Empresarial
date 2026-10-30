@@ -1,204 +1,128 @@
 import { jStat } from 'jstat';
+// Solo presentación: no modifica los parámetros usados en los cálculos ni el historial.
+export const formatearParametroDiscreto = valor => {
+    if (valor === null || valor === undefined || String(valor).trim() === '') return '';
+    const numero = Number(String(valor).replace(',', '.'));
+    if (!Number.isFinite(numero)) return '—';
+    return Number.isInteger(numero) ? String(numero) : numero.toFixed(4);
+};
+
+export const formatearResultadoDiscreto = valor => typeof valor === 'number' && Number.isFinite(valor)
+    ? valor.toFixed(4) : '—';
 // src/components/MAT251/Temas/Tema_3/logica_Tema3.js
 
-// Funciones Auxiliares
-const factorial = (n) => {
-    if (n < 0) return 0;
-    if (n === 0 || n === 1) return 1;
-    let res = 1;
-    for (let i = 2; i <= n; i++) {
-        res *= i;
-    }
-    return res;
-};
-
-const nCr = (n, r) => {
-    if (r < 0 || r > n) return 0;
-    if (r === 0 || r === n) return 1;
-    // Optimización para evitar factoriales muy grandes
-    if (r > n / 2) r = n - r;
-    let res = 1;
-    for (let i = 1; i <= r; i++) {
-        res = res * (n - i + 1) / i;
-    }
-    return Math.round(res); // asegurar precisión entera
-};
-
-// --- Probabilidades Puntuales P(X = x) ---
-
+// Cálculos discretos en escala logarítmica para evitar factoriales infinitos.
+const limitarProbabilidad = valor => Math.min(1, Math.max(0, valor));
+const logCombinacion = (n, r) => r < 0 || r > n ? -Infinity
+    : r === 0 || r === n ? 0
+        : jStat.gammaln(n + 1) - jStat.gammaln(r + 1) - jStat.gammaln(n - r + 1);
 export const puntualBinomial = (n, p, x) => {
-    if (x < 0 || x > n || !Number.isInteger(x)) return 0;
-    const combinatoria = nCr(n, x);
-    const exito = Math.pow(p, x);
-    const fracaso = Math.pow(1 - p, n - x);
-    return combinatoria * exito * fracaso;
+    if (!Number.isInteger(x) || x < 0 || x > n) return 0;
+    if (p === 0 || p === 1 || n === 0) return x === n * p ? 1 : 0;
+    return limitarProbabilidad(Math.exp(logCombinacion(n, x) + x * Math.log(p) + (n - x) * Math.log1p(-p)));
 };
-
 export const puntualPoisson = (lambda, x) => {
-    if (x < 0 || !Number.isInteger(x)) return 0;
-    const numerador = Math.pow(Math.E, -lambda) * Math.pow(lambda, x);
-    const denominador = factorial(x);
-    return numerador / denominador;
+    if (!Number.isInteger(x) || x < 0) return 0;
+    if (lambda === 0) return x === 0 ? 1 : 0;
+    return limitarProbabilidad(Math.exp(-lambda + x * Math.log(lambda) - jStat.gammaln(x + 1)));
 };
-
 export const puntualHipergeometrica = (N, K, n, x) => {
-    if (x < 0 || x > Math.min(K, n) || x < Math.max(0, n - (N - K)) || !Number.isInteger(x)) return 0;
-    const num1 = nCr(K, x);
-    const num2 = nCr(N - K, n - x);
-    const den = nCr(N, n);
-    return (num1 * num2) / den;
+    if (!Number.isInteger(x) || x < Math.max(0, n - (N - K)) || x > Math.min(K, n)) return 0;
+    return limitarProbabilidad(Math.exp(logCombinacion(K, x) + logCombinacion(N - K, n - x) - logCombinacion(N, n)));
 };
-
-// --- Cálculo Principal de Distribución (Puntual, Acumuladas e Intervalos) ---
-// params: objeto con las propiedades de cada modelo
-// condicion: { tipo: 'exacta'|'menor'|'mayor'|'intervalo', valorX: Number, valorB: Number (solo para intervalo) }
-
+// Sumar la cola por recurrencia evita depender de un factorial o de bucles
+// proporcionales a un umbral de búsqueda extremadamente grande.
+const colaPoisson = (inicio, lambda) => {
+    if (inicio <= 0) return 1;
+    if (lambda === 0) return 0;
+    if (inicio <= lambda) return limitarProbabilidad(jStat.lowRegGamma(inicio, lambda));
+    let termino = puntualPoisson(lambda, inicio);
+    let suma = termino;
+    for (let paso = 1; paso <= 100000 && termino > 0; paso++) {
+        termino *= lambda / (inicio + paso);
+        suma += termino;
+        if (termino <= suma * 1e-14) break;
+    }
+    return limitarProbabilidad(suma);
+};
+const acumuladaPoisson = (limite, lambda) => {
+    if (limite < 0) return 0;
+    if (lambda === 0) return 1;
+    const x = Math.floor(limite);
+    if (x >= lambda) return limitarProbabilidad(1 - colaPoisson(x + 1, lambda));
+    let termino = puntualPoisson(lambda, x);
+    let suma = termino;
+    for (let k = x; k > 0 && termino > 0; k--) {
+        termino *= k / lambda;
+        suma += termino;
+        if (termino <= suma * 1e-14) break;
+    }
+    return limitarProbabilidad(suma);
+};
 export const calcularDistribucionModelo = (modelo, params, condicion) => {
-    let prob = 0;
-    let inicio = 0;
-    let fin = 0;
-
-    // Calcular Esperanza y Varianza teóricas
-    let E = 0;
-    let V = 0;
-    if (modelo === 'Bernoulli') {
-        E = params.p;
-        V = params.p * (1 - params.p);
-    } else if (modelo === 'Binomial') {
-        E = params.n * params.p;
-        V = params.n * params.p * (1 - params.p);
-    } else if (modelo === 'Poisson') {
-        E = params.lambda;
-        V = params.lambda;
-    } else if (modelo === 'Hipergeometrica') {
-        const { N, K, n } = params;
-        const p = K / N;
-        E = n * p;
-        V = n * p * (1 - p) * ((N - n) / (N - 1));
-    }
-
-    if (!condicion) {
-        return {
-            probabilidadFinal: null,
-            esperanza: E,
-            varianza: V,
-            desviacion: Math.sqrt(V)
-        };
-    }
-
-    // Determinar límites del bucle según condición y modelo
-    const { tipo, valorX, valorB } = condicion;
-    
-    // Límites teóricos máximos
-    let maxTeorico = 0;
-    if (modelo === 'Bernoulli') maxTeorico = 1;
-    else if (modelo === 'Binomial') maxTeorico = params.n;
-    else if (modelo === 'Hipergeometrica') maxTeorico = Math.min(params.K, params.n);
-    else if (modelo === 'Poisson') {
-        // Poisson va al infinito, si es 'mayor' cortaremos el bucle o usaremos complemento 1 - P(X < x)
-        // Para graficar, cortaremos cuando P(x) sea muy pequeña.
-        maxTeorico = Infinity; 
-    }
-
-    if (tipo === 'exacta') {
-        inicio = valorX;
-        fin = valorX;
-    } else if (tipo === 'menor_igual') {
-        inicio = 0;
-        fin = valorX;
-    } else if (tipo === 'mayor_igual') {
-        inicio = valorX;
-        fin = maxTeorico; 
-    } else if (tipo === 'intervalo') {
-        inicio = valorX;
-        fin = valorB;
-    }
-
-    // Funciones de cálculo según modelo
-    const calcularPuntual = (x) => {
-        if (modelo === 'Bernoulli') return x === 0 ? 1 - params.p : (x === 1 ? params.p : 0);
+    let esperanza = 0;
+    let varianza = 0;
+    let maximo = Infinity;
+    let minimo = 0;
+    const puntual = x => {
+        if (modelo === 'Bernoulli') return x === 0 ? 1 - params.p : x === 1 ? params.p : 0;
         if (modelo === 'Binomial') return puntualBinomial(params.n, params.p, x);
         if (modelo === 'Poisson') return puntualPoisson(params.lambda, x);
-        if (modelo === 'Hipergeometrica') return puntualHipergeometrica(params.N, params.K, params.n, x);
-        return 0;
+        return puntualHipergeometrica(params.N, params.K, params.n, x);
     };
-
-    // Caso especial: Poisson Acumulada Mayor o Igual
-    if (modelo === 'Poisson' && tipo === 'mayor_igual') {
-        // 1 - P(X < valorX)
-        let probMenorEstricto = 0;
-        for (let x = 0; x < valorX; x++) {
-            probMenorEstricto += calcularPuntual(x);
-        }
-        prob = 1 - probMenorEstricto;
-    } else {
-        // Sumatoria estándar
-        for (let x = inicio; x <= fin; x++) {
-            // Protección Poisson (si fin es Infinity, nunca ocurriría aquí porque lo cubrimos arriba)
-            // Si por alguna razón fin es Infinity, se rompe cuando la prob es casi 0
-            const p_x = calcularPuntual(x);
-            if (modelo === 'Poisson' && fin === Infinity && p_x < 1e-15 && x > params.lambda) {
-                break;
-            }
-            prob += p_x;
-        }
-    }
-
-    // Esperanza y Varianza teóricas ya calculadas arriba
-
-    return {
-        probabilidadFinal: prob,
-        esperanza: E,
-        varianza: V,
-        desviacion: Math.sqrt(V)
-    };
-};
-
-// Generador de datos para el gráfico de bastones
-export const generarDatosGrafico = (modelo, params) => {
     if (modelo === 'Bernoulli') {
-        return [
-            { x: 0, p: 1 - params.p },
-            { x: 1, p: params.p }
-        ];
-    }
-
-    const datos = [];
-    let limite = 0;
-
-    if (modelo === 'Binomial') {
-        limite = params.n;
-    } else if (modelo === 'Hipergeometrica') {
-        // Puede graficarse hasta n, pero prob=0 si x > K
-        limite = params.n; 
+        esperanza = params.p; varianza = params.p * (1 - params.p); maximo = 1;
+    } else if (modelo === 'Binomial') {
+        esperanza = params.n * params.p; varianza = params.n * params.p * (1 - params.p); maximo = params.n;
     } else if (modelo === 'Poisson') {
-        limite = Math.max(10, Math.ceil(params.lambda * 2)); // Empezar con un buen rango
+        esperanza = params.lambda; varianza = params.lambda;
+    } else if (modelo === 'Hipergeometrica') {
+        const p = params.K / params.N;
+        esperanza = params.n * p;
+        varianza = params.N === 1 ? 0 : params.n * p * (1 - p) * ((params.N - params.n) / (params.N - 1));
+        minimo = Math.max(0, params.n - (params.N - params.K)); maximo = Math.min(params.K, params.n);
     }
-
-    for (let x = 0; x <= limite; x++) {
-        let p_x = 0;
-        if (modelo === 'Binomial') p_x = puntualBinomial(params.n, params.p, x);
-        else if (modelo === 'Poisson') p_x = puntualPoisson(params.lambda, x);
-        else if (modelo === 'Hipergeometrica') p_x = puntualHipergeometrica(params.N, params.K, params.n, x);
-        
-        datos.push({ x, p: p_x });
-    }
-
-    // Para Poisson, extender el límite si la probabilidad aún es significativa (> 0.0001)
-    if (modelo === 'Poisson') {
-        let x = limite + 1;
-        while (true) {
-            let p_x = puntualPoisson(params.lambda, x);
-            if (p_x < 0.0001 && x > params.lambda) break;
-            datos.push({ x, p: p_x });
-            x++;
-            if (x > 200) break; // Safety break
+    const acumulada = x => {
+        if (x < minimo) return 0;
+        if (x >= maximo) return 1;
+        if (modelo === 'Bernoulli') return 1 - params.p;
+        if (modelo === 'Binomial') {
+            if (params.p === 0) return 1;
+            if (params.p === 1) return 0;
+            return jStat.ibeta(1 - params.p, params.n - Math.floor(x), Math.floor(x) + 1);
         }
+        if (modelo === 'Poisson') return acumuladaPoisson(x, params.lambda);
+        return jStat.hypgeom.cdf(Math.floor(x), params.N, params.K, params.n);
+    };
+    let probabilidadFinal = null;
+    if (condicion) {
+        const { tipo, valorX, valorB } = condicion;
+        if (tipo === 'exacta') probabilidadFinal = puntual(valorX);
+        else if (tipo === 'menor_igual') probabilidadFinal = acumulada(valorX);
+        else if (tipo === 'mayor_igual') probabilidadFinal = modelo === 'Poisson' && valorX > 0 && params.lambda > 0
+            ? colaPoisson(valorX, params.lambda) : 1 - acumulada(valorX - 1);
+        else if (tipo === 'intervalo') probabilidadFinal = valorB < valorX ? 0 : acumulada(valorB) - acumulada(valorX - 1);
+        if (probabilidadFinal !== null) probabilidadFinal = limitarProbabilidad(probabilidadFinal);
     }
-
+    return { probabilidadFinal, esperanza, varianza, desviacion: Math.sqrt(Math.max(0, varianza)) };
+};
+export const generarDatosGrafico = (modelo, params) => {
+    if (modelo === 'Bernoulli') return [{ x: 0, p: 1 - params.p }, { x: 1, p: params.p }];
+    let inicio = 0;
+    let fin = modelo === 'Binomial' ? params.n : modelo === 'Hipergeometrica'
+        ? Math.min(params.K, params.n) : Math.max(10, Math.ceil(params.lambda + 10 * Math.sqrt(params.lambda + 1)));
+    if (modelo === 'Hipergeometrica') inicio = Math.max(0, params.n - (params.N - params.K));
+    // Evitar crear una cantidad ilimitada de barras al reabrir entradas extremas.
+    if (!Number.isSafeInteger(fin) || fin - inicio > 20000) return [];
+    const datos = [];
+    for (let x = inicio; x <= fin; x++) {
+        const p = modelo === 'Binomial' ? puntualBinomial(params.n, params.p, x)
+            : modelo === 'Poisson' ? puntualPoisson(params.lambda, x)
+                : puntualHipergeometrica(params.N, params.K, params.n, x);
+        datos.push({ x, p });
+    }
     return datos;
 };
-
 // --- Distribución Uniforme Continua ---
 
 // Función de Distribución Acumulada F(x) = P(X <= x)
@@ -939,7 +863,7 @@ export const generarDatosGraficoContinua = (modelo, params, condicion, resultado
 };
 
 // Desarrollo de las probabilidades de distribuciones discretas.
-const numero = valor => String(valor).replace(/e([+-]?\d+)/i, '\\times 10^{$1}');
+const numero = valor => formatearParametroDiscreto(valor).replace(/e([+-]?\d+)/i, '\\times 10^{$1}');
 
 export function desarrollarProbabilidadDiscreta(modelo, params, condicion, probabilidad) {
     if (!params || !condicion?.tipo || !Number.isFinite(probabilidad)) return null;

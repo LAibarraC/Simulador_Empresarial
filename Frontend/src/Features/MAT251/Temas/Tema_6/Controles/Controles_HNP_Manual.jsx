@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cardStyle, labelStyle, FS, RADIUS, FONT } from '../../../Principal/Constantes';
-import { pruebaChiCuadradaBondad, pruebaChiCuadradaIndependencia, pruebaSignosResumida, pruebaRachas } from '../../../Matematicas/Logica_Tema6';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 import katex from 'katex';
@@ -8,34 +7,30 @@ import 'katex/dist/katex.min.css';
 
 const renderKatex = (math) => <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />;
 
-export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
-    const [alpha, setAlpha] = useState('0.05');
+export default function Controles_HNP_Manual({ prueba, configuracion, onEditar, onCalcular, bloquearHistorial = false }) {
+    const { alpha, tipoChiCuadrada, filasBondad, indFilas, indCols, matrizInd, nombresFilas, nombresCols, signosPositivos, signosNegativos, tipoPrueba, n1Rachas, n2Rachas, obsRachas } = configuracion;
+    const setAlpha = valor => onEditar('alpha', valor);
+    const setTipoChiCuadrada = valor => { if (!bloquearHistorial) onEditar('tipoChiCuadrada', valor); };
+    const setFilasBondad = valor => onEditar('filasBondad', valor);
+    const setIndFilas = valor => onEditar('indFilas', valor);
+    const setIndCols = valor => onEditar('indCols', valor);
+    const setMatrizInd = valor => onEditar('matrizInd', valor);
+    const setNombresFilas = valor => onEditar('nombresFilas', valor);
+    const setNombresCols = valor => onEditar('nombresCols', valor);
+    const setSignosPositivos = valor => onEditar('signosPositivos', valor);
+    const setSignosNegativos = valor => onEditar('signosNegativos', valor);
+    const setTipoPrueba = valor => onEditar('tipoPrueba', valor);
+    const setN1Rachas = valor => onEditar('n1Rachas', valor);
+    const setN2Rachas = valor => onEditar('n2Rachas', valor);
+    const setObsRachas = valor => onEditar('obsRachas', valor);
     const [isAlphaOpen, setIsAlphaOpen] = useState(false);
     const alphaRef = useRef(null);
 
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
 
     // Chi-cuadrada
-    const [tipoChiCuadrada, setTipoChiCuadrada] = useState('bondad');
     const [isTipoChiOpen, setIsTipoChiOpen] = useState(false);
     const tipoChiRef = useRef(null);
-
-    const [filasBondad, setFilasBondad] = useState([{ obs: 20, esp: 25 }, { obs: 30, esp: 25 }, { obs: 25, esp: 25 }]);
-    const [indFilas, setIndFilas] = useState(2);
-    const [indCols, setIndCols] = useState(2);
-    const [matrizInd, setMatrizInd] = useState([[0, 0], [0, 0]]);
-    const [nombresFilas, setNombresFilas] = useState(['Fila 1', 'Fila 2']);
-    const [nombresCols, setNombresCols] = useState(['Columna 1', 'Columna 2']);
-
-    // Signos
-    const [signosPositivos, setSignosPositivos] = useState('');
-    const [signosNegativos, setSignosNegativos] = useState('');
-    const [tipoPrueba, setTipoPrueba] = useState('bilateral');
-    
-    // Rachas
-    const [n1Rachas, setN1Rachas] = useState('');
-    const [n2Rachas, setN2Rachas] = useState('');
-    const [obsRachas, setObsRachas] = useState('');
 
     useEffect(() => {
         const handler = (e) => {
@@ -45,26 +40,6 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
-
-    useEffect(() => {
-        setResultadosManual(null);
-    }, [
-        prueba,
-        tipoChiCuadrada,
-        alpha,
-        filasBondad,
-        indFilas,
-        indCols,
-        matrizInd,
-        nombresFilas,
-        nombresCols,
-        signosPositivos,
-        signosNegativos,
-        tipoPrueba,
-        n1Rachas,
-        n2Rachas,
-        obsRachas
-    ]);
 
     const alphaOptions = [
         { value: '0.10', label: '0.10 (90%) - Significación' },
@@ -83,8 +58,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
 
     // Manejadores Chi-cuadrada
     const updateFilaBondad = (index, field, value) => {
-        const newFilas = [...filasBondad];
-        newFilas[index][field] = value === '' ? '' : parseFloat(value);
+        const newFilas = filasBondad.map((fila, i) => i === index ? { ...fila, [field]: value === '' ? '' : parseFloat(value) } : fila);
         setFilasBondad(newFilas);
     };
     const addFilaBondad = () => setFilasBondad([...filasBondad, { obs: 0, esp: 0 }]);
@@ -159,42 +133,13 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
     };
 
     const updateMatrizInd = (r, c, val) => {
-        const newMat = [...matrizInd];
-        newMat[r][c] = val === '' ? '' : parseFloat(val);
+        const newMat = matrizInd.map((fila, i) => i === r ? fila.map((valor, j) => j === c ? (val === '' ? '' : parseFloat(val)) : valor) : fila);
         setMatrizInd(newMat);
     };
 
     const handleCalcular = () => {
-        let res = null;
-        const numAlpha = Number(alpha);
-        if (prueba === 'chi_cuadrada') {
-            if (tipoChiCuadrada === 'bondad') {
-                const observadas = filasBondad.map(f => Number(f.obs) || 0);
-                const esperadas = filasBondad.map(f => Number(f.esp) || 0);
-                res = { tipo: 'chi_cuadrada', subtipo: 'bondad', observadas, esperadas, categorias: filasBondad.map((f, i) => f.categoria || `Categoría ${i + 1}`), ...pruebaChiCuadradaBondad(observadas, esperadas, numAlpha) };
-            } else {
-                res = { tipo: 'chi_cuadrada', subtipo: 'independencia', matriz: matrizInd.map(fila => [...fila]), nombresFilas: [...nombresFilas], nombresCols: [...nombresCols], ...pruebaChiCuadradaIndependencia(matrizInd, numAlpha) };
-            }
-        } else if (prueba === 'signos') {
-            if(signosPositivos === '' || signosNegativos === '') {
-                mostrarAlerta('Ingresa la cantidad de signos positivos y negativos.', 'Datos Faltantes');
-                return;
-            }
-            res = { tipo: 'signos', ...pruebaSignosResumida(signosPositivos, signosNegativos, numAlpha, tipoPrueba) };
-        } else if (prueba === 'rachas') {
-            if (n1Rachas === '' || n2Rachas === '' || obsRachas === '') {
-                mostrarAlerta('Ingresa n1, n2 y la cantidad de rachas observadas (R).', 'Datos Faltantes');
-                return;
-            }
-            res = { tipo: 'rachas', ...pruebaRachas(Number(n1Rachas), Number(n2Rachas), Number(obsRachas), numAlpha, tipoPrueba) };
-        }
-
-        if(res.error) {
-            mostrarAlerta(res.error, 'Error de Cálculo', 'error');
-            setResultadosManual(null);
-            return;
-        }
-        setResultadosManual(res);
+        const calculo = onCalcular();
+        if (calculo?.error) mostrarAlerta(calculo.error, 'Datos inválidos', 'warning');
     };
 
     const alphaSelector = (
@@ -410,7 +355,8 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                         <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>Tipo:</label>
                         <div id="tour-t6-hnp-manual-tipo-chi" ref={tipoChiRef} style={{ position: 'relative', flex: 1 }}>
                             <div
-                                onClick={() => setIsTipoChiOpen(!isTipoChiOpen)}
+                                aria-disabled={bloquearHistorial}
+                                onClick={() => { if (!bloquearHistorial) setIsTipoChiOpen(!isTipoChiOpen); }}
                                 style={{
                                     padding: '8px 12px', background: 'var(--bg-card)',
                                     border: `1px solid ${isTipoChiOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
@@ -427,7 +373,7 @@ export default function Controles_HNP_Manual({ prueba, setResultadosManual }) {
                                     <polyline points="6 9 12 15 18 9" />
                                 </svg>
                             </div>
-                            {isTipoChiOpen && (
+                            {isTipoChiOpen && !bloquearHistorial && (
                                 <div style={{
                                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
                                     background: 'var(--bg-card)', border: '1px solid var(--border-color)',

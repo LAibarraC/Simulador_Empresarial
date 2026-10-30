@@ -1,36 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { cardStyle, FONT, RADIUS, FS, labelStyle } from '../../../Principal/Constantes';
 import { EditarDatos } from '../../../../../ui/iconos';
-import { pruebaChiCuadradaBondad, pruebaChiCuadradaIndependencia, pruebaSignos, pruebaRachas } from '../../../Matematicas/Logica_Tema6';
+import { crearMatrizContingenciaHNP as crearMatrizContingencia, extraerBondadHNP } from '../../../Historial/historial_Tema6';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
 const renderKatex = (math) => <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />;
-
-function crearMatrizContingencia(datos) {
-    const categoriasFila = [];
-    const categoriasCol = [];
-    const conteos = new Map();
-
-    (datos || []).forEach(dato => {
-        const partes = (dato ?? '').toString().split('|').map(parte => parte.trim());
-        const [valorFila, valorCol] = partes;
-        if (!valorFila || !valorCol) return;
-
-        if (!categoriasFila.includes(valorFila)) categoriasFila.push(valorFila);
-        if (!categoriasCol.includes(valorCol)) categoriasCol.push(valorCol);
-        const clave = `${valorFila}\u0000${valorCol}`;
-        conteos.set(clave, (conteos.get(clave) || 0) + 1);
-    });
-
-    return {
-        categoriasFila,
-        categoriasCol,
-        matriz: categoriasFila.map(valorFila => categoriasCol.map(valorCol => conteos.get(`${valorFila}\u0000${valorCol}`) || 0))
-    };
-}
 
 function SelectorColumna({ columnas, value, onChange, label }) {
     const [abierto, setAbierto] = useState(false);
@@ -109,37 +86,32 @@ function CampoFrecuenciaEsperada({ value, onChange, indice }) {
     );
 }
 
-export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, setResultadosMatriz, variables }) {
-    const [alpha, setAlpha] = useState(0.05);
+export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, configuracion, onEditar, onCalcular, bloquearHistorial = false }) {
+    const { alpha, subTipoChi, columnaSeleccionada, valRef, tipoPrueba, corteRachas, cortePersonalizado } = configuracion;
+    const setAlpha = valor => onEditar('alpha', valor);
+    const setSubTipoChi = valor => { if (!bloquearHistorial) onEditar('subTipoChi', valor); };
+    const setColumnaSeleccionada = valor => onEditar('columnaSeleccionada', valor);
+    const setEsperadasEditables = valor => onEditar('esperadasEditables', valor);
+    const setValRef = valor => onEditar('valRef', valor);
+    const setTipoPrueba = valor => onEditar('tipoPrueba', valor);
+    const setCorteRachas = valor => onEditar('corteRachas', valor);
+    const setCortePersonalizado = valor => onEditar('cortePersonalizado', valor);
+    const { categoriasExtraidas, observadasExtraidas, nTotal, errorFormatoBondad, esperadasPredeterminadas } = extraerBondadHNP(filas, varSeleccionada);
+    const esperadasEditables = configuracion.esperadasEditables.length ? configuracion.esperadasEditables : esperadasPredeterminadas;
     const [isAlphaOpen, setIsAlphaOpen] = useState(false);
     const alphaRef = useRef(null);
 
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
 
     // Chi Cuadrada
-    const [subTipoChi, setSubTipoChi] = useState('bondad');
-    const [columnaSeleccionada, setColumnaSeleccionada] = useState(0);
-    const [errorFormatoBondad, setErrorFormatoBondad] = useState(false);
     const [isColumnaOpen, setIsColumnaOpen] = useState(false);
     const columnaRef = useRef(null);
     const [isTipoChiOpen, setIsTipoChiOpen] = useState(false);
     const tipoChiRef = useRef(null);
 
-    // Edición de Esperadas
-    const [categoriasExtraidas, setCategoriasExtraidas] = useState([]);
-    const [observadasExtraidas, setObservadasExtraidas] = useState([]);
-    const [esperadasEditables, setEsperadasEditables] = useState([]);
-    const [nTotal, setNTotal] = useState(0);
-
     // Signos
-    const [valRef, setValRef] = useState(null);
-    const [tipoPrueba, setTipoPrueba] = useState('bilateral');
     const [isTipoPruebaOpen, setIsTipoPruebaOpen] = useState(false);
     const tipoPruebaRef = useRef(null);
-
-    // Rachas
-    const [corteRachas, setCorteRachas] = useState('mediana');
-    const [cortePersonalizado, setCortePersonalizado] = useState(0);
 
     useEffect(() => {
         const handler = (e) => {
@@ -171,330 +143,9 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
         setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
     };
 
-    // Al cambiar de variable, conservar el tipo de prueba y reiniciar solo la columna auxiliar.
-    useEffect(() => {
-        setColumnaSeleccionada(0);
-    }, [varSeleccionada]);
-
-    useEffect(() => {
-        setResultadosMatriz(null);
-    }, [varSeleccionada, prueba, subTipoChi, columnaSeleccionada, filas, alpha, esperadasEditables, valRef, tipoPrueba, corteRachas, cortePersonalizado]);
-
-    useEffect(() => {
-        if (prueba === 'chi_cuadrada' && subTipoChi === 'bondad' && varSeleccionada && filas?.length > 0) {
-            const columnas = varSeleccionada?.nombresColumnas || [];
-            const isMatrix = columnas.length > 1;
-            const conteos = new Map();
-            let hayFrecuenciaInvalida = false;
-
-            filas.forEach(fila => {
-                const valor = fila?.valor !== null && fila?.valor !== undefined ? fila.valor.toString() : '';
-                const partes = isMatrix ? valor.split(' | ').map(parte => parte.trim()) : [valor.trim()];
-
-                if (isMatrix && columnas.length === 2) {
-                    const categoria = partes[0] || '';
-                    const frecuenciaRaw = partes[1] || '';
-                    if (!categoria && !frecuenciaRaw) return;
-                    const frecuencia = Number(frecuenciaRaw);
-                    if (!categoria || !frecuenciaRaw || !Number.isInteger(frecuencia) || frecuencia < 0) {
-                        hayFrecuenciaInvalida = true;
-                        return;
-                    }
-                    conteos.set(categoria, (conteos.get(categoria) || 0) + frecuencia);
-                    return;
-                }
-
-                if (isMatrix && columnas.length > 2) {
-                    hayFrecuenciaInvalida = true;
-                    return;
-                }
-                const categoria = isMatrix ? (partes[columnaSeleccionada] || '') : partes[0];
-                if (categoria) conteos.set(categoria, (conteos.get(categoria) || 0) + 1);
-            });
-
-            const categorias = Array.from(conteos.keys());
-            const observadas = Array.from(conteos.values());
-
-            const total = observadas.reduce((a, b) => a + b, 0);
-            setNTotal(total);
-            setCategoriasExtraidas(categorias);
-            setObservadasExtraidas(observadas);
-            setErrorFormatoBondad(hayFrecuenciaInvalida);
-
-            if (categorias.length > 0) {
-                const espUnica = total / categorias.length;
-                setEsperadasEditables(Array(categorias.length).fill(espUnica.toFixed(2)));
-            } else {
-                setEsperadasEditables([]);
-            }
-        } else if (prueba === 'chi_cuadrada' && subTipoChi === 'bondad') {
-            setCategoriasExtraidas([]);
-            setObservadasExtraidas([]);
-            setEsperadasEditables([]);
-            setNTotal(0);
-            setErrorFormatoBondad(false);
-        }
-    }, [varSeleccionada, filas, prueba, subTipoChi, columnaSeleccionada]);
-
     const handleCalcular = () => {
-        if (!varSeleccionada || !filas || filas.length === 0) {
-            mostrarAlerta('Por favor, selecciona o agrega una variable con datos válidos.', 'Faltan Datos', 'warning');
-            return;
-        }
-
-        const datos = filas.map(f => f.valor);
-        let res = null;
-
-        if (prueba === 'chi_cuadrada') {
-            if (subTipoChi === 'bondad') {
-                const cantidadColumnas = varSeleccionada?.nombresColumnas?.length || 1;
-                if (cantidadColumnas > 2) {
-                    mostrarAlerta('Bondad de Ajuste admite una columna de observaciones o dos columnas: categoría y frecuencia entera.', 'Formato de datos inválido', 'warning');
-                    return;
-                }
-                if (errorFormatoBondad) {
-                    mostrarAlerta('Usa dos columnas: categoría y frecuencia observada (entero desde 0).', 'Formato de datos inválido', 'warning');
-                    return;
-                }
-                if (nTotal <= 0) {
-                    mostrarAlerta('La suma de las frecuencias observadas debe ser mayor que 0.', 'Datos inválidos', 'warning');
-                    return;
-                }
-                if (categoriasExtraidas.length < 2) {
-                    mostrarAlerta('Chi-cuadrada requiere al menos 2 categorías diferentes en los datos.', 'Error', 'error');
-                    return;
-                }
-                const esperadasParsed = esperadasEditables.map(v => parseFloat(v));
-                if (esperadasParsed.some(v => !Number.isFinite(v) || v <= 0)) {
-                    mostrarAlerta('Cada frecuencia esperada debe ser un número mayor que 0.', 'Error', 'error');
-                    return;
-                }
-                const sumEsp = esperadasParsed.reduce((a, b) => a + b, 0);
-                if (Math.abs(sumEsp - nTotal) > 0.1) {
-                    mostrarAlerta(`La suma de las frecuencias esperadas (${sumEsp.toFixed(2)}) debe ser igual a n = ${nTotal}.`, 'Error', 'error');
-                    return;
-                }
-                res = { tipo: 'chi_cuadrada', subtipo: 'bondad', categorias: categoriasExtraidas, observadas: observadasExtraidas, esperadas: esperadasParsed, ...pruebaChiCuadradaBondad(observadasExtraidas, esperadasParsed, alpha) };
-            } else if (subTipoChi === 'independencia') {
-                if (typeof varSeleccionada !== 'object' || !varSeleccionada.nombresColumnas || varSeleccionada.nombresColumnas.length !== 2) {
-                    mostrarAlerta('La Prueba de Independencia requiere cruzar 2 variables. Selecciona una matriz que contenga exactamente 2 columnas.', 'Error', 'error');
-                    return;
-                }
-
-                const varObj = variables?.find(v => v.nombre === varSeleccionada.nombre);
-                if (!varObj) {
-                    mostrarAlerta('No se pudo encontrar la matriz seleccionada.', 'Error', 'error');
-                    return;
-                }
-
-                // varObj.datos ya contiene solo los registros seleccionados; no incluye encabezados.
-                // No quitar la primera fila: es una observación válida del conjunto.
-                const datosRaw = varObj.datos || [];
-                const { categoriasFila, categoriasCol, matriz: matrizNum } = crearMatrizContingencia(datosRaw);
-
-                if (categoriasFila.length < 2 || categoriasCol.length < 2) {
-                    mostrarAlerta('Cada variable debe tener al menos 2 categorías diferentes para la Prueba de Independencia.', 'Error', 'error');
-                    return;
-                }
-
-                res = { 
-                    tipo: 'chi_cuadrada', 
-                    subtipo: 'independencia', 
-                    matriz: matrizNum, 
-                    nombresFilas: categoriasFila, 
-                    nombresCols: categoriasCol, 
-                    labelV1: varObj.nombresColumnas[0], 
-                    labelV2: varObj.nombresColumnas[1], 
-                    ...pruebaChiCuadradaIndependencia(matrizNum, alpha) 
-                };
-            }
-        } else if (prueba === 'signos') {
-            const isDosColumnas = typeof varSeleccionada === 'object' && varSeleccionada?.nombresColumnas?.length === 2;
-            if (!isDosColumnas && !Number.isFinite(valRef)) {
-                mostrarAlerta('Ingresa el valor de referencia para realizar la Prueba de Signos.', 'Dato requerido', 'warning');
-                return;
-            }
-            let datosDiferencia = [];
-
-            if (isDosColumnas) {
-                datos.forEach(d => {
-                    const str = d !== null && d !== undefined ? d.toString() : '';
-                    if (str.includes(' | ')) {
-                        const partes = str.split(' | ').map(p => p.trim());
-                        const col1 = parseFloat(partes[0]);
-                        const col2 = parseFloat(partes[1]);
-                        if (!isNaN(col1) && !isNaN(col2)) {
-                            datosDiferencia.push(col2 - col1); // Resta: Columna 2 - Columna 1
-                        }
-                    }
-                });
-            } else {
-                const isMatrix = typeof varSeleccionada === 'object' && varSeleccionada?.nombresColumnas?.length > 1;
-                datosDiferencia = datos.map(d => {
-                    if (isMatrix) {
-                        const str = d !== null && d !== undefined ? d.toString() : '';
-                        const partes = str.split(' | ');
-                        return parseFloat(partes[columnaSeleccionada]);
-                    }
-                    return parseFloat(d);
-                }).filter(n => !isNaN(n));
-            }
-
-            if (datosDiferencia.length === 0) {
-                mostrarAlerta('La variable seleccionada no contiene datos numéricos válidos para la Prueba de Signos.', 'Error', 'error');
-                return;
-            }
-            
-            const referenciaReal = isDosColumnas ? 0 : valRef;
-            res = {
-                tipo: 'signos', datosAnalizados: [...datosDiferencia], valorReferencia: referenciaReal,
-                detalleSignos: signosDetalle.map(detalle => ({ ...detalle })),
-                columnasPareadas: isDosColumnas ? [...varSeleccionada.nombresColumnas] : undefined,
-                columnaEvaluada: !isDosColumnas && varSeleccionada?.nombresColumnas?.length > 1 ? varSeleccionada.nombresColumnas[columnaSeleccionada] : undefined,
-                ...pruebaSignos(datosDiferencia, referenciaReal, alpha, tipoPrueba)
-            };
-
-        } else if (prueba === 'rachas') {
-            setResultadosMatriz(null);
-            const isMatrix = typeof varSeleccionada === 'object' && varSeleccionada?.nombresColumnas?.length > 1;
-            
-            const rawDatos = (isMatrix 
-                ? datos.map(d => {
-                    const str = d !== null && d !== undefined ? d.toString() : '';
-                    const partes = str.split(' | ');
-                    return partes[columnaSeleccionada] !== undefined ? partes[columnaSeleccionada].trim() : '';
-                })
-                : datos.map(d => d !== null && d !== undefined ? d.toString().trim() : '')
-            ).filter(d => d !== '');
-
-            if (rawDatos.length < 2) {
-                mostrarAlerta('La secuencia debe tener al menos 2 elementos.', 'Error', 'error');
-                return;
-            }
-
-            let secuenciaDicotomica = [];
-            let nIgnorados = 0;
-            let tipo1Str = '';
-            let tipo2Str = '';
-            let valorCorteFinal = null;
-
-            const nums = rawDatos.map(d => Number(d));
-            const valoresNumericosValidos = nums.every(Number.isFinite);
-            const valoresNoNumericos = rawDatos.map(d => Number.isNaN(Number(d)));
-            const esSecuenciaCualitativa = valoresNoNumericos.every(Boolean);
-
-            if (valoresNumericosValidos) {
-                if (nums.length < 2) {
-                    mostrarAlerta('La secuencia numérica necesita al menos 2 valores válidos.', 'Formato de datos inválido', 'warning');
-                    return;
-                }
-                
-                const uniqueNums = [...new Set(nums)].sort((a, b) => a - b);
-                if (uniqueNums.length < 2) {
-                    mostrarAlerta('Los datos numéricos deben formar dos grupos. Todos los valores son iguales y no se pueden contar rachas.', 'Formato de datos inválido', 'warning');
-                    return;
-                }
-                
-                if (uniqueNums.length === 2) {
-                    tipo1Str = `${uniqueNums[0]} (-)`;
-                    tipo2Str = `${uniqueNums[1]} (+)`;
-                    valorCorteFinal = 'Separación automática (2 valores)';
-                    
-                    for (let d of nums) {
-                        if (d === uniqueNums[1]) secuenciaDicotomica.push('+');
-                        else if (d === uniqueNums[0]) secuenciaDicotomica.push('-');
-                    }
-                } else {
-                    let puntoDeCorte = 0;
-                    if (corteRachas === 'mediana') {
-                        const sorted = [...nums].sort((a, b) => a - b);
-                        const half = Math.floor(sorted.length / 2);
-                        if (sorted.length % 2 === 0) puntoDeCorte = (sorted[half - 1] + sorted[half]) / 2.0;
-                        else puntoDeCorte = sorted[half];
-                        valorCorteFinal = `Mediana = ${puntoDeCorte.toFixed(4)}`;
-                    } else if (corteRachas === 'media') {
-                        puntoDeCorte = nums.reduce((a, b) => a + b, 0) / nums.length;
-                        valorCorteFinal = `Media = ${puntoDeCorte.toFixed(4)}`;
-                    } else {
-                        puntoDeCorte = parseFloat(cortePersonalizado);
-                        if (isNaN(puntoDeCorte)) {
-                            mostrarAlerta('Ingresa un valor de corte personalizado válido.', 'Error', 'error');
-                            return;
-                        }
-                        valorCorteFinal = `Corte personalizado = ${puntoDeCorte}`;
-                    }
-
-                    tipo1Str = `> ${puntoDeCorte}`;
-                    tipo2Str = `< ${puntoDeCorte}`;
-
-                    for (let d of nums) {
-                        if (d > puntoDeCorte) secuenciaDicotomica.push('+');
-                        else if (d < puntoDeCorte) secuenciaDicotomica.push('-');
-                        else nIgnorados++;
-                    }
-                }
-
-            } else if (esSecuenciaCualitativa) {
-                const categoriasUnicas = [...new Set(rawDatos)];
-                if (categoriasUnicas.length !== 2) {
-                    mostrarAlerta(`Para datos de caracteres o categorías, la secuencia debe tener exactamente 2 categorías distintas. Se encontraron ${categoriasUnicas.length}.`, 'Formato de datos inválido', 'warning');
-                    return;
-                }
-                tipo1Str = categoriasUnicas[0];
-                tipo2Str = categoriasUnicas[1];
-                valorCorteFinal = `Categorías: ${tipo1Str} y ${tipo2Str}`;
-
-                for (let d of rawDatos) {
-                    if (d === tipo1Str) secuenciaDicotomica.push('+');
-                    else if (d === tipo2Str) secuenciaDicotomica.push('-');
-                }
-            } else {
-                mostrarAlerta('La secuencia mezcla números y caracteres. Usa una columna con solo valores numéricos o solo dos categorías de texto.', 'Formato de datos inválido', 'warning');
-                return;
-            }
-
-            if (secuenciaDicotomica.length < 2) {
-                mostrarAlerta('La secuencia resultante (después de descartar empates) tiene menos de 2 elementos.', 'Error', 'error');
-                return;
-            }
-
-            let n1 = 0;
-            let n2 = 0;
-            let R = 0;
-            let currentStr = '';
-
-            for (let i = 0; i < secuenciaDicotomica.length; i++) {
-                const s = secuenciaDicotomica[i];
-                if (s === '+') n1++;
-                else if (s === '-') n2++;
-                
-                if (s !== currentStr) {
-                    R++;
-                    currentStr = s;
-                }
-            }
-
-            res = { 
-                tipo: 'rachas', 
-                nOriginal: rawDatos.length,
-                nEfectivo: secuenciaDicotomica.length,
-                nIgnorados,
-                valorCorteFinal,
-                secuenciaDicotomica: secuenciaDicotomica.join(' '),
-                detalleRachas: rachasDetalle.map(detalle => ({ ...detalle })),
-                rachasCuantitativa: isCuantitativaUI,
-                rachasUsaCorte: isCuantitativaUI && hasMoreThanTwoNumericValues,
-                columnaEvaluada: isMatrix ? varSeleccionada.nombresColumnas[columnaSeleccionada] : undefined,
-                ...pruebaRachas(n1, n2, R, alpha, tipoPrueba) 
-            };
-        }
-
-        if (res?.error) {
-            mostrarAlerta(res.error, 'Error de Cálculo', 'error');
-            setResultadosMatriz(null);
-        } else {
-            setResultadosMatriz(res);
-        }
+        const calculo = onCalcular();
+        if (calculo?.error) mostrarAlerta(calculo.error, 'Datos inválidos', 'warning');
     };
 
     const alphaSelector = (
@@ -706,7 +357,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                 </div>
             </div>
 
-            {!varSeleccionada ? (
+            {!filas?.some(fila => String(fila.valor ?? '').trim()) ? (
                 <div style={{ padding: '5px', color: 'var(--text-muted)', fontSize: '0.7rem'}}>
                     Importa una matriz o agrega datos en el panel superior para comenzar.
                 </div>
@@ -890,7 +541,8 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                                 <label style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)', width: 'auto', whiteSpace: 'nowrap', textAlign: 'right' }}>Tipo:</label>
                                 <div id="tour-t6-hnp-subtipo-chi" ref={tipoChiRef} style={{ position: 'relative', flex: 1, minWidth: 0 }}>
                                     <div
-                                        onClick={() => setIsTipoChiOpen(!isTipoChiOpen)}
+                                        aria-disabled={bloquearHistorial}
+                                        onClick={() => { if (!bloquearHistorial) setIsTipoChiOpen(!isTipoChiOpen); }}
                                         style={{
                                             padding: '8px 12px', background: 'var(--bg-card)',
                                             border: `1px solid ${isTipoChiOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
@@ -907,7 +559,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                                             <polyline points="6 9 12 15 18 9" />
                                         </svg>
                                     </div>
-                                    {isTipoChiOpen && (
+                                    {isTipoChiOpen && !bloquearHistorial && (
                                         <div style={{
                                             position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
                                             background: 'var(--bg-card)', border: '1px solid var(--border-color)',
@@ -1057,7 +709,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
                             <table className="hnp-matriz-contingencia-table" style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', borderRadius: '0px', fontSize: '0.8rem', textAlign: 'center', color: 'var(--text-pure)', background: 'var(--bg-card)', border: '1px solid var(--text-pure)' }}>
                                 <thead>
                                     <tr style={{ background: 'var(--bg-input)' }}>
-                                        <th style={{ padding: '6px 4px', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', background: 'var(--bg-input)', whiteSpace: 'nowrap', fontSize: '0.72rem' }}>
+                                        <th style={{ padding: '6px 4px', border: '1px solid var(--text-pure)', color: 'var(--text-pure)', background: 'var(--bg-input)', whiteSpace: 'normal', overflowWrap: 'anywhere', lineHeight: 1.3, fontSize: '0.72rem' }}>
                                             {varSeleccionada.nombresColumnas[0]} \ {varSeleccionada.nombresColumnas[1]}
                                         </th>
                                         {matrizPreview.categoriasCol.map((categoria, indice) => (
@@ -1138,7 +790,7 @@ export default function Controles_HNP_Matriz({ varSeleccionada, filas, statsDato
 
                     {!(prueba === 'chi_cuadrada' && subTipoChi === 'bondad' && errorFormatoBondad) && (prueba !== 'rachas' || rachasDatosValidos) && (
                         <div style={{ order: 4, display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                            <button id="tour-t6-hnp-btn-calcular" className="button_calcular" style={{ width: 'auto', padding: '5px 15px', marginTop: '10px' }} onClick={handleCalcular} disabled={!varSeleccionada}>
+                            <button id="tour-t6-hnp-btn-calcular" className="button_calcular" style={{ width: 'auto', padding: '5px 15px', marginTop: '10px' }} onClick={handleCalcular} disabled={!filas?.some(fila => String(fila.valor ?? '').trim())}>
                                 Calcular Prueba
                             </button>
                         </div>

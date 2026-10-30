@@ -5,12 +5,16 @@
   import '../styles/ui/Menu.css';
   import { alerta } from "../utils/Notificaciones";
   import { api } from "../services/api";
+  import { useNotificaciones } from "../hooks/useNotificaciones";
+  import { Megaphone } from "lucide-react";
   import { 
     IconoCandado, IconoEstadisticaGeneral, IconoEstadisticaMatematica,
     IconoInicio, IconoArchivos, IconoCalculadoraMenu, IconoChevron, 
     IconoGrupos, IconoGestionGrupos, IconoGestionAlumnos, IconoHistorial, 
     IconoTareas, IconoEstadisticasDocente, IconoAdmin, IconoCampana
   } from "./iconos";
+
+  const PREFIJO_AVISO = /^s*[📢📣]️?s*/u;
 
   export default function Menu({ usuario, setUsuario }) {
     const navigate = useNavigate();
@@ -23,7 +27,7 @@
     const perfilRef = useRef(null);
 
     // --- ESTADOS PARA SISTEMA DE NOTIFICACIONES ---
-    const [notificaciones, setNotificaciones] = useState([]);
+    const { notificaciones, setNotificaciones } = useNotificaciones(usuario);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const notifRef = useRef(null);
 
@@ -31,24 +35,6 @@
     const mobileMenuRef = useRef(null);
     const hamburgerRef = useRef(null);
 
-    const cargarNotificaciones = async () => {
-      try {
-        const data = await api.obtenerNotificaciones();
-        setNotificaciones(data);
-      } catch (error) {
-        console.error("Error al cargar notificaciones:", error);
-      }
-    };
-
-    useEffect(() => {
-      if (usuario) {
-        cargarNotificaciones();
-        const interval = setInterval(cargarNotificaciones, 30000);
-        return () => clearInterval(interval);
-      } else {
-        setNotificaciones([]);
-      }
-    }, [usuario]);
 
     const handleMarcarLeida = async (id, e) => {
       e.stopPropagation(); // Evitar que el dropdown se cierre
@@ -425,7 +411,13 @@
                             }}
                             style={{ cursor: 'pointer' }}
                           >
-                            <span className="notif-item-msg">{n.mensaje}</span>
+                            <span className="notif-item-msg">
+                              {PREFIJO_AVISO.test(n.mensaje || "") && (
+                                <Megaphone size={18} aria-hidden="true" focusable="false"
+                                  style={{ color: 'var(--accent-color)', verticalAlign: '-3px', marginRight: '6px' }} />
+                              )}
+                              {(n.mensaje || "").replace(PREFIJO_AVISO, "")}
+                            </span>
                             <div className="notif-item-meta">
                               <span 
                                 className={`notif-badge-type ${n.tipo === 'sistema' ? 'sistema' : n.tipo === 'tarea' ? 'tarea' : 'personal'}`}

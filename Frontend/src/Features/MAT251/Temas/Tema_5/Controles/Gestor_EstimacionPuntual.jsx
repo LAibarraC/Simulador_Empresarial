@@ -30,7 +30,7 @@ const MODOS = [
     { id: 'manual', label: 'Modo Manual' }
 ];
 
-export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, setModo }) {
+export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, setModo, bloquearHistorial = false }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             {/* Selector de Parámetro */}
@@ -42,6 +42,7 @@ export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, 
                                 key={p.id}
                                 type="button"
                                 className={`btn-mat251-modo ${parametro === p.id ? 'active' : ''}`}
+                                disabled={bloquearHistorial && parametro !== p.id}
                                 onClick={() => setParametro(p.id)}
                                 style={{ flex: '1 1 0', minWidth: 'max-content', padding: '5px 10px', textAlign: 'center' }}
                             >
@@ -55,36 +56,16 @@ export function Controles_EstimacionPuntual_UI({ parametro, setParametro, modo, 
     );
 }
 
-export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, modo, setModo, onResultado }) {
+export default function Gestor_EstimacionPuntual({
+    varSeleccionada, filas, statsDatos, abrirEditor, parametro, modo, setModo,
+    configuracion, onEditar, onCalcular, resultado, bloquearHistorial = false,
+}) {
     const variableKey = varSeleccionada?.nombre ?? null;
-    // Estados para almacenar resultados de cada modo
-    const [resMatriz, setResMatriz] = useState(null);
-    const [resManual, setResManual] = useState(null);
     const [resSimulacion, setResSimulacion] = useState(null);
-
-    // Resetear resultados al cambiar de parámetro o modo
-    useEffect(() => {
-        setResMatriz(null);
-        setResManual(null);
-        setResSimulacion(null);
-        
-        // El modo manual no está disponible para 'media'
-        if (parametro === 'media' && modo === 'manual') {
-            setModo('matriz');
-        }
-    }, [parametro, modo, variableKey, setModo]);
-
-    const resultadoMatrizActual = resMatriz?.parametro === parametro && resMatriz?.variableKey === variableKey ? resMatriz.resultado : null;
-    const resultadoManualActual = resManual?.parametro === parametro && resManual?.variableKey === variableKey ? resManual.resultado : null;
+    useEffect(() => { setResSimulacion(null); }, [parametro, modo, variableKey]);
+    const resultadoActual = resultado?.operacion === 'Estimacion_puntual' && resultado.parametro === parametro && resultado.modo === modo
+        ? resultado.resultados : null;
     const resultadoSimulacionActual = resSimulacion?.parametro === parametro && resSimulacion?.variableKey === variableKey ? resSimulacion.resultado : null;
-    const resultadoExportable = modo === 'matriz' ? resultadoMatrizActual : modo === 'manual' && parametro !== 'media' ? resultadoManualActual : null;
-
-    useEffect(() => {
-        onResultado?.(resultadoExportable ? {
-            operacion: 'Estimacion_puntual', parametro, modo,
-            nombreVariable: variableKey, resultados: resultadoExportable
-        } : null);
-    }, [resultadoExportable, parametro, modo, variableKey, onResultado]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT, '--text-main': 'var(--text-pure)' }}>
@@ -98,6 +79,7 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
                                 key={m.id}
                                 type="button"
                                 className={`btn-mat251-modo ${modo === m.id ? 'active' : ''}`}
+                                disabled={bloquearHistorial && modo !== m.id}
                                 onClick={() => setModo(m.id)}
                                 style={{ flex: '1 1 0', minWidth: 'max-content', padding: '5px 15px', textAlign: 'center' }}
                             >
@@ -119,9 +101,10 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
                             filas={filas}
                             statsDatos={statsDatos}
                             abrirEditor={abrirEditor}
-                            onCalcular={(resultado) => setResMatriz(resultado ? { parametro, variableKey, resultado } : null)}
+                            valorExito={configuracion.valorExito} setValorExito={valor => onEditar('valorExito', valor)}
+                            onCalcular={onCalcular}
                         />
-                        <Resultados_EstimacionMatriz resultados={resultadoMatrizActual} parametro={parametro} />
+                        <Resultados_EstimacionMatriz resultados={resultadoActual} parametro={parametro} />
                     </>
                 )}
 
@@ -130,9 +113,9 @@ export default function Gestor_EstimacionPuntual({ varSeleccionada, filas, stats
                         <Controles_EstimacionManual
                             key={`manual-${parametro}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
-                            onCalcular={(resultado) => setResManual(resultado ? { parametro, variableKey, resultado } : null)}
+                            configuracion={configuracion.manual} onEditar={onEditar} onCalcular={onCalcular}
                         />
-                        <Resultados_EstimacionManual resultados={resultadoManualActual} parametro={parametro} />
+                        <Resultados_EstimacionManual resultados={resultadoActual} parametro={parametro} />
                     </>
                 )}
 

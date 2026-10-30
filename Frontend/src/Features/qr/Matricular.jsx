@@ -29,7 +29,7 @@ import { CierreX, Regenerar, Graduacion } from "../../ui/iconos";
 export default function Matricular() {
   const { token } = useParams();
   const navigate = useNavigate();
-  const { usuario } = useData();
+  const { usuario, actualizarModulosUsuario } = useData();
 
   // Estados de la pantalla
   const [info, setInfo] = useState(null);
@@ -109,16 +109,24 @@ export default function Matricular() {
     setMatriculando(true);
     try {
       const data = await qrApi.matricularPorQR(token);
-      alerta.success(
-        "¡Inscripción Exitosa!",
-        `Te has unido a ${data.clase_nombre || "la materia"} exitosamente`
-      );
+      const accesosActualizados = await actualizarModulosUsuario();
+      if (accesosActualizados) {
+        alerta.success(
+          "¡Inscripción Exitosa!",
+          `Te has unido a ${data.clase_nombre || "la materia"} exitosamente`
+        );
+      } else {
+        alerta.warning("Matrícula registrada", "Tu inscripción se guardó, pero no se pudo actualizar el acceso a las calculadoras. Revisa tu conexión.");
+      }
       redirigirDespuesDelToast("/mis-cursos");
     } catch (e) {
       // Mapeo de mensajes amigables según el código de error
       const mensaje = e.message || "No fue posible completar la matrícula.";
       if (e.status === 409) {
-        alerta.warning("Ya Matriculado", "Ya te encuentras matriculado en esta asignatura.");
+        const accesosActualizados = await actualizarModulosUsuario();
+        alerta.warning("Ya Matriculado", accesosActualizados
+          ? "Ya te encuentras matriculado en esta asignatura."
+          : "Ya estás matriculado, pero no se pudo actualizar el acceso a las calculadoras. Revisa tu conexión.");
         redirigirDespuesDelToast("/mis-cursos");
       } else if (e.status === 400) {
         alerta.warning("QR no disponible", mensaje);

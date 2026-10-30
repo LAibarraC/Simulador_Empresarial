@@ -5,4 +5,5 @@ class RegistroHistorial(BaseModel):
     autor: str
     calculo: str
     archivo_origen: str
+    modulo: Optional[str] = "MAT151"
     snapshot: Optional[Dict[str, Any]] = None

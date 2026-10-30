@@ -225,7 +225,7 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
       }
 
       if (usuario?.nombre) {
-        const resHistorial = await api.obtenerHistorial(usuario.nombre);
+        const resHistorial = await api.obtenerHistorial(usuario.nombre, "MAT151");
         if (resHistorial && resHistorial.historial) {
           setHistorialUsuario(resHistorial.historial);
         } else {

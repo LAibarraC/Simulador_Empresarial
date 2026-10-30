@@ -10,6 +10,7 @@ class HistorialCalculo(Base):
     __tablename__ = "historial_calculos"
 
     id = Column(Integer, primary_key=True, index=True)
+    modulo = Column(String(50), nullable=True, index=True)
     tipo_analisis = Column(String(100), nullable=False)  # Ej: "Tendencia Central", "Bivariado", "Frecuencias"
     nombre_trabajo = Column(String(150), nullable=False)  # Título que el usuario le da a su cálculo
     fecha_creacion = Column(DateTime, default=func.now())

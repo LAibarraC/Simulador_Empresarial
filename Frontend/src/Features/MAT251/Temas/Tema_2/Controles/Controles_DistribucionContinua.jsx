@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FONT, FS, RADIUS } from '../../../Principal/Constantes';
-import { calcularMomentosContinua, integracionNumerica } from '../../../Matematicas/logica_Tema2';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
-import { parse, fraction, evaluate, simplify } from 'mathjs';
-import { mat251Api } from '../../../Matematicas/services/api';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
 const MATH_FONT = "'Cambria Math', 'Times New Roman', serif"; 
@@ -22,73 +19,17 @@ const crearBloque = (tipo, valor = '') => ({
     exp_adjunto: '',
 });
 
-// ─── PARSER RECURSIVO ────────────────────────────────────────────────────────
-const parsearArray = (arr, activeVar = 'x') => {
-    const parts = arr.map(b => {
-        if (b.tipo === 'incognita_dinamica') return `(${b.valor || 'k'})`;
-        if (b.tipo === 'pi') return 'pi';
-        if (b.tipo === 'signo') return b.valor;
-        if (b.tipo === 'paren_abre') return '(';
-        if (b.tipo === 'paren_cierra') return ')';
-        if (b.tipo === 'corchete_abre') return '(';
-        if (b.tipo === 'corchete_cierra') return ')';
-        if (b.tipo === 'fraccion') {
-            const numStr = parsearArray(b.numerador, activeVar) || '1';
-            const denStr = parsearArray(b.denominador, activeVar) || '1';
-            const baseStr = `((${numStr}) / (${denStr}))`;
-            if (b.variable_adjunta) {
-                if (b.variable_adjunta === 'termino_lineal') return `${baseStr} * (${activeVar})`;
-                if (b.variable_adjunta === 'termino_cuadratico') return `${baseStr} * (${activeVar}^2)`;
-                if (b.variable_adjunta === 'termino_potencia') {
-                    let e = parseFloat(b.exp_adjunto);
-                    if (isNaN(e)) e = 1;
-                    return `${baseStr} * (${activeVar}^${e})`;
-                }
-            }
-            return baseStr;
-        }
-        if (b.tipo === 'euler') {
-            const expStr = parsearArray(b.numerador, activeVar) || '1';
-            return `exp(${expStr})`;
-        }
-        if (b.tipo === 'absoluto') {
-            const intStr = parsearArray(b.numerador, activeVar) || '0';
-            return `abs(${intStr})`;
-        }
-        let c = parseFloat(b.coef);
-        if (isNaN(c)) c = 1;
-        if (b.tipo === 'constante') {
-            if (!String(b.coef || '').trim()) return '0';
-            return `(${parseFloat(b.coef)})`;
-        }
-        if (b.tipo === 'termino_lineal') return `(${c} * ${activeVar})`;
-        if (b.tipo === 'termino_cuadratico') return `(${c} * ${activeVar}^2)`;
-        if (b.tipo === 'termino_potencia') {
-            let e = parseFloat(b.exp);
-            if (isNaN(e)) e = 1;
-            return `(${c} * ${activeVar}^${e})`;
-        }
-        return '';
-    }).filter(p => p !== '');
-    return parts.join(' ');
-};
-
 // ─── COMPONENTE ──────────────────────────────────────────────────────────────
-export default function ControlDistribucionContinua({ onCalcular }) {
-    const [bloques, setBloques] = useState([]);
-    const bloquesRef = useRef([]);
+export default function ControlDistribucionContinua({ onCalcular, configuracion, setConfiguracion, calculando = false, errorCalculo = '' }) {
+    const { bloques, limiteA, limiteB, constante } = configuracion;
+    const bloquesRef = useRef(bloques);
     const setBloquesSync = (nuevos, preserveK = false) => {
         bloquesRef.current = nuevos;
-        setBloques(nuevos);
-        if (!preserveK) {
-            setMensajeK(null);
-            if (onCalcular) onCalcular(null);
-        }
+        setConfiguracion(prev => ({ ...prev, bloques: nuevos, ...(preserveK ? {} : { constante: null }) }));
     };
-
-    const [modo, setModo] = useState('densidad'); // 'densidad' | 'acumulada'
-    const [limiteA, setLimiteA] = useState('');
-    const [limiteB, setLimiteB] = useState('');
+    const modo = 'densidad';
+    const setLimiteA = valor => setConfiguracion(prev => ({ ...prev, limiteA: valor, constante: null }));
+    const setLimiteB = valor => setConfiguracion(prev => ({ ...prev, limiteB: valor, constante: null }));
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Error en la función', tipo: 'error' });
     const setError = (mensaje) => {
         if (!mensaje) {
@@ -97,8 +38,12 @@ export default function ControlDistribucionContinua({ onCalcular }) {
         }
         setModalAlerta({ isOpen: true, mensaje, titulo: 'Error en la función', tipo: 'error' });
     };
-    const [mensajeInfo, setMensajeInfo] = useState('');
-    const [mensajeK, setMensajeK] = useState(null);
+    const mensajeK = constante ? {
+        texto: "¡Constante encontrada! " + constante.incognitaVar + ' = ' + constante.valorExacto, datos: constante,
+    } : null;
+    useEffect(() => {
+        setError(errorCalculo);
+    }, [errorCalculo]);
 
     // RECURSION STATE
     const [activeId, setActiveId] = useState(null);
@@ -117,6 +62,16 @@ export default function ControlDistribucionContinua({ onCalcular }) {
     };
 
     const [isTyping, setIsTyping] = useState(false);
+    useEffect(() => {
+        bloquesRef.current = bloques;
+        const objetivo = focusSlotRef.current?.parentId || activeIdRef.current;
+        const existe = lista => lista.some(bloque => bloque.id === objetivo
+            || existe(bloque.numerador || []) || existe(bloque.denominador || []));
+        if (objetivo && objetivo !== 'START' && objetivo !== 'START_SLOT' && !existe(bloques)) {
+            setActiveIdSync(null);
+            setFocusSlotSync(null);
+        }
+    }, [bloques]);
 
     const activeVariable = modo === 'acumulada' ? 't' : 'x';
 
@@ -527,228 +482,10 @@ export default function ControlDistribucionContinua({ onCalcular }) {
     };
 
     // ── validacion ────────────────────────────────────────────────────────────
-    const formatearParaMathJs = () => {
-        let finalString = parsearArray(bloquesRef.current, activeVariable);
-
-        // Reemplazos de seguridad (Regex) para asegurar multiplicación implícita
-        // Multiplica números seguidos de paréntesis: 0.75( => 0.75*(
-        finalString = finalString.replace(/(\d)\s*(\()/g, '$1*$2');
-        // Multiplica paréntesis seguidos de paréntesis: )( => )*(
-        finalString = finalString.replace(/(\))\s*(\()/g, '$1*$2');
-        // Multiplica números seguidos de letras/funciones: 2x => 2*x, 2exp => 2*exp
-        finalString = finalString.replace(/(\d)\s*([a-zA-Z])/g, '$1*$2');
-        // Multiplica paréntesis seguidos de letras/funciones: )x => )*x, )exp => )*exp
-        finalString = finalString.replace(/(\))\s*([a-zA-Z])/g, '$1*$2');
-
-        console.log("String a evaluar:", finalString);
-        return finalString;
-    };
-
     const manejarValidacion = async () => {
-        setMensajeInfo('');
-        const stringMath = formatearParaMathJs();
-        if (stringMath === '0' || stringMath === '') { setError("La función no puede ser nula."); return; }
-
-        let a, b_v;
-        try {
-            const cleanA = limiteA === '∞' ? 'Infinity' : limiteA === '-∞' ? '-Infinity' : limiteA.replace(/π/g, 'pi');
-            a = evaluate(cleanA);
-            if (typeof a !== 'number' || isNaN(a)) throw new Error();
-        } catch (e) {
-            setError("El límite inferior debe ser una expresión matemática válida (ej: 0, 10, π, -∞)."); return;
-        }
-
-        let cleanB = limiteB === '∞' ? 'Infinity' : limiteB === '-∞' ? '-Infinity' : limiteB.replace(/π/g, 'pi');
-        let esPuntualAcumulada = false;
-
-        if (modo === 'acumulada' && cleanB.trim() === '') {
-            cleanB = 'x';
-        }
-
-        try {
-            b_v = evaluate(cleanB);
-            if (typeof b_v !== 'number' || isNaN(b_v)) throw new Error();
-            if (modo === 'acumulada') esPuntualAcumulada = true;
-        } catch (e) {
-            if (cleanB.toLowerCase().includes('x')) {
-                if (/\bx\b/.test(stringMath)) {
-                    setError("Error de Notación: La variable de integración no puede ser la misma que el límite superior. Por favor, usa la variable 't' en tu ecuación (ej. dt).");
-                    return;
-                }
-                b_v = Infinity;
-            } else if (cleanB.toLowerCase().includes('t')) {
-                if (/\bt\b/.test(stringMath)) {
-                    setError("Error de Notación: La variable de integración no puede ser la misma que el límite superior.");
-                    return;
-                }
-                b_v = Infinity;
-            } else {
-                setError("El límite superior debe ser una expresión matemática válida o la variable 'x'."); return;
-            }
-        }
-
-        if (modo !== 'acumulada' && a >= b_v) {
-            setError("El límite inferior 'a' debe ser estrictamente menor que 'b'."); return;
-        }
-
-        // --- INTERCEPTAR INCÓGNITA DINÁMICA ---
-        let stringMathFinal = stringMath;
-        let incognitaVar = null;
-
-        // Forma correcta de buscar en el AST (ya que buscarYEjecutar llama al callback con (list, index))
-        const buscarIncognita = (list) => {
-            for (let b of list) {
-                if (b.tipo === 'incognita_dinamica') { incognitaVar = b.valor || 'k'; return; }
-                if (b.numerador) buscarIncognita(b.numerador);
-                if (b.denominador) buscarIncognita(b.denominador);
-            }
-        };
-        buscarIncognita(bloquesRef.current);
-
-        if (incognitaVar) {
-            const regexVar = new RegExp(`\\(${incognitaVar}\\)`, 'g');
-            const stringTemp = stringMath.replace(regexVar, '(1)');
-            
-            try {
-                const data = await mat251Api.resolucionK({ 
-                    funcion: stringTemp, 
-                    a: a, 
-                    b: b_v, 
-                    incognita_var: incognitaVar 
-                });
-                
-                if (!data.success) {
-                    setError(`Error del servidor al despejar ${incognitaVar}: ${data.error}`);
-                    return;
-                }
-                
-                const { latex_block, k_val, k_str } = data;
-                
-                let kFracObj = null;
-                if (k_str.includes('/')) {
-                    const partes = k_str.split('/');
-                    kFracObj = { n: parseInt(partes[0]), d: parseInt(partes[1]), s: parseInt(partes[0]) < 0 ? -1 : 1 };
-                }
-                
-                const constante = {
-                    incognitaVar,
-                    latex_block,
-                    valor: k_val,
-                    valorExacto: k_str,
-                    funcionOriginal: stringMath
-                };
-                setMensajeK({
-                    texto: `¡Constante encontrada! Para que el área sea 1, ${incognitaVar} = ${k_str}`,
-                    datos: constante
-                });
-                
-                // Mutar el estado para reemplazar las incógnitas por la constante o fracción
-                const currentBloques = deepClone(bloquesRef.current);
-                const reemplazarKRecursivo = (list) => {
-                    for (let i = 0; i < list.length; i++) {
-                        if (list[i].tipo === 'incognita_dinamica') {
-                            if (kFracObj) {
-                                const fracBloque = crearBloque('fraccion');
-                                let numStr = kFracObj.n.toString();
-                                if (kFracObj.s < 0) numStr = '-' + numStr;
-                                fracBloque.numerador = [crearBloque('constante', numStr)];
-                                fracBloque.denominador = [crearBloque('constante', kFracObj.d.toString())];
-                                list[i] = fracBloque;
-                            } else {
-                                list[i] = crearBloque('constante', Math.round(k_val * 10000) / 10000);
-                            }
-                        } else {
-                            if (list[i].numerador) reemplazarKRecursivo(list[i].numerador);
-                            if (list[i].denominador) reemplazarKRecursivo(list[i].denominador);
-                        }
-                    }
-                };
-                reemplazarKRecursivo(currentBloques);
-                setBloquesSync(currentBloques, true);
-
-                // El procedimiento ya es exportable; los momentos se calculan
-                // al presionar CALCULAR nuevamente con la constante sustituida.
-                if (onCalcular) onCalcular({ soloConstante: true, a, b: b_v, constante });
-                
-                return; // Detener la ejecución: solo mostrar el cálculo de la constante k
-                
-            } catch (err) {
-                setError("Error de conexión al resolver la constante.");
-                return;
-            }
-        }
-
-        const resultado = calcularMomentosContinua(stringMathFinal, a, b_v, activeVariable);
-        if (resultado.error) { setError(resultado.error); return; }
-        setError('');
-
-        let modoParaGraficar = modo;
-        if (esPuntualAcumulada) {
-            const numLimit = Number.isInteger(b_v) ? b_v : b_v.toFixed(2);
-            const areaFormat = resultado.area !== undefined ? resultado.area.toFixed(4) : '';
-            setMensajeInfo(`Probabilidad acumulada P(X ≤ ${numLimit}) calculada (${areaFormat}). Tip: Para ver la curva de la función F(x), ingresa la variable 'x' en el límite superior.`);
-            delete resultado.warning; // Omitir el warning de que el área no es 1
-            modoParaGraficar = 'densidad'; // Para la puntual, dibujamos la densidad sombreada hasta el número
-        }
-
-        let latexString = `(${stringMathFinal})`;
-        try {
-            const parsed = parse(stringMathFinal);
-            let simplified;
-            try {
-                simplified = simplify(parsed);
-            } catch (e) {
-                simplified = parsed; 
-            }
-            latexString = simplified.toTex({ parenthesis: 'auto' });
-        } catch (e) { }
-
-        // --- LLAMADA AL BACKEND PARA CÁLCULO SIMBÓLICO EXACTO (SymPy) ---
-        let latex_esperanza = null;
-        let latex_varianza = null;
-        let latex_area = null;
-        let esperanza_backend = null;
-        let varianza_backend = null;
-        let area_backend = null;
-        
-        try {
-            const data = await mat251Api.resolucionContinua({
-                funcion: stringMathFinal,
-                a: a === Infinity ? 'inf' : a === -Infinity ? '-inf' : Number(a),
-                b: b_v === Infinity ? 'inf' : b_v === -Infinity ? '-inf' : Number(b_v)
-            });
-            if (data.success) {
-                latex_esperanza = data.latex_esperanza;
-                latex_varianza = data.latex_varianza;
-                latex_area = data.latex_area;
-                esperanza_backend = data.esperanza;
-                varianza_backend = data.varianza;
-                area_backend = data.area;
-            } else if (data.mensaje_error) {
-                setError(data.mensaje_error);
-                return;
-            }
-        } catch (e) {
-            console.error("Error al obtener resolución simbólica del backend", e);
-        }
-
-        onCalcular({ 
-            ...resultado, 
-            funcionFx: stringMathFinal, 
-            a, 
-            b: b_v, 
-            latexString, 
-            modo: modoParaGraficar,
-            latex_esperanza,
-            latex_varianza,
-            latex_area,
-            esperanza_backend,
-            varianza_backend,
-            area_backend,
-            constante: mensajeK?.datos || null
-        });
+        const calculo = await onCalcular();
+        if (!calculo?.cancelado) setError(calculo?.error || '');
     };
-
     const handleLimiteChange = (setter, val) => {
         let v = val;
         const vLower = v.toLowerCase();
@@ -756,8 +493,6 @@ export default function ControlDistribucionContinua({ onCalcular }) {
         else if (vLower === '-i' || vLower === '-inf' || vLower === '-infinity') v = '-∞';
         v = v.replace(/pi/gi, 'π');
         setter(v);
-        setMensajeK(null);
-        if (onCalcular) onCalcular(null);
     };
 
     const limpiarTodo = () => {
@@ -766,7 +501,6 @@ export default function ControlDistribucionContinua({ onCalcular }) {
         setFocusSlotSync(null);
         setLimiteA('');
         setLimiteB('');
-        if (onCalcular) onCalcular(null);
     };
 
     const handleBtnMouseDown = (e, charToAppend, blockAction) => {
@@ -1303,7 +1037,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                     }
                 `}</style>
 
-                {mensajeInfo && <div style={{ backgroundColor: '#eff6ff', color: '#1e3a8a', border: '1px solid #bfdbfe', padding: '12px 15px', borderRadius: RADIUS, fontSize: FS.sm }}><strong>Info: </strong>{mensajeInfo}</div>}
+                {calculando && <p role="status" aria-live="polite" style={{ fontSize: FS.sm, color: 'var(--text-muted)' }}>Calculando la función...</p>}
 
                 {mensajeK && (
                     <div id="tour-continua-procedimiento-k" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '0px' }}>
@@ -1334,6 +1068,7 @@ export default function ControlDistribucionContinua({ onCalcular }) {
                         id="tour-continua-btn-calcular"
                         type="button"
                         className="button_calcular"
+                        disabled={calculando}
                         onClick={manejarValidacion}
                         style={{
                             width: 'fit-content',

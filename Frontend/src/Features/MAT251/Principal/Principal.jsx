@@ -1,9 +1,52 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  esOperacionHNP, crearConfiguracionHNP, crearRecetaHNP, leerRecetaHNP, calcularRecetaHNP,
+  configuracionRestauradaHNP, esOperacionHP, crearConfiguracionHP, crearRecetaHP, leerRecetaHP,
+  calcularRecetaHP, configuracionRestauradaHP,
+} from '../Historial/historial_Tema6';
+import {
+  esOperacionIntervalos, crearConfiguracionIntervalos, crearRecetaIntervalos, leerRecetaIntervalos,
+  calcularRecetaIntervalos, configuracionRestauradaIntervalos, esOperacionPuntual,
+  crearConfiguracionPuntual, crearRecetaPuntual, leerRecetaPuntual, calcularRecetaPuntual,
+  configuracionRestauradaPuntual,
+} from '../Historial/historial_Tema5';
+import React, { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
+import {
+  deserializarValoresEspeciales, puedeActualizarHistorialMAT251, obtenerArchivoRealHistorialMAT251,
+  leerDatosMatrizHistorial,
+} from '../Historial/historialMAT251';
+import {
+  crearRecetaProbabilidad, leerRecetaProbabilidad, calcularRecetaProbabilidad, firmaRecetaProbabilidad,
+  esOperacionTotal, crearRecetaTotal, leerRecetaTotal, calcularRecetaTotal, firmaEntradasTotal,
+  crearRecetaAdicion, leerRecetaAdicion, calcularRecetaAdicion, firmaRecetaAdicion,
+  crearRecetaMultiplicacion, leerRecetaMultiplicacion, calcularRecetaMultiplicacion,
+  firmaRecetaMultiplicacion,
+} from '../Historial/historial_Tema1';
+import {
+  crearRecetaDiscreta, leerRecetaDiscreta, calcularRecetaDiscreta, firmaEntradasDiscreta,
+  vistaDiscretaInicial, crearRecetaContinua, leerRecetaContinua, calcularRecetaContinua,
+  expandirBloquesContinua,
+} from '../Historial/historial_Tema2';
+import {
+  MODELOS_DISCRETOS, crearEstadoModelosDiscretos, esOperacionModelosDiscretos,
+  crearRecetaModelosDiscretos, leerRecetaModelosDiscretos, estimarRecetaModelosDiscretos,
+  calcularRecetaModelosDiscretos, estadoRestauradoModelosDiscretos, MODELOS_CONTINUOS,
+  crearEstadoModelosContinuos, esOperacionModelosContinuos, crearRecetaModelosContinuos,
+  leerRecetaModelosContinuos, estimarRecetaModelosContinuos, calcularRecetaModelosContinuos,
+  estadoRestauradoModelosContinuos,
+} from '../Historial/historial_Tema3';
+import {
+  crearEstadoMuestral, crearRecetaMuestral, leerRecetaMuestral, calcularRecetaMuestral,
+  estadoRestauradoMuestral, crearEstadoTyF, crearRecetaTyF, leerRecetaTyF, calcularRecetaTyF,
+  estadoRestauradoTyF,
+} from '../Historial/historial_Tema4';
 import { useParams, useNavigate } from 'react-router-dom';
 import 'react-data-grid/lib/styles.css';
 import { useMAT251Data } from '../../../components/gestion_datos/DataContext';
-import { calcularTecnicasConteo, calcularProbabilidadClasica, calcularProbabilidadCondicional, calcularProbabilidadTotalParticion } from '../Matematicas/logica_Tema1';
-import { calcularMomentosDiscreta, calcularMomentosContinua } from '../Matematicas/logica_Tema2';
+import {
+  obtenerElementosConteo, coincideConteoConEntradas, calcularTecnicasConteo, calcularProbabilidadClasica,
+  calcularProbabilidadCondicional, calcularProbabilidadTotalParticion,
+} from '../Matematicas/logica_Tema1';
+import { calcularMomentosContinua } from '../Matematicas/logica_Tema2';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import '../styles/pages/Pantalla.css';
@@ -48,26 +91,45 @@ import GraficoBastonesModelos from '../Graficas/Tema_3/GraficoBastonesModelos';
 import ModalProcedimientoModelos from '../Temas/Tema_3/Modales/ModalProcedimientoModelos';
 import ReportePDF_MAT251 from '../ui/ReportePDF_MAT251';
 
-export default function Principal({ usuario, selectedFile, selectedSheet }) {
+const construirResultadoConteo = (parametros) => {
+    const elementosBase = obtenerElementosConteo(
+        parametros.n, parametros.tipoElementos, parametros.customElementsInput || ''
+    );
+    const resultado = calcularTecnicasConteo(parametros.n, parametros.r, elementosBase);
+    if (resultado?.error) return resultado;
+    if (!Number.isFinite(resultado?.permutacion?.resultado)
+        || !Number.isFinite(resultado?.combinacion?.resultado)) {
+        return { error: 'El resultado excede el rango admitido. Reduce n o r.' };
+    }
+    return { ...resultado, ...parametros, elementosBase };
+};
+
+const Principal = forwardRef(function Principal({ usuario, selectedFile, setSelectedFile, selectedSheet, setSelectedSheet, reabrirState, onEstadoHistorialChange }, ref) {
     const { variables, actualizarVariable } = useMAT251Data();
     const { operacionId } = useParams();
     const navigate = useNavigate();
 
     // ── UI ───────────────────────────────────────────────────────────────────────
     const [panelAbierto, setPanelAbierto] = useState(true);
-    const [operacion, setOperacion] = useState(operacionId || '');
+    const esHistorial = !!reabrirState?.snapshot;
+    const operacionHistorial = reabrirState?.snapshot?.operacion || reabrirState?.calculoReabrir;
+    const [operacion, setOperacion] = useState(operacionHistorial || operacionId || '');
     const [subTipoProbabilidad, setSubTipoProbabilidad] = useState('clasica');
     const [columnaParticion, setColumnaParticion] = useState(''); // Para probabilidad total
 
     // Sincronizar estado si la URL cambia externamente o por navegación
     useEffect(() => {
+        if (esHistorial) {
+            if (operacionHistorial) setOperacion(operacionHistorial);
+            return;
+        }
         if (operacionId && operacionId !== operacion) {
             setOperacion(operacionId);
             if (operacionId === 'probabilidad') setSubTipoProbabilidad('clasica');
         } else if (!operacionId && operacion) {
             setOperacion('');
         }
-    }, [operacionId]);
+    }, [operacionId, esHistorial, operacionHistorial]);
 
     const nombreOperacion = useMemo(() => {
         if (!operacion) return '';
@@ -76,7 +138,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
             if (found) return found.label;
         }
         if (operacion === 'conteo') return 'Técnicas de Conteo';
-        if (operacion === 'Probabilidad_Total' || operacion === 'simulador_total') return 'Teorema de Probabilidad Total';
+        if (esOperacionTotal(operacion)) return 'Teorema de Probabilidad Total';
         if (operacion === 'regla_adicion') return 'Regla de la Adición';
         if (operacion === 'regla_multiplicacion') return 'Regla de la Multiplicación';
         if (operacion === 'muestreo') return 'Introducción al Muestreo';
@@ -112,32 +174,33 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
         return customElementsInput.split(',').map(el => el.trim()).filter(Boolean);
     }, [customElementsInput]);
 
-    const finalElements = useMemo(() => {
-        const numN = parseInt(n) || 0;
-        if (tipoElementos === 'letras') {
-            return Array.from({ length: numN }, (_, i) => String.fromCharCode(65 + i));
+    const finalElements = useMemo(
+        () => obtenerElementosConteo(n, tipoElementos, customElementsInput),
+        [n, tipoElementos, customElementsInput]
+    );
+    const parametrosConteo = { n, r, tipoElementos, customElementsInput };
+    // Si cambian las entradas, los resultados anteriores dejan de ser válidos.
+    useEffect(() => {
+        if (resConteo && !coincideConteoConEntradas(resConteo, { n, r, tipoElementos, customElementsInput })) {
+            setResConteo(null);
         }
-        if (tipoElementos === 'numeros') {
-            return Array.from({ length: numN }, (_, i) => (i + 1).toString());
-        }
+    }, [n, r, tipoElementos, customElementsInput, resConteo]);
 
-        let elements = [...parsedElements];
-        if (elements.length < numN) {
-            let index = 0;
-            while (elements.length < numN) {
-                let candidate = String.fromCharCode(65 + index);
-                while (elements.includes(candidate)) {
-                    index++;
-                    candidate = String.fromCharCode(65 + index);
-                }
-                elements.push(candidate);
-                index++;
-            }
-        } else if (elements.length > numN) {
-            elements = elements.slice(0, numN);
-        }
-        return elements;
-    }, [parsedElements, tipoElementos, n]);
+    const restaurarConteo = (parametros) => {
+        const valores = {
+            n: String(parametros.n ?? ''),
+            r: String(parametros.r ?? ''),
+            tipoElementos: parametros.tipoElementos || 'letras',
+            customElementsInput: parametros.customElementsInput || '',
+        };
+        setN(valores.n);
+        setR(valores.r);
+        setTipoElementos(valores.tipoElementos);
+        setCustomElementsInput(valores.customElementsInput);
+        const resultado = construirResultadoConteo(valores);
+        setResConteo(resultado?.error ? null : resultado);
+        setResProbabilidad(null);
+    };
 
     // ── Probabilidad ─────────────────────────────────────────────────────────────
     const [filas, setFilas] = useState([filaVacia(1), filaVacia(2), filaVacia(3)]);
@@ -155,6 +218,55 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
     const [nombreEncabezadoManual, setNombreEncabezadoManual] = useState('');
     const [inputModeProb, setInputModeProb] = useState('matriz');
     const [datosExperimento, setDatosExperimento] = useState(null);
+    const [manualN, setManualN] = useState('');
+    const [manualF, setManualF] = useState('');
+    const [recetaProbabilidadRestaurada, setRecetaProbabilidadRestaurada] = useState(null);
+    const [versionProbabilidad, setVersionProbabilidad] = useState(0);
+    const datosProbabilidadActuales = {
+        operacion: 'probabilidad', selectedFile, selectedSheet, filas, varSeleccionada,
+        subTipoProbabilidad, inputModeProb, colProbClasica, eventoFavorable, eventoCondicion,
+        manualN, manualF, datosExperimento, resProbabilidad, nombreEncabezadoManual,
+    };
+    const recetaProbabilidadActual = crearRecetaProbabilidad(datosProbabilidadActuales);
+    const firmaProbabilidadActual = firmaRecetaProbabilidad(recetaProbabilidadActual);
+    const snapshotHistorial = reabrirState?.snapshot;
+    // El historial usa su propia copia; nunca mezclarla con las variables del módulo.
+    const variableHistorial = varSeleccionada
+        || (snapshotHistorial ? leerDatosMatrizHistorial(snapshotHistorial).varSeleccionada : null);
+    const variablesDisponibles = esHistorial
+        ? (variableHistorial ? [variableHistorial] : [])
+        : variables;
+    useEffect(() => {
+        if (operacion === 'probabilidad' && resProbabilidad
+            && resProbabilidad._entradaProbabilidad !== firmaProbabilidadActual) {
+            setResProbabilidad(null);
+        }
+    }, [operacion, firmaProbabilidadActual, resProbabilidad]);
+
+    const restaurarProbabilidad = (snapshot) => {
+        const receta = leerRecetaProbabilidad(snapshot);
+        setSubTipoProbabilidad(receta.subTipo);
+        setInputModeProb(receta.modo);
+        setColProbClasica(receta.columna);
+        setEventoFavorable(receta.eventoFavorable);
+        setEventoCondicion(receta.eventoCondicion);
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setManualN(String(receta.parametros?.manualN ?? ''));
+        setManualF(String(receta.parametros?.manualF ?? ''));
+        setDatosExperimento(null);
+        setRecetaProbabilidadRestaurada(receta);
+        setVersionProbabilidad(version => version + 1);
+        setResProbabilidad(calcularRecetaProbabilidad(receta));
+        if (receta.modo === 'matriz' || receta.experimento?.fuente === 'encuesta') {
+            setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+            setSelectedSheet?.(receta.hoja ?? snapshot.referenciaArchivo?.hoja ?? 0);
+        } else {
+            setSelectedFile?.('');
+            setSelectedSheet?.(0);
+        }
+    };
     const formulaProbRef = useRef(null);
 
     // ── Simulador Probabilidad Total ─────────────────────────────────────────────
@@ -165,6 +277,51 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
     const [colCausa, setColCausa] = useState('');
     const [colEvento, setColEvento] = useState('');
     const [valExito, setValExito] = useState('');
+    const [modoTotal, setModoTotal] = useState('matriz');
+    const [ramasManualesTotal, setRamasManualesTotal] = useState([
+        { id: 1, name: 'Causa 1', pA: '', pBA: '' },
+        { id: 2, name: 'Causa 2', pA: '', pBA: '' },
+    ]);
+    const [causasBayesMatrizTotal, setCausasBayesMatrizTotal] = useState([]);
+    const [causasBayesManualTotal, setCausasBayesManualTotal] = useState([]);
+    const causasBayesTotal = modoTotal === 'manual' ? causasBayesManualTotal : causasBayesMatrizTotal;
+    const datosTotalActuales = {
+        operacion, selectedFile, selectedSheet, filas, varSeleccionada, nombreEncabezadoManual,
+        modoTotal, ramasManualesTotal, colCausa, colEvento, valExito,
+        causasBayesTotal, resultadoSimulador,
+    };
+    const firmaTotalActual = firmaEntradasTotal(crearRecetaTotal(datosTotalActuales));
+    useEffect(() => {
+        if (esOperacionTotal(operacion) && resultadoSimulador
+            && resultadoSimulador._entradaTotal !== firmaTotalActual) {
+            setResultadoSimulador(null);
+            setCausasBayesMatrizTotal([]);
+            setCausasBayesManualTotal([]);
+        }
+    }, [operacion, firmaTotalActual, resultadoSimulador]);
+
+    const restaurarTotal = (snapshot) => {
+        const receta = leerRecetaTotal(snapshot);
+        const calculo = calcularRecetaTotal(receta);
+        setModoTotal(receta.modo);
+        setRamasManualesTotal(receta.ramasManuales.length ? receta.ramasManuales : [
+            { id: 1, name: 'Causa 1', pA: '', pBA: '' },
+            { id: 2, name: 'Causa 2', pA: '', pBA: '' },
+        ]);
+        setColCausa(receta.colCausa);
+        setColEvento(receta.colEvento);
+        setValExito(String(receta.valExito));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoSimulador(calculo.resultado || null);
+        setRamas(calculo.resultado?.desglose || []);
+        setCausasBayesMatrizTotal(receta.modo === 'matriz' ? calculo.resultado?.causasBayes || [] : []);
+        setCausasBayesManualTotal(receta.modo === 'manual' ? calculo.resultado?.causasBayes || [] : []);
+        setErrorSimulador('');
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+    };
 
     // ── Regla de Adición ─────────────────────────────────────────────────────────────
     const [colA_Adicion, setColA_Adicion] = useState('');
@@ -173,6 +330,58 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
     const [valB_Adicion, setValB_Adicion] = useState('');
     const [resultadoAdicion, setResultadoAdicion] = useState(null);
     const [errorAdicion, setErrorAdicion] = useState('');
+    const [modoAdicion, setModoAdicion] = useState('matriz');
+    const [manualAdicion, setManualAdicion] = useState({
+        nameA: 'A', nameB: 'B', pA: '', pB: '', pAB: '',
+    });
+    const datosAdicionActuales = {
+        operacion, modoAdicion, manualAdicion, selectedFile, selectedSheet,
+        filas, varSeleccionada, nombreEncabezadoManual,
+        colA_Adicion, valA_Adicion, colB_Adicion, valB_Adicion, resultadoAdicion,
+    };
+    const firmaAdicionActual = firmaRecetaAdicion(crearRecetaAdicion(datosAdicionActuales));
+    const firmaAdicionAnteriorRef = useRef(firmaAdicionActual);
+
+
+    const calcularAdicion = () => {
+        // Usar las mismas entradas para calcular, mostrar y guardar el resultado.
+        const calculo = calcularRecetaAdicion(crearRecetaAdicion(datosAdicionActuales));
+        setResultadoAdicion(calculo.resultado || null);
+        setErrorAdicion(calculo.error || '');
+        return calculo;
+    };
+
+    useEffect(() => {
+        // Montar (o repetir el montaje en StrictMode) no es editar las entradas.
+        if (firmaAdicionAnteriorRef.current === firmaAdicionActual) return;
+        firmaAdicionAnteriorRef.current = firmaAdicionActual;
+        if (operacion !== 'regla_adicion') return;
+        setResultadoAdicion(anterior => (
+            anterior && anterior._entradaAdicion !== firmaAdicionActual ? null : anterior
+        ));
+        setErrorAdicion('');
+    }, [operacion, firmaAdicionActual]);
+
+    const restaurarAdicion = (snapshot) => {
+        const receta = leerRecetaAdicion(snapshot);
+        const calculo = calcularRecetaAdicion(receta);
+
+        setModoAdicion(receta.modo);
+        setManualAdicion(receta.modo === 'manual' ? receta.parametros : {
+            nameA: 'A', nameB: 'B', pA: '', pB: '', pAB: '',
+        });
+        setColA_Adicion(receta.modo === 'matriz' ? receta.parametros.colA : '');
+        setValA_Adicion(receta.modo === 'matriz' ? String(receta.parametros.valA) : '');
+        setColB_Adicion(receta.modo === 'matriz' ? receta.parametros.colB : '');
+        setValB_Adicion(receta.modo === 'matriz' ? String(receta.parametros.valB) : '');
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoAdicion(calculo.resultado || null);
+        setErrorAdicion(calculo.error || '');
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+    };
 
     // ── Regla de Multiplicación ──────────────────────────────────────────────────
     const [modReemplazo, setModReemplazo] = useState('con_reemplazo');
@@ -182,6 +391,70 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
     const [valB_Mult, setValB_Mult] = useState('');
     const [resultadoMult, setResultadoMult] = useState(null);
     const [errorMult, setErrorMult] = useState('');
+    const [modoMult, setModoMult] = useState('matriz');
+    const [eventosManualesMult, setEventosManualesMult] = useState([
+        { id: 'e1', name: 'A', prob: '' }, { id: 'e2', name: 'B', prob: '' },
+    ]);
+    const datosMultiplicacionActuales = {
+        operacion, modoMult, eventosManualesMult, modReemplazo,
+        selectedFile, selectedSheet, filas, varSeleccionada, nombreEncabezadoManual,
+        colA_Mult, valA_Mult, colB_Mult, valB_Mult, resultadoMult,
+    };
+    const firmaMultiplicacionActual = firmaRecetaMultiplicacion(crearRecetaMultiplicacion(datosMultiplicacionActuales));
+    const firmaMultiplicacionAnteriorRef = useRef(firmaMultiplicacionActual);
+    const restauracionMultiplicacionRef = useRef(null);
+
+    const cambiarModoMult = (modo) => {
+        if (esHistorial || modo === modoMult) return;
+        setModoMult(modo);
+        setResultadoMult(null);
+        setErrorMult('');
+    };
+    const cambiarReemplazoMult = (modo) => {
+        setModReemplazo(modo);
+    };
+    const calcularMultiplicacion = () => {
+        const calculo = calcularRecetaMultiplicacion(crearRecetaMultiplicacion(datosMultiplicacionActuales));
+        setResultadoMult(calculo.resultado || null);
+        setErrorMult(calculo.error || '');
+        return calculo;
+    };
+    useEffect(() => {
+        // El montaje inicial y su repetición en StrictMode no son una edición.
+        if (firmaMultiplicacionAnteriorRef.current === firmaMultiplicacionActual) return;
+        firmaMultiplicacionAnteriorRef.current = firmaMultiplicacionActual;
+        const esRestauracion = restauracionMultiplicacionRef.current === firmaMultiplicacionActual;
+        restauracionMultiplicacionRef.current = null;
+        if (operacion !== 'regla_multiplicacion' || esRestauracion) return;
+        setResultadoMult(anterior => (
+            anterior && anterior._entradaMultiplicacion !== firmaMultiplicacionActual ? null : anterior
+        ));
+        setErrorMult('');
+    }, [operacion, firmaMultiplicacionActual]);
+
+    const restaurarMultiplicacion = (snapshot) => {
+        const receta = leerRecetaMultiplicacion(snapshot);
+        const calculo = calcularRecetaMultiplicacion(receta);
+        restauracionMultiplicacionRef.current = firmaRecetaMultiplicacion(receta);
+        setModoMult(receta.modo);
+        setModReemplazo(receta.parametros.modReemplazo);
+        setEventosManualesMult(receta.modo === 'manual'
+            ? receta.parametros.eventos.map((evento, indice) => ({
+                id: `e${indice + 1}`, name: evento.name, prob: String(evento.prob),
+            })) : [{ id: 'e1', name: 'A', prob: '' }, { id: 'e2', name: 'B', prob: '' }]);
+        setColA_Mult(receta.modo === 'matriz' ? receta.parametros.colA : '');
+        setValA_Mult(receta.modo === 'matriz' ? receta.parametros.valA : '');
+        setColB_Mult(receta.modo === 'matriz' ? receta.parametros.colB : '');
+        setValB_Mult(receta.modo === 'matriz' ? receta.parametros.valB : '');
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoMult(calculo.resultado || null);
+        setErrorMult(calculo.error || '');
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+    };
+
 
     // ── Muestreo ─────────────────────────────────────────────────────────────────
     const [metodoMuestreo, setMetodoMuestreo] = useState('mas');
@@ -200,16 +473,29 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
     // ── Estimación Puntual ────────────────────────────────────────────────────────
     const [paramEstimacion, setParamEstimacion] = useState('media');
     const [modoEstimacion, setModoEstimacion] = useState('matriz');
+    const [configuracionPuntual, setConfiguracionPuntual] = useState(crearConfiguracionPuntual);
 
     // ── Estimación por Intervalos ──────────────────────────────────────────────────
     const [paramIntervalos, setParamIntervalos] = useState('media');
     const [modoIntervalos, setModoIntervalos] = useState('matriz');
     const [confianzaIntervalos, setConfianzaIntervalos] = useState(95);
+    const [configuracionIntervalos, setConfiguracionIntervalos] = useState(crearConfiguracionIntervalos);
     const [resultadoEstimacion, setResultadoEstimacion] = useState(null);
+    // Tema 6: entradas y resultado de hipótesis paramétricas.
+    const [pruebaHP, setPruebaHP] = useState('media_z');
+    const [modoHP, setModoHP] = useState('matriz');
+    const [configuracionHP, setConfiguracionHP] = useState(crearConfiguracionHP);
+    const [pruebaHNP, setPruebaHNP] = useState('chi_cuadrada');
+    const [modoHNP, setModoHNP] = useState('matriz');
+    const [configuracionHNP, setConfiguracionHNP] = useState(crearConfiguracionHNP);
+    const [resultadoHipotesis, setResultadoHipotesis] = useState(null);
 
+    const operacionEstimacionAnteriorRef = useRef(operacion);
     useEffect(() => {
-        setResultadoEstimacion(null);
-    }, [operacion, varSeleccionada?.id]);
+        const cambioOperacion = operacionEstimacionAnteriorRef.current !== operacion;
+        operacionEstimacionAnteriorRef.current = operacion;
+        if (!esHistorial && (cambioOperacion || (!esOperacionPuntual(operacion) && !esOperacionIntervalos(operacion)))) setResultadoEstimacion(null);
+    }, [operacion, varSeleccionada?.id, esHistorial]);
 
     // Estado para el Modal de Alerta Global
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
@@ -219,32 +505,884 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
 
     // Estados para Tema 2: Discreta y Continua
     const [datosDiscretos, setDatosDiscretos] = useState(null);
-    const [datosContinuos, setDatosContinuos] = useState(null);
-
-    // Resultados Tema 3
-    const [datosTema3, setDatosTema3] = useState(null);
-    const [datosTema3Continuos, setDatosTema3Continuos] = useState(null);
-    const [resultadoMuestral, setResultadoMuestral] = useState(null);
-
+    const [modoDiscreta, setModoDiscreta] = useState('matriz');
+    const [columnaDiscreta, setColumnaDiscreta] = useState('');
+    const [tablaDiscreta, setTablaDiscreta] = useState([
+        { id: 1, x: '', p: '' }, { id: 2, x: '', p: '' },
+    ]);
+    const [vistaDiscreta, setVistaDiscreta] = useState({ ...vistaDiscretaInicial });
+    const datosDiscretaActuales = {
+        operacion, modoDiscreta, columnaDiscreta, tablaDiscreta, vistaDiscreta, datosDiscretos,
+        selectedFile, selectedSheet, filas, varSeleccionada, nombreEncabezadoManual,
+    };
+    const firmaDiscretaActual = firmaEntradasDiscreta(crearRecetaDiscreta(datosDiscretaActuales));
+    const firmaDiscretaAnteriorRef = useRef(firmaDiscretaActual);
+    const restauracionDiscretaRef = useRef(null);
+    const cambiarModoDiscreta = (modo) => {
+        if (esHistorial || modo === modoDiscreta) return;
+        setModoDiscreta(modo);
+        setDatosDiscretos(null);
+    };
+    const calcularDiscreta = () => {
+        const calculo = calcularRecetaDiscreta(crearRecetaDiscreta(datosDiscretaActuales));
+        setDatosDiscretos(calculo.resultado || { error: calculo.error });
+        return calculo;
+    };
     useEffect(() => {
+        if (firmaDiscretaAnteriorRef.current === firmaDiscretaActual) return;
+        firmaDiscretaAnteriorRef.current = firmaDiscretaActual;
+        const esRestauracion = restauracionDiscretaRef.current === firmaDiscretaActual;
+        restauracionDiscretaRef.current = null;
+        if (operacion !== 'dist_discreta' || esRestauracion) return;
+        setDatosDiscretos(anterior => (
+            anterior && anterior._entradaDiscreta !== firmaDiscretaActual ? null : anterior
+        ));
+    }, [operacion, firmaDiscretaActual]);
+    const restaurarDiscreta = (snapshot) => {
+        const receta = leerRecetaDiscreta(snapshot);
+        const calculo = calcularRecetaDiscreta(receta);
+        restauracionDiscretaRef.current = firmaEntradasDiscreta(receta);
+        setModoDiscreta(receta.modo);
+        setColumnaDiscreta(receta.columna);
+        setTablaDiscreta(receta.modo === 'manual'
+            ? receta.tabla.map(([x, p], indice) => ({ id: indice + 1, x: String(x), p: String(p) }))
+            : [{ id: 1, x: '', p: '' }, { id: 2, x: '', p: '' }]);
+        setVistaDiscreta({ ...receta.vista });
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setDatosDiscretos(calculo.resultado || { error: calculo.error });
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+    };
+    const [datosContinuos, setDatosContinuos] = useState(null);
+    const [configuracionContinua, setConfiguracionContinua] = useState({ bloques: [], limiteA: '', limiteB: '', constante: null });
+    const [calculandoContinua, setCalculandoContinua] = useState(false);
+    const [errorContinua, setErrorContinua] = useState('');
+    const [restauracionContinua, setRestauracionContinua] = useState(null);
+    const solicitudContinuaRef = useRef(0);
+    const continuaMontadaRef = useRef(false);
+    useEffect(() => {
+        continuaMontadaRef.current = true;
+        return () => {
+            continuaMontadaRef.current = false;
+            solicitudContinuaRef.current++;
+        };
+    }, []);
+    const datosContinuaActuales = { operacion, configuracionContinua, datosContinuos };
+    const editarContinua = (cambio) => {
+        solicitudContinuaRef.current++;
+        setCalculandoContinua(false);
+        setErrorContinua('');
+        setDatosContinuos(null);
+        setConfiguracionContinua(cambio);
+    };
+    const calcularContinua = async () => {
+        const solicitud = ++solicitudContinuaRef.current;
+        const receta = crearRecetaContinua(datosContinuaActuales);
+        setCalculandoContinua(true);
+        setErrorContinua('');
+        setDatosContinuos(null);
+        const calculo = await calcularRecetaContinua(receta, {
+            continuarTrasConstante: !!configuracionContinua.constante,
+            constantePrevia: configuracionContinua.constante,
+        });
+        if (!continuaMontadaRef.current || solicitud !== solicitudContinuaRef.current) return { cancelado: true };
+        if (calculo.configuracion) setConfiguracionContinua(calculo.configuracion);
+        setDatosContinuos(calculo.resultado || null);
+        setErrorContinua(calculo.error || '');
+        setCalculandoContinua(false);
+        return calculo;
+    };
+    const restaurarContinua = (snapshot) => {
+        solicitudContinuaRef.current++;
+        const receta = leerRecetaContinua(snapshot);
+        setConfiguracionContinua({
+            bloques: expandirBloquesContinua(receta.bloques), limiteA: receta.limites[0], limiteB: receta.limites[1], constante: null,
+        });
+        setDatosContinuos(null);
+        setErrorContinua('');
+        setSelectedFile?.('');
+        setSelectedSheet?.(0);
+        setRestauracionContinua({ receta });
+    };
+    useEffect(() => {
+        if (!restauracionContinua) return;
+        let vigente = true;
+        const solicitud = ++solicitudContinuaRef.current;
+        setCalculandoContinua(true);
+        calcularRecetaContinua(restauracionContinua.receta, {
+            continuarTrasConstante: restauracionContinua.receta.etapa !== 'constante',
+        }).then(calculo => {
+            if (!vigente || !continuaMontadaRef.current || solicitud !== solicitudContinuaRef.current) return;
+            if (calculo.configuracion) setConfiguracionContinua(calculo.configuracion);
+            setDatosContinuos(calculo.resultado || null);
+            setErrorContinua(calculo.error || '');
+            setCalculandoContinua(false);
+        });
+        return () => { vigente = false; };
+    }, [restauracionContinua]);
+    // Resultados Tema 3
+    // La condición puede editarse sin descartar la distribución ya graficada.
+    const conservarGraficaSinCondicion = anterior => {
+        if (!anterior || anterior._condicionPendiente) return anterior;
+        const resultados = { ...anterior.resultados, probabilidadFinal: null };
+        delete resultados.c;
+        delete resultados.c1;
+        delete resultados.c2;
+        const siguiente = {
+            ...anterior, condicion: null, resultados, _condicionPendiente: true,
+            datosGrafico: anterior.datosGrafico.map(punto => 'fillY' in punto ? { ...punto, fillY: null } : punto),
+        };
+        delete siguiente._entradaModeloDiscreto;
+        delete siguiente._entradaModeloContinuo;
+        return siguiente;
+    };
+    const [datosTema3, setDatosTema3] = useState(null);
+    const [modeloTema3Discreto, setModeloTema3Discreto] = useState('Bernoulli');
+    const [estadoModelosDiscretos, setEstadoModelosDiscretos] = useState(crearEstadoModelosDiscretos);
+    const datosModelosDiscretosActuales = {
+        operacion, modeloTema3Discreto, estadoModelosDiscretos, datosTema3,
+        filas, varSeleccionada, nombreEncabezadoManual, selectedFile, selectedSheet,
+    };
+    const invalidarModeloDiscreto = () => setDatosTema3(null);
+    const editarModeloDiscreto = (cambio, soloCondicion = false) => {
+        setEstadoModelosDiscretos(cambio);
+        setDatosTema3(soloCondicion ? conservarGraficaSinCondicion : null);
+    };
+    const cambiarModeloDiscreto = modelo => {
+        if (esHistorial || modelo === modeloTema3Discreto) return;
+        setModeloTema3Discreto(modelo);
+        setDatosTema3(null);
+    };
+    const estimarModeloDiscreto = () => {
+        const receta = crearRecetaModelosDiscretos(datosModelosDiscretosActuales, false);
+        const estimacion = estimarRecetaModelosDiscretos(receta);
+        setDatosTema3(null);
+        if (!estimacion.error) setEstadoModelosDiscretos(prev => ({ ...prev, [modeloTema3Discreto]: {
+            ...prev[modeloTema3Discreto], yaCalculado: false,
+            matriz: { ...prev[modeloTema3Discreto].matriz, ...estimacion.params, stats: estimacion.stats },
+        } }));
+        return estimacion;
+    };
+    const calcularModeloDiscreto = (soloGrafico = false) => {
+        const receta = crearRecetaModelosDiscretos(datosModelosDiscretosActuales, !soloGrafico);
+        const calculo = calcularRecetaModelosDiscretos(receta);
+        setDatosTema3(anterior => calculo.resultado || conservarGraficaSinCondicion(anterior));
+        if (calculo.resultado) setEstadoModelosDiscretos(prev => ({ ...prev, [modeloTema3Discreto]: {
+            ...prev[modeloTema3Discreto], yaCalculado: true,
+            matriz: calculo.estimacion ? {
+                ...prev[modeloTema3Discreto].matriz, ...calculo.estimacion.params, stats: calculo.estimacion.stats,
+            } : prev[modeloTema3Discreto].matriz,
+        } }));
+        return calculo;
+    };
+    const firmaDatosModelosDiscretos = (variable, datos, encabezado) => JSON.stringify({ encabezado: encabezado || '',
+        nombre: variable?.nombre || '', columnas: variable?.nombresColumnas || [],
+        filas: datos.map(fila => String(fila.valor ?? '').trim()).filter(Boolean),
+    });
+    const firmaDatosModelosActual = firmaDatosModelosDiscretos(varSeleccionada, filas, nombreEncabezadoManual);
+    const firmaDatosModelosAnteriorRef = useRef(firmaDatosModelosActual);
+    const restauracionDatosModelosRef = useRef(null);
+    useEffect(() => {
+        if (firmaDatosModelosAnteriorRef.current === firmaDatosModelosActual) return;
+        firmaDatosModelosAnteriorRef.current = firmaDatosModelosActual;
+        const esRestauracion = restauracionDatosModelosRef.current === firmaDatosModelosActual;
+        restauracionDatosModelosRef.current = null;
+        if (esRestauracion) return;
+        setEstadoModelosDiscretos(prev => Object.fromEntries(Object.entries(prev).map(([modelo, estado]) => [modelo, {
+            ...estado, yaCalculado: estado.modo === 'matriz' ? false : estado.yaCalculado,
+            matriz: { ...estado.matriz, col: 0, valorExito: '', stats: null, p: '', n: '', N: '', K: '', lambda: '' },
+        }])));
+        setDatosTema3(anterior => anterior?.modo === 'matriz' ? null : anterior);
+    }, [firmaDatosModelosActual]);
+    const restaurarModelosDiscretos = snapshot => {
+        const receta = leerRecetaModelosDiscretos(snapshot);
+        const calculo = calcularRecetaModelosDiscretos(receta);
+        restauracionDatosModelosRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
+        setModeloTema3Discreto(MODELOS_DISCRETOS.includes(receta.modelo) ? receta.modelo : 'Bernoulli');
+        setEstadoModelosDiscretos(estadoRestauradoModelosDiscretos(receta, calculo));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setDatosTema3(calculo.resultado || null);
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const [datosTema3Continuos, setDatosTema3Continuos] = useState(null);
+    const [modeloTema3Continuo, setModeloTema3Continuo] = useState('Uniforme');
+    const [estadoModelosContinuos, setEstadoModelosContinuos] = useState(() => {
+        const estados = crearEstadoModelosContinuos();
+        // Apertura normal de la calculadora; la restauración del historial aplica su modo guardado.
+        estados.FFisher.modo = 'matriz';
+        return estados;
+    });
+    const datosModelosContinuosActuales = {
+        operacion, modeloTema3Continuo, estadoModelosContinuos, datosTema3Continuos,
+        filas, varSeleccionada, nombreEncabezadoManual, selectedFile, selectedSheet,
+    };
+    const invalidarModeloContinuo = () => setDatosTema3Continuos(null);
+    const editarModeloContinuo = (cambio, soloCondicion = false) => {
+        setEstadoModelosContinuos(cambio);
+        setDatosTema3Continuos(soloCondicion ? conservarGraficaSinCondicion : null);
+    };
+    const cambiarModeloContinuo = modelo => {
+        if (esHistorial || modelo === modeloTema3Continuo) return;
+        setModeloTema3Continuo(modelo);
+        setDatosTema3Continuos(null);
+    };
+    const estimarModeloContinuo = () => {
+        const receta = crearRecetaModelosContinuos(datosModelosContinuosActuales, false);
+        const estimacion = estimarRecetaModelosContinuos(receta);
+        setDatosTema3Continuos(null);
+        if (!estimacion.error) setEstadoModelosContinuos(prev => ({ ...prev, [modeloTema3Continuo]: {
+            ...prev[modeloTema3Continuo], yaCalculado: false,
+            matriz: { ...prev[modeloTema3Continuo].matriz, ...estimacion.params, stats: estimacion.stats },
+        } }));
+        return estimacion;
+    };
+    const calcularModeloContinuo = (soloGrafico = false) => {
+        const receta = crearRecetaModelosContinuos(datosModelosContinuosActuales, !soloGrafico);
+        const calculo = calcularRecetaModelosContinuos(receta);
+        setDatosTema3Continuos(anterior => calculo.resultado || conservarGraficaSinCondicion(anterior));
+        if (calculo.resultado) setEstadoModelosContinuos(prev => ({ ...prev, [modeloTema3Continuo]: {
+            ...prev[modeloTema3Continuo], yaCalculado: true,
+            matriz: calculo.estimacion ? {
+                ...prev[modeloTema3Continuo].matriz, ...calculo.estimacion.params, stats: calculo.estimacion.stats,
+            } : prev[modeloTema3Continuo].matriz,
+        } }));
+        return calculo;
+    };
+    const firmaDatosContinuosAnteriorRef = useRef(firmaDatosModelosActual);
+    const restauracionDatosContinuosRef = useRef(null);
+    useEffect(() => {
+        if (firmaDatosContinuosAnteriorRef.current === firmaDatosModelosActual) return;
+        firmaDatosContinuosAnteriorRef.current = firmaDatosModelosActual;
+        const esRestauracion = restauracionDatosContinuosRef.current === firmaDatosModelosActual;
+        restauracionDatosContinuosRef.current = null;
+        if (esRestauracion) return;
+        setEstadoModelosContinuos(prev => Object.fromEntries(Object.entries(prev).map(([modelo, estado]) => [modelo, {
+            ...estado, yaCalculado: estado.modo === 'matriz' ? false : estado.yaCalculado,
+            matriz: { ...estado.matriz, stats: null, a: '', b: '', mu: '', sigma: '', k: '', v1: '', v2: '', n: '' },
+        }])));
+        setDatosTema3Continuos(anterior => anterior?.modo === 'matriz' ? null : anterior);
+    }, [firmaDatosModelosActual]);
+    const restaurarModelosContinuos = snapshot => {
+        const receta = leerRecetaModelosContinuos(snapshot);
+        const calculo = calcularRecetaModelosContinuos(receta);
+        restauracionDatosContinuosRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
+        setModeloTema3Continuo(MODELOS_CONTINUOS.includes(receta.modelo) ? receta.modelo : 'Uniforme');
+        setEstadoModelosContinuos(estadoRestauradoModelosContinuos(receta, calculo));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setDatosTema3Continuos(calculo.resultado || null);
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const datosPuntualesActuales = { operacion, paramEstimacion, modoEstimacion, configuracionPuntual, resultadoEstimacion,
+        filas, varSeleccionada, nombreEncabezadoManual, selectedFile, selectedSheet };
+    const editarPuntual = (campo, valor) => {
+        setConfiguracionPuntual(prev => campo === 'valorExito' ? { ...prev, valorExito: valor }
+            : { ...prev, manual: { ...prev.manual, [campo]: valor } });
+        setResultadoEstimacion(null);
+    };
+    const cambiarParametroPuntual = parametro => {
+        if (esHistorial || parametro === paramEstimacion) return;
+        setParamEstimacion(parametro);
+        if (parametro === 'media' && modoEstimacion === 'manual') setModoEstimacion('matriz');
+        setConfiguracionPuntual(crearConfiguracionPuntual());
+        setResultadoEstimacion(null);
+    };
+    const cambiarModoPuntual = modo => {
+        if (esHistorial || modo === modoEstimacion || (paramEstimacion === 'media' && modo === 'manual')) return;
+        setModoEstimacion(modo);
+        setResultadoEstimacion(null);
+    };
+    const calcularPuntual = () => {
+        const calculo = calcularRecetaPuntual(crearRecetaPuntual(datosPuntualesActuales));
+        setResultadoEstimacion(calculo.resultado || null);
+        return calculo;
+    };
+    const firmaDatosPuntualAnteriorRef = useRef(firmaDatosModelosActual);
+    const restauracionDatosPuntualRef = useRef(null);
+    useEffect(() => {
+        if (firmaDatosPuntualAnteriorRef.current === firmaDatosModelosActual) return;
+        firmaDatosPuntualAnteriorRef.current = firmaDatosModelosActual;
+        const restaurando = restauracionDatosPuntualRef.current === firmaDatosModelosActual;
+        restauracionDatosPuntualRef.current = null;
+        if (!restaurando) setResultadoEstimacion(anterior => anterior?.operacion === 'Estimacion_puntual' && anterior.modo === 'matriz' ? null : anterior);
+    }, [firmaDatosModelosActual]);
+    const restaurarPuntual = snapshot => {
+        const receta = leerRecetaPuntual(snapshot);
+        const calculo = calcularRecetaPuntual(receta);
+        restauracionDatosPuntualRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
+        setOperacion('Estimacion_puntual');
+        setParamEstimacion(receta.parametro);
+        setModoEstimacion(receta.modo);
+        setConfiguracionPuntual(configuracionRestauradaPuntual(receta));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoEstimacion(calculo.resultado || null);
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const datosIntervalosActuales = { operacion, paramIntervalos, modoIntervalos, confianzaIntervalos, configuracionIntervalos,
+        resultadoEstimacion, filas, varSeleccionada, nombreEncabezadoManual, selectedFile, selectedSheet };
+    const editarIntervalos = (campo, valor) => {
+        setConfiguracionIntervalos(prev => ({ ...prev, [modoIntervalos]: { ...prev[modoIntervalos], [campo]: valor } }));
+        setResultadoEstimacion(null);
+    };
+    const cambiarParametroIntervalos = parametro => {
+        if (esHistorial || parametro === paramIntervalos) return;
+        setParamIntervalos(parametro);
+        setConfiguracionIntervalos(crearConfiguracionIntervalos());
+        setResultadoEstimacion(null);
+    };
+    const cambiarModoIntervalos = modo => {
+        if (esHistorial || modo === modoIntervalos) return;
+        setModoIntervalos(modo);
+        setResultadoEstimacion(null);
+    };
+    const cambiarConfianzaIntervalos = confianza => {
+        if (confianza === confianzaIntervalos) return;
+        setConfianzaIntervalos(confianza);
+        setResultadoEstimacion(null);
+    };
+    const calcularIntervalos = () => {
+        const calculo = calcularRecetaIntervalos(crearRecetaIntervalos(datosIntervalosActuales));
+        setResultadoEstimacion(calculo.resultado || null);
+        return calculo;
+    };
+    const firmaDatosIntervalosAnteriorRef = useRef(firmaDatosModelosActual);
+    const restauracionDatosIntervalosRef = useRef(null);
+    useEffect(() => {
+        if (firmaDatosIntervalosAnteriorRef.current === firmaDatosModelosActual) return;
+        firmaDatosIntervalosAnteriorRef.current = firmaDatosModelosActual;
+        const restaurando = restauracionDatosIntervalosRef.current === firmaDatosModelosActual;
+        restauracionDatosIntervalosRef.current = null;
+        if (!restaurando) setResultadoEstimacion(anterior => anterior?.operacion === 'Estimacion_intervalos' && anterior.modo === 'matriz' ? null : anterior);
+    }, [firmaDatosModelosActual]);
+    const restaurarIntervalos = snapshot => {
+        const receta = leerRecetaIntervalos(snapshot);
+        const calculo = calcularRecetaIntervalos(receta);
+        restauracionDatosIntervalosRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
+        setOperacion('Estimacion_intervalos');
+        setParamIntervalos(receta.parametro);
+        setModoIntervalos(receta.modo);
+        setConfianzaIntervalos(receta.confianza);
+        setConfiguracionIntervalos(configuracionRestauradaIntervalos(receta));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoEstimacion(calculo.resultado || null);
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const [resultadoMuestral, setResultadoMuestral] = useState(null);
+    const [configuracionMuestral, setConfiguracionMuestral] = useState(crearEstadoMuestral);
+    const datosMuestralesActuales = { operacion, configuracionMuestral, resultadoMuestral, filas, varSeleccionada,
+        nombreEncabezadoManual, selectedFile, selectedSheet };
+    const editarMuestral = (campo, valor) => {
+        const esConsulta = ['condicion', 'valorX1', 'valorX2'].includes(campo);
+        setConfiguracionMuestral(prev => {
+            if (prev.vista === 'empirica') return { ...prev, empirica: { ...prev.empirica, [campo]: valor } };
+            const activo = prev.calculadora[prev.distribucion];
+            return { ...prev, calculadora: { ...prev.calculadora, [prev.distribucion]: {
+                ...activo, ...(!esConsulta ? { condicion: 'menor_que', valorX1: '', valorX2: '' } : {}), [campo]: valor,
+            } } };
+        });
+        setResultadoMuestral(anterior => esConsulta && anterior?._baseMuestral
+            ? { ...anterior, resultados: anterior._baseMuestral, _entradaMuestral: null } : null);
+    };
+    const cambiarVistaMuestral = vista => {
+        if (esHistorial || vista === configuracionMuestral.vista) return;
+        setConfiguracionMuestral(prev => ({ ...prev, vista }));
         setResultadoMuestral(null);
-    }, [operacion, varSeleccionada?.id]);
+    };
+    const cambiarDistribucionMuestral = distribucion => {
+        if (esHistorial || distribucion === configuracionMuestral.distribucion) return;
+        setConfiguracionMuestral(prev => ({ ...prev, distribucion }));
+        setResultadoMuestral(null);
+    };
+    const calcularMuestral = (evaluarCondicion = false) => {
+        const calculo = calcularRecetaMuestral(crearRecetaMuestral(datosMuestralesActuales, evaluarCondicion));
+        if (calculo.resultado) setResultadoMuestral(calculo.resultado);
+        return calculo;
+    };
+    const firmaDatosMuestralAnteriorRef = useRef(firmaDatosModelosActual);
+    const restauracionDatosMuestralRef = useRef(null);
+    useEffect(() => {
+        if (firmaDatosMuestralAnteriorRef.current === firmaDatosModelosActual) return;
+        firmaDatosMuestralAnteriorRef.current = firmaDatosModelosActual;
+        const restaurando = restauracionDatosMuestralRef.current === firmaDatosModelosActual;
+        restauracionDatosMuestralRef.current = null;
+        if (!restaurando) setResultadoMuestral(anterior => anterior?.distribucion === 'empirica' ? null : anterior);
+    }, [firmaDatosModelosActual]);
+    const operacionMuestralAnteriorRef = useRef(operacion);
+    useEffect(() => {
+        const cambioOperacion = operacionMuestralAnteriorRef.current !== operacion;
+        operacionMuestralAnteriorRef.current = operacion;
+        if (!esHistorial && (cambioOperacion || !['distribuciones_muestrales', 'tyf'].includes(operacion))) setResultadoMuestral(null);
+    }, [operacion, varSeleccionada?.id, esHistorial]);
+    const restaurarMuestral = snapshot => {
+        const receta = leerRecetaMuestral(snapshot);
+        const calculo = calcularRecetaMuestral(receta);
+        restauracionDatosMuestralRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
+        setConfiguracionMuestral(estadoRestauradoMuestral(receta));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoMuestral(calculo.resultado || null);
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const [configuracionTyF, setConfiguracionTyF] = useState(crearEstadoTyF);
+    const datosTyFActuales = { operacion, configuracionTyF, resultadoMuestral };
+    const editarTyF = (campo, valor) => {
+        const esConsulta = ['condicion', 'valorX1', 'valorX2'].includes(campo);
+        setConfiguracionTyF(prev => ({ ...prev, formularios: { ...prev.formularios, [prev.distribucion]: {
+            ...prev.formularios[prev.distribucion],
+            ...(!esConsulta && prev.distribucion !== 'dif_medias_desc' ? { condicion: 'menor_que', valorX1: '', valorX2: '' } : {}), [campo]: valor,
+        } } }));
+        setResultadoMuestral(anterior => esConsulta && anterior?._baseTyF
+            ? { ...anterior, resultados: anterior._baseTyF, _entradaTyF: null } : null);
+    };
+    const cambiarDistribucionTyF = distribucion => {
+        if (esHistorial || configuracionTyF.distribucion === distribucion) return;
+        setConfiguracionTyF(prev => ({ ...prev, distribucion }));
+        setResultadoMuestral(null);
+    };
+    const calcularTyF = (evaluarCondicion = false) => {
+        const calculo = calcularRecetaTyF(crearRecetaTyF(datosTyFActuales, evaluarCondicion));
+        if (calculo.resultado) setResultadoMuestral(calculo.resultado);
+        return calculo;
+    };
+    const restaurarTyF = snapshot => {
+        const receta = leerRecetaTyF(snapshot);
+        const calculo = calcularRecetaTyF(receta);
+        setConfiguracionTyF(estadoRestauradoTyF(receta));
+        setResultadoMuestral(calculo.resultado || null);
+        setFilas([]);
+        setVarSeleccionada(null);
+        setNombreEncabezadoManual('');
+        setSelectedFile?.('');
+        setSelectedSheet?.(0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const datosHPActuales = { operacion, pruebaHP, modoHP, configuracionHP, resultadoHipotesis,
+        filas, varSeleccionada, nombreEncabezadoManual, selectedFile, selectedSheet };
+    const editarHP = (campo, valor) => {
+        setConfiguracionHP(prev => ({ ...prev, [modoHP]: { ...prev[modoHP], [campo]: valor } }));
+        setResultadoHipotesis(null);
+    };
+    const cambiarPruebaHP = prueba => {
+        if (esHistorial || prueba === pruebaHP) return;
+        setPruebaHP(prueba);
+        setConfiguracionHP(crearConfiguracionHP());
+        setResultadoHipotesis(null);
+    };
+    const cambiarModoHP = modo => {
+        if (esHistorial || modo === modoHP) return;
+        setModoHP(modo);
+        setResultadoHipotesis(null);
+    };
+    const calcularHP = () => {
+        const calculo = calcularRecetaHP(crearRecetaHP(datosHPActuales));
+        setResultadoHipotesis(calculo.resultado || null);
+        return calculo;
+    };
+    const firmaDatosHPAnteriorRef = useRef(firmaDatosModelosActual);
+    const restauracionDatosHPRef = useRef(null);
+    useEffect(() => {
+        if (firmaDatosHPAnteriorRef.current === firmaDatosModelosActual) return;
+        firmaDatosHPAnteriorRef.current = firmaDatosModelosActual;
+        const restaurando = restauracionDatosHPRef.current === firmaDatosModelosActual;
+        restauracionDatosHPRef.current = null;
+        if (!restaurando) setResultadoHipotesis(anterior => anterior?.operacion === 'Hipotesis_parametricas' && anterior.modo === 'matriz' ? null : anterior);
+    }, [firmaDatosModelosActual]);
+    const restaurarHP = snapshot => {
+        const receta = leerRecetaHP(snapshot);
+        const calculo = calcularRecetaHP(receta);
+        restauracionDatosHPRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
+        setOperacion('Hipotesis_parametricas');
+        setPruebaHP(receta.prueba);
+        setModoHP(receta.modo);
+        setConfiguracionHP(configuracionRestauradaHP(receta));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoHipotesis(calculo.resultado || null);
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const datosHNPActuales = { operacion, pruebaHNP, modoHNP, configuracionHNP, resultadoHipotesis,
+        filas, varSeleccionada, nombreEncabezadoManual, selectedFile, selectedSheet };
+    const editarHNP = (campo, valor) => {
+        if (esHistorial && ['subTipoChi', 'tipoChiCuadrada'].includes(campo)) return;
+        setConfiguracionHNP(prev => {
+            const actual = prev[modoHNP];
+            return { ...prev, [modoHNP]: { ...actual, [campo]: typeof valor === 'function' ? valor(actual[campo]) : valor } };
+        });
+        setResultadoHipotesis(null);
+    };
+    const cambiarPruebaHNP = prueba => {
+        if (esHistorial || prueba === pruebaHNP) return;
+        setPruebaHNP(prueba);
+        setConfiguracionHNP(crearConfiguracionHNP());
+        setResultadoHipotesis(null);
+    };
+    const cambiarModoHNP = modo => {
+        if (esHistorial || modo === modoHNP) return;
+        setModoHNP(modo);
+        setResultadoHipotesis(null);
+    };
+    const calcularHNP = () => {
+        const calculo = calcularRecetaHNP(crearRecetaHNP(datosHNPActuales));
+        setResultadoHipotesis(calculo.resultado || null);
+        return calculo;
+    };
+    const firmaDatosHNPAnteriorRef = useRef(firmaDatosModelosActual);
+    const restauracionDatosHNPRef = useRef(null);
+    useEffect(() => {
+        if (firmaDatosHNPAnteriorRef.current === firmaDatosModelosActual) return;
+        firmaDatosHNPAnteriorRef.current = firmaDatosModelosActual;
+        const restaurando = restauracionDatosHNPRef.current === firmaDatosModelosActual;
+        restauracionDatosHNPRef.current = null;
+        if (!restaurando && esOperacionHNP(operacion) && modoHNP === 'matriz') {
+            setResultadoHipotesis(null);
+            setConfiguracionHNP(prev => ({ ...prev, matriz: { ...prev.matriz, esperadasEditables: [],
+                columnaSeleccionada: prev.matriz.columnaSeleccionada < Math.max(1, varSeleccionada?.nombresColumnas?.length || 0) ? prev.matriz.columnaSeleccionada : 0 } }));
+        }
+    }, [firmaDatosModelosActual, operacion, modoHNP, varSeleccionada]);
+    const restaurarHNP = snapshot => {
+        const receta = leerRecetaHNP(snapshot);
+        const calculo = calcularRecetaHNP(receta);
+        restauracionDatosHNPRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
+        setOperacion('Hipotesis_noparametricas');
+        setPruebaHNP(receta.prueba);
+        setModoHNP(receta.modo);
+        setConfiguracionHNP(configuracionRestauradaHNP(receta));
+        setFilas(receta.filas);
+        setVarSeleccionada(receta.varSeleccionada);
+        setNombreEncabezadoManual(receta.nombreEncabezadoManual);
+        setResultadoHipotesis(calculo.resultado || null);
+        setSelectedFile?.(obtenerArchivoRealHistorialMAT251(receta) || '');
+        setSelectedSheet?.(receta.modo === 'matriz' ? receta.hoja ?? 0 : 0);
+        if (calculo.error) mostrarAlerta(calculo.error);
+    };
+    const simulacionSinHistorial = (esOperacionPuntual(operacion) && modoEstimacion === 'simulacion')
+        || (operacion.toLowerCase() === 'estimacion_intervalos' && modoIntervalos === 'simulacion')
+        || (esOperacionHP(operacion) && modoHP === 'simulacion')
+        || (esOperacionHNP(operacion) && modoHNP === 'simulacion');
+    const puedeGuardarCambiosHistorial = esHistorial && puedeActualizarHistorialMAT251(
+        esOperacionHNP(operacion) ? datosHNPActuales
+            : esOperacionHP(operacion) ? datosHPActuales
+            : operacion === 'tyf' ? datosTyFActuales
+            : esOperacionPuntual(operacion) ? datosPuntualesActuales
+            : esOperacionIntervalos(operacion) ? datosIntervalosActuales
+            : operacion === 'distribuciones_muestrales' ? datosMuestralesActuales
+            : esOperacionModelosContinuos(operacion) ? datosModelosContinuosActuales
+            : esOperacionModelosDiscretos(operacion) ? datosModelosDiscretosActuales
+            : operacion === 'dist_continua' ? datosContinuaActuales
+            : operacion === 'dist_discreta' ? datosDiscretaActuales
+            : operacion === 'regla_multiplicacion' ? datosMultiplicacionActuales
+            : operacion === 'regla_adicion' ? datosAdicionActuales
+            : esOperacionTotal(operacion) ? datosTotalActuales
+            : operacion === 'probabilidad' ? datosProbabilidadActuales
+            : { operacion, n, r, tipoElementos, customElementsInput, resConteo },
+        snapshotHistorial
+    );
+    useEffect(() => {
+        onEstadoHistorialChange?.({
+            snapshot: snapshotHistorial,
+            habilitado: puedeGuardarCambiosHistorial, simulacionSinHistorial,
+        });
+    }, [onEstadoHistorialChange, snapshotHistorial, puedeGuardarCambiosHistorial, simulacionSinHistorial]);
+
+
+
+
+
     const [modalProcTema3, setModalProcTema3] = useState(false);
 
     // Resultados Tema 4 delegados a Gestor_CalculadoraMuestral
 
-    // Tema 6: Hipótesis Paramétricas
-    const [pruebaHP, setPruebaHP] = useState('media_z');
-    const [modoHP, setModoHP] = useState('matriz');
 
-    // Tema 6: Hipótesis No Paramétricas
-    const [pruebaHNP, setPruebaHNP] = useState('chi_cuadrada');
-    const [modoHNP, setModoHNP] = useState('matriz');
-    const [resultadoHipotesis, setResultadoHipotesis] = useState(null);
 
+
+    const operacionHipotesisAnteriorRef = useRef(operacion);
     useEffect(() => {
-        setResultadoHipotesis(null);
-    }, [operacion, varSeleccionada?.id]);
+        const cambioOperacion = operacionHipotesisAnteriorRef.current !== operacion;
+        operacionHipotesisAnteriorRef.current = operacion;
+        if ((!esOperacionHP(operacion) && !esOperacionHNP(operacion)) || (!esHistorial && cambioOperacion)) setResultadoHipotesis(null);
+    }, [operacion, varSeleccionada?.id, esHistorial]);
+
+    // ── EXPONER DATOS PARA GUARDAR EN HISTORIAL ──────────────────────────────────
+    useImperativeHandle(ref, () => ({
+
+        restablecerCalculoHistorial: () => {
+            if (esOperacionHNP(operacion)) {
+                restaurarHNP(reabrirState.snapshot);
+                return;
+            }
+            if (esOperacionHP(operacion)) {
+                restaurarHP(reabrirState.snapshot);
+                return;
+            }
+            if (operacion === 'tyf') {
+                restaurarTyF(reabrirState.snapshot);
+                return;
+            }
+            if (esOperacionIntervalos(operacion)) {
+                restaurarIntervalos(reabrirState.snapshot);
+                return;
+            }
+            if (esOperacionPuntual(operacion)) {
+                restaurarPuntual(reabrirState.snapshot);
+                return;
+            }
+            if (operacion === 'distribuciones_muestrales') {
+                restaurarMuestral(reabrirState.snapshot);
+                return;
+            }
+            if (esOperacionModelosContinuos(operacion)) {
+                restaurarModelosContinuos(reabrirState.snapshot);
+                return;
+            }
+            if (esOperacionModelosDiscretos(operacion)) {
+                restaurarModelosDiscretos(reabrirState.snapshot);
+                return;
+            }
+            if (operacion === 'dist_continua') {
+                restaurarContinua(reabrirState.snapshot);
+                return;
+            }
+            if (operacion === 'dist_discreta') {
+                restaurarDiscreta(reabrirState.snapshot);
+                return;
+            }
+            if (operacion === 'regla_multiplicacion') {
+                restaurarMultiplicacion(reabrirState.snapshot);
+                return;
+            }
+            if (operacion === 'regla_adicion') {
+                restaurarAdicion(reabrirState.snapshot);
+                return;
+            }
+            if (esOperacionTotal(operacion)) {
+                restaurarTotal(reabrirState.snapshot);
+                return;
+            }
+            if (operacion === 'probabilidad') {
+                restaurarProbabilidad(reabrirState.snapshot);
+                return;
+            }
+            if (operacion !== 'conteo') return;
+            const snapshot = reabrirState?.snapshot;
+            const parametros = snapshot?.parametros || snapshot?.tema1?.conteo;
+            if (parametros) restaurarConteo(parametros);
+        },
+        obtenerDatosParaHistorial: () => ({
+            operacion,
+            nombreOperacion,
+            selectedFile,
+            selectedSheet,
+            filas,
+            varSeleccionada,
+            // Tema 1
+            n, r, tipoElementos, customElementsInput, resConteo,
+            subTipoProbabilidad, inputModeProb, colProbClasica, eventoFavorable, eventoCondicion, resProbabilidad,
+            manualN, manualF, datosExperimento, nombreEncabezadoManual,
+            numRamas, ramas, resultadoSimulador,
+            modoTotal, ramasManualesTotal, causasBayesTotal, colCausa, colEvento, valExito,
+            modoAdicion, manualAdicion,
+            colA_Adicion, valA_Adicion, colB_Adicion, valB_Adicion, resultadoAdicion,
+            modoMult, eventosManualesMult, modReemplazo, colA_Mult, valA_Mult, colB_Mult, valB_Mult, resultadoMult,
+            metodoMuestreo, tamanoMuestra, varEstratificacion, resultadoMuestreo,
+            varUniforme, inputMin, inputMax, resultadoUniforme,
+            // Tema 2
+            modoDiscreta, columnaDiscreta, tablaDiscreta, vistaDiscreta, datosDiscretos, configuracionContinua, datosContinuos,
+            // Tema 3
+            modeloTema3Discreto, estadoModelosDiscretos, datosTema3, modeloTema3Continuo, estadoModelosContinuos, datosTema3Continuos,
+            // Tema 4
+            configuracionMuestral, configuracionTyF, resultadoMuestral,
+            // Tema 5
+            paramEstimacion, modoEstimacion, configuracionPuntual, paramIntervalos, modoIntervalos, confianzaIntervalos, configuracionIntervalos, resultadoEstimacion,
+            // Tema 6
+            pruebaHP, modoHP, configuracionHP, pruebaHNP, modoHNP, configuracionHNP, resultadoHipotesis
+        })
+    }), [
+        modoAdicion, manualAdicion,
+        modoTotal, ramasManualesTotal, causasBayesTotal, colCausa, colEvento, valExito,
+        operacion, nombreOperacion, selectedFile, selectedSheet, filas, varSeleccionada, reabrirState,
+        n, r, tipoElementos, customElementsInput, resConteo,
+        subTipoProbabilidad, inputModeProb, colProbClasica, eventoFavorable, eventoCondicion, resProbabilidad,
+        manualN, manualF, datosExperimento, nombreEncabezadoManual,
+        numRamas, ramas, resultadoSimulador,
+        colA_Adicion, valA_Adicion, colB_Adicion, valB_Adicion, resultadoAdicion,
+        modoMult, eventosManualesMult, modReemplazo, colA_Mult, valA_Mult, colB_Mult, valB_Mult, resultadoMult,
+        metodoMuestreo, tamanoMuestra, varEstratificacion, resultadoMuestreo,
+        varUniforme, inputMin, inputMax, resultadoUniforme,
+        modoDiscreta, columnaDiscreta, tablaDiscreta, vistaDiscreta, datosDiscretos, configuracionContinua, datosContinuos, modeloTema3Discreto, estadoModelosDiscretos, datosTema3, modeloTema3Continuo, estadoModelosContinuos, datosTema3Continuos,
+        configuracionMuestral, configuracionTyF, resultadoMuestral,
+        paramEstimacion, modoEstimacion, configuracionPuntual, paramIntervalos, modoIntervalos, confianzaIntervalos, configuracionIntervalos, resultadoEstimacion,
+        pruebaHP, modoHP, configuracionHP, pruebaHNP, modoHNP, configuracionHNP, resultadoHipotesis
+    ]);
+
+    // ── RESTAURACIÓN DE CÁLCULO REABIERTO DESDE HISTORIAL ─────────────────────────
+    const calculoRestauradoRef = useRef(false);
+    useEffect(() => {
+        if (!reabrirState || calculoRestauradoRef.current) return;
+        const snapRaw = reabrirState.snapshot;
+        if (!snapRaw) return;
+
+        calculoRestauradoRef.current = true;
+        const snap = deserializarValoresEspeciales(snapRaw);
+
+        const opDestino = snap.operacion || reabrirState.calculoReabrir;
+        const esConteo = opDestino?.toLowerCase() === 'conteo';
+
+        // Conteo siempre es manual; "Modo Manual" nunca es un archivo.
+        if (esConteo || snap.modo === 'manual') {
+            setSelectedFile?.('');
+            setSelectedSheet?.(0);
+        } else if (setSelectedFile) {
+            setSelectedFile(obtenerArchivoRealHistorialMAT251(snap, reabrirState.archivoReabrir) || '');
+        }
+        if (!esConteo && snap.modo !== 'manual' && snap.referenciaArchivo?.hoja !== undefined && setSelectedSheet) {
+            setSelectedSheet(snap.referenciaArchivo.hoja);
+        }
+
+        // 2. Restaurar operación activa
+        if (opDestino) {
+            setOperacion(opDestino);
+        }
+
+        // 3. Restaurar snapshot de filas y variable
+        if (snap.datosSnapshot?.filas && Array.isArray(snap.datosSnapshot.filas)) {
+            setFilas(snap.datosSnapshot.filas);
+        }
+        if (snap.datosSnapshot?.varSeleccionada) {
+            setVarSeleccionada(snap.datosSnapshot.varSeleccionada);
+        }
+
+        // 4. Restaurar Tema 1
+        if (snap.tema1) {
+            const t1 = snap.tema1;
+
+            if (t1.probabilidad) {
+                if (t1.probabilidad.subTipo) setSubTipoProbabilidad(t1.probabilidad.subTipo);
+                if (t1.probabilidad.modo) setInputModeProb(t1.probabilidad.modo);
+                if (t1.probabilidad.columna) setColProbClasica(t1.probabilidad.columna);
+                if (t1.probabilidad.favorables) setEventoFavorable(t1.probabilidad.favorables);
+                if (t1.probabilidad.condicion) setEventoCondicion(t1.probabilidad.condicion);
+                if (t1.probabilidad.resultado) setResProbabilidad(t1.probabilidad.resultado);
+            }
+            if (t1.simuladorTotal) {
+                if (t1.simuladorTotal.numRamas) setNumRamas(t1.simuladorTotal.numRamas);
+                if (t1.simuladorTotal.ramas) setRamas(t1.simuladorTotal.ramas);
+                if (t1.simuladorTotal.resultado) setResultadoSimulador(t1.simuladorTotal.resultado);
+            }
+            if (t1.reglaAdicion) {
+                if (t1.reglaAdicion.colA) setColA_Adicion(t1.reglaAdicion.colA);
+                if (t1.reglaAdicion.valA) setValA_Adicion(t1.reglaAdicion.valA);
+                if (t1.reglaAdicion.colB) setColB_Adicion(t1.reglaAdicion.colB);
+                if (t1.reglaAdicion.valB) setValB_Adicion(t1.reglaAdicion.valB);
+                if (t1.reglaAdicion.resultado) setResultadoAdicion(t1.reglaAdicion.resultado);
+            }
+            if (t1.reglaMultiplicacion) {
+                if (t1.reglaMultiplicacion.modReemplazo) setModReemplazo(t1.reglaMultiplicacion.modReemplazo);
+                if (t1.reglaMultiplicacion.colA) setColA_Mult(t1.reglaMultiplicacion.colA);
+                if (t1.reglaMultiplicacion.valA) setValA_Mult(t1.reglaMultiplicacion.valA);
+                if (t1.reglaMultiplicacion.colB) setColB_Mult(t1.reglaMultiplicacion.colB);
+                if (t1.reglaMultiplicacion.valB) setValB_Mult(t1.reglaMultiplicacion.valB);
+                if (t1.reglaMultiplicacion.resultado) setResultadoMult(t1.reglaMultiplicacion.resultado);
+            }
+            if (t1.muestreo) {
+                if (t1.muestreo.metodo) setMetodoMuestreo(t1.muestreo.metodo);
+                if (t1.muestreo.tamano) setTamanoMuestra(t1.muestreo.tamano);
+                if (t1.muestreo.varEstratificacion) setVarEstratificacion(t1.muestreo.varEstratificacion);
+                if (t1.muestreo.resultado) setResultadoMuestreo(t1.muestreo.resultado);
+            }
+            if (t1.espacioContinuo) {
+                if (t1.espacioContinuo.variable) setVarUniforme(t1.espacioContinuo.variable);
+                if (t1.espacioContinuo.min !== undefined) setInputMin(t1.espacioContinuo.min);
+                if (t1.espacioContinuo.max !== undefined) setInputMax(t1.espacioContinuo.max);
+                if (t1.espacioContinuo.resultado) setResultadoUniforme(t1.espacioContinuo.resultado);
+            }
+        }
+
+        // 5. Restaurar Tema 2
+        if (snap.tema2) {
+            if (snap.tema2.discretos) setDatosDiscretos(snap.tema2.discretos);
+            if (snap.tema2.continuos) setDatosContinuos(snap.tema2.continuos);
+        }
+
+        // 6. Restaurar Tema 3
+        if (snap.tema === 3 || snap.tema3 || opDestino === 'Distribuciones_Continuas') {
+
+            if (snap.tema3?.discretos) setDatosTema3(snap.tema3.discretos);
+        }
+        if (esConteo) {
+            // Reabrir muestra el cálculo listo, sin temporizadores y con la misma
+            // construcción de elementos que el botón de cálculo.
+            const parametros = snap.parametros || snap.tema1?.conteo;
+            if (parametros) restaurarConteo(parametros);
+        }
+
+        if (opDestino?.toLowerCase() === 'probabilidad') {
+            restaurarProbabilidad(snap);
+        }
+
+        if (esOperacionTotal(opDestino)) restaurarTotal(snap);
+        if (opDestino === 'regla_adicion') restaurarAdicion(snap);
+        if (opDestino === 'regla_multiplicacion') restaurarMultiplicacion(snap);
+        if (opDestino === 'dist_discreta') restaurarDiscreta(snap);
+        if (opDestino === 'dist_continua') restaurarContinua(snap);
+        if (esOperacionModelosDiscretos(opDestino)) restaurarModelosDiscretos(snap);
+        if (esOperacionModelosContinuos(opDestino)) restaurarModelosContinuos(snap);
+
+        // 7. Restaurar Tema 4
+        if (opDestino === 'distribuciones_muestrales') {
+            restaurarMuestral(snap);
+        } else if (opDestino === 'tyf') {
+            restaurarTyF(snap);
+        } else if (snap.tema4?.resultado) {
+            setResultadoMuestral(snap.tema4.resultado);
+        }
+
+        // 8. Restaurar Tema 5
+        if (snap.tema5) {
+            if (snap.tema5.paramEstimacion) setParamEstimacion(snap.tema5.paramEstimacion);
+            if (snap.tema5.modoEstimacion) setModoEstimacion(snap.tema5.modoEstimacion);
+            if (snap.tema5.paramIntervalos) setParamIntervalos(snap.tema5.paramIntervalos);
+            if (snap.tema5.modoIntervalos) setModoIntervalos(snap.tema5.modoIntervalos);
+            if (snap.tema5.confianzaIntervalos !== undefined) setConfianzaIntervalos(snap.tema5.confianzaIntervalos);
+            if (snap.tema5.resultado) setResultadoEstimacion(snap.tema5.resultado);
+        }
+
+        if (esOperacionPuntual(opDestino)) restaurarPuntual(snap);
+        else if (esOperacionIntervalos(opDestino)) restaurarIntervalos(snap);
+
+        // 9. Restaurar Tema 6
+        if (snap.tema6) {
+            if (snap.tema6.pruebaHP) setPruebaHP(snap.tema6.pruebaHP);
+            if (snap.tema6.modoHP) setModoHP(snap.tema6.modoHP);
+            if (snap.tema6.pruebaHNP) setPruebaHNP(snap.tema6.pruebaHNP);
+            if (snap.tema6.modoHNP) setModoHNP(snap.tema6.modoHNP);
+            if (snap.tema6.resultado) setResultadoHipotesis(snap.tema6.resultado);
+        }
+        if (esOperacionHP(opDestino)) restaurarHP(snap);
+        else if (esOperacionHNP(opDestino)) restaurarHNP(snap);
+    }, [reabrirState, setSelectedFile, setSelectedSheet]);
 
     // ==========================================FUNCIONES //
 
@@ -491,7 +1629,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
             actualizarReferenciaColumna(setVarUniforme);
 
             setVarSeleccionada(prev => ({ ...prev, nombresColumnas: nombresColumnasActualizados }));
-            if (!varSeleccionada.esCombinada && varSeleccionada.id) {
+            if (!esHistorial && !varSeleccionada.esCombinada && varSeleccionada.id) {
                 actualizarVariable(varSeleccionada.id, { nombresColumnas: nombresColumnasActualizados });
             }
 
@@ -505,7 +1643,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
             const nombreColumna = encabezadoGuardado('valor');
             if (varSeleccionada) {
                 setVarSeleccionada(prev => ({ ...prev, nombre: nombreColumna }));
-                if (!varSeleccionada.esCombinada && varSeleccionada.id) {
+                if (!esHistorial && !varSeleccionada.esCombinada && varSeleccionada.id) {
                     actualizarVariable(varSeleccionada.id, { nombre: nombreColumna });
                 }
             } else {
@@ -541,6 +1679,10 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
         }
 
         const nombreCombinado = arr.map(v => v.nombre).join(' | ');
+        const archivosOrigen = arr.map(v => typeof v.archivoOrigen === 'string' ? v.archivoOrigen.trim() : null);
+        const archivoOrigen = archivosOrigen[0] && archivosOrigen.every(archivo => archivo === archivosOrigen[0]) ? archivosOrigen[0] : null;
+        const hojaOrigen = archivoOrigen && arr.every(v => v.hojaOrigen === arr[0].hojaOrigen)
+            && Number.isInteger(arr[0].hojaOrigen) && arr[0].hojaOrigen >= 0 ? arr[0].hojaOrigen : null;
         const longitud = arr[0]?.datos?.length || 0;
         const nuevas = [];
 
@@ -557,6 +1699,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
         setDatosContinuos(null);
         setVarSeleccionada({
             nombre: nombreCombinado,
+            archivoOrigen, hojaOrigen,
             esCombinada: arr.length > 1,
             datos: nuevas.map(n => n.valor),
             // Si es combinación de varias variables, los nombres de columna son los nombres de esas variables
@@ -580,10 +1723,15 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
 
     // Sincronizar datos si la variable es editada/eliminada en Gestión de Datos
     useEffect(() => {
-        if (!varSeleccionada) return;
+        if (!varSeleccionada || esHistorial || operacion === 'dist_continua') return;
         if (varSeleccionada.esCombinada) return; // Si es combinada omitimos la sincronización automática
-        const varActualizada = variables.find(v => v.id === varSeleccionada.id)
+        const variableEncontrada = variables.find(v => v.id === varSeleccionada.id)
             || variables.find(v => v.nombre === varSeleccionada.nombre);
+        const varActualizada = variableEncontrada ? {
+            ...variableEncontrada,
+            archivoOrigen: variableEncontrada.archivoOrigen ?? null,
+            hojaOrigen: variableEncontrada.hojaOrigen ?? null,
+        } : null;
 
         if (!varActualizada) {
             setVarSeleccionada(null);
@@ -598,7 +1746,9 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
         const datosViejos = JSON.stringify(varSeleccionada.datos);
         const datosNuevos = JSON.stringify(varActualizada.datos);
         const metadatosCambiaron = varSeleccionada.nombre !== varActualizada.nombre
-            || JSON.stringify(varSeleccionada.nombresColumnas) !== JSON.stringify(varActualizada.nombresColumnas);
+            || JSON.stringify(varSeleccionada.nombresColumnas) !== JSON.stringify(varActualizada.nombresColumnas)
+            || varSeleccionada.archivoOrigen !== varActualizada.archivoOrigen
+            || varSeleccionada.hojaOrigen !== varActualizada.hojaOrigen;
 
         if (datosViejos !== datosNuevos) {
             setVarSeleccionada(varActualizada);
@@ -613,7 +1763,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
         } else if (metadatosCambiaron) {
             setVarSeleccionada(varActualizada);
         }
-    }, [variables, varSeleccionada]);
+    }, [variables, varSeleccionada, esHistorial, operacion]);
 
     // Katex
 
@@ -622,10 +1772,26 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
     // Calcular
 
     const ejecutar = () => {
+        if (operacion === 'probabilidad' && ['matriz', 'manual'].includes(inputModeProb)) {
+            const resultado = calcularRecetaProbabilidad(recetaProbabilidadActual);
+            setResProbabilidad(resultado);
+            setResConteo(null);
+            if (!resultado) mostrarAlerta(
+                inputModeProb === 'manual'
+                    ? 'Completa ambos valores: 0 ≤ favorables ≤ total y total mayor que cero. En condicional ingresa probabilidades entre 0 y 1.'
+                    : 'Agrega datos y selecciona los eventos. En condicional también debes seleccionar la condición B.',
+                'Revisa los parámetros', 'warning'
+            );
+            return;
+        }
         if (operacion === 'conteo') {
-            const res = calcularTecnicasConteo(n, r, finalElements);
-            if (res?.error) { mostrarAlerta(res.error, 'Error de Cálculo', 'error'); return; }
-            setResConteo({ ...res, n, r, tipoElementos, elementosBase: finalElements });
+            const res = construirResultadoConteo(parametrosConteo);
+            if (res?.error) {
+                setResConteo(null);
+                mostrarAlerta(res.error, 'Error de Cálculo', 'error');
+                return;
+            }
+            setResConteo(res);
             setResProbabilidad(null);
         } else {
             if (!inputDatos) { mostrarAlerta('Por favor, agrega datos al espacio muestral en la pestaña "Datos".', 'Faltan Datos', 'warning'); return; }
@@ -662,6 +1828,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
     };
 
     const handleOperacion = (val) => {
+        if (esHistorial) return;
         setOperacion(val);
         if (val) {
             navigate(`/MAT251/${val}`);
@@ -683,10 +1850,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
         setDatosContinuos(null);
     };
 
-    // Al cambiar subTipo, borrar resultados
-    useEffect(() => {
-        setResProbabilidad(null);
-    }, [subTipoProbabilidad]);
+
 
     const hayResultado = resConteo || resProbabilidad;
 
@@ -765,7 +1929,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                         {/* Selector de operación iterativo (Personalizado) */}
                         {/* Selector de operación iterativo (Personalizado) */}
                         <label style={{ ...labelStyle, fontSize: FS.xs }}>OPERACIÓN:</label>
-                        <Operacion operacion={operacion} handleOperacion={handleOperacion} />
+                        <Operacion operacion={operacion} handleOperacion={handleOperacion} disabled={esHistorial} />
 
                         {/* Hint cuando no hay operación */}
                         {!operacion && (
@@ -792,9 +1956,12 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                                         <button
                                             key={tipo.id}
                                             className={`btn-mat251-modo ${subTipoProbabilidad === tipo.id ? 'active' : ''}`}
+                                            disabled={esHistorial && subTipoProbabilidad !== tipo.id}
+                                            title={esHistorial && subTipoProbabilidad !== tipo.id ? 'El tipo de probabilidad está fijado por el historial' : undefined}
                                             onClick={() => {
+                                                if (esHistorial) return;
                                                 setSubTipoProbabilidad(tipo.id);
-                                                if (tipo.id !== 'clasica' && inputModeProb === 'experimentos') {
+                                                if ((tipo.id !== 'clasica' && inputModeProb === 'experimentos') || (tipo.id === 'condicional' && inputModeProb === 'simulacion')) {
                                                     setInputModeProb('matriz');
                                                 }
                                             }}
@@ -810,31 +1977,31 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                         {/* CONTROLES ESTIMACION PUNTUAL */}
                         {operacion === 'Estimacion_puntual' && (
                             <Controles_EstimacionPuntual_UI 
-                                parametro={paramEstimacion} setParametro={setParamEstimacion} 
-                                modo={modoEstimacion} setModo={setModoEstimacion} 
+                                parametro={paramEstimacion} setParametro={cambiarParametroPuntual}
+                                modo={modoEstimacion} setModo={cambiarModoPuntual} bloquearHistorial={esHistorial}
                             />
                         )}
 
                         {/* CONTROLES ESTIMACION INTERVALOS */}
                         {operacion === 'Estimacion_intervalos' && (
                             <Controles_EstimacionIntervalos_UI 
-                                parametro={paramIntervalos} setParametro={setParamIntervalos} 
-                                modo={modoIntervalos} setModo={setModoIntervalos} 
-                                confianza={confianzaIntervalos} setConfianza={setConfianzaIntervalos}
+                                parametro={paramIntervalos} setParametro={cambiarParametroIntervalos}
+                                modo={modoIntervalos} setModo={cambiarModoIntervalos}
+                                confianza={confianzaIntervalos} setConfianza={cambiarConfianzaIntervalos} bloquearHistorial={esHistorial}
                             />
                         )}
 
                         {/* CONTROLES HIPOTESIS PARAMETRICAS */}
                         {operacion === 'Hipotesis_parametricas' && (
                             <Controles_HP_UI 
-                                prueba={pruebaHP} setPrueba={setPruebaHP} 
+                                prueba={pruebaHP} setPrueba={cambiarPruebaHP} bloquearHistorial={esHistorial}
                             />
                         )}
 
                         {/* CONTROLES HIPOTESIS NO PARAMETRICAS */}
                         {operacion === 'Hipotesis_noparametricas' && (
                             <Controles_HNP_UI 
-                                prueba={pruebaHNP} setPrueba={setPruebaHNP} 
+                                prueba={pruebaHNP} setPrueba={cambiarPruebaHNP} bloquearHistorial={esHistorial}
                             />
                         )}
 
@@ -843,6 +2010,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             <ControlesConteo
                                 n={n} setN={setN} r={r} setR={setR}
                                 ajustar={ajustar} ejecutar={ejecutar}
+
                                 customElementsInput={customElementsInput}
                                 setCustomElementsInput={setCustomElementsInput}
                                 parsedElements={parsedElements}
@@ -850,11 +2018,11 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                                 setTipoElementos={setTipoElementos}
                             />
                         )}
-                        {(operacion === 'probabilidad' || operacion === 'Probabilidad_Total' || operacion === 'simulador_total' || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'dist_continua' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'Distribuciones_Discretas' || operacion === 'discretas' || operacion === 'distribuciones_discretas' || operacion === 'modelos_discretos' || operacion === 'Distribuciones_Continuas' || operacion === 'continuas' || operacion === 'distribuciones_continuas' || operacion === 'modelos_continuos' || operacion === 'dist_discreta' || operacion === 'Estimacion_puntual' || operacion === 'Estimacion_intervalos' || operacion === 'Hipotesis_parametricas' || operacion === 'Hipotesis_noparametricas') && (
+                        {(operacion === 'probabilidad' || esOperacionTotal(operacion) || operacion === 'regla_adicion' || operacion === 'regla_multiplicacion' || operacion === 'muestreo' || operacion === 'distribuciones_muestrales' || operacion === 'tamanio_muestra' || operacion === 'dist_uniforme' || operacion === 'esperanza_varianza' || operacion === 'momentos_asimetria' || operacion === 'Distribuciones_Discretas' || operacion === 'discretas' || operacion === 'distribuciones_discretas' || operacion === 'modelos_discretos' || operacion === 'Distribuciones_Continuas' || operacion === 'continuas' || operacion === 'distribuciones_continuas' || operacion === 'modelos_continuos' || operacion === 'dist_discreta' || operacion === 'Estimacion_puntual' || operacion === 'Estimacion_intervalos' || operacion === 'Hipotesis_parametricas' || operacion === 'Hipotesis_noparametricas') && (
                             <ControlesProbabilidad
                                 setModalVars={setModalVars}
                                 varSeleccionada={varSeleccionada}
-                                variables={variables}
+                                variables={variablesDisponibles}
                                 cargarVariable={cargarVariable}
                                 setVarSeleccionada={setVarSeleccionada}
                                 deseleccionarVariable={deseleccionarVariable}
@@ -938,28 +2106,19 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                                 filas={filas}
                                 statsDatos={statsDatos}
                                 abrirEditor={abrirEditor}
-                                onCalcular={(datosRaw, contexto) => {
-                                    if (!datosRaw) {
-                                        setDatosDiscretos(null);
-                                        return;
-                                    }
-                                    const calculos = calcularMomentosDiscreta(datosRaw);
-                                    setDatosDiscretos({ ...calculos, ...contexto });
-                                }}
+                                modo={modoDiscreta} setModo={cambiarModoDiscreta}
+                                columnaSeleccionada={columnaDiscreta} setColumnaSeleccionada={setColumnaDiscreta}
+                                tabla={tablaDiscreta} setTabla={setTablaDiscreta}
+                                bloquearModo={esHistorial} onCalcular={calcularDiscreta}
                             />
-                            <Resultados_DistribucionDiscreta resultados={datosDiscretos} />
+                            <Resultados_DistribucionDiscreta resultados={datosDiscretos} vista={vistaDiscreta} setVista={setVistaDiscreta} />
                         </div>
                     ) : operacion === 'dist_continua' ? (
                         <div className="tema2-container">
                             <div>
                                 <Controles_DistribucionContinua
-                                    onCalcular={(datos) => {
-                                        if (datos) {
-                                            setDatosContinuos(datos);
-                                        } else {
-                                            setDatosContinuos(null);
-                                        }
-                                    }}
+                                    configuracion={configuracionContinua} setConfiguracion={editarContinua}
+                                    onCalcular={calcularContinua} calculando={calculandoContinua} errorCalculo={errorContinua}
                                 />
 
                                 {datosContinuos && !datosContinuos.soloConstante && (
@@ -976,9 +2135,10 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                                 filas={filas}
                                 statsDatos={statsDatos}
                                 abrirEditor={abrirEditor}
-                                onCalcular={(datos) => {
-                                    setDatosTema3(datos);
-                                }}
+                                modelo={modeloTema3Discreto} setModelo={cambiarModeloDiscreto}
+                                modelosState={estadoModelosDiscretos} setModelosState={editarModeloDiscreto}
+                                bloquearModo={esHistorial} onEstimar={estimarModeloDiscreto}
+                                onCalcular={calcularModeloDiscreto} onInvalidar={invalidarModeloDiscreto}
                             >
                                 {datosTema3 && (
                                     <>
@@ -1005,9 +2165,10 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                                 filas={filas}
                                 statsDatos={statsDatos}
                                 abrirEditor={abrirEditor}
-                                onCalcular={(datos) => {
-                                    setDatosTema3Continuos(datos);
-                                }}
+                                modelo={modeloTema3Continuo} setModelo={cambiarModeloContinuo}
+                                modelosState={estadoModelosContinuos} setModelosState={editarModeloContinuo}
+                                bloquearModo={esHistorial} onEstimar={estimarModeloContinuo}
+                                onCalcular={calcularModeloContinuo} onInvalidar={invalidarModeloContinuo}
                             >
                                 {datosTema3Continuos && (
                                     <>
@@ -1049,13 +2210,25 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             statsDatos={statsDatos} abrirEditor={abrirEditor}
                         />
                     ) : operacion === 'distribuciones_muestrales' ? (
-                        <Gestor_CalculadoraMuestral varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor} onResultado={setResultadoMuestral} />
+                        <Gestor_CalculadoraMuestral
+                            varSeleccionada={varSeleccionada} filas={filas} abrirEditor={abrirEditor}
+                            configuracion={configuracionMuestral} onEditar={editarMuestral}
+                            onCambiarVista={cambiarVistaMuestral} onCambiarDistribucion={cambiarDistribucionMuestral}
+                            onGenerar={calcularMuestral} resultado={resultadoMuestral} bloquearHistorial={esHistorial}
+                        />
                     ) : operacion === 'tyf' ? (
-                        <Gestor_DistribucionesTyF onResultado={setResultadoMuestral} />
+                        <Gestor_DistribucionesTyF
+                            configuracion={configuracionTyF} resultado={resultadoMuestral}
+                            onEditar={editarTyF} onGenerar={calcularTyF} onCambiarDistribucion={cambiarDistribucionTyF}
+                            bloquearHistorial={esHistorial}
+                        />
                     ) : operacion === 'regla_multiplicacion' ? (
                         <ResultadosReglaMultiplicacion
                             varSeleccionada={varSeleccionada} filas={filas}
-                            modReemplazo={modReemplazo} setModReemplazo={setModReemplazo}
+                            inputMode={modoMult} setInputMode={cambiarModoMult}
+                            manualEvents={eventosManualesMult} setManualEvents={setEventosManualesMult}
+                            onCalcular={calcularMultiplicacion} bloquearModo={esHistorial}
+                            modReemplazo={modReemplazo} setModReemplazo={cambiarReemplazoMult}
                             colA={colA_Mult} setColA={setColA_Mult} valA={valA_Mult} setValA={setValA_Mult}
                             colB={colB_Mult} setColB={setColB_Mult} valB={valB_Mult} setValB={setValB_Mult}
                             resultado={resultadoMult} setResultado={setResultadoMult}
@@ -1064,6 +2237,10 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                         />
                     ) : operacion === 'regla_adicion' ? (
                         <ResultadosReglaAdicion
+                            onCalcular={calcularAdicion}
+                            inputMode={modoAdicion} setInputMode={setModoAdicion}
+                            manualAdicion={manualAdicion} setManualAdicion={setManualAdicion}
+                            bloquearModo={esHistorial}
                             resultado={resultadoAdicion} error={errorAdicion}
                             varSeleccionada={varSeleccionada} filas={filas}
                             colA={colA_Adicion} setColA={setColA_Adicion} valA={valA_Adicion} setValA={setValA_Adicion}
@@ -1071,8 +2248,13 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             setResultado={setResultadoAdicion} setError={setErrorAdicion}
                             statsDatos={statsDatos} abrirEditor={abrirEditor}
                         />
-                    ) : (operacion === 'Probabilidad_Total' || operacion === 'simulador_total') ? (
+                    ) : esOperacionTotal(operacion) ? (
                         <ResultadosSimuladorTotal
+                            inputMode={modoTotal} setInputMode={setModoTotal}
+                            manualBranches={ramasManualesTotal} setManualBranches={setRamasManualesTotal}
+                            causasBayesMatriz={causasBayesMatrizTotal} setCausasBayesMatriz={setCausasBayesMatrizTotal}
+                            causasBayesManual={causasBayesManualTotal} setCausasBayesManual={setCausasBayesManualTotal}
+                            bloquearModo={esHistorial}
                             filas={filas} varSeleccionada={varSeleccionada}
                             colCausa={colCausa} setColCausa={setColCausa}
                             colEvento={colEvento} setColEvento={setColEvento}
@@ -1090,9 +2272,9 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             abrirEditor={abrirEditor} 
                             parametro={paramEstimacion}
                             modo={modoEstimacion}
-                            setModo={setModoEstimacion}
-                            setParametro={setParamEstimacion}
-                            onResultado={setResultadoEstimacion}
+                            setModo={cambiarModoPuntual} bloquearHistorial={esHistorial}
+                            configuracion={configuracionPuntual} onEditar={editarPuntual}
+                            onCalcular={calcularPuntual} resultado={resultadoEstimacion}
                         />
                     ) : operacion === 'Estimacion_intervalos' ? (
                         <Gestor_EstimacionIntervalos 
@@ -1101,12 +2283,12 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             statsDatos={statsDatos} 
                             abrirEditor={abrirEditor} 
                             parametro={paramIntervalos}
-                            setParametro={setParamIntervalos}
+                            setParametro={cambiarParametroIntervalos}
                             modo={modoIntervalos}
-                            setModo={setModoIntervalos}
+                            setModo={cambiarModoIntervalos}
                             confianza={confianzaIntervalos}
-                            setConfianza={setConfianzaIntervalos}
-                            onResultado={setResultadoEstimacion}
+                            setConfianza={cambiarConfianzaIntervalos}
+                            configuracion={configuracionIntervalos} onEditar={editarIntervalos} onCalcular={calcularIntervalos} resultado={resultadoEstimacion} bloquearHistorial={esHistorial}
                         />
                     ) : operacion === 'conteo' ? (
                         <ResultadosConteo resConteo={resConteo} hayResultado={hayResultado} />
@@ -1117,10 +2299,9 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             statsDatos={statsDatos} 
                             abrirEditor={abrirEditor} 
                             prueba={pruebaHP}
-                            setPrueba={setPruebaHP}
                             modo={modoHP}
-                            setModo={setModoHP}
-                            onResultado={setResultadoHipotesis}
+                            setModo={cambiarModoHP} bloquearHistorial={esHistorial}
+                            configuracion={configuracionHP} onEditar={editarHP} onCalcular={calcularHP} resultado={resultadoHipotesis}
                         />
                     ) : operacion === 'Hipotesis_noparametricas' ? (
                         <Gestor_HipotesisNoParametricas 
@@ -1129,14 +2310,16 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             statsDatos={statsDatos} 
                             abrirEditor={abrirEditor} 
                             prueba={pruebaHNP}
-                            setPrueba={setPruebaHNP}
                             modo={modoHNP}
-                            setModo={setModoHNP}
-                            onResultado={setResultadoHipotesis}
-                            variables={variables}
+                            setModo={cambiarModoHNP} bloquearHistorial={esHistorial}
+                            configuracion={configuracionHNP} onEditar={editarHNP} onCalcular={calcularHNP} resultado={resultadoHipotesis}
                         />
                     ) : (
                         <ResultadosProbabilidad
+                            key={`${subTipoProbabilidad}-${inputModeProb}-${versionProbabilidad}`}
+                            manualN={manualN} setManualN={setManualN}
+                            manualF={manualF} setManualF={setManualF}
+                            experimentoRestaurar={recetaProbabilidadRestaurada?.experimento}
                             statsDatos={statsDatos} abrirEditor={abrirEditor} valoresUnicos={valoresUnicos}
                             statsEventos={statsEventos} setModalEvento={setModalEvento}
                             eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable}
@@ -1149,6 +2332,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
                             varSeleccionada={varSeleccionada}
                             colProbClasica={colProbClasica} setColProbClasica={setColProbClasica}
                             inputMode={inputModeProb} setInputMode={setInputModeProb}
+                            bloquearModos={esHistorial}
                             mostrarAlerta={mostrarAlerta}
                             onResultadoExperimento={setDatosExperimento}
                         />
@@ -1160,7 +2344,7 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
             <ModalEditor modalEditor={modalEditor} setModalEditor={setModalEditor} filasTemp={filasTemp} setFilasTemp={setFilasTemp} columns={columnasEditor} guardarEditor={guardarEditor} hayCambiosEditor={hayCambiosEditor} titulo={subTipoProbabilidad === 'frecuentista' ? 'Editor de Datos Históricos' : 'Editor de Espacio Muestral'} />
             <ModalEventos modalEvento={modalEvento} setModalEvento={setModalEvento} statsEventos={statsEventos} statsEventosPorColumna={(subTipoProbabilidad === 'clasica' || subTipoProbabilidad === 'frecuentista') ? null : statsEventosPorColumnaParaA} eventoFavorable={eventoFavorable} setEventoFavorable={setEventoFavorable} setResProbabilidad={setResProbabilidad} titulo={subTipoProbabilidad === 'frecuentista' ? 'Seleccionar Evento de Interés' : subTipoProbabilidad === 'condicional' ? 'Seleccionar Eventos para Interés (A)' : 'Seleccionar Eventos Favorables'} mostrarFrecuencia={subTipoProbabilidad === 'condicional' || (subTipoProbabilidad === 'frecuentista' && inputModeProb === 'matriz')} />
             <ModalEventos modalEvento={modalCondicion} setModalEvento={setModalCondicion} statsEventos={statsEventos} statsEventosPorColumna={statsEventosPorColumnaParaB} eventoFavorable={eventoCondicion} setEventoFavorable={setEventoCondicion} setResProbabilidad={setResProbabilidad} titulo="Seleccionar Eventos para Condición (B)" mostrarFrecuencia={subTipoProbabilidad === 'condicional'} />
-            <ModalVariables modalVars={modalVars} setModalVars={setModalVars} variables={variables} cargarVariable={cargarVariable} />
+            <ModalVariables modalVars={modalVars} setModalVars={setModalVars} variables={variablesDisponibles} cargarVariable={cargarVariable} />
 
             {/* Modales Tema 3 */}
             {modalProcTema3 && (
@@ -1236,4 +2420,6 @@ export default function Principal({ usuario, selectedFile, selectedSheet }) {
             />
         </div>
     );
-}
+});
+
+export default Principal;

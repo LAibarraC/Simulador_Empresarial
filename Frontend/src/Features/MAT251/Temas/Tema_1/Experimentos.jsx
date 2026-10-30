@@ -14,6 +14,9 @@ import { api } from '../../../../services/api';
 import { alerta } from '../../../../utils/Notificaciones';
 import EspacioMuestralMatriz from './EspacioMuestralMatriz';
 import StatLabel from '../../ui/StatLabel';
+import {
+  compactarSimulacionExperimento,
+} from '../../Historial/historialMAT251';
 
 function ResultadoMath({ expresion, displayMode = false, className }) {
     const html = katex.renderToString(expresion, { displayMode, throwOnError: false });
@@ -445,48 +448,74 @@ function convertirHistorialEnsayosAFilas(ensayos, columnas) {
     });
 }
 
-export default function Experimentos({ filas = [], varSeleccionada, abrirEditor, onResultadoExperimento }) {
-    const [fuente, setFuente] = useState('teorico');
-    const [tipoExperimento, setTipoExperimento] = useState('simple');
-    const [usarFrecuencias, setUsarFrecuencias] = useState(false);
-    const [columnaFrecuenciaSeleccionada, setColumnaFrecuenciaSeleccionada] = useState('');
-    const [componentes, setComponentes] = useState([
+function reconstruirSimulacionHistorial(simulacion, componentes, reglas, resultado) {
+    const compacta = compactarSimulacionExperimento(simulacion, componentes);
+    if (!compacta?.ensayos?.length) return null;
+    const N = Number(compacta.N) || compacta.ensayos.length;
+    const pTeorica = resultado.cantidadFavorable / resultado.total;
+    const pasoGrafica = Math.max(1, Math.floor(N / 80));
+    const historialEnsayos = [];
+    const puntosGrafica = [];
+    let exitos = 0;
+    let ultimoCaso = null;
+    let ultimoValores = [];
+    let ultimoEsFavorable = false;
+    compacta.ensayos.forEach((valores, indice) => {
+        const caso = Object.fromEntries(componentes.map((componente, posicion) => [componente.id, valores[posicion]]));
+        const intento = indice + 1;
+        const esFavorable = evaluarReglas(reglas, caso);
+        if (esFavorable) exitos++;
+        ultimoCaso = componentes.map(c => `${c.nombre || c.id}: ${caso[c.id]}`).join('  ·  ');
+        ultimoValores = componentes.map(c => ({
+            id: c.id, nombre: c.nombre || c.id, valor: caso[c.id],
+            eventos: [...new Set(parsearEventos(c.eventos))],
+        }));
+        ultimoEsFavorable = esFavorable;
+        historialEnsayos.push({
+            intento, caso: ultimoCaso, valores: caso, esFavorable,
+            exitosAcumulados: exitos, probabilidadAcumulada: exitos / intento,
+        });
+        if (intento === 1 || intento % pasoGrafica === 0 || intento === N) {
+            puntosGrafica.push({
+                intento, empirica: Number((exitos / intento).toFixed(4)),
+                teorica: Number(pTeorica.toFixed(4)),
+            });
+        }
+    });
+    const intentoActual = compacta.ensayos.length;
+    const pEmpirica = exitos / intentoActual;
+    return {
+        N, exitos, intentoActual, pEmpirica, pTeorica,
+        errorAbsoluto: Math.abs(pEmpirica - pTeorica),
+        puntosGrafica, historialEnsayos, ultimoCaso, ultimoValores, ultimoEsFavorable,
+    };
+}
+
+export default function Experimentos({ filas = [], varSeleccionada, abrirEditor, onResultadoExperimento, estadoRestaurar, bloquearTipo = false }) {
+    const [fuente, setFuente] = useState(() => estadoRestaurar?.fuente || 'teorico');
+    const [tipoExperimento, setTipoExperimento] = useState(() => estadoRestaurar?.tipoExperimento || 'simple');
+    const [usarFrecuencias, setUsarFrecuencias] = useState(() => estadoRestaurar?.usarFrecuencias || false);
+    const [columnaFrecuenciaSeleccionada, setColumnaFrecuenciaSeleccionada] = useState(() => estadoRestaurar?.columnaFrecuenciaSeleccionada || '');
+    const [componentes, setComponentes] = useState(() => estadoRestaurar?.componentes || [
         crearComponente('componente-1', '', '')
     ]);
     const [componenteClonadoId, setComponenteClonadoId] = useState(null);
     const refComponenteClonado = useRef(null);
-    const [reglas, setReglas] = useState([crearRegla([{ value: 'componente-1' }])]);
+    const [reglas, setReglas] = useState(() => estadoRestaurar?.reglas || [crearRegla([{ value: 'componente-1' }])]);
     const [resultado, setResultado] = useState(null);
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
-    const siguienteComponente = useRef(2);
+    const siguienteComponente = useRef(Math.max(1, ...componentes.map(
+        componente => Number(componente.id.match(/\d+$/)?.[0]) || 1
+    )) + 1);
     const limiteUniversoAvisado = useRef(false);
+    const restauracionPendienteRef = useRef(!!estadoRestaurar);
+    const simulacionPendienteRef = useRef(!!estadoRestaurar);
 
-    useEffect(() => {
-        if (typeof onResultadoExperimento === 'function') {
-            if (resultado) {
-                onResultadoExperimento({
-                    resultado,
-                    tipoExperimento,
-                    componentes,
-                    reglas,
-                    fuente
-                });
-            } else {
-                onResultadoExperimento(null);
-            }
-        }
-        return () => {
-            if (typeof onResultadoExperimento === 'function') {
-                onResultadoExperimento(null);
-            }
-        };
-    }, [resultado, tipoExperimento, componentes, reglas, fuente, onResultadoExperimento]);
-
-    const [iteracionesSim, setIteracionesSim] = useState('');
+    const [iteracionesSim, setIteracionesSim] = useState(() => estadoRestaurar?.iteracionesSim || '');
     const [resultadoSimulacion, setResultadoSimulacion] = useState(null);
     const [simulando, setSimulando] = useState(false);
     const [pausado, setPausado] = useState(false);
-    const [velocidadSim, setVelocidadSim] = useState('1x');
+    const [velocidadSim, setVelocidadSim] = useState(() => estadoRestaurar?.velocidadSim || '1x');
     const [paginaActualTabla, setPaginaActualTabla] = useState(1);
     const FILAS_POR_PAGINA = 10;
 
@@ -497,6 +526,29 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor,
     const resumeRef = useRef(null);
     const publicarSimulacionRef = useRef(null);
     const generacionSimulacionRef = useRef(0);
+    const firmaConfiguracion = JSON.stringify({
+        fuente, tipoExperimento, componentes, reglas, usarFrecuencias,
+        columnaFrecuenciaSeleccionada,
+        filas: fuente === 'encuesta' ? filas : [],
+        columnas: fuente === 'encuesta' ? varSeleccionada?.nombresColumnas : null,
+        nombreVariable: fuente === 'encuesta' ? varSeleccionada?.nombre : null,
+    });
+
+    useEffect(() => {
+        if (resultado && resultado._configuracion !== firmaConfiguracion) invalidarResultados();
+    }, [firmaConfiguracion, resultado]);
+
+    useEffect(() => {
+        const vigente = resultado && resultado._configuracion === firmaConfiguracion;
+        onResultadoExperimento?.(vigente ? {
+            resultado, tipoExperimento, componentes, reglas, fuente, usarFrecuencias,
+            columnaFrecuenciaSeleccionada, iteracionesSim, resultadoSimulacion, velocidadSim, simulando,
+        } : null);
+    }, [resultado, firmaConfiguracion, tipoExperimento, componentes, reglas, fuente,
+        usarFrecuencias, columnaFrecuenciaSeleccionada, iteracionesSim, resultadoSimulacion,
+        velocidadSim, simulando, onResultadoExperimento]);
+
+    useEffect(() => () => onResultadoExperimento?.(null), [onResultadoExperimento]);
     const sensoresExperimentos = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -978,6 +1030,7 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor,
     };
 
     const cambiarTipoExperimento = (tipo) => {
+        if (bloquearTipo) return;
         setTipoExperimento(tipo);
         if (tipo === 'simple') setComponenteClonadoId(null);
         setComponentes(prev => {
@@ -1181,8 +1234,24 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor,
             );
             return;
         }
-        setResultado({ universo, favorables, nombres, total, cantidadFavorable });
+        setResultado({ universo, favorables, nombres, total, cantidadFavorable, _configuracion: firmaConfiguracion });
     };
+
+    // Solo al abrir/restablecer un historial; las ediciones normales requieren CALCULAR.
+    useEffect(() => {
+        if (!restauracionPendienteRef.current || !estadoRestaurar) return;
+        restauracionPendienteRef.current = false;
+        calcular();
+    }, [estadoRestaurar]);
+
+    useEffect(() => {
+        if (!simulacionPendienteRef.current || !resultado) return;
+        simulacionPendienteRef.current = false;
+        const simulacion = estadoRestaurar?.simulacion || estadoRestaurar?.resultadoSimulacion;
+        if (simulacion) {
+            setResultadoSimulacion(reconstruirSimulacionHistorial(simulacion, componentes, reglas, resultado));
+        }
+    }, [resultado, estadoRestaurar, componentes, reglas]);
 
     const cambiarFuente = (nuevaFuente) => {
         setFuente(nuevaFuente);
@@ -1266,8 +1335,8 @@ export default function Experimentos({ filas = [], varSeleccionada, abrirEditor,
                         <div id="tour-exp-tipo-selector">
                             <span className="mat251-experimentos-label">Tipo de experimento</span>
                             <div className="contenedor-selector-modos-mat251" style={{ width: '100%' }} role="group" aria-label="Tipo de experimento">
-                                <button id="tour-exp-btn-tipo-simple" type="button" aria-pressed={tipoExperimento === 'simple'} className={`btn-mat251-modo${tipoExperimento === 'simple' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('simple')}>Simple</button>
-                                <button id="tour-exp-btn-tipo-compuesto" type="button" aria-pressed={tipoExperimento === 'compuesto'} className={`btn-mat251-modo${tipoExperimento === 'compuesto' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('compuesto')}>Compuesto</button>
+                                <button id="tour-exp-btn-tipo-simple" type="button" disabled={bloquearTipo && tipoExperimento !== 'simple'} title={bloquearTipo && tipoExperimento !== 'simple' ? 'El tipo de experimento está fijado por el historial' : undefined} aria-pressed={tipoExperimento === 'simple'} className={`btn-mat251-modo${tipoExperimento === 'simple' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('simple')}>Simple</button>
+                                <button id="tour-exp-btn-tipo-compuesto" type="button" disabled={bloquearTipo && tipoExperimento !== 'compuesto'} title={bloquearTipo && tipoExperimento !== 'compuesto' ? 'El tipo de experimento está fijado por el historial' : undefined} aria-pressed={tipoExperimento === 'compuesto'} className={`btn-mat251-modo${tipoExperimento === 'compuesto' ? ' active' : ''}`} onClick={() => cambiarTipoExperimento('compuesto')}>Compuesto</button>
                             </div>
                         </div>
                     )}

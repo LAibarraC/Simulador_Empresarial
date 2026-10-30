@@ -36,7 +36,7 @@ const NIVELES_CONFIANZA = [
     { id: 99, label: '99 %' }
 ];
 
-export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, modo, setModo, confianza, setConfianza }) {
+export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, confianza, setConfianza, bloquearHistorial = false }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             {/* Selector de Parámetro */}
@@ -48,7 +48,8 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
                                 key={p.id}
                                 type="button"
                                 className={`btn-mat251-modo ${parametro === p.id ? 'active' : ''}`}
-                                onClick={() => setParametro(p.id)}
+                                disabled={bloquearHistorial && parametro !== p.id}
+                                onClick={() => { if (!bloquearHistorial) setParametro(p.id); }}
                                 style={{ flex: '1 1 0', minWidth: 'max-content', padding: '3px 13px', textAlign: 'center' }}
                             >
                                 {p.label}
@@ -91,32 +92,14 @@ export function Controles_EstimacionIntervalos_UI({ parametro, setParametro, mod
     );
 }
 
-export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, setParametro, modo, setModo, confianza, setConfianza, onResultado }) {
+export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, statsDatos, abrirEditor, parametro, modo, setModo, confianza, configuracion, onEditar, onCalcular, resultado, bloquearHistorial = false }) {
     const variableKey = varSeleccionada?.nombre ?? null;
 
-    // Estados para almacenar resultados de cada modo
-    const [resMatriz, setResMatriz] = useState(null);
-    const [resManual, setResManual] = useState(null);
     const [resSimulacion, setResSimulacion] = useState(null);
-
-    // Resetear resultados al cambiar de parámetro, modo o nivel de confianza
-    useEffect(() => {
-        setResMatriz(null);
-        setResManual(null);
-        setResSimulacion(null);
-    }, [parametro, modo, confianza, variableKey]);
-
-    const resultadoMatrizActual = resMatriz?.parametro === parametro && resMatriz?.confianza === confianza && resMatriz?.variableKey === variableKey ? resMatriz.resultado : null;
-    const resultadoManualActual = resManual?.parametro === parametro && resManual?.confianza === confianza && resManual?.variableKey === variableKey ? resManual.resultado : null;
+    useEffect(() => { setResSimulacion(null); }, [parametro, modo, confianza, variableKey]);
+    const resultadoActual = resultado?.operacion === 'Estimacion_intervalos'
+        && resultado.parametro === parametro && resultado.modo === modo && resultado.confianza === confianza ? resultado.resultados : null;
     const resultadoSimulacionActual = resSimulacion?.parametro === parametro && resSimulacion?.confianza === confianza && resSimulacion?.variableKey === variableKey ? resSimulacion.resultado : null;
-    const resultadoExportable = modo === 'matriz' ? resultadoMatrizActual : modo === 'manual' ? resultadoManualActual : null;
-
-    useEffect(() => {
-        onResultado?.(resultadoExportable ? {
-            operacion: 'Estimacion_intervalos', parametro, modo, confianza,
-            nombreVariable: variableKey, resultados: resultadoExportable
-        } : null);
-    }, [resultadoExportable, parametro, modo, confianza, variableKey, onResultado]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: FONT, '--text-main': 'var(--text-pure)' }}>
@@ -130,7 +113,8 @@ export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, st
                                 key={m.id}
                                 type="button"
                                 className={`btn-mat251-modo ${modo === m.id ? 'active' : ''}`}
-                                onClick={() => setModo(m.id)}
+                                disabled={bloquearHistorial && modo !== m.id}
+                                onClick={() => { if (!bloquearHistorial) setModo(m.id); }}
                                 style={{ flex: '1 1 0', minWidth: 'max-content', padding: '5px 15px', textAlign: 'center' }}
                             >
                                 {m.label}
@@ -147,14 +131,12 @@ export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, st
                         <Controles_IntervalosMatriz
                             key={`matriz-${parametro}-${confianza}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
-                            confianza={confianza}
-                            varSeleccionada={varSeleccionada}
                             filas={filas}
                             statsDatos={statsDatos}
                             abrirEditor={abrirEditor}
-                            onCalcular={(resultado) => setResMatriz(resultado ? { parametro, confianza, variableKey, resultado } : null)}
+                            configuracion={configuracion.matriz} onEditar={onEditar} onCalcular={onCalcular}
                         />
-                        <Resultados_IntervalosMatriz resultados={resultadoMatrizActual} parametro={parametro} />
+                        <Resultados_IntervalosMatriz resultados={resultadoActual} parametro={parametro} />
                     </>
                 )}
 
@@ -163,10 +145,9 @@ export default function Gestor_EstimacionIntervalos({ varSeleccionada, filas, st
                         <Controles_IntervalosManual
                             key={`manual-${parametro}-${confianza}-${variableKey ?? 'sin-variable'}`}
                             parametro={parametro}
-                            confianza={confianza}
-                            onCalcular={(resultado) => setResManual(resultado ? { parametro, confianza, variableKey, resultado } : null)}
+                            configuracion={configuracion.manual} onEditar={onEditar} onCalcular={onCalcular}
                         />
-                        <Resultados_IntervalosManual resultados={resultadoManualActual} parametro={parametro} />
+                        <Resultados_IntervalosManual resultados={resultadoActual} parametro={parametro} />
                     </>
                 )}
 

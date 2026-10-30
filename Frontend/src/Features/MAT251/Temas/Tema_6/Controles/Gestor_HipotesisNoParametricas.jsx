@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FONT, RADIUS } from '../../../Principal/Constantes';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -29,7 +29,7 @@ const MODOS = [
     { id: 'manual', label: 'Modo Manual' }
 ];
 
-export function Controles_HNP_UI({ prueba, setPrueba }) {
+export function Controles_HNP_UI({ prueba, setPrueba, bloquearHistorial = false }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -40,7 +40,8 @@ export function Controles_HNP_UI({ prueba, setPrueba }) {
                                 key={p.id}
                                 type="button"
                                 className={`btn-mat251-modo ${prueba === p.id ? 'active' : ''}`}
-                                onClick={() => setPrueba(p.id)}
+                                disabled={bloquearHistorial && prueba !== p.id}
+                                onClick={() => { if (!bloquearHistorial) setPrueba(p.id); }}
                                 style={{ width: '100%', padding: '5px 15px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '5px', fontSize: '0.75rem', fontFamily: FONT }}
                             >
                                 {p.label}
@@ -53,30 +54,11 @@ export function Controles_HNP_UI({ prueba, setPrueba }) {
     );
 }
 
-export default function Gestor_HipotesisNoParametricas({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, modo, setModo, variables, onResultado }) {
+export default function Gestor_HipotesisNoParametricas({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, modo, setModo, configuracion, onEditar, onCalcular, resultado, bloquearHistorial = false }) {
     
-    const [resMatriz, setResMatriz] = useState(null);
-    const [resManual, setResManual] = useState(null);
     const [resSimulacion, setResSimulacion] = useState(null);
-    const variableKey = `${varSeleccionada?.id ?? ''}:${varSeleccionada?.nombre ?? ''}:${statsDatos?.total ?? 0}`;
-    const guardarMatriz = useCallback(resultados => setResMatriz(resultados ? { prueba, variableKey, resultados } : null), [prueba, variableKey]);
-    const guardarManual = useCallback(resultados => setResManual(resultados ? { prueba, resultados } : null), [prueba]);
-    const matrizActual = resMatriz?.prueba === prueba && resMatriz?.variableKey === variableKey ? resMatriz.resultados : null;
-    const manualActual = resManual?.prueba === prueba ? resManual.resultados : null;
-    const exportable = modo === 'matriz' ? matrizActual : modo === 'manual' ? manualActual : null;
-
-    useEffect(() => {
-        onResultado?.(exportable ? {
-            operacion: 'Hipotesis_noparametricas', prueba, modo,
-            nombreVariable: varSeleccionada?.nombre, resultados: exportable
-        } : null);
-    }, [exportable, prueba, modo, varSeleccionada?.nombre, onResultado]);
-
-    useEffect(() => {
-        setResMatriz(null);
-        setResManual(null);
-        setResSimulacion(null);
-    }, [prueba, modo]);
+    const resultadoActual = resultado?.operacion === 'Hipotesis_noparametricas' && resultado.prueba === prueba && resultado.modo === modo ? resultado.resultados : null;
+    useEffect(() => { setResSimulacion(null); }, [prueba, modo]);
 
     return (
         <div className="tema6-hnp-responsive" style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontFamily: FONT, marginTop: '10px' }}>
@@ -90,7 +72,8 @@ export default function Gestor_HipotesisNoParametricas({ varSeleccionada, filas,
                                 key={m.id}
                                 type="button"
                                 className={`btn-mat251-modo ${modo === m.id ? 'active' : ''}`}
-                                onClick={() => setModo(m.id)}
+                                disabled={bloquearHistorial && modo !== m.id}
+                                onClick={() => { if (!bloquearHistorial) setModo(m.id); }}
                                 style={{ flex: '1 1 0', minWidth: 0, padding: '5px 15px', textAlign: 'center', fontFamily: FONT }}
                             >
                                 {m.label}
@@ -110,11 +93,10 @@ export default function Gestor_HipotesisNoParametricas({ varSeleccionada, filas,
                             filas={filas}
                             statsDatos={statsDatos}
                             abrirEditor={abrirEditor}
-                            setResultadosMatriz={guardarMatriz}
-                            variables={variables}
+                            configuracion={configuracion.matriz} onEditar={onEditar} onCalcular={onCalcular} bloquearHistorial={bloquearHistorial}
                         />
-                        {matrizActual && (
-                            <Resultados_HNP_Matriz resultados={matrizActual} prueba={prueba} />
+                        {resultadoActual && (
+                            <Resultados_HNP_Matriz resultados={resultadoActual} prueba={prueba} />
                         )}
                     </>
                 )}
@@ -123,10 +105,10 @@ export default function Gestor_HipotesisNoParametricas({ varSeleccionada, filas,
                     <>
                         <Controles_HNP_Manual 
                             prueba={prueba}
-                            setResultadosManual={guardarManual}
+                            configuracion={configuracion.manual} onEditar={onEditar} onCalcular={onCalcular} bloquearHistorial={bloquearHistorial}
                         />
-                        {manualActual && (
-                            <Resultados_HNP_Manual resultados={manualActual} prueba={prueba} />
+                        {resultadoActual && (
+                            <Resultados_HNP_Manual resultados={resultadoActual} prueba={prueba} />
                         )}
                     </>
                 )}

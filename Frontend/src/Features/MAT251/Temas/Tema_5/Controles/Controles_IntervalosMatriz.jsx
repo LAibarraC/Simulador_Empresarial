@@ -1,22 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { calcularEstimacionPuntualMatriz, calcularIntervaloMedia, calcularIntervaloProporcion, calcularIntervaloVarianza } from '../../../Matematicas/logica_Tema5';
 import { cardStyle, FS, labelStyle, RADIUS, FONT } from '../../../Principal/Constantes';
 import { EditarDatos } from '../../../../../ui/iconos';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import katex from 'katex';
 
-export default function Controles_IntervalosMatriz({ parametro, confianza, varSeleccionada, filas, statsDatos, abrirEditor, onCalcular }) {
-    const [valorExito, setValorExito] = useState('');
+export default function Controles_IntervalosMatriz({ parametro, filas, statsDatos, abrirEditor, configuracion, onEditar, onCalcular }) {
+    const { valorExito, sigmaConocida, sigmaPoblacional } = configuracion;
+    const setValorExito = valor => onEditar('valorExito', valor);
+    const setSigmaConocida = valor => onEditar('sigmaConocida', valor);
+    const setSigmaPoblacional = valor => onEditar('sigmaPoblacional', valor);
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const [isSelectOpen, setIsSelectOpen] = useState(false);
     const selectRef = useRef(null);
-    const hayDatosMatriz = Boolean(varSeleccionada) && Array.isArray(filas) && filas.some(
+    const hayDatosMatriz = Array.isArray(filas) && filas.some(
         (fila) => fila.valor !== undefined && fila.valor !== null && fila.valor.toString().trim() !== ''
     );
 
-    // Opciones para la media cuando usamos matriz
-    const [sigmaConocida, setSigmaConocida] = useState(false);
-    const [sigmaPoblacional, setSigmaPoblacional] = useState('');
 
     const renderKatex = (math, negrita = false) => (
         <span className={negrita ? 'tema5-matematica-negrita' : undefined} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
@@ -35,60 +34,8 @@ export default function Controles_IntervalosMatriz({ parametro, confianza, varSe
     };
 
     const handleCalcular = () => {
-        const datosCompletos = filas
-            .map(f => f.valor)
-            .filter(v => v !== undefined && v !== null && v.toString().trim() !== '');
-
-        if (!datosCompletos || datosCompletos.length === 0) {
-            mostrarAlerta('Por favor, selecciona o agrega una variable con datos válidos.', 'Faltan Datos', 'warning');
-            return;
-        }
-
-        if (parametro === 'proporcion' && (!valorExito || valorExito.trim() === '')) {
-            mostrarAlerta('Por favor, seleccione el valor considerado como éxito.', 'Faltan Datos', 'warning');
-            return;
-        }
-
-        if (parametro === 'media' && sigmaConocida && (!sigmaPoblacional || parseFloat(sigmaPoblacional) <= 0)) {
-            mostrarAlerta('Por favor ingrese una desviación estándar poblacional válida (>0).', 'Falta Parámetro', 'warning');
-            return;
-        }
-
-        // 1. Calculamos la estimación puntual usando la matriz
-        const resPuntual = calcularEstimacionPuntualMatriz(datosCompletos, parametro, valorExito);
-        if (resPuntual.error) {
-            mostrarAlerta(resPuntual.error, 'Error de Cálculo', 'error');
-            onCalcular(null);
-            return;
-        }
-
-        // 2. Usamos los resultados puntuales para calcular el intervalo
-        let resIntervalo = null;
-
-        if (parametro === 'media') {
-            const x_bar = resPuntual.estimacion;
-            const n = resPuntual.n;
-            const s = resPuntual.calculos.desviacion; // Desviación muestral S
-            const desviacion = sigmaConocida ? parseFloat(sigmaPoblacional) : s;
-            
-            resIntervalo = calcularIntervaloMedia(x_bar, desviacion, n, confianza, sigmaConocida);
-        } else if (parametro === 'proporcion') {
-            const x = resPuntual.calculos.x;
-            const n = resPuntual.n;
-            resIntervalo = calcularIntervaloProporcion(x, n, confianza);
-        } else if (parametro === 'varianza') {
-            const s2 = resPuntual.estimacion;
-            const n = resPuntual.n;
-            resIntervalo = calcularIntervaloVarianza(s2, n, confianza);
-        }
-
-        if (resIntervalo && resIntervalo.error) {
-            mostrarAlerta(resIntervalo.error, 'Error de Cálculo', 'error');
-            onCalcular(null);
-        } else {
-            // Combinar la información puntual y de intervalo para el componente de Resultados
-            onCalcular({ ...resIntervalo, puntual: resPuntual, sigmaConocida: parametro === 'media' ? sigmaConocida : undefined });
-        }
+        const calculo = onCalcular();
+        if (calculo?.error) mostrarAlerta(calculo.error, 'Datos inválidos', 'warning');
     };
 
     return (

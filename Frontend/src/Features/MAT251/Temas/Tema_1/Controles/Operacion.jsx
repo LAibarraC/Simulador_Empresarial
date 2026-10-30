@@ -77,7 +77,7 @@ const getIcon = (val) => {
 };
 
 // ─── ACCORDION SELECT AGRUPADO POR TEMAS ────────────────────────────────────
-export default function Operacion({ operacion, handleOperacion }) {
+export default function Operacion({ operacion, handleOperacion, disabled = false }) {
     const [isOpen, setIsOpen] = useState(false);
     const [temaAbierto, setTemaAbierto] = useState(null);
     const selectRef = useRef(null);
@@ -114,13 +114,16 @@ export default function Operacion({ operacion, handleOperacion }) {
 
             {/* ── TRIGGER ── */}
             <div
-                onClick={() => setIsOpen(o => !o)}
+                role="button"
+                aria-disabled={disabled}
+                title={disabled ? 'La operación está bloqueada al consultar un historial' : undefined}
+                onClick={() => { if (!disabled) setIsOpen(o => !o); }}
                 style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '8px 12px',
                     background: 'var(--bg-card)',
                     border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                    borderRadius: RADIUS, cursor: 'pointer',
+                    borderRadius: RADIUS, cursor: disabled ? 'not-allowed' : 'pointer',
                     boxShadow: isOpen ? '0 0 0 3px rgba(0,123,255,0.15)' : 'none',
                     transition: 'all 0.2s ease',
                     color: 'var(--text-color)',
@@ -138,7 +141,7 @@ export default function Operacion({ operacion, handleOperacion }) {
             </div>
 
             {/* ── PANEL ACCORDION FLOTANTE ── */}
-            {isOpen && (
+            {isOpen && !disabled && (
                 <div style={{
                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
                     background: 'var(--bg-card)',

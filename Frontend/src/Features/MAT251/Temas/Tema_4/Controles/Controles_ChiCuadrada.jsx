@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { generarDistribucionChiCuadrada, calcularProbabilidadChiCuadrada } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 
@@ -147,68 +146,37 @@ const CustomSelect = ({ value, onChange, options = [], placeholder = 'Selecciona
     );
 };
 
-export default function Controles_ChiCuadrada({ onCalcular }) {
+export default function Controles_ChiCuadrada({ configuracion, onEditar, onGenerar, baseCalculada }) {
     // Inputs numéricos
-    const [varianzaPoblacional, setVarianzaPoblacional] = useState(''); // sigma^2
-    const [tamañoMuestra, setTamañoMuestra] = useState(''); // n
-    const [tipoDispersion, setTipoDispersion] = useState('varianza'); // 'varianza' o 'desviacion'
+    const varianzaPoblacional = configuracion.varianzaPoblacional;
+    const setVarianzaPoblacional = valor => onEditar('varianzaPoblacional', valor);
+    const tamañoMuestra = configuracion.tamañoMuestra;
+    const setTamañoMuestra = valor => onEditar('tamañoMuestra', valor);
+    const tipoDispersion = configuracion.tipoDispersion;
+    const setTipoDispersion = valor => onEditar('tipoDispersion', valor);
 
     // Estado del proceso
-    const [distribucionGenerada, setDistribucionGenerada] = useState(false);
-    const [datosParciales, setDatosParciales] = useState(null);
+    const distribucionGenerada = !!baseCalculada;
+    const datosParciales = baseCalculada;
 
     // Inputs de objetivo
-    const [condicion, setCondicion] = useState('menor_que');
-    const [valorX1, setValorX1] = useState('');
-    const [valorX2, setValorX2] = useState(''); // solo si 'entre'
+    const condicion = configuracion.condicion;
+    const setCondicion = valor => onEditar('condicion', valor);
+    const valorX1 = configuracion.valorX1;
+    const setValorX1 = valor => onEditar('valorX1', valor);
+    const valorX2 = configuracion.valorX2;
+    const setValorX2 = valor => onEditar('valorX2', valor);
 
     // Modal de Alertas
     const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
 
     // Paso 1: Generar Distribución
-    const generarDistribucion = () => {
-        const result = generarDistribucionChiCuadrada(varianzaPoblacional, tamañoMuestra, tipoDispersion);
-        if (result.error) {
-            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            return;
-        }
-
-        const parciales = { ...result };
-        delete parciales.error;
-        
-        setDatosParciales(parciales);
-        setDistribucionGenerada(true);
-        onCalcular(parciales);
+    const ejecutarCalculo = evaluarCondicion => {
+        const calculo = onGenerar(evaluarCondicion);
+        setAlertaModal({ isOpen: !!calculo.error, mensaje: calculo.error || '', tipo: 'warning' });
     };
-
-    // Paso 2: Calcular Probabilidad
-    const calcularProbabilidad = () => {
-        const result = calcularProbabilidadChiCuadrada(datosParciales, condicion, valorX1, valorX2);
-        if (result.error) {
-            if (result.error !== 'Faltan parámetros previos.') {
-                setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            }
-            return;
-        }
-
-        onCalcular({
-            ...datosParciales,
-            strDesarrollo: result.strDesarrollo,
-            probFinal: result.probFinal,
-            x1: result.x1,
-            x2: result.x2,
-            condicion: result.condicion
-        });
-    };
-
-    const resetDistribucion = () => {
-        setDistribucionGenerada(false);
-        setDatosParciales(null);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(null);
-    };
+    const generarDistribucion = () => ejecutarCalculo(false);
+    const calcularProbabilidad = () => ejecutarCalculo(true);
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent', marginTop: '10px' }}>
@@ -218,7 +186,7 @@ export default function Controles_ChiCuadrada({ onCalcular }) {
                     <div style={{ width: '90px', flexShrink: 0 }}>
                         <CustomSelect
                             value={tipoDispersion}
-                            onChange={(val) => { setTipoDispersion(val); resetDistribucion(); }}
+                            onChange={(val) => { setTipoDispersion(val); }}
                             options={[
                                 { value: 'varianza', label: <Latex formula="\boldsymbol{\sigma^2} =" /> },
                                 { value: 'desviacion', label: <Latex formula="\boldsymbol{\sigma} =" /> }
@@ -230,7 +198,7 @@ export default function Controles_ChiCuadrada({ onCalcular }) {
                         className="input-mat251 placeholder-small"
                         placeholder={tipoDispersion === 'varianza' ? "Var. Pob." : "Desv. Est. Pob."}
                         value={varianzaPoblacional}
-                        onChange={(e) => { setVarianzaPoblacional(e.target.value); resetDistribucion(); }}
+                        onChange={(e) => { setVarianzaPoblacional(e.target.value); }}
                         style={{
                             flex: 1,
                             width: '100%',
@@ -256,7 +224,7 @@ export default function Controles_ChiCuadrada({ onCalcular }) {
                         className="input-mat251 placeholder-small"
                         placeholder="Muestra"
                         value={tamañoMuestra}
-                        onChange={(e) => { setTamañoMuestra(e.target.value); resetDistribucion(); }}
+                        onChange={(e) => { setTamañoMuestra(e.target.value); }}
                         style={{
                             flex: 1,
                             width: '100%',

@@ -579,3 +579,63 @@
   opacity: 0.65;
   color: var(--text-muted);
 }
+
+/* Dos herramientas en el historial de Conteo, sin huecos del menú completo. */
+:where(.mat251) .menu-flotante-radial.menu-historial-conteo .item-3-pdf {
+  --fab-x: -60px;
+  --fab-y: -28px;
+  transition-delay: 0s;
+}
+
+:where(.mat251) .menu-flotante-radial.menu-historial-conteo .item-4-guia {
+  --fab-x: -60px;
+  --fab-y: 28px;
+  transition-delay: 0.05s;
+}
+
+@media (max-width: 768px) {
+  :where(.mat251) .menu-flotante-radial.menu-historial-conteo {
+    right: max(12px, env(safe-area-inset-right, 0px)) !important;
+    bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+    width: 44px;
+    height: 44px;
+  }
+
+  :where(.mat251) .menu-flotante-radial.menu-historial-conteo .fab-main {
+    width: 44px;
+    height: 44px;
+  }
+
+  :where(.mat251) .menu-flotante-radial.menu-historial-conteo .fab-item {
+    top: 4px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
+  }
+
+  :where(.mat251) .menu-flotante-radial.menu-historial-conteo .item-3-pdf {
+    --fab-x: -14px;
+    --fab-y: -62px;
+  }
+
+  :where(.mat251) .menu-flotante-radial.menu-historial-conteo .item-4-guia {
+    --fab-x: -52px;
+    --fab-y: -18px;
+  }
+
+  :where(.mat251) .menu-flotante-radial.menu-historial-conteo .fab-tooltip {
+    right: calc(100% + 8px);
+    bottom: auto;
+    width: max-content;
+    max-width: calc(100vw - 124px);
+    white-space: normal;
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 768px) and (hover: none) {
+  :where(.mat251) .menu-flotante-radial .fab-tooltip {
+    display: none;
+  }
+}

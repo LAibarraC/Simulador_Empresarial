@@ -1309,3 +1309,158 @@ html.dark :where(.mat251) .select-estilo-operacion {
     border-radius: 2px;
   }
 }
+
+/* Banner aviso de cálculo reabierto desde el historial (MAT251) */
+:where(.mat251) .aviso-origen-historial {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 5px 15px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+}
+
+:where(.mat251) .aviso-origen-historial-icono {
+  flex-shrink: 0;
+  color: var(--primary-color, #3b82f6);
+}
+
+:where(.mat251) .aviso-origen-historial-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+:where(.mat251) .aviso-origen-historial-info > * {
+  flex-shrink: 0;
+}
+
+:where(.mat251) .aviso-origen-historial-modulo {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--primary-color, #3b82f6);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+:where(.mat251) .aviso-origen-historial-detalle,
+:where(.mat251) .aviso-origen-historial-archivo {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+:where(.mat251) .acciones-historial-mat251 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+:where(.mat251) .acciones-historial-mat251 button {
+  border-radius: 5px;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+:where(.mat251) .acciones-historial-mat251 .btn-volver-historial {
+  flex-shrink: 0;
+  padding: 5px 20px;
+  font-size: 0.8rem;
+}
+
+/* Historial en tablets y celulares: información legible y acciones alineadas. */
+@media (max-width: 1024px) {
+  :where(.mat251) .aviso-origen-historial {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px 10px;
+    padding: 12px;
+    border-radius: 5px;
+  }
+
+  :where(.mat251) .aviso-origen-historial-icono {
+    width: 18px;
+    height: 18px;
+    align-self: center;
+  }
+
+  :where(.mat251) .aviso-origen-historial-info {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  :where(.mat251) .aviso-origen-historial-info > * {
+    min-width: 0;
+    font-size: inherit;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  :where(.mat251) .aviso-origen-historial-modulo {
+    order: 0;
+    padding: 2px 5px;
+  }
+
+  :where(.mat251) .aviso-origen-historial-archivo {
+    order: 1;
+    max-width: 30%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :where(.mat251) .aviso-origen-historial-detalle {
+    order: 2;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :where(.mat251) .acciones-historial-mat251 {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  :where(.mat251) .acciones-historial-mat251 .btn-volver-historial {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  :where(.mat251) .acciones-historial-mat251 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

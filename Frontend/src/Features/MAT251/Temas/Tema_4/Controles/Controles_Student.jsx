@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { generarDistribucionStudent, calcularProbabilidadStudent } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 
@@ -147,21 +146,28 @@ const CustomSelect = ({ value, onChange, options = [], placeholder = 'Selecciona
     );
 };
 
-export default function Controles_Student({ onCalcular }) {
+export default function Controles_Student({ configuracion, onEditar, onGenerar, baseCalculada }) {
     // Inputs del problema
-    const [mu, setMu] = useState('');
-    const [s, setS] = useState('');
-    const [n, setN] = useState('');
-    const [tipoDispersion, setTipoDispersion] = useState('desviacion'); // 'desviacion' o 'varianza'
+    const mu = configuracion.mu;
+    const setMu = valor => onEditar('mu', valor);
+    const s = configuracion.s;
+    const setS = valor => onEditar('s', valor);
+    const n = configuracion.n;
+    const setN = valor => onEditar('n', valor);
+    const tipoDispersion = configuracion.tipoDispersion;
+    const setTipoDispersion = valor => onEditar('tipoDispersion', valor);
 
     // Estado del proceso
-    const [distribucionGenerada, setDistribucionGenerada] = useState(false);
-    const [datosParciales, setDatosParciales] = useState(null);
+    const distribucionGenerada = !!baseCalculada;
+    const datosParciales = baseCalculada;
 
     // Inputs de objetivo
-    const [condicion, setCondicion] = useState('menor_que');
-    const [valorX1, setValorX1] = useState('');
-    const [valorX2, setValorX2] = useState('');
+    const condicion = configuracion.condicion;
+    const setCondicion = valor => onEditar('condicion', valor);
+    const valorX1 = configuracion.valorX1;
+    const setValorX1 = valor => onEditar('valorX1', valor);
+    const valorX2 = configuracion.valorX2;
+    const setValorX2 = valor => onEditar('valorX2', valor);
 
     // Alertas
     const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
@@ -171,53 +177,12 @@ export default function Controles_Student({ onCalcular }) {
         return num.toLocaleString('es-ES', { minimumFractionDigits: minDec, maximumFractionDigits: maxDec }).replace(/,/g, '{,}');
     };
 
-    const generarDistribucion = () => {
-        const result = generarDistribucionStudent(mu, s, n, tipoDispersion);
-        if (result.error) {
-            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            return;
-        }
-
-        const parciales = { ...result };
-        delete parciales.error;
-        
-        setDatosParciales(parciales);
-        setDistribucionGenerada(true);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(parciales); 
+    const ejecutarCalculo = evaluarCondicion => {
+        const calculo = onGenerar(evaluarCondicion);
+        setAlertaModal({ isOpen: !!calculo.error, mensaje: calculo.error || '', tipo: 'warning' });
     };
-
-    const calcularProbabilidad = () => {
-        const result = calcularProbabilidadStudent(datosParciales, condicion, valorX1, valorX2);
-        if (result.error) {
-            if (result.error !== 'Faltan parámetros previos.') {
-                setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            }
-            return;
-        }
-
-        onCalcular({
-            ...datosParciales,
-            strDesarrollo: result.strDesarrollo,
-            probFinal: result.probFinal,
-            t1: result.t1,
-            t2: result.t2,
-            x1: result.x1,
-            x2: result.x2,
-            condicion: result.condicion
-        });
-    };
-
-    const resetDistribucion = () => {
-        setDistribucionGenerada(false);
-        setDatosParciales(null);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(null);
-    };
+    const generarDistribucion = () => ejecutarCalculo(false);
+    const calcularProbabilidad = () => ejecutarCalculo(true);
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
@@ -231,7 +196,7 @@ export default function Controles_Student({ onCalcular }) {
                             className="input-mat251 placeholder-small"
                             placeholder="Media Pob."
                             value={mu}
-                            onChange={(e) => { setMu(e.target.value); resetDistribucion(); }}
+                            onChange={(e) => { setMu(e.target.value); }}
                             style={{
                                 flex: 1,
                                 width: '100%',
@@ -252,7 +217,7 @@ export default function Controles_Student({ onCalcular }) {
                         <div style={{ width: '85px', flexShrink: 0 }}>
                             <CustomSelect
                                 value={tipoDispersion}
-                                onChange={(val) => { setTipoDispersion(val); resetDistribucion(); }}
+                                onChange={(val) => { setTipoDispersion(val); }}
                                 options={[
                                     { value: 'desviacion', label: <Latex formula="\boldsymbol{S} =" /> },
                                     { value: 'varianza', label: <Latex formula="\boldsymbol{S}^2 =" /> }
@@ -264,7 +229,7 @@ export default function Controles_Student({ onCalcular }) {
                             className="input-mat251 placeholder-small"
                             placeholder={tipoDispersion === 'varianza' ? "Varianza Muestral" : "Desv. Est. Muestral"}
                             value={s}
-                            onChange={(e) => { setS(e.target.value); resetDistribucion(); }}
+                            onChange={(e) => { setS(e.target.value); }}
                             style={{
                                 flex: 1,
                                 width: '100%',
@@ -291,7 +256,7 @@ export default function Controles_Student({ onCalcular }) {
                             className="input-mat251 placeholder-small"
                             placeholder="Muestra"
                             value={n}
-                            onChange={(e) => { setN(e.target.value); resetDistribucion(); }}
+                            onChange={(e) => { setN(e.target.value); }}
                             style={{
                                 flex: 1,
                                 width: '100%',

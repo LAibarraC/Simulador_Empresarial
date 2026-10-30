@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { generarDistribucionProporcion, calcularProbabilidadProporcion } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 
@@ -147,60 +146,34 @@ const CustomSelect = ({ value, onChange, options = [], placeholder = 'Selecciona
     );
 };
 
-export default function Controles_Proporcion({ onCalcular }) {
-    const [tipoPoblacion, setTipoPoblacion] = useState('infinita');
-    const [tamanoPoblacion, setTamanoPoblacion] = useState('');
-    const [pPoblacional, setPPoblacional] = useState('');
-    const [tamanoMuestra, setTamanoMuestra] = useState('');
+export default function Controles_Proporcion({ configuracion, onEditar, onGenerar, baseCalculada }) {
+    const tipoPoblacion = configuracion.tipoPoblacion;
+    const setTipoPoblacion = valor => onEditar('tipoPoblacion', valor);
+    const tamanoPoblacion = configuracion.tamanoPoblacion;
+    const setTamanoPoblacion = valor => onEditar('tamanoPoblacion', valor);
+    const pPoblacional = configuracion.pPoblacional;
+    const setPPoblacional = valor => onEditar('pPoblacional', valor);
+    const tamanoMuestra = configuracion.tamanoMuestra;
+    const setTamanoMuestra = valor => onEditar('tamanoMuestra', valor);
 
-    const [distribucionGenerada, setDistribucionGenerada] = useState(false);
-    const [datosParciales, setDatosParciales] = useState(null);
+    const distribucionGenerada = !!baseCalculada;
+    const datosParciales = baseCalculada;
 
-    const [condicion, setCondicion] = useState('menor_que');
-    const [valorX1, setValorX1] = useState('');
-    const [valorX2, setValorX2] = useState('');
+    const condicion = configuracion.condicion;
+    const setCondicion = valor => onEditar('condicion', valor);
+    const valorX1 = configuracion.valorX1;
+    const setValorX1 = valor => onEditar('valorX1', valor);
+    const valorX2 = configuracion.valorX2;
+    const setValorX2 = valor => onEditar('valorX2', valor);
 
     const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
 
-    const generarDistribucion = () => {
-        const result = generarDistribucionProporcion(pPoblacional, tamanoMuestra, tamanoPoblacion, tipoPoblacion);
-        if (result.error) {
-            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            return;
-        }
-
-        setDatosParciales(result.datosParciales);
-        setDistribucionGenerada(true);
-        onCalcular({ ...result.datosParciales, ...result.onCalcularData }); 
+    const ejecutarCalculo = evaluarCondicion => {
+        const calculo = onGenerar(evaluarCondicion);
+        setAlertaModal({ isOpen: !!calculo.error, mensaje: calculo.error || '', tipo: 'warning' });
     };
-
-    const calcularProbabilidad = () => {
-        const result = calcularProbabilidadProporcion(datosParciales, condicion, valorX1, valorX2);
-        if (result.error) {
-            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            return;
-        }
-
-        onCalcular({
-            ...datosParciales,
-            strDesarrollo: result.strDesarrollo,
-            probFinal: result.probFinal,
-            x1: result.x1,
-            x2: result.x2,
-            z1: result.z1,
-            z2: result.z2,
-            condicion: result.condicion,
-            tipoPoblacion: tipoPoblacion
-        });
-    };
-
-    const resetDistribucion = () => {
-        setDistribucionGenerada(false);
-        setDatosParciales(null);
-        setValorX1('');
-        setValorX2('');
-        onCalcular(null);
-    };
+    const generarDistribucion = () => ejecutarCalculo(false);
+    const calcularProbabilidad = () => ejecutarCalculo(true);
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
@@ -211,7 +184,7 @@ export default function Controles_Proporcion({ onCalcular }) {
                         <button
                             type="button"
                             className={`btn-mat251-modo ${tipoPoblacion === 'infinita' ? 'active' : ''}`}
-                            onClick={() => { setTipoPoblacion('infinita'); resetDistribucion(); }}
+                            onClick={() => { setTipoPoblacion('infinita'); }}
                             style={{ width: '140px', fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: FS.sm, fontWeight: 600 }}
                         >
                             Infinita
@@ -219,7 +192,7 @@ export default function Controles_Proporcion({ onCalcular }) {
                         <button
                             type="button"
                             className={`btn-mat251-modo ${tipoPoblacion === 'finita' ? 'active' : ''}`}
-                            onClick={() => { setTipoPoblacion('finita'); resetDistribucion(); }}
+                            onClick={() => { setTipoPoblacion('finita'); }}
                             style={{ width: '140px', fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: FS.sm, fontWeight: 600 }}
                         >
                             Finita
@@ -239,7 +212,7 @@ export default function Controles_Proporcion({ onCalcular }) {
                         className="input-mat251 placeholder-small"
                         placeholder="Prop. Pob."
                         value={pPoblacional}
-                        onChange={(e) => { setPPoblacional(e.target.value); resetDistribucion(); }}
+                        onChange={(e) => { setPPoblacional(e.target.value); }}
                         style={{
                             flex: 1,
                             width: '100%',
@@ -266,7 +239,7 @@ export default function Controles_Proporcion({ onCalcular }) {
                         className="input-mat251 placeholder-small"
                         placeholder="Muestra"
                         value={tamanoMuestra}
-                        onChange={(e) => { setTamanoMuestra(e.target.value); resetDistribucion(); }}
+                        onChange={(e) => { setTamanoMuestra(e.target.value); }}
                         style={{
                             flex: 1,
                             width: '100%',
@@ -294,7 +267,7 @@ export default function Controles_Proporcion({ onCalcular }) {
                             className="input-mat251 placeholder-small"
                             placeholder="Población"
                             value={tamanoPoblacion}
-                            onChange={(e) => { setTamanoPoblacion(e.target.value); resetDistribucion(); }}
+                            onChange={(e) => { setTamanoPoblacion(e.target.value); }}
                             style={{
                                 flex: 1,
                                 width: '100%',

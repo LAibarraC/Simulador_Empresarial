@@ -168,7 +168,7 @@ function CustomSelectGrupos({ value, onChange, options = [], placeholder = "Sele
 }
 
 export default function Grupos() {
-  const { usuario } = useData();
+  const { usuario, actualizarModulosUsuario } = useData();
   const navigate = useNavigate();
 
   const iniciarTour = () => {
@@ -645,12 +645,17 @@ export default function Grupos() {
       const mensajeError = data.error || data.detail || "No fue posible completar la matrícula.";
 
       if (res.ok) {
+        const accesosActualizados = await actualizarModulosUsuario();
         setCodigoBusqueda("");
         setMostrarModalMatricular(false);
-        alerta.success(
-          "¡Inscripción Exitosa!",
-          `Te has unido a ${data.clase_nombre || "la materia"} exitosamente`
-        );
+        if (accesosActualizados) {
+          alerta.success(
+            "¡Inscripción Exitosa!",
+            `Te has unido a ${data.clase_nombre || "la materia"} exitosamente`
+          );
+        } else {
+          alerta.warning("Matrícula registrada", "Tu inscripción se guardó, pero no se pudo actualizar el acceso a las calculadoras. Revisa tu conexión.");
+        }
         redirigirDespuesDelToast();
         await cargarCursos();
       } else if (res.status === 409) {
@@ -662,8 +667,11 @@ export default function Grupos() {
       }
     } catch (error) {
       if (error.status === 409) {
+        const accesosActualizados = await actualizarModulosUsuario();
         setMostrarModalMatricular(false);
-        alerta.warning("Ya Matriculado", "Ya te encuentras matriculado en esta asignatura.");
+        alerta.warning("Ya Matriculado", accesosActualizados
+          ? "Ya te encuentras matriculado en esta asignatura."
+          : "Ya estás matriculado, pero no se pudo actualizar el acceso a las calculadoras. Revisa tu conexión.");
         redirigirDespuesDelToast();
       } else if (error.name === "AbortError") {
         alerta.error("Error de matrícula", "El servidor tardó demasiado en responder. Intenta nuevamente.");

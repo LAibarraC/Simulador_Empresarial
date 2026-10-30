@@ -318,9 +318,11 @@ async def configurar_precuenta_logic(datos: ConfigurarPrecuenta, usuario: models
     await db.commit()
     await db.refresh(usuario)
     token = create_access_token(data={"id": usuario.id, "email": usuario.email, "rol": usuario.rol})
+    modulos = await obtener_modulos_usuario_logic(usuario, db)
     return {"token": token, "id": usuario.email, "nombre": usuario.nombre, "rol": usuario.rol,
             "email": usuario.email, "perfil": usuario.perfil, "institucion": usuario.institucion,
-            "requiere_configuracion": False, "foto_perfil": getattr(usuario, "foto_perfil", None)}
+            "requiere_configuracion": False, "foto_perfil": getattr(usuario, "foto_perfil", None),
+            "modulos": modulos}
 
 async def vincular_google_logic(token_google: str, usuario: models.Usuario, db: AsyncSession):
     try:
@@ -341,11 +343,12 @@ async def vincular_google_logic(token_google: str, usuario: models.Usuario, db: 
         usuario_rol = usuario.rol
         usuario_perfil = usuario.perfil
         usuario_institucion = usuario.institucion
+        modulos = await obtener_modulos_usuario_logic(usuario, db)
         await db.commit()
         nuevo_token = create_access_token(data={"id": usuario_id, "email": usuario_email, "rol": usuario_rol})
         return {"token": nuevo_token, "id": usuario_email, "nombre": usuario_nombre, "rol": usuario_rol,
                 "email": usuario_email, "perfil": usuario_perfil, "institucion": usuario_institucion,
-                "requiere_configuracion": False, "foto_perfil": foto_perfil}
+                "requiere_configuracion": False, "foto_perfil": foto_perfil, "modulos": modulos}
     except HTTPException:
         raise
     except Exception as e:
@@ -508,30 +511,180 @@ async def cambiar_password_perfil_logic(data: CambiarPasswordPerfil, db: AsyncSe
     await db.commit()
     return {"message": "Contraseña cambiada exitosamente."}
 
+def _limpiar_archivos_usuario(rutas, rutas_conservadas):
+    """Borra archivos propios tras el commit, limitados a la carpeta de Excel."""
+    from pathlib import Path
+    import logging
+
+    logger = logging.getLogger(__name__)
+    raiz = Path("excels").resolve()
+
+    def resolver(ruta):
+        try:
+            destino = Path(str(ruta).replace("\\", "/")).resolve()
+            return destino if destino != raiz and destino.is_relative_to(raiz) else None
+        except (OSError, ValueError, RuntimeError):
+            return None
+
+    protegidas = {destino for ruta in rutas_conservadas if (destino := resolver(ruta))}
+    protegidas.update(meta for destino in list(protegidas) if (meta := resolver(str(destino) + ".meta")))
+    candidatos = set()
+    pendientes = 0
+    for ruta in rutas:
+        destino = resolver(ruta)
+        if destino is None:
+            pendientes += 1
+            logger.warning("No se limpió una ruta de archivo fuera del almacenamiento permitido")
+            continue
+        candidatos.add(destino)
+        meta = resolver(str(destino) + ".meta")
+        if meta is not None:
+            candidatos.add(meta)
+
+    carpetas = set()
+    for destino in candidatos - protegidas:
+        try:
+            destino.unlink(missing_ok=True)
+            carpetas.add(destino.parent)
+        except OSError:
+            pendientes += 1
+            logger.exception("No se pudo eliminar el archivo de la cuenta: %s", destino)
+
+    # Sólo retirar carpetas vacías; no borrar contenido compartido recursivamente.
+    for carpeta in sorted(carpetas, key=lambda valor: len(valor.parts), reverse=True):
+        while carpeta != raiz and carpeta.is_relative_to(raiz):
+            try:
+                carpeta.rmdir()
+            except OSError:
+                break
+            carpeta = carpeta.parent
+    return pendientes
+
+
+async def _eliminar_usuario_y_dependencias(db: AsyncSession, usuario: models.Usuario):
+    """Un único commit para la cuenta y sus dependencias, de hijos a padres."""
+    from sqlalchemy import delete, update, or_, func
+    from sqlalchemy.exc import IntegrityError
+    import logging
+
+    usuario_id = usuario.id
+    email = usuario.email
+    try:
+        result = await db.execute(
+            select(models.Clase.id)
+            .where(models.Clase.docente_id == usuario_id)
+            .with_for_update()
+        )
+        clases_ids = list(result.scalars().all())
+
+        result = await db.execute(
+            select(models.Archivo.id, models.Archivo.nombre_original, models.Archivo.ruta_servidor)
+            .where(or_(
+                models.Archivo.usuario_id == usuario_id,
+                models.Archivo.clase_id.in_(clases_ids),
+            ))
+            .with_for_update()
+        )
+        archivos = result.all()
+        archivo_ids = [archivo.id for archivo in archivos]
+
+        result = await db.execute(
+            select(models.Tarea.id)
+            .where(or_(
+                models.Tarea.docente_id == usuario_id,
+                models.Tarea.clase_id.in_(clases_ids),
+            ))
+            .with_for_update()
+        )
+        tareas_ids = list(result.scalars().all())
+
+        await db.execute(delete(models.EntregaTarea).where(or_(
+            models.EntregaTarea.estudiante_id == usuario_id,
+            models.EntregaTarea.tarea_id.in_(tareas_ids),
+        )))
+        await db.execute(delete(models.Tarea).where(models.Tarea.id.in_(tareas_ids)))
+        await db.execute(delete(models.HistorialCalculo).where(or_(
+            models.HistorialCalculo.usuario_id == usuario_id,
+            models.HistorialCalculo.clase_id.in_(clases_ids),
+        )))
+
+        # Las tareas, entregas e historiales ajenos que sólo referencian un
+        # archivo eliminado conservan sus datos y pierden únicamente ese enlace.
+        for archivo in archivos:
+            await db.execute(
+                update(models.Tarea)
+                .where(models.Tarea.archivo_id == archivo.id)
+                .values(
+                    archivo_nombre_fijo=func.coalesce(models.Tarea.archivo_nombre_fijo, archivo.nombre_original),
+                    archivo_id=None,
+                )
+            )
+        if archivo_ids:
+            await db.execute(
+                update(models.EntregaTarea)
+                .where(models.EntregaTarea.archivo_entrega_id.in_(archivo_ids))
+                .values(archivo_entrega_id=None)
+            )
+            await db.execute(
+                update(models.HistorialCalculo)
+                .where(models.HistorialCalculo.archivo_id.in_(archivo_ids))
+                .values(archivo_id=None)
+            )
+        result = await db.execute(
+            select(models.Archivo.ruta_servidor)
+            .where(models.Archivo.id.notin_(archivo_ids))
+        )
+        rutas_conservadas = list(result.scalars().all())
+
+        await db.execute(delete(models.Archivo).where(models.Archivo.id.in_(archivo_ids)))
+        await db.execute(delete(models.Inscripcion).where(or_(
+            models.Inscripcion.estudiante_id == usuario_id,
+            models.Inscripcion.clase_id.in_(clases_ids),
+        )))
+        await db.execute(delete(models.ClaseQR).where(or_(
+            models.ClaseQR.docente_id == usuario_id,
+            models.ClaseQR.clase_id.in_(clases_ids),
+        )))
+        await db.execute(delete(models.DocenteModulo).where(models.DocenteModulo.docente_id == usuario_id))
+        await db.execute(delete(models.EstudianteModulo).where(models.EstudianteModulo.estudiante_id == usuario_id))
+        await db.execute(delete(models.CredencialAutorizada).where(models.CredencialAutorizada.usuario_id == usuario_id))
+        await db.execute(delete(models.Notificacion).where(models.Notificacion.usuario_id == usuario_id))
+        await db.execute(delete(models.Clase).where(models.Clase.id.in_(clases_ids)))
+        await db.delete(usuario)
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        logging.getLogger(__name__).exception("No se pudo completar la eliminación del usuario %s", usuario_id)
+        raise HTTPException(status_code=409, detail="No se pudo eliminar la cuenta por una dependencia de datos. No se aplicaron cambios.")
+    except Exception:
+        await db.rollback()
+        raise
+
+    recovery_tokens.pop(email, None)
+    pendientes = await asyncio.to_thread(
+        _limpiar_archivos_usuario,
+        [archivo.ruta_servidor for archivo in archivos],
+        rutas_conservadas,
+    )
+    if pendientes:
+        return "La cuenta y sus datos de base de datos se eliminaron, pero quedaron archivos físicos pendientes de limpieza. Revisa los permisos del almacenamiento."
+    return None
+
+
 async def eliminar_cuenta_logic(datos: UsuarioLogin, db: AsyncSession):
-    from sqlalchemy import delete
-    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == datos.email))
+    result = await db.execute(
+        select(models.Usuario).filter(models.Usuario.email == datos.email).with_for_update()
+    )
     usuario = result.scalars().first()
     if not usuario or not verify_password(datos.password, usuario.password):
         return JSONResponse(status_code=401, content={"error": "Contraseña de confirmación incorrecta"})
-    
-    await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.estudiante_id == usuario.id))
-    await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.usuario_id == usuario.id))
-    await db.execute(delete(models.Archivo).filter(models.Archivo.usuario_id == usuario.id))
-    await db.execute(delete(models.ClaseQR).filter(models.ClaseQR.docente_id == usuario.id))
-    
-    result = await db.execute(select(models.Clase).filter(models.Clase.docente_id == usuario.id))
-    clases_docente = result.scalars().all()
-    for clase in clases_docente:
-        await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.clase_id == clase.id))
-        await db.execute(delete(models.Archivo).filter(models.Archivo.clase_id == clase.id))
-        await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.clase_id == clase.id))
-        await db.execute(delete(models.ClaseQR).filter(models.ClaseQR.clase_id == clase.id))
-        await db.delete(clase)
-        
-    await db.delete(usuario)
-    await db.commit()
-    return {"message": "Cuenta eliminada con éxito"}
+
+    advertencia = await _eliminar_usuario_y_dependencias(db, usuario)
+    respuesta = {"message": "Cuenta eliminada con éxito"}
+    if advertencia:
+        respuesta["advertencia"] = advertencia
+    return respuesta
+
 
 async def cambiar_rol_logic(datos: CambiarRol, db: AsyncSession):
     result = await db.execute(select(models.Usuario).filter(models.Usuario.email == datos.email))
@@ -592,6 +745,7 @@ async def asignar_rol_inicial_logic(datos: AsignarRolInicial, current_user: mode
     await db.commit()
     await db.refresh(current_user)
 
+    modulos = await obtener_modulos_usuario_logic(current_user, db)
     access_token = create_access_token(data={"id": current_user.id, "email": current_user.email, "rol": current_user.rol})
     return {
         "token": access_token,
@@ -602,7 +756,8 @@ async def asignar_rol_inicial_logic(datos: AsignarRolInicial, current_user: mode
         "perfil": current_user.perfil,
         "institucion": current_user.institucion,
         "requiere_rol": False,
-        "foto_perfil": getattr(current_user, 'foto_perfil', None)
+        "foto_perfil": getattr(current_user, 'foto_perfil', None),
+        "modulos": modulos
     }
 
 async def cambiar_estado_logic(datos: CambiarEstado, db: AsyncSession, current_user_id: int):
@@ -619,33 +774,22 @@ async def cambiar_estado_logic(datos: CambiarEstado, db: AsyncSession, current_u
     return {"message": f"El usuario ha sido {'activado' if datos.activo else 'suspendido'} con éxito"}
 
 async def admin_eliminar_usuario_logic(email: str, db: AsyncSession, current_user_id: int):
-    from sqlalchemy import delete
-    result = await db.execute(select(models.Usuario).filter(models.Usuario.email == email))
+    result = await db.execute(
+        select(models.Usuario).filter(models.Usuario.email == email).with_for_update()
+    )
     usuario = result.scalars().first()
     if not usuario:
         return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
-        
+
     if usuario.id == current_user_id:
         return JSONResponse(status_code=400, content={"error": "No puedes eliminar tu propia cuenta"})
-        
-    await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.estudiante_id == usuario.id))
-    await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.usuario_id == usuario.id))
-    await db.execute(delete(models.Archivo).filter(models.Archivo.usuario_id == usuario.id))
-    await db.execute(delete(models.Notificacion).filter(models.Notificacion.usuario_id == usuario.id))
-    await db.execute(delete(models.ClaseQR).filter(models.ClaseQR.docente_id == usuario.id))
-    
-    result = await db.execute(select(models.Clase).filter(models.Clase.docente_id == usuario.id))
-    clases_docente = result.scalars().all()
-    for clase in clases_docente:
-        await db.execute(delete(models.Inscripcion).filter(models.Inscripcion.clase_id == clase.id))
-        await db.execute(delete(models.Archivo).filter(models.Archivo.clase_id == clase.id))
-        await db.execute(delete(models.HistorialCalculo).filter(models.HistorialCalculo.clase_id == clase.id))
-        await db.execute(delete(models.ClaseQR).filter(models.ClaseQR.clase_id == clase.id))
-        await db.delete(clase)
-        
-    await db.delete(usuario)
-    await db.commit()
-    return {"message": "Usuario eliminado con éxito"}
+
+    advertencia = await _eliminar_usuario_y_dependencias(db, usuario)
+    respuesta = {"message": "Usuario eliminado con éxito"}
+    if advertencia:
+        respuesta["advertencia"] = advertencia
+    return respuesta
+
 
 async def obtener_usuarios_logic(db: AsyncSession):
     result = await db.execute(select(models.Usuario))

@@ -10,6 +10,7 @@ from routers import auth, archivos, calculos, historial, grupos, notificaciones,
 from MAT251.Tema2 import routers_simbolicos as mat251_tema2_simbolicos
 from MAT251.Tema5 import simulacion as mat251_simulacion
 from config.database import async_engine, get_db
+from utils.notificaciones_sse import canal_notificaciones
 import models
 
 # --- Lifespan: crea tablas al arrancar usando el motor asíncrono (asyncmy) ---
@@ -42,7 +43,10 @@ async def lifespan(app: FastAPI):
             await conn.execute(text("ALTER TABLE clases ADD COLUMN modulo VARCHAR(50) NULL"))
         except Exception:
             pass
-    yield
+    try:
+        yield
+    finally:
+        canal_notificaciones.cerrar()
 
 _is_production = os.getenv("ENVIRONMENT") == "production"
 app = FastAPI(
@@ -63,7 +67,7 @@ origins = [
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
     "https://sice.jboris.org", #enlace de temporal
     "http://10.250.52.137:5173",
-    "http://192.168.100.180:5173",
+    "http://192.168.100.186:5173",
 ]                               
 
 app.add_middleware( 

@@ -4,7 +4,6 @@ import katex from 'katex';
 import DiagramaVenn from '../../../Graficas/Tema_1/DiagramaVenn';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
 import { IconoCalculadora, EditarDatos } from '../../../../../ui/iconos';
-import { calcularReglaAdicion } from '../../../Matematicas/logica_Tema1';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
 const InlineMath = ({ math }) => (
@@ -150,24 +149,21 @@ export default function ResultadosReglaAdicion({
     colB, setColB, valB, setValB,
     resultado, setResultado,
     error, setError,
-    statsDatos, abrirEditor
+    statsDatos, abrirEditor,
+    inputMode, setInputMode, manualAdicion, setManualAdicion, onCalcular, bloquearModo = false
 }) {
     const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
-    // Estado para el modo de entrada
-    const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
-
-    // Estados para el modo manual
-    const [manualNameA, setManualNameA] = useState('A');
-    const [manualNameB, setManualNameB] = useState('B');
-    const [manualPA, setManualPA] = useState('');
-    const [manualPB, setManualPB] = useState('');
-    const [manualPAndB, setManualPAndB] = useState('');
-    const [resultadoManual, setResultadoManual] = useState(null);
-    const [errorManual, setErrorManual] = useState('');
-
-    // Segregación total entre modo matriz y modo manual
-    const activeResultado = inputMode === 'manual' ? resultadoManual : resultado;
-    const activeError = inputMode === 'manual' ? errorManual : error;
+    const {
+        nameA: manualNameA, nameB: manualNameB,
+        pA: manualPA, pB: manualPB, pAB: manualPAndB,
+    } = manualAdicion;
+    const setManualNameA = nameA => setManualAdicion(prev => ({ ...prev, nameA }));
+    const setManualNameB = nameB => setManualAdicion(prev => ({ ...prev, nameB }));
+    const setManualPA = pA => setManualAdicion(prev => ({ ...prev, pA }));
+    const setManualPB = pB => setManualAdicion(prev => ({ ...prev, pB }));
+    const setManualPAndB = pAB => setManualAdicion(prev => ({ ...prev, pAB }));
+    const activeResultado = resultado;
+    const activeError = error;
 
     // Extraer valores únicos para A y B
     const pseudoVar = useMemo(() => {
@@ -222,122 +218,22 @@ export default function ResultadosReglaAdicion({
     }, [pseudoVar, colA, colB, setColA, setValA, setColB, setValB]);
 
     const calcular = () => {
-        if (inputMode === 'matriz') {
-            if (!pseudoVar) {
-                setAlerta({ isOpen: true, mensaje: "Importa una Matriz o agrega datos en el editor primero." });
-                setResultado(null);
-                return;
-            }
-            if (!colA) {
-                setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable Evento (<InlineMath math="A" />) antes de calcular.</span> });
-                setResultado(null);
-                return;
-            }
-            if (!valA) {
-                setAlerta({ isOpen: true, mensaje: <span>Selecciona el Valor (Éxito) para el Evento <InlineMath math="A" /> antes de calcular.</span> });
-                setResultado(null);
-                return;
-            }
-            if (!colB) {
-                setAlerta({ isOpen: true, mensaje: <span>Selecciona la Variable Evento (<InlineMath math="B" />) antes de calcular.</span> });
-                setResultado(null);
-                return;
-            }
-            if (!valB) {
-                setAlerta({ isOpen: true, mensaje: <span>Selecciona el Valor (Éxito) para el Evento <InlineMath math="B" /> antes de calcular.</span> });
-                setResultado(null);
-                return;
-            }
-
-            const res = calcularReglaAdicion(filas, pseudoVar.nombresColumnas, colA, valA, colB, valB);
-            if (res.error) {
-                setError(res.error);
-                setResultado(null);
-            } else {
-                setResultado({
-                    ...res.resultado,
-                    modo: 'matriz',
-                    colA,
-                    valA,
-                    colB,
-                    valB
-                });
-                setError('');
-            }
-        } else {
-            // Calcular Modo Manual
-            setResultado(null);
-            const pA = parseFloat(manualPA);
-            const pB = parseFloat(manualPB);
-            const pAandB = parseFloat(manualPAndB);
-
-            if (isNaN(pA) || isNaN(pB) || isNaN(pAandB)) {
-                setAlerta({ isOpen: true, mensaje: "Todos los campos de probabilidad deben ser números válidos." });
-                setResultadoManual(null);
-                return;
-            }
-
-            if (pA < 0 || pA > 1 || pB < 0 || pB > 1 || pAandB < 0 || pAandB > 1) {
-                setAlerta({ isOpen: true, mensaje: "Las probabilidades deben estar entre 0 y 1." });
-                setResultadoManual(null);
-                return;
-            }
-
-            if (pAandB > pA || pAandB > pB) {
-                setAlerta({ isOpen: true, mensaje: <span>La probabilidad de la intersección <InlineMath math="P(A \cap B)" /> no puede ser mayor que <InlineMath math="P(A)" /> ni que <InlineMath math="P(B)" />.</span> });
-                setResultadoManual(null);
-                return;
-            }
-
-            const pAorB = pA + pB - pAandB;
-
-            if (pAorB > 1) {
-                setAlerta({ isOpen: true, mensaje: <span>La probabilidad de la unión <InlineMath math="P(A \cup B)" /> calculada excede 1. Revisa tus datos.</span> });
-                setResultadoManual(null);
-                return;
-            }
-
-            const resultadoCalculado = {
-                nameA: manualNameA || 'A',
-                nameB: manualNameB || 'B',
-                pA: pA,
-                pB: pB,
-                pAandB: pAandB,
-                pAorB: pAorB,
-                countA: '-', countB: '-', countAandB: '-', total: '-',
-                modo: 'manual'
-            };
-            setResultadoManual(resultadoCalculado);
-            setResultado(resultadoCalculado);
-            setErrorManual('');
-        }
+        const calculo = onCalcular();
+        setAlerta({ isOpen: !!calculo.error, mensaje: calculo.error || '' });
     };
-
-    // Limpiar resultado de matriz cuando cambian sus datos o selecciones
-    useEffect(() => {
-        setResultado(null);
-        setError('');
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [colA, valA, colB, valB, pseudoVar, filas]);
-
-    // Limpiar resultado al cambiar valores manuales
-    useEffect(() => {
-        setResultadoManual(null);
-        setErrorManual('');
-        setResultado(null);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [manualPA, manualPB, manualPAndB, manualNameA, manualNameB]);
 
     const cambiarModo = (nuevoModo) => {
+        if (bloquearModo || nuevoModo === inputMode) return;
         setInputMode(nuevoModo);
-        if (nuevoModo === 'manual') {
-            setResultado(resultadoManual ? { ...resultadoManual, modo: 'manual' } : null);
-        } else {
-            setResultado(resultado
-                ? { ...resultado, modo: 'matriz', colA, valA, colB, valB }
-                : null);
-        }
+        setResultado(null);
+        setError('');
     };
+
+    useEffect(() => {
+        if (inputMode !== 'matriz') return;
+        if (valA && !valoresUnicosA.includes(String(valA))) setValA('');
+        if (valB && !valoresUnicosB.includes(String(valB))) setValB('');
+    }, [inputMode, valA, valB, valoresUnicosA, valoresUnicosB, setValA, setValB]);
 
     return (
         <div style={{ marginTop: '10px', fontFamily: FONT }}>
@@ -348,6 +244,8 @@ export default function ResultadosReglaAdicion({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
+                        disabled={bloquearModo && inputMode !== 'matriz'}
+                        title={bloquearModo && inputMode !== 'matriz' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => cambiarModo('matriz')}
                         style={{ fontFamily: FONT }}
                     >
@@ -356,6 +254,8 @@ export default function ResultadosReglaAdicion({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
+                        disabled={bloquearModo && inputMode !== 'manual'}
+                        title={bloquearModo && inputMode !== 'manual' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => cambiarModo('manual')}
                         style={{ fontFamily: FONT }}
                     >

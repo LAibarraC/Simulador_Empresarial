@@ -140,7 +140,7 @@ export default function GraficoBastonesModelos({ datos, condicion, modoPDF = fal
             return (
                 <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', padding: '10px', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                     <p style={{ margin: 0, fontWeight: 600, color: '#334155' }}>x = {label}</p>
-                    <p style={{ margin: 0, color: '#3b82f6' }}>P(x) = {p.toFixed(2)}</p>
+                    <p style={{ margin: 0, color: '#3b82f6' }}>P(x) = {p.toFixed(4)}</p>
                 </div>
             );
         }

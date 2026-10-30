@@ -322,6 +322,70 @@ export const pasosPresentacionMAT251 = [
     }
 ];
 
+// Esta guía se limita a la barra del historial, sin repetir la guía del módulo.
+export const iniciarGuiaHistorialMAT251 = () => {
+    const pasos = [
+        {
+            element: '#tour-mat251-historial-info',
+            popover: {
+                title: 'Cálculo del historial',
+                description: 'Aquí ves el módulo, la fecha de guardado y la operación del registro que abriste.',
+            },
+        },
+        {
+            element: '#tour-mat251-historial-guardar',
+            popover: {
+                title: 'Guardar cambios',
+                description: 'Actualiza este mismo registro. Se habilita cuando modificas los datos y pulsas CALCULAR con esos datos. Después de guardar vuelve a deshabilitarse.',
+            },
+        },
+        {
+            element: '#tour-mat251-historial-restablecer',
+            popover: {
+                title: 'Restablecer datos guardados',
+                description: 'Descarta los cambios de la pantalla y recupera los datos y el resultado de la última versión guardada.',
+            },
+        },
+        {
+            element: '#tour-mat251-historial-salir',
+            popover: {
+                title: 'Salir del historial',
+                description: 'Vuelve a esta operación en modo normal, con los parámetros y resultados reiniciados y el selector de operación desbloqueado. No guarda los cambios pendientes.',
+            },
+        },
+        {
+            element: '#tour-mat251-historial-volver',
+            popover: {
+                title: 'Volver al Historial',
+                description: 'Regresa a la lista de cálculos guardados. Los cambios pendientes de esta pantalla no se guardan.',
+            },
+        },
+    ].filter(paso => {
+        const elemento = document.querySelector(paso.element);
+        return elemento && elemento.getClientRects().length > 0;
+    });
+
+    if (!pasos.length) return;
+
+    const guia = driver({
+        popoverClass: 'mat251-driver-popover',
+        showProgress: true,
+        nextBtnText: 'Siguiente',
+        prevBtnText: 'Anterior',
+        doneBtnText: '¡Entendido!',
+        progressText: 'Paso {{current}} de {{total}}',
+        animate: true,
+        allowClose: true,
+        disableActiveInteraction: true,
+        overlayColor: 'rgba(0, 0, 0, 0.65)',
+        stagePadding: 6,
+        stageRadius: 5,
+        popoverOffset: 16,
+        steps: pasos,
+    });
+    guia.drive();
+};
+
 /**
  * Inicia el tour interactivo de MAT251:
  * - Si está en la pantalla inicial (sin operación activa), lanza la Presentación General de MAT251.
@@ -337,6 +401,10 @@ export const pasosPresentacionMAT251 = [
  * - Si está en Cálculo de Probabilidad general, lanza el flujo de trabajo del Tema 1.
  */
 export const iniciarGuiaMAT251 = () => {
+    if (document.querySelector('#tour-mat251-barra-historial')) {
+        iniciarGuiaHistorialMAT251();
+        return;
+    }
     const operacionTxt = document.querySelector('#tour-mat251-operacion')?.textContent?.toLowerCase() || '';
 
     const esPresentacionGeneral = document.querySelector('#tour-mat251-contenedor-temas') !== null;

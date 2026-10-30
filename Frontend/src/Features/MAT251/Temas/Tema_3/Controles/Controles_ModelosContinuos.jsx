@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import '../../../styles/Temas/Tema3.css';
-import { calcularDistribucionContinua, generarDatosGraficoContinua } from '../../../Matematicas/logica_Tema3';
+import { crearEstadoModelosContinuos, columnasModelosDiscretos } from '../../../Historial/historial_Tema3';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { IconoMas, IconoBasura, EditarDatos } from '../../../../../ui/iconos';
@@ -13,68 +13,11 @@ export default function Controles_ModelosContinuos({
     filas,
     statsDatos,
     abrirEditor,
-    onCalcular,
+    onCalcular, onEstimar, onInvalidar, modelo, setModelo, modelosState, setModelosState, bloquearModo = false,
     children
 }) {
-    const initialModelosState = {
-        Uniforme: {
-            modo: 'matriz',
-            manual: { a: '', b: '' },
-            matriz: { col: 0, col2: 1, stats: null, a: '', b: '' },
-            directa: { tipo: 'menor_igual', x: '', x2: '', intervals: [{ id: 1, min: '', max: '' }, { id: 2, min: '', max: '' }] },
-            inversa: { tipo: 'inversa_menor', p: '' },
-            calcMode: 'directa',
-            yaCalculado: false,
-        },
-        Normal: {
-            modo: 'matriz',
-            manual: { mu: '', sigma: '' },
-            matriz: { col: 0, col2: 1, stats: null, mu: '', sigma: '' },
-            directa: { tipo: 'menor_igual', x: '', x2: '', intervals: [{ id: 1, min: '', max: '' }, { id: 2, min: '', max: '' }] },
-            inversa: { tipo: 'inversa_menor', p: '' },
-            calcMode: 'directa',
-            yaCalculado: false,
-        },
-        NormalEstandar: {
-            modo: 'manual',
-            manual: { mu: '0', sigma: '1' },
-            matriz: { col: 0, col2: 1, stats: null },
-            directa: { tipo: 'menor_igual', x: '', x2: '', intervals: [{ id: 1, min: '', max: '' }, { id: 2, min: '', max: '' }] },
-            inversa: { tipo: 'inversa_menor', p: '' },
-            calcMode: 'directa',
-            yaCalculado: false,
-        },
-        ChiCuadrado: {
-            modo: 'matriz',
-            manual: { k: '' },
-            matriz: { col: 0, col2: 1, stats: null, k: '' },
-            directa: { tipo: 'menor_igual', x: '', x2: '', intervals: [{ id: 1, min: '', max: '' }, { id: 2, min: '', max: '' }] },
-            inversa: { tipo: 'inversa_menor', p: '' },
-            calcMode: 'directa',
-            yaCalculado: false,
-        },
-        FFisher: {
-            modo: 'manual',
-            manual: { v1: '', v2: '' },
-            matriz: { col: 0, col2: 1, stats: null, v1: '', v2: '' },
-            directa: { tipo: 'menor_igual', x: '', x2: '', intervals: [{ id: 1, min: '', max: '' }, { id: 2, min: '', max: '' }] },
-            inversa: { tipo: 'inversa_menor', p: '' },
-            calcMode: 'directa',
-            yaCalculado: false,
-        },
-        TStudent: {
-            modo: 'matriz',
-            manual: { n: '' },
-            matriz: { col: 0, col2: 1, stats: null, n: '' },
-            directa: { tipo: 'menor_igual', x: '', x2: '', intervals: [{ id: 1, min: '', max: '' }, { id: 2, min: '', max: '' }] },
-            inversa: { tipo: 'inversa_menor', p: '' },
-            calcMode: 'directa',
-            yaCalculado: false,
-        }
-    };
-
-    const [modelo, setModelo] = useState('Uniforme');
-    const [modelosState, setModelosState] = useState(initialModelosState);
+    const initialModelosState = crearEstadoModelosContinuos();
+    initialModelosState.FFisher.modo = 'matriz';
     const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
 
     const activeState = modelosState[modelo] || initialModelosState[modelo];
@@ -109,21 +52,23 @@ export default function Controles_ModelosContinuos({
         return <span style={{ fontSize: '0.9em' }} dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
     };
 
-    const updateActive = (updater) => {
+    const updateActive = (updater, soloCondicion = false) => {
         setModelosState(prev => {
             const cur = prev[modelo] || initialModelosState[modelo];
             const next = typeof updater === 'function' ? updater(cur) : { ...cur, ...updater };
             return { ...prev, [modelo]: next };
-        });
+        }, soloCondicion);
     };
 
     const setModo = (nuevoModo) => {
+        if (bloquearModo || modelo === 'NormalEstandar' || nuevoModo === modo) return;
         updateActive(cur => ({ ...cur, modo: nuevoModo }));
-        if (onCalcular) onCalcular(null);
+        onInvalidar?.();
     };
 
     const setCalcMode = (nuevoCalcMode) => {
-        updateActive(cur => ({ ...cur, calcMode: nuevoCalcMode }));
+        if (nuevoCalcMode === calcMode) return;
+        updateActive(cur => ({ ...cur, calcMode: nuevoCalcMode }), true);
     };
 
     const setYaCalculado = (val) => {
@@ -137,15 +82,15 @@ export default function Controles_ModelosContinuos({
             } else {
                 return { ...cur, inversa: { ...cur.inversa, tipo: val } };
             }
-        });
+        }, true);
     };
 
     const setValorX = (val) => {
-        updateActive(cur => ({ ...cur, directa: { ...cur.directa, x: val } }));
+        updateActive(cur => ({ ...cur, directa: { ...cur.directa, x: val } }), true);
     };
 
     const setValorX2 = (val) => {
-        updateActive(cur => ({ ...cur, directa: { ...cur.directa, x2: val } }));
+        updateActive(cur => ({ ...cur, directa: { ...cur.directa, x2: val } }), true);
     };
 
     const setIntervals = (newIntervals) => {
@@ -155,11 +100,11 @@ export default function Controles_ModelosContinuos({
                 ...cur.directa,
                 intervals: typeof newIntervals === 'function' ? newIntervals(cur.directa.intervals) : newIntervals
             }
-        }));
+        }), true);
     };
 
     const setValorP = (val) => {
-        updateActive(cur => ({ ...cur, inversa: { ...cur.inversa, p: val } }));
+        updateActive(cur => ({ ...cur, inversa: { ...cur.inversa, p: val } }), true);
     };
 
     const setParamA = (val) => {
@@ -206,345 +151,26 @@ export default function Controles_ModelosContinuos({
         updateActive(cur => ({ ...cur, matriz: { ...cur.matriz, stats } }));
     };
 
-    useEffect(() => {
-        setModelosState(prev => {
-            const next = { ...prev };
-            Object.keys(next).forEach(k => {
-                next[k] = {
-                    ...next[k],
-                    matriz: { ...next[k].matriz, col: 0, col2: 1, stats: null, a: '', b: '', mu: '', sigma: '', k: '', v1: '', v2: '', n: '' },
-                    yaCalculado: next[k].modo === 'matriz' ? false : next[k].yaCalculado
-                };
-            });
-            return next;
-        });
-        if (onCalcular) onCalcular(null);
-    }, [varSeleccionada, filas]);
-
     const handleCambiarModelo = (nuevoModelo) => {
-        if (modelo === nuevoModelo) return;
+        if (bloquearModo || modelo === nuevoModelo) return;
         setModelo(nuevoModelo);
         setAlerta({ isOpen: false, mensaje: '' });
-        if (onCalcular) onCalcular(null);
+        onInvalidar?.();
     };
 
     // Extraer datos
-    const columnasDisponibles = useMemo(() => {
-        return (varSeleccionada?.nombresColumnas && varSeleccionada.nombresColumnas.length > 0)
-            ? varSeleccionada.nombresColumnas
-            : (varSeleccionada ? [varSeleccionada.nombre || 'Datos'] : []);
-    }, [varSeleccionada]);
-
-    const colActiva = (typeof columnaSeleccionada === 'number' && columnaSeleccionada < columnasDisponibles.length) ? columnaSeleccionada : 0;
-    const colActiva2 = (typeof columnaSeleccionada2 === 'number' && columnaSeleccionada2 < columnasDisponibles.length) ? columnaSeleccionada2 : (columnasDisponibles.length > 1 ? 1 : 0);
-
-    const datosColumna = useMemo(() => {
-        if (!varSeleccionada || !filas || filas.length === 0) return [];
-        const validas = filas.filter(f => (f.valor || '').toString().trim() !== '');
-        return validas.map(f => {
-            if (varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) {
-                const partes = (f.valor || '').toString().split(' | ');
-                return partes[colActiva] ? partes[colActiva].trim() : '';
-            }
-            return (f.valor || '').toString().trim();
-        }).map(v => parseFloat(v)).filter(v => !isNaN(v));
-    }, [varSeleccionada, filas, colActiva]);
-
-    // Datos de la segunda columna (para FFisher)
-    const datosColumna2 = useMemo(() => {
-        if (!varSeleccionada || !filas || filas.length === 0) return [];
-        const validas = filas.filter(f => (f.valor || '').toString().trim() !== '');
-        return validas.map(f => {
-            if (varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) {
-                const partes = (f.valor || '').toString().split(' | ');
-                return partes[colActiva2] ? partes[colActiva2].trim() : '';
-            }
-            return '';
-        }).map(v => parseFloat(v)).filter(v => !isNaN(v));
-    }, [varSeleccionada, filas, colActiva2]);
-
-    // Estimar desde datos
+    const columnasDisponibles = useMemo(() => columnasModelosDiscretos(varSeleccionada, filas), [varSeleccionada, filas]);
+    const colActiva = columnasDisponibles.length === 1 ? 0
+        : Number.isInteger(columnaSeleccionada) && columnaSeleccionada >= 0 && columnaSeleccionada < columnasDisponibles.length ? columnaSeleccionada : '';
+    const colActiva2 = Number.isInteger(columnaSeleccionada2) && columnaSeleccionada2 >= 0 && columnaSeleccionada2 < columnasDisponibles.length ? columnaSeleccionada2 : '';
     const estimarDesdeDatos = () => {
-        if (!varSeleccionada || !filas || filas.length === 0) {
-            setAlerta({ isOpen: true, mensaje: 'No hay datos cargados en la variable seleccionada.' });
-            return;
-        }
-
-        if (modelo === 'FFisher') {
-            if (columnasDisponibles.length < 2) {
-                setAlerta({ isOpen: true, mensaje: 'La Distribución F de Fisher requiere una matriz con al menos 2 columnas numéricas (Grupo 1 y Grupo 2).' });
-                return;
-            }
-            if (colActiva === colActiva2) {
-                setAlerta({ isOpen: true, mensaje: 'Debes seleccionar columnas diferentes para el Grupo 1 y el Grupo 2.' });
-                return;
-            }
-            if (datosColumna.length === 0 || datosColumna2.length === 0) {
-                setAlerta({
-                    isOpen: true,
-                    mensaje: (
-                        <span>
-                            Una o ambas columnas seleccionadas contienen datos <strong>cualitativos (texto)</strong> o sin valores numéricos válidos.
-                            <br />
-                            Las distribuciones continuas requieren <strong>datos cuantitativos (números)</strong>.
-                        </span>
-                    )
-                });
-                return;
-            }
-            const n1 = datosColumna.length;
-            const n2 = datosColumna2.length;
-            if (n1 < 2) {
-                setAlerta({ isOpen: true, mensaje: <span>La columna del Grupo 1 requiere al menos 2 datos numéricos ({renderLatex('v_1')} = n_1 - 1).</span> });
-                return;
-            }
-            if (n2 < 2) {
-                setAlerta({ isOpen: true, mensaje: <span>La columna del Grupo 2 requiere al menos 2 datos numéricos ({renderLatex('v_2')} = n_2 - 1).</span> });
-                return;
-            }
-            const v1 = n1 - 1;
-            const v2 = n2 - 1;
-            updateActive(cur => ({
-                ...cur,
-                matriz: {
-                    ...cur.matriz,
-                    stats: { total1: n1, total2: n2, v1, v2 },
-                    v1: v1.toString(),
-                    v2: v2.toString()
-                }
-            }));
-            setAlerta({ isOpen: false, mensaje: '' });
-            if (onCalcular) onCalcular(null);
-            return;
-        }
-
-        // Validación de datos numéricos
-        if (datosColumna.length === 0) {
-            setAlerta({
-                isOpen: true,
-                mensaje: (
-                    <span>
-                        La variable o columna seleccionada contiene datos <strong>cualitativos (texto)</strong> o no numéricos.
-                        <br />
-                        Las distribuciones continuas requieren <strong>datos cuantitativos (números)</strong>.
-                    </span>
-                )
-            });
-            return;
-        }
-
-        if (modelo === 'Uniforme') {
-            const min = Math.min(...datosColumna);
-            const max = Math.max(...datosColumna);
-
-            if (min >= max) {
-                setAlerta({
-                    isOpen: true,
-                    mensaje: (
-                        <span>
-                            Para estimar la Distribución Uniforme se requieren al menos dos valores numéricos diferentes ({renderLatex('a < b')}). Todos los datos son iguales a <strong>{min}</strong>.
-                        </span>
-                    )
-                });
-                return;
-            }
-
-            updateActive(cur => ({
-                ...cur,
-                matriz: {
-                    ...cur.matriz,
-                    stats: {
-                        total: datosColumna.length,
-                        min: min,
-                        max: max
-                    },
-                    a: min.toString(),
-                    b: max.toString()
-                }
-            }));
-        } else if (modelo === 'Normal') {
-            if (datosColumna.length < 2) {
-                setAlerta({
-                    isOpen: true,
-                    mensaje: (
-                        <span>
-                            La Distribución Normal requiere al menos 2 datos numéricos para calcular la desviación estándar muestral ({renderLatex('\\sigma')}).
-                        </span>
-                    )
-                });
-                return;
-            }
-
-            const sum = datosColumna.reduce((a, b) => a + b, 0);
-            const media = sum / datosColumna.length;
-            const variance = datosColumna.reduce((a, b) => a + Math.pow(b - media, 2), 0) / (datosColumna.length - 1);
-            const dev = Math.sqrt(variance);
-
-            if (dev <= 0) {
-                setAlerta({
-                    isOpen: true,
-                    mensaje: (
-                        <span>
-                            La desviación estándar calculada es 0 (todos los datos son idénticos). La Distribución Normal requiere variabilidad en los datos ({renderLatex('\\sigma > 0')}).
-                        </span>
-                    )
-                });
-                return;
-            }
-
-            updateActive(cur => ({
-                ...cur,
-                matriz: {
-                    ...cur.matriz,
-                    stats: {
-                        total: datosColumna.length,
-                        media: media,
-                        desviacion: dev
-                    },
-                    mu: media.toFixed(4),
-                    sigma: dev.toFixed(4)
-                }
-            }));
-        } else if (modelo === 'ChiCuadrado' || modelo === 'TStudent') {
-            const num = datosColumna.length - 1;
-            if (num <= 0) {
-                setAlerta({ isOpen: true, mensaje: <span>Se requieren al menos 2 datos numéricos para estimar los grados de libertad ({renderLatex('n')} = total - 1).</span> });
-                return;
-            }
-            updateActive(cur => ({
-                ...cur,
-                matriz: {
-                    ...cur.matriz,
-                    stats: { total: datosColumna.length, n: num },
-                    k: modelo === 'ChiCuadrado' ? num.toString() : cur.matriz.k,
-                    n: modelo === 'TStudent' ? num.toString() : cur.matriz.n
-                }
-            }));
-        }
-
-        setAlerta({ isOpen: false, mensaje: '' });
-        setYaCalculado(false);
-        if (onCalcular) onCalcular(null);
+        const estimacion = onEstimar();
+        setAlerta({ isOpen: !!estimacion.error, mensaje: estimacion.error || '' });
     };
-
-    const manejarCalculo = (isGraficarOnly = false) => {
-        setAlerta({ isOpen: false, mensaje: '' });
-
-        const parseNum = (val) => {
-            if (val === undefined || val === null || val === '') return NaN;
-            return parseFloat(val.toString().replace(',', '.'));
-        };
-
-        const parseIntNum = (val) => {
-            if (val === undefined || val === null || val === '') return NaN;
-            return parseInt(val.toString().replace(',', '.'), 10);
-        };
-
-        let params = {};
-
-        if (modelo === 'Uniforme') {
-            const a = parseNum(paramA);
-            const b = parseNum(paramB);
-            if (isNaN(a) || isNaN(b)) return setAlerta({ isOpen: true, mensaje: <span>En Uniforme, &quot;{renderLatex('a')}&quot; y &quot;{renderLatex('b')}&quot; deben ser números válidos.</span> });
-            if (a >= b) return setAlerta({ isOpen: true, mensaje: <span>El parámetro &quot;{renderLatex('a')}&quot; (mínimo) debe ser estrictamente menor que &quot;{renderLatex('b')}&quot; (máximo).</span> });
-            params = { a, b };
-        } else if (modelo === 'Normal') {
-            const mu = parseNum(paramMu);
-            const sigma = parseNum(paramSigma);
-            if (isNaN(mu) || isNaN(sigma)) return setAlerta({ isOpen: true, mensaje: <span>En Normal, la media ({renderLatex('\\mu')}) y desviación ({renderLatex('\\sigma')}) deben ser números válidos.</span> });
-            if (sigma <= 0) return setAlerta({ isOpen: true, mensaje: <span>La desviación estándar ({renderLatex('\\sigma')}) debe ser mayor a 0.</span> });
-            params = { mu, sigma };
-        } else if (modelo === 'NormalEstandar') {
-            params = { mu: 0, sigma: 1 };
-        } else if (modelo === 'ChiCuadrado') {
-            const k = parseIntNum(paramK);
-            if (isNaN(k) || k <= 0) return setAlerta({ isOpen: true, mensaje: <span>En Chi-cuadrada, los grados de libertad ({renderLatex('v')}) deben ser un número entero mayor a 0.</span> });
-            params = { k };
-        } else if (modelo === 'FFisher') {
-            const v1 = parseIntNum(paramV1);
-            const v2 = parseIntNum(paramV2);
-            if (isNaN(v1) || v1 <= 0 || isNaN(v2) || v2 <= 0) return setAlerta({ isOpen: true, mensaje: <span>En F de Fisher, los grados de libertad ({renderLatex('v_1')} y {renderLatex('v_2')}) deben ser enteros mayores a 0.</span> });
-            params = { v1, v2 };
-        } else if (modelo === 'TStudent') {
-            const n = parseIntNum(paramNStudent);
-            if (isNaN(n) || n <= 0) return setAlerta({ isOpen: true, mensaje: <span>En T de Student, los grados de libertad ({renderLatex('n')}) deben ser un número entero mayor a 0.</span> });
-            params = { n };
-        } else {
-            return setAlerta({ isOpen: true, mensaje: 'Este modelo continuo aún está en construcción.' });
-        }
-
-        let condicionCalculo = null;
-        let condicionVisual = null;
-
-        if (!isGraficarOnly) {
-            if (calcMode === 'directa') {
-                if (tipoCondicion === 'suma_intervalos') {
-                    const hasValidInterval = intervals.some(i => i.min !== '' && i.max !== '');
-                    if (!hasValidInterval) return setAlerta({ isOpen: true, mensaje: 'Ingresa al menos un intervalo válido.' });
-                    const parsedIntervals = intervals.map(i => ({
-                        ...i,
-                        min: i.min !== '' ? parseNum(i.min) : '',
-                        max: i.max !== '' ? parseNum(i.max) : ''
-                    }));
-                    condicionVisual = { tipo: tipoCondicion, intervals: parsedIntervals };
-                    condicionCalculo = { tipo: tipoCondicion, intervals: parsedIntervals };
-                } else {
-                    if (valorX === '') {
-                        return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el <strong>valor objetivo {renderLatex('x')}</strong> para la condición de búsqueda.</span> });
-                    }
-                    let x = parseNum(valorX);
-                    if (isNaN(x)) return setAlerta({ isOpen: true, mensaje: <span>El valor objetivo &quot;{renderLatex('x')}&quot; debe ser numérico.</span> });
-
-                    let valB = '';
-                    if (['entre', 'exterior', 'intervalo'].includes(tipoCondicion)) {
-                        if (valorX2 === '') {
-                            return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el <strong>límite superior {renderLatex('b')}</strong> para el intervalo.</span> });
-                        }
-                        valB = parseNum(valorX2);
-                        if (isNaN(valB) || valB <= x) return setAlerta({ isOpen: true, mensaje: 'El límite superior debe ser mayor que el límite inferior.' });
-                    }
-
-                    condicionVisual = { tipo: tipoCondicion, valX: x, valX2: valB };
-                    condicionCalculo = { tipo: tipoCondicion, valX: x, valX2: valB };
-                }
-            } else { // calcMode === 'inversa'
-                if (valorP === '') {
-                    return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa la <strong>probabilidad {renderLatex('p')}</strong> para la condición inversa.</span> });
-                }
-                let p = parseNum(valorP);
-                if (isNaN(p) || p <= 0 || p >= 1) return setAlerta({ isOpen: true, mensaje: <span>La probabilidad ({renderLatex('P')}) debe ser un número entre 0 y 1.</span> });
-                condicionVisual = { tipo: tipoCondicion, valP: p };
-                condicionCalculo = { tipo: tipoCondicion, valP: p };
-            }
-        }
-
-        const resultados = calcularDistribucionContinua(modelo, params, condicionCalculo);
-        const datosGrafico = generarDatosGraficoContinua(modelo, params, condicionCalculo, resultados);
-
-        if (isGraficarOnly) setYaCalculado(true);
-        onCalcular({
-            modelo, params, condicion: condicionVisual, resultados, datosGrafico,
-            modo: modelo === 'NormalEstandar' ? null : modo,
-            contextoMatriz: isMatriz && modelo !== 'NormalEstandar' ? {
-                nombreVariable: varSeleccionada?.nombre,
-                cantidadColumnas: columnasDisponibles.length,
-                columna: columnasDisponibles[colActiva],
-                observaciones: [...datosColumna],
-                grupos: modelo === 'FFisher' ? [
-                    { columna: columnasDisponibles[colActiva], observaciones: [...datosColumna] },
-                    { columna: columnasDisponibles[colActiva2], observaciones: [...datosColumna2] }
-                ] : null,
-                estadisticas: statsEstimados ? { ...statsEstimados } : null
-            } : null
-        });
+    const manejarCalculo = (soloGrafico = false) => {
+        const calculo = onCalcular(soloGrafico);
+        setAlerta({ isOpen: !!calculo.error, mensaje: calculo.error || '' });
     };
-
-    const limpiarCondicionCalculada = () => {
-        if (yaCalculado) {
-            manejarCalculo(true);
-        }
-    };
-
     const renderParametrosManuales = () => {
         const isMatriz = modo === 'matriz';
         const modelSupportsMatriz = modelo === 'Uniforme' || modelo === 'Normal' || modelo === 'ChiCuadrado' || modelo === 'TStudent' || modelo === 'FFisher';
@@ -594,7 +220,7 @@ export default function Controles_ModelosContinuos({
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="any"
-                                value={paramMu} onChange={e => { setParamMu(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                                value={paramMu} onChange={e => { setParamMu(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                                 placeholder="Media"
                                 disabled={readOnlyParams}
                                 style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 8px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-pure)', textAlign: 'center', width: '100%', maxWidth: '130px', minWidth: '0', boxSizing: 'border-box' }}
@@ -606,7 +232,7 @@ export default function Controles_ModelosContinuos({
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="any"
-                                value={paramSigma} onChange={e => { setParamSigma(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                                value={paramSigma} onChange={e => { setParamSigma(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                                 placeholder="Desviación"
                                 disabled={readOnlyParams}
                                 style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 8px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-pure)', textAlign: 'center', width: '100%', maxWidth: '130px', minWidth: '0', boxSizing: 'border-box' }}
@@ -680,7 +306,7 @@ export default function Controles_ModelosContinuos({
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
-                                value={paramK} onChange={e => { setParamK(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                                value={paramK} onChange={e => { setParamK(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                                 placeholder="Grados de libertad"
                                 disabled={readOnlyParams}
                                 style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 12px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-pure)', textAlign: 'center', width: '160px', boxSizing: 'border-box' }}
@@ -716,7 +342,7 @@ export default function Controles_ModelosContinuos({
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
-                                value={paramV1} onChange={e => { setParamV1(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                                value={paramV1} onChange={e => { setParamV1(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                                 placeholder="Grados num."
                                 title="Grados de libertad del numerador (n)"
                                 disabled={readOnlyParams}
@@ -729,7 +355,7 @@ export default function Controles_ModelosContinuos({
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
-                                value={paramV2} onChange={e => { setParamV2(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                                value={paramV2} onChange={e => { setParamV2(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                                 placeholder="Grados den."
                                 title="Grados de libertad del denominador (m)"
                                 disabled={readOnlyParams}
@@ -765,7 +391,7 @@ export default function Controles_ModelosContinuos({
                             </label>
                             <input
                                 type="number" className="input-mat251 placeholder-small" step="1" min="1"
-                                value={paramNStudent} onChange={e => { setParamNStudent(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                                value={paramNStudent} onChange={e => { setParamNStudent(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                                 placeholder="Grados de libertad"
                                 disabled={readOnlyParams}
                                 style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 12px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-pure)', textAlign: 'center', width: '160px', boxSizing: 'border-box' }}
@@ -807,7 +433,7 @@ export default function Controles_ModelosContinuos({
                         </label>
                         <input
                             type="number" className="input-mat251 placeholder-small" step="any"
-                            value={paramA} onChange={e => { setParamA(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                            value={paramA} onChange={e => { setParamA(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                             placeholder="Mínimo"
                             disabled={readOnlyParams}
                             style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 8px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-pure)', textAlign: 'center', width: '100%', maxWidth: '130px', minWidth: '0', boxSizing: 'border-box' }}
@@ -819,7 +445,7 @@ export default function Controles_ModelosContinuos({
                         </label>
                         <input
                             type="number" className="input-mat251 placeholder-small" step="any"
-                            value={paramB} onChange={e => { setParamB(e.target.value); setYaCalculado(false); if (onCalcular) onCalcular(null); }}
+                            value={paramB} onChange={e => { setParamB(e.target.value); setYaCalculado(false); onInvalidar?.(); }}
                             placeholder="Máximo"
                             disabled={readOnlyParams}
                             style={{ ...readOnlyParams ? disabledStyle : {}, padding: '6px 8px', fontSize: FS.sm, fontFamily: FONT, borderRadius: RADIUS, border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-pure)', textAlign: 'center', width: '100%', maxWidth: '130px', minWidth: '0', boxSizing: 'border-box' }}
@@ -850,6 +476,8 @@ export default function Controles_ModelosContinuos({
                             key={tipo.id}
                             type="button"
                             className={`btn-mat251-modo ${modelo === tipo.id ? 'active' : ''}`}
+                            disabled={bloquearModo && modelo !== tipo.id}
+                            title={bloquearModo && modelo !== tipo.id ? 'La distribución está fijada por el historial' : undefined}
                             onClick={() => handleCambiarModelo(tipo.id)}
                             style={{ flex: '1 0 140px', whiteSpace: 'nowrap', fontFamily: FONT }}
                         >
@@ -863,6 +491,8 @@ export default function Controles_ModelosContinuos({
                         <button
                             type="button"
                             className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
+                            disabled={bloquearModo && modo !== 'matriz'}
+                            title={bloquearModo && modo !== 'matriz' ? 'El modo está fijado por el historial' : undefined}
                             onClick={() => { setModo('matriz'); setAlerta({ isOpen: false, mensaje: '' }); }}
                             style={{ flex: 1, fontFamily: FONT, borderRadius: RADIUS }}
                         >
@@ -871,6 +501,8 @@ export default function Controles_ModelosContinuos({
                         <button
                             type="button"
                             className={`btn-mat251-modo ${modo === 'manual' ? 'active' : ''}`}
+                            disabled={bloquearModo && modo !== 'manual'}
+                            title={bloquearModo && modo !== 'manual' ? 'El modo está fijado por el historial' : undefined}
                             onClick={() => { setModo('manual'); setAlerta({ isOpen: false, mensaje: '' }); }}
                             style={{ flex: 1, fontFamily: FONT, borderRadius: RADIUS }}
                         >
@@ -938,7 +570,7 @@ export default function Controles_ModelosContinuos({
                                                     setColumnaSeleccionada(numVal);
                                                     setStatsEstimados(null);
                                                     setYaCalculado(false);
-                                                    if (onCalcular) onCalcular(null);
+                                                    onInvalidar?.();
                                                 }}
                                                 options={columnasDisponibles.map((col, idx) => ({ value: idx, label: col }))}
                                                 placeholder="Seleccionar columna..."
@@ -958,7 +590,7 @@ export default function Controles_ModelosContinuos({
                                                     setColumnaSeleccionada2(numVal);
                                                     setStatsEstimados(null);
                                                     setYaCalculado(false);
-                                                    if (onCalcular) onCalcular(null);
+                                                    onInvalidar?.();
                                                 }}
                                                 options={columnasDisponibles.map((col, idx) => ({ value: idx, label: col }))}
                                                 placeholder="Seleccionar columna..."
@@ -978,7 +610,7 @@ export default function Controles_ModelosContinuos({
                                                     setColumnaSeleccionada(numVal);
                                                     setStatsEstimados(null);
                                                     setYaCalculado(false);
-                                                    if (onCalcular) onCalcular(null);
+                                                    onInvalidar?.();
                                                 }}
                                                 options={columnasDisponibles.map((col, idx) => ({ value: idx, label: col }))}
                                                 placeholder="Seleccione columna..."
@@ -1158,7 +790,6 @@ export default function Controles_ModelosContinuos({
                                     className={`btn-mat251-modo ${calcMode === 'directa' ? 'active' : ''}`}
                                     onClick={() => {
                                         setCalcMode('directa');
-                                        limpiarCondicionCalculada();
                                     }}
                                     style={{ flex: 1, fontFamily: FONT }}
                                 >
@@ -1169,7 +800,6 @@ export default function Controles_ModelosContinuos({
                                     className={`btn-mat251-modo ${calcMode === 'inversa' ? 'active' : ''}`}
                                     onClick={() => {
                                         setCalcMode('inversa');
-                                        limpiarCondicionCalculada();
                                     }}
                                     style={{ flex: 1, fontFamily: FONT }}
                                 >
@@ -1190,7 +820,6 @@ export default function Controles_ModelosContinuos({
                                         value={tipoCondicion}
                                         onChange={val => { 
                                             setTipoCondicion(val); 
-                                            limpiarCondicionCalculada();
                                         }}
                                         options={(() => {
                                             const isContinua = true; 
@@ -1261,7 +890,6 @@ export default function Controles_ModelosContinuos({
                                             value={valorP}
                                             onChange={e => {
                                                 setValorP(e.target.value);
-                                                limpiarCondicionCalculada();
                                             }}
                                             placeholder="Probabilidad"
                                             style={{
@@ -1310,7 +938,6 @@ export default function Controles_ModelosContinuos({
                                             value={valorX}
                                             onChange={e => {
                                                 setValorX(e.target.value);
-                                                limpiarCondicionCalculada();
                                             }}
                                             placeholder={
                                                 tipoCondicion === 'exterior' ? 'Límite izquierdo'
@@ -1347,7 +974,6 @@ export default function Controles_ModelosContinuos({
                                                 value={valorX2}
                                                 onChange={e => {
                                                     setValorX2(e.target.value);
-                                                    limpiarCondicionCalculada();
                                                 }}
                                                 placeholder={tipoCondicion === 'exterior' ? 'Límite derecho' : 'Límite superior'}
                                                 style={{
@@ -1402,7 +1028,6 @@ export default function Controles_ModelosContinuos({
                                                                     const newIntervals = [...intervals];
                                                                     newIntervals[index].min = e.target.value;
                                                                     setIntervals(newIntervals);
-                                                                    limpiarCondicionCalculada();
                                                                 }}
                                                                 placeholder="Inferior"
                                                                 className="input-mat251 placeholder-small"
@@ -1417,7 +1042,6 @@ export default function Controles_ModelosContinuos({
                                                                     const newIntervals = [...intervals];
                                                                     newIntervals[index].max = e.target.value;
                                                                     setIntervals(newIntervals);
-                                                                    limpiarCondicionCalculada();
                                                                 }}
                                                                 placeholder="Superior"
                                                                 className="input-mat251 placeholder-small"
@@ -1430,7 +1054,6 @@ export default function Controles_ModelosContinuos({
                                                                 onClick={() => {
                                                                     if (intervals.length > 1) {
                                                                         setIntervals(intervals.filter(i => i.id !== inv.id));
-                                                                        limpiarCondicionCalculada();
                                                                     }
                                                                 }}
                                                                 disabled={intervals.length === 1}
@@ -1457,7 +1080,6 @@ export default function Controles_ModelosContinuos({
                                         className="btn-primary"
                                         onClick={() => {
                                             setIntervals([...intervals, { id: Date.now(), min: '', max: '' }]);
-                                            limpiarCondicionCalculada();
                                         }}
                                         style={{
                                             padding: '5px 20px',

@@ -19,7 +19,7 @@ import ModalAlerta from '../../../ui/ModalAlerta';
 import katex from 'katex';
 import ArbolProbabilidad from '../../../Graficas/Tema_1/ArbolProbabilidad';
 import MarcoWidgetMAT251 from '../../../ui/MarcoWidgetMAT251';
-import { calcularProbabilidadTotal } from '../../../Matematicas/logica_Tema1';
+import { crearRecetaTotal, calcularRecetaTotal } from '../../../Historial/historial_Tema1';
 
 const InlineMath = ({ math }) => (
     <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
@@ -271,20 +271,17 @@ export default function ResultadosSimuladorTotal({
     ramas, setRamas,
     resultado, setResultadoSimulador,
     errorSimulador, setErrorSimulador,
-    statsDatos, abrirEditor
+    statsDatos, abrirEditor,
+    inputMode, setInputMode, manualBranches, setManualBranches,
+    causasBayesMatriz, setCausasBayesMatriz, causasBayesManual, setCausasBayesManual,
+    bloquearModo = false
 }) {
     const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
-    const [inputMode, setInputMode] = useState('matriz'); // 'matriz' | 'manual'
-    const [manualBranches, setManualBranches] = useState([
-        { id: 1, name: 'Causa 1', pA: '', pBA: '' },
-        { id: 2, name: 'Causa 2', pA: '', pBA: '' }
-    ]);
+
 
     const [ordenWidgets, setOrdenWidgets] = useState(['w-arbol']);
-    const [causasBayesMatriz, setCausasBayesMatriz] = useState([]);
-    const [causasBayesManual, setCausasBayesManual] = useState([]);
-    const [resultadoManual, setResultadoManual] = useState(null);
-    const [errorManual, setErrorManual] = useState('');
+    const resultadoManual = resultado?.modo === 'manual' ? resultado : null;
+    const errorManual = inputMode === 'manual' ? errorSimulador : '';
 
     // Datos dinámicos totalmente segregados según el modo activo
     const activeRamas = inputMode === 'manual'
@@ -296,17 +293,19 @@ export default function ResultadosSimuladorTotal({
     const setActiveCausasBayes = inputMode === 'manual' ? setCausasBayesManual : setCausasBayesMatriz;
 
     const cambiarModo = (nuevoModo) => {
-        if (nuevoModo === inputMode) return;
+        if (bloquearModo || nuevoModo === inputMode) return;
         setInputMode(nuevoModo);
         setResultadoSimulador(null);
-        setResultadoManual(null);
         setCausasBayesMatriz([]);
         setCausasBayesManual([]);
-        setErrorManual('');
         setErrorSimulador('');
     };
 
     const handleBayesChange = (val) => {
+        if (val.length && (!activeResultado || activeResultado.probB <= 0)) {
+            setAlerta({ isOpen: true, mensaje: 'El Teorema de Bayes no está definido cuando P(A) es cero.' });
+            return;
+        }
         setActiveCausasBayes(val);
         setResultadoSimulador(prev => {
             if (!prev) return prev;
@@ -317,7 +316,6 @@ export default function ResultadosSimuladorTotal({
     const agregarRama = () => {
         const nextId = manualBranches.length > 0 ? Math.max(...manualBranches.map(b => b.id)) + 1 : 1;
         setManualBranches([...manualBranches, { id: nextId, name: `Causa ${nextId}`, pA: '', pBA: '' }]);
-        setResultadoManual(null);
         setResultadoSimulador(null);
         setCausasBayesManual([]);
     };
@@ -326,7 +324,6 @@ export default function ResultadosSimuladorTotal({
         if (manualBranches.length <= 2) return;
         const filtradas = manualBranches.filter(b => b.id !== id);
         setManualBranches(filtradas);
-        setResultadoManual(null);
         setResultadoSimulador(null);
         setCausasBayesManual([]);
     };
@@ -338,7 +335,6 @@ export default function ResultadosSimuladorTotal({
             }
             return b;
         }));
-        setResultadoManual(null);
         setResultadoSimulador(null);
         setCausasBayesManual([]);
     };
@@ -381,6 +377,12 @@ export default function ResultadosSimuladorTotal({
         return [...new Set(vals)].sort();
     }, [varSeleccionada, colEvento, filas]);
 
+    useEffect(() => {
+        if (inputMode === 'matriz' && valExito && !valoresUnicosEvento.includes(String(valExito))) {
+            setValExito('');
+        }
+    }, [inputMode, valExito, valoresUnicosEvento, setValExito]);
+
     // Garantizar exclusión mutua estricta: si colCausa y colEvento coinciden, limpiar colEvento
     useEffect(() => {
         if (colCausa && colEvento && colCausa === colEvento) {
@@ -402,125 +404,28 @@ export default function ResultadosSimuladorTotal({
         }
     }, [varSeleccionada, colCausa, colEvento, setColCausa, setColEvento, setValExito]);
 
-    const calcular = () => {
-        if (!varSeleccionada) {
-            setAlerta({ isOpen: true, mensaje: "Debes importar o seleccionar una Matriz de Excel primero." });
-            setResultadoSimulador(null);
-            return;
-        }
-        if (!colCausa) {
-            setAlerta({ isOpen: true, mensaje: <span>Debes seleccionar la Variable Causa (<InlineMath math="B_i" />) antes de calcular.</span> });
-            setResultadoSimulador(null);
-            return;
-        }
-        if (!colEvento) {
-            setAlerta({ isOpen: true, mensaje: <span>Debes seleccionar la Variable Evento (<InlineMath math="A" />) antes de calcular.</span> });
-            setResultadoSimulador(null);
-            return;
-        }
-        if (!valExito) {
-            setAlerta({ isOpen: true, mensaje: "Debes seleccionar el Valor de 'Éxito' en el evento antes de calcular." });
-            setResultadoSimulador(null);
-            return;
-        }
-
-        const res = calcularProbabilidadTotal(filas, varSeleccionada.nombresColumnas, colCausa, colEvento, valExito);
-        if (res.error) {
-            setErrorSimulador(res.error);
-            setResultadoSimulador(null);
-        } else {
-            setRamas(res.resultado.desglose);
-            setResultadoSimulador({
-                ...res.resultado,
-                modo: 'matriz',
-                colCausa,
-                colEvento,
-                valExito,
-                causasBayes: []
-            });
-            setErrorSimulador('');
-            setCausasBayesMatriz([]); // Reset Bayes de matriz
-        }
-    };
-
-    const calcularManual = () => {
-        for (const b of manualBranches) {
-            const nombre = (b.name || '').trim();
-            if (!nombre) {
-                setAlerta({ isOpen: true, mensaje: "Todas las causas deben tener un nombre asignado." });
-                setResultadoManual(null);
-                setResultadoSimulador(null);
-                return;
-            }
-            if (b.pA === '' || b.pBA === '') {
-                setAlerta({ isOpen: true, mensaje: `Debes ingresar las probabilidades P(${nombre}) y P(A|${nombre}).` });
-                setResultadoManual(null);
-                setResultadoSimulador(null);
-                return;
-            }
-            const pA = parseFloat(b.pA);
-            const pBA = parseFloat(b.pBA);
-            if (isNaN(pA) || pA < 0 || pA > 1) {
-                setAlerta({ isOpen: true, mensaje: `La probabilidad P(${nombre}) debe ser un número entre 0 y 1.` });
-                setResultadoManual(null);
-                setResultadoSimulador(null);
-                return;
-            }
-            if (isNaN(pBA) || pBA < 0 || pBA > 1) {
-                setAlerta({ isOpen: true, mensaje: `La probabilidad condicional P(A|${nombre}) debe ser un número entre 0 y 1.` });
-                setResultadoManual(null);
-                setResultadoSimulador(null);
-                return;
-            }
-        }
-
-        const totalPA = manualBranches.reduce((acc, b) => acc + (parseFloat(b.pA) || 0), 0);
-        if (Math.abs(totalPA - 1) > 0.0001) {
-            setAlerta({
-                isOpen: true,
-                mensaje: `La suma de las probabilidades marginales P(B_i) es ${(totalPA * 100).toFixed(2)}%. Recuerde que para constituir una partición completa del espacio muestral, la suma debe ser igual al 100% (1.0).`
-            });
-            setResultadoManual(null);
-            setResultadoSimulador(null);
-            return;
-        }
-
-        const desglose = manualBranches.map(b => {
-            const pAVal = parseFloat(b.pA);
-            const pBAVal = parseFloat(b.pBA);
-            return {
-                id: b.id,
-                nombre: (b.name || `Causa ${b.id}`).trim(),
-                n_Ai: 0,
-                totalDatos: 0,
-                pA: pAVal,
-                n_B_dado_Ai: 0,
-                pB_A: pBAVal,
-                mult: pAVal * pBAVal
-            };
+    const calcularActual = () => {
+        const receta = crearRecetaTotal({
+            modoTotal: inputMode, ramasManualesTotal: manualBranches,
+            filas, varSeleccionada, colCausa, colEvento, valExito,
+            causasBayesTotal: [],
         });
-
-        const probB = desglose.reduce((acc, r) => acc + r.mult, 0);
-        const resMan = {
-            probB,
-            desglose,
-            modo: 'manual',
-            causasBayes: []
-        };
-        setResultadoManual(resMan);
-        setResultadoSimulador(resMan);
-        setCausasBayesManual([]);
-        setErrorManual('');
-    };
-
-    // Limpiar el resultado al cambiar parámetros de matriz
-    useEffect(() => {
-        setResultadoSimulador(null);
+        const calculo = calcularRecetaTotal(receta);
         setCausasBayesMatriz([]);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filas, colCausa, colEvento, valExito, varSeleccionada]);
-
-
+        setCausasBayesManual([]);
+        if (calculo.error) {
+            setResultadoSimulador(null);
+            setRamas([]);
+            setErrorSimulador(calculo.error);
+            setAlerta({ isOpen: true, mensaje: calculo.error });
+            return;
+        }
+        setRamas(calculo.resultado.desglose);
+        setResultadoSimulador(calculo.resultado);
+        setErrorSimulador('');
+    };
+    const calcular = calcularActual;
+    const calcularManual = calcularActual;
 
     return (
         <div style={{ marginTop: '10px' }}>
@@ -530,6 +435,8 @@ export default function ResultadosSimuladorTotal({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
+                        disabled={bloquearModo && inputMode !== 'matriz'}
+                        title={bloquearModo && inputMode !== 'matriz' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => cambiarModo('matriz')}
                         style={{ fontFamily: FONT }}
                     >
@@ -538,6 +445,8 @@ export default function ResultadosSimuladorTotal({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
+                        disabled={bloquearModo && inputMode !== 'manual'}
+                        title={bloquearModo && inputMode !== 'manual' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => cambiarModo('manual')}
                         style={{ fontFamily: FONT }}
                     >

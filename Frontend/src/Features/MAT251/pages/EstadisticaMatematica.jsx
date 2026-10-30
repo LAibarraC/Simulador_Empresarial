@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useHistorialMAT251 } from "../Historial/useHistorialMAT251";
+import { puedeActualizarHistorialMAT251 } from "../Historial/historialMAT251";
 import Datos from "../../../pages/Datos";
 import { useCalculadoraExcel } from "../../MAT151/hooks/useCalculadoraExcel";
 import { useData } from "../../../components/gestion_datos/DataContext";
@@ -71,11 +73,30 @@ const TypingTitle = () => {
 export default function Pantalla() {
   const { usuario } = useData();
   const navigate = useNavigate();
+  const location = useLocation();
+  const principalRef = useRef(null);
+  const locationActualRef = useRef(location);
+  locationActualRef.current = location;
+  const [estadoActualizacionHistorial, setEstadoActualizacionHistorial] = useState({
+    snapshot: null,
+    habilitado: false,
+  });
   const [mostrarDatos, setMostrarDatos] = useState(false);
   const [mostrarCreacion, setMostrarCreacion] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [selectedFile, setSelectedFile] = useState("");
   const [selectedSheet, setSelectedSheet] = useState(0);
+  const { guardando, guardarCalculoMAT251 } = useHistorialMAT251({ usuario, selectedFile });
+
+  const handleGuardarHistorial = async () => {
+    setMenuAbierto(false);
+    if (!principalRef.current?.obtenerDatosParaHistorial) {
+      alerta.advertencia("No disponible", "No hay cálculo listo para guardar.");
+      return;
+    }
+    const datos = principalRef.current.obtenerDatosParaHistorial();
+    await guardarCalculoMAT251(datos);
+  };
   const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
 
   const _stats = useCalculadoraExcel(selectedFile, selectedSheet);
@@ -214,7 +235,7 @@ export default function Pantalla() {
           </div>
 
           <TypingTitle />
-          
+
           <div 
             style={{ 
               backgroundColor: "rgba(59, 130, 246, 0.15)", 
@@ -286,21 +307,125 @@ export default function Pantalla() {
     );
   }
 
+  const paramsReabrir = location.state || {};
+  const historialOrigen = paramsReabrir.historialOrigen;
+  const esHistorialEditable = !!historialOrigen
+    && ['conteo', 'probabilidad', 'probabilidad_total', 'simulador_total', 'regla_adicion', 'regla_multiplicacion', 'dist_discreta', 'dist_continua', 'distribuciones_discretas', 'discretas', 'modelos_discretos', 'distribuciones_continuas', 'continuas', 'modelos_continuos', 'distribuciones_muestrales', 'estimacion_puntual', 'estimacion_intervalos', 'tyf', 'hipotesis_parametricas', 'hipotesis_noparametricas'].includes(
+      (paramsReabrir.snapshot?.operacion || paramsReabrir.calculoReabrir)?.toLowerCase()
+    );
+
+  const puedeGuardarCambios = esHistorialEditable
+    && estadoActualizacionHistorial.snapshot === paramsReabrir.snapshot
+    && estadoActualizacionHistorial.habilitado;
+
+  const handleGuardarCambiosHistorial = async () => {
+    if (guardando || !esHistorialEditable || !historialOrigen?.id) return;
+    const datos = principalRef.current?.obtenerDatosParaHistorial();
+    if (!datos || !puedeActualizarHistorialMAT251(datos, paramsReabrir.snapshot)) return;
+    const ubicacionAlGuardar = location.key;
+    const respuesta = await guardarCalculoMAT251(datos, historialOrigen.id);
+    if (!respuesta?.registro || !principalRef.current || locationActualRef.current.key !== ubicacionAlGuardar) return;
+    const registro = respuesta.registro;
+    // Restablecer recuperará la última versión confirmada por el servidor.
+    navigate(location.pathname, {
+      replace: true,
+      state: {
+        ...paramsReabrir,
+        archivoReabrir: registro.archivo_origen,
+        calculoReabrir: registro.calculo,
+        snapshot: registro.snapshot,
+        historialOrigen: {
+          id: registro.id,
+          fecha: registro.fecha,
+          hora: registro.hora,
+          modulo: registro.modulo,
+          calculo: registro.calculo,
+          archivo: registro.archivo_origen,
+        },
+      },
+    });
+  };
+
+  const salirDelHistorial = () => {
+    const operacion = paramsReabrir.snapshot?.operacion || paramsReabrir.calculoReabrir;
+    setSelectedFile("");
+    setSelectedSheet(0);
+    setMostrarDatos(false);
+    setMostrarCreacion(false);
+    setMenuAbierto(false);
+    setModalAlerta({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+    // Quitar el estado del historial desbloquea el selector. La clave de
+    // Principal cambia y reinicia sus parámetros, resultados y diálogos.
+    navigate(operacion ? `/MAT251/${encodeURIComponent(operacion)}` : "/MAT251", {
+      replace: true,
+      state: null,
+    });
+  };
+
   return (
     <div className="mat251 contenedor-principal-sistema">
+      {historialOrigen && (
+        <section id="tour-mat251-barra-historial" className="aviso-origen-historial" aria-label="Cálculo reabierto del historial">
+          <svg className="aviso-origen-historial-icono" width="22" height="22" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 11a9 9 0 1 1 2.8 7" />
+            <polyline points="3 4 3 11 10 11" />
+            <polyline points="12 7 12 12 15 14" />
+          </svg>
+          <div id="tour-mat251-historial-info" className="aviso-origen-historial-info">
+            <span className="aviso-origen-historial-modulo">{historialOrigen.modulo || "MAT251"}</span>
+            <p className="aviso-origen-historial-detalle">
+              {[
+                historialOrigen.fecha && `Guardado el ${historialOrigen.fecha}`,
+                historialOrigen.hora,
+              ].filter(Boolean).join(" - ")}
+            </p>
+          </div>
+          <div className="acciones-historial-mat251">
+            {esHistorialEditable && (
+              <>
+                <button type="button" id="tour-mat251-historial-guardar" className="btn-verde btn-volver-historial" disabled={guardando || !puedeGuardarCambios} onClick={handleGuardarCambiosHistorial}>
+                  {guardando ? "Guardando..." : "Guardar cambios"}
+                </button>
+                <button type="button" id="tour-mat251-historial-restablecer" className="btn-azul btn-volver-historial" disabled={guardando} onClick={() => principalRef.current?.restablecerCalculoHistorial()}>
+                  Restablecer datos
+                </button>
+              </>
+            )}
+            <button type="button" id="tour-mat251-historial-salir" className="btn-rojo btn-volver-historial" onClick={salirDelHistorial}>
+              Salir del historial
+            </button>
+            <button type="button" id="tour-mat251-historial-volver" className="btn-azul btn-volver-historial" onClick={() => navigate("/historial")}>
+              Volver al Historial
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* VENTANA PRINCIPAL: CÁLCULOS (Principal.jsx) */}
       <div className="ventana-contenido-principal">
-        <Principal usuario={usuario} selectedFile={selectedFile} selectedSheet={selectedSheet} />
+        <Principal
+          key={paramsReabrir.snapshot ? `historial-${historialOrigen?.id || "abierto"}` : "normal"}
+          ref={principalRef}
+          usuario={usuario}
+          selectedFile={selectedFile}
+          setSelectedFile={setSelectedFile}
+          selectedSheet={selectedSheet}
+          setSelectedSheet={setSelectedSheet}
+          reabrirState={location.state}
+          onEstadoHistorialChange={setEstadoActualizacionHistorial}
+        />
       </div>
 
       {/* MENÚ FLOTANTE RADIAL */}
-      <div className={`menu-flotante-radial ${menuAbierto ? 'abierto' : ''}`}>
-        
+      <div className={`menu-flotante-radial ${esHistorialEditable ? 'menu-historial-conteo' : ''} ${menuAbierto ? 'abierto' : ''}`}>
+
         {/* Botón Principal (Toggle) */}
         <button
           className="fab-main"
           onClick={() => setMenuAbierto(!menuAbierto)}
-          title="Menú de Herramientas"
+          aria-label="Menú de Herramientas"
+          aria-expanded={menuAbierto}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
@@ -308,32 +433,36 @@ export default function Pantalla() {
           </svg>
         </button>
 
-        {/* Botón 1: Gestión de Datos */}
-        <button
-          className="fab-item item-1"
-          onClick={() => { setMostrarDatos(true); setMenuAbierto(false); }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-          </svg>
-          <span className="fab-tooltip">Gestión de Datos</span>
-        </button>
+        {!esHistorialEditable && (
+          <>
+            {/* Botón 1: Gestión de Datos */}
+            <button
+              className="fab-item item-1"
+              onClick={() => { setMostrarDatos(true); setMenuAbierto(false); }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+              </svg>
+              <span className="fab-tooltip">Gestión de Datos</span>
+            </button>
 
-        {/* Botón 2: Creación de Tablas MAT251 */}
-        <button
-          className="fab-item item-2"
-          onClick={() => { setMostrarCreacion(true); setMenuAbierto(false); }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="3" y1="9" x2="21" y2="9"></line>
-            <line x1="3" y1="15" x2="21" y2="15"></line>
-            <line x1="12" y1="3" x2="12" y2="21"></line>
-          </svg>
-          <span className="fab-tooltip">Creación de Tablas</span>
-        </button>
+            {/* Botón 2: Creación de Tablas MAT251 */}
+            <button
+              className="fab-item item-2"
+              onClick={() => { setMostrarCreacion(true); setMenuAbierto(false); }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="3" y1="15" x2="21" y2="15"></line>
+                <line x1="12" y1="3" x2="12" y2="21"></line>
+              </svg>
+              <span className="fab-tooltip">Creación de Tablas</span>
+            </button>
+          </>
+        )}
 
         {/* Botón 3: Exportar Reporte PDF (Tema 1) */}
         <button
@@ -348,18 +477,24 @@ export default function Pantalla() {
           <span className="fab-tooltip">{exportandoPDF ? "Generando PDF..." : "Exportar Reporte PDF"}</span>
         </button>
 
-        {/* Botón 4: Guardar en Historial */}
-        <button
-          type="button"
-          className="fab-item item-5-historial"
-          id="tour-mat251-fab-historial"
-          disabled
-          title="Guardar en historial"
-          aria-label="Guardar en historial"
-        >
-          <IconoGuardar />
-          <span className="fab-tooltip">Guardar en historial</span>
-        </button>
+        {!esHistorialEditable && (
+          <>
+            {/* Botón 4: Guardar en Historial */}
+            <button
+              type="button"
+              className={`fab-item item-5-historial ${guardando ? 'guardando' : ''}`}
+              id="tour-mat251-fab-historial"
+              onClick={handleGuardarHistorial}
+              disabled={guardando}
+              title={guardando ? "Guardando en historial..." : "Guardar en historial"}
+              aria-label="Guardar en historial"
+              style={guardando ? { opacity: 0.7, pointerEvents: "none" } : undefined}
+            >
+              <IconoGuardar />
+              <span className="fab-tooltip">{guardando ? "Guardando..." : "Guardar en historial"}</span>
+            </button>
+          </>
+        )}
 
         {/* Botón 5: Guía Rápida Interactiva */}
         <button
@@ -369,14 +504,14 @@ export default function Pantalla() {
             setMenuAbierto(false);
             iniciarGuiaMAT251();
           }}
-          title="Guía Rápida"
+          title={historialOrigen ? "Guía del historial" : "Guía Rápida"}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          <span className="fab-tooltip">Guía Rápida</span>
+          <span className="fab-tooltip">{historialOrigen ? "Guía del historial" : "Guía Rápida"}</span>
         </button>
       </div>
 
@@ -417,7 +552,7 @@ export default function Pantalla() {
       )}
 
       {/* ESTADO DEL ARCHIVO */}
-      {selectedFile && (
+      {selectedFile && !paramsReabrir.snapshot && !historialOrigen && (
         <div style={{
           position: 'absolute',
           bottom: '20px',

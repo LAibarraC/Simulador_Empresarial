@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import katex from 'katex';
 import "katex/dist/katex.min.css";
 import GraficoBastonesDiscreta from "../../../Graficas/Tema_2/GraficoBastonesDiscreta";
@@ -10,17 +10,19 @@ const LatexText = React.memo(({ math }) => {
     return <span dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />;
 });
 
-export default function Resultados_DistribucionDiscreta({ resultados }) {
-    const [ordenMomento, setOrdenMomento] = useState(1);
-    const [propA, setPropA] = useState(2);
-    const [propB, setPropB] = useState(3);
+export default function Resultados_DistribucionDiscreta({ resultados, vista, setVista }) {
+    const { ordenMomento, propA, propB } = vista;
+    const setOrdenMomento = valor => setVista(prev => ({ ...prev, ordenMomento: valor }));
+    const setPropA = valor => setVista(prev => ({ ...prev, propA: valor }));
+    const setPropB = valor => setVista(prev => ({ ...prev, propB: valor }));
 
     // Cálculo interactivo del momento solicitado
     const momentoCalculado = useMemo(() => {
         if (!resultados || !resultados.datos) return 0;
-        const r = parseInt(ordenMomento);
-        if (isNaN(r)) return 0;
-        return resultados.datos.reduce((acc, d) => acc + (Math.pow(d.x, r) * d.p), 0);
+        const r = Number(ordenMomento);
+        if (!Number.isSafeInteger(r) || r < 1) return null;
+        const momento = resultados.datos.reduce((acc, d) => d.p === 0 ? acc : acc + (Math.pow(d.x, r) * d.p), 0);
+        return Number.isFinite(momento) ? momento : null;
     }, [resultados, ordenMomento]);
 
     const renderLatex = (str) => {
@@ -233,7 +235,7 @@ export default function Resultados_DistribucionDiscreta({ resultados }) {
                         </div>
                         <div className="formula-desarrollo-box formula-scroll-container thin-scrollbar" style={{ width: '100%', maxWidth: '100%', minWidth: 0, overflowX: 'auto', background: 'var(--bg-input)', border: 'none', padding: '12px 10px', borderRadius: RADIUS, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', textAlign: 'left', color: 'var(--text-pure)', boxSizing: 'border-box' }}>
                             <div style={{ fontWeight: 'normal', textAlign: 'left' }}>
-                                {renderLatex(`\\mu'_{${ordenMomento || 'r'}} = E(X^{${ordenMomento || 'r'}}) = \\mathbf{${momentoCalculado.toFixed(4)}}`)}
+                                {renderLatex(`\\mu'_{${ordenMomento || 'r'}} = E(X^{${ordenMomento || 'r'}}) = \\mathbf{${momentoCalculado === null ? "\\text{No válido}" : momentoCalculado.toFixed(4)}}`)}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <label style={{ fontSize: FS.sm, color: 'var(--text-pure)', fontFamily: FONT, display: 'inline-flex', alignItems: 'center' }}>

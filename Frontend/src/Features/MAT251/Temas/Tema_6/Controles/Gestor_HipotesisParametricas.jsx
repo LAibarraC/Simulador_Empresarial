@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FONT, RADIUS } from '../../../Principal/Constantes';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -30,7 +30,7 @@ const MODOS = [
     { id: 'manual', label: 'Modo Manual' }
 ];
 
-export function Controles_HP_UI({ prueba, setPrueba }) {
+export function Controles_HP_UI({ prueba, setPrueba, bloquearHistorial = false }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -41,7 +41,8 @@ export function Controles_HP_UI({ prueba, setPrueba }) {
                                 key={p.id}
                                 type="button"
                                 className={`btn-mat251-modo ${prueba === p.id ? 'active' : ''}`}
-                                onClick={() => setPrueba(p.id)}
+                                disabled={bloquearHistorial && prueba !== p.id}
+                                onClick={() => { if (!bloquearHistorial) setPrueba(p.id); }}
                                 style={{ width: '100%', padding: '5px 15px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '5px', fontSize: '0.75rem' }}
                             >
                                 {p.label}
@@ -54,28 +55,12 @@ export function Controles_HP_UI({ prueba, setPrueba }) {
     );
 }
 
-export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, modo, setModo, onResultado }) {
-    const [resMatriz, setResMatriz] = useState(null);
-    const [resManual, setResManual] = useState(null);
+export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, statsDatos, abrirEditor, prueba, modo, setModo, configuracion, onEditar, onCalcular, resultado, bloquearHistorial = false }) {
     const [resSimulacion, setResSimulacion] = useState(null);
     const [pruebaResSimulacion, setPruebaResSimulacion] = useState(null);
-    const variableKey = `${varSeleccionada?.id ?? ''}:${varSeleccionada?.nombre ?? ''}:${statsDatos?.total ?? 0}`;
-    const guardarMatriz = useCallback(resultados => setResMatriz(resultados ? { prueba, variableKey, resultados } : null), [prueba, variableKey]);
-    const guardarManual = useCallback(resultados => setResManual(resultados ? { prueba, resultados } : null), [prueba]);
-    const matrizActual = resMatriz?.prueba === prueba && resMatriz?.variableKey === variableKey ? resMatriz.resultados : null;
-    const manualActual = resManual?.prueba === prueba ? resManual.resultados : null;
-    const exportable = modo === 'matriz' ? matrizActual : modo === 'manual' ? manualActual : null;
-
+    const resultadoActual = resultado?.operacion === 'Hipotesis_parametricas' && resultado.prueba === prueba
+        && resultado.modo === modo ? resultado.resultados : null;
     useEffect(() => {
-        onResultado?.(exportable ? {
-            operacion: 'Hipotesis_parametricas', prueba, modo,
-            nombreVariable: varSeleccionada?.nombre, resultados: exportable
-        } : null);
-    }, [exportable, prueba, modo, varSeleccionada?.nombre, onResultado]);
-
-    useEffect(() => {
-        setResMatriz(null);
-        setResManual(null);
         setResSimulacion(null);
         setPruebaResSimulacion(null);
     }, [prueba, modo, varSeleccionada, statsDatos?.total]);
@@ -92,7 +77,8 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
                                 key={m.id}
                                 type="button"
                                 className={`btn-mat251-modo ${modo === m.id ? 'active' : ''}`}
-                                onClick={() => setModo(m.id)}
+                                disabled={bloquearHistorial && modo !== m.id}
+                                onClick={() => { if (!bloquearHistorial) setModo(m.id); }}
                                 style={{ flex: '1 1 0', minWidth: 'max-content', padding: '5px 15px', textAlign: 'center' }}
                             >
                                 {m.label}
@@ -108,14 +94,13 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
                     <>
                         <Controles_HP_Matriz
                             prueba={prueba}
-                            varSeleccionada={varSeleccionada}
                             filas={filas}
                             statsDatos={statsDatos}
                             abrirEditor={abrirEditor}
-                            onCalcular={guardarMatriz}
+                            configuracion={configuracion.matriz} onEditar={onEditar} onCalcular={onCalcular}
                         />
-                        {matrizActual && varSeleccionada && statsDatos?.total > 0 && (
-                            <Resultados_HP_Matriz resultados={matrizActual} prueba={prueba} />
+                        {resultadoActual && (
+                            <Resultados_HP_Matriz resultados={resultadoActual} prueba={prueba} />
                         )}
                     </>
                 )}
@@ -124,10 +109,10 @@ export default function Gestor_HipotesisParametricas({ varSeleccionada, filas, s
                     <>
                         <Controles_HP_Manual
                             prueba={prueba}
-                            onCalcular={guardarManual}
+                            configuracion={configuracion.manual} onEditar={onEditar} onCalcular={onCalcular}
                         />
-                        {manualActual && (
-                            <Resultados_HP_Manual resultados={manualActual} prueba={prueba} />
+                        {resultadoActual && (
+                            <Resultados_HP_Manual resultados={resultadoActual} prueba={prueba} />
                         )}
                     </>
                 )}

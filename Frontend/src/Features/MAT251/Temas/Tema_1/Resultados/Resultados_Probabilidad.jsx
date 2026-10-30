@@ -35,7 +35,8 @@ export default function ResultadosProbabilidad({
     tipo = 'clasica',
     eventoCondicion = [], setModalCondicion = () => { },
     colProbClasica, setColProbClasica, varSeleccionada, filas = [],
-    inputMode, setInputMode, mostrarAlerta, onResultadoExperimento
+    inputMode, setInputMode, mostrarAlerta, onResultadoExperimento,
+    manualN, setManualN, manualF, setManualF, experimentoRestaurar, bloquearModos = false
 }) {
     const [isDropdownColOpen, setIsDropdownColOpen] = useState(false);
     const dropdownColRef = useRef(null);
@@ -165,8 +166,7 @@ export default function ResultadosProbabilidad({
 
     const labels = getLabels();
 
-    const [manualN, setManualN] = useState('');
-    const [manualF, setManualF] = useState('');
+
 
     const nVal = parseFloat(manualN) || 0;
     const fVal = parseFloat(manualF) || 0;
@@ -182,34 +182,13 @@ export default function ResultadosProbabilidad({
         errorManual = `${labels.numerador.text}${labels.numerador.math} no puede ser mayor que el ${labels.denominador.text}${labels.denominador.math}.`;
     }
 
-    const activeRes = (() => {
-        if (inputMode === 'manual') {
-            if (errorManual || nVal <= 0) {
-                return {
-                    casosFavorables: fVal,
-                    casosTotales: nVal,
-                    probabilidadDecimal: '0.0000',
-                    probabilidadPorcentaje: '0.00',
-                    arrFiltrado: []
-                };
-            }
-            const pDec = fVal / nVal;
-            return {
-                casosFavorables: fVal,
-                casosTotales: nVal,
-                probabilidadDecimal: pDec.toFixed(4),
-                probabilidadPorcentaje: (pDec * 100).toFixed(2),
-                arrFiltrado: []
-            };
-        }
-        return resProbabilidad;
-    })();
+    if (!errorManual && isCond && (nVal > 1 || fVal > 1)) {
+        errorManual = 'P(AB) y P(B) deben estar entre 0 y 1.';
+    } else if (!errorManual && !isCond && (!Number.isSafeInteger(nVal) || !Number.isSafeInteger(fVal))) {
+        errorManual = 'Ingresa cantidades enteras para los casos favorables y el total.';
+    }
 
-    useEffect(() => {
-        if (inputMode === 'manual' && setResProbabilidad) {
-            setResProbabilidad(activeRes);
-        }
-    }, [inputMode, activeRes]);
+    const activeRes = resProbabilidad;
 
     const handleEjecutarSimulacion = () => {
         if (eventoFavorable.length === 0) {
@@ -520,7 +499,9 @@ export default function ResultadosProbabilidad({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'matriz' ? 'active' : ''}`}
-                        onClick={() => setInputMode('matriz')}
+                        disabled={bloquearModos && inputMode !== 'matriz'}
+                        title={bloquearModos && inputMode !== 'matriz' ? 'El modo está fijado por el historial' : undefined}
+                        onClick={() => { if (!bloquearModos) setInputMode('matriz'); }}
                         style={{ fontFamily: FONT }}
                     >
                         Análisis de Matriz
@@ -529,7 +510,10 @@ export default function ResultadosProbabilidad({
                         <button
                             type="button"
                             className={`btn-mat251-modo ${inputMode === 'simulacion' ? 'active' : ''}`}
+                            disabled={bloquearModos && inputMode !== 'simulacion'}
+                            title={bloquearModos && inputMode !== 'simulacion' ? 'El modo está fijado por el historial' : undefined}
                             onClick={() => {
+                                if (bloquearModos) return;
                                 setInputMode('simulacion');
                                 if (tipo === 'clasica' && setColProbClasica) {
                                     setColProbClasica('');
@@ -544,7 +528,9 @@ export default function ResultadosProbabilidad({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${inputMode === 'manual' ? 'active' : ''}`}
-                        onClick={() => setInputMode('manual')}
+                        disabled={bloquearModos && inputMode !== 'manual'}
+                        title={bloquearModos && inputMode !== 'manual' ? 'El modo está fijado por el historial' : undefined}
+                        onClick={() => { if (!bloquearModos) setInputMode('manual'); }}
                         style={{ fontFamily: FONT }}
                     >
                         Modo Manual
@@ -553,7 +539,9 @@ export default function ResultadosProbabilidad({
                         <button
                             type="button"
                             className={`btn-mat251-modo ${inputMode === 'experimentos' ? 'active' : ''}`}
-                            onClick={() => setInputMode('experimentos')}
+                            disabled={bloquearModos && inputMode !== 'experimentos'}
+                            title={bloquearModos && inputMode !== 'experimentos' ? 'El modo está fijado por el historial' : undefined}
+                            onClick={() => { if (!bloquearModos) setInputMode('experimentos'); }}
                             style={{ fontFamily: FONT }}
                         >
                             Experimentos
@@ -569,6 +557,8 @@ export default function ResultadosProbabilidad({
                         varSeleccionada={varSeleccionada}
                         abrirEditor={abrirEditor}
                         onResultadoExperimento={onResultadoExperimento}
+                        estadoRestaurar={experimentoRestaurar}
+                        bloquearTipo={bloquearModos}
                     />
                 ) : inputMode === 'manual' ? (
                     /* INTERFAZ PARA MODO MANUAL */
@@ -582,7 +572,9 @@ export default function ResultadosProbabilidad({
                                     <input
                                         type="number"
                                         min="0"
-                                        placeholder="Ej: 5"
+                                        max={isCond ? 1 : undefined}
+                                        step={isCond ? 'any' : 1}
+                                        placeholder={isCond ? "Ej: 0.2" : "Ej: 5"}
                                         className="input-mat251 placeholder-small"
                                         value={manualF}
                                         onChange={(e) => setManualF(e.target.value)}
@@ -607,8 +599,10 @@ export default function ResultadosProbabilidad({
                                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, fontSize: FS.md, color: 'var(--text-main)', whiteSpace: 'nowrap' }}><InlineMath math={labels.denominador.math} />:</span>
                                     <input
                                         type="number"
-                                        min="1"
-                                        placeholder="Ej: 10"
+                                        min={isCond ? 0 : 1}
+                                        max={isCond ? 1 : undefined}
+                                        step={isCond ? 'any' : 1}
+                                        placeholder={isCond ? "Ej: 0.5" : "Ej: 10"}
                                         className="input-mat251 placeholder-small"
                                         value={manualN}
                                         onChange={(e) => setManualN(e.target.value)}
@@ -634,6 +628,11 @@ export default function ResultadosProbabilidad({
                                 {errorManual}
                             </div>
                         )}
+                        <button type="button" id="tour-mat251-btn-calcular" className="button_calcular"
+                            onClick={ejecutar}
+                            style={{ width: 'fit-content', alignSelf: 'center', padding: '5px 20px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 600, fontFamily: FONT }}>
+                            CALCULAR
+                        </button>
                     </div>
                 ) : inputMode === 'simulacion' && tipo === 'clasica' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '0px' }}>

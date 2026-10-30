@@ -56,7 +56,7 @@ export default function ControlesConteo({
                             <label style={{ fontSize: FS.sm, fontFamily: FONT, width: '85px', flexShrink: 0, margin: 0, color: 'var(--text-pure)' }}>{label}</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
                                 <button type="button" className="btn-primary" onClick={() => ajustar(setVal, val, '-')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>−</button>
-                                <input type="number" value={val} onChange={(e) => setVal(e.target.value)} className="container_cal_input" style={{ textAlign: 'center', flex: 1, borderRadius: RADIUS, fontSize: FS.base, color: 'var(--text-pure)', backgroundColor: 'var(--bg-input)', border: '1px solid var(--border-color)', outline: 'none' }} />
+                                <input type="number" min="0" step="1" value={val} onChange={(e) => setVal(e.target.value)} className="container_cal_input" style={{ textAlign: 'center', flex: 1, borderRadius: RADIUS, fontSize: FS.base, color: 'var(--text-pure)', backgroundColor: 'var(--bg-input)', border: '1px solid var(--border-color)', outline: 'none' }} />
                                 <button type="button" className="btn-primary" onClick={() => ajustar(setVal, val, '+')} style={{ width: '32px', padding: '4px', borderRadius: RADIUS, fontSize: FS.md }}>+</button>
                             </div>
                         </div>

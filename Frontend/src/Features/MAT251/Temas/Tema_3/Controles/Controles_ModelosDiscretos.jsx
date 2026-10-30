@@ -1,54 +1,25 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import '../../../styles/Temas/Tema3.css';
-import { calcularDistribucionModelo, generarDatosGrafico } from '../../../Matematicas/logica_Tema3';
+import {
+  crearEstadoModelosDiscretos, columnasModelosDiscretos, valoresColumnaModelo,
+} from '../../../Historial/historial_Tema3';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { FONT, FS, RADIUS } from '../../../Principal/Constantes';
 import { EditarDatos } from '../../../../../ui/iconos';
 import StatLabel from '../../../ui/StatLabel';
+import { formatearParametroDiscreto } from '../../../Matematicas/logica_Tema3';
 
 export default function Controles_ModelosDiscretos({
     varSeleccionada,
     filas,
     statsDatos,
     abrirEditor,
-    onCalcular,
+    onCalcular, onEstimar, onInvalidar, modelo, setModelo, modelosState, setModelosState, bloquearModo = false,
     children
 }) {
-    const initialModelosDiscretosState = {
-        Bernoulli: {
-            modo: 'matriz',
-            manual: { p: '' },
-            matriz: { col: 0, valorExito: '', stats: null, p: '' },
-            condicion: { tipo: 'exacta', x: '', b: '' },
-            yaCalculado: false
-        },
-        Binomial: {
-            modo: 'matriz',
-            manual: { n: '', p: '' },
-            matriz: { col: 0, valorExito: '', modoEstimacion: 'especifico', nArriba: '', muestraN: '', stats: null, n: '', p: '' },
-            condicion: { tipo: 'exacta', x: '', b: '' },
-            yaCalculado: false
-        },
-        Poisson: {
-            modo: 'matriz',
-            manual: { lambda: '' },
-            matriz: { col: 0, stats: null, lambda: '' },
-            condicion: { tipo: 'exacta', x: '', b: '' },
-            yaCalculado: false
-        },
-        Hipergeometrica: {
-            modo: 'matriz',
-            manual: { N: '', K: '', n: '' },
-            matriz: { col: 0, valorExito: '', muestraN: '', stats: null, N: '', K: '', n: '' },
-            condicion: { tipo: 'exacta', x: '', b: '' },
-            yaCalculado: false
-        }
-    };
-
-    const [modelo, setModelo] = useState('Bernoulli');
-    const [modelosState, setModelosState] = useState(initialModelosDiscretosState);
+    const initialModelosDiscretosState = crearEstadoModelosDiscretos();
     const [alerta, setAlerta] = useState({ isOpen: false, mensaje: '' });
 
     const activeState = modelosState[modelo] || initialModelosDiscretosState[modelo];
@@ -57,10 +28,10 @@ export default function Controles_ModelosDiscretos({
 
     // Parámetros según modo
     const isMatriz = modo === 'matriz';
-    const paramP_ber = isMatriz ? (activeState.matriz.p ?? '') : (activeState.manual.p ?? '');
+    const paramP_ber = isMatriz ? formatearParametroDiscreto(activeState.matriz.p) : (activeState.manual.p ?? '');
     const paramN_bin = isMatriz ? (activeState.matriz.n ?? '') : (activeState.manual.n ?? '');
-    const paramP_bin = isMatriz ? (activeState.matriz.p ?? '') : (activeState.manual.p ?? '');
-    const paramLambda = isMatriz ? (activeState.matriz.lambda ?? '') : (activeState.manual.lambda ?? '');
+    const paramP_bin = isMatriz ? formatearParametroDiscreto(activeState.matriz.p) : (activeState.manual.p ?? '');
+    const paramLambda = isMatriz ? formatearParametroDiscreto(activeState.matriz.lambda) : (activeState.manual.lambda ?? '');
     const paramN_hip = isMatriz ? (activeState.matriz.N ?? '') : (activeState.manual.N ?? '');
     const paramK_hip = isMatriz ? (activeState.matriz.K ?? '') : (activeState.manual.K ?? '');
     const paramn_hip = isMatriz ? (activeState.matriz.n ?? '') : (activeState.manual.n ?? '');
@@ -71,7 +42,7 @@ export default function Controles_ModelosDiscretos({
     const valorB = activeState.condicion.b;
 
     // Matriz activa
-    const columnaSeleccionada = activeState.matriz.col ?? 0;
+    const columnaSeleccionada = varSeleccionada?.nombresColumnas?.length > 1 ? activeState.matriz.col ?? 0 : 0;
     const valorExito = activeState.matriz.valorExito ?? '';
     const modoEstimacionBinomial = activeState.matriz.modoEstimacion ?? 'especifico';
     const statsEstimados = activeState.matriz.stats ?? null;
@@ -82,17 +53,18 @@ export default function Controles_ModelosDiscretos({
         return <span style={{ fontSize: '0.9em' }} dangerouslySetInnerHTML={{ __html: katex.renderToString(str, { throwOnError: false }) }} />;
     };
 
-    const updateActive = (updater) => {
+    const updateActive = (updater, soloCondicion = false) => {
         setModelosState(prev => {
             const cur = prev[modelo] || initialModelosDiscretosState[modelo];
             const next = typeof updater === 'function' ? updater(cur) : { ...cur, ...updater };
             return { ...prev, [modelo]: next };
-        });
+        }, soloCondicion);
     };
 
     const setModo = (nuevoModo) => {
+        if (bloquearModo || nuevoModo === modo) return;
         updateActive(cur => ({ ...cur, modo: nuevoModo }));
-        if (onCalcular) onCalcular(null);
+        onInvalidar?.();
     };
 
     const setYaCalculado = (val) => {
@@ -100,15 +72,15 @@ export default function Controles_ModelosDiscretos({
     };
 
     const setTipoCondicion = (tipo) => {
-        updateActive(cur => ({ ...cur, condicion: { ...cur.condicion, tipo } }));
+        updateActive(cur => ({ ...cur, condicion: { ...cur.condicion, tipo } }), true);
     };
 
     const setValorX = (x) => {
-        updateActive(cur => ({ ...cur, condicion: { ...cur.condicion, x } }));
+        updateActive(cur => ({ ...cur, condicion: { ...cur.condicion, x } }), true);
     };
 
     const setValorB = (b) => {
-        updateActive(cur => ({ ...cur, condicion: { ...cur.condicion, b } }));
+        updateActive(cur => ({ ...cur, condicion: { ...cur.condicion, b } }), true);
     };
 
     const setParamP_ber = (p) => {
@@ -163,53 +135,17 @@ export default function Controles_ModelosDiscretos({
         updateActive(cur => ({ ...cur, matriz: { ...cur.matriz, muestraN }, yaCalculado: false }));
     };
 
-    useEffect(() => {
-        setModelosState(prev => {
-            const next = { ...prev };
-            Object.keys(next).forEach(k => {
-                next[k] = {
-                    ...next[k],
-                    matriz: { ...next[k].matriz, col: 0, valorExito: '', stats: null, p: '', n: '', lambda: '', N: '', K: '' },
-                    yaCalculado: next[k].modo === 'matriz' ? false : next[k].yaCalculado
-                };
-            });
-            return next;
-        });
-        if (onCalcular) onCalcular(null);
-    }, [varSeleccionada, filas]);
-
     const handleCambiarModelo = (nuevoModelo) => {
-        if (modelo === nuevoModelo) return;
+        if (bloquearModo || modelo === nuevoModelo) return;
         setModelo(nuevoModelo);
         setAlerta({ isOpen: false, mensaje: '' });
-        if (onCalcular) onCalcular(null);
+        onInvalidar?.();
     };
 
     // Extraer datos de la matriz
-    const columnasDisponibles = useMemo(() => {
-        return (varSeleccionada?.nombresColumnas && varSeleccionada.nombresColumnas.length > 0)
-            ? varSeleccionada.nombresColumnas
-            : (varSeleccionada ? [varSeleccionada.nombre || 'Datos'] : []);
-    }, [varSeleccionada]);
-
-    const datosColumna = useMemo(() => {
-        if (!varSeleccionada || !filas || filas.length === 0) return [];
-        const validas = filas.filter(f => (f.valor || '').toString().trim() !== '');
-
-        return validas.map(f => {
-            if (varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1) {
-                const partes = (f.valor || '').toString().split(' | ');
-                return partes[columnaSeleccionada] ? partes[columnaSeleccionada].trim() : '';
-            }
-            return (f.valor || '').toString().trim();
-        }).filter(val => val !== '');
-    }, [varSeleccionada, filas, columnaSeleccionada]);
-
-    const esColumnaNumerica = useMemo(() => {
-        if (datosColumna.length === 0) return false;
-        return !isNaN(parseFloat(datosColumna[0]));
-    }, [datosColumna]);
-
+    const columnasDisponibles = useMemo(() => columnasModelosDiscretos(varSeleccionada, filas), [varSeleccionada, filas]);
+    const datosColumna = useMemo(() => valoresColumnaModelo(filas, columnaSeleccionada), [filas, columnaSeleccionada]);
+    const esColumnaNumerica = datosColumna.length > 0 && datosColumna.every(valor => Number.isFinite(Number(valor)));
     const valoresUnicos = useMemo(() => {
         if (datosColumna.length === 0) return [];
         return [...new Set(datosColumna)].sort((a, b) => {
@@ -224,302 +160,13 @@ export default function Controles_ModelosDiscretos({
 
     // Estimar desde datos
     const estimarDesdeDatos = () => {
-        if (datosColumna.length === 0) {
-            setAlerta({ isOpen: true, mensaje: 'No hay datos válidos en la columna.' });
-            return;
-        }
-
-        const totalDatos = datosColumna.length;
-        let p = 0;
-        let K = 0;
-        let media = 0;
-
-        if (modelo === 'Binomial') {
-            const n_lote = parseInt(nArriba);
-            if (isNaN(n_lote) || n_lote <= 0) {
-                setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el Tamaño del ensayo ({renderLatex('n')}) mayor a 0 antes de estimar.</span> });
-                return;
-            }
-
-            const esTexto = isNaN(parseFloat(datosColumna[0]));
-
-            if (esTexto || modoEstimacionBinomial === 'especifico') {
-                // Modo 1: Evaluar un valor específico (o columna de texto)
-                if (valorExito === '' || valorExito === null || valorExito === undefined) {
-                    setAlerta({ isOpen: true, mensaje: <span>Debe seleccionar el &quot;Valor a evaluar ({renderLatex('x')})&quot;.</span> });
-                    return;
-                }
-
-                const conteoExito = datosColumna.filter(v => {
-                    const numV = parseFloat(v);
-                    const numExito = parseFloat(valorExito);
-                    if (!isNaN(numV) && !isNaN(numExito)) {
-                        return numV === numExito;
-                    }
-                    return String(v).trim() === String(valorExito).trim();
-                }).length;
-
-                p = conteoExito / totalDatos;
-
-                updateActive(cur => ({
-                    ...cur,
-                    matriz: {
-                        ...cur.matriz,
-                        stats: {
-                            total: totalDatos,
-                            exitos: conteoExito,
-                            p: p
-                        },
-                        n: n_lote.toString(),
-                        p: p.toFixed(4)
-                    }
-                }));
-            } else {
-                // Modo 2: "Datos como conteos por lote"
-                const numeros = datosColumna.map(v => parseFloat(v)).filter(v => !isNaN(v));
-
-                if (numeros.length === 0) {
-                    setAlerta({ isOpen: true, mensaje: 'No hay datos numéricos válidos en la columna seleccionada.' });
-                    return;
-                }
-
-                const tieneNegativos = numeros.some(v => v < 0);
-                if (tieneNegativos) {
-                    setAlerta({ isOpen: true, mensaje: 'Los valores registrados en la columna no pueden ser menores a 0.' });
-                    return;
-                }
-
-                const maxValor = Math.max(...numeros);
-                if (maxValor > n_lote) {
-                    setAlerta({
-                        isOpen: true,
-                        mensaje: (
-                            <span>
-                                El tamaño del lote ({renderLatex('n')}) no puede ser menor que los valores registrados en la columna (valor máximo encontrado: <strong>{maxValor}</strong>).
-                            </span>
-                        )
-                    });
-                    return;
-                }
-
-                const sumaTotal = numeros.reduce((acc, curr) => acc + curr, 0);
-                const totalEnsayos = numeros.length * n_lote;
-                p = sumaTotal / totalEnsayos;
-
-                updateActive(cur => ({
-                    ...cur,
-                    matriz: {
-                        ...cur.matriz,
-                        stats: {
-                            total: totalEnsayos,
-                            exitos: sumaTotal,
-                            p: p
-                        },
-                        n: n_lote.toString(),
-                        p: p.toFixed(4)
-                    }
-                }));
-            }
-        } else if (modelo === 'Hipergeometrica' || modelo === 'Bernoulli') {
-            if (modelo === 'Hipergeometrica') {
-                const n_muestra = parseInt(muestraN);
-                if (isNaN(n_muestra) || n_muestra <= 0) {
-                    setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa la Muestra a extraer ({renderLatex('n')}) mayor a 0 antes de estimar.</span> });
-                    return;
-                }
-                if (n_muestra > totalDatos) {
-                    setAlerta({ isOpen: true, mensaje: <span>La muestra &quot;{renderLatex('n')}&quot; ({n_muestra}) no puede ser mayor que la población total &quot;{renderLatex('N')}&quot; ({totalDatos}).</span> });
-                    return;
-                }
-            }
-
-            if (!valorExito) {
-                setAlerta({ isOpen: true, mensaje: 'Debe seleccionar qué valor representa el "Éxito".' });
-                return;
-            }
-            const conteoExito = datosColumna.filter(v => v === valorExito).length;
-            p = conteoExito / totalDatos;
-            K = conteoExito;
-
-            if (modelo === 'Bernoulli') {
-                updateActive(cur => ({
-                    ...cur,
-                    matriz: {
-                        ...cur.matriz,
-                        stats: {
-                            total: totalDatos,
-                            exitos: conteoExito,
-                            p: p,
-                            K: K
-                        },
-                        p: p.toFixed(4)
-                    }
-                }));
-            } else {
-                updateActive(cur => ({
-                    ...cur,
-                    matriz: {
-                        ...cur.matriz,
-                        stats: {
-                            total: totalDatos,
-                            exitos: conteoExito,
-                            p: p,
-                            K: K
-                        },
-                        N: totalDatos.toString(),
-                        K: K.toString(),
-                        n: muestraN.toString()
-                    }
-                }));
-            }
-        } else if (modelo === 'Poisson') {
-            const numeros = datosColumna.map(v => parseFloat(v)).filter(v => !isNaN(v));
-            if (numeros.length === 0) {
-                setAlerta({ isOpen: true, mensaje: 'Para Poisson se requieren datos numéricos.' });
-                return;
-            }
-            const sum = numeros.reduce((acc, curr) => acc + curr, 0);
-            media = sum / numeros.length;
-
-            updateActive(cur => ({
-                ...cur,
-                matriz: {
-                    ...cur.matriz,
-                    stats: {
-                        total: numeros.length,
-                        suma: sum,
-                        media: media
-                    },
-                    lambda: media.toFixed(2)
-                }
-            }));
-        }
-        setAlerta({ isOpen: false, mensaje: '' });
-        setYaCalculado(false);
-        if (onCalcular) onCalcular(null);
+        const estimacion = onEstimar();
+        setAlerta({ isOpen: !!estimacion.error, mensaje: estimacion.error || '' });
     };
-
-    const manejarCalculo = (isGraficarOnly = false) => {
-        setAlerta({ isOpen: false, mensaje: '' });
-
-        const parseNum = (val) => {
-            if (val === undefined || val === null || val === '') return NaN;
-            return parseFloat(val.toString().replace(',', '.'));
-        };
-
-        const parseIntNum = (val) => {
-            if (val === undefined || val === null || val === '') return NaN;
-            return parseInt(val.toString().replace(',', '.'), 10);
-        };
-
-        // Parsear parámetros
-        let params = {};
-
-        if (modelo === 'Binomial') {
-            const n = parseIntNum(paramN_bin);
-            const p = parseNum(paramP_bin);
-            if (isNaN(n) || n <= 0) return setAlerta({ isOpen: true, mensaje: <span>En Binomial, &quot;{renderLatex('n')}&quot; debe ser entero positivo.</span> });
-            if (isNaN(p) || p < 0 || p > 1) return setAlerta({ isOpen: true, mensaje: <span>En Binomial, &quot;{renderLatex('p')}&quot; debe estar entre 0 y 1.</span> });
-            params = { n, p };
-        } else if (modelo === 'Poisson') {
-            const lambda = parseNum(paramLambda);
-            if (isNaN(lambda) || lambda <= 0) return setAlerta({ isOpen: true, mensaje: <span>En Poisson, lambda ({renderLatex('\\lambda')}) debe ser mayor a 0.</span> });
-            params = { lambda };
-        } else if (modelo === 'Hipergeometrica') {
-            const N = parseIntNum(paramN_hip);
-            const K = parseIntNum(paramK_hip);
-            const n = parseIntNum(paramn_hip);
-            if (isNaN(n) || n <= 0) return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa un tamaño de muestra ({renderLatex('n')}) mayor a 0 para generar la gráfica.</span> });
-            if (isNaN(N) || N <= 0) return setAlerta({ isOpen: true, mensaje: <span>{renderLatex('N')} (población) debe ser entero positivo.</span> });
-            if (isNaN(K) || K < 0 || K > N) return setAlerta({ isOpen: true, mensaje: <span>{renderLatex('K')} (éxitos) debe estar entre 0 y {renderLatex('N')}.</span> });
-            if (n <= 0 || K < 0 || N <= 0 || n > N || K > N) return setAlerta({ isOpen: true, mensaje: <span>Parámetros Hipergeométrica inválidos. {renderLatex('n, K \\leq N')}, etc.</span> });
-            params = { N, K, n };
-        } else if (modelo === 'Bernoulli') {
-            const p = parseNum(paramP_ber);
-            if (isNaN(p) || p < 0 || p > 1) return setAlerta({ isOpen: true, mensaje: <span>La probabilidad {renderLatex('p')} debe estar entre 0 y 1.</span> });
-            params = { p };
-        }
-
-        // Parsear condición
-        let condicionCalculo = null;
-        let condicionVisual = null;
-        if (!isGraficarOnly && valorX !== '') {
-            let x = parseIntNum(valorX);
-            if (isNaN(x) || x < 0) return setAlerta({ isOpen: true, mensaje: <span>El valor objetivo &quot;{renderLatex('x')}&quot; debe ser un entero no negativo.</span> });
-            if (modelo === 'Bernoulli' && x !== 0 && x !== 1) return setAlerta({ isOpen: true, mensaje: <span>En el modelo Bernoulli, {renderLatex('x')} solo puede ser <strong>0</strong> (fracaso) o <strong>1</strong> (éxito).</span> });
-
-            let b = 0;
-            if (tipoCondicion.includes('intervalo')) {
-                if (valorB === '') {
-                    return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el <strong>Límite Superior {renderLatex('b')}</strong> para el intervalo de búsqueda.</span> });
-                }
-                b = parseIntNum(valorB);
-                if (isNaN(b) || b <= x) return setAlerta({ isOpen: true, mensaje: 'El límite superior del intervalo debe ser mayor que el límite inferior.' });
-            }
-
-            condicionVisual = { tipo: tipoCondicion, valorX: x, valorB: b };
-
-            // Lógica de traducción estricta a inclusiva
-            let tipoAjustado = tipoCondicion;
-            switch (tipoCondicion) {
-                case 'menor_estricto':
-                    x = x - 1;
-                    if (x < 0) return setAlerta({ isOpen: true, mensaje: <span>Al evaluar {renderLatex('P(X < x)')}, el límite inclusivo ({renderLatex('x-1')}) es negativo. La probabilidad es 0.</span> });
-                    tipoAjustado = 'menor_igual';
-                    break;
-                case 'mayor_estricto':
-                    x = x + 1;
-                    tipoAjustado = 'mayor_igual';
-                    break;
-                case 'intervalo_estricto':
-                    x = x + 1;
-                    b = b - 1;
-                    if (b < x) return setAlerta({ isOpen: true, mensaje: 'El intervalo estricto ingresado no contiene ningún número entero válido.' });
-                    tipoAjustado = 'intervalo';
-                    break;
-                default:
-                    break;
-            }
-
-            // Validar límites de x según modelo
-            if (modelo === 'Binomial' && x > params.n) return setAlerta({ isOpen: true, mensaje: <span>&quot;{renderLatex('x')}&quot; ajustado no puede ser mayor que {renderLatex('n')} ({params.n}).</span> });
-            if (modelo === 'Hipergeometrica' && x > Math.min(params.K, params.n)) {
-                return setAlerta({ isOpen: true, mensaje: <span>&quot;{renderLatex('x')}&quot; ajustado no puede ser mayor que el mínimo entre {renderLatex('K')} y {renderLatex('n')} ({Math.min(params.K, params.n)}).</span> });
-            }
-
-            condicionCalculo = { tipo: tipoAjustado, valorX: x, valorB: b };
-        } else {
-            if (isGraficarOnly !== true) {
-                return setAlerta({ isOpen: true, mensaje: <span>Por favor, ingresa el <strong>Número de éxitos {renderLatex('x')}</strong> para la Condición de Búsqueda.</span> });
-            }
-        }
-
-        // Calcular
-        const resultados = calcularDistribucionModelo(modelo, params, condicionCalculo);
-        const datosGrafico = generarDatosGrafico(modelo, params);
-
-        if (isGraficarOnly) setYaCalculado(true);
-        onCalcular({
-            modelo, params, condicion: condicionVisual, resultados, datosGrafico,
-            modo,
-            contextoMatriz: isMatriz ? {
-                nombreVariable: varSeleccionada?.nombre,
-                columna: columnasDisponibles[columnaSeleccionada],
-                cantidadColumnas: columnasDisponibles.length,
-                valorExito,
-                modoEstimacion: modelo === 'Binomial' ? modoEstimacionBinomial : null,
-                observaciones: [...datosColumna],
-                estadisticas: statsEstimados ? { ...statsEstimados } : null
-            } : null
-        });
+    const manejarCalculo = (soloGrafico = false) => {
+        const calculo = onCalcular(soloGrafico);
+        setAlerta({ isOpen: !!calculo.error, mensaje: calculo.error || '' });
     };
-
-    const limpiarCondicionCalculada = () => {
-        if (yaCalculado) {
-            manejarCalculo(true);
-        }
-    };
-
     const renderParametrosManuales = () => {
         const isMatriz = modo === 'matriz';
         const readOnlyParams = isMatriz;
@@ -547,7 +194,7 @@ export default function Controles_ModelosDiscretos({
                                 value={paramP_ber}
                                 onChange={e => {
                                     setParamP_ber(e.target.value);
-                                    if (onCalcular) onCalcular(null);
+                                    onInvalidar?.();
                                 }}
                                 placeholder="Probabilidad"
                                 disabled={readOnlyParams}
@@ -567,7 +214,7 @@ export default function Controles_ModelosDiscretos({
                         </div>
                         <div id="tour-t3discreta-bernoulli-formula" className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
                             <div className="t3-formula-inner">
-                                {renderLatex(paramP_ber !== '' ? `P(X=x) = p^x (1 - p)^{1-x} \\quad \\implies \\quad ${paramP_ber}^x (1 - ${paramP_ber})^{1-x}` : `P(X=x) = p^x (1 - p)^{1-x}`)}
+                                {renderLatex(paramP_ber !== '' ? `P(X=x) = p^x (1 - p)^{1-x} \\quad \\implies \\quad ${formatearParametroDiscreto(paramP_ber)}^x (1 - ${formatearParametroDiscreto(paramP_ber)})^{1-x}` : `P(X=x) = p^x (1 - p)^{1-x}`)}
                             </div>
                         </div>
                     </>
@@ -598,7 +245,7 @@ export default function Controles_ModelosDiscretos({
                                     onChange={e => {
                                         setParamN_bin(e.target.value);
                                         setYaCalculado(false);
-                                        if (onCalcular) onCalcular(null);
+                                        onInvalidar?.();
                                     }}
                                     placeholder="Muestra total"
                                     disabled={readOnlyParams}
@@ -631,7 +278,7 @@ export default function Controles_ModelosDiscretos({
                                     onChange={e => {
                                         setParamP_bin(e.target.value);
                                         setYaCalculado(false);
-                                        if (onCalcular) onCalcular(null);
+                                        onInvalidar?.();
                                     }}
                                     placeholder="Probabilidad"
                                     disabled={readOnlyParams}
@@ -655,7 +302,7 @@ export default function Controles_ModelosDiscretos({
                         </div>
                         <div id="tour-t3discreta-binomial-formula" className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
                             <div className="t3-formula-inner">
-                                {renderLatex((paramN_bin !== '' && paramP_bin !== '') ? `P(X=x) = \\binom{n}{x} p^x (1 - p)^{n-x} \\quad \\implies \\quad \\binom{${paramN_bin}}{x} ${paramP_bin}^x (1 - ${paramP_bin})^{${paramN_bin}-x}` : `P(X=x) = \\binom{n}{x} p^x (1 - p)^{n-x}`)}
+                                {renderLatex((paramN_bin !== '' && paramP_bin !== '') ? `P(X=x) = \\binom{n}{x} p^x (1 - p)^{n-x} \\quad \\implies \\quad \\binom{${paramN_bin}}{x} ${formatearParametroDiscreto(paramP_bin)}^x (1 - ${formatearParametroDiscreto(paramP_bin)})^{${paramN_bin}-x}` : `P(X=x) = \\binom{n}{x} p^x (1 - p)^{n-x}`)}
                             </div>
                         </div>
                     </>
@@ -673,7 +320,7 @@ export default function Controles_ModelosDiscretos({
                                 value={paramLambda}
                                 onChange={e => {
                                     setParamLambda(e.target.value);
-                                    if (onCalcular) onCalcular(null);
+                                    onInvalidar?.();
                                 }}
                                 placeholder="Tasa media"
                                 disabled={readOnlyParams}
@@ -693,7 +340,7 @@ export default function Controles_ModelosDiscretos({
                         </div>
                         <div id="tour-t3discreta-poisson-formula" className="t3-formula-scroll" style={{ gridColumn: '1 / -1', display: 'block', color: 'var(--text-pure)', padding: '8px', width: 'fit-content', minWidth: 'min(100%, 280px)', margin: '15px auto 0 auto', maxWidth: '100%', boxSizing: 'border-box' }}>
                             <div className="t3-formula-inner">
-                                {renderLatex(paramLambda !== '' ? `P(X=x) = \\frac{\\lambda^x e^{-\\lambda}}{x!} \\quad \\implies \\quad \\frac{${paramLambda}^x e^{-${paramLambda}}}{x!}` : `P(X=x) = \\frac{\\lambda^x e^{-\\lambda}}{x!}`)}
+                                {renderLatex(paramLambda !== '' ? `P(X=x) = \\frac{\\lambda^x e^{-\\lambda}}{x!} \\quad \\implies \\quad \\frac{${formatearParametroDiscreto(paramLambda)}^x e^{-${formatearParametroDiscreto(paramLambda)}}}{x!}` : `P(X=x) = \\frac{\\lambda^x e^{-\\lambda}}{x!}`)}
                             </div>
                         </div>
                     </>
@@ -712,7 +359,7 @@ export default function Controles_ModelosDiscretos({
                                     value={paramN_hip}
                                     onChange={e => {
                                         setParamN_hip(e.target.value);
-                                        if (onCalcular) onCalcular(null);
+                                        onInvalidar?.();
                                     }}
                                     placeholder="Población"
                                     disabled={readOnlyParams}
@@ -744,7 +391,7 @@ export default function Controles_ModelosDiscretos({
                                     value={paramK_hip}
                                     onChange={e => {
                                         setParamK_hip(e.target.value);
-                                        if (onCalcular) onCalcular(null);
+                                        onInvalidar?.();
                                     }}
                                     placeholder="Éxitos"
                                     disabled={readOnlyParams}
@@ -804,7 +451,7 @@ export default function Controles_ModelosDiscretos({
                                     value={paramn_hip}
                                     onChange={e => {
                                         setParamn_hip(e.target.value);
-                                        if (onCalcular) onCalcular(null);
+                                        onInvalidar?.();
                                     }}
                                     placeholder="Muestra"
                                     style={{
@@ -856,6 +503,8 @@ export default function Controles_ModelosDiscretos({
                             key={tipo.id}
                             type="button"
                             className={`btn-mat251-modo ${modelo === tipo.id ? 'active' : ''}`}
+                            disabled={bloquearModo && modelo !== tipo.id}
+                            title={bloquearModo && modelo !== tipo.id ? 'La distribución está fijada por el historial' : undefined}
                             onClick={() => handleCambiarModelo(tipo.id)}
                             style={{ flex: 1, fontFamily: FONT, borderRadius: RADIUS }}
                         >
@@ -868,6 +517,8 @@ export default function Controles_ModelosDiscretos({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modo === 'matriz' ? 'active' : ''}`}
+                        disabled={bloquearModo && modo !== 'matriz'}
+                        title={bloquearModo && modo !== 'matriz' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => { setModo('matriz'); setAlerta({ isOpen: false, mensaje: '' }); }}
                         style={{ flex: 1, fontFamily: FONT, borderRadius: RADIUS }}
                     >
@@ -876,6 +527,8 @@ export default function Controles_ModelosDiscretos({
                     <button
                         type="button"
                         className={`btn-mat251-modo ${modo === 'manual' ? 'active' : ''}`}
+                        disabled={bloquearModo && modo !== 'manual'}
+                        title={bloquearModo && modo !== 'manual' ? 'El modo está fijado por el historial' : undefined}
                         onClick={() => { setModo('manual'); setAlerta({ isOpen: false, mensaje: '' }); }}
                         style={{ flex: 1, fontFamily: FONT, borderRadius: RADIUS }}
                     >
@@ -956,7 +609,7 @@ export default function Controles_ModelosDiscretos({
                                                     setStatsEstimados(null);
                                                     setValorExito('');
                                                     setYaCalculado(false);
-                                                    if (onCalcular) onCalcular(null);
+                                                    onInvalidar?.();
                                                 }}
                                                 options={columnasDisponibles.map((col, idx) => ({ value: idx, label: col }))}
                                                 placeholder="Seleccione columna..."
@@ -977,7 +630,7 @@ export default function Controles_ModelosDiscretos({
                                                         setModoEstimacionBinomial('especifico');
                                                         setStatsEstimados(null);
                                                         setYaCalculado(false);
-                                                        if (onCalcular) onCalcular(null);
+                                                        onInvalidar?.();
                                                     }
                                                 }}
                                                 style={{ fontFamily: FONT, borderRadius: RADIUS, flex: 1, textAlign: 'center' }}
@@ -992,7 +645,7 @@ export default function Controles_ModelosDiscretos({
                                                         setModoEstimacionBinomial('lote');
                                                         setStatsEstimados(null);
                                                         setYaCalculado(false);
-                                                        if (onCalcular) onCalcular(null);
+                                                        onInvalidar?.();
                                                     }
                                                 }}
                                                 style={{ fontFamily: FONT, borderRadius: RADIUS, flex: 1, textAlign: 'center' }}
@@ -1029,7 +682,7 @@ export default function Controles_ModelosDiscretos({
                                                                 setValorExito(val);
                                                                 setStatsEstimados(null);
                                                                 setYaCalculado(false);
-                                                                if (onCalcular) onCalcular(null);
+                                                                onInvalidar?.();
                                                             }}
                                                             options={valoresUnicos.map(val => ({ value: val, label: String(val) }))}
                                                             placeholder="Seleccione un valor..."
@@ -1059,7 +712,7 @@ export default function Controles_ModelosDiscretos({
                                                                     setMuestraN(e.target.value);
                                                                     setStatsEstimados(null);
                                                                     setYaCalculado(false);
-                                                                    if (onCalcular) onCalcular(null);
+                                                                    onInvalidar?.();
                                                                 }}
                                                                 placeholder="Muestra a extraer (Ej. 5)"
                                                                 min="1"
@@ -1105,7 +758,7 @@ export default function Controles_ModelosDiscretos({
                                                                     setValorExito(val);
                                                                     setStatsEstimados(null);
                                                                     setYaCalculado(false);
-                                                                    if (onCalcular) onCalcular(null);
+                                                                    onInvalidar?.();
                                                                 }}
                                                                 options={valoresUnicos.map(val => ({ value: val, label: String(val) }))}
                                                                 placeholder="Seleccione un valor..."
@@ -1135,7 +788,7 @@ export default function Controles_ModelosDiscretos({
                                                                 setNArriba(e.target.value);
                                                                 setStatsEstimados(null);
                                                                 setYaCalculado(false);
-                                                                if (onCalcular) onCalcular(null);
+                                                                onInvalidar?.();
                                                             }}
                                                             placeholder="Tamaño del ensayo / Lote (Ej. 10)"
                                                             min="1"
@@ -1241,7 +894,7 @@ export default function Controles_ModelosDiscretos({
                                                             fontSize: FS.md,
                                                             fontWeight: 'normal'
                                                         }}>
-                                                            {renderLatex(`\\frac{${statsEstimados.suma}}{${statsEstimados.total}} = ${statsEstimados.media?.toFixed(4)}`)}
+                                                            {renderLatex(`\\frac{${formatearParametroDiscreto(statsEstimados.suma)}}{${statsEstimados.total}} = ${statsEstimados.media?.toFixed(4)}`)}
                                                         </td>
                                                     )}
                                                 </tr>
@@ -1297,7 +950,6 @@ export default function Controles_ModelosDiscretos({
                                     value={tipoCondicion}
                                     onChange={val => {
                                         setTipoCondicion(val);
-                                        limpiarCondicionCalculada();
                                     }}
                                     options={[
                                         { value: 'exacta', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{renderLatex('P(X = x)')}</div> },
@@ -1339,7 +991,6 @@ export default function Controles_ModelosDiscretos({
                                     value={valorX}
                                     onChange={e => {
                                         setValorX(e.target.value);
-                                        limpiarCondicionCalculada();
                                     }}
                                     placeholder={
                                         tipoCondicion.includes('intervalo') ? 'Límite inferior'
@@ -1375,7 +1026,6 @@ export default function Controles_ModelosDiscretos({
                                         value={valorB}
                                         onChange={e => {
                                             setValorB(e.target.value);
-                                            limpiarCondicionCalculada();
                                         }}
                                         placeholder="Límite superior"
                                         style={{

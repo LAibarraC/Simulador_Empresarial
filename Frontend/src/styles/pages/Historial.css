@@ -22,7 +22,7 @@
 .historial-container {
     margin-top: 20px;
     background-color: var(--bg-card);
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid var(--border-color);
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -65,13 +65,18 @@ html.dark .historial-fila:hover {
 }
 
 .historial-celda {
-    padding: 15px;
+    padding: 7.5px 15px;
     color: var(--text-main);
+    font-size: 0.75rem;
 }
 
-.fecha-col {
-    display: flex;
-    flex-direction: column;
+.historial-tabla .historial-celda-fecha,
+.historial-tabla .historial-celda-hora {
+    white-space: nowrap;
+}
+
+.historial-tabla .acciones-container button {
+    font-size: 0.75rem;
 }
 
 .tipo-calculo {
@@ -81,7 +86,7 @@ html.dark .historial-fila:hover {
 
 .archivo-origen {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: inherit;
 }
 
 .acciones-container {
@@ -130,6 +135,13 @@ html.dark .historial-fila:hover {
     margin-bottom: 20px;
 }
 
+/* Regla 7 de MAT251: sólo se modifica la presentación del placeholder. */
+.historial-page .historial-buscador .input-mat251.placeholder-small::placeholder {
+    font-size: 0.72rem !important;
+    opacity: 0.65;
+    color: var(--text-muted);
+}
+
 .historial-buscador + .historial-container {
     margin-top: 0;
 }
@@ -143,11 +155,13 @@ html.dark .historial-fila:hover {
         table-layout: fixed;
     }
 
-    .historial-col-fecha { width: 16%; }
-    .historial-col-calculo { width: 28%; }
-    .historial-col-modulo { width: 10%; }
-    .historial-col-archivo { width: 24%; }
-    .historial-col-acciones { width: 22%; }
+    .historial-col-fecha { width: 7rem; }
+    .historial-col-hora { width: 5rem; }
+    .historial-col-calculo { width: calc(75% - 29rem); }
+    .historial-col-modulo { width: 5.5rem; }
+    .historial-col-archivo { width: 14%; }
+    .historial-col-modo { width: 11%; }
+    .historial-col-acciones { width: 11.5rem; }
 
     .historial-tabla .historial-celda {
         overflow-wrap: anywhere;
@@ -198,8 +212,8 @@ html.dark .historial-fila:hover {
 
     .historial-tabla .historial-fila {
         display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: "calculo" "fecha" "modulo" "archivo" "acciones";
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: "calculo calculo" "fecha hora" "modulo modulo" "archivo archivo" "modo modo" "acciones acciones";
         align-content: start;
         gap: 10px;
         min-width: 0;
@@ -221,36 +235,37 @@ html.dark .historial-fila:hover {
 
     .historial-celda-calculo { grid-area: calculo; }
     .historial-celda-fecha { grid-area: fecha; }
+    .historial-celda-hora { grid-area: hora; }
     .historial-celda-modulo { grid-area: modulo; display: flex !important; align-items: center; gap: 8px; }
-    .historial-celda-modulo::before { content: "Módulo"; font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+    .historial-celda-modulo::before { content: "Módulo"; font-size: inherit; color: var(--text-muted); font-weight: 600; }
     .historial-celda-archivo { grid-area: archivo; }
+    .historial-celda-modo { grid-area: modo; display: flex !important; align-items: baseline; flex-wrap: wrap; gap: 3px 8px; }
+    .historial-celda-modo::before { content: "Modo"; color: var(--text-muted); font-weight: 600; }
+    .historial-celda-modo .modo-historial { min-width: 0; overflow-wrap: anywhere; }
     .historial-celda-acciones { grid-area: acciones; }
 
     .historial-tabla .tipo-calculo {
         display: block;
-        font-size: 0.95rem;
+        font-size: inherit;
         line-height: 1.35;
         overflow-wrap: anywhere;
     }
 
-    .historial-tabla .fecha-col {
-        flex-direction: row;
-        align-items: center;
+    .historial-tabla .historial-celda-fecha,
+    .historial-tabla .historial-celda-hora {
+        display: flex;
+        align-items: baseline;
         flex-wrap: wrap;
-        gap: 6px 12px;
+        gap: 4px 8px;
         color: var(--text-muted);
-        font-size: 0.78rem;
         line-height: 1.4;
     }
 
-    .historial-tabla .fecha-col strong {
-        font-weight: 500;
-    }
+    .historial-celda-fecha::before { content: "Fecha"; }
+    .historial-celda-hora::before { content: "Hora"; }
 
-    .historial-tabla .fecha-col small {
-        font-size: inherit;
-        border-left: 1px solid var(--border-color);
-        padding-left: 12px;
+    .historial-tabla .historial-celda-fecha strong {
+        font-weight: 500;
     }
 
     .historial-tabla .historial-celda-archivo {
@@ -266,13 +281,13 @@ html.dark .historial-fila:hover {
     .historial-celda-archivo::before {
         content: "Archivo";
         color: var(--text-muted);
-        font-size: 0.72rem;
+        font-size: inherit;
         font-weight: 600;
     }
 
     .historial-tabla .archivo-origen {
         min-width: 0;
-        font-size: 0.8rem;
+        font-size: inherit;
         line-height: 1.4;
         overflow-wrap: anywhere;
         color: var(--text-main);
@@ -287,10 +302,11 @@ html.dark .historial-fila:hover {
     .historial-tabla .acciones-container button {
         flex: 1 1 0;
         min-width: 0;
-        min-height: 44px;
-        padding: 5px 20px;
-        border-radius: 8px;
-        font-size: 0.82rem;
+        min-height: 30px;
+        padding: 3px 10px;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        line-height: 1.2;
         justify-content: center;
     }
 
@@ -301,7 +317,7 @@ html.dark .historial-fila:hover {
 
     .historial-fila-cargando .acciones-container .skeleton-box {
         flex: 1 1 0;
-        min-height: 44px;
+        min-height: 30px;
     }
 
     .historial-paginacion {
@@ -320,7 +336,12 @@ html.dark .historial-fila:hover {
 @media (min-width: 600px) and (max-width: 900px) {
     .historial-tabla tbody {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-items: start;
+        grid-auto-rows: 1fr;
+        align-items: stretch;
+    }
+
+    .historial-tabla .historial-fila {
+        grid-template-rows: 1fr auto auto auto auto auto;
     }
 }
 .historial-select-container {
@@ -486,7 +507,7 @@ html.dark .historial-fila:hover {
     margin-bottom: 0;
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 0.72rem;
+    font-size: inherit;
     font-weight: 700;
     line-height: 1.4;
     color: #3b82f6;

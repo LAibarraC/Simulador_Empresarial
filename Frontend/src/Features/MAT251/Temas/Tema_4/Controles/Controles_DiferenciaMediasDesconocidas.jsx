@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { jStat } from 'jstat';
 import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { calcularParametrosDiferenciaMediasDesconocidas, calcularProbabilidadDiferenciaMediasDesconocidas } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
 const CustomSelect = ({ value, onChange, options = [], placeholder = 'Seleccionar...', style = {} }) => {
@@ -147,174 +145,42 @@ const CustomSelect = ({ value, onChange, options = [], placeholder = 'Selecciona
     );
 };
 
-export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
+export default function Controles_DiferenciaMediasDesconocidas({ configuracion, onEditar, onGenerar }) {
     // Muestra 1
-    const [mu1, setMu1] = useState('');
-    const [s1, setS1] = useState('');
-    const [n1, setN1] = useState('');
+    const mu1 = configuracion.mu1;
+    const setMu1 = valor => onEditar('mu1', valor);
+    const s1 = configuracion.s1;
+    const setS1 = valor => onEditar('s1', valor);
+    const n1 = configuracion.n1;
+    const setN1 = valor => onEditar('n1', valor);
 
     // Muestra 2
-    const [mu2, setMu2] = useState('');
-    const [s2, setS2] = useState('');
-    const [n2, setN2] = useState('');
+    const mu2 = configuracion.mu2;
+    const setMu2 = valor => onEditar('mu2', valor);
+    const s2 = configuracion.s2;
+    const setS2 = valor => onEditar('s2', valor);
+    const n2 = configuracion.n2;
+    const setN2 = valor => onEditar('n2', valor);
 
     // Escenario: 'grandes' (n+m > 30), 'iguales' (varianzas iguales), 'distintas' (varianzas distintas)
-    const [escenario, setEscenario] = useState('grandes');
+    const escenario = configuracion.escenario;
+    const setEscenario = valor => onEditar('escenario', valor);
 
-    const [condicion, setCondicion] = useState('menor_que');
-    const [valorX1, setValorX1] = useState('');
-    const [valorX2, setValorX2] = useState('');
+    const condicion = configuracion.condicion;
+    const setCondicion = valor => onEditar('condicion', valor);
+    const valorX1 = configuracion.valorX1;
+    const setValorX1 = valor => onEditar('valorX1', valor);
+    const valorX2 = configuracion.valorX2;
+    const setValorX2 = valor => onEditar('valorX2', valor);
 
     // Alertas
     const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
 
-    const resetValues = () => {
-        onCalcular(null);
+    const ejecutarCalculo = evaluarCondicion => {
+        const calculo = onGenerar(evaluarCondicion);
+        setAlertaModal({ isOpen: !!calculo.error, mensaje: calculo.error || '', tipo: 'warning' });
     };
-
-    const calcular = () => {
-        const m1 = parseFloat(mu1);
-        const std1 = parseFloat(s1);
-        const nn1 = parseInt(n1);
-
-        const m2 = parseFloat(mu2);
-        const std2 = parseFloat(s2);
-        const nn2 = parseInt(n2);
-
-        const x1 = parseFloat(valorX1);
-        const x2 = parseFloat(valorX2);
-
-        if (isNaN(m1) || isNaN(std1) || isNaN(nn1) || isNaN(m2) || isNaN(std2) || isNaN(nn2)) {
-            setAlertaModal({ isOpen: true, mensaje: 'Por favor complete todos los parámetros de las muestras.', tipo: 'warning' });
-            return;
-        }
-
-        if (std1 < 0 || std2 < 0) {
-            setAlertaModal({ isOpen: true, mensaje: 'Las desviaciones estándar deben ser valores no negativos.', tipo: 'warning' });
-            return;
-        }
-
-        if (nn1 <= 0 || nn2 <= 0) {
-            setAlertaModal({ isOpen: true, mensaje: 'Los tamaños de muestra deben ser enteros mayores a cero.', tipo: 'warning' });
-            return;
-        }
-
-        if (isNaN(x1) || (condicion === 'entre' && isNaN(x2))) {
-            setAlertaModal({ isOpen: true, mensaje: 'Por favor ingrese el o los valores límites para la condición.', tipo: 'warning' });
-            return;
-        }
-
-        if (condicion === 'entre' && x1 >= x2) {
-            setAlertaModal({ isOpen: true, mensaje: 'En un intervalo, x1 debe ser estrictamente menor que x2.', tipo: 'warning' });
-            return;
-        }
-
-        // Varianzas muestrales al cuadrado
-        const s1Sq = Math.pow(std1, 2);
-        const s2Sq = Math.pow(std2, 2);
-
-        // Validacion de consistencia con el escenario seleccionado
-        if (escenario === 'grandes' && (nn1 + nn2 <= 30)) {
-            setAlertaModal({ isOpen: true, mensaje: `Para muestras grandes se requiere que n + m > 30 (actualmente ${nn1 + nn2}).`, tipo: 'warning' });
-            return;
-        }
-        if ((escenario === 'iguales' || escenario === 'distintas') && (nn1 + nn2 > 30)) {
-            setAlertaModal({ isOpen: true, mensaje: `Para muestras pequeñas se requiere que n + m ≤ 30 (actualmente ${nn1 + nn2}). Considere usar el escenario de Muestras grandes.`, tipo: 'warning' });
-            return;
-        }
-
-        const esperanza = m1 - m2;
-        let se = 0;
-        let v = 0;
-        let statValue = 0;
-        let statType = 'Z';
-        let formulaLaTeX = '';
-
-        if (escenario === 'grandes') {
-            se = Math.sqrt((s1Sq / nn1) + (s2Sq / nn2));
-            statValue = (x1 - esperanza) / se;
-            statType = 'Z';
-            formulaLaTeX = `Z = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_X - \\mu_Y)}{\\sqrt{\\frac{S_X^2}{n} + \\frac{S_Y^2}{m}}}`;
-        } else if (escenario === 'iguales') {
-            v = nn1 + nn2 - 2;
-            const sp2 = ((nn1 - 1) * s1Sq + (nn2 - 1) * s2Sq) / v;
-            se = Math.sqrt(sp2 * ((1 / nn1) + (1 / nn2)));
-            statValue = (x1 - esperanza) / se;
-            statType = 'T';
-            formulaLaTeX = `T = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_X - \\mu_Y)}{\\sqrt{\\frac{(n-1)S_X^2 + (m-1)S_Y^2}{n+m-2} \\left(\\frac{1}{n} + \\frac{1}{m}\\right)}}`;
-        } else if (escenario === 'distintas') {
-            se = Math.sqrt((s1Sq / nn1) + (s2Sq / nn2));
-            const num = Math.pow((s1Sq / nn1) + (s2Sq / nn2), 2);
-            const den = (Math.pow(s1Sq / nn1, 2) / (nn1 + 1)) + (Math.pow(s2Sq / nn2, 2) / (nn2 + 1));
-            v = (num / den) - 2;
-            // Redondeo de g para presentacion
-            v = Math.round(v * 100) / 100;
-            statValue = (x1 - esperanza) / se;
-            statType = 'T';
-            formulaLaTeX = `T = \\frac{(\\bar{X} - \\bar{Y}) - (\\mu_X - \\mu_Y)}{\\sqrt{\\frac{S_X^2}{n} + \\frac{S_Y^2}{m}}}`;
-        }
-
-        // Calculation for probabilities based on condition
-        let probFinal = 0;
-        let val2Stat = (x2 - esperanza) / se;
-
-        if (escenario === 'grandes') {
-            if (condicion === 'menor_que') {
-                probFinal = jStat.normal.cdf(statValue, 0, 1);
-            } else if (condicion === 'mayor_que') {
-                probFinal = 1 - jStat.normal.cdf(statValue, 0, 1);
-            } else if (condicion === 'entre') {
-                const p1 = jStat.normal.cdf(statValue, 0, 1);
-                const p2 = jStat.normal.cdf(val2Stat, 0, 1);
-                probFinal = Math.abs(p2 - p1);
-            }
-        } else {
-            if (condicion === 'menor_que') {
-                probFinal = jStat.studentt.cdf(statValue, v);
-            } else if (condicion === 'mayor_que') {
-                probFinal = 1 - jStat.studentt.cdf(statValue, v);
-            } else if (condicion === 'entre') {
-                const p1 = jStat.studentt.cdf(statValue, v);
-                const p2 = jStat.studentt.cdf(val2Stat, v);
-                probFinal = Math.abs(p2 - p1);
-            }
-        }
-        const formatNumber = (num, dec = 0) => num.toLocaleString('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: Math.max(dec, 3) }).replace(/,/g, '{,}');
-        let strDesarrollo = '';
-        let S = statType; // 'Z' or 'T'
-
-        if (condicion === 'menor_que') {
-            strDesarrollo = `\\begin{aligned} P(\\bar{X}_1 - \\bar{X}_2 \\le ${formatNumber(x1)}) &= P\\left( ${S} \\le \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${formatNumber(se, 2)}} \\right) \\\\ &= P(${S} \\le ${formatNumber(statValue, 2)}) \\\\ &= ${formatNumber(probFinal, 4)} \\end{aligned}`;
-        } else if (condicion === 'mayor_que') {
-            strDesarrollo = `\\begin{aligned} P(\\bar{X}_1 - \\bar{X}_2 \\ge ${formatNumber(x1)}) &= P\\left( ${S} \\ge \\frac{${formatNumber(x1)} - ${formatNumber(esperanza)}}{${formatNumber(se, 2)}} \\right) \\\\ &= P(${S} \\ge ${formatNumber(statValue, 2)}) \\\\ &= 1 - P(${S} \\le ${formatNumber(statValue, 2)}) = ${formatNumber(probFinal, 4)} \\end{aligned}`;
-        } else if (condicion === 'entre') {
-            const xMin = Math.min(x1, x2);
-            const xMax = Math.max(x1, x2);
-            const tMin = Math.min(statValue, val2Stat);
-            const tMax = Math.max(statValue, val2Stat);
-            strDesarrollo = `\\begin{aligned} P(${formatNumber(xMin)} \\le \\bar{X}_1 - \\bar{X}_2 \\le ${formatNumber(xMax)}) &= P\\left( \\frac{${formatNumber(xMin)} - ${formatNumber(esperanza)}}{${formatNumber(se, 2)}} \\le ${S} \\le \\frac{${formatNumber(xMax)} - ${formatNumber(esperanza)}}{${formatNumber(se, 2)}} \\right) \\\\ &= P(${formatNumber(tMin, 2)} \\le ${S} \\le ${formatNumber(tMax, 2)}) \\\\ &= P(${S} \\le ${formatNumber(tMax, 2)}) - P(${S} \\le ${formatNumber(tMin, 2)}) = ${formatNumber(probFinal, 4)} \\end{aligned}`;
-        }
-
-        onCalcular({
-            m1, std1, nn1,
-            m2, std2, nn2,
-            esperanza,
-            se,
-            v,
-            escenario,
-            condicion,
-            x1,
-            x2,
-            probFinal,
-            statValue,
-            statType,
-            formulaLaTeX,
-            strDesarrollo,
-            mu: esperanza, // Para GraficoStudent
-            p: esperanza,  // Para GraficoDiferenciaMedias
-            esDiferenciaMedias: true
-        });
-    };
+    const calcular = () => ejecutarCalculo(true);
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
@@ -330,7 +196,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Media Pob. 1"
                                 value={mu1}
-                                onChange={(e) => { setMu1(e.target.value); resetValues(); }}
+                                onChange={(e) => { setMu1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -354,7 +220,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Desv. Est. Muestral 1"
                                 value={s1}
-                                onChange={(e) => { setS1(e.target.value); resetValues(); }}
+                                onChange={(e) => { setS1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -378,7 +244,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Muestra 1"
                                 value={n1}
-                                onChange={(e) => { setN1(e.target.value); resetValues(); }}
+                                onChange={(e) => { setN1(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -409,7 +275,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Media Pob. 2"
                                 value={mu2}
-                                onChange={(e) => { setMu2(e.target.value); resetValues(); }}
+                                onChange={(e) => { setMu2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -433,7 +299,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Desv. Est. Muestral 2"
                                 value={s2}
-                                onChange={(e) => { setS2(e.target.value); resetValues(); }}
+                                onChange={(e) => { setS2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -457,7 +323,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Muestra 2"
                                 value={n2}
-                                onChange={(e) => { setN2(e.target.value); resetValues(); }}
+                                onChange={(e) => { setN2(e.target.value); }}
                                 style={{
                                     flex: 1,
                                     width: '100%',
@@ -484,7 +350,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <CustomSelect
                     value={escenario}
-                    onChange={(val) => { setEscenario(val); resetValues(); }}
+                    onChange={(val) => { setEscenario(val); }}
                     style={{ width: '420px', maxWidth: '100%' }}
                     options={[
                         { value: 'grandes', label: <>Muestras grandes, <Latex formula="n + m > 30" /></> },
@@ -511,7 +377,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                 <div className="tema4-condicion-select-wrapper" style={{ width: condicion === 'entre' ? '250px' : '200px' }}>
                     <CustomSelect
                         value={condicion}
-                        onChange={(val) => { setCondicion(val); resetValues(); }}
+                        onChange={(val) => { setCondicion(val); }}
                         options={[
                             { value: 'menor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X}_1 - \bar{X}_2 \le x)" /></div> },
                             { value: 'mayor_que', label: <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}><Latex formula="P(\bar{X}_1 - \bar{X}_2 \ge x)" /></div> },
@@ -545,7 +411,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Límite inferior"
                                 value={valorX1}
-                                onChange={(e) => { setValorX1(e.target.value); resetValues(); }}
+                                onChange={(e) => { setValorX1(e.target.value); }}
                                 style={{
                                     padding: '6px 12px',
                                     fontSize: FS.sm,
@@ -570,7 +436,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                                 className="input-mat251 placeholder-small"
                                 placeholder="Límite superior"
                                 value={valorX2}
-                                onChange={(e) => { setValorX2(e.target.value); resetValues(); }}
+                                onChange={(e) => { setValorX2(e.target.value); }}
                                 style={{
                                     padding: '6px 12px',
                                     fontSize: FS.sm,
@@ -597,7 +463,7 @@ export default function Controles_DiferenciaMediasDesconocidas({ onCalcular }) {
                             className="input-mat251 placeholder-small"
                             placeholder="Valor x"
                             value={valorX1}
-                            onChange={(e) => { setValorX1(e.target.value); resetValues(); }}
+                            onChange={(e) => { setValorX1(e.target.value); }}
                             style={{
                                 padding: '6px 12px',
                                 fontSize: FS.sm,

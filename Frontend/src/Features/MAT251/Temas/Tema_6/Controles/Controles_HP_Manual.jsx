@@ -1,22 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import { pruebaMediaZ, pruebaMediaT, pruebaProporcionZ, pruebaVarianzaChi } from '../../../Matematicas/Logica_Tema6';
 import { cardStyle, labelStyle, FS, RADIUS } from '../../../Principal/Constantes';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
-export default function Controles_HP_Manual({ prueba, onCalcular }) {
-    const [n, setN] = useState('');
-    const [xBar, setXBar] = useState('');
-    const [s, setS] = useState('');
-    const [s2, setS2] = useState('');
-    const [sigma, setSigma] = useState('');
-    const [x, setX] = useState('');
-    const [mu0, setMu0] = useState('');
-    const [p0, setP0] = useState('');
-    const [sigma02, setSigma02] = useState('');
-    const [alpha, setAlpha] = useState('0.05');
-    const [tipoPrueba, setTipoPrueba] = useState('bilateral'); 
+export default function Controles_HP_Manual({ prueba, configuracion, onEditar, onCalcular }) {
+    const { n, xBar, s, s2, sigma, x, mu0, p0, sigma02, alpha, tipoPrueba } = configuracion;
+    const setN = valor => onEditar('n', valor);
+    const setXBar = valor => onEditar('xBar', valor);
+    const setS = valor => onEditar('s', valor);
+    const setS2 = valor => onEditar('s2', valor);
+    const setSigma = valor => onEditar('sigma', valor);
+    const setX = valor => onEditar('x', valor);
+    const setMu0 = valor => onEditar('mu0', valor);
+    const setP0 = valor => onEditar('p0', valor);
+    const setSigma02 = valor => onEditar('sigma02', valor);
+    const setAlpha = valor => onEditar('alpha', valor);
+    const setTipoPrueba = valor => onEditar('tipoPrueba', valor);
 
     const [isAlphaOpen, setIsAlphaOpen] = useState(false);
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
@@ -34,22 +34,6 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    useEffect(() => {
-        setN('');
-        setXBar('');
-        setS('');
-        setS2('');
-        setSigma('');
-        setX('');
-        setMu0('');
-        setP0('');
-        setSigma02('');
-        setAlpha('0.05');
-        setTipoPrueba('bilateral');
-        setIsAlphaOpen(false);
-        onCalcular?.(null);
-    }, [prueba]);
-
     const alphaOptions = [
         { value: '0.10', label: '0.10 (90%) - Significación' },
         { value: '0.05', label: '0.05 (95%) - Significación' },
@@ -64,26 +48,8 @@ export default function Controles_HP_Manual({ prueba, onCalcular }) {
     const paramHypo = prueba === 'proporcion' ? 'p_0' : prueba === 'varianza' ? '\\sigma_0^2' : '\\mu_0';
 
     const handleCalcular = () => {
-        let res;
-        const numN = Number(n);
-        const numAlpha = Number(alpha);
-
-        if (prueba === 'media_z') {
-            res = pruebaMediaZ(numN, Number(xBar), Number(sigma), Number(mu0), numAlpha, tipoPrueba);
-        } else if (prueba === 'media_t') {
-            res = pruebaMediaT(numN, Number(xBar), Number(s), Number(mu0), numAlpha, tipoPrueba);
-        } else if (prueba === 'proporcion') {
-            res = pruebaProporcionZ(numN, Number(x), Number(p0), numAlpha, tipoPrueba);
-        } else if (prueba === 'varianza') {
-            res = pruebaVarianzaChi(numN, Number(s2), Number(sigma02), numAlpha, tipoPrueba);
-        }
-
-        if (res?.error) {
-            mostrarAlerta(res.error, 'Error de Cálculo', 'error');
-            onCalcular(null);
-        } else {
-            onCalcular(res);
-        }
+        const calculo = onCalcular();
+        if (calculo?.error) mostrarAlerta(calculo.error, 'Datos inválidos', 'warning');
     };
 
     return (

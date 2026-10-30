@@ -122,10 +122,11 @@ export function calcularMomentosDiscreta(matrizDatos) {
     let hasF = false;
 
     for (let i = 0; i < matrizDatos.length; i++) {
-        const x = parseFloat(matrizDatos[i].x);
-        const p = parseFloat(matrizDatos[i].p);
+        const x = Number(matrizDatos[i].x);
+        const p = Number(matrizDatos[i].p);
 
-        if (isNaN(x) || isNaN(p)) {
+        if (String(matrizDatos[i].x ?? '').trim() === '' || String(matrizDatos[i].p ?? '').trim() === ''
+            || !Number.isFinite(x) || !Number.isFinite(p)) {
             return { error: `La fila ${i + 1} contiene valores no numéricos.` };
         }
         if (p < 0 || p > 1) {
@@ -146,19 +147,23 @@ export function calcularMomentosDiscreta(matrizDatos) {
     }
 
     // Esperanza Matemática (Momento 1)
-    const esperanza = datosValidos.reduce((acc, val) => acc + (val.x * val.p), 0);
+    const esperanza = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (val.x * val.p), 0);
 
     // Varianza y Desviación (Momento 2 central)
-    const varianza = datosValidos.reduce((acc, val) => acc + (Math.pow(val.x - esperanza, 2) * val.p), 0);
+    const varianza = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (Math.pow(val.x - esperanza, 2) * val.p), 0);
     const desviacion = Math.sqrt(varianza);
 
     // Asimetría (Momento 3 central estandarizado)
-    const m3 = datosValidos.reduce((acc, val) => acc + (Math.pow(val.x - esperanza, 3) * val.p), 0);
+    const m3 = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (Math.pow(val.x - esperanza, 3) * val.p), 0);
     const asimetria = desviacion > 0 ? (m3 / Math.pow(desviacion, 3)) : 0;
 
     // Curtosis (Momento 4 central estandarizado)
-    const m4 = datosValidos.reduce((acc, val) => acc + (Math.pow(val.x - esperanza, 4) * val.p), 0);
+    const m4 = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (Math.pow(val.x - esperanza, 4) * val.p), 0);
     const curtosis = desviacion > 0 ? (m4 / Math.pow(desviacion, 4)) - 3 : 0;
+
+    if (![esperanza, varianza, desviacion, asimetria, curtosis].every(Number.isFinite)) {
+        return { error: 'Los valores exceden el rango numérico admitido para calcular los momentos.' };
+    }
 
     return {
         datos: datosValidos,

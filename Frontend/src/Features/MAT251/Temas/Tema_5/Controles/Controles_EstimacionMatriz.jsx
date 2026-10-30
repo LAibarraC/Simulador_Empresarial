@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { calcularEstimacionPuntualMatriz } from '../../../Matematicas/logica_Tema5';
 import { cardStyle, FS, labelStyle, RADIUS, FONT } from '../../../Principal/Constantes';
 import { EditarDatos } from '../../../../../ui/iconos';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
-export default function Controles_EstimacionMatriz({ parametro, varSeleccionada, filas, statsDatos, abrirEditor, onCalcular }) {
-    const [valorExito, setValorExito] = useState('');
+export default function Controles_EstimacionMatriz({ parametro, filas, statsDatos, abrirEditor, valorExito, setValorExito, onCalcular }) {
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const [isSelectOpen, setIsSelectOpen] = useState(false);
     const selectRef = useRef(null);
-    const hayDatosMatriz = Boolean(varSeleccionada) && Array.isArray(filas) && filas.some(
+    const hayDatosMatriz = Array.isArray(filas) && filas.some(
         (fila) => fila.valor !== undefined && fila.valor !== null && fila.valor.toString().trim() !== ''
     );
 
@@ -26,28 +24,8 @@ export default function Controles_EstimacionMatriz({ parametro, varSeleccionada,
     };
 
     const handleCalcular = () => {
-        // Extraemos todos los datos (cargados + agregados manualmente)
-        const datosCompletos = filas
-            .map(f => f.valor)
-            .filter(v => v !== undefined && v !== null && v.toString().trim() !== '');
-
-        if (!datosCompletos || datosCompletos.length === 0) {
-            mostrarAlerta('Por favor, selecciona o agrega una variable con datos válidos.', 'Faltan Datos', 'warning');
-            return;
-        }
-
-        if (parametro === 'proporcion' && (!valorExito || valorExito.trim() === '')) {
-            mostrarAlerta('Por favor, seleccione el valor considerado como éxito.', 'Faltan Datos', 'warning');
-            return;
-        }
-
-        const res = calcularEstimacionPuntualMatriz(datosCompletos, parametro, valorExito);
-        if (res.error) {
-            mostrarAlerta(res.error, 'Error de Cálculo', 'error');
-            onCalcular(null);
-        } else {
-            onCalcular(res);
-        }
+        const calculo = onCalcular();
+        if (calculo.error) mostrarAlerta(calculo.error, 'Error de Cálculo', 'warning');
     };
 
     return (

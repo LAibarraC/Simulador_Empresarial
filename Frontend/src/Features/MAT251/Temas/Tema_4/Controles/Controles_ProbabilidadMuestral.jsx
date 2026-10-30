@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cardStyle, labelStyle, RADIUS, FS, FONT } from '../../../Principal/Constantes';
 import Latex from '../../../../../components/excel/Latex';
-import { generarDistribucionProbabilidadMuestral, calcularProbabilidadProbabilidadMuestral } from '../../../Matematicas/Logica_Tema4';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import StatLabel from '../../../ui/StatLabel';
 
@@ -139,68 +138,44 @@ const CustomSelect = ({ value, onChange, options = [], placeholder = 'Selecciona
     );
 };
 
-export default function Controles_ProbabilidadMuestral({ onCalcular }) {
+export default function Controles_ProbabilidadMuestral({ configuracion, onEditar, onGenerar, baseCalculada }) {
     // 1. Estados
-    const [tipoPoblacion, setTipoPoblacion] = useState('infinita'); // 'infinita' o 'finita'
-    const [tipoDispersion, setTipoDispersion] = useState('varianza'); // 'varianza' o 'desviacion'
+    const tipoPoblacion = configuracion.tipoPoblacion;
+    const setTipoPoblacion = valor => onEditar('tipoPoblacion', valor);
+    const tipoDispersion = configuracion.tipoDispersion;
+    const setTipoDispersion = valor => onEditar('tipoDispersion', valor);
     
     // Inputs numéricos
-    const [mediaPoblacional, setMediaPoblacional] = useState(''); // mu
-    const [desviacion, setDesviacion] = useState(''); // sigma
-    const [tamañoMuestra, setTamañoMuestra] = useState(''); // n
-    const [poblacionN, setPoblacionN] = useState(''); // N (solo si finita)
+    const mediaPoblacional = configuracion.mediaPoblacional;
+    const setMediaPoblacional = valor => onEditar('mediaPoblacional', valor);
+    const desviacion = configuracion.desviacion;
+    const setDesviacion = valor => onEditar('desviacion', valor);
+    const tamañoMuestra = configuracion.tamañoMuestra;
+    const setTamañoMuestra = valor => onEditar('tamañoMuestra', valor);
+    const poblacionN = configuracion.poblacionN;
+    const setPoblacionN = valor => onEditar('poblacionN', valor);
 
     // Estado del proceso
-    const [distribucionGenerada, setDistribucionGenerada] = useState(false);
-    const [datosParciales, setDatosParciales] = useState(null);
+    const distribucionGenerada = !!baseCalculada;
+    const datosParciales = baseCalculada;
 
     // Inputs de objetivo (por defecto 'menor_que' según el molde)
-    const [condicion, setCondicion] = useState('menor_que');
-    const [valorX1, setValorX1] = useState('');
-    const [valorX2, setValorX2] = useState(''); // solo si 'entre'
+    const condicion = configuracion.condicion;
+    const setCondicion = valor => onEditar('condicion', valor);
+    const valorX1 = configuracion.valorX1;
+    const setValorX1 = valor => onEditar('valorX1', valor);
+    const valorX2 = configuracion.valorX2;
+    const setValorX2 = valor => onEditar('valorX2', valor);
 
     const [alertaModal, setAlertaModal] = useState({ isOpen: false, mensaje: '', tipo: 'warning' });
 
     // Lógica Matemática - Paso 1: Generar Distribución
-    const generarDistribucion = () => {
-        const result = generarDistribucionProbabilidadMuestral(mediaPoblacional, desviacion, tipoDispersion, tamañoMuestra, poblacionN, tipoPoblacion);
-        if (result.error) {
-            setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            return;
-        }
-
-        const parciales = { ...result };
-        delete parciales.error;
-        
-        setDatosParciales(parciales);
-        setDistribucionGenerada(true);
-        onCalcular(parciales);
+    const ejecutarCalculo = evaluarCondicion => {
+        const calculo = onGenerar(evaluarCondicion);
+        setAlertaModal({ isOpen: !!calculo.error, mensaje: calculo.error || '', tipo: 'warning' });
     };
-
-    // Lógica Matemática - Paso 2: Calcular Probabilidad
-    const calcularProbabilidad = () => {
-        const result = calcularProbabilidadProbabilidadMuestral(datosParciales, condicion, valorX1, valorX2);
-        if (result.error) {
-            if (result.error !== 'Faltan parámetros previos.') {
-                setAlertaModal({ isOpen: true, mensaje: result.error, tipo: 'warning' });
-            }
-            return;
-        }
-
-        onCalcular({
-            ...datosParciales,
-            ...result
-        });
-    };
-
-    const resetDistribucion = () => {
-        setDistribucionGenerada(false);
-        setDatosParciales(null);
-        setCondicion('menor_que');
-        setValorX1('');
-        setValorX2('');
-        onCalcular(null);
-    };
+    const generarDistribucion = () => ejecutarCalculo(false);
+    const calcularProbabilidad = () => ejecutarCalculo(true);
 
     return (
         <div style={{ ...cardStyle, border: 'none', padding: '0', backgroundColor: 'transparent' }}>
@@ -212,7 +187,7 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                         <button
                             type="button"
                             className={`btn-mat251-modo ${tipoPoblacion === 'infinita' ? 'active' : ''}`}
-                            onClick={() => { setTipoPoblacion('infinita'); resetDistribucion(); }}
+                            onClick={() => { setTipoPoblacion('infinita'); }}
                             style={{ width: '140px', fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: FS.sm, fontWeight: 600 }}
                         >
                             Infinita
@@ -220,7 +195,7 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                         <button
                             type="button"
                             className={`btn-mat251-modo ${tipoPoblacion === 'finita' ? 'active' : ''}`}
-                            onClick={() => { setTipoPoblacion('finita'); resetDistribucion(); }}
+                            onClick={() => { setTipoPoblacion('finita'); }}
                             style={{ width: '140px', fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: FS.sm, fontWeight: 600 }}
                         >
                             Finita
@@ -240,7 +215,7 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                         className="input-mat251 placeholder-small"
                         placeholder="Media Pob."
                         value={mediaPoblacional}
-                        onChange={(e) => { setMediaPoblacional(e.target.value); resetDistribucion(); }}
+                        onChange={(e) => { setMediaPoblacional(e.target.value); }}
                         style={{
                             flex: 1,
                             width: '100%',
@@ -261,7 +236,7 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                     <div style={{ width: '92px', flexShrink: 0 }}>
                         <CustomSelect
                             value={tipoDispersion}
-                            onChange={(val) => { setTipoDispersion(val); resetDistribucion(); }}
+                            onChange={(val) => { setTipoDispersion(val); }}
                             options={[
                                 { value: 'varianza', label: <Latex formula="\boldsymbol{\sigma^2} =" /> },
                                 { value: 'desviacion', label: <Latex formula="\boldsymbol{\sigma} =" /> }
@@ -273,7 +248,7 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                         className="input-mat251 placeholder-small"
                         placeholder={tipoDispersion === 'varianza' ? "Var. Pob." : "Desv. Est. Pob."}
                         value={desviacion}
-                        onChange={(e) => { setDesviacion(e.target.value); resetDistribucion(); }}
+                        onChange={(e) => { setDesviacion(e.target.value); }}
                         style={{
                             flex: 1,
                             width: '100%',
@@ -299,7 +274,7 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                         className="input-mat251 placeholder-small"
                         placeholder="Muestra"
                         value={tamañoMuestra}
-                        onChange={(e) => { setTamañoMuestra(e.target.value); resetDistribucion(); }}
+                        onChange={(e) => { setTamañoMuestra(e.target.value); }}
                         style={{
                             flex: 1,
                             width: '100%',
@@ -326,7 +301,7 @@ export default function Controles_ProbabilidadMuestral({ onCalcular }) {
                             className="input-mat251 placeholder-small"
                             placeholder="Población"
                             value={poblacionN}
-                            onChange={(e) => { setPoblacionN(e.target.value); resetDistribucion(); }}
+                            onChange={(e) => { setPoblacionN(e.target.value); }}
                             style={{
                                 flex: 1,
                                 width: '100%',

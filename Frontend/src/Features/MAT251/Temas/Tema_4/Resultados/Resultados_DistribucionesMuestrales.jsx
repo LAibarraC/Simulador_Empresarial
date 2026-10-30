@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FONT, FS, RADIUS, cardStyle, labelStyle } from '../../../Principal/Constantes';
-import { calcularDistribucionMuestral } from '../../../Matematicas/logica_Tema1';
 import { EditarDatos } from '../../../../../ui/iconos';
 import Latex from '../../../../../components/excel/Latex';
 import Skeleton from '../../../../../ui/Skeleton';
@@ -8,25 +7,25 @@ import StatLabel from '../../../ui/StatLabel';
 import ModalAlerta from '../../../ui/ModalAlerta';
 import '../../../styles/Temas/Tema4.css';
 
-export default function Resultados_DistribucionesMuestrales({ varSeleccionada, filas, abrirEditor, onCalcular }) {
-    const [poblacion, setPoblacion] = useState('');
-    const [n, setN] = useState('');
-    const [conReemplazo, setConReemplazo] = useState(true);
-    const [parametroCalculo, setParametroCalculo] = useState('media');
-    const [atributoExito, setAtributoExito] = useState('');
+export default function Resultados_DistribucionesMuestrales({ varSeleccionada, filas, abrirEditor, configuracion, onEditar, onGenerar, resultado }) {
+    const n = configuracion.n;
+    const setN = valor => onEditar('n', valor);
+    const conReemplazo = configuracion.conReemplazo;
+    const setConReemplazo = valor => onEditar('conReemplazo', valor);
+    const parametroCalculo = configuracion.parametroCalculo;
+    const setParametroCalculo = valor => onEditar('parametroCalculo', valor);
+    const atributoExito = configuracion.atributoExito || String(filas?.find(fila => String(fila.valor ?? '').trim())?.valor ?? '').trim();
+    const setAtributoExito = valor => onEditar('atributoExito', valor);
     const [isOpenParamSelect, setIsOpenParamSelect] = useState(false);
     const paramSelectRef = useRef(null);
     const [isOpenAtributoSelect, setIsOpenAtributoSelect] = useState(false);
     const atributoSelectRef = useRef(null);
-    const [resDistMuestrales, setResDistMuestrales] = useState(null);
+    const resDistMuestrales = resultado;
     const [paginaActual, setPaginaActual] = useState(1);
-    const [cargando, setCargando] = useState(false);
+    const cargando = false;
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const filasPorPagina = 10;
-
-    useEffect(() => {
-        onCalcular?.(resDistMuestrales);
-    }, [resDistMuestrales, onCalcular]);
+    useEffect(() => { setPaginaActual(1); }, [resultado]);
 
     const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
         setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
@@ -54,135 +53,11 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
     const filasValidas = filas?.filter(f => (f.valor || '').toString().trim() !== '') || [];
 
-    useEffect(() => {
-        // Sincronizar estrictamente la población con las filas
-        const valoresValidos = filas
-            ?.map(f => (f.valor || '').toString().trim())
-            .filter(v => v !== '');
-
-        if (valoresValidos && valoresValidos.length > 0) {
-            setPoblacion(valoresValidos.join(', '));
-            const unique = [...new Set(valoresValidos.map(v => v.includes(' | ') ? v.split(' | ')[0].trim() : v))].filter(Boolean);
-            setAtributoExito(prev => prev && unique.includes(prev) ? prev : (unique[0] || ''));
-        } else {
-            setPoblacion('');
-            setAtributoExito('');
-        }
-        setResDistMuestrales(null);
-    }, [filas]);
-
     const ejecutar = () => {
-        // 1. Regla general: Restricción a 1 sola columna
-        if (esMultiColumna) {
-            mostrarAlerta("La variable debe tener 1 sola columna.", "Atención", "warning");
-            setResDistMuestrales(null);
-            return;
-        }
-
-        const valoresValidos = filasValidas.map(f => (f.valor || '').toString().trim()).filter(Boolean);
-        const N = valoresValidos.length;
-
-        if (N === 0) {
-            mostrarAlerta("Ingresa los datos de la población.", "Atención", "warning");
-            setResDistMuestrales(null);
-            return;
-        }
-
-        const esNumeroValido = (v) => {
-            if (v === null || v === undefined) return false;
-            const str = v.toString().trim();
-            if (str === '') return false;
-            return !isNaN(Number(str));
-        };
-
-        const numN = parseInt(n, 10);
-
-        // Caso A: Si selecciona "Promedios (Normal)"
-        if (parametroCalculo === 'media') {
-            const tieneTexto = valoresValidos.some(v => !esNumeroValido(v));
-            if (tieneTexto) {
-                mostrarAlerta("Para Promedios, los datos deben ser números.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-
-            if (isNaN(numN) || numN < 1) {
-                mostrarAlerta("El tamaño de muestra (n) debe ser mayor a 0.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-
-            if (!conReemplazo && numN > N) {
-                mostrarAlerta("Sin reemplazo, n no puede superar a la población.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-        }
-
-        // Caso B: Si selecciona "Varianza"
-        else if (parametroCalculo === 'varianza') {
-            const tieneTexto = valoresValidos.some(v => !esNumeroValido(v));
-            if (tieneTexto) {
-                mostrarAlerta("Para Varianza, los datos deben ser números.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-
-            if (N < 2) {
-                mostrarAlerta("Para Varianza, se requieren al menos 2 datos (N ≥ 2).", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-
-            if (isNaN(numN) || numN < 2) {
-                mostrarAlerta("Para Varianza, la muestra (n) debe ser al menos 2.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-
-            if (!conReemplazo && numN > N) {
-                mostrarAlerta("Sin reemplazo, n no puede superar a la población.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-        }
-
-        // Caso C: Si selecciona "Proporciones"
-        else if (parametroCalculo === 'proporcion') {
-            if (!atributoExito) {
-                mostrarAlerta("Selecciona un Atributo de Éxito.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-
-            if (isNaN(numN) || numN < 1) {
-                mostrarAlerta("El tamaño de muestra (n) debe ser mayor a 0.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-
-            if (!conReemplazo && numN > N) {
-                mostrarAlerta("Sin reemplazo, n no puede superar a la población.", "Atención", "warning");
-                setResDistMuestrales(null);
-                return;
-            }
-        }
-
-        setCargando(true);
-        setTimeout(() => {
-            const res = calcularDistribucionMuestral(poblacion, n, conReemplazo, parametroCalculo, atributoExito);
-            if (res?.error) {
-                mostrarAlerta(res.error, "Atención", "warning");
-                setResDistMuestrales(null);
-            } else {
-                if (res?.resultado?.length > 5000) {
-                    mostrarAlerta(`Tabla paso a paso omitida por rendimiento (${res.resultado.length} muestras). Cálculos completados.`, "Aviso", "warning");
-                }
-                setResDistMuestrales(res);
-                setPaginaActual(1); // Reiniciar a la página 1 en cada nuevo cálculo
-            }
-            setCargando(false);
-        }, 50);
+        if (esMultiColumna) { mostrarAlerta('La variable debe tener 1 sola columna.'); return; }
+        const calculo = onGenerar();
+        if (calculo.error) mostrarAlerta(calculo.error);
+        else setPaginaActual(1);
     };
 
     // Lógica de Paginación
@@ -287,7 +162,6 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                             onClick={() => {
                                                 setParametroCalculo(item.id);
                                                 setIsOpenParamSelect(false);
-                                                setResDistMuestrales(null);
                                             }}
                                             style={{
                                                 padding: '9px 12px',
@@ -364,7 +238,6 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                                 onClick={() => {
                                                     setAtributoExito(u);
                                                     setIsOpenAtributoSelect(false);
-                                                    setResDistMuestrales(null);
                                                 }}
                                                 style={{
                                                     padding: '9px 12px',
@@ -396,7 +269,6 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                             value={n}
                             onChange={e => {
                                 setN(e.target.value);
-                                setResDistMuestrales(null);
                             }}
                             min={parametroCalculo === 'varianza' ? "2" : "1"}
                             placeholder={parametroCalculo === 'varianza' ? "Ej. 2 (mín. 2)" : "Ej. 2"}
@@ -426,7 +298,6 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                     className={`btn-mat251-modo ${conReemplazo ? 'active' : ''}`}
                                     onClick={() => {
                                         setConReemplazo(true);
-                                        setResDistMuestrales(null);
                                     }}
                                     style={{ fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 14px', fontSize: FS.sm, fontWeight: 600 }}
                                 >
@@ -437,7 +308,6 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                     className={`btn-mat251-modo ${!conReemplazo ? 'active' : ''}`}
                                     onClick={() => {
                                         setConReemplazo(false);
-                                        setResDistMuestrales(null);
                                     }}
                                     style={{ fontFamily: FONT, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 14px', fontSize: FS.sm, fontWeight: 600 }}
                                 >

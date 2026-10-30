@@ -30,9 +30,48 @@ const generarPermutaciones = (elementos, r) => {
     return perms;
 };
 
+export const validarParametrosConteo = (n, r) => {
+    if (n === null || n === undefined || r === null || r === undefined
+        || String(n).trim() === '' || String(r).trim() === '') return false;
+    const numN = Number(n);
+    const numR = Number(r);
+    return Number.isSafeInteger(numN) && Number.isSafeInteger(numR)
+        && numN >= 0 && numR >= 0 && numR <= numN;
+};
+
+// El cálculo normal y el historial deben construir los mismos elementos.
+export const obtenerElementosConteo = (n, tipoElementos, texto = '') => {
+    const numN = Number(n);
+    if (String(n).trim() === '' || !Number.isSafeInteger(numN) || numN < 0) return [];
+    if (tipoElementos === 'numeros') {
+        return Array.from({ length: numN }, (_, i) => String(i + 1));
+    }
+    if (tipoElementos !== 'personalizado') {
+        return Array.from({ length: numN }, (_, i) => String.fromCharCode(65 + i));
+    }
+    const elementos = texto.split(',').map(el => el.trim()).filter(Boolean).slice(0, numN);
+    let indice = 0;
+    while (elementos.length < numN) {
+        const candidato = String.fromCharCode(65 + indice++);
+        if (!elementos.includes(candidato)) elementos.push(candidato);
+    }
+    return elementos;
+};
+
+export const coincideConteoConEntradas = (resultado, datos) => (
+    !!resultado && !resultado.error
+    && Number(resultado.n) === Number(datos.n)
+    && Number(resultado.r) === Number(datos.r)
+    && resultado.tipoElementos === datos.tipoElementos
+    && resultado.customElementsInput === (datos.customElementsInput || '')
+);
+
 export const calcularTecnicasConteo = (n, r, customElements = []) => {
-    const numN = parseInt(n);
-    const numR = parseInt(r);
+    if (!validarParametrosConteo(n, r)) {
+        return { error: 'n y r deben ser enteros no negativos, con r menor o igual que n.' };
+    }
+    const numN = Number(n);
+    const numR = Number(r);
 
     if (isNaN(numN) || isNaN(numR)) return null;
     if (numR > numN) return { error: "r no puede ser mayor que n" };
@@ -271,6 +310,9 @@ export const calcularReglaAdicion = (filas, nombresColumnas, colA, valA, colB, v
 };
 
 export const calcularReglaMultiplicacion = (filas, nombresColumnas, colA, valA, colB, valB, modReemplazo) => {
+    if (!['con_reemplazo', 'sin_reemplazo'].includes(modReemplazo)) {
+        return { error: 'Selecciona un tipo de extracción válido.' };
+    }
     if (!nombresColumnas || nombresColumnas.length === 0) {
         return { error: "Para usar esta función, debes importar una 'Matriz' que contenga columnas." };
     }
@@ -309,11 +351,14 @@ export const calcularReglaMultiplicacion = (filas, nombresColumnas, colA, valA, 
     if (modReemplazo === 'sin_reemplazo') {
         totalB = totalA - 1;
         const reduccion = countA > 0 ? (countAandB / countA) : 0;
-        countB = Number(Math.max(0, countB_inicial - reduccion).toFixed(2));
+        countB = Math.max(0, countB_inicial - reduccion);
     }
 
     if (totalB <= 0) {
         return { error: "No hay suficientes datos para realizar una segunda extracción sin reemplazo." };
+    }
+    if (modReemplazo === 'sin_reemplazo' && countA === 0) {
+        return { error: "No hay casos válidos del evento A para calcular la segunda extracción condicionada." };
     }
 
     const pB = countB / totalB;

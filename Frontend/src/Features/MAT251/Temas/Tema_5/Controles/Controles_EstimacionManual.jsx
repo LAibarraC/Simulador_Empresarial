@@ -1,38 +1,27 @@
 import React, { useState } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import { calcularEstimacionPuntualManual } from '../../../Matematicas/logica_Tema5';
 import { cardStyle, labelStyle } from '../../../Principal/Constantes';
 import ModalAlerta from '../../../ui/ModalAlerta';
 
-export default function Controles_EstimacionManual({ parametro, onCalcular }) {
+export default function Controles_EstimacionManual({ parametro, configuracion, onEditar, onCalcular }) {
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Dato inválido', tipo: 'warning' });
-    const [n, setN] = useState('');
-    const [xBar, setXBar] = useState('');
-    const [x, setX] = useState('');
-    const [s2, setS2] = useState('');
+    const n = configuracion.n;
+    const setN = valor => onEditar('n', valor);
+    const xBar = configuracion.xBar;
+    const setXBar = valor => onEditar('xBar', valor);
+    const x = configuracion.x;
+    const setX = valor => onEditar('x', valor);
+    const s2 = configuracion.s2;
+    const setS2 = valor => onEditar('s2', valor);
 
     const renderKatex = (math, negrita = false) => (
         <span className={negrita ? 'tema5-matematica-negrita' : undefined} dangerouslySetInnerHTML={{ __html: katex.renderToString(math, { throwOnError: false }) }} />
     );
 
     const handleCalcular = () => {
-        if ((parametro === 'proporcion' && (n === '' || x === '')) || (parametro === 'varianza' && (n === '' || s2 === ''))) {
-            const mensaje = parametro === 'proporcion'
-                ? 'Ingrese el tamaño de la muestra y los casos favorables.'
-                : 'Ingrese el tamaño de la muestra y la varianza muestral.';
-            setModalAlerta({ isOpen: true, mensaje, titulo: 'Faltan datos', tipo: 'warning' });
-            onCalcular(null);
-            return;
-        }
-
-        const res = calcularEstimacionPuntualManual({ n, x_bar: xBar, x, s2 }, parametro);
-        if (res.error) {
-            setModalAlerta({ isOpen: true, mensaje: res.error, titulo: 'Dato inválido', tipo: 'warning' });
-            onCalcular(null);
-        } else {
-            onCalcular(res);
-        }
+        const calculo = onCalcular();
+        if (calculo.error) setModalAlerta({ isOpen: true, mensaje: calculo.error, titulo: 'Dato inválido', tipo: 'warning' });
     };
 
     return (
