@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import logoSiCE from "../../assets/images/Logo-SiCE.png";
+import logoSiCE from "../../assets/images/Logo-SiCE.webp";
 import { alerta } from '../../utils/Notificaciones.jsx';
 import '../../styles/ui/Login.css'; // Aseguramos que cargue los estilos de la tarjeta
 

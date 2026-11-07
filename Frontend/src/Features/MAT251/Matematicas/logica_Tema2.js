@@ -118,17 +118,26 @@ export function calcularMomentosDiscreta(matrizDatos) {
 
     let sumP = 0;
     const datosValidos = [];
+    let N = 0;
+    let hasF = false;
 
     for (let i = 0; i < matrizDatos.length; i++) {
-        const x = parseFloat(matrizDatos[i].x);
-        const p = parseFloat(matrizDatos[i].p);
+        const x = Number(matrizDatos[i].x);
+        const p = Number(matrizDatos[i].p);
 
-        if (isNaN(x) || isNaN(p)) {
+        if (String(matrizDatos[i].x ?? '').trim() === '' || String(matrizDatos[i].p ?? '').trim() === ''
+            || !Number.isFinite(x) || !Number.isFinite(p)) {
             return { error: `La fila ${i + 1} contiene valores no numéricos.` };
         }
         if (p < 0 || p > 1) {
             return { error: `La probabilidad en la fila ${i + 1} debe estar entre 0 y 1.` };
         }
+
+        if (matrizDatos[i].f !== undefined) {
+            hasF = true;
+            N += matrizDatos[i].f;
+        }
+
         sumP += p;
         datosValidos.push({ ...matrizDatos[i], x, p });
     }
@@ -138,22 +147,27 @@ export function calcularMomentosDiscreta(matrizDatos) {
     }
 
     // Esperanza Matemática (Momento 1)
-    const esperanza = datosValidos.reduce((acc, val) => acc + (val.x * val.p), 0);
+    const esperanza = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (val.x * val.p), 0);
 
-    // Varianza y Desviación (Momento 2)
-    const varianza = datosValidos.reduce((acc, val) => acc + (Math.pow(val.x - esperanza, 2) * val.p), 0);
+    // Varianza y Desviación (Momento 2 central)
+    const varianza = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (Math.pow(val.x - esperanza, 2) * val.p), 0);
     const desviacion = Math.sqrt(varianza);
 
-    // Asimetría (Momento 3)
-    const m3 = datosValidos.reduce((acc, val) => acc + (Math.pow(val.x - esperanza, 3) * val.p), 0);
+    // Asimetría (Momento 3 central estandarizado)
+    const m3 = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (Math.pow(val.x - esperanza, 3) * val.p), 0);
     const asimetria = desviacion > 0 ? (m3 / Math.pow(desviacion, 3)) : 0;
 
-    // Curtosis (Momento 4)
-    const m4 = datosValidos.reduce((acc, val) => acc + (Math.pow(val.x - esperanza, 4) * val.p), 0);
+    // Curtosis (Momento 4 central estandarizado)
+    const m4 = datosValidos.reduce((acc, val) => val.p === 0 ? acc : acc + (Math.pow(val.x - esperanza, 4) * val.p), 0);
     const curtosis = desviacion > 0 ? (m4 / Math.pow(desviacion, 4)) - 3 : 0;
+
+    if (![esperanza, varianza, desviacion, asimetria, curtosis].every(Number.isFinite)) {
+        return { error: 'Los valores exceden el rango numérico admitido para calcular los momentos.' };
+    }
 
     return {
         datos: datosValidos,
+        N: hasF ? N : null,
         esperanza,
         varianza,
         desviacion,
@@ -162,130 +176,45 @@ export function calcularMomentosDiscreta(matrizDatos) {
     };
 }
 
-export function calcularBivariante(matrizDatos, valoresX, valoresY) {
-    // Parseo de los números
-    const numX = valoresX.map(v => parseFloat(v));
-    const numY = valoresY.map(v => parseFloat(v));
-    const matriz = matrizDatos.map(fila => fila.map(v => parseFloat(v)));
+// Resumen de funciones continuas compartido por la página y el reporte PDF.
+const integrarSimpson = (fn, a, b, n = 1000) => {
+    const h = (b - a) / n;
+    let suma = fn(a) + fn(b);
+    for (let i = 1; i < n; i++) suma += fn(a + i * h) * (i % 2 === 0 ? 2 : 4);
+    return suma * h / 3;
+};
 
-    // Probabilidades Marginales
-    const probX = Array(numX.length).fill(0);
-    const probY = Array(numY.length).fill(0);
-
-    for (let i = 0; i < numX.length; i++) {
-        for (let j = 0; j < numY.length; j++) {
-            probX[i] += matriz[i][j];
-            probY[j] += matriz[i][j];
-        }
-    }
-
-    // Esperanzas Simples y Cuadráticas
-    let EX = 0;
-    let EX2 = 0;
-    for (let i = 0; i < numX.length; i++) {
-        EX += numX[i] * probX[i];
-        EX2 += (numX[i] ** 2) * probX[i];
-    }
-
-    let EY = 0;
-    let EY2 = 0;
-    for (let j = 0; j < numY.length; j++) {
-        EY += numY[j] * probY[j];
-        EY2 += (numY[j] ** 2) * probY[j];
-    }
-
-    // Esperanza Conjunta E(XY)
-    let EXY = 0;
-    let latexExyTerms = [];
-    for (let i = 0; i < numX.length; i++) {
-        for (let j = 0; j < numY.length; j++) {
-            if (matriz[i][j] !== 0) {
-                EXY += numX[i] * numY[j] * matriz[i][j];
-                latexExyTerms.push(`(${numX[i]})(${numY[j]})(${matriz[i][j]})`);
+// Resumen común para la página y el reporte: conserva la resolución simbólica
+// y usa el mismo cálculo numérico si no hay resultados del servidor.
+export function calcularResumenContinua(resultados) {
+    const { funcionFx, a, b, esperanza_backend, varianza_backend, area_backend } = resultados;
+    try {
+        let resumen;
+        if (esperanza_backend !== undefined && esperanza_backend !== null) {
+            resumen = {
+                eX: esperanza_backend,
+                eX2: varianza_backend + esperanza_backend ** 2,
+                varX: varianza_backend,
+                stdDev: Math.sqrt(Math.max(0, varianza_backend)),
+                area: area_backend ?? 1
+            };
+        } else {
+            if (!Number.isFinite(a) || !Number.isFinite(b)) {
+                return { error: 'No se puede integrar numéricamente con límites infinitos. La resolución simbólica falló.' };
             }
+            const expresion = compile(funcionFx);
+            const f = x => expresion.evaluate({ x });
+            const area = integrarSimpson(f, a, b);
+            const eX = integrarSimpson(x => x * f(x), a, b);
+            const eX2 = integrarSimpson(x => x ** 2 * f(x), a, b);
+            const varX = eX2 - eX ** 2;
+            resumen = { area, eX, eX2, varX, stdDev: Math.sqrt(Math.max(0, varX)) };
         }
+        if (Object.values(resumen).some(valor => !Number.isFinite(valor))) {
+            return { error: 'No se obtuvieron resultados finitos para la función en el intervalo indicado.' };
+        }
+        return resumen;
+    } catch {
+        return { error: 'Error al procesar la función. Verifique la sintaxis.' };
     }
-
-    // Varianzas
-    const VarX = EX2 - (EX ** 2);
-    const VarY = EY2 - (EY ** 2);
-    
-    // Covarianza
-    const CovXY = EXY - (EX * EY);
-    
-    // Coeficiente de Correlación
-    const denom = Math.sqrt(VarX * VarY);
-    const Rho = denom === 0 ? 0 : CovXY / denom;
-
-    return {
-        EX, EX2, VarX,
-        EY, EY2, VarY,
-        EXY,
-        latexExyStr: latexExyTerms.join(' + '),
-        CovXY,
-        Rho
-    };
-}
-
-export function calcularContinuaPlantilla(tipoFuncion, a, b, n = 0, c = 0) {
-    const numA = parseFloat(a);
-    const numB = parseFloat(b);
-    const numN = parseFloat(n);
-    const numC = parseFloat(c);
-
-    if (tipoFuncion !== 'exponencial') {
-        if (isNaN(numA) || isNaN(numB)) return { error: 'Límites inválidos' };
-        if (numA >= numB) return { error: 'El límite inferior (a) debe ser menor al límite superior (b).' };
-    } else {
-        if (isNaN(numC) || numC <= 0) return { error: 'Coeficiente c inválido. Debe ser mayor a 0.' };
-    }
-
-    let k = 0, EX = 0, EX2 = 0, VarX = 0, Desv = 0;
-    
-    if (tipoFuncion === 'uniforme') {
-        k = 1 / (numB - numA);
-        EX = (numA + numB) / 2;
-        VarX = Math.pow(numB - numA, 2) / 12;
-        Desv = Math.sqrt(VarX);
-        EX2 = VarX + Math.pow(EX, 2);
-    } else if (tipoFuncion === 'polinomica') {
-        if (isNaN(numN)) return { error: 'Exponente inválido' };
-        
-        const termSuperiorK = Math.pow(numB, numN + 1);
-        const termInferiorK = Math.pow(numA, numN + 1);
-        
-        if (termSuperiorK - termInferiorK === 0) return { error: 'División por cero al calcular k.' };
-        
-        k = (numN + 1) / (termSuperiorK - termInferiorK);
-        
-        const termSuperiorE1 = Math.pow(numB, numN + 2);
-        const termInferiorE1 = Math.pow(numA, numN + 2);
-        EX = k * ((termSuperiorE1 - termInferiorE1) / (numN + 2));
-        
-        const termSuperiorE2 = Math.pow(numB, numN + 3);
-        const termInferiorE2 = Math.pow(numA, numN + 3);
-        EX2 = k * ((termSuperiorE2 - termInferiorE2) / (numN + 3));
-        
-        VarX = EX2 - Math.pow(EX, 2);
-        Desv = Math.sqrt(Math.max(0, VarX));
-    } else if (tipoFuncion === 'exponencial') {
-        k = numC;
-        EX = 1 / numC;
-        VarX = 1 / Math.pow(numC, 2);
-        Desv = Math.sqrt(VarX);
-        EX2 = VarX + Math.pow(EX, 2);
-    }
-
-    return {
-        tipoFuncion,
-        a: tipoFuncion === 'exponencial' ? 0 : numA,
-        b: tipoFuncion === 'exponencial' ? '∞' : numB,
-        n: numN,
-        c: numC,
-        k,
-        EX,
-        EX2,
-        VarX,
-        Desv
-    };
 }

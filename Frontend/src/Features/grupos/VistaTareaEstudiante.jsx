@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { alerta } from "../../utils/Notificaciones";
 import { BASE_URL, api } from "../../services/api";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 
 const TOPIC_CALCULATION_MAPPINGS = {
   "tema 2": ["frecuencias_completas", "distribucion_intervalos", "tabla_frecuencias", "distribucion_de_frecuencias"],
@@ -225,7 +225,7 @@ export default function VistaTareaEstudiante({ tarea, onClose, onEntregaExitosa 
       }
 
       if (usuario?.nombre) {
-        const resHistorial = await api.obtenerHistorial(usuario.nombre);
+        const resHistorial = await api.obtenerHistorial(usuario.nombre, "MAT151");
         if (resHistorial && resHistorial.historial) {
           setHistorialUsuario(resHistorial.historial);
         } else {

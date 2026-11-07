@@ -7,7 +7,7 @@ import "driver.js/dist/driver.css";
 
 // --- IMPORTS DE SERVICIOS Y CONTEXTO ---
 import { useCalculadoraExcel } from "../hooks/useCalculadoraExcel";
-import { useModuleData } from "../../../components/Gestion_Datos/DataContext";
+import { useModuleData } from "../../../components/gestion_datos/DataContext";
 import { api, BASE_URL } from "../../../services/api";
 import { alerta } from "../../../utils/Notificaciones";
 import {
@@ -996,6 +996,7 @@ export default function Calculos() {
       const activeTareaTitulo = tareaContexto?.titulo || tareaContexto?.tareaTitulo || null;
 
       const snapshotCompleto = {
+        modulo: "MAT151",
         datosSnapshot: excelData,
         configuracion: {
           calculo, tipoIntervalo, metodoK, kPersonalizado, percentilK,
@@ -1010,7 +1011,7 @@ export default function Calculos() {
         resultadoFinal: resultado,
         tarea_id: activeTareaId,
       };
-      await api.guardarEnHistorial(usuario.nombre, calculo, selectedFile, snapshotCompleto);
+      await api.guardarEnHistorial(usuario.nombre, calculo, selectedFile, snapshotCompleto, "MAT151");
       if (activeTareaId) {
         alerta.exito("¡Cálculo Guardado para la Tarea!", `El cálculo se guardó y vinculó exclusivamente a «${activeTareaTitulo || 'esta tarea'}».`);
         // Actualizar el estado de la tarea en la barra superior de inmediato

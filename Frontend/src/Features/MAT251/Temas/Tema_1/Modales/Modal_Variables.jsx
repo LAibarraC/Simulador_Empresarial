@@ -23,7 +23,7 @@ export default function ModalVariables({ modalVars, setModalVars, variables, car
     return (
         <div style={overlayStyle} onClick={() => { setModalVars(false); setSeleccionadas([]); }}>
             <div style={{...modalBoxStyle, width: '450px'}} onClick={(e) => e.stopPropagation()}>
-                <h3 style={{ margin: '0 0 16px', fontSize: FS.lg, fontWeight: 600 }}>Selecciona una Variable</h3>
+                <h3 style={{ margin: '0 0 16px', fontSize: FS.lg, fontWeight: 'bold', color: 'var(--text-pure)' }}>Selecciona una Variable</h3>
                 {variables && variables.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
                         {variables.map((v, i) => {
@@ -43,7 +43,22 @@ export default function ModalVariables({ modalVars, setModalVars, variables, car
                                         <strong style={{ fontSize: FS.base, color: isSelected ? 'var(--primary-color)' : 'inherit' }}>{v.nombre}</strong>
                                         {isSelected && <span style={{ color: 'var(--primary-color)', fontSize: '1.2rem' }}>✓</span>}
                                     </div>
-                                    <p style={{ margin: '2px 0 0', fontSize: FS.xs, color: 'var(--text-muted)' }}>{v.datos?.length || 0} datos disponibles</p>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                                        <p style={{ margin: 0, fontSize: FS.xs, color: 'var(--text-muted)' }}>{v.datos?.length || 0} datos disponibles</p>
+                                        {v.tipo && (
+                                            <span style={{
+                                                fontSize: '0.65rem',
+                                                padding: '2px 6px',
+                                                borderRadius: RADIUS,
+                                                background: v.tipo.includes('Cuantitativa') ? '#dcfce7' : v.tipo.includes('Cualitativa') ? '#e0f2fe' : '#fecdd3',
+                                                color: v.tipo.includes('Cuantitativa') ? '#166534' : v.tipo.includes('Cualitativa') ? '#075985' : '#9f1239',
+                                                fontWeight: 600,
+                                                border: v.tipo.includes('Cuantitativa') ? '1px solid #bbf7d0' : v.tipo.includes('Cualitativa') ? '1px solid #bae6fd' : '1px solid #fecdd3'
+                                            }}>
+                                                {v.tipo}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}

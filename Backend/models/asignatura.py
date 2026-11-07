@@ -13,6 +13,24 @@ class Clase(Base):
     fecha_limite_matriculacion = Column(String(10), nullable=True) # Formato YYYY-MM-DD
     activa = Column(Boolean, nullable=False, default=True, server_default="1")
     
+    modulo = Column(String(50), nullable=True) # Ej: MAT151, MAT251
     # Llave foránea: Vincula esta clase con el ID del docente que la creó
     docente_id = Column(Integer, ForeignKey("usuarios.id")) 
     fecha_creacion = Column(DateTime, default=func.now())
+
+class DocenteModulo(Base):
+    __tablename__ = "docente_modulos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    docente_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+    modulo = Column(String(50), nullable=False) # 'MAT151', 'MAT251'
+    activo = Column(Boolean, nullable=False, default=True)
+    fecha_asignacion = Column(DateTime, default=func.now())
+
+class EstudianteModulo(Base):
+    __tablename__ = "estudiante_modulos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    estudiante_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+    modulo = Column(String(50), nullable=False) # 'MAT151', 'MAT251'
+    fecha_habilitacion = Column(DateTime, default=func.now())

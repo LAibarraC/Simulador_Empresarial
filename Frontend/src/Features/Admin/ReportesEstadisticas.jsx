@@ -592,22 +592,98 @@ export default function ReportesEstadisticas() {
 
   return (
     <div ref={reporteRef} style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+      <style>{`
+        .reporte-acciones-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 12px;
+          background-color: var(--bg-card);
+          padding: 16px 20px;
+          border-radius: 12px;
+          border: 1px solid var(--border-color);
+        }
+        .reporte-periodo-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .reporte-periodo-btns {
+          display: flex;
+          gap: 5px;
+          background-color: var(--bg-input);
+          padding: 4px;
+          border-radius: 8px;
+          border: 1px solid var(--border-color);
+          flex-wrap: nowrap;
+        }
+        .reporte-export-btns {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: nowrap;
+        }
+        .reporte-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
+        }
+        .reporte-graficos-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+          gap: 20px;
+        }
+        @media (max-width: 768px) {
+          .reporte-acciones-bar {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 14px;
+            gap: 10px;
+          }
+          .reporte-periodo-wrapper {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+          }
+          .reporte-periodo-btns {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .reporte-periodo-btns button {
+            flex: 1;
+            font-size: 0.75rem !important;
+            padding: 6px 4px !important;
+            text-align: center;
+          }
+          .reporte-export-btns {
+            width: 100%;
+            justify-content: stretch;
+          }
+          .reporte-export-btns button {
+            flex: 1;
+            justify-content: center;
+          }
+          .reporte-kpi-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+          .reporte-graficos-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 480px) {
+          .reporte-kpi-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
 
       {/* BARRA SUPERIOR DE ACCIONES Y FILTROS */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '15px',
-        backgroundColor: 'var(--bg-card)',
-        padding: '16px 20px',
-        borderRadius: '12px',
-        border: '1px solid var(--border-color)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Período:</span>
-          <div style={{ display: 'flex', gap: '5px', backgroundColor: 'var(--bg-input)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+      <div className="reporte-acciones-bar">
+        <div className="reporte-periodo-wrapper">
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Período:</span>
+          <div className="reporte-periodo-btns">
             <button
               onClick={() => setPeriodoFiltro('todo')}
               className={periodoFiltro === 'todo' ? 'btn-amarillo' : ''}
@@ -662,12 +738,12 @@ export default function ReportesEstadisticas() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div className="reporte-export-btns">
           <button
             onClick={cargarEstadisticas}
             title="Refrescar Estadísticas"
             className="btn-azul"
-            style={{ padding: '8px 14px' }}
+            style={{ padding: '8px 14px', whiteSpace: 'nowrap' }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M23 4v6h-6M1 20v-6h6" />
@@ -679,7 +755,7 @@ export default function ReportesEstadisticas() {
           <button
             onClick={exportarExcel}
             className="btn-verde"
-            style={{ padding: '8px 14px' }}
+            style={{ padding: '8px 14px', whiteSpace: 'nowrap' }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -695,7 +771,7 @@ export default function ReportesEstadisticas() {
             onClick={exportarPDF}
             disabled={exportando}
             className="btn-rojo"
-            style={{ padding: '8px 14px' }}
+            style={{ padding: '8px 14px', whiteSpace: 'nowrap' }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -708,11 +784,7 @@ export default function ReportesEstadisticas() {
       </div>
 
       {/* TARJETAS KPI (GRID RESPONSIVO) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '16px'
-      }}>
+      <div className="reporte-kpi-grid">
         {/* KPI 1: Total Usuarios */}
         <div style={{
           backgroundColor: 'var(--bg-card)',
@@ -880,7 +952,7 @@ export default function ReportesEstadisticas() {
       </div>
 
       {/* SECCIÓN DE GRÁFICOS: DISTRIBUCIÓN DE ROLES & EVOLUCIÓN TEMPORAL */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+      <div className="reporte-graficos-grid">
 
         {/* GRÁFICO 1: DISTRIBUCIÓN POR ROL */}
         <div id="grafico-roles" style={{
@@ -1019,43 +1091,47 @@ export default function ReportesEstadisticas() {
         </div>
 
         {top_clases && top_clases.length > 0 ? (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+            <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.75rem' }}>
-                  <th style={{ padding: '10px' }}>Clase</th>
-                  <th style={{ padding: '10px' }}>Código</th>
-                  <th style={{ padding: '10px' }}>Docente</th>
-                  <th style={{ padding: '10px', textAlign: 'center' }}>Estudiantes Inscritos</th>
-                  <th style={{ padding: '10px', textAlign: 'right' }}>Fecha Registro</th>
+                <tr style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
+                  <th style={{ padding: '12px 14px', fontWeight: '700', whiteSpace: 'nowrap', borderBottom: '1px solid var(--border-color)' }}>#  Clase</th>
+                  <th style={{ padding: '12px 14px', fontWeight: '700', whiteSpace: 'nowrap', borderBottom: '1px solid var(--border-color)' }}>Código</th>
+                  <th style={{ padding: '12px 14px', fontWeight: '700', whiteSpace: 'nowrap', borderBottom: '1px solid var(--border-color)' }}>Docente</th>
+                  <th style={{ padding: '12px 14px', fontWeight: '700', whiteSpace: 'nowrap', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Estudiantes</th>
+                  <th style={{ padding: '12px 14px', fontWeight: '700', whiteSpace: 'nowrap', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Fecha Registro</th>
                 </tr>
               </thead>
               <tbody>
                 {top_clases.map((c, i) => (
-                  <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '12px 10px', color: 'var(--text-main)', fontWeight: 'bold' }}>
-                      <span style={{ color: 'var(--accent-color)', marginRight: '8px' }}>#{i + 1}</span>
+                  <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <td style={{ padding: '13px 14px', color: 'var(--text-main)', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                      <span style={{ color: 'var(--accent-color)', marginRight: '8px', fontWeight: 'bold' }}>#{i + 1}</span>
                       {c.nombre}
                     </td>
-                    <td style={{ padding: '12px 10px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                    <td style={{ padding: '13px 14px', color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
                       {c.codigo}
                     </td>
-                    <td style={{ padding: '12px 10px', color: 'var(--text-main)' }}>
+                    <td style={{ padding: '13px 14px', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
                       {c.docente}
                     </td>
-                    <td style={{ padding: '12px 10px', textAlign: 'center' }}>
+                    <td style={{ padding: '13px 14px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                       <span style={{
                         backgroundColor: c.estudiantes_count > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.1)',
                         color: c.estudiantes_count > 0 ? '#10b981' : 'var(--text-muted)',
-                        padding: '4px 10px',
+                        padding: '4px 12px',
                         borderRadius: '20px',
                         fontWeight: 'bold',
-                        fontSize: '0.8rem'
+                        fontSize: '0.8rem',
+                        display: 'inline-block'
                       }}>
                         {c.estudiantes_count} {c.estudiantes_count === 1 ? 'estudiante' : 'estudiantes'}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 10px', color: 'var(--text-muted)', textAlign: 'right' }}>
+                    <td style={{ padding: '13px 14px', color: 'var(--text-muted)', textAlign: 'right', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
                       {c.fecha_creacion || '-'}
                     </td>
                   </tr>

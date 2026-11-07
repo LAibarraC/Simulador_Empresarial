@@ -7,6 +7,7 @@ import {alerta} from "../utils/Notificaciones";
 
 export const useSimuladorLogic = (usuario) => {
   const [workbook, setWorkbook] = useState(null);
+  const [nombreArchivoOrigen, setNombreArchivoOrigen] = useState('');
   const [sheetNames, setSheetNames] = useState([]);
   const [currentSheet, setCurrentSheet] = useState("");
   const [rowData, setRowData] = useState([]);
@@ -15,6 +16,7 @@ export const useSimuladorLogic = (usuario) => {
 
   useEffect(() => {
     setWorkbook(null);
+    setNombreArchivoOrigen('');
     setSheetNames([]);
     setCurrentSheet("");
     setRowData([]);
@@ -43,6 +45,7 @@ export const useSimuladorLogic = (usuario) => {
       try {
         const wb = XLSX.read(evt.target.result, { type: 'binary' });
         setWorkbook(wb);
+        setNombreArchivoOrigen(file.name);
         setSheetNames(wb.SheetNames);
         setVariables([]); // Limpiamos variables al cargar nuevo archivo
         cargarHoja(wb, wb.SheetNames[0], 50);
@@ -60,10 +63,17 @@ export const useSimuladorLogic = (usuario) => {
   const agregarVariable = () => {
     setVariables(prev => {
       const nuevocolor = generarColorAleatorio(prev.length)
+      const numerosOcupados = new Set(
+        prev
+          .map(variable => Number(variable.nombre?.match(/^Variable\s+(\d+)$/i)?.[1]))
+          .filter(Number.isFinite)
+      );
+      let numero = 1;
+      while (numerosOcupados.has(numero)) numero++;
 
       return [...prev, {
         id: Date.now(),
-        nombre: `Variable ${prev.length + 1}`,
+        nombre: `Variable ${numero}`,
         color: nuevocolor,
         datos: [],
         rangoLabel: "",
@@ -87,6 +97,7 @@ export const useSimuladorLogic = (usuario) => {
 
   return {
     workbook,
+    nombreArchivoOrigen,
     sheetNames,
     currentSheet,
     rowData,

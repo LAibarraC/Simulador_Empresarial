@@ -1,6 +1,6 @@
 /* const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; */
 
-/*uvicorn main:app --reload*/
+/*uvicorn main:app --reload*/ 
 
 // Detecta automáticamente si estás en localhost o en la IP del celular
 const hostActual = window.location.hostname;
@@ -331,10 +331,10 @@ export const api = {
     }
   },
 
-  descargarArchivoBinario: async (filename, autor) => {
+  descargarArchivoBinario: async (filename, autor, curso = "") => {
     try {
       const res = await fetch(
-        `${BASE_URL}/files/${encodeURIComponent(filename)}?autor=${encodeURIComponent(autor)}`,
+        `${BASE_URL}/files/${encodeURIComponent(filename)}?autor=${encodeURIComponent(autor)}${curso ? `&curso=${encodeURIComponent(curso)}` : ""}`,
       );
       if (!res.ok)
         throw new Error("No se pudo obtener el archivo del servidor");
@@ -360,7 +360,7 @@ export const api = {
     }
   },
 
-  guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto) => {
+  guardarEnHistorial: async (autor, calculo, archivo, snapshotCompleto, modulo = "MAT151") => {
     try {
       const token = localStorage.getItem("token");
       const headers = { 
@@ -374,6 +374,7 @@ export const api = {
           autor: autor,
           calculo: calculo,
           archivo_origen: archivo,
+          modulo: modulo,
           snapshot: snapshotCompleto,
         }),
       });
@@ -388,12 +389,33 @@ export const api = {
     }
   },
 
-  obtenerHistorial: async (autor) => {
+  actualizarHistorial: async (registroId, datos) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/actualizar_historial/${registroId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(datos),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "No se pudieron guardar los cambios.");
+    }
+    return await res.json();
+  },
+
+  obtenerHistorial: async (autor, modulo = null) => {
     try {
       const token = localStorage.getItem("token");
       const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+      const params = new URLSearchParams();
+      if (autor) params.append("autor", autor);
+      if (modulo && modulo !== "TODOS") params.append("modulo", modulo);
+      const queryString = params.toString() ? `?${params.toString()}` : "";
       const res = await fetch(
-        `${BASE_URL}/obtener_historial?autor=${encodeURIComponent(autor || "")}`,
+        `${BASE_URL}/obtener_historial${queryString}`,
         { headers }
       );
       if (!res.ok)
@@ -472,7 +494,7 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Error al eliminar la cuenta");
+    if (!res.ok) throw new Error(data.error || data.detail || "Error al eliminar la cuenta");
     return data;
   },
 
@@ -525,7 +547,7 @@ export const api = {
       headers,
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Error al eliminar el usuario");
+    if (!res.ok) throw new Error(data.error || data.detail || "Error al eliminar el usuario");
     return data;
   },
 
@@ -651,7 +673,57 @@ export const api = {
     return data;
   },
 
+  // --- ASIGNACIÓN DE MÓDULOS A DOCENTES ---
+  obtenerTodosDocentesModulos: async () => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/admin/docentes-modulos`, {
+      method: "GET",
+      headers: headers,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al obtener módulos de docentes");
+    return data;
+  },
+
+  obtenerModulosDocente: async (docenteId) => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/admin/docentes/${docenteId}/modulos`, {
+      method: "GET",
+      headers: headers,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al consultar asignaturas");
+    return data;
+  },
+
+  asignarModulosDocente: async (docenteId, modulos) => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/admin/docentes/${docenteId}/modulos`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify({ modulos }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || "Error al guardar asignaturas");
+    return data;
+  },
+
+
   // --- SISTEMA DE NOTIFICACIONES ---
+  abrirFlujoNotificaciones: ({ token, signal }) => fetch(BASE_URL + "/notificaciones/eventos", {
+    headers: { Accept: "text/event-stream", Authorization: "Bearer " + token },
+    cache: "no-store",
+    signal,
+  }),
   obtenerNotificaciones: async () => {
     const token = localStorage.getItem("token");
     const headers = { "Content-Type": "application/json" };
@@ -786,15 +858,23 @@ export const api = {
     }
   },
 
-  obtenerEstadisticasDocente: async (claseId = null) => {
+  obtenerEstadisticasDocente: async (claseId = null, modulo = null) => {
     try {
       const token = localStorage.getItem("token");
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       let url = `${BASE_URL}/estadisticas-docente`;
+      const params = new URLSearchParams();
       if (claseId) {
-        url += `?clase_id=${encodeURIComponent(claseId)}`;
+        params.append("clase_id", claseId);
+      }
+      if (modulo && modulo !== "TODAS") {
+        params.append("modulo", modulo);
+      }
+      const qs = params.toString();
+      if (qs) {
+        url += `?${qs}`;
       }
 
       const res = await fetch(url, {

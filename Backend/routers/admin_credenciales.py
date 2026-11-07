@@ -3,8 +3,13 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from config.database import get_db
-from controllers.admin_credenciales import cargar_credenciales_logic, obtener_credenciales_logic, crear_credencial_logic, eliminar_credencial_logic, crear_precuenta_docente_logic
+from controllers.admin_credenciales import (
+    cargar_credenciales_logic, obtener_credenciales_logic, crear_credencial_logic,
+    eliminar_credencial_logic, crear_precuenta_docente_logic,
+    obtener_modulos_docente_logic, asignar_modulos_docente_logic, obtener_todos_docentes_con_modulos_logic
+)
 from middlewares.auth import require_role
+from validators.modulos import AsignarModulosDocente
 
 
 class CredencialCrear(BaseModel):
@@ -12,6 +17,7 @@ class CredencialCrear(BaseModel):
     email: str = Field(..., min_length=3, max_length=100)
     password: str = Field(..., min_length=1, max_length=100)
     rol: Literal["Docente"] = "Docente"
+    modulos: Optional[list[str]] = Field(default_factory=list)
 
 router = APIRouter()
 
@@ -21,7 +27,7 @@ async def obtener_credenciales(db: AsyncSession = Depends(get_db)):
 
 @router.post("/credenciales", dependencies=[Depends(require_role("Administrador"))])
 async def crear_credencial(datos: CredencialCrear, db: AsyncSession = Depends(get_db)):
-    return await crear_precuenta_docente_logic(datos.nombre, datos.email, datos.password, db)
+    return await crear_precuenta_docente_logic(datos.nombre, datos.email, datos.password, db, datos.modulos)
 
 
 @router.delete("/credenciales/{ci}", dependencies=[Depends(require_role("Administrador"))])
@@ -32,3 +38,16 @@ async def eliminar_credencial(ci: str, db: AsyncSession = Depends(get_db)):
 async def cargar_credenciales(file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
     content = await file.read()
     return await cargar_credenciales_logic(content, file.filename, db)
+
+@router.get("/admin/docentes-modulos", dependencies=[Depends(require_role("Administrador"))])
+async def obtener_todos_docentes_modulos(db: AsyncSession = Depends(get_db)):
+    return await obtener_todos_docentes_con_modulos_logic(db)
+
+@router.get("/admin/docentes/{docente_id}/modulos", dependencies=[Depends(require_role("Administrador"))])
+async def obtener_modulos_docente(docente_id: int, db: AsyncSession = Depends(get_db)):
+    return await obtener_modulos_docente_logic(docente_id, db)
+
+@router.put("/admin/docentes/{docente_id}/modulos", dependencies=[Depends(require_role("Administrador"))])
+async def asignar_modulos_docente(docente_id: int, datos: AsignarModulosDocente, db: AsyncSession = Depends(get_db)):
+    return await asignar_modulos_docente_logic(docente_id, datos.modulos, db)
+

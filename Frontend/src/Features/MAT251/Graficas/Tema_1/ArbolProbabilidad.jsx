@@ -28,9 +28,31 @@ export default function ArbolProbabilidad({ resultado, ramas, causasBayes }) {
     const hasBayesSelected = causasBayes && causasBayes.length > 0;
 
     return (
-        <div style={{ width: '100%', height: '100%', padding: '0px' }}>
-
-            <svg viewBox={`0 0 ${width} ${height + 40}`} width="100%" height="100%" style={{ display: 'block', margin: '0 auto', fontFamily: FONT }}>
+        <div 
+            className="thin-scrollbar formula-scroll-container" 
+            style={{ 
+                width: '100%', 
+                height: '100%', 
+                overflowX: 'auto', 
+                overflowY: 'hidden', 
+                boxSizing: 'border-box',
+                WebkitOverflowScrolling: 'touch',
+                padding: '0px'
+            }}
+        >
+            <div style={{ minWidth: `${width}px`, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <svg 
+                    viewBox={`0 0 ${width} ${height + 40}`} 
+                    width={width} 
+                    height="100%" 
+                    style={{ 
+                        display: 'block', 
+                        margin: '0 auto', 
+                        fontFamily: FONT,
+                        minWidth: `${width}px`,
+                        maxWidth: 'none'
+                    }}
+                >
 
                 {resultado.desglose.map((rama, i) => {
                     const ySpacing = height / (ramas.length + 1);
@@ -151,6 +173,7 @@ export default function ArbolProbabilidad({ resultado, ramas, causasBayes }) {
                     );
                 })()}
             </svg>
+            </div>
         </div>
     );
 }

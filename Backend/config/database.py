@@ -8,10 +8,10 @@ load_dotenv()
 
 # --- Configuración Base ---
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "mysql+pymysql://root:@localhost:3306/estadistica_db"
+    "DATABASE_URL"
+    #"mysql+pymysql://root:23luis99@localhost:3306/estadistica_db"
 )
-
+ 
 connect_args = {}
 if "aivencloud" in DATABASE_URL:
     connect_args = {

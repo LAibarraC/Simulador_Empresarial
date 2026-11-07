@@ -95,7 +95,7 @@ export default function ControlesSimuladorTotal({
                 mult: mult
             });
         });
-
+ 
         setRamas(desglose);
         setResultadoSimulador({ probB, desglose });
         setErrorSimulador('');
@@ -170,7 +170,7 @@ export default function ControlesSimuladorTotal({
                     {/* Éxito */}
                     {colEvento && valoresUnicosEvento.length > 0 && (
                         <div style={{ marginBottom: '10px' }}>
-                            <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', color: 'var(--primary-color)', fontWeight: 'bold' }}>Valor de "Éxito" en {colEvento}:</label>
+                            <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', color: 'var(--text-pure)', fontWeight: 600 }}>Valor de "Éxito" en {colEvento}:</label>
                             <select 
                                 value={valExito} 
                                 onChange={(e) => {
@@ -197,7 +197,7 @@ export default function ControlesSimuladorTotal({
             <button 
                 onClick={calcular} 
                 className="button_calcular" 
-                style={{ width: 'fit-content', alignSelf: 'center', padding: '8px 35px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}
+                style={{ width: 'fit-content', alignSelf: 'center', padding: '5px 20px', borderRadius: RADIUS, fontSize: FS.md, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}
             >
                 CALCULAR
             </button>

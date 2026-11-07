@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { alerta } from "../../utils/Notificaciones";
 import { BASE_URL } from "../../services/api";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 import ModalAsignarTarea from './ModalAsignarTarea';
 import VistaTareaEstudiante from './VistaTareaEstudiante';
 import ModalEntregasDocente from './ModalEntregasDocente';

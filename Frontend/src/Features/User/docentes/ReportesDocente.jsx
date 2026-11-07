@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { api } from '../../../services/api';
 import { alerta } from '../../../utils/Notificaciones';
 import Skeleton from '../../../ui/Skeleton';
@@ -158,19 +158,149 @@ const CeldaMaterias = ({ clases, claseNombre, claseCodigo }) => {
   );
 };
 
+function CustomSelectFiltroReportes({ value, onChange, options = [], placeholder = 'Todos los Grupos (Vista General)', minWidth = '220px' }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => String(opt.value) === String(value));
+
+  return (
+    <div ref={dropdownRef} style={{ position: 'relative', minWidth, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '7px 12px',
+          minHeight: '36px',
+          boxSizing: 'border-box',
+          background: 'var(--bg-card)',
+          border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
+          borderRadius: '5px',
+          cursor: 'pointer',
+          boxShadow: isOpen ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : '0 1px 2px rgba(0,0,0,0.04)',
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+          color: 'var(--text-main)',
+          userSelect: 'none',
+          fontSize: '0.85rem',
+          fontWeight: '600'
+        }}
+      >
+        <span
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            marginRight: '8px'
+          }}
+        >
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
+            color: 'var(--text-muted)',
+            flexShrink: 0
+          }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '5px',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+            zIndex: 1000,
+            maxHeight: '260px',
+            overflowY: 'auto',
+            animation: 'fadeInDropdown 0.2s ease'
+          }}
+        >
+          {options.map((opt, idx) => {
+            const isSelected = String(value) === String(opt.value);
+            return (
+              <div
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+                style={{
+                  padding: '9px 12px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  background: isSelected ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                  color: isSelected ? 'var(--primary-color)' : 'var(--text-main)',
+                  fontWeight: isSelected ? 600 : 400,
+                  transition: 'background 0.15s ease, color 0.15s ease',
+                  borderBottom: idx < options.length - 1 ? '1px solid var(--border-color)' : 'none',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {opt.label}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ReportesDocente({ usuario }) {
   const [estadisticas, setEstadisticas] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [exportando, setExportando] = useState(false);
+  const [filtroMateria, setFiltroMateria] = useState('TODAS');
   const [claseSeleccionadaId, setClaseSeleccionadaId] = useState('');
   const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
 
   const reporteRef = useRef(null);
 
-  const cargarEstadisticas = async (idClase = null) => {
+  const cargarEstadisticas = async (idClase = null, modulo = null) => {
     try {
       setCargando(true);
-      const data = await api.obtenerEstadisticasDocente(idClase);
+      const data = await api.obtenerEstadisticasDocente(idClase, modulo);
       setEstadisticas(data);
     } catch (error) {
       alerta.error('Error al cargar reportes', error.message || 'No se pudieron obtener las estadísticas.');
@@ -180,8 +310,36 @@ export default function ReportesDocente({ usuario }) {
   };
 
   useEffect(() => {
-    cargarEstadisticas(claseSeleccionadaId ? parseInt(claseSeleccionadaId) : null);
-  }, [claseSeleccionadaId]);
+    const id = claseSeleccionadaId ? parseInt(claseSeleccionadaId) : null;
+    const mod = filtroMateria !== 'TODAS' ? filtroMateria : null;
+    cargarEstadisticas(id, mod);
+  }, [claseSeleccionadaId, filtroMateria]);
+
+  const clases_disponibles = estadisticas?.clases_disponibles;
+
+  // Clases con módulo inferido/garantizado (los hooks deben llamarse al inicio siempre)
+  const clasesConModulo = useMemo(() => {
+    return (clases_disponibles || []).map(c => ({
+      ...c,
+      modulo: c.modulo || (c.nombre?.toUpperCase().includes('MAT251') ? 'MAT251' : 'MAT151')
+    }));
+  }, [clases_disponibles]);
+
+  // Lista de materias / módulos únicos presentes en los grupos
+  const modulosDisponibles = useMemo(() => {
+    const mods = new Set();
+    clasesConModulo.forEach(c => {
+      if (c.modulo) mods.add(c.modulo);
+    });
+    return Array.from(mods).sort();
+  }, [clasesConModulo]);
+
+  // Cursos filtrados por la materia seleccionada
+  const clasesFiltradasPorMateria = useMemo(() => {
+    if (filtroMateria === 'TODAS') return clasesConModulo;
+    return clasesConModulo.filter(c => c.modulo === filtroMateria);
+  }, [clasesConModulo, filtroMateria]);
+
 
   // --- EXPORTAR A EXCEL PROFESIONAL ---
   const exportarExcel = async () => {
@@ -538,7 +696,7 @@ export default function ReportesDocente({ usuario }) {
       const anchor = document.createElement('a');
       anchor.href = url;
       const fechaArchivo = new Date().toISOString().split('T')[0];
-      const sufijoGrupo = estadisticas.clase_seleccionada ? `_${estadisticas.clase_seleccionada.codigo}` : '_General';
+      const sufijoGrupo = estadisticas.clase_seleccionada ? `_${estadisticas.clase_seleccionada.codigo}` : (filtroMateria !== 'TODAS' ? `_${filtroMateria}` : '_General');
       anchor.download = `Reporte_Docente${sufijoGrupo}_${fechaArchivo}.xlsx`;
       document.body.appendChild(anchor);
       anchor.click();
@@ -591,7 +749,7 @@ export default function ReportesDocente({ usuario }) {
       }
 
       const fechaHoy = new Date().toISOString().split('T')[0];
-      const sufijoGrupo = estadisticas?.clase_seleccionada ? `_${estadisticas.clase_seleccionada.codigo}` : '_General';
+      const sufijoGrupo = estadisticas?.clase_seleccionada ? `_${estadisticas.clase_seleccionada.codigo}` : (filtroMateria !== 'TODAS' ? `_${filtroMateria}` : '_General');
       pdf.save(`Reporte_Docente${sufijoGrupo}_${fechaHoy}.pdf`);
       alerta.success('PDF Descargado', 'El reporte en PDF ha sido guardado correctamente.');
     } catch (error) {
@@ -604,22 +762,33 @@ export default function ReportesDocente({ usuario }) {
 
   if (cargando) {
     return (
-      <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <Skeleton height="50px" width="100%" borderRadius="12px" />
+      <div
+        className="page-container"
+        style={{
+          width: '100%',
+          maxWidth: '100%',
+          padding: '15px',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '15px'
+        }}
+      >
+        <Skeleton height="50px" width="100%" borderRadius="10px" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
           {[1, 2, 3, 4].map(i => (
-            <div key={i} style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+            <div key={i} style={{ padding: '15px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <Skeleton height="16px" width="50%" style={{ marginBottom: '10px' }} />
               <Skeleton height="32px" width="70%" />
             </div>
           ))}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '20px' }}>
-          <div style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-card)', height: '300px', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '15px' }}>
+          <div style={{ padding: '15px', borderRadius: '10px', background: 'var(--bg-card)', height: '300px', border: '1px solid var(--border-color)' }}>
             <Skeleton height="20px" width="40%" style={{ marginBottom: '20px' }} />
             <Skeleton height="200px" width="100%" />
           </div>
-          <div style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-card)', height: '300px', border: '1px solid var(--border-color)' }}>
+          <div style={{ padding: '15px', borderRadius: '10px', background: 'var(--bg-card)', height: '300px', border: '1px solid var(--border-color)' }}>
             <Skeleton height="20px" width="40%" style={{ marginBottom: '20px' }} />
             <Skeleton height="200px" width="100%" />
           </div>
@@ -630,7 +799,17 @@ export default function ReportesDocente({ usuario }) {
 
   if (!estadisticas) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--text-muted)' }}>
+      <div
+        className="page-container"
+        style={{
+          width: '100%',
+          maxWidth: '100%',
+          padding: '15px',
+          boxSizing: 'border-box',
+          textAlign: 'center',
+          color: 'var(--text-muted)'
+        }}
+      >
         <p>No se pudieron obtener las estadísticas de tus grupos en este momento.</p>
         <button
           onClick={() => cargarEstadisticas()}
@@ -653,9 +832,9 @@ export default function ReportesDocente({ usuario }) {
     evolucion_temporal = [],
     ranking_estudiantes = [],
     lista_estudiantes = [],
-    clases_disponibles = [],
     clase_seleccionada
   } = estadisticas;
+
 
   // Filtrado local de estudiantes por buscador
   const estudiantesFiltrados = lista_estudiantes.filter(est => {
@@ -672,7 +851,20 @@ export default function ReportesDocente({ usuario }) {
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', padding: '10px 0 40px 0' }} ref={reporteRef} className="doc-fade-in-container">
+    <div
+      ref={reporteRef}
+      className="page-container doc-fade-in-container"
+      style={{
+        width: '100%',
+        maxWidth: '100%',
+        padding: '15px',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '15px',
+        position: 'relative'
+      }}
+    >
       <style>{`
         @keyframes docFadeInUp {
           from {
@@ -771,24 +963,20 @@ export default function ReportesDocente({ usuario }) {
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '20px',
+        gap: '15px',
         backgroundColor: 'var(--bg-card)',
-        padding: '20px 24px',
-        borderRadius: '14px',
+        padding: '15px',
+        borderRadius: '10px',
         border: '1px solid var(--border-color)',
         boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          {/* Selector de Grupo / Clase con Icono y Estilo Profesional */}
+          {/* Selector de Grupo / Clase con Icono */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            backgroundColor: 'var(--bg-main)',
-            padding: '6px 12px',
-            borderRadius: '10px',
-            border: '1px solid var(--border-color)',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+            flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)' }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -799,54 +987,45 @@ export default function ReportesDocente({ usuario }) {
               </span>
             </div>
 
-            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-              <select
-                value={claseSeleccionadaId}
-                onChange={(e) => setClaseSeleccionadaId(e.target.value)}
-                className="doc-select-custom"
-                style={{
-                  padding: '7px 32px 7px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: 'var(--bg-card)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  minWidth: '230px',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+            {/* SELECTOR DE ASIGNATURAS / MATERIAS */}
+            {modulosDisponibles.length > 1 && (
+              <CustomSelectFiltroReportes
+                value={filtroMateria}
+                onChange={(val) => {
+                  setFiltroMateria(val);
+                  setClaseSeleccionadaId('');
                 }}
-              >
-                <option value="">Todos los Grupos (Vista General)</option>
-                {clases_disponibles.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre} ({c.codigo})
-                  </option>
-                ))}
-              </select>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  pointerEvents: 'none',
-                  color: 'var(--text-muted)'
-                }}
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </div>
+                options={[
+                  { value: 'TODAS', label: 'Todas las Asignaturas' },
+                  ...modulosDisponibles.map(m => ({
+                    value: m,
+                    label: m
+                  }))
+                ]}
+                placeholder="Todas las Asignaturas"
+                minWidth="180px"
+              />
+            )}
+
+            {/* SELECTOR DE GRUPOS */}
+            <CustomSelectFiltroReportes
+              value={claseSeleccionadaId}
+              onChange={(val) => setClaseSeleccionadaId(val)}
+              options={[
+                { 
+                  value: '', 
+                  label: filtroMateria === 'TODAS' 
+                    ? 'Todos los Grupos (Vista General)' 
+                    : `Todos los Grupos (${filtroMateria})` 
+                },
+                ...clasesFiltradasPorMateria.map(c => ({
+                  value: c.id,
+                  label: `${c.nombre} (${c.codigo})${filtroMateria === 'TODAS' && c.modulo ? ` — ${c.modulo}` : ''}`
+                }))
+              ]}
+              placeholder={filtroMateria === 'TODAS' ? 'Todos los Grupos (Vista General)' : `Todos los Grupos (${filtroMateria})`}
+              minWidth="240px"
+            />
           </div>
         </div>
 
@@ -894,13 +1073,13 @@ export default function ReportesDocente({ usuario }) {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-        gap: '16px'
+        gap: '15px'
       }}>
         {/* KPI 1: Grupos / Clases */}
         <div className="doc-kpi-card" style={{
           backgroundColor: 'var(--bg-card)',
-          padding: '20px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           border: '1px solid var(--border-color)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
           display: 'flex',
@@ -940,8 +1119,8 @@ export default function ReportesDocente({ usuario }) {
         {/* KPI 2: Estudiantes Matriculados */}
         <div className="doc-kpi-card" style={{
           backgroundColor: 'var(--bg-card)',
-          padding: '20px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           border: '1px solid var(--border-color)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
           display: 'flex',
@@ -983,8 +1162,8 @@ export default function ReportesDocente({ usuario }) {
         {/* KPI 3: Cálculos y Análisis */}
         <div className="doc-kpi-card" style={{
           backgroundColor: 'var(--bg-card)',
-          padding: '20px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           border: '1px solid var(--border-color)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
           display: 'flex',
@@ -1025,8 +1204,8 @@ export default function ReportesDocente({ usuario }) {
         {/* KPI 4: Promedio por Alumno */}
         <div className="doc-kpi-card" style={{
           backgroundColor: 'var(--bg-card)',
-          padding: '20px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           border: '1px solid var(--border-color)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
           display: 'flex',
@@ -1064,13 +1243,13 @@ export default function ReportesDocente({ usuario }) {
       </div>
 
       {/* SECCIÓN DE GRÁFICOS INTERACTIVOS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '15px' }}>
 
         {/* GRÁFICO 1: MÓDULOS PRACTICADOS */}
         <div id="grafico-docente-modulos" className="doc-card-elevate" style={{
           backgroundColor: 'var(--bg-card)',
-          padding: '22px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           border: '1px solid var(--border-color)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
         }}>
@@ -1111,8 +1290,8 @@ export default function ReportesDocente({ usuario }) {
         {/* GRÁFICO 2: COMPARATIVA DE GRUPOS O RANKING DE ALUMNOS */}
         <div id="grafico-docente-comparativa" className="doc-card-elevate" style={{
           backgroundColor: 'var(--bg-card)',
-          padding: '22px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           border: '1px solid var(--border-color)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
         }}>
@@ -1163,8 +1342,8 @@ export default function ReportesDocente({ usuario }) {
       {evolucion_temporal && evolucion_temporal.length > 0 && (
         <div id="grafico-docente-evolucion" className="doc-card-elevate" style={{
           backgroundColor: 'var(--bg-card)',
-          padding: '22px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           border: '1px solid var(--border-color)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
         }}>
@@ -1201,8 +1380,8 @@ export default function ReportesDocente({ usuario }) {
       {/* TABLA DE ESTUDIANTES Y SU RENDIMIENTO */}
       <div className="doc-card-elevate" style={{
         backgroundColor: 'var(--bg-card)',
-        padding: '22px',
-        borderRadius: '12px',
+        padding: '15px',
+        borderRadius: '10px',
         border: '1px solid var(--border-color)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
       }}>

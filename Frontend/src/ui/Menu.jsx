@@ -1,16 +1,20 @@
   import { useState, useEffect, useRef } from "react";
   import { NavLink, useNavigate, useLocation } from "react-router-dom";
   import OscuroClaro from "./oscuro_claro.jsx";
-  import logoSiCE from "../assets/images/Logo-SiCE.png";
+  import logoSiCE from "../assets/images/Logo-SiCE.webp";
   import '../styles/ui/Menu.css';
   import { alerta } from "../utils/Notificaciones";
   import { api } from "../services/api";
+  import { useNotificaciones } from "../hooks/useNotificaciones";
+  import { Megaphone } from "lucide-react";
   import { 
     IconoCandado, IconoEstadisticaGeneral, IconoEstadisticaMatematica, IconoAnalisisEmpresarial,
     IconoInicio, IconoArchivos, IconoCalculadoraMenu, IconoChevron, 
     IconoGrupos, IconoGestionGrupos, IconoGestionAlumnos, IconoHistorial, 
     IconoTareas, IconoEstadisticasDocente, IconoAdmin, IconoCampana
   } from "./iconos";
+
+  const PREFIJO_AVISO = /^s*[📢📣]️?s*/u;
 
   export default function Menu({ usuario, setUsuario }) {
     const navigate = useNavigate();
@@ -23,7 +27,7 @@
     const perfilRef = useRef(null);
 
     // --- ESTADOS PARA SISTEMA DE NOTIFICACIONES ---
-    const [notificaciones, setNotificaciones] = useState([]);
+    const { notificaciones, setNotificaciones } = useNotificaciones(usuario);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const notifRef = useRef(null);
 
@@ -31,24 +35,6 @@
     const mobileMenuRef = useRef(null);
     const hamburgerRef = useRef(null);
 
-    const cargarNotificaciones = async () => {
-      try {
-        const data = await api.obtenerNotificaciones();
-        setNotificaciones(data);
-      } catch (error) {
-        console.error("Error al cargar notificaciones:", error);
-      }
-    };
-
-    useEffect(() => {
-      if (usuario) {
-        cargarNotificaciones();
-        const interval = setInterval(cargarNotificaciones, 30000);
-        return () => clearInterval(interval);
-      } else {
-        setNotificaciones([]);
-      }
-    }, [usuario]);
 
     const handleMarcarLeida = async (id, e) => {
       e.stopPropagation(); // Evitar que el dropdown se cierre
@@ -115,6 +101,13 @@
     const location = useLocation();
     const navLinksRef = useRef(null);
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
+
+    // Detectamos permisos de módulos asignados (Sin defaults)
+    const modulosUsuario = usuario?.modulos || [];
+    const esAdmin = usuario?.rol === "Administrador";
+    const tieneMAT151 = esAdmin || modulosUsuario.includes("MAT151");
+    const tieneMAT251 = esAdmin || modulosUsuario.includes("MAT251");
+    const tieneCualquierModulo = tieneMAT151 || tieneMAT251;
 
     // Detectamos si estamos en alguna de las páginas de la calculadora
     const isCalculadoraActive = location.pathname === '/calculadora' || location.pathname === '/MAT251' || location.pathname === '/analisis-empresarial';
@@ -201,6 +194,7 @@
               </span>
 
               <ul className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
+<<<<<<< HEAD
                 <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
                   <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
                     <IconoEstadisticaGeneral style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
@@ -219,6 +213,32 @@
                     Análisis Empresarial
                   </NavLink>
                 </li>
+=======
+                {!tieneCualquierModulo ? (
+                  <li className="dropdown-li dropdown-empty">
+                    Sin asignaturas
+                  </li>
+                ) : (
+                  <>
+                    {tieneMAT151 && (
+                      <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
+                        <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
+                          <IconoEstadisticaGeneral style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                          Estadística General
+                        </NavLink>
+                      </li>
+                    )}
+                    {tieneMAT251 && (
+                      <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
+                        <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
+                          <IconoEstadisticaMatematica style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                          Estadística Matemática
+                        </NavLink>
+                      </li>
+                    )}
+                  </>
+                )}
+>>>>>>> 83e5bcc62490a221d33716f2cce0f92715fbf08d
               </ul>
             </li>
 
@@ -412,7 +432,13 @@
                             }}
                             style={{ cursor: 'pointer' }}
                           >
-                            <span className="notif-item-msg">{n.mensaje}</span>
+                            <span className="notif-item-msg">
+                              {PREFIJO_AVISO.test(n.mensaje || "") && (
+                                <Megaphone size={18} aria-hidden="true" focusable="false"
+                                  style={{ color: 'var(--accent-color)', verticalAlign: '-3px', marginRight: '6px' }} />
+                              )}
+                              {(n.mensaje || "").replace(PREFIJO_AVISO, "")}
+                            </span>
                             <div className="notif-item-meta">
                               <span 
                                 className={`notif-badge-type ${n.tipo === 'sistema' ? 'sistema' : n.tipo === 'tarea' ? 'tarea' : 'personal'}`}

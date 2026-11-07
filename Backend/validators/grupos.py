@@ -4,6 +4,7 @@ from typing import Optional
 class NuevaClase(BaseModel):
     nombre: str
     docente_email: str 
+    modulo: Optional[str] = None
     fecha_limite_matriculacion: Optional[str] = None
 
 class UnirseClase(BaseModel):

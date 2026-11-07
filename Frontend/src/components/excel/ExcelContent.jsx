@@ -3,7 +3,7 @@ import { DataGrid } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 
 import { api } from "../../services/api";
-import { useData } from "../Gestion_Datos/DataContext";
+import { useData } from "../gestion_datos/DataContext";
 import { alerta } from "../../utils/Notificaciones"
 
 import "../../styles/components/excel/ExcelContent.css";

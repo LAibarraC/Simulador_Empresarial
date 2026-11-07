@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useData } from '../components/Gestion_Datos/DataContext';
+import { useData } from '../components/gestion_datos/DataContext';
 import { IconoEscudo, IconoDocente, IconoUsuario } from './iconos';
 
 export default function SelectorRol() {

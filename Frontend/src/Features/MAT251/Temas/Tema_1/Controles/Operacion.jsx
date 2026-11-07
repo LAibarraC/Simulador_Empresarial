@@ -11,6 +11,7 @@ const getIcon = (val) => {
         case 'probabilidad': return (
             <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /></svg>
         );
+        case 'Probabilidad_Total':
         case 'simulador_total': return (
             <svg {...props}><path d="M4 10h16" /><path d="M4 14h16" /><path d="M12 4v16" /></svg>
         );
@@ -26,6 +27,9 @@ const getIcon = (val) => {
         case 'distribuciones_muestrales': return (
             <svg {...props}><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
         );
+        case 'tyf': return (
+            <svg {...props}><path d="M3 20h18" /><path d="M4 20c2-5 4-10 8-10s6 5 8 10" /><path d="M6 20c2-8 5-12 12-12" strokeDasharray="3 3" /></svg>
+        );
         case 'dist_uniforme': return (
             <svg {...props}><line x1="3" y1="20" x2="21" y2="20" /><line x1="3" y1="4" x2="3" y2="20" /><rect x="6" y="10" width="12" height="10" /></svg>
         );
@@ -38,9 +42,15 @@ const getIcon = (val) => {
         case 'dist_discreta': return (
             <svg {...props}><line x1="4" y1="20" x2="4" y2="4" /><line x1="4" y1="20" x2="20" y2="20" /><rect x="6" y="14" width="3" height="6" /><rect x="11" y="9" width="3" height="11" /><rect x="16" y="5" width="3" height="15" /></svg>
         );
+        case 'Distribuciones_Discretas':
+        case 'discretas':
+        case 'distribuciones_discretas':
         case 'modelos_discretos': return (
             <svg {...props}><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" /><path d="M14 2v6h6" /><path d="M3 15h6" /><path d="M3 18h6" /></svg>
         );
+        case 'Distribuciones_Continuas':
+        case 'continuas':
+        case 'distribuciones_continuas':
         case 'modelos_continuos': return (
             <svg {...props}><path d="M3 20h18" /><path d="M4 20c1.5-7 3-14 8-14s6.5 7 8 14" /></svg>
         );
@@ -50,12 +60,24 @@ const getIcon = (val) => {
         case 'tamanio_muestra': return (
             <svg {...props}><path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></svg>
         );
+        case 'Estimacion_puntual': return (
+            <svg {...props}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
+        );
+        case 'Estimacion_intervalos': return (
+            <svg {...props}><polyline points="8 4 4 4 4 20 8 20" /><polyline points="16 4 20 4 20 20 16 20" /><line x1="9" y1="12" x2="15" y2="12" /></svg>
+        );
+        case 'Hipotesis_parametricas': return (
+            <svg {...props}><path d="M3 20h18" /><path d="M4 20c1.5-7 3-14 8-14s6.5 7 8 14" /><line x1="15" y1="8" x2="15" y2="20" strokeDasharray="2 2" /></svg>
+        );
+        case 'Hipotesis_noparametricas': return (
+            <svg {...props}><line x1="4" y1="20" x2="4" y2="4" /><line x1="4" y1="20" x2="20" y2="20" /><circle cx="8" cy="16" r="2" fill="currentColor" stroke="none" /><circle cx="13" cy="10" r="2" fill="currentColor" stroke="none" /><circle cx="18" cy="14" r="2" fill="currentColor" stroke="none" /></svg>
+        );
         default: return null;
     }
 };
 
 // ─── ACCORDION SELECT AGRUPADO POR TEMAS ────────────────────────────────────
-export default function Operacion({ operacion, handleOperacion }) {
+export default function Operacion({ operacion, handleOperacion, disabled = false }) {
     const [isOpen, setIsOpen] = useState(false);
     const [temaAbierto, setTemaAbierto] = useState(null);
     const selectRef = useRef(null);
@@ -88,17 +110,20 @@ export default function Operacion({ operacion, handleOperacion }) {
     const toggleTema = (idx) => setTemaAbierto(p => p === idx ? null : idx);
 
     return (
-        <div ref={selectRef} style={{ position: 'relative', width: '100%', marginBottom: '15px', fontFamily: FONT }}>
+        <div id="tour-mat251-operacion" ref={selectRef} style={{ position: 'relative', width: '100%', marginBottom: '15px', fontFamily: FONT }}>
 
             {/* ── TRIGGER ── */}
             <div
-                onClick={() => setIsOpen(o => !o)}
+                role="button"
+                aria-disabled={disabled}
+                title={disabled ? 'La operación está bloqueada al consultar un historial' : undefined}
+                onClick={() => { if (!disabled) setIsOpen(o => !o); }}
                 style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '8px 12px',
                     background: 'var(--bg-card)',
                     border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
-                    borderRadius: RADIUS, cursor: 'pointer',
+                    borderRadius: RADIUS, cursor: disabled ? 'not-allowed' : 'pointer',
                     boxShadow: isOpen ? '0 0 0 3px rgba(0,123,255,0.15)' : 'none',
                     transition: 'all 0.2s ease',
                     color: 'var(--text-color)',
@@ -116,7 +141,7 @@ export default function Operacion({ operacion, handleOperacion }) {
             </div>
 
             {/* ── PANEL ACCORDION FLOTANTE ── */}
-            {isOpen && (
+            {isOpen && !disabled && (
                 <div style={{
                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
                     background: 'var(--bg-card)',

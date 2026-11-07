@@ -23,16 +23,16 @@ import ModalSeleccionRolInicial from './ui/ModalSeleccionRolInicial';
 import ModalConfigPrecuenta from './ui/ModalConfigPrecuenta';
 import OscuroClaro from "./ui/oscuro_claro";
 
-import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModuleContext } from "./components/Gestion_Datos/DataContext";
+import { DataProvider, CalculadoraDataProvider, MAT251DataProvider, ActiveModuleContext } from "./components/gestion_datos/DataContext";
 
 import LtiTester from "./pages/LtiTester";
-import Historial from "./Features/History/Historial";
-import Grupos from './Features/grupos/Grupos';
-import Tareas from './Features/grupos/Tareas';
-import GenerarQR from "./Features/qr/GenerarQR";
-import Matricular from "./Features/qr/Matricular";
+import Historial from "./features/history/Historial";
+import Grupos from './features/grupos/Grupos';
+import Tareas from './features/grupos/Tareas';
+import GenerarQR from "./features/qr/GenerarQR";
+import Matricular from "./features/qr/Matricular";
 import api from "./services/api";
-
+ 
 import "./App.css";
 import ConfirmHost from "./utils/ConfirmHost";
 
@@ -50,7 +50,7 @@ const ConditionalGuestHeader = ({ isAuth, usuario, setUsuario }) => {
   const hideLinkPaths = ['/registro', '/forgot-password', '/reset-password'];
   const isHideLink = hideLinkPaths.includes(location.pathname);
   const isLogin = location.pathname === '/login';
-  
+
   if (isAuth) {
     return (
       <header className="guest-header">
@@ -78,6 +78,30 @@ const ConditionalGuestHeader = ({ isAuth, usuario, setUsuario }) => {
   );
 };
 
+const ModuloNoAsignado = ({ modulo, rol }) => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '65vh', padding: '20px' }}>
+    <div className="grafico-card" style={{ maxWidth: '480px', width: '100%', textAlign: 'center', padding: '36px 24px', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 10px 25px rgba(0,0,0,0.08)' }}>
+      <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h3 style={{ margin: '0 0 10px', color: 'var(--text-main)', fontSize: '1.2rem' }}>
+        Módulo {modulo} no asignado
+      </h3>
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 24px' }}>
+        {rol === 'Docente'
+          ? `No tienes asignada la materia ${modulo}. Solicita al Administrador la habilitación de este módulo para gestionarlo.`
+          : `Aún no has desbloqueado las herramientas de ${modulo}. Inscríbete a un curso de esta asignatura mediante su código o QR para obtener acceso libre y permanente.`}
+      </p>
+      <Link to="/" className="btn-azul" style={{ display: 'inline-flex', padding: '8px 20px', fontSize: '0.88rem', textDecoration: 'none' }}>
+        Volver al Inicio
+      </Link>
+    </div>
+  </div>
+);
+
 function App() {
   const [usuario, setUsuario] = useState(null);
   const [cargandoSesion, setCargandoSesion] = useState(true);
@@ -100,6 +124,8 @@ function App() {
   }, []);
 
   const isAuth = usuario !== null;
+  const tieneMAT151 = usuario?.rol === "Administrador" || (usuario?.modulos || []).includes("MAT151");
+  const tieneMAT251 = usuario?.rol === "Administrador" || (usuario?.modulos || []).includes("MAT251");
 
   if (cargandoSesion) {
     return (
@@ -122,9 +148,9 @@ function App() {
               <ModalConfigPrecuenta onActualizado={setUsuario} />
             )}
             {usuario && (usuario.requiere_rol || usuario.rol === 'Pendiente' || !usuario.rol) && (
-              <ModalSeleccionRolInicial 
-                usuario={usuario} 
-                onRolAsignado={(usuarioActualizado) => setUsuario(usuarioActualizado)} 
+              <ModalSeleccionRolInicial
+                usuario={usuario}
+                onRolAsignado={(usuarioActualizado) => setUsuario(usuarioActualizado)}
               />
             )}
             <SelectorRol />
@@ -132,7 +158,7 @@ function App() {
               <div style={{ position: 'fixed', zIndex: 99999, inset: 0, pointerEvents: 'none' }}>
                 <Toaster position="bottom-right" />
               </div>
-              
+
               <ConfirmHost />
 
               {/* 🆕 CONTROLES FLOTANTES MODERNOS PARA INVITADOS */}
@@ -157,9 +183,13 @@ function App() {
                       <Route path="/" element={<Inicio />} />
                       <Route path="/archivos" element={<Archivos usuario={usuario} />} />
                       <Route path="/calculadora" element={
-                        <ActiveModuleContext.Provider value="calculadora">
-                          <Calculadora />
-                        </ActiveModuleContext.Provider>
+                        tieneMAT151 ? (
+                          <ActiveModuleContext.Provider value="calculadora">
+                            <Calculadora />
+                          </ActiveModuleContext.Provider>
+                        ) : (
+                          <ModuloNoAsignado modulo="MAT151" rol={usuario?.rol} />
+                        )
                       } />
                       <Route path="/historial" element={<Historial />} />
                       <Route path="/grupos" element={<Grupos />} />
@@ -172,9 +202,22 @@ function App() {
                       <Route path="/registro" element={<Navigate to="/" />} />
 
                       <Route path="/MAT251" element={
-                        <ActiveModuleContext.Provider value="mat251">
-                          <MAT251 usuario={usuario} />
-                        </ActiveModuleContext.Provider>
+                        tieneMAT251 ? (
+                          <ActiveModuleContext.Provider value="mat251">
+                            <MAT251 usuario={usuario} />
+                          </ActiveModuleContext.Provider>
+                        ) : (
+                          <ModuloNoAsignado modulo="MAT251" rol={usuario?.rol} />
+                        )
+                      } />
+                      <Route path="/MAT251/:operacionId" element={
+                        tieneMAT251 ? (
+                          <ActiveModuleContext.Provider value="mat251">
+                            <MAT251 usuario={usuario} />
+                          </ActiveModuleContext.Provider>
+                        ) : (
+                          <ModuloNoAsignado modulo="MAT251" rol={usuario?.rol} />
+                        )
                       } />
 
                       <Route path="/analisis-empresarial" element={

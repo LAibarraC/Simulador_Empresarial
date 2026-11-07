@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import { puntualBinomial, puntualPoisson, puntualHipergeometrica } from '../../../Matematicas/logica_Tema3';
+import { puntualBinomial, puntualPoisson, puntualHipergeometrica, formatearParametroDiscreto } from '../../../Matematicas/logica_Tema3';
 import { jStat } from 'jstat';
 
 export default function ModalProcedimientoModelos({ modelo, params, condicion, momento, onClose }) {
@@ -31,15 +31,15 @@ export default function ModalProcedimientoModelos({ modelo, params, condicion, m
             let res = 0;
             if (modelo === 'Bernoulli') {
                 formBase = "E(X) = p";
-                sust = `E(X) = ${params.p}`;
+                sust = `E(X) = ${formatearParametroDiscreto(params.p)}`;
                 res = params.p;
             } else if (modelo === 'Binomial') {
                 formBase = "E(X) = n \\cdot p";
-                sust = `E(X) = ${params.n} \\cdot ${params.p}`;
+                sust = `E(X) = ${params.n} \\cdot ${formatearParametroDiscreto(params.p)}`;
                 res = params.n * params.p;
             } else if (modelo === 'Poisson') {
                 formBase = "E(X) = \\lambda";
-                sust = `E(X) = ${params.lambda}`;
+                sust = `E(X) = ${formatearParametroDiscreto(params.lambda)}`;
                 res = params.lambda;
             } else if (modelo === 'Hipergeometrica') {
                 formBase = "E(X) = n \\cdot \\frac{K}{N}";
@@ -74,20 +74,21 @@ export default function ModalProcedimientoModelos({ modelo, params, condicion, m
             let res = 0;
             if (modelo === 'Bernoulli') {
                 formBase = "V(X) = p \\cdot (1 - p)";
-                sust = `V(X) = ${params.p} \\cdot (1 - ${params.p})`;
+                sust = `V(X) = ${formatearParametroDiscreto(params.p)} \\cdot (1 - ${formatearParametroDiscreto(params.p)})`;
                 res = params.p * (1 - params.p);
             } else if (modelo === 'Binomial') {
                 formBase = "V(X) = n \\cdot p \\cdot (1 - p)";
-                sust = `V(X) = ${params.n} \\cdot ${params.p} \\cdot (1 - ${params.p})`;
+                sust = `V(X) = ${params.n} \\cdot ${formatearParametroDiscreto(params.p)} \\cdot (1 - ${formatearParametroDiscreto(params.p)})`;
                 res = params.n * params.p * (1 - params.p);
             } else if (modelo === 'Poisson') {
                 formBase = "V(X) = \\lambda";
-                sust = `V(X) = ${params.lambda}`;
+                sust = `V(X) = ${formatearParametroDiscreto(params.lambda)}`;
                 res = params.lambda;
             } else if (modelo === 'Hipergeometrica') {
                 formBase = "V(X) = n \\cdot \\frac{K}{N} \\cdot \\frac{N-K}{N} \\cdot \\frac{N-n}{N-1}";
                 sust = `V(X) = ${params.n} \\cdot \\frac{${params.K}}{${params.N}} \\cdot \\frac{${params.N}-${params.K}}{${params.N}} \\cdot \\frac{${params.N}-${params.n}}{${params.N}-1}`;
-                res = params.n * (params.K / params.N) * ((params.N - params.K) / params.N) * ((params.N - params.n) / (params.N - 1));
+                res = params.N === 1 ? 0 : params.n * (params.K / params.N) * ((params.N - params.K) / params.N) * ((params.N - params.n) / (params.N - 1));
+                if (params.N === 1) { formBase = 'V(X) = 0'; sust = 'V(X) = 0'; }
             } else if (modelo === 'uniforme' || modelo === 'Uniforme') {
                 formBase = "V(X) = \\frac{(b - a)^2}{12}";
                 sust = `V(X) = \\frac{(${params.b} - ${params.a})^2}{12}`;
@@ -116,7 +117,7 @@ export default function ModalProcedimientoModelos({ modelo, params, condicion, m
             if (modelo === 'Bernoulli') varVal = params.p * (1 - params.p);
             if (modelo === 'Binomial') varVal = params.n * params.p * (1 - params.p);
             if (modelo === 'Poisson') varVal = params.lambda;
-            if (modelo === 'Hipergeometrica') varVal = params.n * (params.K / params.N) * ((params.N - params.K) / params.N) * ((params.N - params.n) / (params.N - 1));
+            if (modelo === 'Hipergeometrica') varVal = params.N === 1 ? 0 : params.n * (params.K / params.N) * ((params.N - params.K) / params.N) * ((params.N - params.n) / (params.N - 1));
             if (modelo === 'uniforme' || modelo === 'Uniforme') varVal = Math.pow(params.b - params.a, 2) / 12;
             if (modelo === 'Normal') varVal = Math.pow(params.sigma, 2);
             
@@ -151,15 +152,15 @@ export default function ModalProcedimientoModelos({ modelo, params, condicion, m
 
             if (modelo === 'Bernoulli') {
                 formulaBase = formBernoulli;
-                sustitucionEjemplo = `P(X=${xShow}) = (${params.p})^{${xShow}} (1-${params.p})^{1-${xShow}}`;
+                sustitucionEjemplo = `P(X=${xShow}) = (${formatearParametroDiscreto(params.p)})^{${xShow}} (1-${formatearParametroDiscreto(params.p)})^{1-${xShow}}`;
                 resultadoEjemplo = xShow === 1 ? params.p : (xShow === 0 ? 1 - params.p : 0);
             } else if (modelo === 'Binomial') {
                 formulaBase = formBinomial;
-                sustitucionEjemplo = `P(X=${xShow}) = \\binom{${params.n}}{${xShow}} (${params.p})^{${xShow}} (1-${params.p})^{${params.n}-${xShow}}`;
+                sustitucionEjemplo = `P(X=${xShow}) = \\binom{${params.n}}{${xShow}} (${formatearParametroDiscreto(params.p)})^{${xShow}} (1-${formatearParametroDiscreto(params.p)})^{${params.n}-${xShow}}`;
                 resultadoEjemplo = puntualBinomial(params.n, params.p, xShow);
             } else if (modelo === 'Poisson') {
                 formulaBase = formPoisson;
-                sustitucionEjemplo = `P(X=${xShow}) = \\frac{e^{-${params.lambda}} (${params.lambda})^{${xShow}}}{${xShow}!}`;
+                sustitucionEjemplo = `P(X=${xShow}) = \\frac{e^{-${formatearParametroDiscreto(params.lambda)}} (${formatearParametroDiscreto(params.lambda)})^{${xShow}}}{${xShow}!}`;
                 resultadoEjemplo = puntualPoisson(params.lambda, xShow);
             } else if (modelo === 'Hipergeometrica') {
                 formulaBase = formHiper;

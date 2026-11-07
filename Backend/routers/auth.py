@@ -14,7 +14,8 @@ from controllers.auth import (
     resetear_password_logic, cambiar_password_perfil_logic, eliminar_cuenta_logic,
     cambiar_rol_logic, cambiar_estado_logic, admin_eliminar_usuario_logic, obtener_usuarios_logic,
     login_google_logic, configurar_precuenta_logic, vincular_google_logic,
-    asignar_rol_inicial_logic, obtener_estadisticas_admin_logic
+    asignar_rol_inicial_logic, obtener_estadisticas_admin_logic,
+    obtener_modulos_usuario_logic
 )
 
 # Importamos de nuestro validador
@@ -65,7 +66,8 @@ async def login_google(credentials: GoogleLoginRequest, db: AsyncSession = Depen
     return await login_google_logic(credentials, db)
 
 @router.get("/me")
-async def read_users_me(current_user: models.Usuario = Depends(get_current_user)):
+async def read_users_me(current_user: models.Usuario = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    modulos = await obtener_modulos_usuario_logic(current_user, db)
     return {
         "id": current_user.email,
         "nombre": current_user.nombre,
@@ -75,7 +77,8 @@ async def read_users_me(current_user: models.Usuario = Depends(get_current_user)
         "institucion": current_user.institucion,
         "requiere_rol": current_user.rol == "Pendiente" or not current_user.rol,
         "requiere_configuracion": getattr(current_user, "must_change_password", False),
-        "foto_perfil": getattr(current_user, 'foto_perfil', None)
+        "foto_perfil": getattr(current_user, 'foto_perfil', None),
+        "modulos": modulos
     }
 
 @router.put("/configurar_precuenta")

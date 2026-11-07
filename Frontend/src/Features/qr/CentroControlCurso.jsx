@@ -810,16 +810,16 @@ export default function CentroControlCurso({
                   onClick={handleCambiarEstado}
                   style={{
                     position: "relative",
-                    display: "inline-flex",
-                    alignItems: "center",
+                    display: "inline-block",
                     width: "52px",
                     height: "28px",
                     backgroundColor:
                       matriculaCerrada || fechaVencida ? "#9ca3af" : "#10b981",
-                    borderRadius: "9999px",
+                    borderRadius: "14px",
                     border: "none",
                     cursor: desactivando ? "not-allowed" : "pointer",
-                    padding: "2px",
+                    padding: 0,
+                    margin: 0,
                     transition: "background-color 0.25s ease",
                     opacity: desactivando ? 0.6 : 1,
                     outline: "none",
@@ -828,7 +828,9 @@ export default function CentroControlCurso({
                 >
                   <span
                     style={{
-                      display: "inline-block",
+                      position: "absolute",
+                      top: "2px",
+                      left: "2px",
                       width: "24px",
                       height: "24px",
                       backgroundColor: "#ffffff",

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useData } from "../../components/Gestion_Datos/DataContext";
+import { useData } from "../../components/gestion_datos/DataContext";
 import { BASE_URL } from "../../services/api";
 import escudoAdmin from "../../assets/images/escudoAdmin.png";
 import PestaniaTareas from "./PestaniaTareas";
@@ -24,13 +24,21 @@ export default function Tareas() {
         const res = await fetch(`${BASE_URL}/mis_clases/${correoUsuario}`);
         if (res.ok) {
           const data = await res.json();
-          setCursos(data);
+          const dataConModulo = (data || []).map((c) => ({
+            ...c,
+            modulo: c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null)
+          }));
+          setCursos(dataConModulo);
         }
       } else {
         const res = await fetch(`${BASE_URL}/mis_inscripciones/${correoUsuario}`);
         if (res.ok) {
           const data = await res.json();
-          setCursos(data);
+          const dataConModulo = (data || []).map((c) => ({
+            ...c,
+            modulo: c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null)
+          }));
+          setCursos(dataConModulo);
         }
       }
     } catch (error) {

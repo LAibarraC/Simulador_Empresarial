@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { api } from '../../../services/api';
 import { alerta } from '../../../utils/Notificaciones';
 import Modal from '../../../utils/Modal'; 
@@ -39,6 +39,126 @@ const IconoTrash = ({ width = 16, height = 16, style = {} }) => (
   </svg>
 );
 
+// --- COMPONENTE SELECTOR DE MATERIAS (REGLAS_MAT251) ---
+function CustomSelectMateria({ value, onChange, options = [], placeholder = 'Todas las materias' }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => String(opt.value) === String(value));
+
+  return (
+    <div ref={dropdownRef} style={{ position: 'relative', minWidth: '200px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '6px 12px',
+          minHeight: '36px',
+          boxSizing: 'border-box',
+          background: 'var(--bg-card)',
+          border: `1px solid ${isOpen ? 'var(--primary-color)' : 'var(--border-color)'}`,
+          borderRadius: '5px',
+          cursor: 'pointer',
+          boxShadow: isOpen ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : '0 1px 2px rgba(0,0,0,0.04)',
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+          color: 'var(--text-main)',
+          userSelect: 'none',
+          fontSize: '0.85rem',
+          fontWeight: 600
+        }}
+      >
+        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: '8px' }}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
+            color: 'var(--text-muted)',
+            flexShrink: 0
+          }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '5px',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+            zIndex: 1000,
+            maxHeight: '260px',
+            overflowY: 'auto',
+            animation: 'fadeInDropdown 0.2s ease',
+            padding: '4px',
+            boxSizing: 'border-box'
+          }}
+        >
+          {options.map((opt) => {
+            const isSelected = String(value) === String(opt.value);
+            return (
+              <div
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) e.currentTarget.style.background = 'var(--bg-input, rgba(0,0,0,0.04))';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) e.currentTarget.style.background = 'transparent';
+                }}
+                style={{
+                  padding: '9px 12px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  borderRadius: '4px',
+                  background: isSelected ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                  color: isSelected ? 'var(--primary-color)' : 'var(--text-main)',
+                  fontWeight: isSelected ? 600 : 400,
+                  transition: 'background 0.15s ease, color 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {opt.label}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function GestionDocente({ usuario }) {
   const [clases, setClases] = useState([]);
   const [estudiantes, setEstudiantes] = useState([]);
@@ -54,6 +174,7 @@ export default function GestionDocente({ usuario }) {
   // --- ESTADOS PARA BÚSQUEDA, FILTROS Y PAGINACIÓN ---
   const [searchTerm, setSearchTerm] = useState("");
   const [menuFiltroAbierto, setMenuFiltroAbierto] = useState(null); 
+  const [filtroMateria, setFiltroMateria] = useState('TODAS');
   const [filtroCurso, setFiltroCurso] = useState('TODOS');
   const [ordenFecha, setOrdenFecha] = useState('ninguno'); 
 
@@ -64,13 +185,16 @@ export default function GestionDocente({ usuario }) {
   // Cerrar menús de filtro al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuFiltroAbierto(null);
+      if (menuFiltroAbierto && menuRef.current && !menuRef.current.contains(e.target)) {
+        const isFilterButton = e.target.closest('button[title^="Filtrar"], button[title^="Ordenar"]');
+        if (!isFilterButton) {
+          setMenuFiltroAbierto(null);
+        }
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [menuFiltroAbierto]);
 
   // Mantener actualizado el modal de gestión si los datos cambian
   useEffect(() => {
@@ -103,7 +227,7 @@ export default function GestionDocente({ usuario }) {
         element: '#tour-gestion-tabla',
         popover: {
           title: 'Registro de Estudiantes',
-          description: 'Muestra los datos de los alumnos agrupados. Usa el icono de engranaje (⚙️) para gestionar las materias o desmatricular.',
+          description: 'Muestra los datos de los alumnos agrupados. Usa el icono de engranaje (⚙️) para gestionar los grupos o desmatricular.',
           side: "top",
           align: 'start'
         }
@@ -131,11 +255,15 @@ export default function GestionDocente({ usuario }) {
     try {
       setCargandoDatos(true);
       const clasesData = await api.obtenerClasesDocente();
-      setClases(clasesData);
+      const clasesConModulo = (clasesData || []).map(c => ({
+        ...c,
+        modulo: c.modulo || (c.nombre?.toUpperCase().includes('MAT251') ? 'MAT251' : c.nombre?.toUpperCase().includes('MAT151') ? 'MAT151' : null)
+      }));
+      setClases(clasesConModulo);
 
       let mapaEstudiantes = new Map();
       
-      for (const clase of clasesData) {
+      for (const clase of clasesConModulo) {
         const ests = await api.obtenerEstudiantesClase(clase.id, usuario.email);
         
         for (const e of ests) {
@@ -149,6 +277,7 @@ export default function GestionDocente({ usuario }) {
           mapaEstudiantes.get(e.id).clasesInscritas.push({
             claseId: clase.id,
             claseNombre: clase.nombre,
+            modulo: clase.modulo,
             fecha_inscripcion: e.fecha_creacion
           });
         }
@@ -178,7 +307,7 @@ export default function GestionDocente({ usuario }) {
         }
       }
 
-      alerta.exito("Materia actualizada", `El alumno ha sido movido a la nueva materia.`);
+      alerta.exito("Grupo actualizado", `El alumno ha sido movido al nuevo grupo.`);
       await cargarDatosCompletos();
     } catch (error) {
       alerta.error("Error", error.message || "No se pudo cambiar de curso al estudiante");
@@ -221,6 +350,21 @@ export default function GestionDocente({ usuario }) {
     setEstudianteAEliminar(null);
   };
 
+  // Materias únicas disponibles
+  const modulosDisponibles = useMemo(() => {
+    const mods = new Set();
+    clases.forEach(c => {
+      if (c.modulo) mods.add(c.modulo);
+    });
+    return Array.from(mods).sort();
+  }, [clases]);
+
+  // Clases filtradas por materia seleccionada
+  const clasesFiltradasPorMateria = useMemo(() => {
+    if (filtroMateria === 'TODAS') return clases;
+    return clases.filter(c => c.modulo === filtroMateria);
+  }, [clases, filtroMateria]);
+
   // --- LÓGICA DE FILTRADO Y BÚSQUEDA ---
   const getDateVal = (clasesArr) => {
     if (!clasesArr || clasesArr.length === 0) return 0;
@@ -233,9 +377,11 @@ export default function GestionDocente({ usuario }) {
         est.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) || 
         est.email?.toLowerCase().includes(searchTerm.toLowerCase());
       
+      const matchMateria = filtroMateria === 'TODAS' || est.clasesInscritas.some(c => c.modulo === filtroMateria);
+
       const matchCurso = filtroCurso === 'TODOS' || est.clasesInscritas.some(c => String(c.claseId) === String(filtroCurso));
       
-      return matchGlobal && matchCurso;
+      return matchGlobal && matchMateria && matchCurso;
     })
     .sort((a, b) => {
       if (ordenFecha === 'asc') return getDateVal(a.clasesInscritas) - getDateVal(b.clasesInscritas);
@@ -270,7 +416,7 @@ export default function GestionDocente({ usuario }) {
     borderRadius: '8px',
     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
     padding: '6px',
-    zIndex: 50,
+    zIndex: 1000,
     minWidth: '160px',
     textTransform: 'none',
     fontWeight: 'normal',
@@ -353,54 +499,117 @@ export default function GestionDocente({ usuario }) {
   };
 
   return (
-    <div className="page-container" style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative' }}>
+    <div style={{ width: '100%', maxWidth: '100%', padding: '15px', boxSizing: 'border-box', position: 'relative' }}>
+      <style>{`
+        .input-busqueda-gestion::placeholder {
+          font-size: 0.82rem !important;
+          opacity: 0.7;
+        }
+      `}</style>
       
-      {/* CABECERA CON BOTÓN DE TOUR */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(15px, 3vw, 25px)', flexWrap: 'wrap', gap: 'clamp(10px, 3vw, 20px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
-          
-          {/* Botón de Guía Rápida */}
-          <button
-            onClick={iniciarTour}
-            className="guia-rapida-flotante"
-            style={{
-            bottom: '20px',
-            zIndex: 10000
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            <span className="guia-rapida-flotante-texto">Guía Rápida</span>
-          </button>
-        </div>
-      </div>
+      {/* Botón de Guía Rápida Flotante */}
+      <button
+        onClick={iniciarTour}
+        className="guia-rapida-flotante"
+        style={{
+          bottom: '20px',
+          zIndex: 10000
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span className="guia-rapida-flotante-texto">Guía Rápida</span>
+      </button>
 
-      {/* BUSCADOR */}
-      <div id="tour-gestion-buscador" style={{ marginBottom: "20px" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--bg-card)', padding: '10px 15px', borderRadius: '8px', border: '1px solid var(--border-color)', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}><IconoBuscar width="18" height="18" /></span>
-          <input
-            type="text"
-            placeholder="Buscar estudiante por nombre o correo..."
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', width: '100%', fontSize: '0.95rem' }}
-          />
+      {/* BARRA DE BÚSQUEDA Y SELECTOR DE MATERIAS COMPACTA */}
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
+        {/* BUSCADOR COMPACTO */}
+        <div id="tour-gestion-buscador" style={{ flex: '1 1 280px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: 'var(--bg-card)',
+            padding: '6px 12px',
+            minHeight: '36px',
+            borderRadius: '5px',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+            boxSizing: 'border-box'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}>
+              <IconoBuscar width="15" height="15" />
+            </span>
+            <input
+              type="text"
+              placeholder="Buscar estudiante por nombre o correo..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="input-busqueda-gestion"
+              style={{
+                border: 'none',
+                background: 'transparent',
+                outline: 'none',
+                color: 'var(--text-main)',
+                width: '100%',
+                fontSize: '0.85rem',
+                padding: 0
+              }}
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: '2px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: '0.8rem'
+                }}
+                title="Limpiar búsqueda"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* SELECTOR DE MATERIA (Solo si el docente tiene más de 1 materia/módulo) */}
+        {modulosDisponibles.length > 1 && (
+          <div style={{ flex: '0 0 auto', minWidth: '200px' }}>
+            <CustomSelectMateria
+              value={filtroMateria}
+              onChange={(val) => {
+                setFiltroMateria(val);
+                setFiltroCurso('TODOS');
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 'TODAS', label: 'Todas las materias' },
+                ...modulosDisponibles.map(m => ({ value: m, label: m }))
+              ]}
+              placeholder="Todas las materias"
+            />
+          </div>
+        )}
       </div>
 
       {/* CONTENIDO PRINCIPAL DE TABLA */}
       {cargandoDatos ? (
-        <div className="historial-container" style={{ textAlign: 'center', padding: '40px 0', borderRadius: '10px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div className="historial-container" style={{ marginTop: '0px', textAlign: 'center', padding: '40px 0', borderRadius: '10px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
           <div style={{ width: '40px', height: '40px', border: '4px solid var(--border-color)', borderTop: '4px solid var(--accent-color)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }} />
           <p style={{ color: 'var(--text-muted)' }}>Cargando información de estudiantes y cursos...</p>
         </div>
       ) : (
-        <div className="historial-container" id="tour-gestion-tabla" style={{ borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto', paddingBottom: menuFiltroAbierto ? '160px' : '0px', transition: 'padding-bottom 0.3s ease' }}>
+        <div className="historial-container" id="tour-gestion-tabla" style={{ marginTop: '0px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', overflow: menuFiltroAbierto ? 'visible' : 'hidden' }}>
+          <div style={{ overflowX: menuFiltroAbierto ? 'visible' : 'auto' }}>
             <table className="historial-tabla tabla-responsive tabla-responsiva-panel" style={{ width: '100%', borderCollapse: 'collapse', borderSpacing: 0, textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -408,19 +617,19 @@ export default function GestionDocente({ usuario }) {
                   <th style={{ padding: '15px', fontWeight: '600' }}>Correo Electrónico</th>
                   <th style={{ padding: '15px', fontWeight: '600', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>Materias</span>
-                      <button style={btnAjustesStyle(filtroCurso !== 'TODOS')} onClick={() => toggleMenu('curso')} title="Filtrar por curso">
+                      <span>Grupos</span>
+                      <button style={btnAjustesStyle(filtroCurso !== 'TODOS')} onClick={() => toggleMenu('curso')} title="Filtrar por grupo">
                         <IconoAjustes />
                       </button>
                     </div>
                     {menuFiltroAbierto === 'curso' && (
                       <div ref={menuRef} style={getPopoverStyle('curso')}>
                         <button onClick={() => { setFiltroCurso('TODOS'); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(filtroCurso === 'TODOS')} onMouseEnter={(e) => { if (filtroCurso !== 'TODOS') e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'; }} onMouseLeave={(e) => { if (filtroCurso !== 'TODOS') e.currentTarget.style.backgroundColor = 'transparent'; }}>
-                          Todas las materias
+                          Todos los grupos
                         </button>
-                        {clases.map(c => (
+                        {clasesFiltradasPorMateria.map(c => (
                           <button key={c.id} onClick={() => { setFiltroCurso(c.id); setCurrentPage(1); setMenuFiltroAbierto(null); }} style={btnOpcionStyle(String(filtroCurso) === String(c.id))} onMouseEnter={(e) => { if (String(filtroCurso) !== String(c.id)) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'; }} onMouseLeave={(e) => { if (String(filtroCurso) !== String(c.id)) e.currentTarget.style.backgroundColor = 'transparent'; }}>
-                            {c.nombre}
+                            {c.nombre} {filtroMateria === 'TODAS' && c.modulo ? `(${c.modulo})` : ''}
                           </button>
                         ))}
                       </div>
@@ -476,9 +685,12 @@ export default function GestionDocente({ usuario }) {
                       <td data-label="Correo Electrónico" style={{ padding: '15px', color: 'var(--text-main)' }}>
                         {est.email}
                       </td>
-                      <td data-label="Materias" style={{ padding: '15px' }}>
-                        <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                          {est.clasesInscritas.length} materia{est.clasesInscritas.length !== 1 ? 's' : ''}
+                      <td data-label="Grupos" style={{ padding: '15px' }}>
+                        <span 
+                          title={est.clasesInscritas.map(c => `${c.claseNombre}${c.modulo ? ` (${c.modulo})` : ''}`).join(', ')}
+                          style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'default' }}
+                        >
+                          {est.clasesInscritas.length} grupo{est.clasesInscritas.length !== 1 ? 's' : ''}
                         </span>
                       </td>
                       <td data-label="Último Registro" style={{ padding: '15px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
@@ -487,7 +699,7 @@ export default function GestionDocente({ usuario }) {
                       <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
                         <button
                           onClick={() => setModalGestionEstudiante(est)}
-                          title="Gestionar materias"
+                          title="Gestionar grupos"
                           className="btn-azul"
                           style={{
                             padding: '8px',
@@ -509,19 +721,19 @@ export default function GestionDocente({ usuario }) {
       )}
       <ControlesPaginacion />
 
-      {/* MODAL DE GESTIÓN DE MATERIAS DEL ESTUDIANTE (ESTILO TABLA LIMPIA) */}
+      {/* MODAL DE GESTIÓN DE GRUPOS DEL ESTUDIANTE (ESTILO TABLA LIMPIA) */}
       {modalGestionEstudiante && (
         <Modal 
           isOpen={true} 
           onClose={() => setModalGestionEstudiante(null)} 
-          title={`Materias de ${modalGestionEstudiante.nombre}`}
+          title={`Grupos de ${modalGestionEstudiante.nombre}`}
         >
           <div> 
             <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-card, #fff)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead style={{ backgroundColor: 'var(--bg-input, #f9fafb)', borderBottom: '1px solid var(--border-color)' }}>
                   <tr>
-                    <th style={{ padding: '12px 15px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Materia Actual</th>
+                    <th style={{ padding: '12px 15px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Grupo Actual</th>
                     <th style={{ padding: '12px 15px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Reasignar a...</th>
                     <th style={{ padding: '12px 15px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', textAlign: 'center' }}>Acciones</th>
                   </tr>
@@ -537,10 +749,17 @@ export default function GestionDocente({ usuario }) {
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      {/* Columna: Materia actual e información */}
+                      {/* Columna: Grupo actual e información */}
                       <td style={{ padding: '12px 15px', verticalAlign: 'middle' }}>
-                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                          {ci.claseNombre}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                            {ci.claseNombre}
+                          </span>
+                          {ci.modulo && (
+                            <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', fontWeight: 'bold' }}>
+                              {ci.modulo}
+                            </span>
+                          )}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                           Inscrito el: {ci.fecha_inscripcion ? ci.fecha_inscripcion.split(' ')[0] : 'N/A'}
@@ -578,7 +797,7 @@ export default function GestionDocente({ usuario }) {
                       <td style={{ padding: '12px 15px', verticalAlign: 'middle', textAlign: 'center' }}>
                         <button
                           onClick={() => solicitarEliminacionEstudiante(modalGestionEstudiante.id, modalGestionEstudiante.nombre, ci.claseId, ci.claseNombre)}
-                          title="Desmatricular de la materia"
+                          title="Desmatricular del grupo"
                           className="btn-rojo"
                           style={{
                             padding: '8px 12px',
@@ -604,7 +823,7 @@ export default function GestionDocente({ usuario }) {
         title="Confirmar eliminación"
       >
         <p style={{ color: 'var(--text-main)', fontSize: '1rem', marginBottom: '20px' }}>
-          ¿Estás seguro de que deseas eliminar al estudiante <strong>{estudianteAEliminar?.nombre}</strong> de la materia <strong>{estudianteAEliminar?.claseNombre}</strong>?
+          ¿Estás seguro de que deseas eliminar al estudiante <strong>{estudianteAEliminar?.nombre}</strong> del grupo <strong>{estudianteAEliminar?.claseNombre}</strong>?
         </p>
         
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>

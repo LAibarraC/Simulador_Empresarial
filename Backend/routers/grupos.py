@@ -93,8 +93,9 @@ async def obtener_mis_clases_docente_v2(db: AsyncSession = Depends(get_db), curr
 @router.get("/grupos/estadisticas-docente")
 async def obtener_estadisticas_docente(
     clase_id: int = Query(None),
+    modulo: str = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    return await grupos_controller.obtener_estadisticas_docente_db(db, current_user, clase_id)
+    return await grupos_controller.obtener_estadisticas_docente_db(db, current_user, clase_id, modulo)
 

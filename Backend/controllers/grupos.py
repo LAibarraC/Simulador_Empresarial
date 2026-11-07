@@ -8,11 +8,21 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import delete, func
-from models import Clase, ClaseQR, Inscripcion, Usuario, Archivo, HistorialCalculo, Notificacion
+from models import Clase, ClaseQR, Inscripcion, Usuario, Archivo, HistorialCalculo, Notificacion, DocenteModulo, EstudianteModulo
 from validators.grupos import (
     NuevaClase, UnirseClase, CambiarClase, ActualizarClase,
     ActualizarFechaClase, ActualizarEstadoMatricula,
 )
+
+def inferir_modulo_clase(clase):
+    if getattr(clase, 'modulo', None):
+        return clase.modulo
+    nombre_upper = (clase.nombre or "").upper()
+    if "MAT251" in nombre_upper:
+        return "MAT251"
+    if "MAT151" in nombre_upper:
+        return "MAT151"
+    return None
 
 def _limite_fecha(fecha_limite):
     if not fecha_limite:
@@ -34,6 +44,41 @@ async def crear_clase_db(db: AsyncSession, datos: NuevaClase):
 
         docente_id = docente.id
 
+        # Validación estricta de módulos asignados al docente
+        modulo_asignado = None
+        if docente.rol == "Docente":
+            res_mods = await db.execute(
+                select(DocenteModulo).filter(
+                    DocenteModulo.docente_id == docente_id,
+                    DocenteModulo.activo == True
+                )
+            )
+            modulos_activos = [m.modulo for m in res_mods.scalars().all()]
+            if not modulos_activos:
+                return JSONResponse(
+                    status_code=403,
+                    content={"error": "No tienes asignaturas autorizadas por el Administrador para crear clases"}
+                )
+
+            if datos.modulo:
+                if datos.modulo not in modulos_activos:
+                    return JSONResponse(
+                        status_code=403,
+                        content={"error": f"No estás autorizado para dictar la asignatura {datos.modulo}"}
+                    )
+                modulo_asignado = datos.modulo
+            else:
+                # Si no especificó módulo pero tiene asignado exactamente uno, se asigna ese; si tiene varios, debe elegirlo
+                if len(modulos_activos) == 1:
+                    modulo_asignado = modulos_activos[0]
+                else:
+                    return JSONResponse(
+                        status_code=400,
+                        content={"error": "Debes seleccionar la asignatura (módulo) a la que pertenece esta clase"}
+                    )
+        elif docente.rol == "Administrador":
+            modulo_asignado = datos.modulo
+
         prefijo = datos.nombre.replace(" ", "")[:3].upper()
         prefijo = prefijo.ljust(3, 'X')
 
@@ -43,6 +88,7 @@ async def crear_clase_db(db: AsyncSession, datos: NuevaClase):
             nombre=datos.nombre,
             docente_id=docente_id,
             codigo_acceso=codigo,
+            modulo=modulo_asignado,
             fecha_limite_matriculacion=datos.fecha_limite_matriculacion,
             activa=True,
         )
@@ -250,6 +296,17 @@ async def unirse_clase_db(db: AsyncSession, datos: UnirseClase):
     nueva_inscripcion = Inscripcion(clase_id=clase.id, estudiante_id=estudiante.id)
     db.add(nueva_inscripcion)
 
+    # Desbloqueo permanente / vitalicio del módulo para el estudiante
+    mod_clase = inferir_modulo_clase(clase)
+    if mod_clase:
+        res_em = await db.execute(select(EstudianteModulo).filter(
+            EstudianteModulo.estudiante_id == estudiante.id,
+            EstudianteModulo.modulo == mod_clase
+        ))
+        if not res_em.scalars().first():
+            nuevo_desbloqueo = EstudianteModulo(estudiante_id=estudiante.id, modulo=mod_clase)
+            db.add(nuevo_desbloqueo)
+
     nueva_notificacion = Notificacion(
         tipo="matriculacion",
         mensaje=f"El estudiante {nombre_estudiante} ({estudiante.email}) se ha inscrito a tu clase '{nombre_clase}'.",
@@ -335,6 +392,7 @@ async def obtener_clases_docente_db(db: AsyncSession, email: str):
         res_list.append({
             "id": c.id,
             "nombre": c.nombre,
+            "modulo": inferir_modulo_clase(c),
             "codigo": c.codigo_acceso,
             "codigo_acceso": c.codigo_acceso,
             "activa": c.activa,
@@ -362,6 +420,7 @@ async def obtener_clases_estudiante_db(db: AsyncSession, email: str):
             clases_inscritas.append({
                 "id": clase.id,
                 "nombre": clase.nombre,
+                "modulo": inferir_modulo_clase(clase),
                 "codigo": clase.codigo_acceso,
                 "codigo_acceso": clase.codigo_acceso,
                 "activa": clase.activa,
@@ -536,6 +595,7 @@ async def obtener_mis_clases_docente_db(db: AsyncSession, current_user: Usuario)
         res_list.append({
             "id": c.id,
             "nombre": c.nombre,
+            "modulo": inferir_modulo_clase(c),
             "codigo": c.codigo_acceso,
             "alumnos": alumnos_count,
             "archivos": 0,
@@ -547,10 +607,10 @@ async def obtener_mis_clases_docente_db(db: AsyncSession, current_user: Usuario)
     return res_list
 
 
-async def obtener_estadisticas_docente_db(db: AsyncSession, current_user: Usuario, clase_id: int = None):
+async def obtener_estadisticas_docente_db(db: AsyncSession, current_user: Usuario, clase_id: int = None, modulo: str = None):
     """
     Genera estadísticas y métricas analíticas para el Docente.
-    Soporta vista General (todos sus grupos consolidados) o filtrada por un grupo específico.
+    Soporta vista General (todos sus grupos consolidados), por Asignatura o filtrada por un grupo específico.
     """
     try:
         rol_usuario = (current_user.rol or "").capitalize()
@@ -566,7 +626,12 @@ async def obtener_estadisticas_docente_db(db: AsyncSession, current_user: Usuari
             todas_clases = res_clases.scalars().all()
 
         clases_disponibles = [
-            {"id": c.id, "nombre": c.nombre, "codigo": c.codigo_acceso}
+            {
+                "id": c.id, 
+                "nombre": c.nombre, 
+                "codigo": c.codigo_acceso,
+                "modulo": c.modulo or ("MAT251" if "MAT251" in (c.nombre or "").upper() else "MAT151")
+            }
             for c in todas_clases
         ]
 
@@ -588,8 +653,15 @@ async def obtener_estadisticas_docente_db(db: AsyncSession, current_user: Usuari
                 "nombre": clases_filtradas[0].nombre,
                 "codigo": clases_filtradas[0].codigo_acceso,
                 "activa": clases_filtradas[0].activa,
-                "fecha_limite": clases_filtradas[0].fecha_limite_matriculacion
+                "fecha_limite": clases_filtradas[0].fecha_limite_matriculacion,
+                "modulo": clases_filtradas[0].modulo or ("MAT251" if "MAT251" in (clases_filtradas[0].nombre or "").upper() else "MAT151")
             }
+        elif modulo and str(modulo).upper() not in ["TODAS", "ALL", ""]:
+            mod_filtro = str(modulo).upper().strip()
+            clases_filtradas = [
+                c for c in todas_clases
+                if (c.modulo and c.modulo.upper() == mod_filtro) or (mod_filtro in (c.nombre or "").upper())
+            ]
         else:
             clases_filtradas = todas_clases
 

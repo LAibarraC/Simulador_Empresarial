@@ -1,27 +1,229 @@
-.editor_text {
+/* Bases de la pantalla y formularios de MAT251. */
+:where(.mat251).contenedor-principal-sistema { padding: 15px; width: 100%; box-sizing: border-box; }
+
+:where(.mat251) .boton-toggle-medio {
+  border-left: none;
+}
+
+:where(.mat251) .calculadora-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+:where(.mat251) .calculadora-layout.colapsado .calculadora-datos {
+  width: 0px;
+}
+
+:where(.mat251) .tabla-academica {
+  margin-top: 10px;
+}
+
+:where(.mat251) .container_tendencia_posicion {
+  display: flex;
+  justify-Content: space-between;
+  align-Items: center;
+  border-Bottom: 2px solid var(--border-color);
+  padding-Bottom: 5px;
+}
+
+/* Bases propias de MAT251: gráficos y controles independientes de MAT151. */
+
+:where(.mat251) .widget-grafico {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: both;
+  /* flex: 0 0 auto quita el estiramiento automático. Así obedece milimétricamente al ratón. */
+  flex: 0 0 auto;
+  width: calc(50% - 15px);
+  /* Inicia repartiendo la pantalla 50/50 */
+  min-width: 280px;
+  min-height: 420px;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+  color: var(--text-color);
+}
+
+:where(.mat251) .widget-grafico.minimizada {
+  min-height: auto;
+  height: auto !important;
+  resize: none;
+}
+
+:where(.mat251) .widget-grafico:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+:where(.mat251) .widget-grafico.maximizada {
+  position: fixed;
+  top: 5vh;
+  left: 5vw;
+  width: 90vw !important;
+  /* 👈 !important es vital aquí */
+  height: 90vh !important;
+  /* 👈 !important es vital aquí */
+  z-index: 9999;
+  resize: none;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+:where(.mat251) .widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: var(--bg-secondary);
+  /* 👈 Modo oscuro activado */
+  border-bottom: 1px solid var(--border-color);
+  cursor: grab;
+}
+
+:where(.mat251) .widget-header:active {
+  cursor: grabbing;
+}
+
+:where(.mat251) .widget-titulo {
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--text-color);
+  margin: 0;
+  pointer-events: none;
+}
+
+:where(.mat251) .widget-controles {
+  display: flex;
+  gap: 8px;
+}
+
+:where(.mat251) .widget-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 2px 5px;
+  color: var(--text-color);
+  /* 👈 Botones visibles en modo oscuro */
+}
+
+:where(.mat251) .widget-btn:hover {
+  opacity: 1;
+}
+
+:where(.mat251) .widget-body {
+  padding: 15px;
+  width: 100%;
+  display: block;
+  /* 👈 LA CURA AL PROBLEMA: No usar flex aquí */
+  overflow: hidden;
+}
+
+:where(.mat251) .contenedor-grafico-interno {
+  width: 100%;
+  height: 100%;
+  /* Ahora sí ocupará todo el contenedor relativo */
+  transition: height 0.3s ease;
+}
+:where(.mat251) .maximizada .contenedor-grafico-interno {
+  height: 100%;
+}
+
+:where(.mat251) .widget-body.oculto {
+  display: none;
+}
+:where(.mat251) .panel-graficos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  padding: 10px;
+  align-items: stretch;
+}
+:where(.mat251) .grafico-ancho-completo {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  :where(.mat251) .widget-grafico {
+    /* En móviles, forzamos a que ocupen toda la pantalla siempre */
+    width: 100% !important;
+    min-width: 100% !important;
+    flex: 0 0 100% !important;
+    /* Apagamos la esquina de estirar porque en táctil no sirve y rompe el diseño */
+    resize: none !important;
+  }
+}
+
+:where(.mat251) .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+:where(.mat251) .btn-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.1);
+}
+
+:where(.mat251) .button_calcular {
+  width: 100%;
+  padding: 10px 16px;
+  margin-top: 15px;
+  background-color: transparent !important;
+  color: var(--accent-color, #d97706) !important;
+  border: 1px solid var(--accent-color, #d97706) !important;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+:where(.mat251) .button_calcular:hover:not(:disabled) {
+  background-color: var(--accent-color, #d97706) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color, #d97706) !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+:where(.mat251) .editor_text {
   width: 100%;
   border: none;
   padding: 0 5px;
   outline: none;
-  background: transparent; 
+  background: transparent;
   color: inherit;
 }
 
-.calculadora-layout {
+:where(.mat251) .calculadora-layout {
   display: grid;
   grid-template-columns: 350px minmax(0, 1fr);
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 0;
   transition: grid-template-columns 0.3s ease;
   position: relative;
 }
 
-.calculadora-layout.colapsado {
-  grid-template-columns: 15px minmax(0, 1fr);
-  gap: 10px;
+:where(.mat251) .calculadora-layout.colapsado {
+  grid-template-columns: 0 minmax(0, 1fr);
+  gap: 0;
 }
 
-.boton-toggle-medio {
+:where(.mat251) .boton-toggle-medio {
   position: absolute;
   top: 15px;
   left: 355px;
@@ -41,57 +243,57 @@
   transition: left 0.3s ease, transform 0.2s, background-color 0.2s;
 }
 
-.boton-toggle-medio:hover {
+:where(.mat251) .boton-toggle-medio:hover {
   background-color: #e65c00;
   transform: translateY(-50%) translateX(-50%) scale(1.1);
 }
 
-.boton-toggle-medio:focus {
+:where(.mat251) .boton-toggle-medio:focus {
   outline: none;
   box-shadow: none;
 }
 
-.boton-toggle-medio:active {
+:where(.mat251) .boton-toggle-medio:active {
   outline: none;
   box-shadow: none;
   transform: translateY(-50%) translateX(-50%) scale(0.95) !important;
 }
 
-.calculadora-layout.colapsado .boton-toggle-medio {
-  left: 20px;
+:where(.mat251) .calculadora-layout.colapsado .boton-toggle-medio {
+  left: 0;
 }
 
 /* Desktop: el panel está al lado — flecha apunta ◀ (abierto) o ▶ (cerrado) */
-.icono-toggle.abierto {
+:where(.mat251) .icono-toggle.abierto {
   transform: scaleX(1);
 }
 
-.icono-toggle.cerrado {
+:where(.mat251) .icono-toggle.cerrado {
   transform: scaleX(-1);
 }
 
 /* Móvil: el layout se apila — flecha apunta ▲ (abierto) o ▼ (cerrado) */
 @media (max-width: 900px) {
-  .icono-toggle.abierto {
+  :where(.mat251) .icono-toggle.abierto {
     transform: rotate(-90deg) !important;
     margin: 0 !important;
   }
 
-  .icono-toggle.cerrado {
+  :where(.mat251) .icono-toggle.cerrado {
     transform: rotate(90deg) !important;
     margin: 0 !important;
   }
 }
 
-.icono-animado {
+:where(.mat251) .icono-animado {
   position: relative;
   width: 12px;
   height: 12px;
   display: block;
 }
 
-.icono-animado::before,
-.icono-animado::after {
+:where(.mat251) .icono-animado::before,
+:where(.mat251) .icono-animado::after {
   content: '';
   position: absolute;
   background-color: white;
@@ -101,33 +303,33 @@
   transition: transform 0.3s ease;
 }
 
-.icono-animado::before {
+:where(.mat251) .icono-animado::before {
   width: 12px;
   height: 2px;
   transform: translate(-50%, -50%);
 }
 
-.icono-animado::after {
+:where(.mat251) .icono-animado::after {
   width: 2px;
   height: 12px;
   transform: translate(-50%, -50%) rotate(0deg);
 }
 
-.boton-toggle-medio.abierto .icono-animado::after {
+:where(.mat251) .boton-toggle-medio.abierto .icono-animado::after {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
-.calculadora-datos {
+:where(.mat251) .calculadora-datos {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 5px;
+  padding: 15px;
   height: fit-content;
   overflow: visible;
   transition: padding 0.3s ease;
 }
 
-.calculadora-layout.colapsado .calculadora-datos {
+:where(.mat251) .calculadora-layout.colapsado .calculadora-datos {
   padding: 0px;
   border: none;
   opacity: 0;
@@ -135,17 +337,17 @@
   overflow: hidden;
 }
 
-.etiqueta {
+:where(.mat251) .etiqueta {
   font-size: 0.9rem;
   font-weight: bold;
 }
 
-.selector-archivo {
+:where(.mat251) .selector-archivo {
   margin-bottom: 15px;
   width: 100%;
 }
 
-.panel-controles-excel {
+:where(.mat251) .panel-controles-excel {
   margin-top: 0;
   padding: 0;
   border: none;
@@ -154,7 +356,7 @@
 }
 
 /* Banner de bienvenida — modo claro */
-.banner-bienvenida {
+:where(.mat251) .banner-bienvenida {
   text-align: center;
   margin-bottom: 24px;
   padding: 20px;
@@ -165,13 +367,13 @@
 }
 
 /* Banner de bienvenida — modo oscuro */
-html.dark .banner-bienvenida {
+html.dark :where(.mat251) .banner-bienvenida {
   background: linear-gradient(135deg, #1e293b 0%, #263650 100%);
   color: #bfdbfe;
   border-color: #334155;
 }
 
-.container_operaciones {
+:where(.mat251) .container_operaciones {
   width: 100%;
   padding: 8px;
   border-radius: 4px;
@@ -181,87 +383,164 @@ html.dark .banner-bienvenida {
   margin-bottom: 15px;
 }
 
-.container_dataset {
+:where(.mat251) .container_dataset {
   margin-bottom: 15px;
   height: 350px;
   display: flex;
   flex-direction: column;
 }
 
-.info_vista {
+:where(.mat251) .info_vista {
   font-size: 0.8em;
   font-weight: bold;
   margin-bottom: 5px;
   color: var(--text-muted);
 }
 
-.container_intervalos {
+:where(.mat251) .container_intervalos {
   padding: 10px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-bottom: 15px;
 }
 
-.container_select {
+:where(.mat251) .container_select {
   width: 100%;
   margin-bottom: 8px;
 }
 
-.container_cal_input {
+:where(.mat251) .container_cal_input {
   width: 100%;
   margin-top: 5px;
+  border-radius: 5px;
 }
 
-.container_cal_percentil {
-  padding: 10px;
+/* Inputs y Placeholder pequeño estandarizado para MAT251 */
+:where(.mat251) .input-mat251 {
+  border-radius: 5px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  margin-bottom: 15px;
+  background-color: var(--bg-card);
+  color: var(--text-pure);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.container_cal_percentil label {
-  display: block;
-  margin-bottom: 5px;
+:where(.mat251) .input-mat251:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.container_cal_percentil input {
-  width: 100%;
-  padding: 5px;
-}
-
-.container_cal_percentil small {
+:where(.mat251) .placeholder-small::placeholder,
+:where(.mat251) .input-mat251.placeholder-small::placeholder,
+:where(.mat251) .input-mat251::placeholder,
+:where(.mat251) .calculadora-datos input::placeholder,
+:where(.mat251) .calculadora-datos textarea::placeholder,
+:where(.mat251) .container_cal_input::placeholder {
+  font-size: 0.72rem !important;
+  opacity: 0.65;
   color: var(--text-muted);
 }
 
-.container_tendencia_posicion {
+/* ========================================= */
+/* SELECT ESTILO OPERACIÓN (MAT251)          */
+/* ========================================= */
+:where(.mat251) .select-mat251,
+:where(.mat251) .select-estilo-operacion {
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-pure);
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+:where(.mat251) .select-mat251:hover,
+:where(.mat251) .select-estilo-operacion:hover {
+  border-color: var(--primary-color);
+}
+
+:where(.mat251) .select-mat251:focus,
+:where(.mat251) .select-estilo-operacion:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+:where(.mat251) .select-mat251 option,
+:where(.mat251) .select-estilo-operacion option {
+  background-color: var(--bg-card);
+  color: var(--text-pure);
+  padding: 8px 12px;
+}
+
+html.dark :where(.mat251) .select-mat251,
+html.dark :where(.mat251) .select-estilo-operacion {
+  background-color: var(--bg-card);
+  color: var(--text-pure);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+:where(.mat251) .container_cal_percentil {
   padding: 10px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-bottom: 15px;
 }
 
-.container_tendencia_posicion label {
+:where(.mat251) .container_cal_percentil label {
   display: block;
   margin-bottom: 5px;
 }
 
-.container_tendencia_posicion input {
+:where(.mat251) .container_cal_percentil input {
   width: 100%;
   padding: 5px;
 }
 
-.button_calcular {
-  padding: 10px 35px;
-  margin-top: 10px;
-  /* El ancho se controla ahora desde el componente con fit-content */
+:where(.mat251) .container_cal_percentil small {
+  color: var(--text-muted);
 }
 
-.info_cargando {
+:where(.mat251) .container_tendencia_posicion {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+:where(.mat251) .container_tendencia_posicion label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+:where(.mat251) .container_tendencia_posicion input {
+  width: 100%;
+  padding: 5px;
+}
+
+
+:where(.mat251) .info_cargando {
   text-align: center;
   color: var(--text-muted);
 }
 
-.button_resultados {
+:where(.mat251) .button_resultados {
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;
@@ -269,62 +548,63 @@ html.dark .banner-bienvenida {
   font-size: 1em;
 }
 
-.button_resultados_manual {
+:where(.mat251) .button_resultados_manual {
   width: 100%;
   padding: 8px;
   background: #6b7280;
 }
 
-.frecuencias {
+:where(.mat251) .frecuencias {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 5px;
 }
 
-.tendencias {
+:where(.mat251) .tendencias {
   color: var(--primary-color);
   border-bottom: 2px solid var(--border-color);
   padding-bottom: 5px;
 }
 
-.container_tablas_academica {
+:where(.mat251) .container_tablas_academica {
   overflow-x: auto;
   margin-bottom: 30px;
 }
 
-.tabla-academica {
+:where(.mat251) .tabla-academica {
   width: 100%;
   border-collapse: collapse;
-  font-family: "Times New Roman", serif;
+  font-family: inherit;
   font-size: 1.1em;
-  margin-top: 10px;
+  margin: 0;
 }
 
-.tabla-academica th,
-.tabla-academica td {
-  border: 1px solid var(--border-color);
+:where(.mat251) .tabla-academica th,
+:where(.mat251) .tabla-academica td {
+  border: 1px solid var(--text-pure);
   padding: 8px;
   text-align: center;
-  color: var(--text-main);
+  color: var(--text-pure);
 }
 
-.tabla-academica th {
-  background-color: var(--header-bg);
+:where(.mat251) .tabla-academica th {
+  background-color: var(--bg-input);
   font-weight: bold;
+  color: var(--text-pure);
 }
 
 /* ======================================================= */
 /* MAGIA RESPONSIVA PARA EL LAYOUT PRINCIPAL (CELULARES)   */
 /* ======================================================= */
 @media (max-width: 900px) {
-  .calculadora-layout {
+  :where(.mat251) .calculadora-layout {
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
 
-  .boton-toggle-medio {
+  :where(.mat251) .boton-toggle-medio {
     /* Posicionar el botón naranja centrado en la parte superior */
     position: absolute;
     left: 50%;
@@ -334,47 +614,47 @@ html.dark .banner-bienvenida {
     z-index: 10;
   }
 
-  .boton-toggle-medio:hover {
+  :where(.mat251) .boton-toggle-medio:hover {
     transform: translateX(-50%) scale(1.1);
   }
 
-  .boton-toggle-medio:active {
+  :where(.mat251) .boton-toggle-medio:active {
     transform: translateX(-50%) scale(0.95) !important;
   }
 
-  .calculadora-layout.colapsado .boton-toggle-medio {
+  :where(.mat251) .calculadora-layout.colapsado .boton-toggle-medio {
     left: 50%;
     right: auto;
     top: -12.5px;
   }
 
-  .calculadora-layout.colapsado .calculadora-datos {
+  :where(.mat251) .calculadora-layout.colapsado .calculadora-datos {
     display: none;
     /* Oculta completamente el panel de parámetros al colapsar en móvil */
   }
 }
 
 @media (max-width: 768px) {
-  .tabla-academica {
+  :where(.mat251) .tabla-academica {
     font-size: 0.85em;
   }
 
-  .tabla-academica th,
-  .tabla-academica td {
+  :where(.mat251) .tabla-academica th,
+:where(.mat251) .tabla-academica td {
     padding: 4px 2px;
     font-size: 0.85em;
   }
 
-  .container_tablas_academica {
+  :where(.mat251) .container_tablas_academica {
     padding: 0;
     margin-bottom: 20px;
   }
 
-  .frecuencias {
+  :where(.mat251) .frecuencias {
     padding: 10px;
   }
 
-  .frecuencias h3 {
+  :where(.mat251) .frecuencias h3 {
     font-size: 1.1rem;
   }
 }
@@ -382,34 +662,39 @@ html.dark .banner-bienvenida {
 /* ======================================================= */
 /* TEXTOS Y MENSAJES RESPONSIVOS                           */
 /* ======================================================= */
-.mensaje-instruccion-vacio {
-  font-size: 0.95rem; /* Tamaño normal (FS.base) */
+:where(.mat251) .mensaje-instruccion-vacio {
+  font-size: 0.7rem;
+  /* Tamaño normal (FS.base) */
 }
 
-.titulo-operacion-calculadora {
-  font-size: 0.75rem; /* Tamaño pequeño (FS.sx) */
+:where(.mat251) .titulo-operacion-calculadora {
+  font-size: 0.7rem;
+  /* Tamaño pequeño (FS.sx) */
 }
 
 @media (max-width: 900px) {
-  .mensaje-instruccion-vacio {
+  :where(.mat251) .mensaje-instruccion-vacio {
     font-size: 0.85rem;
   }
-  .titulo-operacion-calculadora {
+
+  :where(.mat251) .titulo-operacion-calculadora {
     font-size: 0.70rem;
   }
 }
 
 @media (max-width: 600px) {
-  .mensaje-instruccion-vacio {
+  :where(.mat251) .mensaje-instruccion-vacio {
     font-size: 0.75rem;
   }
-  .titulo-operacion-calculadora {
+
+  :where(.mat251) .titulo-operacion-calculadora {
     font-size: 0.65rem;
-    flex-wrap: wrap; /* Por si el nombre de la operación es muy largo */
+    flex-wrap: wrap;
+    /* Por si el nombre de la operación es muy largo */
   }
 }
 
-.grid-metricas-probabilidad {
+:where(.mat251) .grid-metricas-probabilidad {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 10px;
@@ -417,42 +702,105 @@ html.dark .banner-bienvenida {
 }
 
 @media (max-width: 600px) {
-  .grid-metricas-probabilidad {
-    grid-template-columns: repeat(2, 1fr); /* Forzar exactamente 2 columnas en celulares */
+  :where(.mat251) .grid-metricas-probabilidad {
+    grid-template-columns: repeat(2, 1fr);
+    /* Forzar exactamente 2 columnas en celulares */
   }
-  
+
   /* Si hay un número impar de tarjetas (ej. 3), centrar la última en la fila de abajo y mantener su tamaño original */
-  .grid-metricas-probabilidad > *:last-child:nth-child(odd) {
+  :where(.mat251) .grid-metricas-probabilidad>*:last-child:nth-child(odd) {
     grid-column: 1 / -1;
     justify-self: center;
-    width: calc(50% - 5px); /* Exactamente el mismo ancho que las tarjetas de arriba (considerando el gap de 10px) */
+    width: calc(50% - 5px);
+    /* Exactamente el mismo ancho que las tarjetas de arriba (considerando el gap de 10px) */
   }
 }
+
+:where(.mat251) .tarjeta-prob-titulo {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--text-pure);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+:where(.mat251) .tarjeta-prob-titulo .katex {
+  text-transform: none;
+}
+
+:where(.mat251) .tarjeta-prob-valor {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-pure);
+  font-weight: 400;
+}
+
+/* Tarjetas de Resultados de Cálculos (Texto en formato normal / Title Case) */
+:where(.mat251) .tarjeta-calculo-titulo {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-pure);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+:where(.mat251) .tarjeta-calculo-titulo .katex {
+  text-transform: none;
+}
+
+/* Unificación de títulos de sección y conclusiones en Tema 4 */
+:where(.mat251) .tema4-titulo-seccion {
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+}
+
+:where(.mat251) .tema4-titulo-seccion .katex {
+  text-transform: none;
+  font-size: 0.9rem !important;
+}
+
+:where(.mat251) .tarjeta-calculo-valor {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-pure);
+  font-weight: 400;
+}
+
+
 
 /* ======================================================= */
 /* SIMULACIÓN PROBABILIDAD CLÁSICA                         */
 /* ======================================================= */
-.contenedor-simulacion-clasica {
+:where(.mat251) .contenedor-simulacion-clasica {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
   gap: 20px;
-  flex-wrap: nowrap; /* Mantener en una sola fila */
+  flex-wrap: nowrap;
+  /* Mantener en una sola fila */
 }
 
-.col-simulacion-lateral {
+:where(.mat251) .col-simulacion-lateral {
   width: 140px;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.col-simulacion-lateral.right-side {
+:where(.mat251) .col-simulacion-lateral.right-side {
   align-items: flex-end;
 }
 
-.col-simulacion-centro {
+:where(.mat251) .col-simulacion-centro {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -461,69 +809,87 @@ html.dark .banner-bienvenida {
 }
 
 @media (max-width: 768px) {
-  .contenedor-simulacion-clasica {
+  :where(.mat251) .contenedor-simulacion-clasica {
     gap: 5px;
-    align-items: flex-start; /* Alinear arriba para que no queden tan abajo */
+    align-items: flex-start;
+    /* Alinear arriba para que no queden tan abajo */
   }
-  
-  .col-simulacion-lateral {
-    width: 32%; /* Ajustar el ancho para que quepan */
-    align-items: center !important; /* Centrar contenido en ambos lados */
+
+  :where(.mat251) .col-simulacion-lateral {
+    width: 32%;
+    /* Ajustar el ancho para que quepan */
+    align-items: center !important;
+    /* Centrar contenido en ambos lados */
   }
-  
-  .texto-lanzamiento-simulacion, 
-  .texto-lanzamiento-simulacion-placeholder {
+
+  :where(.mat251) .texto-lanzamiento-simulacion,
+:where(.mat251) .texto-lanzamiento-simulacion-placeholder {
     font-size: 0.65rem !important;
     text-align: center;
   }
-  
-  .tarjeta-probabilidad {
+
+  :where(.mat251) .tarjeta-probabilidad {
     padding: 8px 4px !important;
     width: 100% !important;
   }
-  
-  .tarjeta-prob-titulo {
+
+  :where(.mat251) .tarjeta-prob-titulo {
     font-size: 0.55rem !important;
   }
-  
-  .tarjeta-prob-valor {
+
+  :where(.mat251) .tarjeta-prob-valor {
     font-size: 0.95rem !important;
   }
 
-  .texto-resultado-simulacion {
-    font-size: 0.75rem !important;
-  }
-
-  .titulo-exitos-simulacion {
+  :where(.mat251) .tarjeta-calculo-titulo {
     font-size: 0.65rem !important;
   }
 
-  .valor-exitos-simulacion {
+  :where(.mat251) .tema4-titulo-seccion {
+    font-size: 0.85rem !important;
+  }
+
+  :where(.mat251) .tema4-titulo-seccion .katex {
+    font-size: 0.85rem !important;
+  }
+
+  :where(.mat251) .tarjeta-calculo-valor {
+    font-size: 0.95rem !important;
+  }
+
+
+  :where(.mat251) .texto-resultado-simulacion {
+    font-size: 0.75rem !important;
+  }
+
+  :where(.mat251) .titulo-exitos-simulacion {
+    font-size: 0.65rem !important;
+  }
+
+  :where(.mat251) .valor-exitos-simulacion {
     font-size: 1.1rem !important;
   }
 }
 
-.grid-metricas-empiricas {
+:where(.mat251) .grid-metricas-empiricas {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid var(--border-color);
+  margin-top: 15px;
   gap: 15px;
 }
 
-.tarjeta-metrica-empirica {
+:where(.mat251) .tarjeta-metrica-empirica {
   background: var(--bg-input);
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 5px;
   border: 1px solid var(--border-color);
   text-align: center;
 }
 
-.titulo-metrica-empirica {
+:where(.mat251) .titulo-metrica-empirica {
   margin: 0;
-  font-size: 0.65rem;
-  color: var(--text-muted);
+  font-size: 0.7rem;
+  color: var(--text-pure);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -532,113 +898,569 @@ html.dark .banner-bienvenida {
   text-transform: uppercase;
 }
 
-.valor-metrica-empirica {
+:where(.mat251) .titulo-metrica-empirica .katex {
+  text-transform: none;
+}
+
+:where(.mat251) .valor-metrica-empirica {
   margin: 5px 0 0;
-  font-size: 1.1rem;
-  color: var(--text-color);
-  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text-pure);
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {
-  .grid-metricas-empiricas {
+  :where(.mat251) .grid-metricas-empiricas {
     display: flex !important;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px; /* Menor espacio entre cajas en móvil */
+    gap: 8px;
+    /* Menor espacio entre cajas en móvil */
   }
-  .grid-metricas-empiricas > div {
-    flex: 0 0 calc(50% - 4px); /* Dos por fila */
+
+  :where(.mat251) .grid-metricas-empiricas>div {
+    flex: 0 0 calc(50% - 4px);
+    /* Dos por fila */
   }
-  .grid-metricas-empiricas > div:last-child {
-    flex: 0 0 calc(50% - 4px); /* El tercero ocupa lo mismo pero se centrará */
+
+  :where(.mat251) .grid-metricas-empiricas>div:last-child {
+    flex: 0 0 calc(50% - 4px);
+    /* El tercero ocupa lo mismo pero se centrará */
     margin-top: 0px;
   }
-  
-  .tarjeta-metrica-empirica {
-    padding: 8px 4px; /* Mucho menos padding en móvil para que quepa el texto */
+
+  :where(.mat251) .tarjeta-metrica-empirica {
+    padding: 8px 4px;
+    /* Mucho menos padding en móvil para que quepa el texto */
   }
-  
-  .titulo-metrica-empirica {
-    font-size: 0.55rem; /* Letras más pequeñas en móvil */
+
+  :where(.mat251) .titulo-metrica-empirica {
+    font-size: 0.55rem;
+    /* Letras más pequeñas en móvil */
   }
-  
-  .valor-metrica-empirica {
-    font-size: 0.95rem; /* Números más pequeños en móvil */
+
+  :where(.mat251) .valor-metrica-empirica {
+    font-size: 0.95rem;
+    /* Números más pequeños en móvil */
   }
 }
 
-.widget-titulo {
-  font-size: 0.95rem;
-  font-weight: 700;
+:where(.mat251) .widget-titulo {
+  font-size: 0.8rem;
+  font-weight: bold;
   line-height: 1.3;
-  color: var(--text-main) !important; /* Revertido al color original */
+  color: var(--text-main) !important;
+  /* Revertido al color original */
 }
 
-@media (max-width: 768px) {
-  .widget-titulo {
-    font-size: 0.75rem; /* Mucho más pequeño en móvil para que no ocupe 3 líneas */
+@media (max-width: 950px) {
+  :where(.mat251) .widget-titulo {
+    font-size: 0.7rem;
+    /* Mucho más pequeño en móvil para que no ocupe 3 líneas */
   }
-  
-  .widget-header {
-    align-items: flex-start !important; /* Si envuelve, que quede bien alineado arriba */
+
+  :where(.mat251) .widget-header {
+    align-items: center !important;
   }
 }
 
 /* Clases para el Modal Maximizado */
-.modal-grafico-gigante {
-  width: 90%;
-  height: 90%;
+:where(.mat251) .modal-grafico-gigante {
+  width: 85% !important;
+  height: 85% !important;
+  margin: auto !important;
+  box-sizing: border-box !important;
+  resize: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
 }
 
-.widget-titulo-max {
+:where(.mat251) .modal-header-gigante {
+  align-items: center !important;
+  cursor: default !important;
+}
+
+:where(.mat251) .widget-titulo-max {
   color: var(--text-main);
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
 }
 
-@media (max-width: 768px) {
-  .modal-grafico-gigante {
-    height: auto !important;
-    max-height: 90vh;
+:where(.mat251) .cuerpo-grafico-gigante {
+  flex: 1 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 15px 20px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 950px) {
+  :where(.mat251) .modal-grafico-gigante {
+    width: 95% !important;
+    height: 53% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: auto !important;
   }
-  
-  .modal-header-gigante {
+
+  :where(.mat251) .modal-header-gigante {
     /* Mantenemos el layout original horizontal */
     padding: 10px 15px !important;
+    flex-shrink: 0 !important;
+    align-items: center !important;
   }
-  
-  .widget-titulo-max {
-    font-size: 0.75rem !important; /* Mismo tamaño que el título normal en móvil para que quepa todo horizontal */
-    line-height: 1.2;
+
+  :where(.mat251) .widget-titulo-max {
+    font-size: 0.75rem !important;
+    /* Mismo tamaño que el título normal en móvil para que quepa todo horizontal */
+    line-height: 1.2 !important;
+    display: flex !important;
+    align-items: center !important;
   }
-  
-  .controles-modal-gigante {
-    gap: 5px !important; /* Menos separación entre los controles en móvil */
+
+  :where(.mat251) .controles-modal-gigante {
+    gap: 5px !important;
+    /* Menos separación entre los controles en móvil */
   }
-  
-  .cuerpo-grafico-gigante {
-    flex: none !important;
-    height: 55vh !important;
-    min-height: 350px;
-    padding: 10px 0px 10px 15px !important; /* 15px a la izquierda para que los números no toquen el borde, 0px a la derecha porque ya tiene 30px de margin el LineChart */
+
+  :where(.mat251) .cuerpo-grafico-gigante {
+    flex: 1 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 10px 15px !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+    box-sizing: border-box !important;
   }
-  
-  .katex-responsive-container {
-    font-size: 0.8rem !important; /* Force smaller base font size on mobile */
+
+  :where(.mat251) .katex-responsive-container {
+    font-size: 1rem !important;
   }
-  
-  /* Additionally, target KaTeX specifically to ensure it scales down */
-  .katex-responsive-container .katex {
-    font-size: 0.9em !important; 
+
+  :where(.mat251) .katex-responsive-container .katex {
+    font-size: 1.1rem !important;
   }
-  
-  .table-header-responsive {
-    font-size: 0.7rem !important; /* Smaller text for headers on mobile */
+
+  :where(.mat251) .formula-general-box {
+    font-size: 0.8rem !important;
+  }
+
+  :where(.mat251) .formula-desarrollo-box {
+    font-size: 0.9rem !important;
+  }
+
+  :where(.mat251) .formula-desarrollo-box .katex {
+    font-size: 0.9rem !important;
+  }
+
+  :where(.mat251) .label-bayes-pregunta {
+    font-size: 0.75rem !important;
+  }
+
+  :where(.mat251) .label-bayes-pregunta .katex {
+    font-size: 1em !important;
+  }
+
+  :where(.mat251) .table-header-responsive {
+    font-size: 0.7rem !important;
+    /* Smaller text for headers on mobile */
   }
 }
 
-.katex-responsive-container {
+:where(.mat251) .formula-desarrollo-box {
+  font-size: 0.9rem;
+}
+
+:where(.mat251) .formula-desarrollo-box .katex {
+  font-size: 0.9rem;
+}
+
+:where(.mat251) .katex-responsive-container {
+  color: var(--text-pure);
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+:where(.mat251) .katex-responsive-container .katex {
+  color: var(--text-pure);
+}
+
+:where(.mat251) .formula-scroll-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar {
+  height: 5px;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.6);
+  border-radius: 4px;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.9);
+}
+
+:where(.mat251) .table-header-responsive {
+  font-size: 0.95em;
+  /* Normal size on desktop */
+}
+
+:where(.mat251) .formula-general-box {
   font-size: 1rem;
 }
 
-.table-header-responsive {
-  font-size: 0.95em; /* Normal size on desktop */
+:where(.mat251) .label-bayes-pregunta {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--text-pure);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+:where(.mat251) .label-bayes-pregunta .katex {
+  font-size: 1em;
+}
+
+/* ── TOOLTIPS ESTADÍSTICOS PEDAGÓGICOS (StatLabel) ── */
+:where(.mat251) .mat251-stat-label-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  text-decoration: underline dotted 1px rgba(100, 116, 139, 0.5);
+  text-underline-offset: 3px;
+}
+
+:where(.mat251) .mat251-stat-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(4px);
+  background-color: #1e293b;
+  color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 5px;
+  width: max-content;
+  max-width: min(92vw, 440px);
+  box-sizing: border-box;
+  text-align: center;
+  z-index: 9999;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: normal;
+  font-size: 0.8rem;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+:where(.mat251) .mat251-stat-label-container:hover {
+  z-index: 10000;
+}
+
+:where(.mat251) .hnp-frecuencias-esperadas-scroll th:has(.mat251-stat-label-container:hover),
+:where(.mat251) .minitab-table-scroll th:has(.mat251-stat-label-container:hover) {
+  z-index: 10001 !important;
+}
+
+:where(.mat251) .mat251-stat-label-container:hover .mat251-stat-tooltip {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+:where(.mat251) .mat251-stat-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: var(--arrow-left, 50%);
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #1e293b transparent;
+}
+
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-top {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(-4px);
+}
+
+:where(.mat251) .mat251-stat-label-container:hover .mat251-tooltip-top {
+  transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-top::after {
+  top: 100%;
+  bottom: auto;
+  border-color: #1e293b transparent transparent transparent;
+}
+
+:where(.mat251) .mat251-tooltip-text {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+:where(.mat251) .mat251-stat-label-container.hnp-tooltip-compact .mat251-tooltip-text {
+  font-size: 0.64rem !important;
+}
+
+:where(.mat251) .mat251-tooltip-math {
+  color: #fbbf24 !important;
+  font-size: 0.85rem;
+}
+
+:where(.mat251) .mat251-tooltip-math,
+:where(.mat251) .mat251-tooltip-math *,
+:where(.mat251) .mat251-tooltip-math .katex,
+:where(.mat251) .mat251-tooltip-math .katex * {
+  color: #fbbf24 !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 768px) {
+  :where(.mat251) .mat251-stat-tooltip {
+    max-width: min(90vw, 320px);
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+  :where(.mat251) .mat251-tooltip-text {
+    font-size: 0.72rem;
+  }
+  :where(.mat251) .mat251-tooltip-math {
+    font-size: 0.78rem;
+  }
+}
+
+/* En móviles, el título de la gráfica se desplaza sin invadir sus controles. */
+@media (max-width: 600px) {
+  :where(.mat251) .widget-grafico > .widget-header > div:first-child {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
+  :where(.mat251) .widget-grafico > .widget-header .widget-titulo {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    pointer-events: auto !important;
+    touch-action: pan-x;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-muted, #9aa3ad) transparent;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  :where(.mat251) .widget-grafico > .widget-header .widget-titulo > span:last-child {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  :where(.mat251) .widget-grafico > .widget-header .widget-titulo::-webkit-scrollbar {
+    height: 2px !important;
+    margin: 0;
+  }
+
+  :where(.mat251) .widget-grafico > .widget-header .widget-titulo::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 0;
+  }
+
+  :where(.mat251) .widget-grafico > .widget-header .widget-titulo::-webkit-scrollbar-thumb {
+    background: var(--text-muted, #9aa3ad);
+    border-radius: 2px;
+  }
+}
+
+/* Banner aviso de cálculo reabierto desde el historial (MAT251) */
+:where(.mat251) .aviso-origen-historial {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 5px 15px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+}
+
+:where(.mat251) .aviso-origen-historial-icono {
+  flex-shrink: 0;
+  color: var(--primary-color, #3b82f6);
+}
+
+:where(.mat251) .aviso-origen-historial-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+:where(.mat251) .aviso-origen-historial-info > * {
+  flex-shrink: 0;
+}
+
+:where(.mat251) .aviso-origen-historial-modulo {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--primary-color, #3b82f6);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+:where(.mat251) .aviso-origen-historial-detalle,
+:where(.mat251) .aviso-origen-historial-archivo {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+:where(.mat251) .acciones-historial-mat251 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+:where(.mat251) .acciones-historial-mat251 button {
+  border-radius: 5px;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+:where(.mat251) .acciones-historial-mat251 .btn-volver-historial {
+  flex-shrink: 0;
+  padding: 5px 20px;
+  font-size: 0.8rem;
+}
+
+/* Historial en tablets y celulares: información legible y acciones alineadas. */
+@media (max-width: 1024px) {
+  :where(.mat251) .aviso-origen-historial {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px 10px;
+    padding: 12px;
+    border-radius: 5px;
+  }
+
+  :where(.mat251) .aviso-origen-historial-icono {
+    width: 18px;
+    height: 18px;
+    align-self: center;
+  }
+
+  :where(.mat251) .aviso-origen-historial-info {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  :where(.mat251) .aviso-origen-historial-info > * {
+    min-width: 0;
+    font-size: inherit;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  :where(.mat251) .aviso-origen-historial-modulo {
+    order: 0;
+    padding: 2px 5px;
+  }
+
+  :where(.mat251) .aviso-origen-historial-archivo {
+    order: 1;
+    max-width: 30%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :where(.mat251) .aviso-origen-historial-detalle {
+    order: 2;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :where(.mat251) .acciones-historial-mat251 {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  :where(.mat251) .acciones-historial-mat251 .btn-volver-historial {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  :where(.mat251) .acciones-historial-mat251 {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

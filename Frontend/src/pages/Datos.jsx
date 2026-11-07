@@ -1,27 +1,32 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useContext } from 'react';
 import { AgGridReact, AgGridProvider } from 'ag-grid-react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
 
-import { useModuleData } from '../components/Gestion_Datos/DataContext';
+import { useModuleData, ActiveModuleContext } from '../components/gestion_datos/DataContext';
 import { keyToNum, getExcelChar, excelToCoords } from '../utils/excelHelpers';
-import VariableCard from '../components/Gestion_Datos/VariableCard';
+import VariableCard from '../components/gestion_datos/VariableCard';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import "../styles/pages/Datos.css";
 import * as XLSX from 'xlsx'; 
 
-import { api } from '../services/api';
+import { api, BASE_URL } from '../services/api';
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import ModalAlerta from '../features/MAT251/ui/ModalAlerta';
+import SelectorDatos from '../ui/SelectorDatos';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+provideGlobalGridOptions({ theme: 'legacy' });
 
 const SimuladorMAT251 = () => {
 
     const gridRef = useRef();
+    const moduloContexto = useContext(ActiveModuleContext);
+    const moduloActivo = moduloContexto === "mat251" ? "MAT251" : "MAT151";
     const {
-        workbook, sheetNames, currentSheet, rowData, variables, limiteFilas,
+        workbook, nombreArchivoOrigen, sheetNames, currentSheet, rowData, variables, limiteFilas,
         handleFileUpload, cargarHoja, agregarVariable, eliminarVariable, actualizarVariable, setLimiteFilas,
         usuario
     } = useModuleData();
@@ -46,8 +51,23 @@ const SimuladorMAT251 = () => {
     const [archivosApi, setArchivosApi] = useState([]); 
     const [cargandoApi, setCargandoApi] = useState(false); 
     const [archivoActivo, setArchivoActivo] = useState(null); 
-    const [_selectedApiFile, setSelectedApiFile] = useState("");
+    const [selectedApiFile, setSelectedApiFile] = useState("");
+    const [origenArchivos, setOrigenArchivos] = useState("personal");
+    const [misCursos, setMisCursos] = useState([]);
+    const [cursoSeleccionado, setCursoSeleccionado] = useState("");
+    const [cargandoCursos, setCargandoCursos] = useState(false);
+    const [cargandoLista, setCargandoLista] = useState(false);
+    const [errorLista, setErrorLista] = useState("");
+    const [errorCursos, setErrorCursos] = useState("");
+    const solicitudCarga = useRef(0);
+    const cursosDelModulo = misCursos.filter((curso) => curso.modulo === moduloActivo);
+    const cursoActual = cursosDelModulo.find((curso) => String(curso.id) === cursoSeleccionado);
     const [modalMatrizInfo, setModalMatrizInfo] = useState(null);
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+
+    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
+        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
+    };
 
     const startVariableTour = () => {
         if (document.querySelector('#tour-datos-card-variable')) {
@@ -127,25 +147,69 @@ const SimuladorMAT251 = () => {
         }
     };
 
-    // USE-EFFECT: Cargar lista de archivos de FastAPI 
     useEffect(() => {
-        const cargarListaArchivos = async () => {
-            if (!usuario) return; // Necesitamos el usuario para filtrar archivos
+        let cancelado = false;
+        setMisCursos([]);
+        setCursoSeleccionado("");
+        setErrorCursos("");
+        if (!usuario) return;
+        const cargarCursos = async () => {
+            setCargandoCursos(true);
             try {
-                const data = await api.obtenerArchivos(usuario.nombre);
-                if (data && data.files) {
-                    setArchivosApi(data.files);
-                }
+                const endpoint = ["Docente", "Administrador"].includes(usuario.rol) || usuario.isAdmin
+                    ? "mis_clases" : "mis_inscripciones";
+                const response = await fetch(`${BASE_URL}/${endpoint}/${encodeURIComponent(usuario.email || usuario.id)}`);
+                if (!response.ok) throw new Error("No se pudieron cargar tus grupos.");
+                const data = await response.json();
+                if (cancelado) return;
+                const cursos = (Array.isArray(data) ? data : []).map((curso) => {
+                    const nombre = String(curso.nombre || "").toUpperCase();
+                    const modulo = String(curso.modulo || "").trim().toUpperCase()
+                        || (nombre.includes("MAT251") ? "MAT251" : nombre.includes("MAT151") ? "MAT151" : "SIN_MODULO");
+                    return { ...curso, modulo };
+                });
+                setMisCursos(cursos.filter((curso) => curso.modulo === moduloActivo));
             } catch (error) {
-                console.error("Error al cargar la lista de archivos de la API", error);
+                if (!cancelado) setErrorCursos(error.message);
+            } finally {
+                if (!cancelado) setCargandoCursos(false);
+            }
+        };
+        cargarCursos();
+        return () => { cancelado = true; };
+    }, [usuario, moduloActivo]);
+
+    useEffect(() => {
+        let cancelado = false;
+        setArchivosApi([]);
+        setSelectedApiFile("");
+        setErrorLista("");
+        if (!usuario || (origenArchivos === "curso" && !cursoActual)) {
+            setCargandoLista(false);
+            return;
+        }
+        const cargarListaArchivos = async () => {
+            setCargandoLista(true);
+            try {
+                const data = await api.obtenerArchivos(usuario.nombre,
+                    origenArchivos === "curso" ? "privado" : "personal",
+                    origenArchivos === "curso" ? cursoSeleccionado : "");
+                if (!cancelado) setArchivosApi(data.files || []);
+            } catch (error) {
+                if (!cancelado) setErrorLista("No se pudieron cargar los archivos.");
+            } finally {
+                if (!cancelado) setCargandoLista(false);
             }
         };
         cargarListaArchivos();
-    }, [usuario]);
+        return () => { cancelado = true; };
+    }, [usuario, origenArchivos, cursoSeleccionado, cursoActual, moduloActivo]);
 
     const manejarSubidaLocal = (e) => {
         const files = e.target?.files || e.dataTransfer?.files;
         if (files && files.length > 0) {
+            solicitudCarga.current += 1;
+            setCargandoApi(false);
             setArchivoActivo({ nombre: files[0].name, origen: 'LOCAL' });
             setSelectedApiFile("");
             handleFileUpload(e);
@@ -156,22 +220,27 @@ const SimuladorMAT251 = () => {
     const cargarDesdeAPI = async (filename) => {
         if (!filename) return;
         if (!usuario) {
-            alert("Error: No hay un usuario activo. Por favor recarga la página.");
+            mostrarAlerta("No hay un usuario activo. Por favor, recarga la página.", 'Error', 'error');
             return;
         }
+        const solicitud = ++solicitudCarga.current;
         try {
             setCargandoApi(true);
-            const dataBuffer = await api.descargarArchivoBinario(filename, usuario.nombre);
+            const dataBuffer = await api.descargarArchivoBinario(filename, usuario.nombre,
+                origenArchivos === "curso" ? cursoSeleccionado : "");
+            if (solicitud !== solicitudCarga.current) return;
             const fileVirtual = new File([dataBuffer], filename, {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             });
 
-            setArchivoActivo({ nombre: filename, origen: 'API' });
+            setSelectedApiFile(filename);
+            setArchivoActivo({ nombre: filename, origen: origenArchivos === "curso" ? "CURSO" : "PERSONAL",
+                modulo: cursoActual?.modulo, grupo: cursoActual?.nombre });
             handleFileUpload({ target: { files: [fileVirtual] } });
         } catch (error) {
-            alert("Error al cargar dataset: " + error.message);
+            if (solicitud === solicitudCarga.current) mostrarAlerta("Error al cargar dataset: " + error.message, 'Error', 'error');
         } finally {
-            setCargandoApi(false);
+            if (solicitud === solicitudCarga.current) setCargandoApi(false);
         }
     };
 
@@ -216,7 +285,28 @@ const SimuladorMAT251 = () => {
         }
     };
 
-    // Agrupamos las acciones para pasarlas a la VariableCard
+    const nombreAutomaticoPorColumnas = (id, cantidadColumnas) => {
+        const nombreActual = variables.find(variable => variable.id === id)?.nombre || '';
+        const coincidencia = nombreActual.match(/^(?:Variable|Matriz de datos)\s+(\d+)$/i);
+        if (!coincidencia) return {};
+
+        const prefijo = cantidadColumnas > 1 ? 'Matriz de datos' : 'Variable';
+        const patronNombre = new RegExp('^' + prefijo + '\\s+(\\d+)$', 'i');
+        const numerosOcupados = new Set(
+            variables
+                .filter(variable => variable.id !== id)
+                .map(variable => Number(variable.nombre.match(patronNombre)?.[1]))
+                .filter(Number.isFinite)
+        );
+        let numero = 1;
+        while (numerosOcupados.has(numero)) numero++;
+
+        return {
+            nombre: `${prefijo} ${numero}`
+        };
+    };
+
+    // Agrupamos las acciones para pasarlas a la tarjeta de datos.
     const actions = {
         delete: eliminarVariable,
         update: actualizarVariable,
@@ -233,14 +323,18 @@ const SimuladorMAT251 = () => {
                     rangoLabel: '',
                     coords: null,
                     datos: [],
-                    sheet: null
+                    sheet: null,
+                    ...(moduloActivo === 'MAT251' ? { archivoOrigen: null, hojaOrigen: null } : {})
                 });
             }
         },
 
         capture: (id) => {
             const { start, end } = selection;
-            if (!start || !end) return alert("⚠️ Selecciona un rango en el Excel primero.");
+            if (!start || !end) {
+                mostrarAlerta('Selecciona un rango en el Excel primero.', 'Selecciona un rango');
+                return;
+            }
 
             const rMin = Math.min(start.row, end.row);
             const rMax = Math.max(start.row, end.row);
@@ -257,7 +351,8 @@ const SimuladorMAT251 = () => {
             });
 
             if (solapada) {
-                return alert(`⚠️ Error: El rango choca con la variable "${solapada.nombre}".`);
+                mostrarAlerta('El rango choca con la variable "' + solapada.nombre + '".', 'Rango no válido', 'error');
+                return;
             }
 
 
@@ -298,7 +393,7 @@ const SimuladorMAT251 = () => {
             let tipoDetectado = "Sin datos";
             if (datosValidos.length > 0) {
                 if (contadorNumeros > 0 && contadorTextos > 0) {
-                    tipoDetectado = "Mixta (Error)";
+                    tipoDetectado = "Mixta";
                 } else if (contadorNumeros > 0 && contadorTextos === 0) {
                     tipoDetectado = "Cuantitativa (Número)";
                 } else {
@@ -318,10 +413,12 @@ const SimuladorMAT251 = () => {
 
             // Actualizamos la variable inyectando los datos y el tipo
             actualizarVariable(id, {
+                ...nombreAutomaticoPorColumnas(id, cMax - cMin + 1),
                 rangoLabel: `${getExcelChar(cMin)}${rMin + 1}:${getExcelChar(cMax)}${rMax + 1}`,
                 coords: { rMin, rMax, cMin, cMax },
                 datos: datosValidos, // 👈 Ahora esto ya no estará vacío
                 sheet: currentSheet,
+                ...(moduloActivo === 'MAT251' ? { archivoOrigen: nombreArchivoOrigen || null, hojaOrigen: sheetNames.indexOf(currentSheet) } : {}),
                 tipo: tipoDetectado,
                 nombresColumnas: nombresColumnas
             });
@@ -381,7 +478,7 @@ const SimuladorMAT251 = () => {
                 if (datosValidos.length > 0) {
                     // Si hay por lo menos 1 número Y por lo menos 1 texto en la misma selección:
                     if (contadorNumeros > 0 && contadorTextos > 0) {
-                        tipoDetectado = "Mixta (Error)";
+                        tipoDetectado = "Mixta";
                     }
                     // Si SOLO hay números:
                     else if (contadorNumeros > 0 && contadorTextos === 0) {
@@ -404,10 +501,12 @@ const SimuladorMAT251 = () => {
                 }
 
                 actualizarVariable(id, {
+                    ...nombreAutomaticoPorColumnas(id, coords.cMax - coords.cMin + 1),
                     rangoLabel: nuevoTexto,
                     coords,
                     datos: datosValidos,
                     sheet: currentSheet,
+                    ...(moduloActivo === 'MAT251' ? { archivoOrigen: nombreArchivoOrigen || null, hojaOrigen: sheetNames.indexOf(currentSheet) } : {}),
                     tipo: tipoDetectado, // Inyectamos el tipo también aquí
                     nombresColumnas: nombresColumnas
                 });
@@ -455,24 +554,51 @@ const SimuladorMAT251 = () => {
             <div className="header-datos-upload" style={{ backgroundColor: 'var(--bg-body)', display: 'flex', justifyContent: 'center' }}>
                     <div className="upload-container">
                         <div id="tour-datos-archivos" className="upload-column">
-                            <p className="upload-title">Archivos subidos</p>
-                            <select
-                                className="select-hoja"
-                                style={{ width: '60%', cursor: 'pointer' }}
-                                disabled={cargandoApi || archivosApi.length === 0}
-                                onChange={(e) => cargarDesdeAPI(e.target.value)}
-                            >
-                                <option value="">
-                                    {archivosApi.length === 0 ? "Buscando archivos..." : "Seleccionar Archivo"}
-                                </option>
-                                {archivosApi.map((archivo, index) => (
-                                    <option key={index} value={archivo.filename}>
-                                        {archivo.filename}
-                                    </option>
-                                ))}
-                            </select>
-                            <p style={{ fontSize: '11px', marginTop: '5px', color: 'var(--text-muted)' }}>
-                                {cargandoApi ? "⏳ Descargando y procesando..." : "Click para cargar"}
+                            <div className="datos-origen-pestanas" role="group" aria-label="Origen de archivos">
+                                <button type="button" className={`btn-datos-origen ${origenArchivos === "personal" ? "active" : ""}`}
+                                    aria-pressed={origenArchivos === "personal"} disabled={cargandoApi}
+                                    onClick={() => { if (origenArchivos === "personal") return; setOrigenArchivos("personal"); setArchivosApi([]); setSelectedApiFile(""); }}>
+                                    Mi Espacio
+                                </button>
+                                <button type="button" className={`btn-datos-origen ${origenArchivos === "curso" ? "active" : ""}`}
+                                    aria-pressed={origenArchivos === "curso"} disabled={cargandoApi}
+                                    onClick={() => { if (origenArchivos === "curso") return; setOrigenArchivos("curso"); setArchivosApi([]); setSelectedApiFile(""); }}>
+                                    Mis Cursos
+                                </button>
+                            </div>
+                            <div className="datos-selectores-archivos">
+                                {origenArchivos === "curso" && (
+                                    <>
+                                        <div className="datos-campo-selector">
+                                            <label htmlFor="datos-grupo">Grupo:</label>
+                                            <SelectorDatos id="datos-grupo" value={cursoSeleccionado}
+                                                disabled={cargandoApi || cargandoCursos || !cursosDelModulo.length}
+                                                onChange={(curso) => { setCursoSeleccionado(curso); setSelectedApiFile(""); setArchivosApi([]); }}
+                                                options={[
+                                                    { value: "", label: "Selecciona un grupo" },
+                                                    ...cursosDelModulo.map((curso) => ({ value: String(curso.id), label: `${curso.nombre}${curso.codigo || curso.codigo_acceso ? ` · ${curso.codigo || curso.codigo_acceso}` : ""}` })),
+                                                ]}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                <div className="datos-campo-selector datos-selector-archivo">
+                                            <label htmlFor="datos-archivo">{origenArchivos === "curso" ? "Archivos del grupo:" : "Archivos personales:"}</label>
+                                    <SelectorDatos id="datos-archivo" value={selectedApiFile}
+                                        disabled={cargandoApi || cargandoLista || !archivosApi.length || (origenArchivos === "curso" && !cursoActual)}
+                                        placeholder={cargandoLista ? "Cargando archivos..." : "Seleccionar archivo"}
+                                        onChange={cargarDesdeAPI}
+                                        options={archivosApi.map((archivo) => ({ value: archivo.filename, label: archivo.filename }))}
+                                    />
+                                </div>
+                            </div>
+                            <p className="datos-estado-archivos" role="status">
+                                {cargandoApi ? "Descargando y procesando..." : errorLista || (origenArchivos === "curso" && errorCursos)
+                                    || (cargandoLista || (origenArchivos === "curso" && cargandoCursos) ? "Cargando..."
+                                    : origenArchivos === "curso" && !misCursos.length ? `No tienes grupos disponibles en ${moduloActivo}.`
+                                    : origenArchivos === "curso" && !cursoActual ? "Selecciona un grupo."
+                                    : !archivosApi.length ? (origenArchivos === "curso" ? "Este grupo no tiene archivos compartidos." : "No tienes archivos personales subidos.")
+                                    : "Selecciona un archivo para cargarlo.")}
                             </p>
                         </div>
                         <div className="column-divider"></div>
@@ -505,7 +631,7 @@ const SimuladorMAT251 = () => {
                 </div>
 
                 {sheetNames.length > 0 && (
-                    <div style={{
+                    <div className="datos-hoja-info" style={{
                         margin: '10px 10px 5px 10px',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -518,29 +644,26 @@ const SimuladorMAT251 = () => {
                         boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     }}>
 
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                        <div className="datos-archivo-info" style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
                             <strong>Archivo: </strong>
                             <span style={{ color: '#3b82f6', marginRight: '8px' }}>
                                 {archivoActivo ? archivoActivo.nombre : (workbook ? "Documento cargado" : "Sin archivo")}
                             </span>
                             {archivoActivo && (
-                                <span style={{ color: 'var(--text-muted)' }}>
+                                <span className="datos-archivo-origen" style={{ color: 'var(--text-muted)' }}>
                                     {archivoActivo.origen === 'API' ? `(${usuario?.nombre || 'Nube'})` : '(Local)'}
                                 </span>
                             )}
                         </div>
 
-                        <div>
-                            <span style={{ marginRight: '10px', fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.8rem' }}>
+                        <div className="datos-hoja-selector">
+                            <label htmlFor="datos-hoja-activa" style={{ marginRight: '10px', fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.8rem' }}>
                                 Hoja activa del Excel:
-                            </span>
-                            <select
-                                value={currentSheet}
-                                onChange={(e) => cargarHoja(workbook, e.target.value)}
-                                className="select-hoja"
-                            >
-                                {sheetNames.map(name => <option key={name} value={name}>{name}</option>)}
-                            </select>
+                            </label>
+                            <SelectorDatos id="datos-hoja-activa" value={currentSheet}
+                                onChange={(hoja) => cargarHoja(workbook, hoja)}
+                                options={sheetNames.map((nombre) => ({ value: nombre, label: nombre }))}
+                            />
                         </div>
 
                     </div>
@@ -580,6 +703,7 @@ const SimuladorMAT251 = () => {
                         <div id="tour-datos-tabla" className="ag-theme-alpine grid-wrapper">
                             <AgGridReact
                                 ref={gridRef} rowData={rowData} columnDefs={columnDefs}
+                                theme="legacy"
                                 onCellMouseDown={p => setSelection({ start: { row: p.node.rowIndex, col: keyToNum(p.column.colId) }, end: { row: p.node.rowIndex, col: keyToNum(p.column.colId) }, isDragging: true })}
                                 onCellMouseOver={p => selection.isDragging && setSelection(prev => ({ ...prev, end: { row: p.node.rowIndex, col: keyToNum(p.column.colId) } }))}
                                 suppressCellFocus={true} headerHeight={30} rowHeight={25}
@@ -665,6 +789,13 @@ const SimuladorMAT251 = () => {
                         </div> 
                     </div>
                 )}
+                <ModalAlerta
+                    isOpen={modalAlerta.isOpen}
+                    mensaje={modalAlerta.mensaje}
+                    titulo={modalAlerta.titulo}
+                    tipo={modalAlerta.tipo}
+                    onClose={() => setModalAlerta(prev => ({ ...prev, isOpen: false }))}
+                />
             </div>
         </AgGridProvider>
     );

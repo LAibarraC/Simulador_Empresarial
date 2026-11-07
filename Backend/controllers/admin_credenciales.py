@@ -45,7 +45,7 @@ async def obtener_credenciales_logic(db: AsyncSession):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener credenciales: {str(e)}")
 
-async def crear_precuenta_docente_logic(nombre: str, email: str, password: str, db: AsyncSession):
+async def crear_precuenta_docente_logic(nombre: str, email: str, password: str, db: AsyncSession, modulos: list[str] = None):
     nombre = nombre.strip()
     email = email.strip().lower()
     if not nombre or not email or not password:
@@ -66,6 +66,16 @@ async def crear_precuenta_docente_logic(nombre: str, email: str, password: str, 
     )
     db.add(usuario)
     try:
+        await db.flush()
+        if modulos:
+            modulos_validos = {"MAT151", "MAT251"}
+            for mod in modulos:
+                if mod in modulos_validos:
+                    db.add(models.DocenteModulo(
+                        docente_id=usuario.id,
+                        modulo=mod,
+                        activo=True
+                    ))
         await db.commit()
         await db.refresh(usuario)
         return {"message": "Pre-cuenta docente creada correctamente", "id": usuario.id}
@@ -273,3 +283,77 @@ async def cargar_credenciales_logic(file_content: bytes, filename: str, db: Asyn
         print(f"ERROR CRÍTICO en cargar_credenciales: {traceback.format_exc()}")
         if isinstance(e, HTTPException): raise e
         raise HTTPException(status_code=500, detail=f"Error procesando el archivo: {str(e)}")
+
+
+async def obtener_modulos_docente_logic(docente_id: int, db: AsyncSession):
+    try:
+        result_user = await db.execute(select(models.Usuario).filter(models.Usuario.id == docente_id))
+        usuario = result_user.scalars().first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Docente no encontrado")
+
+        result = await db.execute(
+            select(models.DocenteModulo).filter(
+                models.DocenteModulo.docente_id == docente_id,
+                models.DocenteModulo.activo == True
+            )
+        )
+        modulos = result.scalars().all()
+        return [m.modulo for m in modulos]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener módulos: {str(e)}")
+
+
+async def asignar_modulos_docente_logic(docente_id: int, modulos_nuevos: list[str], db: AsyncSession):
+    try:
+        result_user = await db.execute(select(models.Usuario).filter(models.Usuario.id == docente_id))
+        usuario = result_user.scalars().first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Docente no encontrado")
+
+        modulos_validos = {"MAT151", "MAT251"}
+        modulos_filtrados = [m for m in modulos_nuevos if m in modulos_validos]
+
+        # Reemplazo limpio atómico
+        await db.execute(
+            delete(models.DocenteModulo).filter(models.DocenteModulo.docente_id == docente_id)
+        )
+
+        for mod in modulos_filtrados:
+            nuevo_registro = models.DocenteModulo(
+                docente_id=docente_id,
+                modulo=mod,
+                activo=True
+            )
+            db.add(nuevo_registro)
+
+        await db.commit()
+        return {
+            "message": "Módulos actualizados correctamente",
+            "docente_id": docente_id,
+            "modulos": modulos_filtrados
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al asignar módulos: {str(e)}")
+
+
+async def obtener_todos_docentes_con_modulos_logic(db: AsyncSession):
+    try:
+        result = await db.execute(
+            select(models.DocenteModulo).filter(models.DocenteModulo.activo == True)
+        )
+        registros = result.scalars().all()
+        mapa = {}
+        for r in registros:
+            if r.docente_id not in mapa:
+                mapa[r.docente_id] = []
+            mapa[r.docente_id].append(r.modulo)
+        return mapa
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener asignaciones: {str(e)}")
+

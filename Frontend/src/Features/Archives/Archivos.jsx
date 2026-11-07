@@ -13,6 +13,105 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import escudoAdmin from "../../assets/images/escudoAdmin.png";
 
+const moduloDelCurso = (curso) => {
+  const modulo = String(curso.modulo || "").trim().toUpperCase();
+  if (modulo) return modulo;
+  const nombre = String(curso.nombre || "").toUpperCase();
+  if (nombre.includes("MAT251")) return "MAT251";
+  if (nombre.includes("MAT151")) return "MAT151";
+  return "SIN_MODULO";
+};
+
+const nombreModulo = (modulo) => modulo === "SIN_MODULO" ? "Sin módulo asignado" : modulo;
+
+function SelectorArchivos({ id, value, onChange, options, disabled, placeholder }) {
+  const [abierto, setAbierto] = useState(false);
+  const contenedor = useRef(null);
+  const boton = useRef(null);
+  const lista = useRef(null);
+  const seleccionada = options.find((opcion) => opcion.value === String(value));
+
+  useEffect(() => {
+    if (!abierto) return;
+    const cerrarFuera = (event) => {
+      if (!contenedor.current?.contains(event.target)) setAbierto(false);
+    };
+    document.addEventListener("pointerdown", cerrarFuera);
+    return () => document.removeEventListener("pointerdown", cerrarFuera);
+  }, [abierto]);
+
+  useEffect(() => {
+    if (disabled) setAbierto(false);
+  }, [disabled]);
+
+  useEffect(() => {
+    if (abierto) {
+      const opciones = lista.current?.querySelectorAll('[role="option"]');
+      const indice = options.findIndex((opcion) => opcion.value === String(value));
+      opciones?.[Math.max(0, indice)]?.focus();
+    }
+  }, [abierto]);
+
+  const elegir = (nuevoValor) => {
+    onChange(nuevoValor);
+    setAbierto(false);
+    boton.current?.focus();
+  };
+
+  const manejarTeclado = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setAbierto(false);
+      boton.current?.focus();
+      return;
+    }
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key) || disabled) return;
+    event.preventDefault();
+    if (!abierto) {
+      setAbierto(true);
+      return;
+    }
+    const opciones = Array.from(lista.current?.querySelectorAll('[role="option"]') || []);
+    const actual = opciones.indexOf(document.activeElement);
+    let siguiente = event.key === "ArrowUp" ? actual - 1 : actual + 1;
+    if (event.key === "Home") siguiente = 0;
+    if (event.key === "End") siguiente = opciones.length - 1;
+    opciones[(siguiente + opciones.length) % opciones.length]?.focus();
+  };
+
+  return (
+    <div ref={contenedor} className="archivos-select-container" onKeyDown={manejarTeclado}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setAbierto(false);
+      }}>
+      <button ref={boton} id={id} type="button" disabled={disabled}
+        className={`btn-archivos-select-header ${abierto ? "open" : ""}`}
+        aria-haspopup="listbox" aria-expanded={abierto} aria-controls={`${id}-opciones`}
+        onClick={() => setAbierto(!abierto)}>
+        <span className="archivos-select-text">{seleccionada?.label || placeholder}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          className={`archivos-select-chevron ${abierto ? "open" : ""}`}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {abierto && !disabled && (
+        <div ref={lista} id={`${id}-opciones`} role="listbox" aria-labelledby={id}
+          className="archivos-select-dropdown">
+          {options.map((opcion) => (
+            <button key={opcion.value} type="button" role="option" tabIndex={-1}
+              aria-selected={opcion.value === String(value)}
+              className={`btn-archivos-select-option ${opcion.value === String(value) ? "selected" : ""}`}
+              onClick={() => elegir(opcion.value)}>
+              {opcion.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Archivos({ usuario }) {
   const navigate = useNavigate();
   const [panelAbierto, setPanelAbierto] = useState(true);
@@ -102,6 +201,29 @@ export default function Archivos({ usuario }) {
 
   const [cursoSeleccionado, setCursoSeleccionado] = useState(cursoInicial);
   const [misCursos, setMisCursos] = useState([]);
+  const [moduloSeleccionado, setModuloSeleccionado] = useState("");
+  const [cargandoCursos, setCargandoCursos] = useState(true);
+  const modulosDisponibles = [...new Set(misCursos.map((curso) => curso.modulo))].sort();
+  const cursosDelModulo = misCursos.filter((curso) => curso.modulo === moduloSeleccionado);
+  const cursoActual = cursosDelModulo.find((curso) => String(curso.id) === cursoSeleccionado);
+
+  const limpiarMaterialSeleccionado = () => {
+    solicitudArchivos.current += 1;
+    setFiles([]);
+    setSelectedFile(null);
+    setCargandoArchivos(false);
+  };
+
+  const cambiarModulo = (modulo) => {
+    limpiarMaterialSeleccionado();
+    setModuloSeleccionado(modulo);
+    setCursoSeleccionado("");
+  };
+
+  const cambiarCurso = (cursoId) => {
+    limpiarMaterialSeleccionado();
+    setCursoSeleccionado(cursoId);
+  };
 
   useEffect(() => {
     if (location.state?.cursoIdSeleccionado) {
@@ -110,23 +232,45 @@ export default function Archivos({ usuario }) {
   }, [location, navigate]);
 
   useEffect(() => {
+    let cancelado = false;
     const cargarCursos = async () => {
-      if (!usuario) return;
+      setCargandoCursos(true);
+      setMisCursos([]);
+      limpiarMaterialSeleccionado();
+      if (!usuario) {
+        setCargandoCursos(false);
+        return;
+      }
       try {
-        const correoUsuario = usuario.email || usuario.id;
-        if (["Docente", "Administrador"].includes(usuario.rol)) {
-          const res = await fetch(`${BASE_URL}/mis_clases/${correoUsuario}`);
-          if (res.ok) setMisCursos(await res.json());
-        } else {
-          const res = await fetch(`${BASE_URL}/mis_inscripciones/${correoUsuario}`);
-          if (res.ok) setMisCursos(await res.json());
-        }
+        const correoUsuario = encodeURIComponent(usuario.email || usuario.id);
+        const endpoint = ["Docente", "Administrador"].includes(usuario.rol) || usuario.isAdmin
+          ? "mis_clases" : "mis_inscripciones";
+        const res = await fetch(BASE_URL + "/" + endpoint + "/" + correoUsuario);
+        if (!res.ok) throw new Error("No se pudieron cargar los cursos.");
+        const data = await res.json();
+        if (cancelado) return;
+        const cursos = (Array.isArray(data) ? data : []).map((curso) => ({
+          ...curso, modulo: moduloDelCurso(curso),
+        }));
+        const modulos = [...new Set(cursos.map((curso) => curso.modulo))].sort();
+        const cursoReabrir = cursos.find((curso) => String(curso.id) === cursoInicial);
+        setMisCursos(cursos);
+        setModuloSeleccionado((actual) => cursoReabrir?.modulo ||
+          (modulos.includes(actual) ? actual : modulos[0] || ""));
+        setCursoSeleccionado((actual) => cursos.some((curso) => String(curso.id) === actual) ? actual : "");
       } catch (error) {
-        console.error("Error al cargar cursos para dropdown:", error);
+        if (!cancelado) {
+          setCursoSeleccionado("");
+          setModuloSeleccionado("");
+          console.error("Error al cargar cursos para dropdown:", error);
+        }
+      } finally {
+        if (!cancelado) setCargandoCursos(false);
       }
     };
 
     cargarCursos();
+    return () => { cancelado = true; };
   }, [usuario]);
 
   // 🆕 FUNCIÓN PARA CARGAR LA CUOTA DE MEMORIA
@@ -145,7 +289,7 @@ export default function Archivos({ usuario }) {
   const loadFiles = async () => {
     if (!usuario) return;
 
-    if (tabActiva === "cursos" && !cursoSeleccionado) {
+    if (tabActiva === "cursos" && !cursoActual) {
       solicitudArchivos.current += 1;
       setFiles([]);
       setSelectedFile(null);
@@ -163,7 +307,7 @@ export default function Archivos({ usuario }) {
       const data = await api.obtenerArchivos(
         usuario.nombre,
         visibilidad,
-        cursoSeleccionado,
+        tabActiva === "cursos" ? cursoSeleccionado : "",
       );
 
       if (solicitudActual === solicitudArchivos.current && data.files) {
@@ -182,7 +326,7 @@ export default function Archivos({ usuario }) {
   useEffect(() => {
     loadFiles();
     cargarCuota(); // Actualizamos la memoria cada vez que se recarga la lista
-  }, [usuario, tabActiva, cursoSeleccionado]);
+  }, [usuario, tabActiva, cursoSeleccionado, moduloSeleccionado, misCursos]);
 
   const handleUploadFile = async (fileObj) => {
     if (!fileObj || !usuario) return;
@@ -201,7 +345,7 @@ export default function Archivos({ usuario }) {
     }
 
     // Validación de curso
-    if (tabActiva === "cursos" && !cursoSeleccionado) {
+    if (tabActiva === "cursos" && !cursoActual) {
       alerta.error(
         "Faltan datos",
         "Selecciona el curso al que quieres subir el material.",
@@ -387,7 +531,6 @@ export default function Archivos({ usuario }) {
                 borderRadius: "8px",
                 padding: "5px",
                 border: "1px solid var(--border-color)",
-                marginBottom: "15px",
                 gap: "6px",
               }}
             >
@@ -423,42 +566,32 @@ export default function Archivos({ usuario }) {
               }}
             >
               {tabActiva === "cursos" && (
-                <div style={{ marginBottom: "20px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "8px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Selecciona un Curso:
-                  </label>
-                  <select
-                    value={cursoSeleccionado}
-                    onChange={(e) => setCursoSeleccionado(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      borderRadius: "4px",
-                      border: "1px solid var(--border-color)",
-                      backgroundColor: "var(--bg-input)",
-                      color: "var(--text-main)",
-                    }}
-                  >
-                    <option value="" style={{ backgroundColor: "var(--bg-input)", color: "var(--text-main)" }}>
-                      -- Elige un curso para ver material --
-                    </option>
-                    {misCursos.map((c) => (
-                      <option key={c.id} value={c.id} style={{ backgroundColor: "var(--bg-input)", color: "var(--text-main)" }}>
-                        {c.nombre}
-                      </option>
-                    ))}
-                  </select>
+                <div className="archivos-selectores-curso">
+                  <div className="archivos-campo-curso archivos-campo-modulo">
+                    <label htmlFor="archivos-modulo">Módulo:</label>
+                    <SelectorArchivos id="archivos-modulo" value={moduloSeleccionado}
+                      onChange={cambiarModulo}
+                      disabled={cargandoCursos || modulosDisponibles.length === 0}
+                      placeholder={cargandoCursos ? "Cargando módulos..." : "Sin cursos disponibles"}
+                      options={modulosDisponibles.map((modulo) => ({ value: modulo, label: nombreModulo(modulo) }))}
+                    />
+                  </div>
+                  <div className="archivos-campo-curso">
+                    <label htmlFor="archivos-curso">Selecciona un Curso:</label>
+                    <SelectorArchivos id="archivos-curso" value={cursoSeleccionado}
+                      onChange={cambiarCurso}
+                      disabled={cargandoCursos || cursosDelModulo.length === 0}
+                      options={[
+                        { value: "", label: "-- Elige un curso para ver material --" },
+                        ...cursosDelModulo.map((curso) => ({ value: String(curso.id), label: curso.nombre })),
+                      ]}
+                    />
+                  </div>
                 </div>
               )}
 
               {/* AVISO VISUAL DE CURSO SELECCIONADO CON LÓGICA DE ROL */}
-              {tabActiva === "cursos" && cursoSeleccionado && (
+              {tabActiva === "cursos" && cursoActual && (
                 <div
                   style={{
                     backgroundColor: "#e8f4fd",
@@ -468,20 +601,20 @@ export default function Archivos({ usuario }) {
                     borderLeft: "4px solid var(--primary-color)",
                   }}
                 >
-                  <p style={{ margin: 0, fontSize: "0.95rem", color: "#0056b3" }}>
+                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#0056b3" }}>
                     {" "}
                     {["Docente", "Administrador"].includes(usuario?.rol)
                       ? "Estás gestionando el material del curso:"
                       : "Viendo material de estudio del curso:"}{" "}
                     <strong>
-                      {misCursos.find((c) => String(c.id) === String(cursoSeleccionado))?.nombre || cursoSeleccionado}
+                      {nombreModulo(moduloSeleccionado)} - {cursoActual.nombre}
                     </strong>
                   </p>
                 </div>
               )}
 
               {/* Subida de archivos */}
-              {!(tabActiva === "cursos" && usuario?.rol === "Estudiante") && (
+              {(tabActiva !== "cursos" || (cursoActual && usuario?.rol !== "Estudiante")) && (
                 <div
                   id="tour-subida"
                   style={{
@@ -513,7 +646,7 @@ export default function Archivos({ usuario }) {
 
               <div id="tour-visor">
                 {/* Si es curso y no ha seleccionado uno, no mostramos la lista */}
-                {tabActiva === "cursos" && !cursoSeleccionado ? (
+                {tabActiva === "cursos" && !cursoActual ? (
                   <p
                     style={{
                       color: "var(--text-muted)",

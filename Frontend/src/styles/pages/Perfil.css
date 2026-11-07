@@ -109,16 +109,35 @@
 }
 
 .perfil-stat-box {
-  background-color: var(--bg-main);
-  padding: 15px;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   flex: 1;
+  min-width: 0;
+  padding: 8px 0;
   text-align: center;
-  border: 1px solid var(--border-color);
+}
+
+.perfil-stat-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+.perfil-stat-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 .perfil-stat-value {
   margin: 0;
+  line-height: 1.1;
   font-size: 1.6rem;
   color: var(--primary-color);
 }
@@ -126,20 +145,15 @@
 .perfil-stat-label {
   margin: 0;
   font-size: 0.85rem;
+  line-height: 1.4;
   color: var(--text-muted);
-  font-weight: bold;
+  font-weight: 500;
 }
 
-.perfil-divider {
-  width: 100%;
-  margin: 0 0 20px 0;
-  border: 0;
-  border-top: 1px solid var(--border-color);
-  opacity: 0.3;
-}
 
 .perfil-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15px;
   width: 100%;
 }
@@ -169,6 +183,87 @@
   transform: translateY(-1px);
 }
 
+.perfil-calculadora-selector {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.perfil-actions a.btn-perfil-back {
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.perfil-calculadora-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding-inline: 36px;
+  font-family: inherit;
+}
+
+.perfil-calculadora-chevron {
+  position: absolute;
+  right: 14px;
+  top: calc(50% - 8px);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.perfil-calculadora-chevron.abierto {
+  transform: rotate(180deg);
+}
+
+.perfil-calculadora-opciones {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background-color: var(--bg-card);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.perfil-calculadora-opcion {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 12px;
+  border-radius: 5px;
+  color: var(--text-main);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: left;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.perfil-calculadora-opcion strong {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.perfil-calculadora-opcion:hover,
+.perfil-calculadora-opcion:focus-visible {
+  background-color: var(--bg-input);
+}
+
+.perfil-calculadora-opcion:focus-visible,
+.perfil-calculadora-trigger:focus-visible,
+.perfil-actions a.btn-perfil-back:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 .btn-perfil-logout {
   background-color: transparent !important;
   color: #ef4444 !important;
@@ -185,10 +280,8 @@
 
 /* Secciones secundarias */
 .perfil-section-title {
-  margin: 0 0 20px 0;
+  margin: 0 0 8px;
   color: var(--text-main);
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -230,81 +323,140 @@
   padding: 20px 0;
 }
 
-/* Tablas */
+/* Historial reciente del perfil */
+.perfil-history-card {
+  min-width: 0;
+}
+
+.perfil-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 8px;
+}
+
+.perfil-history-header h3 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.perfil-history-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-color, #d97706);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.perfil-history-link:hover {
+  text-decoration: underline;
+}
+
+.perfil-history-link:focus-visible {
+  outline: 2px solid var(--accent-color, #d97706);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+.perfil-history-empty {
+  margin: 0;
+  padding: 20px 14px;
+  border: 1px dashed var(--border-color);
+  border-radius: 5px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .perfil-table-container {
-  overflow-x: auto;
   width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .perfil-table {
   width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
-  background-color: var(--bg-main);
-  border-radius: 8px;
-  overflow: hidden;
+  background-color: var(--bg-card);
 }
+
+.perfil-col-fecha { width: 13%; }
+.perfil-col-hora { width: 9%; }
+.perfil-col-calculo { width: 32%; }
+.perfil-col-modulo { width: 10%; }
+.perfil-col-archivo { width: 19%; }
+.perfil-col-modo { width: 17%; }
 
 .perfil-table-header-row {
   background-color: var(--accent-color);
-  color: white;
+  color: #ffffff;
   text-align: left;
 }
 
-.perfil-th {
-  padding: 12px 15px;
-}
-
-.perfil-th-center {
-  padding: 12px 15px;
-  text-align: center;
+.perfil-table .perfil-th {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border-color);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .perfil-table-row {
-  border-bottom: 1px solid var(--border-color);
   transition: background-color 0.15s;
 }
 
-.perfil-table-row:nth-child(even) {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
 .perfil-table-row:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(230, 126, 34, 0.04);
 }
 
-.perfil-td {
-  padding: 12px 15px;
+.perfil-table .perfil-td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--border-color);
   color: var(--text-main);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
 }
 
-.perfil-td-center {
-  padding: 12px 15px;
-  text-align: center;
+@media (min-width: 769px) {
+  .perfil-table-row:last-child .perfil-td {
+    border-bottom: 0;
+  }
 }
 
-.perfil-td-muted {
-  padding: 12px 15px;
-  color: var(--text-main);
-  font-size: 0.9rem;
+.perfil-history-fecha,
+.perfil-history-hora {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.perfil-date-cell {
-  display: flex;
-  flex-direction: column;
+.perfil-calc-name {
+  color: var(--accent-color, #d97706);
+  font-weight: 600;
 }
 
-.perfil-small-text {
-  color: var(--text-muted);
-}
-
-.perfil-calc-badge {
-  background-color: rgba(230, 126, 34, 0.1);
-  color: var(--accent-color);
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: bold;
+.perfil-module-badge {
   display: inline-block;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--primary-color, #2563eb);
+  background-color: rgba(37, 99, 235, 0.09);
+  font-size: inherit;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -354,11 +506,11 @@
 }
 
 .perfil-footer-notice {
+  margin: 10px 0 0;
   text-align: center;
-  font-size: 0.85rem;
   color: var(--text-muted);
-  margin-top: 12px;
-  margin-bottom: 0;
+  font-size: 0.7rem;
+  line-height: 1.5;
 }
 
 .perfil-notice-link {
@@ -408,6 +560,12 @@
   color: var(--text-main);
   box-sizing: border-box;
   font-size: 0.92rem;
+}
+
+.perfil-container .perfil-input.input-mat251.placeholder-small::placeholder {
+  font-size: 0.72rem !important;
+  opacity: 0.65;
+  color: var(--text-muted);
 }
 
 .perfil-input:focus {
@@ -460,16 +618,14 @@
 }
 
 .perfil-danger-title {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px;
   color: #ef4444;
-  border-bottom: 2px solid rgba(220, 38, 38, 0.2);
-  padding-bottom: 10px;
 }
 
 .perfil-danger-desc {
   font-size: 0.9rem;
   color: var(--text-muted);
-  margin-bottom: 20px;
+  margin: 0 0 20px;
 }
 
 .btn-danger-perfil {
@@ -583,7 +739,7 @@
   }
 
   .perfil-stat-box {
-    padding: 12px;
+    padding: 6px 0;
   }
 
   .perfil-stat-value {
@@ -608,65 +764,102 @@
     width: 100%;
   }
 
-  /* Tabla Responsiva tipo Tarjetas */
+  /* El historial se organiza como tarjetas sin desplazamiento horizontal. */
+  .perfil-history-header h3 {
+    font-size: 0.95rem;
+  }
+
   .perfil-table-container {
-    overflow-x: hidden;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
   }
 
   .perfil-table,
-  .perfil-table tbody,
-  .perfil-table tr,
-  .perfil-table th {
+  .perfil-table tbody {
     display: block;
     width: 100%;
-    box-sizing: border-box;
+    background-color: transparent;
   }
 
+  .perfil-table colgroup,
   .perfil-table thead {
-    display: none !important;
+    display: none;
   }
 
-  .perfil-table-row {
-    margin-bottom: 15px;
+  .perfil-table tbody {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .perfil-table .perfil-table-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "calculo calculo"
+      "fecha hora"
+      "modulo modo"
+      "archivo archivo";
+    grid-template-rows: 1fr auto auto auto;
+    align-content: start;
+    gap: 10px 14px;
+    min-width: 0;
+    margin: 0;
+    padding: 12px;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-main) !important;
-    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--bg-main);
   }
 
-  .perfil-table td.perfil-td,
-  .perfil-table td.perfil-td-center,
-  .perfil-table td.perfil-td-muted {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color);
-    text-align: right;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .perfil-td:last-child,
-  .perfil-td-center:last-child,
-  .perfil-td-muted:last-child {
-    border-bottom: none;
-  }
-
-  .perfil-td::before,
-  .perfil-td-center::before,
-  .perfil-td-muted::before {
-    content: attr(data-label);
-    font-weight: bold;
-    color: var(--text-muted);
-    flex: 1;
+  .perfil-table .perfil-td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
     text-align: left;
-    margin-right: 10px;
   }
 
-  .perfil-table-actions {
-    justify-content: flex-end;
-    width: 100%;
+  .perfil-table .perfil-td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .perfil-history-fecha { grid-area: fecha; }
+  .perfil-history-hora { grid-area: hora; }
+  .perfil-history-calculo { grid-area: calculo; }
+  .perfil-history-modulo { grid-area: modulo; }
+  .perfil-history-archivo { grid-area: archivo; }
+  .perfil-history-modo { grid-area: modo; }
+
+  .perfil-table .perfil-history-calculo {
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .perfil-table .perfil-history-calculo::before {
+    display: none;
+  }
+
+  .perfil-table .perfil-history-archivo {
+    padding-top: 9px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .perfil-history-loading .perfil-history-calculo {
+    min-height: 1.5em;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 768px) {
+  .perfil-table tbody {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
   }
 }
 
@@ -720,8 +913,13 @@
   }
 
   .perfil-stat-box {
-    width: 50%;
-    padding: 10px;
+    gap: 4px;
+    padding: 6px 0;
+  }
+
+  .perfil-stat-icon {
+    width: 1rem;
+    height: 1rem;
   }
 
   .perfil-stat-value {
@@ -733,7 +931,7 @@
   }
 
   .perfil-actions {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
   }
 

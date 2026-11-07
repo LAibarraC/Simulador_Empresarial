@@ -12,7 +12,7 @@ from validators.qr import GenerarQRRequest, MatricularPorQRRequest
 router = APIRouter()
 
 
-@router.post("/api/qr/generar")
+@router.post("/qr/generar")
 async def generar_qr(
     datos: GenerarQRRequest,
     db: AsyncSession = Depends(get_db),
@@ -21,7 +21,7 @@ async def generar_qr(
     return await qr_controller.generar_qr_db(db, datos, current_user)
 
 
-@router.get("/api/qr/info/{token}")
+@router.get("/qr/info/{token}")
 async def info_qr(
     token: str,
     db: AsyncSession = Depends(get_db),
@@ -31,7 +31,7 @@ async def info_qr(
     return await qr_controller.info_qr_db(db, token)
 
 
-@router.post("/api/qr/matricular")
+@router.post("/qr/matricular")
 async def matricular_por_qr(
     datos: MatricularPorQRRequest,
     db: AsyncSession = Depends(get_db),
@@ -40,8 +40,8 @@ async def matricular_por_qr(
     return await qr_controller.matricular_por_qr_db(db, datos, current_user)
 
 
-@router.patch("/api/qr/cerrar-matricula/{clase_id}")
-@router.post("/api/qr/cerrar-matricula/{clase_id}")
+@router.patch("/qr/cerrar-matricula/{clase_id}")
+@router.post("/qr/cerrar-matricula/{clase_id}")
 async def cerrar_matricula(
     clase_id: int,
     db: AsyncSession = Depends(get_db),
@@ -50,7 +50,7 @@ async def cerrar_matricula(
     return await qr_controller.cerrar_matricula_db(db, clase_id, current_user)
 
 
-@router.post("/api/qr/desactivar/{qr_id}")
+@router.post("/qr/desactivar/{qr_id}")
 async def desactivar_qr(
     qr_id: int,
     db: AsyncSession = Depends(get_db),
@@ -59,7 +59,7 @@ async def desactivar_qr(
     return await qr_controller.desactivar_qr_db(db, qr_id, current_user)
 
 
-@router.get("/api/qr/mis-qrs")
+@router.get("/qr/mis-qrs")
 async def listar_mis_qrs(
     db: AsyncSession = Depends(get_db),
     current_user: models.Usuario = Depends(require_role(["Docente", "Administrador"])),

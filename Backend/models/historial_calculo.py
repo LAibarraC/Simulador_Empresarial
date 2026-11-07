@@ -10,11 +10,12 @@ class HistorialCalculo(Base):
     __tablename__ = "historial_calculos"
 
     id = Column(Integer, primary_key=True, index=True)
+    modulo = Column(String(50), nullable=True, index=True)
     tipo_analisis = Column(String(100), nullable=False)  # Ej: "Tendencia Central", "Bivariado", "Frecuencias"
     nombre_trabajo = Column(String(150), nullable=False)  # Título que el usuario le da a su cálculo
     fecha_creacion = Column(DateTime, default=func.now())
     
-    # 📝 Guardamos configuraciones (columnas seleccionadas) y los resultados (medias, tablas, etc.) como texto estructurado (JSON string de gran capacidad)
+    # Guardamos configuraciones (columnas seleccionadas) y los resultados (medias, tablas, etc.) como texto estructurado (JSON string de gran capacidad)
     parametros_json = Column(Text(length=4294967295), nullable=False)
     resultados_json = Column(Text(length=4294967295), nullable=False)
     

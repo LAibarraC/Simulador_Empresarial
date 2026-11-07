@@ -4,6 +4,7 @@ from sqlalchemy import or_, func, update
 from fastapi import HTTPException
 import models
 from validators.notificaciones import NotificacionCrear
+from utils.notificaciones_sse import invalidar_notificaciones_al_confirmar
 
 async def crear_notificacion_db(db: AsyncSession, datos: NotificacionCrear, current_user: models.Usuario):
     # Lógica de permisos
@@ -97,5 +98,6 @@ async def marcar_todas_como_leidas_db(db: AsyncSession, current_user: models.Usu
         ultimo_id = current_user.ultimo_aviso_global_id or 0
         current_user.ultimo_aviso_global_id = max(ultimo_id, max_global_id)
         
+    invalidar_notificaciones_al_confirmar(db, current_user.id)
     await db.commit()
     return {"message": "Todas las notificaciones fueron marcadas como leídas"}

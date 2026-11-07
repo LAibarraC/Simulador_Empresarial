@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth, archivos, calculos, historial, grupos, notificaciones, tareas, qr as qr_router, admin_credenciales, casos_empresariales
 from config.database import async_engine, get_db
+from utils.notificaciones_sse import canal_notificaciones
 import models
 
 # --- Lifespan: crea tablas al arrancar usando el motor asíncrono (asyncmy) ---
@@ -35,7 +36,20 @@ async def lifespan(app: FastAPI):
             await conn.execute(text("UPDATE credenciales_autorizadas SET fecha_carga = CURRENT_TIMESTAMP WHERE fecha_carga IS NULL"))
         except Exception:
             pass
-    yield
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE usuarios ADD COLUMN must_change_password BOOLEAN NOT NULL DEFAULT 0"))
+        except Exception:
+            pass
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE clases ADD COLUMN modulo VARCHAR(50) NULL"))
+        except Exception:
+            pass
+    try:
+        yield
+    finally:
+        canal_notificaciones.cerrar()
 
 _is_production = os.getenv("ENVIRONMENT") == "production"
 app = FastAPI(
@@ -43,6 +57,7 @@ app = FastAPI(
     docs_url=None if _is_production else "/docs",
     redoc_url=None if _is_production else "/redoc",
     openapi_url=None if _is_production else "/openapi.json",
+    root_path="/api",
 )
 
 #base de datos aiven
@@ -52,21 +67,14 @@ origins = [
     "http://127.0.0.1:5173",         # Desarrollo local alternativo
     "http://localhost:3000",         # Desarrollo local (React alternativo)
     "http://127.0.0.1:3000",         # Desarrollo local (React alternativo)
-    "https://calculadora-estadistica-3inh.onrender.com",  # Producción en Render
-    "https://administracion-calculadora.vercel.app",  # Enlace oficial Vercel
-    "https://proyecto-shc-170-54eovb4bb-coadiegos-projects.vercel.app", # Enlace temporal Vercel
-    "https://proyecto-shc-170.vercel.app", # Enlace limpio Vercel
     "https://adminusfx.jboris.org",  # Enlace de hosting en producción
-    "https://backend-shc170.onrender.com",
-    "https://simulador-empresarial-swart.vercel.app", #por las dudas 
-    "http://10.250.54.12:5173",
-    "http://10.250.50.52:5173",
-    "http://10.250.55.72:5173",
-    "http://10.0.2.2:5173",
+    "https://sice.jboris.org", #enlace de temporal
+    "http://10.250.52.137:5173",
+    "http://192.168.100.186:5173",
 ]                               
 
-app.add_middleware(
-    CORSMiddleware,
+app.add_middleware( 
+    CORSMiddleware, 
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],  # Permite GET, POST, PUT, DELETE, etc.
@@ -81,7 +89,9 @@ app.include_router(historial.router)
 app.include_router(grupos.router)
 app.include_router(notificaciones.router)
 app.include_router(tareas.router)
-# 🆕 Router de QR para matriculación por código
+app.include_router(mat251_tema2_simbolicos.router)
+app.include_router(mat251_simulacion.router)
+# Router de QR para matriculación por código
 # Las rutas internas del router ya están declaradas con el prefijo "/api/qr/...",
 # por lo que se registra sin prefix para evitar duplicarlo.
 app.include_router(qr_router.router)
@@ -93,7 +103,7 @@ VISITAS_FILE = "visitas.txt"
 
 @app.get("/")
 async def root():
-    return {"message": "API de Estadística unificada y modularizada funcionando correctamente. Revisa /docs."}
+    return {"message": "API de Estadistica unificada y modularizada funcionando correctamente. Revisa /docs."}
 
 @app.get("/favicon.ico")
 async def favicon():

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../../styles/components/Gestion_Datos/VariableCard.css";
+import "../../styles/components/gestion_datos/VariableCard.css";
 
 const VariableCard = ({ v, currentSheet, actions }) => {
     const [showMatrix, setShowMatrix] = useState(false);

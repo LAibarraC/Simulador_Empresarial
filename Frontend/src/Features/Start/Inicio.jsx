@@ -12,6 +12,27 @@ import {
   FileText, History, ChevronDown
 } from "lucide-react";
 
+// Icono minimalista: Diana con flecha
+const IconoDianaFlecha = ({ size = 32, strokeWidth = 2, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="1" />
+    <path d="M12 7a5 5 0 1 0 5 5" />
+    <path d="M13 3.055a9 9 0 1 0 7.941 7.945" />
+    <path d="M15 6v3h3l3 -3h-3v-3z" />
+    <path d="M15 9l-3 3" />
+  </svg>
+);
+
 const INTERVALO_MS = 4000;
 
 export default function Inicio() {
@@ -109,7 +130,7 @@ export default function Inicio() {
     { nombre: "Diego Coa Véliz", cargo: "Desarrollador Full-Stack", modulo: "Estadística General", imagen: "https://ui-avatars.com/api/?name=Diego+Coa&background=17a2b8&color=fff&size=150" },
     { nombre: "Luis Alberto Ibarra Calderon", cargo: "Desarrollador Full-Stack", modulo: "Estadística Matemática", imagen: "https://ui-avatars.com/api/?name=Luis+Ibarra&background=17a2b8&color=fff&size=150" },
     { nombre: "Diego Santiago Solorzano Arancibia", cargo: "Desarrollador Full-Stack", modulo: "Analisis Empresarial", imagen: "https://ui-avatars.com/api/?name=Diego+Solorzano&background=17a2b8&color=fff&size=150" },
-    { nombre: "Ulises Jesús Mancilla Rodriguez", cargo: "Desarrollador Full-Stack", modulo: "Marketing", imagen: "https://ui-avatars.com/api/?name=Ulises&background=17a2b8&color=fff&size=150" }
+    { nombre: "Ulises Jesús Mancilla Rodriguez", cargo: "Desarrollador Full-Stack", modulo: "Marketing I", imagen: "https://ui-avatars.com/api/?name=Ulises&background=17a2b8&color=fff&size=150" }
   ];
 
   return (

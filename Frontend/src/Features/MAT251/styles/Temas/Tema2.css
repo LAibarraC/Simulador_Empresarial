@@ -1,11 +1,11 @@
 /* src/styles/components/MAT251/Tema2.css */
-.tema2-container {
+:where(.mat251) .tema2-container {
     padding: 5px;
     font-family: system-ui, -apple-system, sans-serif;
     color: #334155;
 }
 
-.tema2-card {
+:where(.mat251) .tema2-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
@@ -14,7 +14,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.tema2-title {
+:where(.mat251) .tema2-title {
     color: #1e3a8a;
     font-size: 1.25rem;
     font-weight: 700;
@@ -25,12 +25,12 @@
 }
 
 /* Formularios */
-.tema2-form-group {
+:where(.mat251) .tema2-form-group {
     margin-bottom: 15px;
     width: 100%;
 }
 
-.tema2-label {
+:where(.mat251) .tema2-label {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
@@ -38,7 +38,7 @@
     color: #475569;
 }
 
-.tema2-input {
+:where(.mat251) .tema2-input {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #cbd5e1;
@@ -46,13 +46,17 @@
     font-size: 0.95rem;
 }
 
-.tema2-input:focus {
+:where(.mat251) .tema2-input:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-.tema2-button {
+:where(.mat251) .button_calcular {
+    border-radius: 5px !important;
+}
+
+:where(.mat251) .tema2-button {
     background: #3b82f6;
     color: white;
     border: none;
@@ -66,16 +70,16 @@
     gap: 8px;
 }
 
-.tema2-button:hover {
+:where(.mat251) .tema2-button:hover {
     background: #2563eb;
 }
 
-.tema2-button:disabled {
+:where(.mat251) .tema2-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.tema2-error {
+:where(.mat251) .tema2-error {
     color: #dc2626;
     background: #fee2e2;
     padding: 10px;
@@ -87,14 +91,14 @@
 }
 
 /* Grillas de Resultados y Momentos */
-.tema2-moments-grid {
+:where(.mat251) .tema2-moments-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     margin-top: 20px;
 }
 
-.tema2-moment-card {
+:where(.mat251) .tema2-moment-card {
     background: #f8fafc;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -102,7 +106,7 @@
     text-align: center;
 }
 
-.tema2-moment-title {
+:where(.mat251) .tema2-moment-title {
     font-size: 0.8rem;
     color: #64748b;
     text-transform: uppercase;
@@ -111,13 +115,13 @@
     font-weight: bold;
 }
 
-.tema2-moment-value {
+:where(.mat251) .tema2-moment-value {
     font-size: 1.5rem;
     font-weight: 800;
     color: #0f172a;
 }
 
-.tema2-moment-desc {
+:where(.mat251) .tema2-moment-desc {
     font-size: 0.75rem;
     color: #3b82f6;
     font-weight: 600;
@@ -125,65 +129,65 @@
 }
 
 /* Flex utilities */
-.tema2-flex-row {
+:where(.mat251) .tema2-flex-row {
     display: flex;
     gap: 15px;
     align-items: center;
 }
 
-.tema2-flex-between {
+:where(.mat251) .tema2-flex-between {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.tema2-flex-wrap {
+:where(.mat251) .tema2-flex-wrap {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
 }
 
-.tema2-flex-col {
+:where(.mat251) .tema2-flex-col {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
 /* Headers */
-.tema2-h4 {
+:where(.mat251) .tema2-h4 {
     color: #1e3a8a;
     margin: 0 0 15px 0;
     font-size: 1rem;
 }
 
-.tema2-h5 {
+:where(.mat251) .tema2-h5 {
     color: #334155;
     margin: 10px 0 10px 0;
     font-size: 0.95rem;
 }
 
-.tema2-muted-text {
+:where(.mat251) .tema2-muted-text {
     color: #64748b;
     font-size: 0.85rem;
     font-style: italic;
 }
 
 /* Layout boxes */
-.tema2-panel {
+:where(.mat251) .tema2-panel {
     background: #f1f5f9;
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
 }
 
-.tema2-panel-blue {
+:where(.mat251) .tema2-panel-blue {
     background: #eff6ff;
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #bfdbfe;
 }
 
-.tema2-math-dev {
+:where(.mat251) .tema2-math-dev {
     background: #f8fafc;
     padding: 20px 40px;
     border-radius: 8px;
@@ -192,7 +196,7 @@
     margin: 0 auto;
 }
 
-.tema2-math-step {
+:where(.mat251) .tema2-math-step {
     background: #ffffff;
     padding: 15px;
     border-radius: 8px;
@@ -200,7 +204,7 @@
     margin-top: 10px;
 }
 
-.tema2-final-result {
+:where(.mat251) .tema2-final-result {
     font-size: 1.25rem;
     font-weight: bold;
     color: #0f172a;
@@ -210,4 +214,347 @@
     border-radius: 8px;
     display: inline-block;
     box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15);
+}
+
+/* ======================================================= */
+/* TEMA 2: FÓRMULAS Y RESOLUCIONES (ESTILO PROBABILIDAD TOTAL) */
+/* ======================================================= */
+
+:where(.mat251) .katex-responsive-container {
+    color: var(--text-pure);
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+:where(.mat251) .katex-responsive-container .katex {
+    color: var(--text-pure);
+}
+
+:where(.mat251) .formula-scroll-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar {
+    height: 5px;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6);
+    border-radius: 4px;
+}
+
+:where(.mat251) .formula-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.9);
+}
+
+/* --- TAMAÑOS EN PC (DESKTOP) IDÉNTICOS A PROBABILIDAD TOTAL --- */
+:where(.mat251) .formula-general-box {
+    font-size: 1rem;
+    color: var(--text-pure);
+}
+
+:where(.mat251) .formula-desarrollo-box {
+    font-size: 0.9rem;
+    color: var(--text-pure);
+    text-align: left;
+}
+
+:where(.mat251) .formula-desarrollo-box .katex {
+    font-size: 0.9rem;
+    color: var(--text-pure);
+    text-align: left;
+}
+
+:where(.mat251) .tema2-card-metrica {
+    padding: 10px;
+    background: var(--bg-card);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+:where(.mat251) .tema2-titulo-metrica {
+    margin: 0 0 10px 0;
+    color: var(--text-pure);
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+:where(.mat251) .tema2-titulo-metrica .katex {
+    text-transform: none;
+}
+
+/* ======================================================= */
+/* TARJETAS DE MÉTRICAS Y RESULTADOS CONTINUAS MAT251      */
+/* ======================================================= */
+:where(.mat251) .resultados-grid-continua {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+}
+
+:where(.mat251) .tarjeta-calculo-mat251 {
+    background: var(--bg-card);
+    padding: 12px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-pure);
+}
+
+:where(.mat251) .tarjeta-calculo-titulo {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-pure);
+    font-weight: 700;
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+:where(.mat251) .tarjeta-calculo-titulo .katex {
+    text-transform: none;
+}
+
+:where(.mat251) .tarjeta-calculo-valor {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: var(--text-pure);
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:where(.mat251) .tarjeta-calculo-valor .katex {
+    font-weight: normal;
+}
+
+/* --- TAMAÑOS EN MÓVIL / CELULAR (<= 768px) IDÉNTICOS A PROBABILIDAD TOTAL --- */
+@media (max-width: 768px) {
+    :where(.mat251) .katex-responsive-container {
+        font-size: 1rem !important;
+    }
+
+    :where(.mat251) .katex-responsive-container .katex {
+        font-size: 1.1rem !important;
+    }
+
+    :where(.mat251) .formula-general-box {
+        font-size: 0.8rem !important;
+    }
+
+    :where(.mat251) .formula-desarrollo-box {
+        font-size: 0.9rem !important;
+    }
+
+    :where(.mat251) .formula-desarrollo-box .katex {
+        font-size: 0.9rem !important;
+    }
+
+    :where(.mat251) .tema2-titulo-metrica {
+        font-size: 0.65rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    :where(.mat251) .tema2-card-metrica {
+        padding: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    :where(.mat251) .tarjeta-calculo-titulo {
+        font-size: 0.65rem !important;
+    }
+
+    :where(.mat251) .tarjeta-calculo-valor {
+        font-size: 0.95rem !important;
+    }
+}
+
+/* --- ADAPTABILIDAD EN CELULARES (<= 600px) --- */
+@media (max-width: 600px) {
+    :where(.mat251) .resultados-grid-continua {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    /* Si hay 3 tarjetas, centrar la última en la segunda fila manteniendo el mismo ancho */
+    :where(.mat251) .resultados-grid-continua > *:last-child:nth-child(odd) {
+        grid-column: 1 / -1 !important;
+        justify-self: center !important;
+        width: calc(50% - 5px) !important;
+    }
+}
+
+/* --- ALERTAS CONTINUAS MAT251 (Validación de Área y Constante K) --- */
+:where(.mat251) .alerta-valida-continua {
+    background: rgba(34, 197, 94, 0.12) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34, 197, 94, 0.35) !important;
+}
+html.dark :where(.mat251) .alerta-valida-continua,
+.dark :where(.mat251) .alerta-valida-continua,
+[data-theme='dark'] :where(.mat251) .alerta-valida-continua {
+    background: rgba(34, 197, 94, 0.18) !important;
+    color: #86efac !important;
+    border-color: rgba(34, 197, 94, 0.4) !important;
+}
+
+:where(.mat251) .alerta-invalida-continua {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+html.dark :where(.mat251) .alerta-invalida-continua,
+.dark :where(.mat251) .alerta-invalida-continua,
+[data-theme='dark'] :where(.mat251) .alerta-invalida-continua {
+    background: rgba(245, 158, 11, 0.18) !important;
+    color: #fcd34d !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+/* =========================================
+   TOOLTIPS ESTADÍSTICOS MAT251 (StatLabel)
+========================================= */
+:where(.mat251) .mat251-stat-label-container {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dashed var(--text-pure, #666);
+    padding-bottom: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:where(.mat251) .mat251-stat-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(4px);
+    background-color: #1e293b;
+    color: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    width: max-content;
+    max-width: min(92vw, 450px);
+    box-sizing: border-box;
+    text-align: center;
+    z-index: 9999;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-weight: normal;
+    font-size: 0.8rem;
+    display: none; /* No ocupa espacio en el cálculo de scroll horizontal cuando está oculto */
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+:where(.mat251) .mat251-stat-label-container:hover .mat251-stat-tooltip {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+
+/* Alineación para la última columna a la derecha */
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-right {
+    left: auto;
+    right: 0;
+    transform: translateY(4px);
+}
+:where(.mat251) .mat251-stat-label-container:hover .mat251-tooltip-right {
+    transform: translateY(0);
+}
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-right::after {
+    left: auto;
+    right: 14px;
+}
+
+/* Alineación para la primera columna a la izquierda */
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-left {
+    left: 0;
+    transform: translateY(4px);
+}
+:where(.mat251) .mat251-stat-label-container:hover .mat251-tooltip-left {
+    transform: translateY(0);
+}
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-left::after {
+    left: 14px;
+}
+
+:where(.mat251) .mat251-tooltip-text {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.25;
+}
+
+:where(.mat251) .mat251-tooltip-math {
+    color: #fbbf24;
+    font-size: 0.85rem;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+:where(.mat251) .mat251-tooltip-math .katex,
+:where(.mat251) .mat251-tooltip-math .katex * {
+    color: #fbbf24 !important;
+    white-space: nowrap !important;
+}
+
+:where(.mat251) .mat251-stat-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: var(--arrow-left, 50%);
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #1e293b transparent;
+}
+
+/* Posicionamiento superior opcional (StatLabel position="top") */
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-top {
+    top: auto;
+    bottom: calc(100% + 8px);
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(-4px);
+}
+:where(.mat251) .mat251-stat-label-container:hover .mat251-tooltip-top {
+    transform: translateX(calc(-50% + var(--tooltip-shift, 0px))) translateY(0);
+}
+:where(.mat251) .mat251-stat-tooltip.mat251-tooltip-top::after {
+    top: 100%;
+    bottom: auto;
+    border-color: #1e293b transparent transparent transparent;
 }

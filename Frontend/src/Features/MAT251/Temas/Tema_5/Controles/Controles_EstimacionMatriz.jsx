@@ -1,0 +1,196 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { cardStyle, FS, labelStyle, RADIUS, FONT } from '../../../Principal/Constantes';
+import { EditarDatos } from '../../../../../ui/iconos';
+import ModalAlerta from '../../../ui/ModalAlerta';
+
+export default function Controles_EstimacionMatriz({ parametro, filas, statsDatos, abrirEditor, valorExito, setValorExito, onCalcular }) {
+    const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
+    const [isSelectOpen, setIsSelectOpen] = useState(false);
+    const selectRef = useRef(null);
+    const hayDatosMatriz = Array.isArray(filas) && filas.some(
+        (fila) => fila.valor !== undefined && fila.valor !== null && fila.valor.toString().trim() !== ''
+    );
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (selectRef.current && !selectRef.current.contains(e.target)) setIsSelectOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const mostrarAlerta = (mensaje, titulo = 'Atención', tipo = 'warning') => {
+        setModalAlerta({ isOpen: true, mensaje, titulo, tipo });
+    };
+
+    const handleCalcular = () => {
+        const calculo = onCalcular();
+        if (calculo.error) mostrarAlerta(calculo.error, 'Error de Cálculo', 'warning');
+    };
+
+    return (
+        <div style={{ padding: '0px' }}>
+            <div style={{ marginBottom: '10px' }}>
+                <div id="tour-t5-datos-resumen" style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', padding: '10px' }}>
+                    <div>
+                        <span style={{ ...labelStyle, margin: 0, color: 'var(--text-pure)' }}>Datos:</span>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '2px' }}>
+                            <small title="Datos provenientes de variables externas" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                Cargados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.cargados || 0}</strong>
+                            </small>
+                            <small title="Datos ingresados manualmente" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                Agregados: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.agregados || 0}</strong>
+                            </small>
+                            <small title="Total de datos válidos" style={{ color: 'var(--text-muted)', fontSize: FS.xs, cursor: 'help' }}>
+                                Total: <strong style={{ color: 'var(--text-pure)' }}>{statsDatos?.total || 0}</strong>
+                            </small>
+                        </div>
+                    </div>
+                    <button
+                        onClick={abrirEditor}
+                        className="btn-primary"
+                        style={{ padding: '5px 14px', fontSize: FS.sm, borderRadius: RADIUS, fontFamily: FONT, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                        <EditarDatos />
+                        Editar Datos
+                    </button>
+                </div>
+            </div>
+
+            {hayDatosMatriz ? (
+                <>
+            {parametro === 'proporcion' && (() => {
+                const valoresUnicos = [...new Set(filas
+                    .map(f => f.valor)
+                    .filter(v => v !== undefined && v !== null && v.toString().trim() !== '')
+                    .map(v => v.toString().trim())
+                )];
+
+                return (
+                    <div id="tour-t5-proporcion-exito" style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ ...labelStyle, margin: 0, color: 'var(--text-main, #1e293b)', textAlign: 'center' }}>Seleccione el dato a contabilizar:</label>
+                        
+                        <div ref={selectRef} className="tema5-selector-proporcion" style={{ position: 'relative', maxWidth: '100%', fontFamily: FONT }}>
+                            <div
+                                onClick={() => setIsSelectOpen(o => !o)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '8px 12px',
+                                    boxSizing: 'border-box',
+                                    width: '100%',
+                                    minWidth: 0,
+                                    background: 'var(--bg-card)',
+                                    border: `1px solid ${isSelectOpen ? 'var(--primary-color)' : 'var(--border-color, #e2e8f0)'}`,
+                                    borderRadius: RADIUS, cursor: 'pointer',
+                                    boxShadow: isSelectOpen ? '0 0 0 3px rgba(0,123,255,0.15)' : 'none',
+                                    transition: 'all 0.2s ease',
+                                    color: 'var(--text-main, #1e293b)',
+                                    userSelect: 'none',
+                                }}
+                            >
+                                <span style={{ fontWeight: 500, fontSize: FS.sm, flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {valorExito || '-- Seleccione un valor --'}
+                                </span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                    style={{ transform: isSelectOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s ease', color: 'var(--text-muted, #64748b)' }}>
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </div>
+
+                            {isSelectOpen && (
+                                <div style={{
+                                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+                                    background: 'var(--bg-card)',
+                                    border: '1px solid var(--border-color, #e2e8f0)',
+                                    borderRadius: RADIUS,
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                                    zIndex: 1000,
+                                    overflow: 'hidden',
+                                    maxHeight: valoresUnicos.length > 5 ? '220px' : 'none',
+                                    overflowY: valoresUnicos.length > 5 ? 'auto' : 'visible',
+                                    overscrollBehavior: 'contain',
+                                    animation: 'fadeInDropdown 0.2s ease',
+                                }}>
+                                    {valoresUnicos.length > 0 ? (
+                                        valoresUnicos.map((val, idx) => {
+                                            const active = valorExito === val;
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    onClick={() => { setValorExito(val); setIsSelectOpen(false); }}
+                                                    onMouseEnter={e => {
+                                                        if (!active) {
+                                                            e.currentTarget.style.background = 'rgba(0,123,255,0.05)';
+                                                            e.currentTarget.style.color = 'var(--primary-color)';
+                                                        }
+                                                    }}
+                                                    onMouseLeave={e => {
+                                                        if (!active) {
+                                                            e.currentTarget.style.background = 'transparent';
+                                                            e.currentTarget.style.color = 'var(--text-main, #1e293b)';
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        padding: '10px 12px',
+                                                        cursor: 'pointer',
+                                                        background: active ? 'rgba(0,123,255,0.08)' : 'transparent',
+                                                        color: active ? 'var(--primary-color)' : 'var(--text-main, #1e293b)',
+                                                        fontWeight: active ? 600 : 400,
+                                                        fontSize: FS.sm,
+                                                        borderBottom: idx < valoresUnicos.length - 1 ? '1px solid var(--border-color, #e2e8f0)' : 'none',
+                                                        transition: 'all 0.2s ease',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                        whiteSpace: 'nowrap', overflow: 'hidden'
+                                                    }}
+                                                >
+                                                    {val}
+                                                    {active && (
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                                                            style={{ color: 'var(--primary-color)' }}>
+                                                            <polyline points="20 6 9 17 4 12" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div style={{ padding: '10px 12px', fontSize: FS.sm, color: 'var(--text-muted, #64748b)' }}>
+                                            No hay datos disponibles en la matriz
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            })()}
+
+            <div id="tour-t5-btn-calcular-matriz" style={{ display: 'flex', justifyContent: 'center', marginTop: '0px' }}>
+                <button 
+                    className="button_calcular"
+                    style={{ width: 'auto', padding: '5px 20px' }} 
+                    onClick={handleCalcular}
+                >
+                    Calcular Estimación Puntual
+                </button>
+            </div>
+                </>
+            ) : (
+                <p style={{ fontSize: FS.xs, color: 'var(--text-muted)', fontFamily: FONT }}>
+                    No hay datos cargados en el estado global. Ve a Gestión de Datos para importar.
+                </p>
+            )}
+
+            <ModalAlerta
+                isOpen={modalAlerta.isOpen}
+                mensaje={modalAlerta.mensaje}
+                titulo={modalAlerta.titulo}
+                tipo={modalAlerta.tipo}
+                onClose={() => setModalAlerta({ ...modalAlerta, isOpen: false })}
+            />
+
+
+        </div>
+    );
+}

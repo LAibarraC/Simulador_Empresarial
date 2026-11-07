@@ -4,7 +4,7 @@ import "react-data-grid/lib/styles.css";
 
 import { alerta } from '../../utils/Notificaciones';
 import { api } from '../../services/api';
-import { useData } from '../Gestion_Datos/DataContext';
+import { useData } from '../gestion_datos/DataContext';
 import "../../styles/components/excel/TablaDinamica.css";
 
 // Editor manual (Navegación en 4 ejes)

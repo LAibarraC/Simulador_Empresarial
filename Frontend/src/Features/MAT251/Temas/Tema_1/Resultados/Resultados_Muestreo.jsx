@@ -78,7 +78,7 @@ export default function ResultadosMuestreo({
 
                         <div style={{ flex: 1, minWidth: '200px' }}>
                             <label style={{ fontSize: FS.sm, fontFamily: FONT, display: 'block', marginBottom: '4px', fontWeight: 600 }}>Tamaño de la Muestra (n):</label>
-                            <input type="number" min="1" max={filas.length} value={tamanoMuestra} onChange={(e) => setTamanoMuestra(e.target.value)} placeholder={`Ej. ${Math.min(30, filas.length)}`} style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }} />
+                            <input type="number" min="1" max={filas.length} value={tamanoMuestra} onChange={(e) => setTamanoMuestra(e.target.value)} placeholder={`Ej. ${Math.min(30, filas.length)}`} className="input-mat251 placeholder-small" style={{ width: '100%', borderRadius: RADIUS, padding: '8px', fontSize: FS.sm, border: '1px solid var(--border-color)' }} />
                         </div>
 
                         {varSeleccionada.nombresColumnas && varSeleccionada.nombresColumnas.length > 1 && (

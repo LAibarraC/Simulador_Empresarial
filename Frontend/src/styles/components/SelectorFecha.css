@@ -133,3 +133,60 @@
 .react-datepicker__day--disabled:hover {
   background-color: transparent;
 }
+
+/* ==========================================================================
+   Botón Limpiar (isClearable)
+   ========================================================================== */
+
+.selector-fecha-wrapper,
+.react-datepicker-wrapper,
+.react-datepicker__input-container {
+  position: relative !important;
+}
+
+html body #root button.react-datepicker__close-icon,
+html body #root button.react-datepicker__close-icon:hover,
+html body #root button.react-datepicker__close-icon:focus,
+html body #root button.react-datepicker__close-icon:active {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: absolute !important;
+  right: 10px !important;
+  top: 40% !important;
+  transform: translateY(-50%) !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  border-radius: 50% !important;
+}
+
+html body #root button.react-datepicker__close-icon::after,
+html body #root button.react-datepicker__close-icon:hover::after,
+html body #root button.react-datepicker__close-icon:focus::after,
+html body #root button.react-datepicker__close-icon:active::after {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--text-muted, #888) !important;
+  font-size: 1.4rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  content: "\00d7" !important;
+  display: block !important;
+  transition: color 0.2s ease !important;
+  border-radius: 0 !important;
+}
+
+html body #root button.react-datepicker__close-icon:hover::after {
+  color: #dc2626 !important;
+}

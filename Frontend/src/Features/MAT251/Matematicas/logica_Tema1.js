@@ -30,9 +30,48 @@ const generarPermutaciones = (elementos, r) => {
     return perms;
 };
 
+export const validarParametrosConteo = (n, r) => {
+    if (n === null || n === undefined || r === null || r === undefined
+        || String(n).trim() === '' || String(r).trim() === '') return false;
+    const numN = Number(n);
+    const numR = Number(r);
+    return Number.isSafeInteger(numN) && Number.isSafeInteger(numR)
+        && numN >= 0 && numR >= 0 && numR <= numN;
+};
+
+// El cálculo normal y el historial deben construir los mismos elementos.
+export const obtenerElementosConteo = (n, tipoElementos, texto = '') => {
+    const numN = Number(n);
+    if (String(n).trim() === '' || !Number.isSafeInteger(numN) || numN < 0) return [];
+    if (tipoElementos === 'numeros') {
+        return Array.from({ length: numN }, (_, i) => String(i + 1));
+    }
+    if (tipoElementos !== 'personalizado') {
+        return Array.from({ length: numN }, (_, i) => String.fromCharCode(65 + i));
+    }
+    const elementos = texto.split(',').map(el => el.trim()).filter(Boolean).slice(0, numN);
+    let indice = 0;
+    while (elementos.length < numN) {
+        const candidato = String.fromCharCode(65 + indice++);
+        if (!elementos.includes(candidato)) elementos.push(candidato);
+    }
+    return elementos;
+};
+
+export const coincideConteoConEntradas = (resultado, datos) => (
+    !!resultado && !resultado.error
+    && Number(resultado.n) === Number(datos.n)
+    && Number(resultado.r) === Number(datos.r)
+    && resultado.tipoElementos === datos.tipoElementos
+    && resultado.customElementsInput === (datos.customElementsInput || '')
+);
+
 export const calcularTecnicasConteo = (n, r, customElements = []) => {
-    const numN = parseInt(n);
-    const numR = parseInt(r);
+    if (!validarParametrosConteo(n, r)) {
+        return { error: 'n y r deben ser enteros no negativos, con r menor o igual que n.' };
+    }
+    const numN = Number(n);
+    const numR = Number(r);
 
     if (isNaN(numN) || isNaN(numR)) return null;
     if (numR > numN) return { error: "r no puede ser mayor que n" };
@@ -271,6 +310,9 @@ export const calcularReglaAdicion = (filas, nombresColumnas, colA, valA, colB, v
 };
 
 export const calcularReglaMultiplicacion = (filas, nombresColumnas, colA, valA, colB, valB, modReemplazo) => {
+    if (!['con_reemplazo', 'sin_reemplazo'].includes(modReemplazo)) {
+        return { error: 'Selecciona un tipo de extracción válido.' };
+    }
     if (!nombresColumnas || nombresColumnas.length === 0) {
         return { error: "Para usar esta función, debes importar una 'Matriz' que contenga columnas." };
     }
@@ -309,11 +351,14 @@ export const calcularReglaMultiplicacion = (filas, nombresColumnas, colA, valA, 
     if (modReemplazo === 'sin_reemplazo') {
         totalB = totalA - 1;
         const reduccion = countA > 0 ? (countAandB / countA) : 0;
-        countB = Number(Math.max(0, countB_inicial - reduccion).toFixed(2));
+        countB = Math.max(0, countB_inicial - reduccion);
     }
 
     if (totalB <= 0) {
         return { error: "No hay suficientes datos para realizar una segunda extracción sin reemplazo." };
+    }
+    if (modReemplazo === 'sin_reemplazo' && countA === 0) {
+        return { error: "No hay casos válidos del evento A para calcular la segunda extracción condicionada." };
     }
 
     const pB = countB / totalB;
@@ -600,73 +645,136 @@ export const calcularDistribucionUniforme = (minVal, maxVal, inputMin, inputMax)
     };
 };
 
-export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, parametroCalculo = 'media') => {
-    if (!poblacionStr || poblacionStr.trim() === '') return { error: 'Ingresa la población.' };
+export const obtenerEtiquetaSecuencial = (index) => {
+    let label = '';
+    let num = index;
+    while (num >= 0) {
+        label = String.fromCharCode((num % 26) + 65) + label;
+        num = Math.floor(num / 26) - 1;
+    }
+    return label;
+};
+
+export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, parametroCalculo = 'media', atributoExito = null) => {
+    if (!poblacionStr || poblacionStr.trim() === '') return { error: 'Ingresa los datos de la población.' };
 
     const rawItems = poblacionStr.split(',').map(v => v.trim()).filter(v => v !== '');
-    const poblacion = [];
 
-    for (const item of rawItems) {
-        let label = '';
+    // 1. Regla general: Restricción a 1 sola columna
+    if (poblacionStr.includes('|') || rawItems.some(item => item.includes('|'))) {
+        return { error: 'La variable debe tener 1 sola columna.' };
+    }
+
+    if (rawItems.length === 0) return { error: 'Ingresa los datos de la población.' };
+
+    const esNumeroValido = (v) => {
+        if (v === null || v === undefined) return false;
+        const str = v.toString().trim();
+        if (str === '') return false;
+        return !isNaN(Number(str));
+    };
+
+    // 2. Validación específica según el "Parámetro a Calcular"
+    // Caso A: Promedios (Normal)
+    if (parametroCalculo === 'media') {
+        const tieneTexto = rawItems.some(item => {
+            const valStr = item.includes('=') ? item.split('=')[1].trim() : (item.includes(':') ? item.split(':')[1].trim() : item);
+            return !esNumeroValido(valStr);
+        });
+        if (tieneTexto) {
+            return { error: 'Para Promedios, los datos deben ser números.' };
+        }
+    }
+
+    // Caso B: Varianza
+    else if (parametroCalculo === 'varianza') {
+        if (rawItems.length < 2) {
+            return { error: 'Para Varianza, se requieren al menos 2 datos (N ≥ 2).' };
+        }
+        const tieneTexto = rawItems.some(item => {
+            const valStr = item.includes('=') ? item.split('=')[1].trim() : (item.includes(':') ? item.split(':')[1].trim() : item);
+            return !esNumeroValido(valStr);
+        });
+        if (tieneTexto) {
+            return { error: 'Para Varianza, los datos deben ser números.' };
+        }
+    }
+
+    // Caso C: Proporciones
+    else if (parametroCalculo === 'proporcion') {
+        if (!atributoExito || atributoExito.toString().trim() === '') {
+            return { error: 'Selecciona un Atributo de Éxito.' };
+        }
+    }
+
+    // Validación de n
+    const n = parseInt(nStr, 10);
+    if (isNaN(n)) {
+        return { error: 'El tamaño de muestra (n) debe ser un entero positivo.' };
+    }
+
+    if (parametroCalculo === 'varianza') {
+        if (n < 2) {
+            return { error: 'Para Varianza, la muestra (n) debe ser al menos 2.' };
+        }
+    } else {
+        if (n < 1) {
+            return { error: 'El tamaño de muestra (n) debe ser mayor a 0.' };
+        }
+    }
+
+    if (!conReemplazo && n > rawItems.length) {
+        return { error: 'Sin reemplazo, n no puede superar a la población.' };
+    }
+
+    // Generar automáticamente de forma interna las etiquetas secuenciales (Elemento 1 -> A, Elemento 2 -> B...)
+    const poblacion = [];
+    for (let i = 0; i < rawItems.length; i++) {
+        const item = rawItems[i];
+        let label = obtenerEtiquetaSecuencial(i);
         let numStr = item;
 
         if (item.includes('=')) {
             const parts = item.split('=');
-            label = parts[0].trim();
+            label = parts[0].trim() || label;
             numStr = parts[1].trim();
         } else if (item.includes(':')) {
             const parts = item.split(':');
-            label = parts[0].trim();
+            label = parts[0].trim() || label;
             numStr = parts[1].trim();
-        } else if (item.includes('|')) {
-            const parts = item.split('|').map(p => p.trim());
-            if (parts.length >= 3) {
-                // Para 3 o más columnas (ej: "1 | A | 3000"), buscamos el valor numérico desde el final
-                let foundNum = false;
-                for (let i = parts.length - 1; i >= 0; i--) {
-                    if (!isNaN(parseFloat(parts[i]))) {
-                        numStr = parts[i];
-                        label = i > 0 ? parts[i - 1] : parts[0]; // La etiqueta es el valor anterior
-                        foundNum = true;
-                        break;
-                    }
-                }
-                if (!foundNum) {
-                    numStr = parts[parts.length - 1];
-                    label = parts[parts.length - 2];
-                }
-            } else if (parts.length === 2) {
-                // Para 2 columnas
-                const p0 = parts[0];
-                const p1 = parts[1];
-                if (!isNaN(parseFloat(p1)) && isNaN(parseFloat(p0))) {
-                    label = p0;
-                    numStr = p1;
-                } else if (!isNaN(parseFloat(p0)) && isNaN(parseFloat(p1))) {
-                    label = p1;
-                    numStr = p0;
-                } else {
-                    label = p0;
-                    numStr = p1;
-                }
-            } else {
-                numStr = parts[0];
-            }
         }
 
-        const valor = parseFloat(numStr);
-        if (!isNaN(valor)) {
-            poblacion.push({ id: label || valor.toString(), valor: valor });
+        if (parametroCalculo === 'proporcion') {
+            const num = parseFloat(numStr);
+            poblacion.push({
+                id: label,
+                valor: !isNaN(num) && numStr.trim() === num.toString() ? num : numStr.trim()
+            });
+        } else {
+            poblacion.push({
+                id: label,
+                valor: parseFloat(numStr)
+            });
         }
     }
+    const factorial = (num) => {
+        if (num <= 1) return 1;
+        let res = 1;
+        for (let i = 2; i <= num; i++) res *= i;
+        return res;
+    };
 
-    if (poblacion.length === 0) return { error: 'La población ingresada no tiene números válidos.' };
+    const N = poblacion.length;
+    const combinacionesTotales = conReemplazo 
+        ? Math.pow(N, n) 
+        : factorial(N) / (factorial(n) * factorial(N - n));
 
-    const n = parseInt(nStr);
-    if (isNaN(n) || n <= 0) return { error: 'El tamaño de muestra (n) debe ser un número entero positivo.' };
-    if (!conReemplazo && n > poblacion.length) return { error: 'El tamaño de muestra (n) no puede ser mayor a la población sin reemplazo.' };
+    if (combinacionesTotales > 70000) {
+        return { 
+            error: 'Límite excedido (máx. 70,000 muestras). Usa la Calculadora de Probabilidades.'
+        };
+    }
 
-    const limiteSeguridad = 5000;
     let muestras = [];
 
     const generarCombinaciones = (arr, r) => {
@@ -684,7 +792,7 @@ export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, p
         let res = [];
         for (let i = 0; i < arr.length; i++) {
             for (let j = 0; j < subMuestras.length; j++) {
-                if (res.length >= limiteSeguridad) return res;
+                // Genera todas las permutaciones posibles sin límite prematuro
                 res.push([arr[i], ...subMuestras[j]]);
             }
         }
@@ -697,29 +805,36 @@ export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, p
         muestras = generarCombinaciones(poblacion, n);
     }
 
-    if (muestras.length >= limiteSeguridad) {
-        return { error: `Límite de seguridad excedido. Se intentaron generar demasiadas muestras (límite: ${limiteSeguridad}). Por favor, reduce la población o el tamaño de la muestra.` };
-    }
-
     const calcularMedia = (arr) => arr.reduce((a, b) => a + b.valor, 0) / arr.length;
     const calcularVarianzaPoblacional = (arr, media) => arr.reduce((acc, val) => acc + Math.pow(val.valor - media, 2), 0) / arr.length;
     const calcularVarianzaMuestral = (arr, media) => arr.length > 1 ? arr.reduce((acc, val) => acc + Math.pow(val.valor - media, 2), 0) / (arr.length - 1) : 0;
 
     const datosTabla = muestras.map((muestra, index) => {
-        const media = calcularMedia(muestra);
-        const varianza = calcularVarianzaMuestral(muestra, media);
+        let media = 0;
+        let varianza = 0;
+        let proporcion = 0;
+
+        if (parametroCalculo === 'proporcion') {
+            const exitos = muestra.filter(x => String(x.valor).trim() === String(atributoExito).trim()).length;
+            proporcion = exitos / muestra.length;
+        } else {
+            media = calcularMedia(muestra);
+            varianza = calcularVarianzaMuestral(muestra, media);
+        }
+
         return {
             id: index + 1,
             elementos: muestra.map(x => x.id).join(', '),
             valores: muestra.map(x => x.valor).join(' '),
             media: parseFloat(media.toFixed(2)),
-            varianza: parseFloat(varianza.toFixed(2))
+            varianza: parseFloat(varianza.toFixed(2)),
+            proporcion: parseFloat(proporcion.toFixed(4))
         };
     });
 
     const frecuencias = {};
     datosTabla.forEach(fila => {
-        const val = parametroCalculo === 'varianza' ? fila.varianza : fila.media;
+        const val = parametroCalculo === 'varianza' ? fila.varianza : (parametroCalculo === 'proporcion' ? fila.proporcion : fila.media);
         if (frecuencias[val]) {
             frecuencias[val]++;
         } else {
@@ -731,7 +846,7 @@ export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, p
         .map(v => parseFloat(v))
         .sort((a, b) => a - b)
         .map(v => ({
-            valor: v, // puede ser media o varianza dependiendo de parametroCalculo
+            valor: v, // puede ser media, varianza o proporcion dependiendo de parametroCalculo
             frecuencia: frecuencias[v],
             total: datosTabla.length
         }));
@@ -740,18 +855,29 @@ export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, p
     const esperanza = distribucion.reduce((acc, curr) => acc + (curr.valor * (curr.frecuencia / curr.total)), 0);
     const varianzaDeDistribucion = distribucion.reduce((acc, curr) => acc + (Math.pow(curr.valor - esperanza, 2) * (curr.frecuencia / curr.total)), 0);
 
-    const mediaPoblacional = calcularMedia(poblacion);
-    const varianzaPoblacional = calcularVarianzaPoblacional(poblacion, mediaPoblacional);
+    let mediaPoblacional = 0;
+    let varianzaPoblacional = 0;
+    let proporcionPoblacional = 0;
+
+    if (parametroCalculo === 'proporcion') {
+        const exitosPob = poblacion.filter(x => String(x.valor).trim() === String(atributoExito).trim()).length;
+        proporcionPoblacional = exitosPob / poblacion.length;
+    } else {
+        mediaPoblacional = calcularMedia(poblacion);
+        varianzaPoblacional = calcularVarianzaPoblacional(poblacion, mediaPoblacional);
+    }
 
     const calculosFinales = {
         esperanza: parseFloat(esperanza.toFixed(4)),
-        varianzaDeDistribucion: parseFloat(varianzaDeDistribucion.toFixed(4)),
+        varianzaDeDistribucion: parseFloat(varianzaDeDistribucion.toFixed(6)),
         mediaPoblacional: parseFloat(mediaPoblacional.toFixed(4)),
         varianzaPoblacional: parseFloat(varianzaPoblacional.toFixed(4)),
+        proporcionPoblacional: parseFloat(proporcionPoblacional.toFixed(4)),
         n: n,
         N: poblacion.length,
         conReemplazo: conReemplazo,
-        parametroCalculo
+        parametroCalculo,
+        atributoExito
     };
 
     return {

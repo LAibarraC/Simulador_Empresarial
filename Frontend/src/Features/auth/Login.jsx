@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logoSiCE from "../../assets/images/Logo-SiCE.png";
+import logoSiCE from "../../assets/images/Logo-SiCE.webp";
 import { api } from "../../services/api.js";
 import { alerta } from '../../utils/Notificaciones.jsx';
 import '../../styles/ui/Login.css';
@@ -79,7 +79,7 @@ export default function Login({ onLogin }) {
     <div className="login-container" style={{ position: 'relative' }}>
 
       <div className="login-card">
-        <div style={{ textAlign: 'center', marginBottom: '35px', marginTop: '5px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '25px', marginTop: '5px' }}>
           <img
             src={logoSiCE}
             alt="Logo SiCE"

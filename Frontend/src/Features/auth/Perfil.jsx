@@ -1,9 +1,70 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { alerta } from '../../utils/Notificaciones';
 import { api } from "../../services/api";
 import '../../styles/pages/Perfil.css';
 import Skeleton from '../../ui/Skeleton';
+import { obtenerNombreCalculoHistorial } from '../MAT251/Historial/historialMAT251';
+import { obtenerOrigenHistorial } from '../history/origenHistorial';
+
+function SelectorCalculadoraPerfil({ modulos }) {
+  const [abierto, setAbierto] = useState(false);
+  const contenedorRef = useRef(null);
+  const botonRef = useRef(null);
+
+  useEffect(() => {
+    if (!abierto) return;
+    const cerrarFuera = event => {
+      if (!contenedorRef.current?.contains(event.target)) setAbierto(false);
+    };
+    document.addEventListener('mousedown', cerrarFuera);
+    return () => document.removeEventListener('mousedown', cerrarFuera);
+  }, [abierto]);
+
+  if (modulos.length <= 1) {
+    return (
+      <Link to={modulos[0]?.ruta || '/'} className="btn-perfil btn-perfil-back">
+        {modulos.length ? `Volver a ${modulos[0].codigo}` : 'Volver al Inicio'}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="perfil-calculadora-selector" ref={contenedorRef}
+      onBlur={event => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setAbierto(false);
+      }}
+      onKeyDown={event => {
+        if (event.key === 'Escape' && abierto) {
+          event.preventDefault();
+          setAbierto(false);
+          botonRef.current?.focus();
+        }
+      }}>
+      <button type="button" ref={botonRef} className="btn-perfil btn-perfil-back perfil-calculadora-trigger"
+        aria-expanded={abierto} aria-controls="perfil-calculadoras"
+        onClick={() => setAbierto(prev => !prev)}>
+        Volver a la Calculadora
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+          className={abierto ? 'perfil-calculadora-chevron abierto' : 'perfil-calculadora-chevron'}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {abierto && (
+        <div id="perfil-calculadoras" className="perfil-calculadora-opciones" role="group" aria-label="Elegir calculadora">
+          {modulos.map(modulo => (
+            <Link key={modulo.codigo} to={modulo.ruta} className="perfil-calculadora-opcion"
+              onClick={() => setAbierto(false)}>
+              <strong>{modulo.codigo}</strong>
+              <span>{modulo.nombre}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Perfil({ usuario, setUsuario }) {
   const navigate = useNavigate();
@@ -110,8 +171,12 @@ export default function Perfil({ usuario, setUsuario }) {
       return;
     }
     try {
-      await api.eliminarCuenta(usuario.email, passEliminar);
-      alerta.exito("Cuenta eliminada", "Tu cuenta ha sido eliminada permanentemente.");
+      const resultado = await api.eliminarCuenta(usuario.email, passEliminar);
+      if (resultado.advertencia) {
+        alerta.advertencia("Cuenta eliminada: limpieza pendiente", resultado.advertencia);
+      } else {
+        alerta.exito("Cuenta eliminada", "Tu cuenta ha sido eliminada permanentemente.");
+      }
       localStorage.removeItem("token");
       setUsuario(null);
       navigate("/login");
@@ -135,6 +200,26 @@ export default function Perfil({ usuario, setUsuario }) {
     }
     return 'U';
   };
+
+  const historialReciente = historial.slice(0, 5).map(registro => {
+    let snapshot = registro.snapshot || registro.resultados_json || {};
+    if (typeof snapshot === 'string') {
+      try { snapshot = JSON.parse(snapshot); } catch { snapshot = {}; }
+    }
+    const modulo = String(registro.modulo || snapshot?.modulo || snapshot?.configuracion?.modulo || 'MAT151').toUpperCase();
+    const registroVisible = { ...registro, modulo };
+    return {
+      ...registroVisible,
+      nombreCalculo: obtenerNombreCalculoHistorial(registroVisible),
+      ...obtenerOrigenHistorial(registroVisible),
+    };
+  });
+
+  const esAdministrador = usuario.rol === 'Administrador';
+  const modulosCalculadora = [
+    { codigo: 'MAT151', nombre: 'Estadística General', ruta: '/calculadora' },
+    { codigo: 'MAT251', nombre: 'Estadística Matemática', ruta: '/MAT251' },
+  ].filter(modulo => esAdministrador || (usuario.modulos || []).includes(modulo.codigo));
 
   const usadoMB = (espacio.usado / 1048576).toFixed(2);
   const limiteMB = (espacio.limite / 1048576).toFixed(2);
@@ -183,15 +268,31 @@ export default function Perfil({ usuario, setUsuario }) {
 
           <div className="perfil-stats">
             <div className="perfil-stat-box">
-              <h4 className="perfil-stat-value">
-                {cargandoDatos ? <Skeleton height="28px" width="40px" style={{ margin: '0 auto' }} /> : historial.length}
-              </h4>
+              <div className="perfil-stat-content">
+                <svg className="perfil-stat-icon" width="32" height="32" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"
+                  strokeLinejoin="round" aria-hidden="true" focusable="false">
+                  <rect x="5" y="2" width="14" height="20" rx="2" />
+                  <path d="M8 6h8v4H8zM8 14h1m3 0h1m3 0h0M8 18h1m3 0h1m3 0h0" />
+                </svg>
+                <h4 className="perfil-stat-value">
+                  {cargandoDatos ? <Skeleton height="28px" width="40px" /> : historial.length}
+                </h4>
+              </div>
               <p className="perfil-stat-label">Cálculos Guardados</p>
             </div>
             <div className="perfil-stat-box">
-              <h4 className="perfil-stat-value">
-                {cargandoDatos ? <Skeleton height="28px" width="40px" style={{ margin: '0 auto' }} /> : archivosCount}
-              </h4>
+              <div className="perfil-stat-content">
+                <svg className="perfil-stat-icon" width="32" height="32" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"
+                  strokeLinejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6" />
+                  <path d="M8 12h8v7H8zM12 12v7M8 15.5h8" />
+                </svg>
+                <h4 className="perfil-stat-value">
+                  {cargandoDatos ? <Skeleton height="28px" width="40px" /> : archivosCount}
+                </h4>
+              </div>
               <p className="perfil-stat-label">Archivos Excel</p>
             </div>
           </div>
@@ -235,15 +336,8 @@ export default function Perfil({ usuario, setUsuario }) {
             )}
           </div>
 
-          <hr className="perfil-divider" />
-
           <div className="perfil-actions">
-            <button
-              onClick={() => navigate('/calculadora')}
-              className="btn-perfil btn-perfil-back"
-            >
-              Volver a la Calculadora
-            </button>
+            <SelectorCalculadoraPerfil modulos={modulosCalculadora} />
             <button
               onClick={handleCerrarSesion}
               className="btn-perfil btn-perfil-logout"
@@ -256,90 +350,77 @@ export default function Perfil({ usuario, setUsuario }) {
       </div>
 
       {/* --- SECCIÓN HISTORIAL DE CÁLCULOS --- */}
-      <div className="perfil-card-secondary">
-        <h3 className="perfil-section-title">
-          <span>Mi Historial de Cálculos Recientes</span>
-          <span
-            onClick={() => navigate('/historial')}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/historial'); }}
-            role="button"
-            tabIndex={0}
-            className="btn-perfil-link"
-          >
-            Ver Historial Completo
-          </span>
-        </h3>
+      <section className="perfil-card-secondary perfil-history-card" aria-labelledby="perfil-history-title">
+        <div className="perfil-history-header">
+          <h3 id="perfil-history-title">Mi Historial de Cálculos Recientes</h3>
+          <Link to="/historial" className="perfil-history-link">
+            Ver historial completo <span aria-hidden="true">→</span>
+          </Link>
+        </div>
 
-        {cargandoDatos ? (
-          <div className="perfil-table-container">
-            <table className="perfil-table">
-              <thead>
-                <tr className="perfil-table-header-row">
-                  <th className="perfil-th">Fecha / Hora</th>
-                  <th className="perfil-th">Tipo de Cálculo</th>
-                  <th className="perfil-th">Archivo Fuente</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[1, 2, 3].map(i => (
-                  <tr key={i} className="perfil-table-row">
-                    <td className="perfil-td">
-                      <div className="perfil-date-cell">
-                        <Skeleton height="16px" width="100px" style={{ marginBottom: '4px' }} />
-                        <Skeleton height="12px" width="70px" />
-                      </div>
-                    </td>
-                    <td className="perfil-td"><Skeleton height="22px" width="180px" borderRadius="12px" /></td>
-                    <td className="perfil-td-muted"><Skeleton height="14px" width="120px" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : historial.length === 0 ? (
-          <p className="perfil-text-info-center">
+        {!cargandoDatos && historial.length === 0 ? (
+          <p className="perfil-history-empty">
             No tienes cálculos guardados todavía. Realiza un análisis en la calculadora para guardarlo.
           </p>
         ) : (
-          <div className="perfil-table-container">
-            <table className="perfil-table">
-              <thead>
-                <tr className="perfil-table-header-row">
-                  <th className="perfil-th">Fecha / Hora</th>
-                  <th className="perfil-th">Tipo de Cálculo</th>
-                  <th className="perfil-th">Archivo Fuente</th>
-                </tr>
-              </thead>
-              <tbody>
-                {historial.slice(0, 5).map((reg, index) => (
-                  <tr key={reg.id} className="perfil-table-row">
-                    <td className="perfil-td" data-label="Fecha / Hora">
-                      <div className="perfil-date-cell">
-                        <strong>{reg.fecha}</strong>
-                        <small className="perfil-small-text">{reg.hora}</small>
-                      </div>
-                    </td>
-                    <td className="perfil-td" data-label="Tipo de Cálculo">
-                      <span className="perfil-calc-badge">
-                        {reg.calculo.replace(/_/g, " ").toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="perfil-td-muted" data-label="Archivo Fuente">
-                      {reg.archivo_origen}
-                    </td>
+          <>
+            <div className="perfil-table-container" aria-busy={cargandoDatos}>
+              <table className="perfil-table" aria-label="Cinco cálculos más recientes">
+                <colgroup>
+                  <col className="perfil-col-fecha" />
+                  <col className="perfil-col-hora" />
+                  <col className="perfil-col-calculo" />
+                  <col className="perfil-col-modulo" />
+                  <col className="perfil-col-archivo" />
+                  <col className="perfil-col-modo" />
+                </colgroup>
+                <thead>
+                  <tr className="perfil-table-header-row">
+                    <th scope="col" className="perfil-th">Fecha</th>
+                    <th scope="col" className="perfil-th">Hora</th>
+                    <th scope="col" className="perfil-th">Tipo de cálculo</th>
+                    <th scope="col" className="perfil-th">Módulo</th>
+                    <th scope="col" className="perfil-th">Archivo fuente</th>
+                    <th scope="col" className="perfil-th">Modo</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {historial.length > 5 && (
+                </thead>
+                <tbody>
+                  {cargandoDatos ? [1, 2, 3].map(i => (
+                    <tr key={i} className="perfil-table-row perfil-history-loading">
+                      <td className="perfil-td perfil-history-fecha" data-label="Fecha"><Skeleton height="12px" width="85%" /></td>
+                      <td className="perfil-td perfil-history-hora" data-label="Hora"><Skeleton height="12px" width="85%" /></td>
+                      <td className="perfil-td perfil-history-calculo" data-label="Tipo de cálculo"><Skeleton height="14px" width="90%" /></td>
+                      <td className="perfil-td perfil-history-modulo" data-label="Módulo"><Skeleton height="14px" width="80%" /></td>
+                      <td className="perfil-td perfil-history-archivo" data-label="Archivo fuente"><Skeleton height="12px" width="85%" /></td>
+                      <td className="perfil-td perfil-history-modo" data-label="Modo"><Skeleton height="12px" width="85%" /></td>
+                    </tr>
+                  )) : historialReciente.map(reg => (
+                    <tr key={reg.id} className="perfil-table-row">
+                      <td className="perfil-td perfil-history-fecha" data-label="Fecha"><strong>{reg.fecha}</strong></td>
+                      <td className="perfil-td perfil-history-hora" data-label="Hora">{reg.hora}</td>
+                      <td className="perfil-td perfil-history-calculo" data-label="Tipo de cálculo">
+                        <span className="perfil-calc-name">{reg.nombreCalculo}</span>
+                      </td>
+                      <td className="perfil-td perfil-history-modulo" data-label="Módulo">
+                        <span className="perfil-module-badge">{reg.modulo}</span>
+                      </td>
+                      <td className="perfil-td perfil-history-archivo" data-label="Archivo fuente">{reg.archivoFuente}</td>
+                      <td className="perfil-td perfil-history-modo" data-label="Modo">{reg.modoHistorial}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {!cargandoDatos && (
               <p className="perfil-footer-notice">
-                Mostrando los 5 cálculos más recientes. Para ver la lista completa haz clic en
-                <span onClick={() => navigate('/historial')} className="perfil-notice-link">Ver Historial Completo</span>.
+                {historial.length > 5
+                  ? 'Se muestran los 5 cálculos más recientes.'
+                  : `${historial.length} ${historial.length === 1 ? 'cálculo guardado' : 'cálculos guardados'}.`}
               </p>
             )}
-          </div>
+          </>
         )}
-      </div>
+      </section>
 
       {/* SECCIÓN DE SEGURIDAD Y CONFIGURACIÓN */}
       <div className="grafico-card perfil-card-secondary">
@@ -355,7 +436,7 @@ export default function Perfil({ usuario, setUsuario }) {
               value={passActual}
               onChange={(e) => setPassActual(e.target.value)}
               placeholder="Contraseña actual"
-              className="perfil-input"
+              className="perfil-input input-mat251 placeholder-small"
               required
             />
           </div>
@@ -368,7 +449,7 @@ export default function Perfil({ usuario, setUsuario }) {
                 value={passNueva}
                 onChange={(e) => setPassNueva(e.target.value)}
                 placeholder="Mínimo 6 caracteres"
-                className={`perfil-input ${isNuevaPasswordTooShort ? 'input-error' : ''}`}
+                className={`perfil-input input-mat251 placeholder-small ${isNuevaPasswordTooShort ? 'input-error' : ''}`}
                 required
               />
               {isNuevaPasswordTooShort && (
@@ -384,7 +465,7 @@ export default function Perfil({ usuario, setUsuario }) {
                 value={passNuevaConf}
                 onChange={(e) => setPassNuevaConf(e.target.value)}
                 placeholder="Repite nueva contraseña"
-                className={`perfil-input ${!isNuevaPasswordMatch && passNuevaConf !== "" ? 'input-error' : ''}`}
+                className={`perfil-input input-mat251 placeholder-small ${!isNuevaPasswordMatch && passNuevaConf !== "" ? 'input-error' : ''}`}
                 required
               />
               {!isNuevaPasswordMatch && passNuevaConf !== "" && (
@@ -410,7 +491,7 @@ export default function Perfil({ usuario, setUsuario }) {
           Zona de Peligro: Darse de Baja
         </h3>
         <p className="perfil-danger-desc texto-danger" style={{ color: "#ef4444" }}>
-          Al darse de baja, se eliminará tu cuenta y todos tus datos (archivos guardados, historial de cálculos, clases) de forma permanente del sistema. Esta acción no se puede deshacer.
+          Al darse de baja, se eliminará tu cuenta y todos tus datos (asignaciones a módulos, credenciales vinculadas, archivos, historial, clases propias, tareas, entregas e inscripciones) de forma permanente del sistema. Esta acción no se puede deshacer.
         </p>
 
         {!mostrarConfirmarEliminar ? (
