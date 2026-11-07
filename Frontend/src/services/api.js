@@ -824,6 +824,120 @@ export const api = {
     if (!res.ok) throw new Error(data.detail || data.error || "Error al eliminar la tarea");
     return data;
   },
-};
+  // --- CREAR NUEVO CASO DE ESTUDIO (DOCENTE) ---
+  crearCasoEmpresarial: async (datosCaso) => {
+    const res = await fetch(`${BASE_URL}/casos_empresariales/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}),
+      },
+      body: JSON.stringify(datosCaso),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.detail || "No se pudo crear el caso de estudio");
+    return data;
+  },
+  // --- EDITAR CASO DE ESTUDIO (DOCENTE) ---
+  editarCasoEmpresarial: async (id, datosCaso) => {
+    const res = await fetch(`${BASE_URL}/casos_empresariales/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}),
+      },
+      body: JSON.stringify(datosCaso),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.detail || "No se pudo actualizar el caso de estudio");
+    return data;
+  },
+  // --- OBTENER CASOS DE ESTUDIO ---
+  obtenerCasosEmpresariales: async () => {
+    const res = await fetch(`${BASE_URL}/casos_empresariales/`, {
+      headers: { ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) }
+    });
+    if (!res.ok) throw new Error("Error al obtener los casos de estudio");
+    return await res.json();
+  },
+  // --- ELIMINAR CASO DE ESTUDIO (DOCENTE) ---
+  eliminarCasoEmpresarial: async (id) => {
+    const res = await fetch(`${BASE_URL}/casos_empresariales/${id}`, {
+      method: "DELETE",
+      headers: {
+        ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}),
+      }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.detail || "No se pudo eliminar el caso");
+    return data;
+  },
+  // --- EXTRAER TEXTO DE DOCUMENTO PARA CASO (PDF, DOCX, TXT) ---
+  extraerTextoDocumentoCaso: async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
 
+    const token = localStorage.getItem("token");
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(`${BASE_URL}/casos_empresariales/extraer-documento`, {
+      method: "POST",
+      headers: headers,
+      body: formData
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.detail || data.error || "No se pudo extraer el texto del documento.");
+    }
+    return data;
+  },
+
+  // --- SUBIR DIRECTAMENTE DOCUMENTO DEL CASO CON SEGUIMIENTO DE PROGRESO ---
+  subirDocumentoCaso: async (file, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append("file", file);
+
+      xhr.open("POST", `${BASE_URL}/casos_empresariales/subir-documento`, true);
+
+      const token = localStorage.getItem("token");
+      if (token) {
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      }
+
+      if (xhr.upload && onProgress) {
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            onProgress(percent);
+          }
+        };
+      }
+
+      xhr.onload = () => {
+        try {
+          const response = JSON.parse(xhr.responseText || "{}");
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(response);
+          } else {
+            reject(new Error(response.detail || response.error || "Error al subir el documento"));
+          }
+        } catch (e) {
+          reject(new Error("Respuesta inválida del servidor al subir el archivo."));
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error("Error de conexión al subir el documento."));
+      };
+
+      xhr.send(formData);
+    });
+  }
+};
 export default api;

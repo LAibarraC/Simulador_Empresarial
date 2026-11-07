@@ -9,6 +9,7 @@ import Archivos from "./Features/Archives/Archivos";
 import Calculadora from "./Features/MAT151/pages/Calculadora";
 import Login from "./Features/auth/Login";
 import MAT251 from "./Features/MAT251/pages/EstadisticaMatematica";
+import AnalisisEmpresarial from "./Features/AnalisisEmpresarial/AnalisisEmpresarial";
 import Registro from "./Features/auth/Registro";
 import Perfil from "./Features/auth/Perfil";
 import ForgotPassword from "./Features/auth/ForgotPassword";
@@ -148,6 +149,7 @@ function App() {
                       <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/lti-tester" element={<LtiTester onLogin={setUsuario} />} />
                       <Route path="/matricular/:token" element={<Matricular />} />
+                      <Route path="/analisis-empresarial" element={<AnalisisEmpresarial usuario={usuario} />} />
                       <Route path="*" element={<Navigate to="/" />} />
                     </>
                   ) : (
@@ -172,6 +174,12 @@ function App() {
                       <Route path="/MAT251" element={
                         <ActiveModuleContext.Provider value="mat251">
                           <MAT251 usuario={usuario} />
+                        </ActiveModuleContext.Provider>
+                      } />
+
+                      <Route path="/analisis-empresarial" element={
+                        <ActiveModuleContext.Provider value="analisis_empresarial">
+                          <AnalisisEmpresarial usuario={usuario} />
                         </ActiveModuleContext.Provider>
                       } />
 

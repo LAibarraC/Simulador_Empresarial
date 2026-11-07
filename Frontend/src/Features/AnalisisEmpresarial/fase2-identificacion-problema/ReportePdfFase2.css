@@ -1,0 +1,1102 @@
+/* ==========================================================================
+   ESTILOS DEDICADOS PARA EXPORTACIÓN A PDF: FASE 2 (LLUVIA & ÁRBOL)
+   Diseñado específicamente para renderizado de alta fidelidad con html2canvas y jsPDF
+   ========================================================================== */
+
+.reporte-fase2-pdf-document {
+  width: 900px;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  padding: 36px 40px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* HEADER DEL REPORTE */
+.reporte-pdf-header {
+  border-bottom: 2.5px solid #ea580c;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+}
+
+.reporte-pdf-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.reporte-pdf-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reporte-pdf-logo-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #ea580c;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.reporte-pdf-title-block h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 850;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.reporte-pdf-title-block p {
+  margin: 2px 0 0 0;
+  font-size: 0.82rem;
+  color: #ea580c;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reporte-pdf-badge-tag {
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-align: right;
+}
+
+/* METADATOS DEL CASO (DISTRIBUCIÓN EN 3 COLUMNAS LIMPIAS) */
+.reporte-pdf-meta-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1.2fr 1fr;
+  gap: 16px 24px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 22px;
+  margin-top: 14px;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-meta-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.reporte-pdf-meta-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #ea580c;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+.reporte-pdf-meta-value {
+  font-size: 0.90rem;
+  font-weight: 750;
+  color: #0f172a;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* SECCIONES PRINCIPALES CON CABECERA DE ALTO CONTRASTE */
+.reporte-pdf-section {
+  margin-bottom: 24px;
+}
+
+/* BANNER DESTACADO PARA FACTORES ENCONTRADOS */
+.reporte-pdf-factores-banner {
+  background: #fff7ed !important;
+  border: 1.5px solid #fed7aa !important;
+  border-left: 5px solid #ea580c !important;
+  border-radius: 8px !important;
+  padding: 10px 18px !important;
+  margin: 14px 0 16px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.reporte-pdf-factores-titulo {
+  font-size: 1.15rem !important;
+  font-weight: 850 !important;
+  color: #c2410c !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+}
+
+.reporte-pdf-factores-tag {
+  background: #ea580c !important;
+  color: #ffffff !important;
+  font-size: 0.74rem !important;
+  font-weight: 750 !important;
+  padding: 4px 12px !important;
+  border-radius: 6px !important;
+  letter-spacing: 0.02em !important;
+}
+
+.reporte-pdf-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 10px 0 !important;
+  background: transparent !important;
+  border-bottom: 2px solid #ea580c !important;
+  border-left: none !important;
+  border-radius: 0 !important;
+  margin-bottom: 16px;
+  box-shadow: none !important;
+}
+
+.reporte-pdf-section-title h2 {
+  margin: 0;
+  font-size: 1.28rem;
+  font-weight: 850;
+  color: #ea580c !important;
+  letter-spacing: -0.015em;
+  text-transform: none;
+}
+
+.reporte-pdf-section-subtitle {
+  font-size: 0.82rem;
+  color: #9a3412 !important;
+  margin-left: auto;
+  font-weight: 700;
+  background: #ffedd5;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #fed7aa;
+}
+
+/* CARRILES DE LLUVIA DE IDEAS EN PDF */
+.reporte-pdf-carriles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.reporte-pdf-carril {
+  background: #fafafa;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reporte-pdf-carril.carril-int {
+  border-top: 3.5px solid #10b981;
+}
+
+.reporte-pdf-carril.carril-ext {
+  border-top: 3.5px solid #3b82f6;
+}
+
+.reporte-pdf-carril-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.reporte-pdf-carril-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.reporte-pdf-carril-badge {
+  font-size: 0.68rem;
+  font-weight: 750;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.reporte-pdf-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reporte-pdf-idea-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  padding: 9px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.reporte-pdf-idea-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.reporte-pdf-cat-badge {
+  font-size: 0.66rem;
+  font-weight: 750;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.reporte-pdf-idea-num {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.reporte-pdf-idea-text {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #1e293b;
+  line-height: 1.38;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   SECCIÓN 2: ÁRBOL DE PROBLEMAS EN EL REPORTE
+   ========================================================================== */
+.reporte-pdf-tree-container {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 600px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #fdfdfc !important;
+  border: 1.5px solid #e7e5e4;
+  border-radius: 12px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ILUSTRACIÓN ORGÁNICA DE FONDO DEL ÁRBOL EN PDF */
+.reporte-pdf-tree-svg-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.reporte-pdf-tree-svg-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: fill !important;
+}
+
+/* ZONA COPA */
+.reporte-pdf-tree-canopy {
+  position: relative !important;
+  z-index: 2 !important;
+  background: rgba(240, 253, 244, 0.90) !important;
+  border: 1.5px solid #86efac !important;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.08);
+}
+
+.reporte-pdf-zone-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.reporte-pdf-zone-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #166534;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.reporte-pdf-tree-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.reporte-pdf-branch-box {
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.reporte-pdf-branch-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #15803d;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reporte-pdf-node-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+.reporte-pdf-node-card:last-child {
+  margin-bottom: 0;
+}
+
+.reporte-pdf-node-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.reporte-pdf-node-cat {
+  font-size: 0.62rem;
+  font-weight: 750;
+  color: #64748b;
+  background: #ffffff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #e2e8f0;
+}
+
+.reporte-pdf-node-tag {
+  font-size: 0.60rem;
+  font-weight: 700;
+  color: #047857;
+}
+
+.reporte-pdf-node-text {
+  margin: 0;
+  font-size: 0.73rem;
+  color: #0f172a;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+/* ZONA TRONCO (PROBLEMA CENTRAL) */
+.reporte-pdf-tree-trunk {
+  position: relative !important;
+  z-index: 2 !important;
+  background: #ffffff !important;
+  border: 2.5px solid #ea580c !important;
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  max-width: 660px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-trunk-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 850;
+  color: #9a3412 !important;
+  background: #ffedd5 !important;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  border: 1px solid #fed7aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.reporte-pdf-trunk-title,
+html.dark .reporte-pdf-trunk-title,
+html.dark h3.reporte-pdf-trunk-title {
+  margin: 0 0 8px 0;
+  font-size: 1.14rem !important;
+  font-weight: 850 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.reporte-pdf-trunk-desc,
+html.dark .reporte-pdf-trunk-desc,
+html.dark p.reporte-pdf-trunk-desc {
+  margin: 0 0 8px 0;
+  font-size: 0.76rem !important;
+  font-weight: 550 !important;
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.reporte-pdf-trunk-meta,
+html.dark .reporte-pdf-trunk-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+/* ZONA RAÍCES */
+.reporte-pdf-tree-roots {
+  position: relative !important;
+  z-index: 2 !important;
+  background: rgba(255, 247, 237, 0.90) !important;
+  border: 1.5px solid #fdba74 !important;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(194, 65, 12, 0.08);
+}
+
+.reporte-pdf-roots-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #c2410c;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.reporte-pdf-roots-branch-box {
+  background: #ffffff;
+  border: 1px solid #ffedd5;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.reporte-pdf-roots-branch-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #ea580c;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reporte-pdf-node-root-tag {
+  font-size: 0.60rem;
+  font-weight: 700;
+  color: #c2410c;
+}
+
+/* FOOTER DEL REPORTE */
+.reporte-pdf-footer {
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.reporte-pdf-footer-brand {
+  font-weight: 700;
+  color: #64748b;
+}
+
+.reporte-pdf-empty-state {
+  padding: 14px;
+  text-align: center;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   BLINDAJE TOTAL CONTRA MODO OSCURO (EL REPORTE SIEMPRE ES IMPRESIÓN OFICIAL)
+   ========================================================================== */
+html.dark .reporte-fase2-pdf-document {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+html.dark .reporte-fase2-pdf-document .reporte-pdf-node-card {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.dark .reporte-fase2-pdf-document .reporte-pdf-node-text {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+html.dark .reporte-fase2-pdf-document .reporte-pdf-node-cat {
+  background-color: #ffffff !important;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+html.dark .reporte-fase2-pdf-document .reporte-pdf-tree-trunk {
+  background-color: #ffffff !important;
+  border-color: #ea580c !important;
+}
+
+html.dark .reporte-fase2-pdf-document h1,
+html.dark .reporte-fase2-pdf-document h2,
+html.dark .reporte-fase2-pdf-document h3,
+html.dark .reporte-fase2-pdf-document h4 {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+html.dark .reporte-fase2-pdf-document .reporte-pdf-factores-titulo {
+  color: #ea580c !important;
+  -webkit-text-fill-color: #ea580c !important;
+}
+
+html.dark .reporte-fase2-pdf-document .reporte-pdf-brand h1 {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+html.dark .reporte-fase2-pdf-document .reporte-pdf-meta-value {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+/* ==========================================================================
+   SECCIÓN 3: PESTEL EN EL REPORTE PDF (ALTA FIDELIDAD)
+   ========================================================================== */
+.reporte-pdf-pestel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  margin-top: 14px;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-pestel-card {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 10px;
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 9px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.reporte-pdf-pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.09) 0%, rgba(234, 88, 12, 0.02) 100%) !important;
+  border: 1.5px solid rgba(234, 88, 12, 0.28) !important;
+  border-radius: 7px;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.reporte-pdf-pillar-letter {
+  font-size: 1.7rem;
+  font-weight: 950;
+  line-height: 1;
+  color: #ea580c !important;
+  -webkit-text-fill-color: #ea580c !important;
+}
+
+.reporte-pdf-pillar-name {
+  font-size: 0.52rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  width: 100%;
+}
+
+.reporte-pdf-dim-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-dim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-dim-title {
+  margin: 0;
+  font-size: 0.80rem;
+  font-weight: 850;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
+}
+
+.reporte-pdf-dim-guia {
+  margin: 0;
+  font-size: 0.62rem;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.reporte-pdf-dim-criterios-count {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #ea580c !important;
+  -webkit-text-fill-color: #ea580c !important;
+  background: rgba(234, 88, 12, 0.08) !important;
+  border-radius: 4px;
+  padding: 1.5px 5px;
+  display: inline-block;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.reporte-pdf-factores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-factor-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-left-width: 3.5px !important;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.reporte-pdf-factor-card.op {
+  border-left-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.04) !important;
+}
+
+.reporte-pdf-factor-card.am {
+  border-left-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+}
+
+.reporte-pdf-factor-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.reporte-pdf-pill-op {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #059669 !important;
+  -webkit-text-fill-color: #059669 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.reporte-pdf-pill-am {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #dc2626 !important;
+  -webkit-text-fill-color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.reporte-pdf-subdim-pill {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 3px;
+  padding: 1px 5px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.reporte-pdf-factor-text {
+  margin: 0;
+  font-size: 0.66rem;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+  line-height: 1.35;
+  font-weight: 520;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.reporte-pdf-factor-empty {
+  font-size: 0.65rem;
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+  font-style: italic;
+  padding: 4px 0;
+}
+
+/* Criterios de Evaluación en PDF (PESTEL) */
+.reporte-pdf-criterios-box {
+  background: #f8fafc !important;
+  border: 1px dashed #cbd5e1 !important;
+  border-radius: 6px;
+  padding: 5px 8px;
+  margin-top: 3px;
+  margin-bottom: 4px;
+}
+
+.reporte-pdf-criterios-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+}
+
+.reporte-pdf-criterios-label {
+  font-size: 0.60rem;
+  font-weight: 750;
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.reporte-pdf-criterios-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
+}
+
+.reporte-pdf-criterio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 0.58rem;
+  line-height: 1.3;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-criterio-check {
+  color: #059669 !important;
+  -webkit-text-fill-color: #059669 !important;
+  font-weight: 900;
+  font-size: 0.68rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.reporte-pdf-criterio-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.reporte-pdf-criterio-text strong {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   REPORTE PDF: ESTRUCTURA EN CRUZ DE LAS 5 FUERZAS DE PORTER
+   ========================================================================== */
+.reporte-pdf-porter-cross-arena {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+}
+
+.reporte-pdf-cross-cell {
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.reporte-pdf-cross-cell.node-norte {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.reporte-pdf-cross-cell.node-oeste {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.reporte-pdf-cross-cell.node-centro {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.reporte-pdf-cross-cell.node-este {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.reporte-pdf-cross-cell.node-sur {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.reporte-pdf-porter-card {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 10px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.reporte-pdf-porter-card.centro {
+  border: 2px solid #ef4444;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.10);
+}
+
+.reporte-pdf-porter-card.norte {
+  border-top: 3.5px solid #06b6d4;
+}
+
+.reporte-pdf-porter-card.oeste {
+  border-left: 3.5px solid #8b5cf6;
+}
+
+.reporte-pdf-porter-card.este {
+  border-right: 3.5px solid #10b981;
+}
+
+.reporte-pdf-porter-card.sur {
+  border-bottom: 3.5px solid #f59e0b;
+}
+
+.reporte-pdf-porter-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.reporte-pdf-porter-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-cardinal-tag {
+  font-size: 0.58rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  max-width: 65%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.reporte-pdf-pressure-badge {
+  font-size: 0.58rem;
+  font-weight: 850;
+  padding: 1.5px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.reporte-pdf-pressure-badge.alta {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.reporte-pdf-pressure-badge.media {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.reporte-pdf-pressure-badge.baja {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.reporte-pdf-porter-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.reporte-pdf-porter-desc {
+  margin: 0;
+  font-size: 0.61rem;
+  line-height: 1.35;
+  color: #64748b;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.reporte-pdf-porter-section-label {
+  font-size: 0.59rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #475569;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.reporte-pdf-porter-factors-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.reporte-pdf-porter-factor-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  padding: 5px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: 100%;
+}
+
+.reporte-pdf-porter-factor-item.op {
+  border-left: 3px solid #10b981;
+}
+
+.reporte-pdf-porter-factor-item.am {
+  border-left: 3px solid #ef4444;
+}
+
+.reporte-pdf-porter-factor-text {
+  margin: 0;
+  font-size: 0.64rem;
+  line-height: 1.35;
+  color: #1e293b;
+  font-weight: 550;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}

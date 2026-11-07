@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Link } from "react-router-dom";
 import logoSiCEInicio from "../../assets/images/Logo-SiCE-Inicio.png";
 import imagenInicio1 from "../../assets/images/imagen de inicio 1.jpg";
 import imagenInicio2 from "../../assets/images/imagen de inicio 2.jpg";
@@ -313,41 +314,47 @@ export default function Inicio() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '30px' }}>
 
-            <div className="modern-card" style={{ backgroundColor: 'var(--bg-card)', padding: '35px', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
-              <div className="icon-container" style={{ width: '60px', height: '60px', borderRadius: '15px', backgroundColor: 'rgba(241, 196, 15, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-color, #f1c40f)' }}>
-                <BarChart3 size={32} strokeWidth={2} />
+            <Link to="/calculadora" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className="modern-card" style={{ backgroundColor: 'var(--bg-card)', padding: '35px', borderRadius: '20px', border: '1px solid var(--border-color)', height: '100%', boxSizing: 'border-box', transition: 'transform 0.2s ease, border-color 0.2s ease' }}>
+                <div className="icon-container" style={{ width: '60px', height: '60px', borderRadius: '15px', backgroundColor: 'rgba(241, 196, 15, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-color, #f1c40f)' }}>
+                  <BarChart3 size={32} strokeWidth={2} />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Estadística General</h3>
+                <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
+                  Herramientas interactivas para comprender los fundamentos del análisis de datos, distribuciones y probabilidad aplicada a los negocios.
+                </p>
               </div>
-              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Estadística General</h3>
-              <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
-                Herramientas interactivas para comprender los fundamentos del análisis de datos, distribuciones y probabilidad aplicada a los negocios.
-              </p>
-            </div>
+            </Link>
 
-            <div className="modern-card" style={{ backgroundColor: 'var(--bg-card)', padding: '35px', borderRadius: '20px', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'var(--accent-color, #f1c40f)', color: '#000', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                En Desarrollo
+            <Link to="/MAT251" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className="modern-card" style={{ backgroundColor: 'var(--bg-card)', padding: '35px', borderRadius: '20px', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden', height: '100%', boxSizing: 'border-box', transition: 'transform 0.2s ease, border-color 0.2s ease' }}>
+                <div style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                  Disponible
+                </div>
+                <div className="icon-container" style={{ width: '60px', height: '60px', borderRadius: '15px', backgroundColor: 'rgba(241, 196, 15, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-color, #f1c40f)' }}>
+                  <LineChart size={32} strokeWidth={2} />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Estadística Matemática</h3>
+                <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
+                  Módulos avanzados de cálculo estadístico orientados a la predicción, pruebas de hipótesis y la toma de decisiones gerenciales.
+                </p>
               </div>
-              <div className="icon-container" style={{ width: '60px', height: '60px', borderRadius: '15px', backgroundColor: 'rgba(241, 196, 15, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-color, #f1c40f)' }}>
-                <LineChart size={32} strokeWidth={2} />
-              </div>
-              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Estadística Matemática</h3>
-              <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
-                Módulos avanzados de cálculo estadístico orientados a la predicción, pruebas de hipótesis y la toma de decisiones gerenciales.
-              </p>
-            </div>
+            </Link>
 
-            <div className="modern-card" style={{ backgroundColor: 'var(--bg-card)', padding: '35px', borderRadius: '20px', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'var(--accent-color, #f1c40f)', color: '#000', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                Próximamente
+            <Link to="/analisis-empresarial" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className="modern-card" style={{ backgroundColor: 'var(--bg-card)', padding: '35px', borderRadius: '20px', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden', height: '100%', boxSizing: 'border-box', transition: 'transform 0.2s ease, border-color 0.2s ease' }}>
+                <div style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'rgba(234, 88, 12, 0.15)', color: '#ea580c', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                  Nuevo Módulo
+                </div>
+                <div className="icon-container" style={{ width: '60px', height: '60px', borderRadius: '15px', backgroundColor: 'rgba(234, 88, 12, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: '#ea580c' }}>
+                  <Briefcase size={32} strokeWidth={2} />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Análisis Empresarial</h3>
+                <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
+                  Laboratorio de simulación estratégica para la toma de decisiones ejecutivas en tiempo real, casos de uso y asistencia de tutor virtual.
+                </p>
               </div>
-              <div className="icon-container" style={{ width: '60px', height: '60px', borderRadius: '15px', backgroundColor: 'rgba(241, 196, 15, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-color, #f1c40f)' }}>
-                <Briefcase size={32} strokeWidth={2} />
-              </div>
-              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px', fontWeight: '700' }}>Análisis Empresarial</h3>
-              <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '1rem' }}>
-                Integración de nuevos módulos orientados a la evaluación financiera y el diagnóstico integral de escenarios de negocios.
-              </p>
-            </div>
+            </Link>
           </div>
         </div>
 

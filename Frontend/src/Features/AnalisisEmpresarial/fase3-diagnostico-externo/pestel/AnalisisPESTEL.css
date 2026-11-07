@@ -1,0 +1,2426 @@
+/* ==========================================================================
+   ANÁLISIS PESTEL: MACROENTORNO ESTRATÉGICO (FASE 3 • PASO 3.1)
+   Layout vertical secuencial con letras gigantes llamativas denotando "PESTEL"
+   Diseño minimalista y limpio, 100% armonizado con el módulo de Análisis Empresarial
+   ========================================================================== */
+
+.pestel-spacious-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  animation: pestelFadeIn 0.25s ease-out;
+  box-sizing: border-box;
+}
+
+@keyframes pestelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   WORKSPACE GRID: BANDEJA LATERAL + ÁREA PRINCIPAL PESTEL
+   -------------------------------------------------------------------------- */
+.pestel-workspace-grid {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pestel-workspace-grid.tray-collapsed {
+  grid-template-columns: 56px 1fr;
+}
+
+@media (max-width: 1100px) {
+  .pestel-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+  .pestel-workspace-grid.tray-collapsed {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Área principal derecha */
+.pestel-workspace-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   BARRA TÁCTICA DEL MACROENTORNO CON CHIPS Y LETRAS DE PESTEL
+   ========================================================================== */
+.pestel-chip-letter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: rgba(234, 88, 12, 0.15);
+  color: var(--accent-color, #ea580c);
+  font-size: 0.72rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+html.dark .pestel-chip-letter-badge {
+  background: rgba(234, 88, 12, 0.25);
+  color: #fb923c;
+}
+
+/* ==========================================================================
+   SECUENCIA TOTALMENTE VERTICAL DE LAS 6 DIMENSIONES PESTEL
+   ========================================================================= */
+.pestel-dimensions-vertical {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+@media (max-width: 992px) {
+  .pestel-dimensions-vertical {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tarjeta individual en layout vertical de 2 columnas (Pilar Letra + Contenido) */
+.pestel-node-card.pestel-vertical-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.pestel-node-card.pestel-vertical-card:hover {
+  border-color: var(--accent-color, #ea580c);
+  box-shadow: 0 3px 12px rgba(234, 88, 12, 0.08);
+  transform: translateY(-1px);
+}
+
+.pestel-node-card.pestel-vertical-card.drag-over {
+  border-color: var(--accent-color, #ea580c) !important;
+  background: rgba(234, 88, 12, 0.03) !important;
+  box-shadow: 0 0 0 1.5px var(--accent-color, #ea580c) !important;
+  transform: scale(1.003);
+}
+
+/* --------------------------------------------------------------------------
+   PILAR IZQUIERDO: LETRA LLAMATIVA DE LA PALABRA PESTEL
+   -------------------------------------------------------------------------- */
+.pestel-letter-pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.09) 0%, rgba(234, 88, 12, 0.02) 100%);
+  border: 1.5px solid rgba(234, 88, 12, 0.24);
+  border-radius: 8px;
+  padding: 8px 4px;
+  user-select: none;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+html.dark .pestel-letter-pillar {
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.16) 0%, rgba(234, 88, 12, 0.04) 100%);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+.pestel-node-card.pestel-vertical-card:hover .pestel-letter-pillar {
+  border-color: var(--accent-color, #ea580c);
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.14) 0%, rgba(234, 88, 12, 0.05) 100%);
+  transform: scale(1.02);
+}
+
+.pestel-giant-letter {
+  font-size: 2rem;
+  font-weight: 950;
+  line-height: 0.95;
+  color: var(--accent-color, #ea580c);
+  letter-spacing: -0.04em;
+  font-family: inherit;
+  text-shadow: 0 1px 6px rgba(234, 88, 12, 0.2);
+}
+
+html.dark .pestel-giant-letter {
+  color: #fb923c;
+  text-shadow: 0 1px 8px rgba(251, 146, 60, 0.28);
+}
+
+.pestel-pillar-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color, #ea580c);
+  opacity: 0.9;
+}
+
+html.dark .pestel-pillar-icon-box {
+  color: #fb923c;
+}
+
+.pestel-pillar-name {
+  font-size: 0.60rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: var(--text-main);
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+}
+
+/* --------------------------------------------------------------------------
+   CUERPO PRINCIPAL DEL NODO DE DIMENSIÓN
+   -------------------------------------------------------------------------- */
+.pestel-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Cabecera del contenido */
+.pestel-node-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.pestel-node-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pestel-node-header-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pestel-dim-poam-badge {
+  font-size: 0.63rem;
+  font-weight: 750;
+  color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.08);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+html.dark .pestel-dim-poam-badge {
+  background: rgba(234, 88, 12, 0.16);
+  border-color: rgba(234, 88, 12, 0.4);
+  color: #fb923c;
+}
+
+.pestel-node-title {
+  font-size: 0.88rem;
+  font-weight: 850;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pestel-node-subtitle-desc {
+  font-size: 0.70rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-top: 0;
+}
+
+/* Descripción contextual del caso (Estilo minimalista compacto) */
+.pestel-statement-box {
+  padding: 5px 9px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-color);
+  border-left: 2.5px solid var(--accent-color, #ea580c);
+  border-radius: 5px;
+}
+
+html.dark .pestel-statement-box {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pestel-statement-desc {
+  font-size: 0.73rem;
+  color: var(--text-main);
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Acordeón de criterios */
+.pestel-criterios-wrapper {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.pestel-criterios-toggle-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.69rem;
+  font-weight: 700;
+  color: var(--text-main);
+  transition: background 0.15s ease;
+}
+
+.pestel-criterios-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+html.dark .pestel-criterios-toggle-btn {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+html.dark .pestel-criterios-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pestel-criterios-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pestel-criterios-list {
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+}
+
+.pestel-criterio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.69rem;
+  color: var(--text-main);
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.pestel-criterio-row input[type="checkbox"] {
+  margin-top: 1px;
+  accent-color: var(--accent-color, #ea580c);
+  cursor: pointer;
+}
+
+.pestel-criterio-content {
+  flex: 1;
+}
+
+.pestel-criterio-content strong {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.pestel-criterio-content span {
+  color: var(--text-muted);
+}
+
+/* Evidencias vinculadas y dropzone compactos */
+.pestel-evidencias-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-section-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pestel-drag-hint {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pestel-evidencias-chips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-evidencia-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px 6px 3px 6px;
+  border-radius: 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-color, #ea580c);
+  font-size: 0.69rem;
+  color: var(--text-main);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+}
+
+.pestel-evidencia-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-color: rgba(234, 88, 12, 0.4);
+}
+
+.pestel-evidencia-chip:active {
+  cursor: grabbing;
+}
+
+.pestel-evidencia-chip.is-dragging {
+  opacity: 0.4;
+  transform: scale(0.98);
+}
+
+.pestel-evidencia-chip.tipo-op {
+  border-left-color: #10b981;
+}
+
+.pestel-evidencia-chip.tipo-am {
+  border-left-color: #ef4444;
+}
+
+.pestel-evidencia-chip.manual {
+  border-left-color: #f59e0b;
+}
+
+html.dark .pestel-evidencia-chip {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-left-color: var(--accent-color, #ea580c) !important;
+}
+
+html.dark .pestel-evidencia-chip.tipo-op {
+  border-left-color: #10b981 !important;
+}
+
+html.dark .pestel-evidencia-chip.tipo-am {
+  border-left-color: #ef4444 !important;
+}
+
+html.dark .pestel-evidencia-chip.manual {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-left-color: #f59e0b !important;
+}
+
+.pestel-evidencia-main-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 5px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.pestel-drag-grip {
+  color: var(--text-muted);
+  opacity: 0.35;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: grab;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.pestel-evidencia-chip:hover .pestel-drag-grip {
+  opacity: 0.85;
+  color: var(--accent-color, #ea580c);
+}
+
+.pestel-evidencia-chip-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+  font-size: 0.69rem;
+  font-weight: 550;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.pestel-chip-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  padding-right: 2px;
+}
+
+.pestel-btn-attach-chip {
+  cursor: pointer;
+  padding: 0.2rem 0.32rem;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  position: relative;
+  min-width: 22px;
+  height: 20px;
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.09) !important;
+  border: 1px solid rgba(14, 165, 233, 0.22) !important;
+}
+
+.pestel-btn-attach-chip:hover {
+  color: #0369a1 !important;
+  background: rgba(14, 165, 233, 0.18) !important;
+  border-color: rgba(14, 165, 233, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+.pestel-btn-attach-chip.has-attachments {
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.16) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+}
+
+html.dark .pestel-btn-attach-chip {
+  color: #38bdf8 !important;
+  background: rgba(14, 165, 233, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+html.dark .pestel-btn-attach-chip:hover {
+  color: #7dd3fc !important;
+  background: rgba(14, 165, 233, 0.25) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+}
+
+.pestel-attach-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.54rem;
+  font-weight: 800;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 2px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.pestel-btn-remove-chip {
+  cursor: pointer;
+  padding: 0.2rem 0.32rem;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  min-width: 22px;
+  height: 20px;
+  color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.09) !important;
+  border: 1px solid rgba(239, 68, 68, 0.22) !important;
+}
+
+.pestel-btn-remove-chip:hover {
+  color: #b91c1c !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+html.dark .pestel-btn-remove-chip {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+html.dark .pestel-btn-remove-chip:hover {
+  color: #fca5a5 !important;
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.pestel-chip-attachments-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding-top: 2px;
+  margin-top: 1px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
+}
+
+html.dark .pestel-chip-attachments-badges {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.pestel-mini-attach-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 0.57rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  transition: all 0.15s ease;
+  max-width: 120px;
+  height: 16px;
+  box-sizing: border-box;
+}
+
+.pestel-mini-attach-badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.pestel-mini-badge-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pestel-mini-attach-badge.pdf {
+  background: rgba(239, 68, 68, 0.09);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #dc2626;
+}
+.pestel-mini-attach-badge.imagen {
+  background: rgba(168, 85, 247, 0.09);
+  border-color: rgba(168, 85, 247, 0.25);
+  color: #9333ea;
+}
+.pestel-mini-attach-badge.hoja_calculo {
+  background: rgba(16, 185, 129, 0.09);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #059669;
+}
+.pestel-mini-attach-badge.enlace {
+  background: rgba(14, 165, 233, 0.09);
+  border-color: rgba(14, 165, 233, 0.25);
+  color: #0284c7;
+}
+
+.pestel-btn-remove-chip {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+
+.pestel-btn-remove-chip:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.pestel-empty-dropzone {
+  border: 1.5px dashed var(--border-color);
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.01);
+  transition: all 0.2s ease;
+}
+
+html.dark .pestel-empty-dropzone {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.pestel-node-card.drag-over .pestel-empty-dropzone {
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.05);
+}
+
+/* =========================================================================
+   BOTÓN EN CADA DIMENSIÓN PARA ABRIR EL MODAL DE ADICIONAR FACTOR
+   ========================================================================= */
+.pestel-btn-add-factor-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: var(--accent-color, #ea580c) !important;
+  border: 1px solid var(--accent-color, #ea580c) !important;
+  color: #ffffff !important;
+  font-size: 0.69rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  line-height: 1.3;
+  box-shadow: 0 1px 4px rgba(234, 88, 12, 0.25);
+}
+
+.pestel-btn-add-factor-pill:hover {
+  background: #c2410c !important;
+  border-color: #c2410c !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.4);
+}
+
+html.dark .pestel-btn-add-factor-pill {
+  background: var(--accent-color, #ea580c) !important;
+  border-color: var(--accent-color, #ea580c) !important;
+  color: #ffffff !important;
+}
+
+html.dark .pestel-btn-add-factor-pill:hover {
+  background: #f97316 !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
+}
+
+/* Empty dropzone clickable */
+
+.pestel-btn-empty-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.1);
+  color: var(--accent-color, #ea580c);
+  font-size: 0.67rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pestel-btn-empty-add:hover {
+  background: var(--accent-color, #ea580c);
+  color: #ffffff;
+}
+
+/* =========================================================================
+   ESTILOS PREMIUM DEL MODAL DE ADICIÓN DE FACTOR EN PESTEL
+   ========================================================================= */
+.pestel-modal-container.pestel-modal-add-factor {
+  max-width: 560px;
+}
+
+.pestel-modal-factor-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.pestel-modal-factor-form .pestel-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.pestel-modal-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.pestel-modal-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: var(--text-main);
+}
+
+.pestel-modal-label-hint {
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Tarjetas selectoras de Tipo (Oportunidad / Amenaza) - SIN NINGÚN MARCO NI HOVER AZUL */
+.pestel-modal-tipo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+button.pestel-modal-tipo-card,
+.pestel-modal-tipo-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  box-sizing: border-box;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none;
+}
+
+button.pestel-modal-tipo-card:focus,
+button.pestel-modal-tipo-card:focus-visible,
+button.pestel-modal-tipo-card:focus-within,
+.pestel-modal-tipo-card:focus,
+.pestel-modal-tipo-card:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button.pestel-modal-tipo-card.op,
+.pestel-modal-tipo-card.op {
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+button.pestel-modal-tipo-card.op:hover,
+.pestel-modal-tipo-card.op:hover {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.18) !important;
+  outline: none !important;
+  transform: translateY(-1px);
+}
+
+button.pestel-modal-tipo-card.op.active,
+.pestel-modal-tipo-card.op.active {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  box-shadow: 0 0 0 1.5px #10b981 !important;
+  outline: none !important;
+}
+
+html.dark button.pestel-modal-tipo-card.op,
+html.dark .pestel-modal-tipo-card.op {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(52, 211, 153, 0.4) !important;
+}
+
+html.dark button.pestel-modal-tipo-card.op:hover,
+html.dark .pestel-modal-tipo-card.op:hover {
+  background: rgba(16, 185, 129, 0.14) !important;
+  border-color: #34d399 !important;
+}
+
+html.dark button.pestel-modal-tipo-card.op.active,
+html.dark .pestel-modal-tipo-card.op.active {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 0 1.5px #34d399 !important;
+}
+
+button.pestel-modal-tipo-card.am,
+.pestel-modal-tipo-card.am {
+  border: 1.5px solid rgba(239, 68, 68, 0.35) !important;
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+button.pestel-modal-tipo-card.am:hover,
+.pestel-modal-tipo-card.am:hover {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.18) !important;
+  outline: none !important;
+  transform: translateY(-1px);
+}
+
+button.pestel-modal-tipo-card.am.active,
+.pestel-modal-tipo-card.am.active {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  box-shadow: 0 0 0 1.5px #ef4444 !important;
+  outline: none !important;
+}
+
+html.dark button.pestel-modal-tipo-card.am,
+html.dark .pestel-modal-tipo-card.am {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(248, 113, 113, 0.4) !important;
+}
+
+html.dark button.pestel-modal-tipo-card.am:hover,
+html.dark .pestel-modal-tipo-card.am:hover {
+  background: rgba(239, 68, 68, 0.14) !important;
+  border-color: #f87171 !important;
+}
+
+html.dark button.pestel-modal-tipo-card.am.active,
+html.dark .pestel-modal-tipo-card.am.active {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 1.5px #f87171 !important;
+}
+
+.pestel-modal-tipo-radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.pestel-modal-tipo-card.op.active .pestel-modal-tipo-radio {
+  border-color: #10b981;
+}
+
+.pestel-modal-tipo-card.am.active .pestel-modal-tipo-radio {
+  border-color: #ef4444;
+}
+
+.pestel-modal-radio-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.pestel-modal-radio-inner.op {
+  background: #10b981;
+}
+
+.pestel-modal-radio-inner.am {
+  background: #ef4444;
+}
+
+.pestel-modal-tipo-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pestel-modal-tipo-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.pestel-modal-tipo-title.op {
+  color: #059669;
+}
+
+html.dark .pestel-modal-tipo-title.op {
+  color: #34d399;
+}
+
+.pestel-modal-tipo-title.am {
+  color: #dc2626;
+}
+
+html.dark .pestel-modal-tipo-title.am {
+  color: #f87171;
+}
+
+.pestel-modal-tipo-desc {
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+/* Select e input de subdimensión en modal */
+.pestel-modal-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.77rem;
+  font-weight: 550;
+  color: var(--text-main);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.pestel-modal-select:focus {
+  border-color: var(--accent-color, #ea580c);
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+}
+
+.pestel-modal-custom-subdim-wrap {
+  margin-top: 4px;
+}
+
+.pestel-modal-input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1.5px dashed var(--accent-color, #ea580c);
+  background: var(--bg-card);
+  font-size: 0.77rem;
+  color: var(--text-main);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.pestel-modal-input:focus {
+  border-style: solid;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+}
+
+/* Textarea del factor */
+.pestel-modal-textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 7px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.77rem;
+  color: var(--text-main);
+  font-family: inherit;
+  line-height: 1.4;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pestel-modal-textarea:focus {
+  border-color: var(--accent-color, #ea580c);
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+}
+
+/* Botones en footer del modal */
+.pestel-modal-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pestel-modal-btn-cancel {
+  padding: 6px 13px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.73rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pestel-modal-btn-cancel:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
+}
+
+html.dark .pestel-modal-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+button.pestel-modal-btn-save,
+.pestel-modal-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  border-radius: 6px;
+  border: 1px solid #ea580c !important;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  font-size: 0.74rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35) !important;
+  transition: all 0.18s ease;
+  outline: none !important;
+}
+
+button.pestel-modal-btn-save:hover,
+.pestel-modal-btn-save:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+  border-color: #c2410c !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.45) !important;
+}
+
+button.pestel-modal-btn-save:active,
+.pestel-modal-btn-save:active {
+  transform: translateY(0);
+}
+
+html.dark button.pestel-modal-btn-save,
+html.dark .pestel-modal-btn-save {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4) !important;
+}
+
+html.dark button.pestel-modal-btn-save:hover,
+html.dark .pestel-modal-btn-save:hover {
+  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%) !important;
+  border-color: #fb923c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.55) !important;
+}
+
+/* Badges de Tipo y Subdimensión dentro del chip de factor */
+.pestel-chip-tipo-tag {
+  font-size: 0.58rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1.3;
+  transition: all 0.15s ease;
+}
+
+.pestel-chip-tipo-tag:hover {
+  transform: scale(1.05);
+}
+
+.pestel-chip-tipo-tag.tag-op {
+  background: rgba(16, 185, 129, 0.13);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+html.dark .pestel-chip-tipo-tag.tag-op {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+.pestel-chip-tipo-tag.tag-am {
+  background: rgba(239, 68, 68, 0.13);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+html.dark .pestel-chip-tipo-tag.tag-am {
+  background: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+.pestel-chip-subdim-tag {
+  font-size: 0.59rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+html.dark .pestel-chip-subdim-tag {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+}
+
+/* Responsive para tarjeta vertical */
+@media (max-width: 680px) {
+  .pestel-node-card.pestel-vertical-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .pestel-letter-pillar {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 8px 12px;
+    gap: 12px;
+  }
+  .pestel-giant-letter {
+    font-size: 2.2rem;
+  }
+}
+
+/* =========================================================================
+   ESTILOS DE LA BANDEJA LATERAL EN PESTEL (ELIMINA MARCOS AZULES)
+   ========================================================================= */
+
+/* Pestañas de la bandeja sin azul */
+.pestel-sidebar-tray .poam-tray-tab.active {
+  background: var(--bg-card) !important;
+  color: var(--accent-color, #ea580c) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  border-color: var(--border-color) !important;
+}
+
+.pestel-sidebar-tray .poam-tray-tab.op.active {
+  color: #10b981 !important;
+}
+
+.pestel-sidebar-tray .poam-tray-tab.am.active {
+  color: #ef4444 !important;
+}
+
+.pestel-sidebar-tray .poam-tray-search-input {
+  background: transparent !important;
+}
+
+html.dark .pestel-sidebar-tray .poam-tray-search-input {
+  background: transparent !important;
+}
+
+.pestel-sidebar-tray .poam-tray-search-input:focus {
+  border-color: var(--accent-color, #ea580c) !important;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15) !important;
+}
+
+/* Dropzone feedback en la bandeja lateral */
+
+.pestel-tray-drop-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 8px;
+  margin: 2px 0 6px 0;
+  border-radius: 6px;
+  background: rgba(234, 88, 12, 0.12);
+  border: 1.5px dashed var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+  font-size: 0.67rem;
+  font-weight: 750;
+  animation: pestelPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pestelPulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.01); }
+}
+
+/* Tarjetas de la bandeja: aspecto limpio, nítido y con el MISMO COLOR que la bandeja de POAM */
+.pestel-sidebar-tray .noticia-card,
+.pestel-sidebar-tray .arbol-draggable-card,
+.pestel-sidebar-tray .foda-tray-card,
+.pestel-sidebar-tray .poam-carrusel-factor-card {
+  background: var(--bg-card) !important;
+  border: 1.5px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease !important;
+}
+
+.pestel-sidebar-tray .poam-carrusel-factor-card.tipo-op {
+  border-left: 4px solid #10b981 !important;
+}
+
+.pestel-sidebar-tray .poam-carrusel-factor-card.tipo-am {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.pestel-sidebar-tray .noticia-card:hover,
+.pestel-sidebar-tray .arbol-draggable-card:hover,
+.pestel-sidebar-tray .foda-tray-card:hover,
+.pestel-sidebar-tray .poam-carrusel-factor-card:hover {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1px) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.pestel-sidebar-tray .noticia-card.is-dragging,
+.pestel-sidebar-tray .arbol-draggable-card.is-dragging,
+.pestel-sidebar-tray .poam-carrusel-factor-card.is-dragging {
+  opacity: 0.3 !important;
+  filter: none !important;
+}
+
+html.dark .pestel-sidebar-tray .noticia-card,
+html.dark .pestel-sidebar-tray .arbol-draggable-card,
+html.dark .pestel-sidebar-tray .foda-tray-card,
+html.dark .pestel-sidebar-tray .poam-carrusel-factor-card {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html.dark .pestel-sidebar-tray .noticia-card:hover,
+html.dark .pestel-sidebar-tray .arbol-draggable-card:hover,
+html.dark .pestel-sidebar-tray .foda-tray-card:hover,
+html.dark .pestel-sidebar-tray .poam-carrusel-factor-card:hover {
+  background: rgba(255, 255, 255, 0.065) !important;
+  border-color: var(--primary-color) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html.dark .pestel-sidebar-tray .noticia-card.is-dragging,
+html.dark .pestel-sidebar-tray .arbol-draggable-card.is-dragging,
+html.dark .pestel-sidebar-tray .poam-carrusel-factor-card.is-dragging {
+  opacity: 0.3 !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  filter: none !important;
+}
+
+.pestel-sidebar-tray .noticia-categoria-badge {
+  font-size: 0.63rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html.dark .pestel-sidebar-tray .noticia-categoria-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+/* =========================================================================
+   PAGINADOR INFERIOR DE LA BANDEJA (EXACTO A ÁRBOL DE PROBLEMAS)
+   ========================================================================= */
+.pestel-sidebar-tray .foda-tray-paginator,
+.arbol-sidebar-tray .foda-tray-paginator {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 8px 4px 8px !important;
+  border-top: 1px solid var(--border-color, #e2e8f0) !important;
+  background: var(--bg-card, #ffffff) !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  position: relative !important;
+  z-index: 10 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.pestel-sidebar-tray .foda-btn-page,
+.arbol-sidebar-tray .foda-btn-page {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 6px !important;
+  border: 1.5px solid var(--border-color, #cbd5e1) !important;
+  background: var(--bg-card, #ffffff) !important;
+  color: var(--text-main, #1e293b) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+.pestel-sidebar-tray .foda-btn-page:hover:not(:disabled),
+.arbol-sidebar-tray .foda-btn-page:hover:not(:disabled) {
+  border-color: var(--accent-color, #ea580c) !important;
+  color: var(--accent-color, #ea580c) !important;
+  background: rgba(234, 88, 12, 0.08) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15) !important;
+}
+
+.pestel-sidebar-tray .foda-btn-page:disabled,
+.arbol-sidebar-tray .foda-btn-page:disabled {
+  opacity: 0.25 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border-color: var(--border-color, #e2e8f0) !important;
+  color: var(--text-muted, #94a3b8) !important;
+}
+
+.pestel-sidebar-tray .foda-paginator-text,
+.arbol-sidebar-tray .foda-paginator-text {
+  font-size: 0.74rem !important;
+  font-weight: 750 !important;
+  color: var(--text-main, #1e293b) !important;
+  min-width: 85px !important;
+  text-align: center !important;
+  letter-spacing: 0.02em !important;
+  user-select: none !important;
+}
+
+/* Modo oscuro para paginador y elementos de bandeja */
+html.dark .pestel-sidebar-tray .foda-tray-paginator {
+  background: #18181b !important;
+  border-top-color: #27272a !important;
+}
+
+html.dark .pestel-sidebar-tray .foda-btn-page {
+  background: #27272a !important;
+  border-color: #3f3f46 !important;
+  color: #f4f4f5 !important;
+}
+
+html.dark .pestel-sidebar-tray .foda-btn-page:hover:not(:disabled) {
+  border-color: #ea580c !important;
+  color: #f97316 !important;
+  background: rgba(234, 88, 12, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .pestel-sidebar-tray .foda-btn-page:disabled {
+  opacity: 0.2 !important;
+  border-color: #27272a !important;
+  color: #71717a !important;
+}
+
+html.dark .pestel-sidebar-tray .foda-paginator-text {
+  color: #f4f4f5 !important;
+}
+
+/* ==========================================================================
+   MODAL DE EVIDENCIA DOCUMENTAL POR FACTOR (.pdf, imágenes, excel, url)
+   ========================================================================== */
+.pestel-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: pestelFadeIn 0.2s ease-out;
+}
+
+@keyframes pestelFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pestel-modal-container {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: pestelModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pestelModalPop {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+html.dark .pestel-modal-container {
+  background: #18181b;
+  border-color: #27272a;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6);
+}
+
+.pestel-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: rgba(0, 0, 0, 0.015);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+html.dark .pestel-modal-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-color: #27272a;
+}
+
+.pestel-modal-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 36px);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.pestel-modal-pretitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: var(--accent-color, #ea580c);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pestel-modal-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 850;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.pestel-modal-factor-quote {
+  margin: 4px 0 0;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.35;
+  border-left: 2.5px solid var(--accent-color, #ea580c);
+  padding-left: 8px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  max-height: 72px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.pestel-modal-factor-quote::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pestel-modal-factor-quote::-webkit-scrollbar-thumb {
+  background: rgba(234, 88, 12, 0.3);
+  border-radius: 4px;
+}
+
+.pestel-modal-btn-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pestel-modal-btn-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.pestel-modal-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: calc(90vh - 125px);
+}
+
+/* Tabs para los 4 tipos de evidencia */
+.pestel-modal-type-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 580px) {
+  .pestel-modal-type-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pestel-modal-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pestel-modal-tab-btn:hover {
+  color: var(--text-main);
+  border-color: var(--accent-color, #ea580c);
+}
+
+.pestel-modal-tab-btn.active.pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.pestel-modal-tab-btn.active.img {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.pestel-modal-tab-btn.active.sheet {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.pestel-modal-tab-btn.active.link {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+/* Panel de carga */
+.pestel-modal-upload-panel {
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+html.dark .pestel-modal-upload-panel {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pestel-modal-dropzone {
+  display: block;
+  border: 1.5px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.pestel-modal-dropzone:hover {
+  border-color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.03);
+}
+
+.pestel-hidden-file-input {
+  display: none;
+}
+
+.pestel-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.pestel-upload-icon {
+  color: var(--accent-color, #ea580c);
+  opacity: 0.85;
+}
+
+.pestel-dropzone-title {
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: var(--text-main);
+}
+
+.pestel-dropzone-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.pestel-selected-file-preview {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pestel-selected-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pestel-img-thumb-preview {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+}
+
+.pestel-file-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pestel-file-icon-box.pdf {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+.pestel-file-icon-box.hoja_calculo {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+.pestel-file-icon-box.imagen {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.pestel-file-meta-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pestel-rename-input {
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--text-main);
+  outline: none;
+}
+
+.pestel-rename-input:focus {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.pestel-file-raw-meta {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.pestel-modal-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pestel-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pestel-modal-field label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.pestel-input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-input-icon-wrap .input-icon {
+  position: absolute;
+  left: 8px;
+  color: var(--text-muted);
+}
+
+.pestel-input-icon-wrap input {
+  padding-left: 28px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-modal-field input {
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.72rem;
+  color: var(--text-main);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-modal-field input:focus {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.pestel-modal-btn-submit {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent-color, #ea580c);
+  color: #ffffff;
+  font-size: 0.71rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 4px rgba(234, 88, 12, 0.25);
+}
+
+.pestel-modal-btn-submit:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* Sección de evidencias ya adjuntas */
+.pestel-modal-attached-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pestel-modal-attached-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+}
+
+.pestel-attached-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pestel-attached-help {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.pestel-modal-empty-attached {
+  border: 1.5px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 18px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+}
+
+.pestel-modal-empty-attached p {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.pestel-modal-empty-attached span {
+  font-size: 0.65rem;
+  max-width: 380px;
+}
+
+.pestel-attached-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pestel-attached-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.pestel-attached-card:hover {
+  border-color: rgba(234, 88, 12, 0.3);
+}
+
+.pestel-attached-card-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pestel-attached-icon-wrap {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pestel-attached-icon-wrap.pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+.pestel-attached-icon-wrap.imagen {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+.pestel-attached-icon-wrap.hoja_calculo {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.pestel-attached-icon-wrap.enlace {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+}
+
+.pestel-attached-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.pestel-attached-card-name {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pestel-attached-card-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.pestel-attached-type-tag {
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 0 4px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+
+.pestel-attached-type-tag.pdf {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+.pestel-attached-type-tag.imagen {
+  background: rgba(168, 85, 247, 0.15);
+  color: #9333ea;
+}
+.pestel-attached-type-tag.hoja_calculo {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+.pestel-attached-type-tag.enlace {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0284c7;
+}
+
+.pestel-attached-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pestel-btn-doc-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.pestel-btn-doc-action.view:hover {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.pestel-btn-doc-action.delete {
+  padding: 4px;
+}
+
+.pestel-btn-doc-action.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.pestel-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.015);
+}
+
+html.dark .pestel-modal-footer {
+  background: rgba(255, 255, 255, 0.02);
+  border-top-color: #27272a;
+}
+
+.pestel-modal-footer-hint {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.pestel-modal-btn-done {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pestel-modal-btn-done:hover {
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+}
+
+/* =========================================================================
+   DISEÑO MEJORADO DE TARJETA PARA FACTORES REGISTRADOS (CERO PLANO)
+   ========================================================================= */
+.pestel-factor-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color, #ea580c);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.015);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  width: 100%;
+  position: relative;
+}
+
+.pestel-factor-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.pestel-factor-card.tipo-op {
+  border-left-color: #10b981 !important;
+}
+
+.pestel-factor-card.tipo-op:hover {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
+}
+
+.pestel-factor-card.tipo-am {
+  border-left-color: #ef4444 !important;
+}
+
+.pestel-factor-card.tipo-am:hover {
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.08);
+}
+
+html.dark .pestel-factor-card {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .pestel-factor-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.pestel-factor-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.pestel-factor-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.pestel-factor-tipo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: none;
+  cursor: default !important;
+  user-select: none;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.pestel-factor-tipo-pill.pill-op {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+html.dark .pestel-factor-tipo-pill.pill-op {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.pestel-factor-tipo-pill.pill-am {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+html.dark .pestel-factor-tipo-pill.pill-am {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.pestel-factor-subdim-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+html.dark .pestel-factor-subdim-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+}
+
+.pestel-factor-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.pestel-btn-card-action {
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  position: relative;
+  min-width: 24px;
+  height: 22px;
+  border: 1px solid transparent;
+  outline: none;
+}
+
+/* BOTÓN EDITAR EN AMARILLO */
+.pestel-btn-card-action.edit {
+  color: #d97706 !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+.pestel-btn-card-action.edit:hover {
+  color: #b45309 !important;
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+}
+
+html.dark .pestel-btn-card-action.edit {
+  color: #fbbf24 !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+html.dark .pestel-btn-card-action.edit:hover {
+  color: #fde68a !important;
+  background: rgba(245, 158, 11, 0.3) !important;
+  border-color: rgba(245, 158, 11, 0.7) !important;
+}
+
+/* BOTÓN ADJUNTAR */
+.pestel-btn-card-action.attach {
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.09) !important;
+  border: 1px solid rgba(14, 165, 233, 0.25) !important;
+}
+
+.pestel-btn-card-action.attach:hover {
+  color: #0369a1 !important;
+  background: rgba(14, 165, 233, 0.2) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+.pestel-btn-card-action.attach.has-attachments {
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.18) !important;
+  border-color: rgba(14, 165, 233, 0.55) !important;
+}
+
+html.dark .pestel-btn-card-action.attach {
+  color: #38bdf8 !important;
+  background: rgba(14, 165, 233, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+}
+
+/* BOTÓN ELIMINAR */
+.pestel-btn-card-action.delete {
+  color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.09) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+.pestel-btn-card-action.delete:hover {
+  color: #b91c1c !important;
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+html.dark .pestel-btn-card-action.delete {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+.pestel-factor-card-body {
+  width: 100%;
+}
+
+.pestel-factor-card-text {
+  margin: 0;
+  font-size: 0.77rem;
+  font-weight: 520;
+  line-height: 1.45;
+  color: var(--text-main);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.pestel-empty-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   BARRA SUPERIOR CON ACCIÓN DE EXPORTAR A PDF (PESTEL)
+   ========================================================================== */
+.pestel-top-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.pestel-top-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pestel-top-toolbar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: var(--accent-color, #ea580c);
+}
+
+.pestel-top-toolbar-stats {
+  font-size: 0.70rem;
+  font-weight: 650;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+html.dark .pestel-top-toolbar-stats {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pestel-top-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

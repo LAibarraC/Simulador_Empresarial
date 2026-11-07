@@ -1,0 +1,2033 @@
+/* ==========================================================================
+   MATRIZ DE PERFIL COMPETITIVO (MPC) - FASE 5
+   Sistema de diseño 100% unificado con el módulo de Análisis Empresarial
+   (PESTEL, 5 Fuerzas de Porter, POAM y PCI)
+   Soporte completo Modo Claro (Default) y Modo Oscuro (html.dark)
+   ========================================================================== */
+
+:root {
+  --mpc-bg-base: var(--bg-body, #f8fafc);
+  --mpc-bg-card: var(--bg-card, #ffffff);
+  --mpc-border: var(--border-color, #e2e8f0);
+  --mpc-accent: var(--accent-color, #ea580c);
+  --mpc-accent-glow: rgba(234, 88, 12, 0.25);
+  --mpc-esmeralda: #10b981;
+  --mpc-esmeralda-glow: rgba(16, 185, 129, 0.25);
+  --mpc-azul: #3b82f6;
+  --mpc-ambar: #f59e0b;
+  --mpc-rojo: #ef4444;
+  --mpc-text-primary: var(--text-main, #0f172a);
+  --mpc-text-secondary: var(--text-muted, #64748b);
+  --mpc-radius: 12px;
+  --mpc-radius-sm: 8px;
+  --mpc-transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mpc-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0.5rem 0 2.5rem;
+  background-color: transparent;
+  color: var(--text-main);
+  font-family: inherit;
+  box-sizing: border-box;
+  animation: mpcFadeIn 0.25s ease-out;
+}
+
+@keyframes mpcFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   1. BARRA DE CONTROL DE PESOS Y GESTIÓN ESTRATÉGICA MPC
+   ========================================================================== */
+.mpc-weight-control-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--mpc-radius);
+  padding: 1.15rem 1.45rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.04));
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.mpc-weight-control-card:hover {
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+html.dark .mpc-weight-control-card {
+  background: var(--bg-card, #1e1e1e);
+  border-color: var(--border-color, #333333);
+}
+
+.mpc-weight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.15rem;
+}
+
+.mpc-weight-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  min-width: 280px;
+}
+
+.mpc-weight-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(234, 88, 12, 0.1);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+  color: var(--accent-color, #ea580c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+html.dark .mpc-weight-icon-badge {
+  background: rgba(234, 88, 12, 0.18);
+  border-color: rgba(234, 88, 12, 0.35);
+  color: #fb923c;
+}
+
+.mpc-weight-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mpc-weight-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.mpc-weight-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.mpc-weight-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--mpc-transition);
+  white-space: nowrap;
+}
+
+.mpc-weight-badge.valido {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: var(--mpc-esmeralda);
+}
+
+.mpc-weight-badge.invalido-falta {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: var(--mpc-ambar);
+}
+
+.mpc-weight-badge.invalido-sobra {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: var(--mpc-rojo);
+}
+
+.mpc-weight-help-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Acciones rápidas de la barra de control */
+.mpc-weight-quick-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+/* ==========================================================================
+   SISTEMA DE BOTONES UNIFICADO (Idéntico a Porter, POAM y PESTEL)
+   ========================================================================== */
+
+/* Botón primario de acción (Naranja Acento Táctico) */
+.mpc-btn-action-primary,
+.mpc-btn-primary,
+.mpc-btn-next {
+  background: var(--accent-color, #ea580c);
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  padding: 6.5px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.mpc-btn-action-primary:hover,
+.mpc-btn-primary:hover,
+.mpc-btn-next:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+.mpc-btn-action-primary:active,
+.mpc-btn-primary:active,
+.mpc-btn-next:active {
+  transform: translateY(0);
+}
+
+.mpc-btn-next:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Botón secundario outline / superficie neutra */
+.mpc-btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.mpc-btn-secondary:hover:not(:disabled) {
+  background: rgba(234, 88, 12, 0.08);
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+  transform: translateY(-1px);
+}
+
+.mpc-btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.mpc-btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+html.dark .mpc-btn-secondary {
+  background: var(--bg-card, #1e1e1e);
+  border-color: var(--border-color, #3a3a3a);
+  color: var(--text-main, #f3f4f6);
+}
+
+html.dark .mpc-btn-secondary:hover:not(:disabled) {
+  background: rgba(234, 88, 12, 0.16);
+  border-color: var(--accent-color, #ea580c);
+  color: #fb923c;
+}
+
+/* Variante botón: Vincular de Porter */
+.mpc-btn-secondary.porter-btn {
+  background: rgba(234, 88, 12, 0.08);
+  border-color: rgba(234, 88, 12, 0.3);
+  color: var(--accent-color, #ea580c);
+}
+
+.mpc-btn-secondary.porter-btn:hover:not(:disabled) {
+  background: var(--accent-color, #ea580c);
+  border-color: var(--accent-color, #ea580c);
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.3);
+}
+
+/* Variante botón: Añadir Rival */
+.mpc-btn-secondary.mpc-btn-rival {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #6366f1;
+}
+
+.mpc-btn-secondary.mpc-btn-rival:hover:not(:disabled) {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Variante botón: Limpiar Matriz */
+.mpc-btn-secondary.mpc-btn-reset {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.mpc-btn-secondary.mpc-btn-reset:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.3);
+}
+
+/* Barra de progreso de ponderación */
+.mpc-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border-color, #e2e8f0);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+html.dark .mpc-progress-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mpc-progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.35s ease, background-color 0.25s ease;
+}
+
+.mpc-progress-bar.valido {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  box-shadow: 0 0 10px var(--mpc-esmeralda-glow);
+}
+
+.mpc-progress-bar.invalido-falta {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.mpc-progress-bar.invalido-sobra {
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+}
+
+/* ==========================================================================
+   2. TABLA MATRIZ DE PERFIL COMPETITIVO (MPC) - DISTRIBUCIÓN Y ESTILOS
+   ========================================================================== */
+.mpc-table-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--mpc-radius);
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm, 0 1px 4px rgba(0, 0, 0, 0.04));
+  scrollbar-width: thin;
+  scrollbar-color: rgba(234, 88, 12, 0.25) transparent;
+}
+
+html.dark .mpc-table-wrapper {
+  background: var(--bg-card, #1e1e1e);
+  border-color: var(--border-color, #333333);
+}
+
+.mpc-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+.mpc-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mpc-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(234, 88, 12, 0.25);
+  border-radius: 4px;
+}
+
+.mpc-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+/* Encabezados Principales */
+.mpc-table thead tr:first-child th {
+  background: var(--bg-body, #f8fafc);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.85rem 1rem;
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+html.dark .mpc-table thead tr:first-child th {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main, #f3f4f6);
+}
+
+/* Columna de FCE - Fijada a la izquierda (Sticky Column) */
+th.mpc-col-fce {
+  width: 36%;
+  min-width: 360px;
+  max-width: 480px;
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background: var(--bg-body, #f8fafc) !important;
+  border-right: 2px solid var(--border-color);
+  box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+html.dark th.mpc-col-fce {
+  background: #1e1e1e !important;
+  border-right-color: var(--border-color, #333333);
+  box-shadow: 4px 0 10px -2px rgba(0, 0, 0, 0.4);
+}
+
+td.mpc-col-fce {
+  width: 36%;
+  min-width: 360px;
+  max-width: 480px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: var(--bg-card, #ffffff);
+  border-right: 2px solid var(--border-color);
+  box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+html.dark td.mpc-col-fce {
+  background: var(--bg-card, #1e1e1e);
+  border-right-color: var(--border-color, #333333);
+  box-shadow: 4px 0 10px -2px rgba(0, 0, 0, 0.4);
+}
+
+.mpc-table tbody tr:nth-child(even) td.mpc-col-fce {
+  background: #fbfbfc;
+}
+
+html.dark .mpc-table tbody tr:nth-child(even) td.mpc-col-fce {
+  background: #191919;
+}
+
+.mpc-table tbody tr:hover td.mpc-col-fce {
+  background: #fff8f5;
+}
+
+html.dark .mpc-table tbody tr:hover td.mpc-col-fce {
+  background: #262220;
+}
+
+/* Columna de Peso */
+.mpc-col-peso {
+  width: 95px;
+  min-width: 90px;
+  text-align: center;
+}
+
+/* Encabezado de cada competidor (1 columna por empresa) */
+.mpc-th-competidor {
+  text-align: center;
+  border-left: 1px solid var(--border-color);
+  background: var(--bg-body, #f8fafc);
+  position: relative;
+  transition: var(--mpc-transition);
+  min-width: 210px;
+  vertical-align: top;
+  padding: 0.75rem 0.6rem !important;
+}
+
+html.dark .mpc-th-competidor {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mpc-th-competidor.nuestra-empresa {
+  background: rgba(234, 88, 12, 0.07) !important;
+  border-left: 2px solid var(--accent-color, #ea580c) !important;
+  border-right: 2px solid var(--accent-color, #ea580c) !important;
+}
+
+.mpc-comp-header-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.mpc-comp-tag-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.mpc-comp-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.18rem 0.65rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mpc-comp-tag.propia {
+  background: rgba(234, 88, 12, 0.15);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.4);
+}
+
+.mpc-comp-tag.rival {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+.mpc-comp-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  width: 100%;
+  max-width: 200px;
+}
+
+.mpc-comp-name-input {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.84rem;
+  text-align: center;
+  padding: 0.28rem 0.5rem;
+  width: 100%;
+  outline: none !important;
+  transition: all 0.2s ease;
+}
+
+.mpc-comp-name-input:hover,
+.mpc-comp-name-input:focus {
+  border-color: var(--accent-color, #ea580c);
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+}
+
+.mpc-comp-name-input.sin-nombre {
+  border-color: rgba(234, 88, 12, 0.45);
+  background: rgba(234, 88, 12, 0.04);
+}
+
+.mpc-comp-name-input.sin-nombre:focus {
+  border-color: var(--accent-color, #ea580c);
+  background: var(--bg-card);
+}
+
+.mpc-btn-remove-comp {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: var(--mpc-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mpc-btn-remove-comp:hover {
+  color: var(--mpc-rojo);
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* Subencabezados por competidor */
+.mpc-table thead tr.sub-header th {
+  background: var(--bg-body, #f1f5f9);
+  border-bottom: 2px solid var(--border-color);
+  padding: 0.45rem 0.6rem;
+}
+
+html.dark .mpc-table thead tr.sub-header th {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mpc-sub-th-eval {
+  text-align: center;
+  border-left: 1px solid var(--border-color);
+}
+
+.mpc-sub-th-eval.nuestra-empresa {
+  border-left: 2px solid var(--accent-color, #ea580c) !important;
+  border-right: 2px solid var(--accent-color, #ea580c) !important;
+  background: rgba(234, 88, 12, 0.05) !important;
+}
+
+.mpc-sub-th-labels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mpc-sub-th-sep {
+  color: var(--border-color);
+}
+
+/* Filas del cuerpo */
+.mpc-table tbody tr {
+  transition: background-color 0.18s ease;
+}
+
+.mpc-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+html.dark .mpc-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.mpc-table tbody tr:hover {
+  background: rgba(234, 88, 12, 0.035);
+}
+
+.mpc-table tbody td {
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+/* Celda FCE */
+.mpc-fce-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.35rem 0;
+}
+
+.mpc-fce-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.mpc-fce-meta-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mpc-fce-codigo {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.1);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.mpc-fce-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--bg-body, #f8fafc);
+  border: 1px solid var(--border-color);
+  padding: 0.16rem 0.28rem;
+  border-radius: 7px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+html.dark .mpc-fce-actions {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.mpc-btn-fce-action {
+  cursor: pointer;
+  padding: 0.24rem 0.35rem;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  position: relative;
+  min-width: 25px;
+  height: 23px;
+}
+
+.mpc-btn-fce-action.evidencia {
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.09) !important;
+  border: 1px solid rgba(14, 165, 233, 0.22) !important;
+}
+
+.mpc-btn-fce-action.evidencia:hover {
+  color: #0369a1 !important;
+  background: rgba(14, 165, 233, 0.18) !important;
+  border-color: rgba(14, 165, 233, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+.mpc-btn-fce-action.evidencia.has-evidencias {
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.16) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+}
+
+html.dark .mpc-btn-fce-action.evidencia {
+  color: #38bdf8 !important;
+  background: rgba(14, 165, 233, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+html.dark .mpc-btn-fce-action.evidencia:hover {
+  color: #7dd3fc !important;
+  background: rgba(14, 165, 233, 0.25) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+}
+
+.mpc-evidencia-badge-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.54rem;
+  font-weight: 800;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 2px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón Editar - Amarillo / Ámbar dorado */
+.mpc-btn-fce-action.edit {
+  color: #d97706 !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.mpc-btn-fce-action.edit:hover {
+  color: #b45309 !important;
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+html.dark .mpc-btn-fce-action.edit {
+  color: #facc15 !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  border-color: rgba(250, 204, 21, 0.38) !important;
+}
+
+html.dark .mpc-btn-fce-action.edit:hover {
+  color: #fef08a !important;
+  background: rgba(245, 158, 11, 0.28) !important;
+  border-color: rgba(250, 204, 21, 0.6) !important;
+}
+
+.mpc-btn-fce-action.delete {
+  color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.09) !important;
+  border: 1px solid rgba(239, 68, 68, 0.22) !important;
+}
+
+.mpc-btn-fce-action.delete:hover {
+  color: #b91c1c !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+html.dark .mpc-btn-fce-action.delete {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+html.dark .mpc-btn-fce-action.delete:hover {
+  color: #fca5a5 !important;
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.mpc-fce-nombre {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  line-height: 1.42;
+  word-break: break-word;
+}
+
+.mpc-fce-desc {
+  font-size: 0.77rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  font-style: italic;
+  background: rgba(0, 0, 0, 0.025);
+  border-left: 2.5px solid var(--accent-color, #ea580c);
+  padding: 0.28rem 0.55rem;
+  border-radius: 0 4px 4px 0;
+  word-break: break-word;
+}
+
+html.dark .mpc-fce-desc {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* Celda Peso */
+.mpc-peso-cell {
+  text-align: center;
+}
+
+.mpc-peso-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  background: var(--bg-body, #f8fafc);
+  border: 1.5px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.25rem 0.4rem;
+  transition: all 0.2s ease;
+  outline: none !important;
+}
+
+html.dark .mpc-peso-input-wrapper {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mpc-peso-input-wrapper.peso-invalido {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  background: rgba(239, 68, 68, 0.06) !important;
+}
+
+html.dark .mpc-peso-input-wrapper.peso-invalido {
+  border-color: rgba(248, 113, 113, 0.6) !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+.mpc-peso-input-wrapper:focus-within {
+  border-color: var(--accent-color, #ea580c);
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+  outline: none !important;
+}
+
+.mpc-peso-input {
+  width: 44px;
+  background: transparent;
+  border: none !important;
+  color: var(--text-main);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none !important;
+}
+
+.mpc-peso-pct {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Celda de Evaluación por Competidor (Calif + Pond juntos) */
+.mpc-td-eval {
+  text-align: center;
+  border-left: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.mpc-td-eval.nuestra-empresa {
+  background: rgba(234, 88, 12, 0.035);
+  border-left: 2px solid var(--accent-color, #ea580c) !important;
+  border-right: 2px solid var(--accent-color, #ea580c) !important;
+}
+
+.mpc-eval-cell-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  white-space: nowrap;
+}
+
+/* Selector de Rating (Pills 1-4) */
+.mpc-rating-selector {
+  display: inline-flex;
+  gap: 0.22rem;
+  background: var(--bg-body, #f1f5f9);
+  padding: 0.2rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+html.dark .mpc-rating-selector {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.mpc-rating-btn {
+  width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  border: none !important;
+  outline: none !important;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--mpc-transition);
+  flex-shrink: 0;
+}
+
+.mpc-rating-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-main);
+  transform: scale(1.08);
+}
+
+.mpc-rating-btn.active-1 {
+  background: var(--mpc-rojo) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4) !important;
+}
+
+.mpc-rating-btn.active-2 {
+  background: var(--mpc-ambar) !important;
+  color: #121417 !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4) !important;
+}
+
+.mpc-rating-btn.active-3 {
+  background: #0ea5e9 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(14, 165, 233, 0.4) !important;
+}
+
+.mpc-rating-btn.active-4 {
+  background: var(--mpc-esmeralda) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px var(--mpc-esmeralda-glow) !important;
+}
+
+/* Badge de Puntaje Ponderado en la celda */
+.mpc-eval-pond-badge {
+  min-width: 44px;
+  padding: 0.22rem 0.45rem;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.86rem;
+  text-align: center;
+  background: var(--bg-body, #f8fafc);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  transition: var(--mpc-transition);
+}
+
+.mpc-eval-pond-badge.activo {
+  color: var(--text-main);
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.mpc-td-eval.nuestra-empresa .mpc-eval-pond-badge.activo {
+  color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.1);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+/* ==========================================================================
+   3. FILA DE TOTALES PONDERADOS EN TFOOT (REDESIGN COMPACTO Y ORDENADO)
+   ========================================================================== */
+.mpc-table tfoot tr.mpc-tfoot-row {
+  background: var(--bg-body, #f8fafc);
+}
+
+html.dark .mpc-table tfoot tr.mpc-tfoot-row {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mpc-tfoot-td-label {
+  padding: 1.15rem 1.1rem;
+  border-top: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-right: 2px solid var(--border-color);
+  vertical-align: middle;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: var(--bg-body, #f8fafc) !important;
+  box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+html.dark .mpc-tfoot-td-label {
+  background: #1e1e1e !important;
+  border-right-color: var(--border-color, #333333);
+  box-shadow: 4px 0 10px -2px rgba(0, 0, 0, 0.4);
+}
+
+.mpc-tfoot-label-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.mpc-tfoot-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(234, 88, 12, 0.1);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+  color: var(--accent-color, #ea580c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mpc-tfoot-main-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mpc-tfoot-sub-title {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+/* Columna Peso en tfoot */
+.mpc-tfoot-td-peso {
+  padding: 1.15rem 0.5rem;
+  border-top: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.mpc-tfoot-peso-pill {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.mpc-tfoot-peso-pill.valido {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: var(--mpc-esmeralda);
+}
+
+.mpc-tfoot-peso-pill.invalido-falta {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: var(--mpc-ambar);
+}
+
+.mpc-tfoot-peso-pill.invalido-sobra {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: var(--mpc-rojo);
+}
+
+.mpc-tfoot-peso-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.mpc-tfoot-peso-base {
+  font-size: 0.74rem;
+  opacity: 0.75;
+}
+
+/* Celdas Competidores en tfoot */
+.mpc-tfoot-td-comp {
+  padding: 0.95rem 0.75rem;
+  border-top: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  vertical-align: middle;
+  text-align: center;
+}
+
+.mpc-tfoot-td-comp.nuestra-empresa {
+  background: rgba(234, 88, 12, 0.05);
+  border-left: 2px solid var(--accent-color, #ea580c) !important;
+  border-right: 2px solid var(--accent-color, #ea580c) !important;
+  border-bottom: 2px solid var(--accent-color, #ea580c) !important;
+}
+
+.mpc-tfoot-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.6rem;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  min-width: 150px;
+  max-width: 220px;
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.04));
+  transition: var(--mpc-transition);
+}
+
+.mpc-tfoot-card.propia {
+  background: rgba(234, 88, 12, 0.06);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+.mpc-tfoot-card.card-lider {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.15);
+}
+
+.mpc-tfoot-score-row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.mpc-tfoot-score-number {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.mpc-tfoot-card.propia .mpc-tfoot-score-number {
+  color: var(--accent-color, #ea580c);
+}
+
+.mpc-tfoot-card.card-lider .mpc-tfoot-score-number {
+  color: #f59e0b;
+}
+
+.mpc-tfoot-score-divider {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Posture badge */
+.mpc-tfoot-posture-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  max-width: 100%;
+}
+
+.mpc-tfoot-posture-badge.rank-1 {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #d97706;
+}
+
+html.dark .mpc-tfoot-posture-badge.rank-1 {
+  color: #fbbf24;
+}
+
+.mpc-tfoot-posture-badge.rank-2 {
+  background: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  color: var(--text-main);
+}
+
+.mpc-tfoot-posture-badge.rank-3 {
+  background: rgba(234, 88, 12, 0.12);
+  border: 1px solid rgba(234, 88, 12, 0.3);
+  color: var(--accent-color, #ea580c);
+}
+
+.mpc-tfoot-posture-badge.rank-4,
+.mpc-tfoot-posture-badge.rank-5,
+.mpc-tfoot-posture-badge.rank-6,
+.mpc-tfoot-posture-badge.rank-7,
+.mpc-tfoot-posture-badge.rank-8 {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.mpc-tfoot-posture-badge.rank-sin-evaluar {
+  background: rgba(107, 114, 128, 0.12);
+  color: var(--text-muted);
+  border: 1px solid rgba(107, 114, 128, 0.25);
+}
+
+.mpc-tfoot-posture-medal {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.mpc-tfoot-posture-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.mpc-tfoot-tag-propia {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent-color, #ea580c);
+  letter-spacing: 0.06em;
+  margin-top: -0.1rem;
+}
+
+/* ==========================================================================
+   4. ESTADO VACÍO EN LA TABLA MPC (TRABAJO DESDE CERO)
+   ========================================================================== */
+.mpc-empty-state-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 4.5rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.04));
+  transition: all 0.25s ease;
+}
+
+html.dark .mpc-empty-state-card {
+  background: var(--bg-card, #1e1e1e);
+  border-color: var(--border-color, #333333);
+}
+
+.mpc-empty-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.mpc-empty-state-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 16px;
+  background: rgba(234, 88, 12, 0.1);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+  color: var(--accent-color, #ea580c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.12);
+}
+
+.mpc-empty-state-title {
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.015em;
+}
+
+.mpc-empty-state-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 1.65rem 0;
+}
+
+.mpc-empty-state-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   5. MODALES UNIFICADOS (NUEVO FCE, EDITAR FCE, VINCULAR DE PORTER)
+   ========================================================================== */
+.mpc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.5rem;
+  animation: modalFade 0.2s ease-out;
+}
+
+@keyframes modalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mpc-modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.dark .mpc-modal-content {
+  background: var(--bg-card, #1e1e1e) !important;
+  border-color: var(--border-color, #444444) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7) !important;
+}
+
+@keyframes modalPop {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.mpc-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+}
+
+.mpc-modal-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mpc-modal-close-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.mpc-modal-close-btn:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.06));
+  color: var(--text-main);
+}
+
+html.dark .mpc-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.mpc-modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  color: var(--text-main);
+}
+
+/* Campos de Formulario en Modales */
+.mpc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mpc-form-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.mpc-form-input,
+.mpc-form-textarea {
+  background: var(--bg-body, #f8fafc);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+html.dark .mpc-form-input,
+html.dark .mpc-form-textarea {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mpc-form-input:focus,
+.mpc-form-textarea:focus {
+  border-color: var(--accent-color, #ea580c);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.mpc-form-help {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.mpc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+/* ==========================================================================
+   MODAL DE VINCULACIÓN DE 5 FUERZAS DE PORTER (ENHANCED)
+   ========================================================================== */
+
+/* Buscador con el mismo fondo que tiene el modal (sin fondo azul) */
+
+/* Pestañas de Fuerzas: Grid ordenado y moderno en una sola barra */
+
+/* Lista de Tarjetas */
+
+/* Badges en la tarjeta */
+
+/* ==========================================================================
+   6. RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 900px) {
+  .mpc-weight-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mpc-weight-quick-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .mpc-col-fce {
+    min-width: 280px;
+  }
+}
+
+/* ==========================================================================
+   7. MODAL DE EVIDENCIAS Y FUENTES DEL FACTOR (MPC)
+   ========================================================================== */
+.mpc-modal-container {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: mpcModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mpcModalPop {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+html.dark .mpc-modal-container {
+  background: #18181b;
+  border-color: #27272a;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6);
+}
+
+.mpc-modal-header-evidencias {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: rgba(0, 0, 0, 0.015);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+html.dark .mpc-modal-header-evidencias {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-color: #27272a;
+}
+
+.mpc-modal-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mpc-modal-pretitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent-color, #ea580c);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mpc-modal-factor-quote {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.35;
+  border-left: 2.5px solid var(--accent-color, #ea580c);
+  padding-left: 8px;
+  word-break: break-word;
+}
+
+.mpc-modal-btn-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.mpc-modal-btn-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.mpc-modal-body-evidencias {
+  padding: 14px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: calc(90vh - 125px);
+}
+
+.mpc-modal-type-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 580px) {
+  .mpc-modal-type-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mpc-modal-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.mpc-modal-tab-btn:hover {
+  color: var(--text-main);
+  border-color: var(--accent-color, #ea580c);
+}
+
+.mpc-modal-tab-btn.active.pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.mpc-modal-tab-btn.active.img {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.mpc-modal-tab-btn.active.sheet {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.mpc-modal-tab-btn.active.link {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.mpc-modal-upload-panel {
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+html.dark .mpc-modal-upload-panel {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mpc-modal-dropzone {
+  display: block;
+  border: 1.5px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.mpc-modal-dropzone:hover {
+  border-color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.03);
+}
+
+.mpc-hidden-file-input {
+  display: none;
+}
+
+.mpc-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.mpc-upload-icon {
+  color: var(--accent-color, #ea580c);
+  opacity: 0.85;
+}
+
+.mpc-dropzone-title {
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: var(--text-main);
+}
+
+.mpc-dropzone-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.mpc-selected-file-preview {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mpc-selected-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mpc-img-thumb-preview {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+}
+
+.mpc-file-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mpc-file-icon-box.pdf {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+.mpc-file-icon-box.hoja_calculo {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+.mpc-file-icon-box.imagen {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.mpc-file-meta-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mpc-rename-input {
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--text-main);
+  outline: none;
+}
+
+.mpc-rename-input:focus {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.mpc-file-raw-meta {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.mpc-modal-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mpc-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mpc-modal-field label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.mpc-input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mpc-input-icon-wrap .input-icon {
+  position: absolute;
+  left: 8px;
+  color: var(--text-muted);
+}
+
+.mpc-input-icon-wrap input {
+  padding-left: 28px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mpc-modal-field input {
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.72rem;
+  color: var(--text-main);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mpc-modal-field input:focus {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.mpc-modal-btn-submit {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent-color, #ea580c);
+  color: #ffffff;
+  font-size: 0.71rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 4px rgba(234, 88, 12, 0.25);
+}
+
+.mpc-modal-btn-submit:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* Sección de evidencias ya registradas */
+.mpc-modal-attached-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mpc-modal-attached-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+}
+
+.mpc-attached-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mpc-attached-help {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.mpc-modal-empty-attached {
+  border: 1.5px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 18px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+}
+
+.mpc-modal-empty-attached p {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.mpc-modal-empty-attached span {
+  font-size: 0.65rem;
+  max-width: 380px;
+}
+
+.mpc-attached-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mpc-attached-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.mpc-attached-card:hover {
+  border-color: rgba(14, 165, 233, 0.35);
+}
+
+.mpc-attached-card-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.mpc-attached-icon-wrap {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mpc-attached-icon-wrap.pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+.mpc-attached-icon-wrap.imagen {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+.mpc-attached-icon-wrap.hoja_calculo {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.mpc-attached-icon-wrap.enlace {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+}
+
+.mpc-attached-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.mpc-attached-card-name {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mpc-attached-card-sub {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.mpc-attached-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mpc-attached-btn-action {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.mpc-attached-btn-action.view:hover {
+  color: #0ea5e9;
+  background: rgba(14, 165, 233, 0.1);
+}
+
+.mpc-attached-btn-action.delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}

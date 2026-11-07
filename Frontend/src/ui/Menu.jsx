@@ -6,7 +6,7 @@
   import { alerta } from "../utils/Notificaciones";
   import { api } from "../services/api";
   import { 
-    IconoCandado, IconoEstadisticaGeneral, IconoEstadisticaMatematica,
+    IconoCandado, IconoEstadisticaGeneral, IconoEstadisticaMatematica, IconoAnalisisEmpresarial,
     IconoInicio, IconoArchivos, IconoCalculadoraMenu, IconoChevron, 
     IconoGrupos, IconoGestionGrupos, IconoGestionAlumnos, IconoHistorial, 
     IconoTareas, IconoEstadisticasDocente, IconoAdmin, IconoCampana
@@ -117,7 +117,7 @@
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
     // Detectamos si estamos en alguna de las páginas de la calculadora
-    const isCalculadoraActive = location.pathname === '/calculadora' || location.pathname === '/MAT251';
+    const isCalculadoraActive = location.pathname === '/calculadora' || location.pathname === '/MAT251' || location.pathname === '/analisis-empresarial';
     const isGruposActive = location.pathname === '/grupos' || location.pathname === '/gestion-docente' || location.pathname === '/reportes-docente';
     const isMasActive = ['/tareas', '/reportes-docente', '/admin'].includes(location.pathname);
 
@@ -211,6 +211,12 @@
                   <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
                     <IconoEstadisticaMatematica style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
                     Estadística Matemática
+                  </NavLink>
+                </li>
+                <li className="dropdown-li" style={{ transitionDelay: '0.15s' }}>
+                  <NavLink to="/analisis-empresarial" onClick={closeMenu} className="dropdown-item">
+                    <IconoAnalisisEmpresarial style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                    Análisis Empresarial
                   </NavLink>
                 </li>
               </ul>

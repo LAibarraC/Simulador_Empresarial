@@ -1,0 +1,156 @@
+/* ==========================================================================
+   FASE 6 · MATRIZ DAFO Y MATRIZ ANSOFF
+   Complementa HerramientaFase4.css y ResumenFase5.css. Sin color-mix() (PDF).
+   Todas las clases de botón contienen "btn-".
+   ========================================================================== */
+
+/* ---------- Introducción y posición estratégica ---------- */
+
+/* ---------- Matriz DAFO (TOWS) ---------- */
+.f6-matrix { display: grid; grid-template-columns: minmax(150px, .7fr) repeat(2, minmax(0, 1fr)); gap: 8px; }
+.f6-corner { display: grid; place-items: center; align-content: center; gap: 2px; padding: 10px; border: 1.5px dashed var(--border-color); border-radius: 10px; color: var(--hf-accent); text-align: center; }
+.f6-corner strong { color: var(--text-main); font-size: 1rem; font-weight: 950; letter-spacing: .08em; }
+.f6-corner small { color: var(--text-muted); font-size: .6rem; font-weight: 700; }
+.f6-head { display: grid; align-content: start; gap: 6px; min-width: 0; padding: 9px 10px; border: 1.5px solid var(--f6-c); border-radius: 10px; background: var(--bg-card); }
+.f6-head > strong { display: flex; align-items: center; gap: 7px; color: var(--f6-c); font-size: .78rem; font-weight: 850; }
+.f6-head > strong b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; color: #fff; background: var(--f6-c); font-size: .76rem; }
+.f6-head > strong em { margin-left: auto; color: var(--text-muted); font-size: .66rem; font-style: normal; }
+.f6-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.f6-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 2px 8px 2px 2px; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-main); background: var(--bg-card); font: inherit; font-size: .66rem; line-height: 1.3; text-align: left; transition: all .15s ease; }
+button.f6-chip { cursor: pointer; }
+.f6-chip b { flex-shrink: 0; padding: 1px 6px; border-radius: 20px; color: #fff; background: var(--f6-c); font-size: .6rem; }
+.f6-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 210px; }
+.f6-chip.active { border-color: var(--f6-c); background: var(--f6-c); color: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, .15); }
+.f6-chip.active b { color: var(--f6-c); background: #fff; }
+button.f6-chip:hover { border-color: var(--f6-c); }
+
+.f6-cell { display: grid; grid-template-rows: auto 1fr auto; gap: 8px; min-width: 0; min-height: 190px; padding: 10px; border: 1.5px solid var(--f6-c); border-radius: 12px; background: var(--f6-bg); }
+.f6-cell.recomendado { box-shadow: 0 0 0 3px rgba(234, 88, 12, .25); }
+.f6-cell > header { display: flex; align-items: flex-start; gap: 8px; }
+.f6-cell > header > div { display: grid; flex: 1; min-width: 0; }
+.f6-cell > header strong { color: var(--text-main); font-size: .82rem; font-weight: 850; }
+.f6-cell > header small { color: var(--text-muted); font-size: .64rem; line-height: 1.35; }
+.f6-quad-badge { display: grid; place-items: center; flex: 0 0 34px; height: 34px; border-radius: 9px; color: #fff; background: var(--f6-c); font-size: .78rem; font-weight: 950; letter-spacing: .02em; }
+.f6-rec { flex-shrink: 0; padding: 1px 8px; border-radius: 20px; color: #fff; background: var(--hf-accent); font-size: .58rem; font-weight: 850; text-transform: uppercase; }
+.f6-cell-list { display: grid; align-content: start; gap: 6px; }
+.f6-cell-empty { margin: 0; padding: 10px; border: 1.5px dashed var(--f6-c); border-radius: 8px; color: var(--text-muted); font-size: .7rem; text-align: center; opacity: .8; }
+.f6-btn-strategy { display: grid; gap: 5px; width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-left: 3px solid var(--f6-c); border-radius: 8px; color: var(--text-main); background: var(--bg-card); font: inherit; text-align: left; cursor: pointer; transition: all .15s ease; }
+.f6-btn-strategy:hover { box-shadow: 0 2px 10px rgba(0, 0, 0, .07); transform: translateY(-1px); }
+.f6-btn-strategy.selected { border-color: var(--f6-c); box-shadow: 0 0 0 2px var(--f6-c); }
+.f6-strategy-text { font-size: .74rem; font-weight: 650; line-height: 1.4; }
+.f6-strategy-text em { color: var(--text-muted); font-weight: 500; }
+.f6-strategy-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.f6-strategy-meta b { padding: 0 6px; border-radius: 4px; color: var(--text-main); background: rgba(148, 163, 184, .18); font-size: .6rem; font-weight: 850; }
+.f6-strategy-meta i { color: #dc2626; font-size: .6rem; font-style: normal; font-weight: 750; }
+.f6-prio { padding: 0 7px; border-radius: 20px; font-size: .58rem; font-weight: 850; text-transform: uppercase; }
+.f6-prio.alta { color: #fff; background: #dc2626; } .f6-prio.media { color: #78350f; background: #fcd34d; } .f6-prio.baja { color: #fff; background: #64748b; }
+.f6-term { color: var(--text-muted); font-size: .6rem; font-weight: 700; }
+.f6-cell > footer { display: flex; gap: 6px; }
+.f6-btn-add { display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: 5px; padding: 6px 8px; border-radius: 7px; font-size: .7rem; font-weight: 800; cursor: pointer; transition: all .15s ease; }
+.f6-btn-add { border: 1px solid var(--f6-c, var(--hf-accent)); color: #fff; background: var(--f6-c, var(--hf-accent)); }
+.f6-btn-add:hover { filter: brightness(.93); }
+
+/* ---------- Editor (DAFO y Ansoff) ---------- */
+
+.f6-editor-factors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.f6-editor-factors > div { display: grid; align-content: start; gap: 5px; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; }
+.f6-editor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+.f6-span-2 { grid-column: 1 / -1; }
+.hf-btn-segment.f6-seg-alta.active { border-color: #dc2626; background: #dc2626; }
+.hf-btn-segment.f6-seg-media.active { border-color: #f59e0b; color: #78350f; background: #fcd34d; }
+.hf-btn-segment.f6-seg-baja.active { border-color: #64748b; background: #64748b; }
+
+/* ---------- Matriz Ansoff ---------- */
+.f6-ansoff { display: grid; grid-template-columns: 34px repeat(2, minmax(0, 1fr)); grid-template-rows: auto auto auto; gap: 8px; }
+.f6-ansoff-corner { grid-column: 1; grid-row: 1; }
+.f6-ansoff-axis { display: grid; place-items: center; padding: 6px; border-radius: 8px; color: #fff; background: #475569; font-size: .68rem; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+.f6-ansoff-axis.top.nuevo { background: var(--hf-accent); }
+.f6-ansoff-axis.side { position: relative; min-height: 150px; }
+.f6-ansoff-axis.side > span { position: absolute; top: 50%; left: 50%; white-space: nowrap; transform: translate(-50%, -50%) rotate(-90deg); }
+.f6-ansoff-axis.side.nuevo { background: var(--hf-accent); }
+.f6-ansoff-q { display: grid; align-content: start; gap: 8px; min-width: 0; padding: 12px; border: 1.5px solid var(--f6-c); border-radius: 12px; background: var(--bg-card); }
+.f6-ansoff-q.q-penetracion { background: linear-gradient(135deg, rgba(16, 185, 129, .1), rgba(16, 185, 129, .02)); }
+.f6-ansoff-q.q-producto { background: linear-gradient(135deg, rgba(37, 99, 235, .09), rgba(37, 99, 235, .02)); }
+.f6-ansoff-q.q-mercado { background: linear-gradient(135deg, rgba(217, 119, 6, .1), rgba(217, 119, 6, .02)); }
+.f6-ansoff-q.q-diversificacion { background: linear-gradient(135deg, rgba(220, 38, 38, .09), rgba(220, 38, 38, .02)); }
+.f6-ansoff-q.principal { box-shadow: 0 0 0 3px var(--f6-c), 0 6px 18px rgba(0, 0, 0, .1); }
+.f6-ansoff-q > header { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 6px 8px; }
+.f6-ansoff-q > header > div { display: grid; flex: 1; min-width: 0; }
+.f6-ansoff-q > header strong { color: var(--f6-c); font-size: .9rem; font-weight: 900; }
+.f6-ansoff-q > header small { color: var(--text-muted); font-size: .64rem; text-transform: capitalize; }
+.f6-btn-principal { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border: 1.5px solid var(--f6-c); border-radius: 20px; color: var(--f6-c); background: var(--bg-card); font-size: .66rem; font-weight: 800; cursor: pointer; transition: all .15s ease; }
+.f6-btn-principal:hover, .f6-btn-principal.active { color: #fff; background: var(--f6-c); }
+.f6-principal-tag { display: none; width: 100%; color: var(--f6-c); font-size: .6rem; font-weight: 850; text-transform: uppercase; }
+.r5-exportando .f6-principal-tag { display: block; }
+.f6-risk { display: inline-flex; align-items: center; gap: 3px; }
+.f6-risk i { width: 18px; height: 6px; border-radius: 3px; background: rgba(148, 163, 184, .3); }
+.f6-risk.r1 i.on { background: #10b981; } .f6-risk.r2 i.on { background: #f59e0b; } .f6-risk.r3 i.on { background: #ef4444; }
+.f6-risk em { margin-left: 5px; color: var(--text-muted); font-size: .62rem; font-style: normal; font-weight: 750; }
+.f6-ansoff-desc { margin: 0; color: var(--text-muted); font-size: .72rem; line-height: 1.45; }
+.f6-ansoff-list { display: grid; gap: 6px; }
+
+.f6-ini-name { font-size: .76rem; font-weight: 750; line-height: 1.35; }
+.f6-ini-name em { color: var(--text-muted); font-weight: 500; }
+.f6-ini-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--text-muted); font-size: .62rem; font-weight: 700; }
+.f6-score { padding: 0 6px; border-radius: 5px; color: #fff; background: var(--f6-c); font-size: .62rem; }
+
+.f6-stars { display: inline-flex; align-items: center; gap: 1px; color: #cbd5e1; }
+.f6-stars svg.on { color: #f59e0b; fill: #f59e0b; }
+.f6-btn-star { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; color: #cbd5e1; background: transparent; cursor: pointer; }
+.f6-btn-star.on { color: #f59e0b; }
+.f6-btn-star.on svg { fill: #f59e0b; }
+.f6-btn-star:hover { background: rgba(245, 158, 11, .1); }
+.f6-tactics { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.f6-tactics > span { color: var(--text-muted); font-size: .6rem; font-weight: 800; text-transform: uppercase; }
+.f6-btn-tactic { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border: 1px dashed var(--f6-c); border-radius: 20px; color: var(--text-main); background: var(--bg-card); font-size: .64rem; font-weight: 650; cursor: pointer; transition: all .15s ease; }
+.f6-btn-tactic:hover { border-style: solid; color: var(--f6-c); }
+.f6-risk-scale { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; color: var(--text-muted); font-size: .62rem; font-weight: 750; text-transform: uppercase; }
+.f6-risk-scale i { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444); }
+
+/* Mapa riesgo / potencial */
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 820px) {
+  .f6-matrix { grid-template-columns: minmax(0, 1fr); }
+  .f6-corner { display: none; }
+  .f6-ansoff { grid-template-columns: minmax(0, 1fr); }
+  .f6-ansoff-corner, .f6-ansoff-axis { display: none; }
+  .f6-editor-factors, .f6-editor-grid { grid-template-columns: minmax(0, 1fr); }
+  .f6-chip span { max-width: 160px; }
+}
+
+/* Tarjeta de estrategia compacta: texto + etiquetas en línea; responsable e indicador solo al seleccionarla */
+.f6-strategy-card { position: relative; display: grid; gap: 4px; padding: 6px 52px 6px 8px; cursor: default; }
+.f6-btn-strategy-body { display: grid; gap: 4px; min-width: 0; padding: 0; border: 0; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.f6-strategy-text { font-size: .72rem; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
+.f6-strategy-meta { gap: 3px; }
+.f6-strategy-meta .f6-prio { padding: 0 6px; font-size: .54rem; line-height: 1.5; }
+.f6-strategy-meta .f6-term { display: inline-flex; align-items: center; gap: 2px; font-size: .58rem; }
+.f6-strategy-meta b.f6-sc-chip { padding: 0 6px; border: 1px solid var(--f6-c); border-radius: 20px; color: var(--f6-c); background: transparent; font-size: .58rem; line-height: 1.5; }
+.f6-strategy-actions { position: absolute; top: 4px; right: 4px; display: flex; gap: 2px; }
+.f6-strategy-card .f6-strategy-actions .hf-btn-icon { width: 22px; height: 22px; min-width: 0; padding: 0; border-radius: 6px; }
+.f6-sc-foot { display: none; gap: 2px; padding-top: 4px; border-top: 1px dashed var(--border-color); color: var(--text-muted); font-size: .62rem; font-weight: 650; }
+.f6-strategy-card.selected .f6-sc-foot, .r5-exportando .f6-sc-foot { display: grid; }
+.f6-sc-foot span { display: flex; align-items: flex-start; gap: 4px; min-width: 0; line-height: 1.3; overflow-wrap: anywhere; }
+.f6-sc-foot svg { flex: none; margin-top: 2px; }
+.f6-modal-form { display: grid; gap: 14px; }
+
+/* Lista de evidencia: solo aparece en el PDF exportado */
+.f6-pdf-docs { display: none; }
+.r5-exportando .f6-pdf-docs { display: block; }
+.f6 .fl-doc-step { width: 100%; margin-top: 3px; padding: 3px 6px; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); background: var(--bg-card); font: inherit; font-size: .68rem; }
+
+/* Tarjeta de iniciativa: nombre y atractivo arriba, estrellas y datos en fichas, iconos a la derecha */
+.f6-ini-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 8px 8px 8px 10px; border: 1px solid var(--border-color); border-left: 4px solid var(--f6-c); border-radius: 10px; color: var(--text-main); background: var(--bg-card); transition: background .15s ease, box-shadow .15s ease; }
+.f6-ini-card:hover { box-shadow: 0 2px 10px rgba(0, 0, 0, .07); }
+.f6-ini-card.selected { background: rgba(148, 163, 184, .12); }
+.f6-btn-ini-body { display: grid; justify-content: stretch; justify-items: stretch; align-items: start; width: 100%; gap: 6px; min-width: 0; padding: 0; border: 0; outline: 0; color: inherit; background: transparent; box-shadow: none; font: inherit; text-align: left; cursor: pointer; }
+.f6-btn-ini-body:focus-visible { outline: 2px solid var(--f6-c); outline-offset: 3px; border-radius: 4px; }
+.f6-ini-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.f6-ini-head .f6-ini-name { min-width: 0; overflow-wrap: anywhere; }
+.f6-ini-head .f6-score { flex: none; padding: 1px 8px; border-radius: 20px; }
+.f6-ini-chip { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 20px; color: var(--text-muted); background: rgba(148, 163, 184, .16); font-size: .6rem; font-weight: 750; }
+.f6-ini-chip.link { color: #9a3412; background: rgba(234, 88, 12, .12); }
+.f6-ini-actions { display: flex; flex-direction: column; gap: 4px; }
+.f6-ini-card .f6-ini-actions .hf-btn-icon { width: 24px; height: 24px; min-width: 0; padding: 0; border-radius: 6px; }

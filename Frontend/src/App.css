@@ -72,10 +72,10 @@ html.dark .historial-titulo,
 html.dark .archivos-titulo,
 html.dark .admin-title,
 html.dark .perfil-title,
-html.dark h1:not(.titulo-danger):not(.perfil-danger-title),
-html.dark h2:not(.titulo-danger):not(.perfil-danger-title),
-html.dark h3:not(.titulo-danger):not(.perfil-danger-title),
-html.dark h4:not(.titulo-danger):not(.perfil-danger-title) {
+html.dark h1:not(.titulo-danger):not(.perfil-danger-title):not(.reporte-fase2-pdf-document *),
+html.dark h2:not(.titulo-danger):not(.perfil-danger-title):not(.reporte-fase2-pdf-document *),
+html.dark h3:not(.titulo-danger):not(.perfil-danger-title):not(.reporte-fase2-pdf-document *),
+html.dark h4:not(.titulo-danger):not(.perfil-danger-title):not(.reporte-fase2-pdf-document *) {
   color: #ffffff !important;
 }
 
@@ -270,12 +270,12 @@ button:disabled,
 }
 
 /* Botón base sin clase específica (solo cuando no tiene clases de color específicas) */
-button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):not(.theme-toggle-btn):not(.boton-toggle-medio):not([class*="fab-"]) {
+button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):not(.theme-toggle-btn):not(.boton-toggle-medio):not([class*="fab-"]):not(.subfase-tab):not([class*="poam-"]):not([class*="porter-"]):not([class*="foda-"]):not([class*="bandeja-"]):not(.bandeja-filter-pill):not([class*="mpc-"]):not([class*="efi-"]):not([class*="pestel-"]) {
   border: 1px solid var(--primary-color);
   color: var(--primary-color);
 }
 
-button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):not(.theme-toggle-btn):not(.boton-toggle-medio):not([class*="fab-"]):hover:not(:disabled) {
+button:not([class*="btn-"]):not([class*="button_"]):not([class*="container_button"]):not([class*="tab-"]):not([class*="modal_viewer_"]):not(.red-icono):not(.carrusel-arrow):not(.dot):not(.nav-link-dropdown):not(.dropdown-item):not(.hamburger-menu):not(.bell-btn):not(.notif-clear-btn):not([data-sileo-toast]):not([data-sileo-button]):not([class*="sileo"]):not(.theme-toggle-btn):not(.boton-toggle-medio):not([class*="fab-"]):not(.subfase-tab):not([class*="poam-"]):not([class*="porter-"]):not([class*="foda-"]):not([class*="bandeja-"]):not(.bandeja-filter-pill):not([class*="mpc-"]):not([class*="efi-"]):not([class*="pestel-"]):hover:not(:disabled) {
   background-color: var(--primary-color) !important;
   color: #ffffff !important;
   border-color: var(--primary-color) !important;

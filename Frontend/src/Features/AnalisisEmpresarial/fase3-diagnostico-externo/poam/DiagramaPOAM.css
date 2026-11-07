@@ -1,0 +1,5344 @@
+/* ==========================================================================
+   DIAGRAMA Y PERFIL POAM (PERFIL DE OPORTUNIDADES Y AMENAZAS DEL MEDIO)
+   Sistema de diseño unificado con Las 5 Fuerzas de Porter y Lluvia de Ideas
+   Soporte completo para Modo Claro / Modo Oscuro mediante variables institucionales
+   ========================================================================== */
+
+.poam-container,
+.poam-spacious-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  color: var(--text-main);
+  font-family: inherit;
+  box-sizing: border-box;
+  animation: poamFadeIn 0.25s ease-out;
+}
+
+@keyframes poamFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   MAIN LAYOUT POAM: RÉPLICA EXACTA DE LAS 5 FUERZAS DE PORTER (320px SIDEBAR)
+   ========================================================================== */
+
+.poam-main-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.poam-workspace-left {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   HEADER LIMPIO ESTILO PORTER PARA POAM
+   ========================================================================== */
+
+.poam-clean-header {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  box-sizing: border-box;
+  width: 100%;
+  transition: all 0.25s ease;
+}
+
+.poam-clean-header:hover {
+  border-color: rgba(234, 88, 12, 0.4);
+}
+
+html.dark .poam-clean-header {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.poam-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background-color: rgba(234, 88, 12, 0.1);
+  border: 1px solid rgba(234, 88, 12, 0.28);
+  color: var(--accent-color, #ea580c);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+html.dark .poam-step-pill {
+  background-color: rgba(234, 88, 12, 0.18);
+  border-color: rgba(234, 88, 12, 0.4);
+  color: #fb923c;
+}
+
+.poam-metodo-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background-color: rgba(234, 88, 12, 0.08);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+  color: var(--accent-color, #ea580c);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   1. HEADER SUPERIOR: BALANZA DE PRESIÓN AMBIENTAL (TUG OF WAR)
+   ========================================================================== */
+
+.poam-tow-hero-card {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  align-items: center;
+  gap: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.poam-tow-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+  opacity: 0.85;
+}
+
+/* Lado Oportunidades (Izquierda) */
+.poam-tow-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.poam-tow-side.favorable {
+  text-align: left;
+}
+
+.poam-tow-side.hostil {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.poam-tow-side-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.poam-tow-side.hostil .poam-tow-side-header {
+  flex-direction: row-reverse;
+}
+
+.poam-tow-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.poam-tow-pill-tag.op {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.poam-tow-pill-tag.am {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.poam-tow-count {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.poam-tow-mass-val {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.poam-tow-side.hostil .poam-tow-mass-val {
+  flex-direction: row-reverse;
+}
+
+.poam-tow-mass-number {
+  font-size: 2.3rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.poam-tow-side.favorable .poam-tow-mass-number {
+  color: #10b981;
+  text-shadow: 0 0 24px rgba(16, 185, 129, 0.4);
+}
+
+.poam-tow-side.hostil .poam-tow-mass-number {
+  color: #ef4444;
+  text-shadow: 0 0 24px rgba(239, 68, 68, 0.4);
+}
+
+.poam-tow-mass-unit {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.poam-tow-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.35;
+  max-width: 250px;
+}
+
+/* Centro: Balanza Tradicional de Platillos */
+.poam-tow-center-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.poam-scale-pans-container,
+.poam-tow-dial-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.poam-scale-pans-svg {
+  width: 100%;
+  max-width: 330px;
+  height: 140px;
+  overflow: visible;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
+}
+
+.poam-tow-dial-svg {
+  width: 210px;
+  height: 110px;
+  overflow: visible;
+}
+
+.poam-tow-climate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-top: -6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  animation: pulseBadge 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseBadge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.poam-tow-climate-badge.clima-favorable {
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.45);
+}
+
+.poam-tow-climate-badge.clima-hostil {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.poam-tow-climate-badge.clima-equilibrio {
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+/* Barra de tensión cuerda Tug of War */
+.poam-tow-rope-wrapper {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.poam-tow-rope-track {
+  height: 7px;
+  background: #1e293b;
+  border-radius: 9999px;
+  position: relative;
+  overflow: visible;
+  display: flex;
+}
+
+.poam-tow-rope-fill-op {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+  border-radius: 9999px 0 0 9999px;
+  transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.poam-tow-rope-fill-am {
+  height: 100%;
+  background: linear-gradient(90deg, #f87171, #ef4444);
+  border-radius: 0 9999px 9999px 0;
+  transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.poam-tow-rope-knot {
+  position: absolute;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2.5px solid #0f172a;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  transition: left 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.poam-tow-rope-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.poam-tow-delta-pill {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+  font-weight: 800;
+  font-size: 0.72rem;
+}
+
+/* ==========================================================================
+   2. BARRA DE CONTROL Y CONMUTADOR DE VISTAS (VIEW SWITCHER)
+   ========================================================================== */
+
+.poam-control-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 16px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+
+.poam-view-switcher-pill {
+  display: inline-flex;
+  background: var(--bg-body, rgba(0, 0, 0, 0.05));
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.poam-view-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-view-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.poam-view-tab-btn.active {
+  background: var(--bg-card);
+  color: var(--accent-color, #ea580c);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+}
+
+.poam-tab-counter {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.poam-view-tab-btn.active .poam-tab-counter {
+  background: rgba(234, 88, 12, 0.15);
+  color: var(--accent-color, #ea580c);
+}
+
+.poam-control-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 12px;
+}
+
+.poam-view-filters {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 10px;
+}
+
+.poam-fixed-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 10px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.poam-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 5px 10px;
+  transition: all 0.2s ease;
+}
+
+.poam-filter-pill:hover {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.poam-select-native {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.74rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.poam-select-native option {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.poam-search-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 5px 10px;
+  transition: all 0.2s ease;
+}
+
+.poam-search-pill:hover,
+.poam-search-pill:focus-within {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.poam-search-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.78rem;
+  outline: none;
+  width: 140px;
+  font-family: inherit;
+}
+
+.poam-search-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.poam-search-clear-btn:hover {
+  color: var(--text-main);
+}
+
+.poam-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1.5px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-btn-ghost:hover {
+  background: rgba(234, 88, 12, 0.08);
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+  transform: translateY(-1px);
+}
+
+.poam-btn-action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-color, #ea580c);
+  border: 1.5px solid var(--accent-color, #ea580c);
+  color: #ffffff;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.25);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-btn-action-primary:hover {
+  background: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+/* Guía Desplegable */
+.poam-guide-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color, #ea580c);
+  border-radius: 12px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+
+.poam-guide-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.poam-guide-icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.poam-guide-title {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.poam-guide-desc {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.poam-guide-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.poam-guide-close:hover {
+  color: var(--text-main);
+}
+
+.poam-guide-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.poam-guide-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--bg-body, rgba(0, 0, 0, 0.02));
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.77rem;
+  line-height: 1.4;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.poam-guide-step strong {
+  display: block;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.poam-step-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-color, #ea580c);
+  color: #ffffff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   3. LAYOUT PRINCIPAL DE 2 COLUMNAS (WORKSPACE Y COPILOTO)
+   ========================================================================== */
+
+.poam-main-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+@media (max-width: 1100px) {
+  .poam-main-grid-layout {
+    grid-template-columns: 1fr;
+  }
+  .poam-tow-hero-card {
+    grid-template-columns: 1fr;
+    text-align: center !important;
+  }
+  .poam-tow-side.hostil {
+    text-align: center;
+    align-items: center;
+  }
+  .poam-tow-side-header {
+    justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   MODO 1: RADAR TÁCTICO CONCÉNTRICO EN 5 DIMENSIONES
+   ========================================================================== */
+
+.poam-radar-tactico-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+
+.poam-radar-header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.poam-radar-card-title {
+  margin: 0 0 4px 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.poam-accent-icon {
+  color: var(--accent-color, #ea580c);
+}
+
+.poam-radar-card-subtitle {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  max-width: 580px;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.poam-radar-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-body, rgba(0, 0, 0, 0.03));
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.poam-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.poam-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.poam-legend-dot.op {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+
+.poam-legend-dot.am {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+}
+
+.poam-legend-ring-badge.nucleo {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* ==========================================================================
+   BARRA DE PROGRESO DE UBICACIÓN MANUAL EN EL RADAR
+   ========================================================================== */
+.poam-radar-placement-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.poam-placement-progress-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 240px;
+}
+
+.poam-placement-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.poam-placement-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.poam-placement-pct-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+}
+
+.poam-placement-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.poam-placement-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ea580c, #f59e0b, #10b981);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.poam-placement-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.poam-btn-mini-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-btn-mini-tool:hover {
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+  background: var(--bg-hover, rgba(0, 0, 0, 0.02));
+  transform: translateY(-1px);
+}
+
+.poam-btn-mini-tool.danger:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* ==========================================================================
+   WORKSPACE GRID: CARRUSEL SUPERIOR (FODA) + RADAR SVG AMPLIADO (INFERIOR)
+   ========================================================================== */
+.poam-radar-workspace-grid {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 20px;
+  width: 100%;
+  align-items: start;
+  transition: grid-template-columns 0.3s ease;
+}
+
+.poam-radar-workspace-grid.collapsed {
+  grid-template-columns: 50px 1fr;
+}
+
+@media (max-width: 1100px) {
+  .poam-radar-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   PANEL IZQUIERDO DE FACTORES POR UBICAR (SIN SCROLL, 4 FACTORES COMPLETOS)
+   ========================================================================== */
+.poam-radar-top-carousel-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+  height: fit-content;
+}
+
+.poam-carrusel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.poam-carrusel-title-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.poam-carrusel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.poam-carrusel-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.poam-carrusel-subtitle {
+  font-size: 0.77rem;
+  color: var(--text-muted);
+  margin: 3px 0 0 0;
+  line-height: 1.35;
+}
+
+.poam-carrusel-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Filtros horizontales en el carrusel */
+.poam-tray-filters-box.horizontal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.poam-tray-filters-box.horizontal .poam-tray-search-input-wrap {
+  width: 200px;
+}
+
+/* Track y Contenedor del Carrusel con Movimiento Lateral */
+.poam-radar-top-carousel-card .evidencias-carrusel-track {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  width: 100%;
+}
+
+.poam-radar-top-carousel-card .btn-carrusel-lateral:hover:not(:disabled) {
+  background-color: var(--accent-color, #ea580c) !important;
+  border-color: var(--accent-color, #ea580c) !important;
+  color: #ffffff !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3) !important;
+}
+
+html.dark .poam-radar-top-carousel-card .btn-carrusel-lateral:hover:not(:disabled) {
+  background-color: var(--accent-color, #ea580c) !important;
+  border-color: var(--accent-color, #ea580c) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45) !important;
+}
+
+/* Viewport y Track */
+
+/* Cada página de slide: 1 tarjeta por fila ahora que es panel lateral */
+.poam-slide-page {
+  min-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  box-sizing: border-box;
+  padding: 4px 2px;
+}
+
+/* Tarjeta individual en el carrusel */
+.poam-carrusel-factor-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 122px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.poam-carrusel-factor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-color);
+}
+
+.poam-carrusel-factor-card.tipo-op {
+  border-left: 4px solid #10b981;
+}
+
+.poam-carrusel-factor-card.tipo-am {
+  border-left: 4px solid #ef4444;
+}
+
+.poam-carrusel-factor-card.is-dragging {
+  opacity: 0.15;
+  transform: scale(0.97);
+  border-style: dashed;
+}
+
+/* Puntos de paginación */
+
+/* Chip de página */
+
+/* Mensaje de completado en carrusel */
+.poam-carrusel-completed-msg {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px dashed rgba(16, 185, 129, 0.35);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.poam-carrusel-completed-msg strong {
+  color: #10b981;
+  font-size: 0.88rem;
+}
+
+/* Badge de progreso integrado en cabecera del carrusel */
+.poam-placement-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.poam-placement-badge strong {
+  color: var(--accent-color, #ea580c);
+  font-weight: 800;
+}
+
+/* Barra delgada de leyenda rápida arriba del radar táctico */
+.poam-radar-quick-legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+/* BANDEJA DE FACTORES POR UBICAR */
+.poam-radar-tray-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.poam-radar-tray-panel.colapsada {
+  padding: 12px;
+}
+
+.poam-tray-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.poam-tray-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.poam-tray-header-title h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.poam-tray-counter-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+}
+
+.poam-tray-collapse-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.poam-tray-collapse-btn:hover {
+  color: var(--text-main);
+  border-color: var(--accent-color, #ea580c);
+}
+
+.poam-tray-instructions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  background: var(--bg-body);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px dashed var(--border-color);
+}
+
+.poam-tray-filters-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poam-tray-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.poam-tray-search-input-wrap svg {
+  position: absolute;
+  left: 9px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.poam-tray-search-input {
+  width: 100%;
+  padding: 6px 26px 6px 28px;
+  font-size: 0.78rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-body);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.poam-tray-search-input:focus {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.poam-tray-clear-search {
+  position: absolute;
+  right: 7px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.poam-tray-type-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-body);
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.poam-tray-tab {
+  flex: 1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.poam-tray-tab:hover {
+  color: var(--text-main);
+}
+
+.poam-tray-tab.active {
+  background: var(--bg-card);
+  color: var(--text-main);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.poam-tray-tab.op.active {
+  color: #10b981;
+}
+
+.poam-tray-tab.am.active {
+  color: #ef4444;
+}
+
+/* LISTA DE TARJETAS ARRASTRABLES */
+.poam-tray-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.poam-tray-cards-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.poam-tray-cards-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.poam-tray-factor-card {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.poam-tray-factor-card:hover {
+  border-color: var(--accent-color, #ea580c);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.poam-tray-factor-card.is-dragging {
+  opacity: 0.15;
+  cursor: grabbing;
+  transform: scale(0.97);
+  border-style: dashed;
+}
+
+.poam-tray-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.poam-tray-grip-handle {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  cursor: grab;
+}
+
+.poam-tray-card-body {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.poam-tray-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+html.dark .poam-tray-card-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.poam-tray-suggested-imp {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.poam-tray-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.poam-btn-tray-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--accent-color, #ea580c);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.poam-btn-tray-place:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+
+.poam-btn-tray-custom {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.poam-btn-tray-custom:hover {
+  border-color: var(--accent-color, #ea580c);
+  color: var(--text-main);
+}
+
+/* Estados vacíos de bandeja */
+.poam-tray-empty-box {
+  padding: 24px 12px;
+  text-align: center;
+}
+
+.poam-tray-complete-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.poam-success-icon {
+  color: #10b981;
+}
+
+.poam-tray-complete-state h5 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.poam-tray-complete-state p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.poam-tray-no-results {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ÁREA CENTRAL: STAGE DEL RADAR AMPLIADO */
+.poam-radar-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  min-height: 650px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.poam-radar-stage.poam-radar-stage-full {
+  width: 100%;
+}
+
+/* Dropzone feedback en el canvas */
+.poam-radar-canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  padding: 16px 0;
+  user-select: none;
+  border-radius: 12px;
+  transition: box-shadow 0.25s ease;
+}
+
+.poam-radar-canvas-container.large {
+  max-width: 820px;
+  width: 100%;
+}
+
+.poam-radar-canvas-container.radar-dropzone-active {
+  box-shadow: inset 0 0 0 2px var(--accent-color, #ea580c), 0 0 24px rgba(234, 88, 12, 0.12);
+  background: var(--bg-body);
+}
+
+/* Resalte de sector activo al soltar */
+.poam-active-drop-sector {
+  animation: dropSectorPulse 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes dropSectorPulse {
+  from {
+    fill-opacity: 0.22;
+    stroke-width: 2;
+  }
+  to {
+    fill-opacity: 0.44;
+    stroke-width: 3.5;
+  }
+}
+
+/* HUD FLOTANTE DE ARRASTRE */
+.poam-radar-drop-hud {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1.5px solid var(--accent-color, #ea580c);
+  padding: 8px 18px;
+  border-radius: 22px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.2);
+  font-size: 0.82rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 15;
+  pointer-events: none;
+  max-width: 92%;
+  white-space: nowrap;
+}
+
+.poam-hud-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Watermark de radar vacío */
+.poam-watermark-disk {
+  fill: var(--bg-card);
+  stroke: var(--border-color);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.poam-watermark-title {
+  font-size: 11px;
+  font-weight: 800;
+  fill: var(--text-main);
+}
+
+.poam-watermark-subtitle {
+  font-size: 9px;
+  fill: var(--text-muted);
+}
+
+/* Botón devolver a pendientes en el inspector */
+.poam-btn-unplace-trigger {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-btn-unplace-trigger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: #ef4444;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   MODAL DE CONFIGURACIÓN DEL FACTOR ESTRATÉGICO
+   ========================================================================== */
+.modal-config-factor {
+  max-width: 680px !important;
+  width: 95% !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+.modal-config-factor .poam-modal-header {
+  padding: 16px 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  flex-shrink: 0 !important;
+}
+
+.modal-config-factor .poam-config-factor-body {
+  padding: 20px 22px !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+}
+
+.modal-config-factor .poam-config-modal-footer {
+  padding: 14px 22px !important;
+  border-top: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* Acciones en la cabecera del modal (Píldora + X de cierre con separación) */
+.poam-modal-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+/* Badge de estado en header */
+.poam-pill-status {
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  padding: 5px 12px !important;
+  border-radius: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.poam-pill-status.colocado {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+.poam-pill-status.pendiente {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #f59e0b !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Botón de cierre en cabecera: con marco, centrado y efecto hover */
+.poam-modal-close-btn {
+  background: var(--bg-body, rgba(255, 255, 255, 0.06)) !important;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
+  color: var(--text-muted, #94a3b8) !important;
+  cursor: pointer !important;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  outline: none !important;
+}
+
+.poam-modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  transform: scale(1.05) !important;
+}
+
+/* Card Hero con el texto del factor */
+.poam-config-hero-card {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poam-config-hero-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.poam-config-hero-text {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
+/* Secciones de configuración */
+.poam-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poam-config-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.poam-readonly-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  background: var(--bg-body);
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: default;
+  user-select: text;
+}
+
+.poam-readonly-field small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.poam-readonly-polarity.op { border-color: rgba(16, 185, 129, 0.35); }
+.poam-readonly-polarity.am { border-color: rgba(239, 68, 68, 0.35); }
+
+.poam-config-factor-body .poam-form-textarea:not(:read-only) {
+  border-color: var(--accent-color, #ea580c);
+  background: var(--bg-card);
+  cursor: text;
+}
+
+/* Grilla de selectores de 72° */
+.poam-dim-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.poam-dim-select-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border-radius: 8px;
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.poam-dim-select-btn:hover {
+  border-color: var(--accent-color, #ea580c);
+  transform: translateY(-1px);
+}
+
+.poam-dim-select-btn.active {
+  box-shadow: 0 0 0 1.5px currentColor;
+}
+
+/* Grilla de Dials de 2 columnas (Polaridad e Impacto/Fuerza) */
+.poam-config-dials-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .poam-config-dials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.poam-config-dial-box {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poam-dial-box-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Banner de ubicación en radar */
+.poam-config-location-banner {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.poam-location-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.poam-location-status.placed {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.poam-location-status.pending {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.poam-location-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.poam-location-text strong {
+  font-size: 0.86rem;
+  color: var(--text-main);
+  display: block;
+}
+
+.poam-location-text p {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.poam-location-icon.placed {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.poam-location-icon.pending {
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.poam-btn-location-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.poam-btn-location-action.unplace {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid #ef4444;
+  color: #ef4444;
+}
+
+.poam-btn-location-action.unplace:hover {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.poam-btn-location-action.place {
+  background: var(--accent-color, #ea580c);
+  border: 1.5px solid var(--accent-color, #ea580c);
+  color: #ffffff;
+}
+
+.poam-btn-location-action.place:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
+}
+
+/* Footer del modal */
+.poam-config-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.poam-footer-left,
+.poam-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.poam-btn-with-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.poam-modal-icon-badge.config {
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+}
+
+/* Botón Primario Principal (Listo, Guardar, Confirmar) */
+.poam-btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+  border: 1.5px solid #ea580c !important;
+  color: #ffffff !important;
+  padding: 9px 22px !important;
+  border-radius: 8px !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  font-family: inherit !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  outline: none !important;
+}
+
+.poam-btn-primary:hover {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.55) !important;
+}
+
+.poam-btn-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3) !important;
+}
+
+html.dark .poam-btn-primary {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 18px rgba(234, 88, 12, 0.5) !important;
+}
+
+/* Lienzo SVG */
+.poam-radar-svg-canvas {
+  width: 100%;
+  max-width: 780px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.08));
+}
+
+.poam-radar-svg-canvas.large {
+  max-width: 780px;
+  width: 100%;
+}
+
+html.dark .poam-radar-svg-canvas {
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+}
+
+/* Círculo base de radar adaptativo a modo claro y oscuro (sin azul hardcodeado) */
+.poam-radar-base-circle {
+  fill: var(--bg-body, #ffffff);
+  stroke: var(--border-color, #e2e8f0);
+  stroke-width: 1.5;
+  transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+html.dark .poam-radar-base-circle {
+  fill: rgba(255, 255, 255, 0.02);
+  stroke: var(--border-color, #334155);
+}
+
+/* ==========================================================================
+   EFECTO DE ONDAS DE SONAR Y BARRIDO DE RADAR
+   ========================================================================== */
+.poam-radar-waves-layer {
+  pointer-events: none;
+}
+
+.poam-sonar-wave {
+  fill: none;
+  stroke: var(--accent-color, #ea580c);
+  pointer-events: none;
+}
+
+html.dark .poam-sonar-wave {
+  stroke: #fb923c;
+  filter: drop-shadow(0 0 3px rgba(234, 88, 12, 0.4));
+}
+
+/* Anillos concéntricos */
+.poam-radar-ring {
+  fill: none;
+  stroke: var(--border-color, #cbd5e1);
+  stroke-width: 1.5;
+  transition: stroke 0.3s ease;
+}
+
+.poam-radar-ring.ring-bajo {
+  stroke-dasharray: 4 4;
+  opacity: 0.75;
+}
+
+.poam-radar-ring.ring-medio {
+  opacity: 0.9;
+}
+
+.poam-radar-ring.ring-alto {
+  fill: url(#nucleoGlow);
+  stroke: rgba(239, 68, 68, 0.55);
+  stroke-width: 2;
+}
+
+.poam-radar-center-dot {
+  fill: var(--text-muted);
+  stroke: var(--bg-card);
+  stroke-width: 2;
+  opacity: 0.85;
+}
+
+.poam-radar-axis-line {
+  stroke: var(--border-color, #cbd5e1);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+  opacity: 0.75;
+}
+
+.poam-radar-ring-text {
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: inherit;
+  pointer-events: none;
+}
+
+.poam-radar-ring-text.critical {
+  fill: #ef4444;
+  opacity: 0.95;
+  font-weight: 800;
+}
+
+.poam-radar-ring-text.medium {
+  fill: var(--text-muted);
+  opacity: 0.75;
+}
+
+.poam-radar-ring-text.low {
+  fill: var(--text-muted);
+  opacity: 0.65;
+}
+
+/* Insignias de las 5 Dimensiones exteriores (adaptativas a tema claro/oscuro) */
+.poam-sector-group {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.poam-sector-group:hover {
+  transform: scale(1.04);
+}
+
+.poam-sector-badge-bg {
+  fill: var(--bg-card);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08));
+  transition: fill 0.25s ease, stroke 0.25s ease, filter 0.25s ease;
+}
+
+html.dark .poam-sector-badge-bg {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+
+.poam-sector-badge-text {
+  fill: var(--text-main);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 750;
+  pointer-events: none;
+  transition: fill 0.25s ease;
+  user-select: none;
+}
+
+/* Esferas de los nodos */
+.poam-node-item {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: grab;
+  user-select: none;
+}
+
+.poam-node-item:hover {
+  filter: brightness(1.22);
+}
+
+.poam-node-item.seleccionado { filter: brightness(1.15) drop-shadow(0 0 8px rgba(234, 88, 12, 0.48)); }
+
+.poam-node-item.arrastrando {
+  cursor: grabbing !important;
+  filter: brightness(1.3) drop-shadow(0 0 12px rgba(255, 255, 255, 0.7));
+  opacity: 0.82;
+}
+
+.poam-node-badge-bg {
+  fill: var(--bg-card);
+  transition: fill 0.25s ease;
+}
+
+.poam-node-badge-text {
+  fill: var(--text-main);
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.poam-pulse-halo {
+  animation: radarHaloSpin 5s linear infinite;
+}
+
+@keyframes radarHaloSpin {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 36; }
+}
+
+/* Tooltip al pasar el ratón sobre una esfera del radar */
+.poam-radar-quick-hover-tip {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: var(--bg-card, #ffffff);
+  backdrop-filter: blur(14px);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 12px 16px;
+  max-width: 440px;
+  width: max-content;
+  box-sizing: border-box;
+  pointer-events: none;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+  z-index: 50;
+  color: var(--text-main, #0f172a);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+html.dark .poam-radar-quick-hover-tip {
+  background: #000000;
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+  color: #f8fafc;
+}
+
+.poam-tip-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin-bottom: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.poam-tag-tipo {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 5px;
+  letter-spacing: 0.02em;
+}
+
+.poam-tag-tipo.op {
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+html.dark .poam-tag-tipo.op {
+  background: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.poam-tag-tipo.am {
+  background: rgba(239, 68, 68, 0.16);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+html.dark .poam-tag-tipo.am {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.poam-tag-dim {
+  font-size: 0.72rem;
+  color: #334155;
+  font-weight: 700;
+}
+
+html.dark .poam-tag-dim {
+  color: #94a3b8;
+}
+
+.poam-tag-origen {
+  font-size: 0.7rem;
+  color: #b45309;
+  font-weight: 800;
+  margin-left: auto;
+}
+
+html.dark .poam-tag-origen {
+  color: #fbbf24;
+}
+
+.poam-tip-title {
+  margin: 0 0 8px 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+html.dark .poam-tip-title {
+  color: #f8fafc;
+}
+
+.poam-tip-metrics {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: #475569;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 6px;
+}
+
+html.dark .poam-tip-metrics {
+  color: #94a3b8;
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.poam-tip-metrics strong {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+html.dark .poam-tip-metrics strong {
+  color: #ffffff;
+}
+
+/* Inspector Drawer del Factor Seleccionado */
+.poam-radar-inspector-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+
+.poam-inspector-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.poam-inspector-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.poam-tag-badge-pill {
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.poam-tag-badge-pill.op {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.poam-tag-badge-pill.am {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.poam-tag-dim-pill {
+  font-size: 0.72rem;
+  background: var(--bg-body, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.poam-tag-origin-pill {
+  font-size: 0.72rem;
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.poam-inspector-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Botones de acción del Inspector (Editar en Azul, Eliminar en Rojo) */
+.poam-icon-btn {
+  background: var(--bg-card);
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+/* 1. EDITAR: Marco y letra azul, hover fondo azul */
+.poam-icon-btn.edit,
+.poam-icon-btn:not(.danger) {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+  border: 1.5px solid #2563eb !important;
+  color: #2563eb !important;
+}
+
+.poam-icon-btn.edit:hover,
+.poam-icon-btn:not(.danger):hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35) !important;
+}
+
+/* 2. ELIMINAR: Marco y letra roja, hover fondo rojo */
+.poam-icon-btn.danger {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+  border: 1.5px solid #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.poam-icon-btn.danger:hover {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Dark mode */
+html.dark .poam-icon-btn.edit,
+html.dark .poam-icon-btn:not(.danger) {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+  border-color: #3b82f6 !important;
+  color: #60a5fa !important;
+}
+
+html.dark .poam-icon-btn.edit:hover,
+html.dark .poam-icon-btn:not(.danger):hover {
+  background-color: #2563eb !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.5) !important;
+}
+
+html.dark .poam-icon-btn.danger {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+}
+
+html.dark .poam-icon-btn.danger:hover {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(239, 68, 68, 0.5) !important;
+}
+
+.poam-inspector-factor-text {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.poam-inspector-justificacion {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  background: var(--bg-body, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-color, #ea580c);
+  font-family: inherit;
+}
+
+.poam-inspector-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+.poam-quick-ctrl-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.poam-ctrl-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ==========================================================================
+   ESTILOS DE BOTONES DIAL (SEGMENTED DIAL) - RÉPLICA EXACTA DE 5 FUERZAS DE PORTER
+   ========================================================================== */
+
+.segmented-dial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+/* Base button dial idéntico a Porter */
+button.btn-dial-item,
+button.dial-item,
+.btn-dial-item,
+.dial-item,
+.poam-ctrl-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  padding: 5px 8px !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  font-family: inherit !important;
+  background-color: transparent !important;
+  border: 1.5px solid var(--border-color) !important;
+  color: var(--text-muted) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  text-align: center !important;
+  transform: none !important;
+  gap: 4px !important;
+}
+
+/* ==========================================================================
+   BAJA / OPORTUNIDAD: Verde (#10b981) - El hover y el active son del mismo color que su marco
+   ========================================================================== */
+button.btn-dial-item.baja:hover,
+button.btn-dial-item.btn-dial-baja:hover,
+button.dial-item.baja:hover,
+button.btn-dial-item.baja.active,
+button.btn-dial-item.btn-dial-baja.active,
+button.dial-item.baja.active,
+.btn-dial-item.baja:hover,
+.dial-item.baja:hover,
+.btn-dial-item.baja.active,
+.dial-item.baja.active,
+button.btn-dial-item.op:hover,
+button.dial-item.op:hover,
+button.btn-dial-item.op.active,
+button.dial-item.op.active,
+.poam-ctrl-btn.baja:hover,
+.poam-ctrl-btn.baja.active,
+.poam-ctrl-btn.op:hover,
+.poam-ctrl-btn.op.active {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.25) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ==========================================================================
+   MEDIA: Amarillo/Ámbar (#f59e0b) - El hover y el active son del mismo color que su marco
+   ========================================================================== */
+button.btn-dial-item.media:hover,
+button.btn-dial-item.btn-dial-media:hover,
+button.dial-item.media:hover,
+button.btn-dial-item.media.active,
+button.btn-dial-item.btn-dial-media.active,
+button.dial-item.media.active,
+.btn-dial-item.media:hover,
+.dial-item.media:hover,
+.btn-dial-item.media.active,
+.dial-item.media.active,
+.poam-ctrl-btn.media:hover,
+.poam-ctrl-btn.media.active {
+  background-color: rgba(245, 158, 11, 0.08) !important;
+  border-color: #f59e0b !important;
+  color: #f59e0b !important;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ==========================================================================
+   ALTA / AMENAZA: Rojo (#ef4444) - El hover y el active son del mismo color que su marco
+   ========================================================================== */
+button.btn-dial-item.alta:hover,
+button.btn-dial-item.btn-dial-alta:hover,
+button.dial-item.alta:hover,
+button.btn-dial-item.alta.active,
+button.btn-dial-item.btn-dial-alta.active,
+button.dial-item.alta.active,
+.btn-dial-item.alta:hover,
+.dial-item.alta:hover,
+.btn-dial-item.alta.active,
+.dial-item.alta.active,
+button.btn-dial-item.am:hover,
+button.dial-item.am:hover,
+button.btn-dial-item.am.active,
+button.dial-item.am.active,
+.poam-ctrl-btn.alta:hover,
+.poam-ctrl-btn.alta.active,
+.poam-ctrl-btn.am:hover,
+.poam-ctrl-btn.am.active {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Soporte dark mode para los tres diales (marco y letra con alta luminancia idéntico a Porter) */
+html.dark button.btn-dial-item.baja:hover,
+html.dark button.btn-dial-item.baja.active,
+html.dark .dial-item.baja:hover,
+html.dark .dial-item.baja.active,
+html.dark button.btn-dial-item.op:hover,
+html.dark button.btn-dial-item.op.active,
+html.dark .dial-item.op:hover,
+html.dark .dial-item.op.active,
+html.dark .poam-ctrl-btn.baja:hover,
+html.dark .poam-ctrl-btn.baja.active,
+html.dark .poam-ctrl-btn.op:hover,
+html.dark .poam-ctrl-btn.op.active {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  border-color: #34d399 !important;
+  color: #34d399 !important;
+}
+
+html.dark button.btn-dial-item.media:hover,
+html.dark button.btn-dial-item.media.active,
+html.dark .dial-item.media:hover,
+html.dark .dial-item.media.active,
+html.dark .poam-ctrl-btn.media:hover,
+html.dark .poam-ctrl-btn.media.active {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  border-color: #fbbf24 !important;
+  color: #fbbf24 !important;
+}
+
+html.dark button.btn-dial-item.alta:hover,
+html.dark button.btn-dial-item.alta.active,
+html.dark .dial-item.alta:hover,
+html.dark .dial-item.alta.active,
+html.dark button.btn-dial-item.am:hover,
+html.dark button.btn-dial-item.am.active,
+html.dark .dial-item.am:hover,
+html.dark .dial-item.am.active,
+html.dark .poam-ctrl-btn.alta:hover,
+html.dark .poam-ctrl-btn.alta.active,
+html.dark .poam-ctrl-btn.am:hover,
+html.dark .poam-ctrl-btn.am.active {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  border-color: #f87171 !important;
+  color: #f87171 !important;
+}
+
+button.btn-dial-item:active,
+button.dial-item:active,
+.btn-dial-item:active,
+.dial-item:active,
+.poam-ctrl-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* ==========================================================================
+   MODO 2: MATRIZ TABULAR CUANTITATIVA FORMAL
+   ========================================================================== */
+
+.poam-matriz-tabular-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+
+.poam-matriz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.poam-matriz-title {
+  margin: 0 0 4px 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.poam-matriz-subtitle {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  max-width: 580px;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.poam-matriz-meta-count {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-body, rgba(0, 0, 0, 0.03));
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  font-family: inherit;
+}
+
+.poam-table-scroll-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.poam-formal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.poam-formal-table th {
+  background: var(--bg-body, rgba(0, 0, 0, 0.04));
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.poam-formal-table th.th-center {
+  text-align: center;
+}
+
+.poam-formal-table th.op {
+  color: #34d399;
+}
+
+.poam-formal-table th.am {
+  color: #f87171;
+}
+
+.poam-formal-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+  vertical-align: middle;
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+
+.poam-formal-table td.td-center {
+  text-align: center;
+}
+
+.poam-formal-table .td-index {
+  color: var(--text-muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+.poam-row {
+  transition: background-color 0.15s ease;
+}
+
+.poam-row:hover {
+  background: rgba(234, 88, 12, 0.04);
+}
+
+.poam-row { cursor: pointer; }
+.poam-row.selected { background: rgba(234, 88, 12, 0.1); box-shadow: inset 3px 0 0 var(--accent-color, #ea580c); }
+.poam-row.selected td { border-bottom-color: color-mix(in srgb, var(--accent-color, #ea580c) 35%, var(--border-color)); }
+.poam-row.selected .td-factor { border-left-width: 5px; }
+html.dark .poam-row.selected { background: rgba(251, 146, 60, 0.12); }
+
+.poam-row.row-op td.td-factor {
+  border-left: 3px solid #10b981;
+}
+
+.poam-row.row-am td.td-factor {
+  border-left: 3px solid #ef4444;
+}
+
+.poam-table-factor-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.poam-origin-tag {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  width: fit-content;
+  letter-spacing: 0.02em;
+}
+
+.poam-origin-tag.porter {
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.3);
+}
+
+html.dark .poam-origin-tag.porter {
+  color: #fb923c;
+}
+
+.poam-origin-tag.pest {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+html.dark .poam-origin-tag.pest {
+  color: #34d399;
+}
+
+.poam-factor-title-text {
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.35;
+  font-family: inherit;
+}
+
+.poam-factor-source-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: inherit;
+}
+
+.poam-dim-badge {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-body, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--border-color);
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+/* Casillas segmentadas B | M | A */
+.poam-pill-segmented {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--bg-body, rgba(0, 0, 0, 0.05));
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.poam-seg-btn {
+  padding: 3px 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.poam-seg-btn:hover {
+  color: var(--text-main);
+}
+
+.poam-seg-btn.op.active {
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.poam-seg-btn.am.active {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.poam-table-impact-pill {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-table-impact-pill.alta {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.45) !important;
+}
+
+.poam-table-impact-pill.media {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #f59e0b !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+}
+
+.poam-table-impact-pill.baja {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
+}
+
+.poam-inline-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text-main);
+  font-size: 0.78rem;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-inline-input:focus {
+  background: var(--bg-body, rgba(0, 0, 0, 0.04));
+  border-color: var(--accent-color, #ea580c);
+  color: var(--text-main);
+}
+
+.poam-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Botones de acción en tabla (Editar en Azul, Eliminar en Rojo) */
+.poam-row-btn {
+  background: var(--bg-card);
+  padding: 4px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+/* 1. EDITAR: Marco y letra azul, hover fondo azul */
+.poam-row-btn.edit,
+.poam-row-btn:not(.danger) {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+  border: 1.5px solid #2563eb !important;
+  color: #2563eb !important;
+}
+
+.poam-row-btn.edit:hover,
+.poam-row-btn:not(.danger):hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+}
+
+/* 2. ELIMINAR: Marco y letra roja, hover fondo rojo */
+.poam-row-btn.danger {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+  border: 1.5px solid #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.poam-row-btn.danger:hover {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Dark mode */
+html.dark .poam-row-btn.edit,
+html.dark .poam-row-btn:not(.danger) {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+  border-color: #3b82f6 !important;
+  color: #60a5fa !important;
+}
+
+html.dark .poam-row-btn.edit:hover,
+html.dark .poam-row-btn:not(.danger):hover {
+  background-color: #2563eb !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.45) !important;
+}
+
+html.dark .poam-row-btn.danger {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+}
+
+html.dark .poam-row-btn.danger:hover {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.45) !important;
+}
+
+/* Fila de Totales */
+.poam-total-row {
+  background: var(--bg-body, rgba(0, 0, 0, 0.04));
+  border-top: 2px solid var(--border-color);
+}
+
+.poam-total-row td {
+  padding: 12px;
+  color: var(--text-main);
+  font-weight: 700;
+  font-family: inherit;
+}
+
+/* ==========================================================================
+   4. PANEL LATERAL DERECHO: TUTORÍA, GUÍA, DR. ESTRATEGIA & IMPACTO FODA
+   RÉPLICA EXACTA DE ESTILOS Y TAMAÑO DE LAS 5 FUERZAS DE PORTER (320px)
+   ========================================================================== */
+
+.poam-main-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.poam-workspace-left {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.porter-summary-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 320px;
+  min-width: 320px;
+  position: sticky;
+  top: 16px;
+  z-index: 30;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Sidebar Minimizar Bar */
+
+/* Botón Minimizar Sidebar */
+
+/* Dock Lateral Minimizado */
+
+/* Tarjeta Guía Payload POAM -> FODA */
+.poam-payload-card {
+  box-sizing: border-box;
+}
+
+.poam-rule-banner {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+html.dark .poam-rule-banner {
+  background: transparent;
+  border: none;
+}
+
+.poam-rule-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.38;
+  margin: 0;
+}
+
+.poam-rule-desc strong {
+  color: var(--accent-color, #ea580c);
+}
+
+.poam-rule-desc em {
+  font-style: normal;
+  color: var(--text-main, #f8fafc);
+  font-weight: 700;
+}
+
+.poam-counts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.poam-count-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.poam-count-box.amen {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.poam-count-box.amen .num {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #dc2626;
+}
+
+.poam-count-box.opor {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.poam-count-box.opor .num {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #059669;
+}
+
+/* Mini Balanza Visual en Sidebar Tutoría & Guía */
+.poam-sidebar-mini-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+/* Botón CTA idéntico a Porter */
+
+/* ==========================================================================
+   FOOTER LIMPIO DE NAVEGACIÓN (RÉPLICA EXACTA DE LAS 5 FUERZAS DE PORTER)
+   ========================================================================== */
+
+.poam-clean-footer,
+.porter-clean-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-card, #0f172a);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 12px 18px;
+  box-sizing: border-box;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.btn-footer-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1.5px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.btn-footer-back:hover {
+  background: rgba(234, 88, 12, 0.08);
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #fb923c);
+  transform: translateY(-1px);
+}
+
+.btn-footer-action,
+.btn-footer-export-foda {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-color, #ea580c);
+  border: 1.5px solid var(--accent-color, #ea580c);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.25);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-footer-action:hover,
+.btn-footer-export-foda:hover {
+  background: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+.btn-footer-action:active,
+.btn-footer-export-foda:active,
+.btn-footer-back:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   5. MODAL DE CREACIÓN / EDICIÓN DE FACTOR POAM
+   ========================================================================== */
+
+.poam-modal-overlay,
+.poam-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(3, 7, 18, 0.88) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 999999 !important;
+  padding: 24px !important;
+  box-sizing: border-box !important;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.poam-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.poam-modal-subtitle {
+  display: block;
+  font-size: 0.77rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+  margin-top: 2px;
+  font-family: inherit;
+}
+
+.poam-modal-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.28);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.poam-modal-box {
+  width: 95%;
+  max-width: 820px;
+  max-height: 92vh;
+  background: var(--bg-card, #0f172a);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 16px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  color: var(--text-main);
+  position: relative;
+  z-index: 1000000;
+}
+
+@keyframes modalZoomIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.poam-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card, #1e293b);
+  flex-shrink: 0;
+}
+
+.poam-modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.poam-modal-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.3);
+  flex-shrink: 0;
+}
+
+.poam-modal-title {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--text-main, #f8fafc);
+  letter-spacing: -0.01em;
+  font-family: inherit;
+}
+
+.poam-modal-subtitle {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.76rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+}
+
+.poam-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.poam-modal-close-btn:hover {
+  background: var(--bg-body, rgba(255, 255, 255, 0.06));
+  color: var(--text-main, #ffffff);
+}
+
+.poam-modal-form {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  max-height: calc(92vh - 145px);
+}
+
+/* BLOQUE 1: Grid de 2 columnas balanceadas */
+.poam-modal-row-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.poam-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.poam-form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted, #cbd5e1);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-family: inherit;
+}
+
+.poam-label-icon {
+  color: var(--accent-color, #ea580c);
+  flex-shrink: 0;
+}
+
+.poam-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.poam-form-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted, #64748b);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.poam-form-select,
+.poam-form-input,
+.poam-form-textarea {
+  background: var(--bg-body, #1e293b);
+  border: 1.5px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text-main, #f8fafc);
+  font-size: 0.84rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.poam-form-textarea {
+  resize: vertical;
+  min-height: 60px;
+  line-height: 1.45;
+}
+
+.poam-form-select:focus,
+.poam-form-input:focus,
+.poam-form-textarea:focus {
+  border-color: var(--accent-color, #ea580c);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18);
+}
+
+/* Grid de tags de origen */
+.poam-origin-tags-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.poam-origin-tag-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 6px;
+  background: var(--bg-body, #1e293b);
+  border: 1.5px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.73rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-family: inherit;
+}
+
+.poam-origin-tag-btn:hover {
+  border-color: rgba(234, 88, 12, 0.5);
+  color: var(--text-main, #ffffff);
+}
+
+.poam-origin-tag-btn.active {
+  background: rgba(234, 88, 12, 0.15) !important;
+  border-color: var(--accent-color, #ea580c) !important;
+  color: var(--accent-color, #ea580c) !important;
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.25);
+}
+
+/* BLOQUE 3: Card de calibración táctica de 3 columnas */
+.poam-modal-calibration-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.poam-modal-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #f59e0b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.poam-modal-calibration-columns {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.segmented-dial-grid.col-2 {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.segmented-dial-grid.col-3 {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+/* FOOTER ESPACIOSO CON RESUMEN Y ACCIONES */
+.poam-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  padding-top: 16px;
+  flex-shrink: 0;
+}
+
+.poam-auto-sync-status {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.poam-sync-indicator-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.78rem;
+  background: rgba(16, 185, 129, 0.08);
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.1);
+}
+
+.poam-sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: pulseRadarSync 2s infinite ease-in-out;
+}
+
+@keyframes pulseRadarSync {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.poam-sync-indicator-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--border-color);
+}
+
+.poam-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.poam-modal-btn-cancel {
+  background: transparent;
+  border: 1.5px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  color: var(--text-muted, #cbd5e1);
+  padding: 8px 18px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.poam-modal-btn-cancel:hover {
+  background: var(--bg-body, rgba(255, 255, 255, 0.05));
+  color: var(--text-main, #ffffff);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.poam-modal-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-color, #ea580c);
+  border: 1.5px solid var(--accent-color, #ea580c);
+  color: #ffffff;
+  padding: 8px 20px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.25);
+  transition: all 0.2s ease;
+}
+
+.poam-modal-btn-save:hover {
+  background: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+.poam-modal-btn-save:disabled,
+.poam-btn-location-action.place:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  filter: grayscale(0.6) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Responsividad para pantallas medianas o reducidas */
+@media (max-width: 768px) {
+  .poam-modal-box {
+    max-width: 96%;
+  }
+  .poam-modal-row-grid {
+    grid-template-columns: 1fr;
+  }
+  .poam-modal-calibration-columns {
+    grid-template-columns: 1fr;
+  }
+  .poam-modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .poam-modal-summary-pill {
+    justify-content: center;
+  }
+  .poam-modal-actions {
+    justify-content: flex-end;
+  }
+}
+
+/* ==========================================================================
+   6. BOTÓN DEL HEADER Y MODAL DE BALANZA TRADICIONAL DE PLATILLOS
+   ========================================================================== */
+
+.btn-header-balanza {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.12), rgba(234, 88, 12, 0.05)) !important;
+  border: 1.5px solid rgba(234, 88, 12, 0.35) !important;
+  color: var(--accent-color, #ea580c) !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  padding: 6.5px 15px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 1px 4px rgba(234, 88, 12, 0.12) !important;
+  font-family: inherit !important;
+  letter-spacing: 0.01em !important;
+  user-select: none !important;
+}
+
+.btn-header-balanza:hover {
+  background: var(--accent-color, #ea580c) !important;
+  border-color: var(--accent-color, #ea580c) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3) !important;
+}
+
+.btn-header-balanza:active {
+  transform: translateY(0) !important;
+}
+
+.poam-modal-dialog,
+.poam-modal-balanza-dialog {
+  max-width: 1040px !important;
+  width: 95% !important;
+  max-height: 92vh !important;
+  overflow-y: auto !important;
+  border-radius: 14px !important;
+  background: var(--bg-card, #0f172a) !important;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+  position: relative !important;
+  z-index: 1000000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: inherit !important;
+  color: var(--text-main) !important;
+}
+
+.poam-modal-icon-badge.balanza {
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent-color, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.3);
+}
+
+.poam-balanza-modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.poam-tow-modal-card {
+  margin: 0;
+  border-radius: 12px;
+}
+
+.poam-balanza-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 820px) {
+  .poam-balanza-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.poam-detail-col {
+  background: var(--bg-body, #111827);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: inherit;
+}
+
+.poam-detail-col.favorable {
+  border-top: 3px solid #10b981;
+}
+
+.poam-detail-col.hostil {
+  border-top: 3px solid #ef4444;
+}
+
+.poam-detail-col-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.poam-col-mass-badge {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.poam-col-mass-badge.am {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.poam-factors-pan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.poam-pan-factor-card {
+  background: var(--bg-card, rgba(15, 23, 42, 0.6));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: inherit;
+}
+
+.poam-pan-factor-card.op {
+  border-left: 3px solid #10b981;
+}
+
+.poam-pan-factor-card.am {
+  border-left: 3px solid #ef4444;
+}
+
+.poam-pan-factor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.factor-dim-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+}
+
+.factor-pts-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.factor-pts-badge.op {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.factor-pts-badge.am {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.factor-desc-text {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-main, #f1f5f9);
+  line-height: 1.35;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.factor-just-text {
+  font-size: 0.7rem;
+  color: var(--text-muted, #64748b);
+  font-style: italic;
+  line-height: 1.3;
+  font-family: inherit;
+}
+
+.poam-pan-empty {
+  font-size: 0.78rem;
+  color: var(--text-muted, #64748b);
+  text-align: center;
+  padding: 16px;
+  font-style: italic;
+  font-family: inherit;
+}
+
+.poam-balanza-verdict-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--bg-body, #1e293b);
+  border: 1px solid var(--border-color, rgba(245, 158, 11, 0.3));
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-family: inherit;
+}
+
+/* ==========================================================================
+   ESTILOS COPIADOS DE LA BANDEJA FODA (UNIFICACIÓN DE DISEÑO)
+   ========================================================================== */
+.foda-tray-collapsed-dock {
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 10px;
+}
+
+.foda-tray-collapsed-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin-top: 24px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.foda-tray-header {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.foda-tray-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.foda-tray-counter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.foda-accent-icon {
+  color: var(--primary-color, #2563eb);
+}
+
+.foda-tray-counter-pill {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+  padding: 2.5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.foda-tray-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.foda-btn-icon-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.foda-btn-icon-tool:hover {
+  border-color: var(--primary-color, #2563eb);
+  color: var(--primary-color, #2563eb);
+  background: var(--bg-hover, rgba(37, 99, 235, 0.06));
+  transform: translateY(-1px);
+}
+
+html.dark .foda-btn-icon-tool {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+html.dark .foda-btn-icon-tool:hover {
+  color: #60a5fa;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.foda-tray-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible !important;
+}
+
+.foda-tray-cards-viewport {
+  overflow: visible !important;
+  width: 100%;
+  padding-right: 0 !important;
+  max-height: none !important;
+}
+
+.foda-tray-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 2px 1px;
+  overflow: visible !important;
+}
+
+.foda-tray-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+}
+
+.poam-radar-top-carousel-card .poam-carrusel-factor-card {
+  min-height: auto;
+  padding: 9px 12px;
+  gap: 7px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.poam-radar-top-carousel-card .noticia-texto {
+  font-size: 0.8rem;
+  line-height: 1.38;
+  color: var(--text-main);
+  font-weight: 600;
+  margin: 0;
+  white-space: normal;
+  overflow: visible;
+  display: block;
+}
+
+.foda-tray-card.poam-carrusel-factor-card {
+  min-height: auto;
+  padding: 10px 13px;
+  gap: 8px;
+  border-radius: 9px;
+  transition: all 0.2s ease;
+}
+
+.foda-tray-card.poam-carrusel-factor-card .noticia-header {
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.foda-tray-card.poam-carrusel-factor-card .foda-chip-text {
+  max-width: 200px;
+}
+
+.foda-tray-card.poam-carrusel-factor-card .noticia-texto {
+  font-size: 0.81rem;
+  line-height: 1.42;
+  color: var(--text-main);
+  font-weight: 550;
+  margin: 0;
+  word-break: break-word;
+}
+
+.foda-tray-card.poam-carrusel-factor-card .noticia-footer {
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-color);
+  flex-wrap: nowrap;
+}
+
+.foda-tray-card.poam-carrusel-factor-card .poam-btn-tray-custom {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: all 0.15s ease;
+}
+
+.foda-tray-card.poam-carrusel-factor-card .poam-btn-tray-custom:hover {
+  background: var(--accent-color, #ea580c);
+  color: #ffffff;
+  border-color: var(--accent-color, #ea580c);
+  transform: translateY(-1px);
+}
+
+.poam-factor-card {
+  display: grid;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  border-left: 3px solid #10b981;
+  background: var(--bg-card, var(--bg-body));
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.poam-factor-card.tipo-am { border-left-color: #ef4444; }
+.poam-factor-card:hover { border-color: color-mix(in srgb, var(--text-muted) 38%, var(--border-color)); background: var(--bg-hover, var(--bg-body)); }
+.poam-factor-card.is-dragging { opacity: 0.45; }
+.poam-factor-card.selected { border-color: var(--accent-color, #ea580c); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color, #ea580c) 18%, transparent); }
+html.dark .poam-factor-card.selected { box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.22); }
+
+@media (max-width: 820px) {
+  .poam-control-bar { align-items: stretch; }
+  .poam-control-actions { flex-basis: 100%; flex-direction: column; align-items: stretch; }
+  .poam-fixed-actions { justify-content: flex-end; margin-left: 0; }
+}
+
+@media (max-width: 520px) {
+  .poam-fixed-actions { flex-wrap: wrap; }
+  .poam-fixed-actions > button { flex: 1 1 auto; justify-content: center; }
+}
+
+.poam-factor-card-heading,
+.poam-factor-card-footer,
+.poam-factor-card-status,
+.poam-factor-card-actions {
+  display: flex;
+  align-items: center;
+}
+
+.poam-factor-card-heading {
+  justify-content: flex-start;
+  gap: 7px;
+}
+
+.poam-factor-polarity,
+.poam-factor-dimension,
+.poam-factor-impact,
+.poam-factor-radar-status {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.poam-factor-polarity { flex: 0 0 auto; }
+.poam-factor-polarity.opportunity { color: #059669; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25); }
+.poam-factor-polarity.threat { color: #dc2626; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.25); }
+.poam-factor-dimension { color: var(--dimension-color); background: color-mix(in srgb, var(--dimension-color) 9%, transparent); border-color: color-mix(in srgb, var(--dimension-color) 20%, transparent); }
+
+.poam-factor-card-text {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 550;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.poam-factor-subdimension {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+  color: var(--text-muted);
+}
+
+.poam-factor-subdimension::before { content: ''; flex: 0 0 5px; width: 5px; height: 5px; margin-top: 5px; border-radius: 50%; background: var(--text-muted); opacity: 0.7; }
+.poam-factor-subdimension strong { color: var(--text-muted); font-size: 0.7rem; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+.poam-factor-card-footer { justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent); }
+.poam-factor-card-status, .poam-factor-card-actions { gap: 7px; flex-wrap: wrap; }
+.poam-factor-impact { padding: 0; border: 0; color: var(--text-muted); background: transparent; font-size: 0.68rem; font-weight: 500; }
+.poam-factor-impact.impact-alto { color: #dc2626; }
+.poam-factor-impact.impact-medio { color: #2563eb; }
+.poam-factor-impact.impact-bajo { color: #64748b; }
+.poam-factor-card-actions .poam-btn-tray-custom { padding: 5px 8px; border-radius: 6px; font-size: 0.68rem; }
+.poam-factor-card-actions .pestel-btn-attach-chip { min-width: 28px; height: 28px; padding: 4px; }
+
+@media (max-width: 520px) {
+  .poam-factor-card { gap: 8px; padding: 11px; }
+  .poam-factor-card-heading { flex-wrap: wrap; }
+  .poam-factor-card-footer { align-items: center; }
+}
+
+.foda-tray-paginator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.foda-btn-page {
+  padding: 3px 8px !important;
+  font-size: 0.75rem !important;
+}
+
+.foda-paginator-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   MARCO ESTILIZADO PARA NIVEL DE PRESIÓN EN TARJETAS POAM
+   ========================================================================== */
+.poam-presion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4.5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 2px 7.5px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+  color: var(--text-main);
+  white-space: nowrap;
+  letter-spacing: 0.015em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.poam-presion-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: inline-block;
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+.poam-presion-badge-prefix {
+  font-weight: 600;
+  font-size: 0.60rem;
+  opacity: 0.82;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.poam-presion-badge-val {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* 1. Nivel de Presión Alta (Marco Rojo / Amenaza Severa) */
+
+/* 2. Nivel de Presión Media (Marco Ámbar / Alerta Moderada) */
+
+/* 3. Nivel de Presión Baja (Marco Esmeralda / Oportunidad Favorable) */
+
+/* ==========================================================================
+   ESTILOS DE SUBDIVISIONES METODOLÓGICAS DEL POAM (5 DIMENSIONES)
+   ========================================================================== */
+
+/* Columna y selector de subdivisión en la Matriz Tabular Formal */
+.td-subdivision {
+  vertical-align: top;
+  padding: 8px 10px !important;
+}
+
+.poam-table-subdiv-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.poam-select-subdiv {
+  width: 100%;
+  font-size: 0.75rem;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--bg-body, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.poam-select-subdiv:focus {
+  border-color: var(--accent-color, #ea580c);
+  background: var(--bg-card);
+}
+
+.poam-table-subdiv-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 2px;
+}
+
+/* Sección y Cabecera de Subdivisiones en Modal de Configuración */
+.poam-config-section-subdiv {
+  margin-top: 2px;
+}
+
+.poam-subdiv-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.poam-subdiv-active-tag {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  background: var(--bg-body, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-color);
+  padding: 3px 10px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.poam-subdiv-active-tag strong {
+  font-weight: 700;
+}
+
+/* Grid espacioso, desaglomerado y balanceado a 2 columnas para subdivisiones */
+.poam-subdiv-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 14px;
+  margin-top: 6px;
+}
+
+@media (max-width: 680px) {
+  .poam-subdiv-selection-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Tarjeta individual de subdivisión (Desaglomerada, horizontal y con respiro visual) */
+.poam-subdiv-select-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 15px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  box-sizing: border-box;
+  min-height: 50px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.poam-subdiv-select-card:hover {
+  border-color: rgba(234, 88, 12, 0.5);
+  background: rgba(234, 88, 12, 0.04);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.poam-subdiv-select-card.active {
+  border-color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.09);
+  box-shadow: 0 0 0 1px var(--accent-color, #ea580c), 0 4px 14px rgba(234, 88, 12, 0.14);
+}
+
+.poam-subdiv-card-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Badge circular del índice (1, 2, 3...) */
+.poam-subdiv-index-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-body, rgba(0, 0, 0, 0.04));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.poam-subdiv-select-card:hover .poam-subdiv-index-badge:not(.active) {
+  border-color: var(--text-muted);
+  color: var(--text-main);
+}
+
+.poam-subdiv-index-badge.active {
+  border-color: transparent;
+}
+
+.poam-subdiv-card-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  word-break: normal;
+}
+
+.poam-subdiv-select-card.active .poam-subdiv-card-title {
+  font-weight: 700;
+}
+
+/* Indicador de verificación a la derecha */
+.poam-subdiv-check-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.poam-subdiv-check-badge.active {
+  border-color: transparent;
+}
+
+.poam-subdiv-radio-placeholder {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.poam-subdiv-select-card:hover .poam-subdiv-radio-placeholder {
+  background: var(--text-muted);
+}
+
+.poam-subdiv-empty-hint {
+  grid-column: 1 / -1;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  padding: 14px;
+  text-align: center;
+  font-style: italic;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-body, rgba(0, 0, 0, 0.02));
+}
+
+/* Guía didáctica: desglose de dimensiones y subdivisiones */
+.poam-guide-subdivisions-card {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--bg-body, rgba(0, 0, 0, 0.02));
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.poam-guide-subdivisions-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 12px 0;
+}
+
+.poam-guide-dim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.poam-guide-dim-block {
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left-width: 4px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.poam-guide-dim-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.poam-guide-dim-name {
+  font-weight: 800;
+  font-size: 0.82rem;
+}
+
+.poam-guide-dim-desc {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.poam-guide-subdiv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.poam-guide-subdiv-chip {
+  font-size: 0.74rem;
+  background: var(--bg-body, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 5px 12px;
+  line-height: 1.35;
+  transition: all 0.2s ease;
+}
+
+.poam-guide-subdiv-chip:hover {
+  border-color: var(--text-muted);
+  background: var(--bg-card);
+}
+
+.poam-guide-subdiv-name {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* Chip de subdivisión en tarjetas de la bandeja */
+
+/* ==========================================================================
+   ACCIONES EN FACTORES POAM Y MODAL DE EVIDENCIA DOCUMENTAL (ESTILO PESTEL)
+   ========================================================================== */
+.pestel-btn-attach-chip {
+  cursor: pointer;
+  padding: 0.2rem 0.32rem;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  position: relative;
+  min-width: 22px;
+  height: 20px;
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.09) !important;
+  border: 1px solid rgba(14, 165, 233, 0.22) !important;
+}
+
+.pestel-btn-attach-chip:hover {
+  color: #0369a1 !important;
+  background: rgba(14, 165, 233, 0.18) !important;
+  border-color: rgba(14, 165, 233, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+.pestel-btn-attach-chip.has-attachments {
+  color: #0284c7 !important;
+  background: rgba(14, 165, 233, 0.16) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+}
+
+html.dark .pestel-btn-attach-chip {
+  color: #38bdf8 !important;
+  background: rgba(14, 165, 233, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+html.dark .pestel-btn-attach-chip:hover {
+  color: #7dd3fc !important;
+  background: rgba(14, 165, 233, 0.25) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+}
+
+.pestel-attach-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.54rem;
+  font-weight: 800;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 2px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.pestel-btn-remove-chip {
+  cursor: pointer;
+  padding: 0.2rem 0.32rem;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  min-width: 22px;
+  height: 20px;
+  color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.09) !important;
+  border: 1px solid rgba(239, 68, 68, 0.22) !important;
+}
+
+.pestel-btn-remove-chip:hover {
+  color: #b91c1c !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+html.dark .pestel-btn-remove-chip {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+html.dark .pestel-btn-remove-chip:hover {
+  color: #fca5a5 !important;
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/* ==========================================================================
+   MODAL DE EVIDENCIA DOCUMENTAL POR FACTOR (.pdf, imágenes, excel, url)
+   ========================================================================== */
+.pestel-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: poamModalFadeIn 0.2s ease-out;
+}
+
+@keyframes poamModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pestel-modal-container {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: poamModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes poamModalPop {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+html.dark .pestel-modal-container {
+  background: #18181b;
+  border-color: #27272a;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6);
+}
+
+.pestel-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: rgba(0, 0, 0, 0.015);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+html.dark .pestel-modal-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-color: #27272a;
+}
+
+.pestel-modal-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 36px);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.pestel-modal-pretitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: var(--accent-color, #ea580c);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pestel-modal-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 850;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.pestel-modal-factor-quote {
+  margin: 4px 0 0;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.35;
+  border-left: 2.5px solid var(--accent-color, #ea580c);
+  padding-left: 8px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  max-height: 72px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.pestel-modal-factor-quote::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pestel-modal-factor-quote::-webkit-scrollbar-thumb {
+  background: rgba(234, 88, 12, 0.3);
+  border-radius: 4px;
+}
+
+.pestel-modal-btn-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pestel-modal-btn-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.pestel-modal-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: calc(90vh - 125px);
+}
+
+/* Tabs para los 4 tipos de evidencia */
+.pestel-modal-type-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 580px) {
+  .pestel-modal-type-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pestel-modal-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pestel-modal-tab-btn:hover {
+  color: var(--text-main);
+  border-color: var(--accent-color, #ea580c);
+}
+
+.pestel-modal-tab-btn.active.pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.pestel-modal-tab-btn.active.img {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.pestel-modal-tab-btn.active.sheet {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.pestel-modal-tab-btn.active.link {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+/* Panel de carga */
+.pestel-modal-upload-panel {
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+html.dark .pestel-modal-upload-panel {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pestel-modal-dropzone {
+  display: block;
+  border: 1.5px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.pestel-modal-dropzone:hover {
+  border-color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.03);
+}
+
+.pestel-hidden-file-input {
+  display: none;
+}
+
+.pestel-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.pestel-upload-icon {
+  color: var(--accent-color, #ea580c);
+  opacity: 0.85;
+}
+
+.pestel-dropzone-title {
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: var(--text-main);
+}
+
+.pestel-dropzone-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.pestel-selected-file-preview {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pestel-selected-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pestel-img-thumb-preview {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+}
+
+.pestel-file-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pestel-file-icon-box.pdf {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+.pestel-file-icon-box.hoja_calculo {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+.pestel-file-icon-box.imagen {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.pestel-file-meta-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pestel-rename-input {
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--text-main);
+  outline: none;
+}
+
+.pestel-rename-input:focus {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.pestel-file-raw-meta {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.pestel-modal-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pestel-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pestel-modal-field label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.pestel-input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-input-icon-wrap .input-icon {
+  position: absolute;
+  left: 8px;
+  color: var(--text-muted);
+}
+
+.pestel-input-icon-wrap input {
+  padding-left: 28px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-modal-field input {
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  font-size: 0.72rem;
+  color: var(--text-main);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pestel-modal-field input:focus {
+  border-color: var(--accent-color, #ea580c);
+}
+
+.pestel-modal-btn-submit {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent-color, #ea580c);
+  color: #ffffff;
+  font-size: 0.71rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 4px rgba(234, 88, 12, 0.25);
+}
+
+.pestel-modal-btn-submit:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* Sección de evidencias ya adjuntas */
+.pestel-modal-attached-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pestel-modal-attached-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+}
+
+.pestel-attached-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pestel-attached-help {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.pestel-modal-empty-attached {
+  border: 1.5px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 18px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+}
+
+.pestel-modal-empty-attached p {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.pestel-modal-empty-attached span {
+  font-size: 0.65rem;
+  max-width: 380px;
+}
+
+.pestel-attached-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pestel-attached-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.pestel-attached-card:hover {
+  border-color: rgba(234, 88, 12, 0.3);
+}
+
+.pestel-attached-card-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pestel-attached-icon-wrap {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pestel-attached-icon-wrap.pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+.pestel-attached-icon-wrap.imagen {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+.pestel-attached-icon-wrap.hoja_calculo {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.pestel-attached-icon-wrap.enlace {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+}
+
+.pestel-attached-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.pestel-attached-card-name {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pestel-attached-card-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.63rem;
+  color: var(--text-muted);
+}
+
+.pestel-attached-type-tag {
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 0 4px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+
+.pestel-attached-type-tag.pdf {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+.pestel-attached-type-tag.imagen {
+  background: rgba(168, 85, 247, 0.15);
+  color: #9333ea;
+}
+.pestel-attached-type-tag.hoja_calculo {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+.pestel-attached-type-tag.enlace {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0284c7;
+}
+
+.pestel-attached-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pestel-btn-doc-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.pestel-btn-doc-action.view:hover {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.pestel-btn-doc-action.delete {
+  padding: 4px;
+}
+
+.pestel-btn-doc-action.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.pestel-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.015);
+}
+
+html.dark .pestel-modal-footer {
+  background: rgba(255, 255, 255, 0.02);
+  border-top-color: #27272a;
+}
+
+.pestel-modal-footer-hint {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.pestel-modal-btn-done {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pestel-modal-btn-done:hover {
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+}
+
+/* Badge de Amenaza (-A) en color Rojo */
+.foda-origen-etiqueta.origen-amenaza {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+html.dark .foda-origen-etiqueta.origen-amenaza {
+  background: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.poam-readonly-value { display: block; color: var(--text-main); font-size: 0.76rem; line-height: 1.4; }
+
+.poam-control-bar > .btn-exportar-fase2-pdf:hover:not(:disabled) { border-color: #ea580c; color: #c2410c; background: #fff7ed; }
+
+html.dark .poam-control-bar > .btn-exportar-fase2-pdf:hover:not(:disabled) { color: #fdba74; background: #431407; border-color: #c2410c; }
