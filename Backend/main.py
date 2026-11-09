@@ -7,6 +7,8 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers import auth, archivos, calculos, historial, grupos, notificaciones, tareas, qr as qr_router, admin_credenciales, casos_empresariales
+from MAT251.Tema2 import routers_simbolicos as mat251_tema2_simbolicos
+from MAT251.Tema5 import simulacion as mat251_simulacion
 from config.database import async_engine, get_db
 from utils.notificaciones_sse import canal_notificaciones
 import models
