@@ -372,35 +372,22 @@ const construirEspacioEvaluadoCompuesto = (comps, res) => {
     return `\\Omega = \\left\\{\\begin{array}{l} ${filas.join(' \\\\ ')} \\end{array}\\right\\}`;
 };
 
-function LlaveMuestralPDF({ lado, filas = 6 }) {
-    const reflejar = lado === 'derecho';
-    const alturaPx = Math.max(22, filas * 15.5);
-
+function LlaveMuestralPDF({ lado }) {
+    // Las curvas tienen altura fija: solo se estiran los segmentos verticales.
+    const estiloExtremo = { position: 'absolute', left: 0, width: '12px', height: '10px', overflow: 'visible' };
     return (
-        <svg
-            style={{
-                height: `${alturaPx}px`,
-                width: "9px",
-                flex: "0 0 9px",
-                overflow: "visible",
-                display: "inline-block",
-                verticalAlign: "middle"
-            }}
-            viewBox="0 0 32 100"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-        >
-            <path
-                d="M30 1 C17 1 16 8 16 23 C16 39 12 46 2 50 C12 54 16 61 16 77 C16 92 17 99 30 99"
-                transform={reflejar ? "translate(32 0) scale(-1 1)" : undefined}
-                fill="none"
-                stroke="#000000"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-            />
-        </svg>
+        <span aria-hidden="true" style={{ position: 'relative', alignSelf: 'stretch', flex: '0 0 12px', minHeight: '22px', transform: lado === 'derecho' ? 'scaleX(-1)' : undefined }}>
+            <svg viewBox="0 0 12 10" style={{ ...estiloExtremo, top: 0 }}>
+                <path d="M11 1 Q6 1 6 10" fill="none" stroke="#000000" strokeWidth="1.3" />
+            </svg>
+            <span style={{ position: 'absolute', left: '5.35px', top: '10px', bottom: '10px', borderLeft: '1.3px solid #000000' }} />
+            <svg viewBox="0 0 12 14" style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '12px', height: '14px', backgroundColor: '#ffffff' }}>
+                <path d="M6 0 Q6 7 1 7 Q6 7 6 14" fill="none" stroke="#000000" strokeWidth="1.3" />
+            </svg>
+            <svg viewBox="0 0 12 10" style={{ ...estiloExtremo, bottom: 0, transform: 'rotate(180deg)' }}>
+                <path d="M1 1 Q6 1 6 10" fill="none" stroke="#000000" strokeWidth="1.3" />
+            </svg>
+        </span>
     );
 }
 
@@ -413,16 +400,35 @@ function EspacioMuestralCompuestoPDF({ comps, res, evaluado = false }) {
         const evtsPorComp = comps.map(c => parsearEventosExp(c.eventos));
         casos = evtsPorComp.reduce((acc, evts, idx) => {
             const compId = vars[idx];
-            if (acc.length === 0) return evts.map(e => ({ [compId]: e }));
             return acc.flatMap(item => evts.map(e => ({ ...item, [compId]: e })));
-        }, []);
+        }, [{}]);
     }
 
     const favSet = evaluado
         ? new Set((res?.favorables || []).map(f => JSON.stringify(vars.map(id => String(f[id] ?? '').trim()))))
         : null;
 
-    const elementos = casos.map(caso => {
+    // Mismo criterio que la matriz de la página: el experimento con más
+    // eventos ocupa las columnas (en un empate se conserva el último).
+    const eventosPorComponente = comps.map(comp => parsearEventosExp(comp.eventos));
+    const indiceColumna = eventosPorComponente.reduce((mayor, eventos, indice) => (
+        eventos.length > eventosPorComponente[mayor].length ? indice : mayor
+    ), comps.length - 1);
+    const eventosColumnas = eventosPorComponente[indiceColumna];
+    const porFila = Math.max(1, eventosColumnas.length);
+    const variableColumna = vars[indiceColumna];
+    const variablesFila = vars.filter((_, indice) => indice !== indiceColumna);
+    const grupos = new Map();
+    casos.forEach(caso => {
+        const claveFila = JSON.stringify(variablesFila.map(id => String(caso[id] ?? '').trim()));
+        if (!grupos.has(claveFila)) grupos.set(claveFila, []);
+        grupos.get(claveFila).push(caso);
+    });
+    const casosOrdenados = Array.from(grupos.values()).flatMap(fila => fila.sort((a, b) => (
+        eventosColumnas.indexOf(String(a[variableColumna] ?? '').trim())
+        - eventosColumnas.indexOf(String(b[variableColumna] ?? '').trim())
+    )));
+    const elementos = casosOrdenados.map(caso => {
         const vals = vars.map(id => String(caso[id] ?? '').trim());
         const clave = JSON.stringify(vals);
         const esFav = favSet ? favSet.has(clave) : false;
@@ -432,22 +438,7 @@ function EspacioMuestralCompuestoPDF({ comps, res, evaluado = false }) {
         };
     });
 
-    const eventosUltimo = comps.length > 0 ? parsearEventosExp(comps[comps.length - 1]?.eventos) : [];
-    let porFila = 6;
-    if (comps.length === 2 && eventosUltimo.length >= 2 && eventosUltimo.length <= 12) {
-        porFila = eventosUltimo.length;
-    } else if (eventosUltimo.length >= 4 && eventosUltimo.length <= 10) {
-        porFila = eventosUltimo.length;
-    } else if (elementos.length % 6 === 0) {
-        porFila = 6;
-    } else if (elementos.length % 4 === 0) {
-        porFila = 4;
-    } else if (eventosUltimo.length >= 2) {
-        porFila = eventosUltimo.length;
-    }
-
     const elementosMostrar = elementos;
-    const cantidadFilas = Math.ceil(elementosMostrar.length / porFila);
 
     return (
         <div style={{
@@ -455,16 +446,21 @@ function EspacioMuestralCompuestoPDF({ comps, res, evaluado = false }) {
             alignItems: "center",
             justifyContent: "center",
             gap: "5px",
+            width: "100%",
+            minWidth: 0,
             margin: "4px 0",
             fontSize: "7.5pt",
             fontFamily: "KaTeX_Main, 'Times New Roman', serif"
         }}>
             <span style={{ fontSize: "10pt", fontStyle: "italic", fontWeight: "bold" }}>Ω</span>
             <span style={{ fontSize: "10pt", margin: "0 2px" }}>=</span>
-            <LlaveMuestralPDF lado="izquierdo" filas={cantidadFilas} />
+            <LlaveMuestralPDF lado="izquierdo" />
             <div style={{
                 display: "grid",
-                gridTemplateColumns: `repeat(${porFila}, max-content)`,
+                gridTemplateColumns: `repeat(${porFila}, minmax(0, 1fr))`,
+                flex: "1 1 0",
+                minWidth: 0,
+                alignItems: "center",
                 columnGap: "7px",
                 rowGap: "2px",
                 textAlign: "center",
@@ -478,8 +474,10 @@ function EspacioMuestralCompuestoPDF({ comps, res, evaluado = false }) {
                             key={idx}
                             className={esFav ? "texto-verde-pdf" : undefined}
                             style={{
-                                whiteSpace: "nowrap",
-                                color: esFav ? "#07865b !important" : "#000000",
+                                minWidth: 0,
+                                whiteSpace: "normal",
+                                overflowWrap: "anywhere",
+                                color: esFav ? "#07865b" : "#000000",
                                 fontWeight: esFav ? "bold" : "normal"
                             }}
                         >
@@ -488,7 +486,7 @@ function EspacioMuestralCompuestoPDF({ comps, res, evaluado = false }) {
                     );
                 })}
             </div>
-            <LlaveMuestralPDF lado="derecho" filas={cantidadFilas} />
+            <LlaveMuestralPDF lado="derecho" />
         </div>
     );
 }
@@ -1006,7 +1004,7 @@ export default function ReportePDF_Tema1({
                                                         <tr key={regla.id || idx}>
                                                             <td style={{ textAlign: "center", fontWeight: "bold" }}>{idx + 1}</td>
                                                             <td style={{ textAlign: "center", fontWeight: "bold" }}>{idx === 0 ? '-' : (regla.conector === 'or' ? 'O' : 'Y')}</td>
-                                                            <td style={{ textAlign: "center" }}>{regla.tipo === 'suma' ? 'Suma de Experimentos' : 'Variable Individual'}</td>
+                                                            <td style={{ textAlign: "center" }}>{regla.tipo === 'suma' ? 'Suma de Experimentos' : 'Evento Individual'}</td>
                                                             <td style={{ textAlign: "center", fontWeight: "bold" }}>{obtenerTextoReglaExp(regla)}</td>
                                                         </tr>
                                                     ))}

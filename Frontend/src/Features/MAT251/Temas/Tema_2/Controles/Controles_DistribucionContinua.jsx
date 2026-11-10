@@ -62,6 +62,30 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
     };
 
     const [isTyping, setIsTyping] = useState(false);
+    const [editorActivo, setEditorActivo] = useState(false);
+    const editorActivoRef = useRef(false);
+    const lienzoRef = useRef(null);
+    const panelRef = useRef(null);
+
+    const activarEditor = (activo) => {
+        editorActivoRef.current = activo;
+        setEditorActivo(activo);
+    };
+
+    useEffect(() => {
+        const detectarInteraccion = ({ target }) => {
+            activarEditor(Boolean(lienzoRef.current?.contains(target) || panelRef.current?.contains(target)));
+        };
+        const ocultarCursor = () => activarEditor(false);
+        document.addEventListener('pointerdown', detectarInteraccion, true);
+        document.addEventListener('focusin', detectarInteraccion);
+        window.addEventListener('blur', ocultarCursor);
+        return () => {
+            document.removeEventListener('pointerdown', detectarInteraccion, true);
+            document.removeEventListener('focusin', detectarInteraccion);
+            window.removeEventListener('blur', ocultarCursor);
+        };
+    }, []);
     useEffect(() => {
         bloquesRef.current = bloques;
         const objetivo = focusSlotRef.current?.parentId || activeIdRef.current;
@@ -100,9 +124,17 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
     // ── soporte teclado físico ───────────────────────────────────────────────
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (!editorActivoRef.current) return;
+            const campoPotencia = e.target.dataset?.campoPotencia;
+            const haciaIzquierda = e.key === 'ArrowLeft';
+            const flechaHorizontal = haciaIzquierda || e.key === 'ArrowRight';
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                const borde = haciaIzquierda ? 0 : e.target.value.length;
+                if (campoPotencia !== 'exponente' || !flechaHorizontal || e.shiftKey
+                    || e.target.selectionStart !== borde || e.target.selectionEnd !== borde) return;
+            }
 
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            if (flechaHorizontal) {
                 const getFlattenedPositions = (lista, currentParentSlot = null) => {
                     let positions = [];
                     
@@ -121,6 +153,13 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                         } else if (b.tipo === 'euler' || b.tipo === 'absoluto') {
                             positions = positions.concat(getFlattenedPositions(b.numerador, { parentId: b.id, slot: 'numerador' }));
                         }
+                        if (b.tipo === 'termino_potencia') {
+                            positions.push({ activeId: b.id, focusSlot: currentParentSlot, campo: 'base' });
+                            if (String(b.exp ?? '').startsWith('-')) {
+                                positions.push({ activeId: b.id, focusSlot: currentParentSlot, campo: 'signo' });
+                            }
+                            positions.push({ activeId: b.id, focusSlot: currentParentSlot, campo: 'exponente' });
+                        }
                         positions.push({ activeId: b.id, focusSlot: currentParentSlot });
                     });
                     return positions;
@@ -132,6 +171,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
 
                 let currentIndex = positions.findIndex(p => {
                     if (p.activeId !== activeIdRef.current) return false;
+                    if (p.campo !== campoPotencia) return false;
                     if (p.activeId !== null && p.activeId !== 'START' && p.activeId !== 'START_SLOT') return true;
 
                     if (!p.focusSlot && !focusSlotRef.current) return true;
@@ -141,10 +181,27 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     return false;
                 });
 
+                if (currentIndex === -1 && activeIdRef.current === null && focusSlotRef.current) {
+                    const { parentId, slot } = focusSlotRef.current;
+                    currentIndex = positions.findLastIndex(p => p.focusSlot?.parentId === parentId && p.focusSlot?.slot === slot);
+                }
+
                 if (currentIndex !== -1 || e.key === 'ArrowLeft') {
                     let newIndex = e.key === 'ArrowLeft' ? currentIndex - 1 : currentIndex + 1;
                     if (newIndex >= 0 && newIndex < positions.length) {
                         const newPos = positions[newIndex];
+                        if (newPos.campo) {
+                            const campo = lienzoRef.current?.querySelector(
+                                `[data-potencia-id="${newPos.activeId}"][data-campo-potencia="${newPos.campo}"]`
+                            );
+                            campo?.focus();
+                            if (newPos.campo === 'exponente' && campo) {
+                                const cursor = haciaIzquierda ? campo.value.length : 0;
+                                campo.setSelectionRange(cursor, cursor);
+                            }
+                        } else if (campoPotencia) {
+                            e.target.blur();
+                        }
                         setActiveIdSync(newPos.activeId);
                         setFocusSlotSync(newPos.focusSlot);
                     } else if (newIndex >= positions.length) {
@@ -410,6 +467,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
     };
 
     const borrarBloque = () => {
+        if (activeIdRef.current === 'START_SLOT') return;
         const currentBloques = deepClone(bloquesRef.current);
         let deleted = false;
 
@@ -422,7 +480,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     setFocusSlotSync(null);
                 } else {
                     if (parentBlock) {
-                        setActiveIdSync(null);
+                        setActiveIdSync(list.length ? 'START_SLOT' : null);
                         setFocusSlotSync({ parentId: parentBlock.id, slot: slotName });
                     } else {
                         setActiveIdSync('START');
@@ -433,7 +491,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                 return true;
             }
 
-            if (focusSlotRef.current && focusSlotRef.current.parentId === b.id) {
+            if (activeIdRef.current === null && focusSlotRef.current?.parentId === b.id) {
                 const targetArr = b[focusSlotRef.current.slot];
                 if (targetArr.length > 0) {
                     const last = targetArr[targetArr.length - 1];
@@ -503,17 +561,53 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
         setLimiteB('');
     };
 
+    const convertirConstanteEnTermino = (input) => {
+        const coeficiente = input.value.trim();
+        if (coeficiente && !Number.isFinite(Number(coeficiente))) return;
+
+        const id = activeIdRef.current;
+        const nuevos = deepClone(bloquesRef.current);
+        const convertido = buscarYEjecutar(nuevos, (lista, indice) => {
+            const bloque = lista[indice];
+            if (bloque.id !== id || bloque.tipo !== 'constante') return false;
+            bloque.tipo = 'termino_lineal';
+            return true;
+        });
+        if (!convertido) return;
+
+        input.blur();
+        setBloquesSync(nuevos);
+    };
+
     const handleBtnMouseDown = (e, charToAppend, blockAction) => {
         e.preventDefault(); // Evita que el botón quite el foco del input
+        activarEditor(true);
         const a = document.activeElement;
 
         if (charToAppend === 'Limpiar') {
             limpiarTodo();
             return;
         }
+        if (charToAppend === 'Backspace' && a?.dataset.campoPotencia === 'signo') {
+            a.click();
+            return;
+        }
 
         // Si el usuario está tecleando en ALGÚN input (límites, coeficientes, exponentes)
         if (a && a.tagName === 'INPUT') {
+            if (a.hasAttribute('data-exponente') && charToAppend === 'Backspace'
+                && a.selectionStart === 0 && a.selectionEnd === 0) {
+                updateBlockById(activeIdRef.current, 'exp', a.value);
+                return;
+            }
+            if (a.hasAttribute('data-exponente') && (charToAppend === '-' || charToAppend === '+')) {
+                updateBlockById(activeIdRef.current, 'exp', (charToAppend === '-' ? '-' : '') + a.value);
+                return;
+            }
+            if (blockAction === 'termino_lineal' && a.hasAttribute('data-constante-numerica')) {
+                convertirConstanteEnTermino(a);
+                return;
+            }
             if (charToAppend === 'Backspace') {
                 if (a.selectionStart > 0 || a.selectionStart !== a.selectionEnd) {
                     const start = a.selectionStart;
@@ -557,6 +651,12 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
         } else if (Array.isArray(blockAction)) {
             agregarBloque(blockAction[0], blockAction[1]);
         }
+    };
+
+    const escribirDesdePanel = (e, tecla) => {
+        handleBtnMouseDown(e, tecla, () => {
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: tecla }));
+        });
     };
 
     // ── helpers ast ───────────────────────────────────────────────────────────────
@@ -605,15 +705,34 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
         }
     };
 
-    const CursorMain = ({ height = '24px' }) => (
-        <div style={{
+    const CursorMain = ({ height = '24px' }) => editorActivo && (
+        <div className="cursor-formula" style={{
             width: '2px', height, background: '#3b82f6',
             margin: '0 2px', borderRadius: '1px',
             animation: 'blinkCursorMat251 1s step-end infinite'
         }} title="Inserción" />
     );
 
-    const baseInputStyle = { background: 'white', border: '1px dashed #ccc', borderRadius: '4px', color: 'var(--text-main)', textAlign: 'center', outline: 'none', fontFamily: MATH_FONT, transition: 'all 0.2s', lineHeight: 1 };
+    const propsCasilla = (parentId, slot, etiqueta) => {
+        const seleccionar = () => {
+            setActiveIdSync(null);
+            setFocusSlotSync({ parentId, slot });
+        };
+        return {
+            role: 'group',
+            tabIndex: 0,
+            'aria-label': etiqueta,
+            onFocus: (e) => {
+                if (e.target === e.currentTarget) seleccionar();
+            },
+            onClick: (e) => {
+                e.stopPropagation();
+                seleccionar();
+            },
+        };
+    };
+
+    const baseInputStyle = { background: 'var(--bg-input)', border: '1px dashed #ccc', borderRadius: '4px', color: 'var(--text-main)', textAlign: 'center', outline: 'none', fontFamily: MATH_FONT, transition: 'all 0.2s', lineHeight: 1 };
 
     const handleFocus = (e) => { e.target.style.border = '1px solid #3b82f6'; setIsTyping(true); };
     const handleBlur = (e) => { e.target.style.border = '1px dashed #ccc'; setIsTyping(false); };
@@ -642,32 +761,10 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
 
             if (bloque.tipo === 'signo') {
                 blockJSX = (
-                    <div key={bloque.id} onClick={clickBloque} style={{ display: 'inline-flex', cursor: 'pointer', padding: '1px' }}>
-                        <input
-                            type="text"
-                            value={bloque.valor}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === '' || val === '+' || val === '-') {
-                                    updateBlockById(bloque.id, 'valor', val);
-                                } else {
-                                    const stripped = val.replace(bloque.valor, '');
-                                    if (stripped === '+' || stripped === '-') {
-                                        updateBlockById(bloque.id, 'valor', stripped);
-                                    } else {
-                                        const last = val.slice(-1);
-                                        if (last === '+' || last === '-') {
-                                            updateBlockById(bloque.id, 'valor', last);
-                                        }
-                                    }
-                                }
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }}
-                            onBlur={(e) => { e.target.style.border = '1px solid transparent'; setIsTyping(false); }}
-                            style={{ ...baseInputStyle, width: '2.5ch', fontSize: '1em', padding: '0', border: '1px solid transparent', background: 'transparent' }}
-                        />
-                    </div>
+                    <span key={bloque.id} tabIndex={0} onClick={clickBloque} onFocus={clickBloque}
+                        style={{ display: 'inline-flex', justifyContent: 'center', minWidth: '2.5ch', cursor: 'pointer', fontFamily: MATH_FONT }}>
+                        {bloque.valor}
+                    </span>
                 );
             } else if (bloque.tipo === 'paren_abre' || bloque.tipo === 'paren_cierra') {
                 const isLeft = bloque.tipo === 'paren_abre';
@@ -686,7 +783,14 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             } else if (bloque.tipo === 'constante') {
                 blockJSX = (
                     <div key={bloque.id} onClick={clickBloque} style={{ display: 'inline-flex', cursor: 'pointer', padding: '1px' }}>
-                        <input type="text" inputMode="decimal" step="any" className="ghost-input" value={bloque.coef} onChange={(e) => updateBlockById(bloque.id, 'coef', e.target.value)} onClick={(e) => e.stopPropagation()} onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }} onBlur={(e) => { e.target.style.border = '1px solid transparent'; setIsTyping(false); }} onKeyDown={(e) => handleInputKeyDown(e, bloque.id)} style={{ ...baseInputStyle, width: getAnchoInput(bloque.coef, 2), fontSize: '0.8em', padding: '0', border: '1px solid transparent', background: 'transparent' }} />
+                        <input type="text" inputMode="decimal" step="any" className="ghost-input" data-constante-numerica value={bloque.coef} onChange={(e) => updateBlockById(bloque.id, 'coef', e.target.value)} onClick={(e) => e.stopPropagation()} onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }} onBlur={(e) => { e.target.style.border = '1px solid transparent'; setIsTyping(false); }} onKeyDown={(e) => {
+                            if (e.key.toLowerCase() === activeVariable && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                                e.preventDefault();
+                                convertirConstanteEnTermino(e.currentTarget);
+                                return;
+                            }
+                            handleInputKeyDown(e, bloque.id);
+                        }} style={{ ...baseInputStyle, width: getAnchoInput(bloque.coef, 2), fontSize: '0.8em', padding: '0', border: '1px solid transparent', background: 'transparent' }} />
                     </div>
                 );
             } else if (bloque.tipo === 'pi') {
@@ -701,44 +805,102 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                 const isActive = activeId === bloque.id;
                 const hideCoef = bloque.coef === '' && !isActive;
                 const varStr = modo === 'acumulada' ? 't' : 'x';
+                const exponente = String(bloque.exp ?? '');
+                const negativo = exponente.startsWith('-');
+                const magnitud = exponente.replace(/^[+-]/, '');
 
                 blockJSX = (
                     <div key={bloque.id} onClick={clickBloque} style={{ display: 'flex', alignItems: 'baseline', cursor: 'pointer', padding: '1px' }}>
                         {!hideCoef && (
                             <input type="text" inputMode="decimal" step="any" className="ghost-input" placeholder="c" value={bloque.coef} onChange={(e) => updateBlockById(bloque.id, 'coef', e.target.value)} onClick={(e) => e.stopPropagation()} onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }} onBlur={handleBlur} onKeyDown={(e) => handleInputKeyDown(e, bloque.id)} style={{ ...baseInputStyle, width: getAnchoInput(bloque.coef, 1), fontSize: '0.8em', padding: '0', border: bloque.coef === '' ? '1.5px dashed #3b82f6' : '1px solid transparent', background: bloque.coef === '' ? 'rgba(59, 130, 246, 0.05)' : 'white' }} />
                         )}
-                        <div style={{ fontSize: '0.8em', margin: '0 2px' }}>
+                        <div
+                            tabIndex={bloque.tipo === 'termino_potencia' ? -1 : undefined}
+                            data-potencia-id={bloque.tipo === 'termino_potencia' ? bloque.id : undefined}
+                            data-campo-potencia={bloque.tipo === 'termino_potencia' ? 'base' : undefined}
+                            onFocus={bloque.tipo === 'termino_potencia' ? clickBloque : undefined}
+                            onClick={bloque.tipo === 'termino_potencia' ? (e) => {
+                                e.stopPropagation();
+                                e.currentTarget.focus();
+                            } : undefined}
+                            style={{ fontSize: '0.8em', margin: '0 2px' }}
+                        >
                             {bloque.tipo === 'termino_lineal' && <InlineMath math={varStr} />}
                             {bloque.tipo === 'termino_cuadratico' && <InlineMath math={`${varStr}^2`} />}
                             {bloque.tipo === 'termino_potencia' && <InlineMath math={varStr} />}
                         </div>
                         {bloque.tipo === 'termino_potencia' && (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', position: 'relative', top: '-0.85em', marginLeft: '1px' }}>
+                            {negativo && (
+                                <button type="button" aria-label="Quitar el signo menos del exponente"
+                                    data-potencia-id={bloque.id}
+                                    data-campo-potencia="signo"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onFocus={clickBloque}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        const campo = e.currentTarget.nextElementSibling;
+                                        campo.focus();
+                                        campo.setSelectionRange(0, 0);
+                                        updateBlockById(bloque.id, 'exp', magnitud);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Backspace' || e.key === 'Delete') {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            e.currentTarget.click();
+                                        }
+                                    }}
+                                    style={{ border: 0, background: 'transparent', color: 'inherit', cursor: 'pointer', padding: '0 2px', fontFamily: MATH_FONT }}>
+                                    −
+                                </button>
+                            )}
                             <input
                                 type="text"
                                 inputMode="decimal"
                                 step="any"
-                                value={bloque.exp}
-                                onChange={(e) => updateBlockById(bloque.id, 'exp', e.target.value)}
+                                className="exponente-input"
+                                data-exponente
+                                data-potencia-id={bloque.id}
+                                data-campo-potencia="exponente"
+                                aria-label="Exponente de la potencia"
+                                value={magnitud}
+                                onChange={(e) => {
+                                    const valor = e.target.value;
+                                    if (/^[+-]?(?:\d*\.?\d*)$/.test(valor)) {
+                                        const signo = valor.startsWith('-') || (negativo && !valor.startsWith('+')) ? '-' : '';
+                                        updateBlockById(bloque.id, 'exp', signo + valor.replace(/^[+-]/, ''));
+                                    }
+                                }}
                                 onClick={(e) => e.stopPropagation()}
                                 onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }}
                                 onBlur={handleBlur}
-                                onKeyDown={(e) => handleInputKeyDown(e, bloque.id)}
+                                onKeyDown={(e) => {
+                                    if (negativo && e.key === 'Backspace'
+                                        && e.currentTarget.selectionStart === 0 && e.currentTarget.selectionEnd === 0) {
+                                        e.preventDefault();
+                                        updateBlockById(bloque.id, 'exp', magnitud);
+                                    } else if (e.key === '-' || e.key === '+') {
+                                        e.preventDefault();
+                                        updateBlockById(bloque.id, 'exp', (e.key === '-' ? '-' : '') + magnitud);
+                                    } else if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                                        handleInputKeyDown(e, bloque.id);
+                                    }
+                                }}
                                 placeholder="n"
                                 style={{
                                     ...baseInputStyle,
-                                    width: getAnchoInput(bloque.exp || 'n', 1),
+                                    width: getAnchoInput(magnitud || 'n', 1),
                                     minWidth: '1.6ch',
                                     fontSize: '0.72em',
                                     padding: '0 2px',
-                                    position: 'relative',
-                                    top: '-0.85em',
-                                    marginLeft: '1px',
-                                    background: 'white',
+                                    background: 'var(--bg-input)',
                                     border: '1px dashed #ccc',
                                     borderRadius: '3px',
                                     color: 'var(--text-main)',
                                 }}
                             />
+                            </span>
                         )}
                     </div>
                 );
@@ -750,14 +912,14 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                 if (bloque.tipo === 'fraccion') {
                     blockJSX = (
                         <div key={bloque.id} className="fraction-block" onClick={clickBloque} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 4px', cursor: 'pointer', border: activeId === bloque.id && !focusSlot ? '1.5px solid #3b82f6' : '1px solid transparent' }}>
-                            <div className={`ghost-slot ${bloque.numerador.length === 0 ? 'empty-slot' : ''} ${isNum ? 'focused-slot' : ''}`} role="button" tabIndex={0} aria-label="Escribir en el numerador" title="Haz clic para escribir en el numerador" onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'numerador' }); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'numerador' }); } }} style={{ ...sStyle(isNum, 'numerador'), border: isNum ? '2px solid #2563eb' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
+                            <div className={`ghost-slot ${bloque.numerador.length === 0 ? 'empty-slot' : ''} ${isNum ? 'focused-slot' : ''}`} {...propsCasilla(bloque.id, 'numerador', 'Escribir en el numerador')} style={{ ...sStyle(isNum, 'numerador'), border: isNum ? '2px solid #2563eb' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
                                 {bloque.numerador.length === 0 ? <span className="ghost-text" style={{ transition: 'opacity 0.2s', visibility: 'hidden' }}>&nbsp;&nbsp;</span> : renderListaBloques(bloque.numerador, false, isNestedInExponent, bloque.id, 'numerador')}
-                                {isNum && <CursorMain height="16px" />}
+                                {isNum && (activeId === null || activeId === bloque.id) && <CursorMain height="16px" />}
                             </div>
                             <div style={{ width: '100%', height: '1.5px', background: isNum || isDen || activeId === bloque.id ? '#3b82f6' : 'var(--text-main)', margin: '2px 0', flexShrink: 0 }} />
-                            <div className={`ghost-slot ${bloque.denominador.length === 0 ? 'empty-slot' : ''} ${isDen ? 'focused-slot' : ''}`} role="button" tabIndex={0} aria-label="Escribir en el denominador" title="Haz clic para escribir en el denominador" onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'denominador' }); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'denominador' }); } }} style={{ ...sStyle(isDen, 'denominador'), border: isDen ? '2px solid #2563eb' : (bloque.denominador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
+                            <div className={`ghost-slot ${bloque.denominador.length === 0 ? 'empty-slot' : ''} ${isDen ? 'focused-slot' : ''}`} {...propsCasilla(bloque.id, 'denominador', 'Escribir en el denominador')} style={{ ...sStyle(isDen, 'denominador'), border: isDen ? '2px solid #2563eb' : (bloque.denominador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
                                 {bloque.denominador.length === 0 ? <span className="ghost-text" style={{ transition: 'opacity 0.2s', visibility: 'hidden' }}>&nbsp;&nbsp;</span> : renderListaBloques(bloque.denominador, false, isNestedInExponent, bloque.id, 'denominador')}
-                                {isDen && <CursorMain height="16px" />}
+                                {isDen && (activeId === null || activeId === bloque.id) && <CursorMain height="16px" />}
                             </div>
                         </div>
                     );
@@ -765,11 +927,11 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     blockJSX = (
                         <div key={bloque.id} onClick={clickBloque} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginLeft: '2px' }}>
                             <div style={{ fontSize: '1.2em', lineHeight: 1, padding: '2px 4px', border: activeId === bloque.id && !focusSlot ? '1.5px solid #3b82f6' : '1.5px solid transparent', borderRadius: '4px' }}><InlineMath math="e" /></div>
-                            <div className="exponent-container" onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'numerador' }); }} style={{ ...sStyle(isNum, 'center'), position: 'relative', top: '-1.5em', border: isNum ? '1.5px solid #3b82f6' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent') }}>
+                            <div className="exponent-container ghost-slot" {...propsCasilla(bloque.id, 'numerador', 'Editar el exponente de e')} style={{ ...sStyle(isNum, 'center'), position: 'relative', top: '-1.5em', border: isNum ? '1.5px solid #3b82f6' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent') }}>
                                 <div style={{ transform: 'scale(0.75)', transformOrigin: 'left center', display: 'flex', alignItems: 'center', margin: '0 -12%', whiteSpace: 'nowrap' }}>
                                     {bloque.numerador.length === 0 ? <span style={{ color: '#cbd5e1', fontSize: '0.68rem', fontStyle: 'italic' }}>exp</span> : renderListaBloques(bloque.numerador, false, true, bloque.id, 'numerador')}
                                 </div>
-                                {isNum && <CursorMain height="16px" />}
+                                {isNum && (activeId === null || activeId === bloque.id) && <CursorMain height="16px" />}
                             </div>
                         </div>
                     );
@@ -777,9 +939,9 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     blockJSX = (
                         <div key={bloque.id} onClick={clickBloque} style={{ display: 'flex', alignItems: 'stretch', cursor: 'pointer', padding: '2px', border: activeId === bloque.id && !focusSlot ? '1.5px solid #3b82f6' : '1px solid transparent' }}>
                             <div style={{ display: 'flex', alignItems: 'center', fontSize: '1.2em', color: 'var(--text-main)' }}><InlineMath math="\vert" /></div>
-                            <div onClick={(e) => { e.stopPropagation(); setActiveIdSync(null); setFocusSlotSync({ parentId: bloque.id, slot: 'numerador' }); }} style={{ ...sStyle(isNum, 'center'), border: isNum ? '1.5px solid #3b82f6' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent') }}>
+                            <div className="ghost-slot" {...propsCasilla(bloque.id, 'numerador', 'Editar el valor absoluto')} style={{ ...sStyle(isNum, 'center'), border: isNum ? '1.5px solid #3b82f6' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent') }}>
                                 {bloque.numerador.length === 0 ? <span style={{ color: '#cbd5e1', fontSize: '0.68rem', fontStyle: 'italic' }}>{activeVariable}</span> : renderListaBloques(bloque.numerador, false, isNestedInExponent, bloque.id, 'numerador')}
-                                {isNum && <CursorMain height="16px" />}
+                                {isNum && (activeId === null || activeId === bloque.id) && <CursorMain height="16px" />}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', fontSize: '1.2em', color: 'var(--text-main)' }}><InlineMath math="\vert" /></div>
                         </div>
@@ -791,18 +953,18 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             }
 
             elementos.push(blockJSX);
-            if (activeId === bloque.id && !focusSlot && !isTyping) {
-                elementos.push(<CursorMain key={`c-${bloque.id}`} />);
+            if (activeId === bloque.id && focusSlot?.parentId !== bloque.id && !isTyping) {
+                elementos.push(<CursorMain key={`c-${bloque.id}`} height={isNestedInExponent ? '12px' : '24px'} />);
             }
         });
         return elementos;
     };
 
     const obtenerEstadoEntrada = () => {
+        if (!editorActivo) return 'Selecciona una casilla o una posición de la fórmula para editar.';
         if (isTyping) return 'Editando el valor seleccionado. Escribe directamente o usa las teclas del panel.';
         if (focusSlot) {
-            const nombreCasilla = focusSlot.slot === 'numerador' ? 'numerador' : 'denominador';
-            return `Punto de entrada: ${nombreCasilla} de la fracción seleccionada. Usa ↑/↓ para cambiar de casilla.`;
+            return 'Casilla activa. Escribe con el teclado o el panel. Usa Tab para pasar al siguiente campo.';
         }
         if (activeId === 'START') return 'Punto de entrada: inicio de la función. Usa ←/→ para moverte por la expresión.';
         if (activeId && activeId !== 'START' && activeId !== 'START_SLOT') {
@@ -844,6 +1006,21 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     background: var(--bg-input);
                     color: var(--text-main);
                     border-color: var(--border-color);
+                }
+                #tour-continua-lienzo-formula {
+                    background: var(--bg-card, #fff);
+                    border: 1px solid var(--border-color, #dbe4ef);
+                    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+                }
+                #tour-continua-lienzo-formula :is(.limite-input, .exponente-input, .ghost-slot):hover {
+                    background-color: rgba(59, 130, 246, 0.08);
+                }
+                #tour-continua-lienzo-formula :is(.limite-input, .exponente-input, .ghost-slot, .ghost-input, [data-campo-potencia]):focus-visible {
+                    outline: 2px solid #60a5fa !important;
+                    outline-offset: 1px;
+                }
+                #tour-continua-lienzo-formula:has([data-campo-potencia]:focus) .cursor-formula {
+                    display: none;
                 }
                 .teclado-container {
                     background: #f8fafc;
@@ -907,15 +1084,15 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div id="tour-continua-lienzo-formula" onClick={() => { setActiveIdSync(null); setFocusSlotSync(null); }} className="formula-container" style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', padding: '15px 15px', borderRadius: '5px', overflowX: 'auto', minHeight: '80px' }}>
+                <div ref={lienzoRef} id="tour-continua-lienzo-formula" role="group" aria-label="Editor de la función" onClick={() => { setActiveIdSync(null); setFocusSlotSync(null); }} className="formula-container" style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', padding: '15px 15px', borderRadius: '5px', overflowX: 'auto', minHeight: '80px' }}>
                     <div style={{ fontSize: '1rem', marginRight: '10px', color: 'inherit', flexShrink: 0 }}><InlineMath math={'f(x) ='} /></div>
                     <div id="tour-continua-limites" style={{ position: 'relative', display: 'inline-block', width: 'max-content', marginRight: '25px', flexShrink: 0 }}>
                         <div style={{ fontSize: '1.2rem', paddingRight: '5px', lineHeight: '1' }}><InlineMath math="\displaystyle \int" /></div>
-                        <input type="text" name="limiteB" className="limite-input" value={limiteB} onChange={(e) => handleLimiteChange(setLimiteB, e.target.value)} onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', top: '-10px', left: '28px', width: getAnchoInput(limiteB || 'x', 1), fontSize: '0.8rem', textAlign: 'center', outline: 'none', fontFamily: MATH_FONT, padding: '0 2px' }} onFocus={handleFocus} onBlur={handleBlur} placeholder={modo === 'acumulada' ? 'x' : 'b'} onKeyDown={(e) => {
+                        <input type="text" name="limiteB" aria-label="Límite superior" className="limite-input" value={limiteB} onChange={(e) => handleLimiteChange(setLimiteB, e.target.value)} onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', top: '-10px', left: '28px', width: getAnchoInput(limiteB || 'x', 1), fontSize: '0.8rem', textAlign: 'center', outline: 'none', fontFamily: MATH_FONT, padding: '0 2px' }} onFocus={handleFocus} onBlur={handleBlur} placeholder={modo === 'acumulada' ? 'x' : 'b'} onKeyDown={(e) => {
                             if (e.key === 'ArrowDown') { e.preventDefault(); document.getElementsByName('limiteA')[0]?.focus(); }
                             else if (e.key === 'ArrowRight' && e.target.selectionEnd === e.target.value.length) { e.preventDefault(); e.target.blur(); setFocusSlotSync(null); setActiveIdSync('START'); }
                         }} />
-                        <input type="text" name="limiteA" className="limite-input" value={limiteA} onChange={(e) => handleLimiteChange(setLimiteA, e.target.value)} onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', bottom: '-8px', left: '12px', width: getAnchoInput(limiteA, 1), fontSize: '0.8rem', textAlign: 'center', outline: 'none', fontFamily: MATH_FONT, padding: '0 2px' }} onFocus={handleFocus} onBlur={handleBlur} placeholder="a" onKeyDown={(e) => {
+                        <input type="text" name="limiteA" aria-label="Límite inferior" className="limite-input" value={limiteA} onChange={(e) => handleLimiteChange(setLimiteA, e.target.value)} onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', bottom: '-8px', left: '12px', width: getAnchoInput(limiteA, 1), fontSize: '0.8rem', textAlign: 'center', outline: 'none', fontFamily: MATH_FONT, padding: '0 2px' }} onFocus={handleFocus} onBlur={handleBlur} placeholder="a" onKeyDown={(e) => {
                             if (e.key === 'ArrowUp') { e.preventDefault(); document.getElementsByName('limiteB')[0]?.focus(); }
                             else if (e.key === 'ArrowRight' && e.target.selectionEnd === e.target.value.length) { e.preventDefault(); document.getElementsByName('limiteB')[0]?.focus(); }
                         }} />
@@ -934,7 +1111,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     <span>{obtenerEstadoEntrada()}</span>
                 </div>
 
-                <div id="tour-continua-teclado" className="teclado-container" style={{ padding: '10px', borderRadius: RADIUS, marginTop: 0 }}>
+                <div ref={panelRef} id="tour-continua-teclado" className="teclado-container" style={{ padding: '10px', borderRadius: RADIUS, marginTop: 0 }}>
                     <div className="teclado-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                         {/* Fila 1 */}
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '(', 'paren_abre'); }}><InlineMath math="(" /></button>
@@ -945,29 +1122,29 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, 'Limpiar', null); }} style={{ gridColumn: 'span 2', border: '1px solid #ef4444', color: '#ef4444' }}><span style={{fontWeight: 600}}>AC</span></button>
 
                         {/* Fila 2 */}
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '7' })); }}>7</button>
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '8' })); }}>8</button>
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '9' })); }}>9</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '7')}>7</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '8')}>8</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '9')}>9</button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '+', '+'); }}><InlineMath math="+" /></button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, 'x', 'termino_lineal'); }}><InlineMath math={activeVariable} /></button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '^2', 'termino_cuadratico'); }}><InlineMath math={`${activeVariable}^2`} /></button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, 'Backspace', borrarBloque); }} style={{ border: '1px solid #f59e0b', color: '#f59e0b' }}><span style={{fontWeight: 600}}>DEL</span></button>
 
                         {/* Fila 3 */}
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '4' })); }}>4</button>
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' })); }}>5</button>
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '6' })); }}>6</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '4')}>4</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '5')}>5</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '6')}>6</button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '-', '-'); }}><InlineMath math="-" /></button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, '^', 'termino_potencia'); }}><InlineMath math={`${activeVariable}^n`} /></button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, 'exp(', 'euler'); }}><InlineMath math={`e^{${activeVariable}}`} /></button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, 'k', ['incognita_dinamica', 'k']); }}><InlineMath math="k" /></button>
 
                         {/* Fila 4 */}
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' })); }}>1</button>
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '2' })); }}>2</button>
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '3' })); }}>3</button>
-                        <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '.' })); }}>.</button>
-                        <button className="teclado-btn-dark num" onMouseDown={(e) => { e.preventDefault(); window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' })); }} style={{ gridColumn: 'span 2' }}>0</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '1')}>1</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '2')}>2</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '3')}>3</button>
+                        <button className="teclado-btn-dark" onMouseDown={(e) => escribirDesdePanel(e, '.')}>.</button>
+                        <button className="teclado-btn-dark num" onMouseDown={(e) => escribirDesdePanel(e, '0')} style={{ gridColumn: 'span 2' }}>0</button>
                         <button className="teclado-btn-dark" onMouseDown={(e) => { e.preventDefault(); handleBtnMouseDown(e, null, 'constante'); }}><InlineMath math="\square" /></button>
                     </div>
                 </div>

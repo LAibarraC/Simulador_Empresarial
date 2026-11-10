@@ -242,11 +242,29 @@ const incognitasEn = bloques => bloques.flatMap(bloque => [
   ...(bloque.tipo === 'incognita_dinamica' ? [bloque.valor || 'k'] : []),
   ...incognitasEn(bloque.numerador || []), ...incognitasEn(bloque.denominador || []),
 ]);
+const esNumeroCompleto = valor => {
+  const texto = String(valor ?? '').trim();
+  return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(texto)
+    && Number.isFinite(Number(texto));
+};
+
+const bloquesContinuaCompletos = bloques => Array.isArray(bloques) && bloques.every(bloque => {
+  const { tipo, coef, exp, numerador, denominador, variable_adjunta, exp_adjunto } = bloque;
+  if (!TIPOS.has(tipo)) return false;
+  if (tipo === 'constante' && !esNumeroCompleto(coef)) return false;
+  if (tipo.startsWith('termino_') && String(coef ?? '').trim() && !esNumeroCompleto(coef)) return false;
+  if (tipo === 'termino_potencia' && !esNumeroCompleto(exp)) return false;
+  if (tipo === 'fraccion') {
+    if (!numerador?.length || !denominador?.length) return false;
+    if (variable_adjunta === 'termino_potencia' && !esNumeroCompleto(exp_adjunto)) return false;
+  }
+  if ((tipo === 'euler' || tipo === 'absoluto') && !numerador?.length) return false;
+  return bloquesContinuaCompletos(numerador || []) && bloquesContinuaCompletos(denominador || []);
+});
+
 export const validarEntradasContinua = receta => {
   try {
-    const revisar = bloques => Array.isArray(bloques) && bloques.every(bloque => TIPOS.has(bloque.tipo)
-      && revisar(bloque.numerador || []) && revisar(bloque.denominador || []));
-    if (!receta.bloques?.length || !revisar(receta.bloques)) return false;
+    if (!receta.bloques?.length || !bloquesContinuaCompletos(receta.bloques)) return false;
     const [a, b] = receta.limites.map(evaluarLimite);
     const incognitas = [...new Set(incognitasEn(receta.bloques))];
     return a < b && incognitas.length <= 1 && incognitas.every(nombre => /^[a-zA-Z][a-zA-Z0-9_]*$/.test(nombre))
@@ -256,6 +274,9 @@ export const validarEntradasContinua = receta => {
 
 export const calcularRecetaContinua = async (receta, { continuarTrasConstante = false, constantePrevia = null } = {}) => {
   try {
+    if (receta.bloques?.length && !bloquesContinuaCompletos(receta.bloques)) {
+      return { error: 'Completa las casillas de la fórmula. Escribe solo números en los coeficientes y exponentes numéricos, y completa el numerador y el denominador de cada fracción.' };
+    }
     if (!validarEntradasContinua(receta)) {
       return { error: 'Completa la función y dos límites válidos, con el límite inferior menor que el superior.' };
     }
@@ -303,7 +324,7 @@ export const calcularRecetaContinua = async (receta, { continuarTrasConstante = 
       if (!respuesta.success) return { error: respuesta.mensaje_error || respuesta.error || 'No se pudo resolver la función.' };
       simbolico = respuesta;
     } catch {
-      if (!Number.isFinite(a) || !Number.isFinite(b)) return { error: 'Se necesita conexión con el servidor para resolver límites infinitos.' };
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return { error: 'No se pudo calcular la integral con los límites infinitos ingresados.' };
     }
     const numerico = calcularMomentosContinua(funcionFx, a, b, 'x');
     if (numerico.error) return numerico;

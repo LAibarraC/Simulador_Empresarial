@@ -1,5 +1,4 @@
 // Historial del Tema 4: Distribuciones muestrales, T y F.
-import { calcularDistribucionMuestral } from '../Matematicas/logica_Tema1';
 import {
   generarDistribucionProbabilidadMuestral, calcularProbabilidadProbabilidadMuestral,
   generarDistribucionProporcion, calcularProbabilidadProporcion, generarDistribucionChiCuadrada,
@@ -7,6 +6,7 @@ import {
   calcularProbabilidadDiferenciaMedias, generarDistribucionDiferenciaProporciones,
   calcularProbabilidadDiferenciaProporciones, generarDistribucionStudent, calcularProbabilidadStudent,
   calcularParametrosRazonVarianzas, calcularProbabilidadRazonVarianzas,
+  calcularDistribucionMuestralWorker,
 } from '../Matematicas/Logica_Tema4';
 import {
   leerDatosMatrizHistorial, obtenerArchivoRealHistorialMAT251,
@@ -85,7 +85,7 @@ export const firmaRecetaMuestral = receta => JSON.stringify({
     encabezado: receta.nombreEncabezadoManual || '', filas: (receta.filas || []).map(fila => String(fila.valor ?? '').trim()).filter(Boolean),
   } : {}),
 });
-export const calcularRecetaMuestral = receta => {
+export const calcularRecetaMuestral = async receta => {
   const d = receta.distribucion;
   const p = receta.parametros || {};
   const fallo = error => ({ error });
@@ -105,10 +105,16 @@ export const calcularRecetaMuestral = receta => {
       if (valores.some(valor => valor.includes(','))) return fallo('Los datos deben usar punto decimal y no contener comas internas.');
       let cantidad = p.conReemplazo ? Math.pow(valores.length, p.n) : 1;
       if (!p.conReemplazo) {
-        for (let i = 1; i <= Math.min(p.n, valores.length - p.n) && cantidad <= 70000; i++) cantidad *= (valores.length - i + 1) / i;
+        for (let i = 1; i <= Math.min(p.n, valores.length - p.n); i++) cantidad *= (valores.length - i + 1) / i;
+        cantidad = Math.round(cantidad);
       }
-      if (!Number.isFinite(cantidad) || cantidad > 70000) return fallo('Límite excedido (máx. 70,000 muestras). Usa la Calculadora de Probabilidades.');
-      resultados = calcularDistribucionMuestral(valores.join(', '), p.n, p.conReemplazo, p.parametroCalculo, p.atributoExito);
+      if (!Number.isFinite(cantidad) || cantidad > 2000000) {
+        const cantStr = !Number.isFinite(cantidad) || cantidad > 1e15
+          ? 'más de 10¹⁵'
+          : Math.round(cantidad).toLocaleString();
+        return fallo(`Límite excedido: se intentó generar ${cantStr} muestras (máx. ${(2000000).toLocaleString()}). Usa la Calculadora de Probabilidades.`);
+      }
+      resultados = await calcularDistribucionMuestralWorker(valores.join(', '), p.n, p.conReemplazo, p.parametroCalculo, p.atributoExito);
       if (resultados?.error) return resultados;
       if (!['esperanza', 'varianzaDeDistribucion', 'mediaPoblacional', 'varianzaPoblacional', 'proporcionPoblacional']
           .every(clave => Number.isFinite(resultados.calculosFinales?.[clave]))) return fallo('Los datos exceden el rango numérico admitido para la demostración.');

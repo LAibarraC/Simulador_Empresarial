@@ -96,7 +96,7 @@ export function calcularProbabilidadProporcion(datosParciales, condicion, x1, x2
         return { error: 'Por favor selecciona una condición lógica a calcular.' };
     }
 
-    const { p, se, factorStr, varianza } = datosParciales;
+    const { p, se, varianza } = datosParciales;
     const x1Num = parseFloat(x1);
     const x2Num = parseFloat(x2);
 
@@ -445,7 +445,7 @@ export function calcularProbabilidadDiferenciaMedias(datosParciales, condicion, 
         return { error: 'El límite superior debe ser mayor que el límite inferior.' };
     }
 
-    const { m1, s1, nn1, m2, s2, nn2, esperanza, se, varFracNum, varFracDen } = datosParciales;
+    const { esperanza, se, varFracNum, varFracDen } = datosParciales;
 
     let probFinal = 0;
     let strDesarrollo = '';
@@ -998,4 +998,326 @@ export function calcularProbabilidadRazonVarianzas(parametrosPrevios, condicion,
         formulaLaTeX,
         strDesarrollo,
     };
+}
+
+// ============================================================================
+// DEMOSTRACIÓN EMPÍRICA: WEB WORKER EN MEMORIA (BLOB WORKER HASTA 1,000,000 DE MUESTRAS)
+// ============================================================================
+
+/**
+ * Worker en memoria (Blob Worker) que procesa hasta 1,000,000 de combinaciones
+ * en un hilo secundario sin congelar la interfaz ni crear archivos externos.
+ */
+export function calcularDistribucionMuestralWorker(poblacionStr, nStr, conReemplazo, parametroCalculo = 'media', atributoExito = null) {
+    return new Promise((resolve) => {
+        if (typeof window === 'undefined' || typeof Worker === 'undefined' || typeof Blob === 'undefined') {
+            resolve({ error: 'El navegador no soporta Web Workers para cálculo en segundo plano.' });
+            return;
+        }
+
+        const workerSource = `
+            function obtenerEtiquetaSecuencial(index) {
+                let label = '';
+                let num = index;
+                while (num >= 0) {
+                    label = String.fromCharCode((num % 26) + 65) + label;
+                    num = Math.floor(num / 26) - 1;
+                }
+                return label;
+            }
+
+            self.onmessage = function(e) {
+                try {
+                    const { poblacionStr, nStr, conReemplazo, parametroCalculo, atributoExito } = e.data;
+
+                    if (!poblacionStr || poblacionStr.trim() === '') {
+                        self.postMessage({ error: 'Ingresa los datos de la población.' });
+                        return;
+                    }
+
+                    const rawItems = poblacionStr.split(',').map(v => v.trim()).filter(v => v !== '');
+                    if (poblacionStr.includes('|') || rawItems.some(item => item.includes('|'))) {
+                        self.postMessage({ error: 'La variable debe tener 1 sola columna.' });
+                        return;
+                    }
+                    if (rawItems.length === 0) {
+                        self.postMessage({ error: 'Ingresa los datos de la población.' });
+                        return;
+                    }
+
+                    const esNumeroValido = (v) => {
+                        if (v === null || v === undefined) return false;
+                        const str = v.toString().trim();
+                        if (str === '') return false;
+                        return !isNaN(Number(str));
+                    };
+
+                    if (parametroCalculo === 'media') {
+                        const tieneTexto = rawItems.some(item => {
+                            const valStr = item.includes('=') ? item.split('=')[1].trim() : (item.includes(':') ? item.split(':')[1].trim() : item);
+                            return !esNumeroValido(valStr);
+                        });
+                        if (tieneTexto) {
+                            self.postMessage({ error: 'Para Promedios, los datos deben ser números.' });
+                            return;
+                        }
+                    } else if (parametroCalculo === 'varianza') {
+                        if (rawItems.length < 2) {
+                            self.postMessage({ error: 'Para Varianza, se requieren al menos 2 datos (N ≥ 2).' });
+                            return;
+                        }
+                        const tieneTexto = rawItems.some(item => {
+                            const valStr = item.includes('=') ? item.split('=')[1].trim() : (item.includes(':') ? item.split(':')[1].trim() : item);
+                            return !esNumeroValido(valStr);
+                        });
+                        if (tieneTexto) {
+                            self.postMessage({ error: 'Para Varianza, los datos deben ser números.' });
+                            return;
+                        }
+                    } else if (parametroCalculo === 'proporcion') {
+                        if (!atributoExito || atributoExito.toString().trim() === '') {
+                            self.postMessage({ error: 'Selecciona un Atributo de Éxito.' });
+                            return;
+                        }
+                    }
+
+                    const n = parseInt(nStr, 10);
+                    if (isNaN(n)) {
+                        self.postMessage({ error: 'El tamaño de muestra (n) debe ser un entero positivo.' });
+                        return;
+                    }
+
+                    if (parametroCalculo === 'varianza') {
+                        if (n < 2) {
+                            self.postMessage({ error: 'Para Varianza, la muestra (n) debe ser al menos 2.' });
+                            return;
+                        }
+                    } else {
+                        if (n < 1) {
+                            self.postMessage({ error: 'El tamaño de muestra (n) debe ser mayor a 0.' });
+                            return;
+                        }
+                    }
+
+                    if (!conReemplazo && n > rawItems.length) {
+                        self.postMessage({ error: 'Sin reemplazo, n no puede superar a la población.' });
+                        return;
+                    }
+
+                    const poblacion = [];
+                    for (let i = 0; i < rawItems.length; i++) {
+                        const item = rawItems[i];
+                        let label = obtenerEtiquetaSecuencial(i);
+                        let numStr = item;
+
+                        if (item.includes('=')) {
+                            const parts = item.split('=');
+                            label = parts[0].trim() || label;
+                            numStr = parts[1].trim();
+                        } else if (item.includes(':')) {
+                            const parts = item.split(':');
+                            label = parts[0].trim() || label;
+                            numStr = parts[1].trim();
+                        }
+
+                        if (parametroCalculo === 'proporcion') {
+                            const num = parseFloat(numStr);
+                            poblacion.push({
+                                id: label,
+                                valor: !isNaN(num) && numStr.trim() === num.toString() ? num : numStr.trim()
+                            });
+                        } else {
+                            poblacion.push({
+                                id: label,
+                                valor: parseFloat(numStr)
+                            });
+                        }
+                    }
+
+                    const N = poblacion.length;
+                    let combinacionesTotales = 1;
+                    if (conReemplazo) {
+                        combinacionesTotales = Math.pow(N, n);
+                    } else {
+                        for (let i = 1; i <= Math.min(n, N - n); i++) {
+                            combinacionesTotales *= (N - i + 1) / i;
+                        }
+                        combinacionesTotales = Math.round(combinacionesTotales);
+                    }
+
+                    if (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 2000000) {
+                        const cantStr = (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 1e15)
+                            ? 'más de 10¹⁵'
+                            : Math.round(combinacionesTotales).toLocaleString();
+                        self.postMessage({
+                            error: 'Límite excedido: se intentó generar ' + cantStr + ' muestras (máx. ' + (2000000).toLocaleString() + '). Usa la Calculadora de Probabilidades.'
+                        });
+                        return;
+                    }
+
+                    const frecuencias = {};
+                    const guardarDetalle = combinacionesTotales <= 5000;
+                    const datosTabla = [];
+                    const strAtributo = atributoExito ? String(atributoExito).trim() : '';
+
+                    function procesarMuestra(muestra, index) {
+                        let media = 0;
+                        let varianza = 0;
+                        let proporcion = 0;
+
+                        if (parametroCalculo === 'proporcion') {
+                            let exitos = 0;
+                            for (let k = 0; k < n; k++) {
+                                if (String(muestra[k].valor).trim() === strAtributo) exitos++;
+                            }
+                            proporcion = exitos / n;
+                        } else {
+                            let suma = 0;
+                            for (let k = 0; k < n; k++) suma += muestra[k].valor;
+                            media = suma / n;
+                            if (parametroCalculo === 'varianza' || guardarDetalle) {
+                                if (n > 1) {
+                                    let sumaSq = 0;
+                                    for (let k = 0; k < n; k++) {
+                                        const diff = muestra[k].valor - media;
+                                        sumaSq += diff * diff;
+                                    }
+                                    varianza = sumaSq / (n - 1);
+                                } else {
+                                    varianza = 0;
+                                }
+                            }
+                        }
+
+                        const val = parametroCalculo === 'varianza' 
+                            ? parseFloat(varianza.toFixed(2)) 
+                            : (parametroCalculo === 'proporcion' ? parseFloat(proporcion.toFixed(4)) : parseFloat(media.toFixed(2)));
+
+                        frecuencias[val] = (frecuencias[val] || 0) + 1;
+
+                        if (guardarDetalle) {
+                            datosTabla.push({
+                                id: index + 1,
+                                elementos: muestra.map(x => x.id).join(', '),
+                                valores: muestra.map(x => x.valor).join(' '),
+                                media: parseFloat(media.toFixed(2)),
+                                varianza: parseFloat(varianza.toFixed(2)),
+                                proporcion: parseFloat(proporcion.toFixed(4))
+                            });
+                        }
+                    }
+
+                    if (conReemplazo) {
+                        const indices = new Array(n).fill(0);
+                        let count = 0;
+                        const muestraBuffer = new Array(n);
+                        while (count < combinacionesTotales) {
+                            for (let k = 0; k < n; k++) muestraBuffer[k] = poblacion[indices[k]];
+                            procesarMuestra(muestraBuffer, count);
+                            count++;
+
+                            let pos = n - 1;
+                            while (pos >= 0) {
+                                indices[pos]++;
+                                if (indices[pos] < N) break;
+                                indices[pos] = 0;
+                                pos--;
+                            }
+                        }
+                    } else {
+                        const indices = [];
+                        for (let i = 0; i < n; i++) indices[i] = i;
+                        let count = 0;
+                        const muestraBuffer = new Array(n);
+
+                        while (true) {
+                            for (let k = 0; k < n; k++) muestraBuffer[k] = poblacion[indices[k]];
+                            procesarMuestra(muestraBuffer, count);
+                            count++;
+
+                            let i = n - 1;
+                            while (i >= 0 && indices[i] === i + N - n) {
+                                i--;
+                            }
+                            if (i < 0) break;
+                            indices[i]++;
+                            for (let j = i + 1; j < n; j++) {
+                                indices[j] = indices[j - 1] + 1;
+                            }
+                        }
+                    }
+
+                    const distribucion = Object.keys(frecuencias)
+                        .map(v => parseFloat(v))
+                        .sort((a, b) => a - b)
+                        .map(v => ({
+                            valor: v,
+                            frecuencia: frecuencias[v],
+                            total: combinacionesTotales
+                        }));
+
+                    const esperanza = distribucion.reduce((acc, curr) => acc + (curr.valor * (curr.frecuencia / curr.total)), 0);
+                    const varianzaDeDistribucion = distribucion.reduce((acc, curr) => acc + (Math.pow(curr.valor - esperanza, 2) * (curr.frecuencia / curr.total)), 0);
+
+                    let mediaPoblacional = 0;
+                    let varianzaPoblacional = 0;
+                    let proporcionPoblacional = 0;
+
+                    if (parametroCalculo === 'proporcion') {
+                        const exitosPob = poblacion.filter(x => String(x.valor).trim() === strAtributo).length;
+                        proporcionPoblacional = exitosPob / poblacion.length;
+                    } else {
+                        const sumaPob = poblacion.reduce((a, b) => a + b.valor, 0);
+                        mediaPoblacional = sumaPob / poblacion.length;
+                        varianzaPoblacional = poblacion.reduce((acc, val) => acc + Math.pow(val.valor - mediaPoblacional, 2), 0) / poblacion.length;
+                    }
+
+                    const calculosFinales = {
+                        esperanza: parseFloat(esperanza.toFixed(4)),
+                        varianzaDeDistribucion: parseFloat(varianzaDeDistribucion.toFixed(6)),
+                        mediaPoblacional: parseFloat(mediaPoblacional.toFixed(4)),
+                        varianzaPoblacional: parseFloat(varianzaPoblacional.toFixed(4)),
+                        proporcionPoblacional: parseFloat(proporcionPoblacional.toFixed(4)),
+                        n: n,
+                        N: N,
+                        conReemplazo: conReemplazo,
+                        parametroCalculo,
+                        atributoExito
+                    };
+
+                    const resultadoArray = guardarDetalle ? datosTabla : new Array(combinacionesTotales);
+
+                    self.postMessage({
+                        resultado: resultadoArray,
+                        distribucion: distribucion,
+                        calculosFinales: calculosFinales
+                    });
+                } catch (err) {
+                    self.postMessage({ error: 'Error durante la simulación: ' + (err.message || 'desconocido') });
+                }
+            };
+        `;
+
+        try {
+            const blob = new Blob([workerSource], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            const worker = new Worker(workerUrl);
+
+            worker.onmessage = function(e) {
+                URL.revokeObjectURL(workerUrl);
+                worker.terminate();
+                resolve(e.data);
+            };
+
+            worker.onerror = function(err) {
+                URL.revokeObjectURL(workerUrl);
+                worker.terminate();
+                resolve({ error: 'Error interno en el Web Worker: ' + (err.message || 'desconocido') });
+            };
+
+            worker.postMessage({ poblacionStr, nStr, conReemplazo, parametroCalculo, atributoExito });
+        } catch (error) {
+            resolve({ error: 'No se pudo iniciar el Web Worker: ' + error.message });
+        }
+    });
 }

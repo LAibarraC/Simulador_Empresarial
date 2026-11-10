@@ -22,7 +22,7 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
     const atributoSelectRef = useRef(null);
     const resDistMuestrales = resultado;
     const [paginaActual, setPaginaActual] = useState(1);
-    const cargando = false;
+    const [cargando, setCargando] = useState(false);
     const [modalAlerta, setModalAlerta] = useState({ isOpen: false, mensaje: '', titulo: 'Atención', tipo: 'warning' });
     const filasPorPagina = 10;
     useEffect(() => { setPaginaActual(1); }, [resultado]);
@@ -53,11 +53,18 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
 
     const filasValidas = filas?.filter(f => (f.valor || '').toString().trim() !== '') || [];
 
-    const ejecutar = () => {
+    const ejecutar = async () => {
         if (esMultiColumna) { mostrarAlerta('La variable debe tener 1 sola columna.'); return; }
-        const calculo = onGenerar();
-        if (calculo.error) mostrarAlerta(calculo.error);
-        else setPaginaActual(1);
+        setCargando(true);
+        try {
+            const calculo = await onGenerar();
+            if (calculo?.error) mostrarAlerta(calculo.error);
+            else setPaginaActual(1);
+        } catch (err) {
+            mostrarAlerta(err?.message || 'Error en el cálculo');
+        } finally {
+            setCargando(false);
+        }
     };
 
     // Lógica de Paginación
@@ -74,10 +81,18 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
     const factorCorr = (calcFinal && !calcFinal.conReemplazo && NVal > 1) ? ((NVal - nVal) / (NVal - 1)) : 1;
     const varianzaTeoricaMedia = calcFinal ? ((Number(calcFinal.varianzaPoblacional) / nVal) * factorCorr) : 0;
     const varianzaTeoricaMediaStr = Number(varianzaTeoricaMedia).toFixed(2);
+    const desvEstandarMedia = Math.sqrt(Number(resDistMuestrales?.calculosFinales?.varianzaDeDistribucion || 0));
+    const desvEstandarMediaStr = Number(desvEstandarMedia).toFixed(2);
+    const desvEstandarTeoricaMedia = Math.sqrt(varianzaTeoricaMedia);
+    const desvEstandarTeoricaMediaStr = Number(desvEstandarTeoricaMedia).toFixed(2);
 
     const pPob = calcFinal ? Number(calcFinal.proporcionPoblacional) : 0;
     const varianzaTeoricaProp = calcFinal ? (((pPob * (1 - pPob)) / nVal) * factorCorr) : 0;
     const varianzaTeoricaPropStr = Number(varianzaTeoricaProp).toFixed(6);
+    const desvEstandarProp = Math.sqrt(Number(resDistMuestrales?.calculosFinales?.varianzaDeDistribucion || 0));
+    const desvEstandarPropStr = Number(desvEstandarProp).toFixed(4);
+    const desvEstandarTeoricaProp = Math.sqrt(varianzaTeoricaProp);
+    const desvEstandarTeoricaPropStr = Number(desvEstandarTeoricaProp).toFixed(4);
 
     return (
         <div style={{ fontFamily: FONT, display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', marginTop: '0px' }}>
@@ -506,12 +521,24 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                                                     </div>
                                                                 </div>
 
+                                                                <div id="tour-t4-desviacion-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Desviación Estándar Muestral (Error Estándar) <Latex formula="\sigma_{\bar{X}}" />
+                                                                    </div>
+                                                                    <div style={{ padding: '10px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)', fontSize: '0.85rem' }}>
+                                                                        <Latex formula={`\\sigma_{\\bar{X}} = \\sqrt{V(\\bar{X})} = \\sqrt{${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(2)}} = ${desvEstandarMediaStr}`} />
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                        Obsérvese que: <Latex formula={`\\sigma_{\\bar{X}} = \\sqrt{\\frac{\\sigma^2}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''}} = \\sqrt{${varianzaTeoricaMediaStr}} = ${desvEstandarTeoricaMediaStr}`} />
+                                                                    </div>
+                                                                </div>
+
                                                                 <div id="tour-t4-distribucion-aproximada">
                                                                     <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                         Distribución Normal Aproximada
                                                                     </div>
                                                                     <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
-                                                                        <Latex formula={`\\bar{X} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} ; ${varianzaTeoricaMediaStr})`} />
+                                                                        <Latex formula={`\\bar{X} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(2)} ; \\; ${varianzaTeoricaMediaStr}) \\quad \\Rightarrow \\quad \\sigma_{\\bar{X}} = ${desvEstandarTeoricaMediaStr}`} />
                                                                     </div>
                                                                 </div>
                                                             </>
@@ -576,12 +603,24 @@ export default function Resultados_DistribucionesMuestrales({ varSeleccionada, f
                                                                     </div>
                                                                 </div>
 
+                                                                <div id="tour-t4-desviacion-muestral">
+                                                                    <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        Desviación Estándar Muestral (Error Estándar) <Latex formula="\sigma_{\hat{p}}" />
+                                                                    </div>
+                                                                    <div style={{ padding: '10px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)', fontSize: '0.85rem' }}>
+                                                                        <Latex formula={`\\sigma_{\\hat{p}} = \\sqrt{V(\\hat{p})} = \\sqrt{${Number(resDistMuestrales.calculosFinales.varianzaDeDistribucion).toFixed(6)}} = ${desvEstandarPropStr}`} />
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-pure)', marginTop: '5px', textAlign: 'center', fontSize: '0.75rem' }}>
+                                                                        Obsérvese que: <Latex formula={`\\sigma_{\\hat{p}} = \\sqrt{\\frac{P \\cdot Q}{n} ${!resDistMuestrales.calculosFinales.conReemplazo ? '\\left(\\frac{N-n}{N-1}\\right)' : ''}} = \\sqrt{${varianzaTeoricaPropStr}} = ${desvEstandarTeoricaPropStr}`} />
+                                                                    </div>
+                                                                </div>
+
                                                                 <div id="tour-t4-distribucion-aproximada">
                                                                     <div className="tema4-titulo-seccion" style={{ margin: '10px 0 0px 0', textAlign: 'center', color: 'var(--text-pure)', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                         Distribución Normal Aproximada
                                                                     </div>
                                                                     <div style={{ marginTop: '0px', padding: '12px 15px', background: 'var(--bg-input)', borderRadius: RADIUS, border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-pure)' }}>
-                                                                        <Latex formula={`\\hat{p} \\sim N(${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} ; ${varianzaTeoricaPropStr})`} />
+                                                                        <Latex formula={`\\hat{p} \\sim N(P = ${Number(resDistMuestrales.calculosFinales.esperanza).toFixed(4)} ; \\; \\sigma^2 = ${varianzaTeoricaPropStr}) \\quad \\Rightarrow \\quad \\sigma_{\\hat{p}} = ${desvEstandarTeoricaPropStr}`} />
                                                                     </div>
                                                                 </div>
                                                             </>

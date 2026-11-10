@@ -35,7 +35,7 @@ export default function Login({ onLogin }) {
       if (error.message === "Credenciales incorrectas") {
         alerta.error("Credenciales incorrectas", "Por favor, verifica tu correo y contraseña.");
       } else {
-        alerta.error("Error de conexión", "Asegúrate de que el servidor Backend esté corriendo.");
+        alerta.error("No pudimos conectar", "No fue posible iniciar sesión en este momento. Comprueba tu conexión e inténtalo de nuevo.");
       }
     }
   };

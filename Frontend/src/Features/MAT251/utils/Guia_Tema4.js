@@ -171,6 +171,16 @@ export const pasosDistribucionesMuestralesEmpirica = [
         }
     },
     {
+        element: '#tour-t4-desviacion-muestral',
+        popover: {
+            popoverClass: 'mat251-driver-popover',
+            title: 'Desviación Estándar Muestral (Error Estándar)',
+            description: `Calcula la desviación estándar de la distribución muestral (${k('\\sigma_{\\bar{X}} = \\sqrt{V(\\bar{X})}')} o ${k('\\sigma_{\\hat{p}} = \\sqrt{V(\\hat{p})}')}), expresada en las mismas unidades de la variable original.`,
+            side: 'top',
+            align: 'center'
+        }
+    },
+    {
         element: '#tour-t4-distribucion-aproximada',
         popover: {
             popoverClass: 'mat251-driver-popover',

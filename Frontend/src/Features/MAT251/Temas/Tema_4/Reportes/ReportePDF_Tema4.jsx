@@ -337,11 +337,16 @@ function EmpiricaPDF({ datos }) {
             <SumaPDF simbolo={`V(${simbolo})`} terminos={distribucion.map(d => `\\frac{${d.frecuencia}}{${d.total}}(${decimal(d.valor, cifrasValor)}-${decimal(c.esperanza, cifrasValor)})^2`)} resultado={c.varianzaDeDistribucion} cifras={esMedia ? 2 : 6} />
             <div style={{ marginTop: '5px' }}>Obsérvese que: <MathPDF math={observacionVarianza} /></div>
         </div>}
+        {!esVarianza && <div className="pdf-section" data-pdf-divisible="formulas" style={{ textAlign: 'center' }}>
+            <div style={titulo}>Desviación Estándar Muestral (Error Estándar) <MathPDF math={`\\sigma_{${simbolo}}`} /></div>
+            <MathPDF math={`\\sigma_{${simbolo}} = \\sqrt{V(${simbolo})} = \\sqrt{${decimal(c.varianzaDeDistribucion, esMedia ? 2 : 6)}} = ${decimal(Math.sqrt(c.varianzaDeDistribucion), esMedia ? 2 : 4)}`} display />
+            <div style={{ marginTop: '5px' }}>Obsérvese que: <MathPDF math={`\\sigma_{${simbolo}} = \\sqrt{${observacionVarianza.split('=')[1] || ''}} = \\sqrt{${decimal(varianzaTeorica, esMedia ? 2 : 6)}} = ${decimal(Math.sqrt(varianzaTeorica), esMedia ? 2 : 4)}`} /></div>
+        </div>}
         <div className="pdf-section" style={{ textAlign: 'center' }}>
             <div style={titulo}>{esVarianza ? 'Distribución Chi-cuadrada' : 'Distribución Normal Aproximada'}</div>
             {esVarianza && <div>Grados de libertad: <MathPDF math={`n-1=${c.n}-1=${c.n - 1}`} /></div>}
             <MathPDF math={esVarianza ? `\\frac{(${c.n}-1)S^2}{\\sigma^2}\\sim\\chi^2_{${c.n}-1}`
-                : `${simbolo}\\sim N(${decimal(c.esperanza, cifrasValor)};${decimal(varianzaTeorica, esMedia ? 2 : 6)})`} display />
+                : `${simbolo}\\sim N(${decimal(c.esperanza, cifrasValor)};\\;${decimal(varianzaTeorica, esMedia ? 2 : 6)}) \\quad \\Rightarrow \\quad \\sigma_{${simbolo}} = ${decimal(Math.sqrt(varianzaTeorica), esMedia ? 2 : 4)}`} display />
         </div>
     </>;
 }

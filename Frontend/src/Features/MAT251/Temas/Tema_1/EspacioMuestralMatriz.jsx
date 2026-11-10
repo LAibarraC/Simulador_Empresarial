@@ -12,25 +12,39 @@ function textoDeCelda(celda) {
     return String(celda?.texto ?? celda?.formula ?? '');
 }
 
-function LlaveMuestral({ lado, filas }) {
+function LlaveMuestral({ lado, altura }) {
     const reflejar = lado === 'derecho';
-    const cantidadFilas = Math.max(1, filas);
+    const alto = Math.max(2, altura);
+    const centro = alto / 2;
+    // Solo se alargan los tramos rectos; las curvas conservan su tamaño en píxeles.
+    const curva = Math.min(12, (alto - 2) / 4);
+    const recorrido = [
+        'M14 1',
+        `Q8 1 8 ${1 + curva}`,
+        `L8 ${centro - curva}`,
+        `Q8 ${centro} 1 ${centro}`,
+        `Q8 ${centro} 8 ${centro + curva}`,
+        `L8 ${alto - 1 - curva}`,
+        `Q8 ${alto - 1} 14 ${alto - 1}`
+    ].join(' ');
 
     return (
-        <svg
-            className="mat251-experimentos-matriz-llave"
-            style={{ height: `${cantidadFilas * 1.4 + (cantidadFilas - 1) * 0.44}em` }}
-            viewBox="0 0 32 100"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-            focusable="false"
-        >
-            <path
-                d="M30 1 C17 1 16 8 16 23 C16 39 12 46 2 50 C12 54 16 61 16 77 C16 92 17 99 30 99"
-                transform={reflejar ? 'translate(32 0) scale(-1 1)' : undefined}
-                vectorEffect="non-scaling-stroke"
-            />
-        </svg>
+        <span className="mat251-experimentos-matriz-llave-contenedor" aria-hidden="true">
+            <svg
+                className="mat251-experimentos-matriz-llave"
+                viewBox={`0 0 15 ${alto}`}
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+                style={{ visibility: altura > 0 ? 'visible' : 'hidden' }}
+            >
+                <path
+                    d={recorrido}
+                    transform={reflejar ? 'translate(15 0) scale(-1 1)' : undefined}
+                    vectorEffect="non-scaling-stroke"
+                />
+            </svg>
+        </span>
     );
 }
 
@@ -38,6 +52,7 @@ function EspacioMuestralMatriz({ celdas = [], columnas = 0 }) {
     const matrizRef = useRef(null);
     const celdasRef = useRef(null);
     const [rangoFilas, setRangoFilas] = useState({ inicio: 0, fin: 24 });
+    const [alturaMatriz, setAlturaMatriz] = useState(0);
     const cantidadFilas = celdas?.length || 0;
 
     const textosMaximosPorColumna = useMemo(() => {
@@ -67,6 +82,7 @@ function EspacioMuestralMatriz({ celdas = [], columnas = 0 }) {
                 const espacioFilas = Number.parseFloat(estilo.rowGap) || 6;
                 const pasoFila = tamanoFuente * ALTURA_FILA_EM + espacioFilas;
                 const rectMatriz = grid.getBoundingClientRect();
+                setAlturaMatriz(anterior => anterior === rectMatriz.height ? anterior : rectMatriz.height);
                 const rectDesplazable = desplazable.getBoundingClientRect();
                 const inicioContenido = rectMatriz.top - rectDesplazable.top + desplazable.scrollTop - desplazable.clientTop;
                 const filaSuperior = Math.max(0, desplazable.scrollTop - inicioContenido);
@@ -90,6 +106,7 @@ function EspacioMuestralMatriz({ celdas = [], columnas = 0 }) {
             ? new ResizeObserver(actualizarRango)
             : null;
         observador?.observe(desplazable);
+        if (celdasRef.current) observador?.observe(celdasRef.current);
         actualizarRango();
 
         return () => {
@@ -124,7 +141,7 @@ function EspacioMuestralMatriz({ celdas = [], columnas = 0 }) {
             <span className="mat251-experimentos-matriz-igual" aria-hidden="true">=</span>
             {hayMatriz ? (
                 <>
-                    <LlaveMuestral lado="izquierdo" filas={cantidadFilas} />
+                    <LlaveMuestral lado="izquierdo" altura={alturaMatriz} />
                     <div
                         className="mat251-experimentos-matriz-celdas"
                         ref={celdasRef}
@@ -155,7 +172,7 @@ function EspacioMuestralMatriz({ celdas = [], columnas = 0 }) {
                             </span>
                         ))}
                     </div>
-                    <LlaveMuestral lado="derecho" filas={cantidadFilas} />
+                    <LlaveMuestral lado="derecho" altura={alturaMatriz} />
                 </>
             ) : (
                 <span

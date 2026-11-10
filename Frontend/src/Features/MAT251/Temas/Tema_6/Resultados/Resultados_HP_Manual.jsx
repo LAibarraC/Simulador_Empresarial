@@ -19,6 +19,8 @@ export default function Resultados_HP_Manual({ resultados, prueba }) {
 
     // Cálculos extras para la tabla estilo Minitab
     const c = resultados.calculos;
+    const alphaVal = c?.alpha != null ? Number(c.alpha) : 0.05;
+    const alphaPct = (alphaVal * 100).toFixed((alphaVal * 100) % 1 !== 0 ? 1 : 0);
     let ee = null;
     let eeDisplay = null;
     let icDisplay = null;
@@ -339,6 +341,22 @@ export default function Resultados_HP_Manual({ resultados, prueba }) {
                             <th style={{ padding: '8px', borderTop: '1px solid var(--text-pure)', borderRight: '1px solid var(--text-pure)' }}>Justificación</th>
                             <td style={{ padding: '8px', borderTop: '1px solid var(--text-pure)' }}>
                                 Como {renderKatex(resultados.criterioRechazoMath)}, el estadístico {isRechazo ? 'cae en la región de rechazo.' : 'no cae en la región de rechazo.'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style={{ padding: '8px', borderTop: '1px solid var(--text-pure)', borderRight: '1px solid var(--text-pure)' }}>
+                                Error Tipo I ({renderKatex('\\alpha')})
+                            </th>
+                            <td style={{ padding: '8px', borderTop: '1px solid var(--text-pure)' }}>
+                                {isRechazo ? (
+                                    <>
+                                        Existe una probabilidad máxima del <strong>{alphaPct}%</strong> ({renderKatex(`\\alpha = ${alphaVal}`)}) de haber cometido un <strong>Error Tipo I</strong> al rechazar {renderKatex('H_0')} siendo esta verdadera.
+                                    </>
+                                ) : (
+                                    <>
+                                        <strong>No se comete Error Tipo I.</strong> Al aceptar {renderKatex('H_0')}, este error no ocurre (el nivel fijado era {renderKatex(`\\alpha = ${alphaVal}`)} o <strong>{alphaPct}%</strong>).
+                                    </>
+                                )}
                             </td>
                         </tr>
                     </tbody>

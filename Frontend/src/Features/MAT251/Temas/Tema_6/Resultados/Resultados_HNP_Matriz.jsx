@@ -21,7 +21,10 @@ const CardResultado = ({ label, value }) => (
 export default function Resultados_HNP_Matriz({ resultados }) {
     if (!resultados) return null;
 
-    const decisionColor = resultados.decision === 'Rechazar H₀' ? '#ef4444' : '#10b981';
+    const isRechazo = resultados.decision === 'Rechazar H₀';
+    const decisionColor = isRechazo ? '#ef4444' : '#10b981';
+    const alphaVal = resultados.calculos?.alpha != null ? Number(resultados.calculos.alpha) : 0.05;
+    const alphaPct = (alphaVal * 100).toFixed((alphaVal * 100) % 1 !== 0 ? 1 : 0);
     const alphaChi = Number(resultados.calculos?.alpha);
     const dfChi = Number(resultados.df);
     const valorCriticoChi = Number(resultados.valorCritico?.chiSup ?? resultados.valorCritico);
@@ -358,6 +361,22 @@ export default function Resultados_HNP_Matriz({ resultados }) {
                                 {resultados.criterioRechazoMath
                                     ? <>Como {renderKatex(resultados.criterioRechazoMath.replace(/p-Valor/gi, 'p\\text{-Valor}'))}, el estadístico {resultados.decision === 'Rechazar H₀' ? 'cae en la región de rechazo.' : 'no cae en la región de rechazo.'}</>
                                     : 'No hay un criterio de rechazo disponible.'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style={{ width: '25%', padding: '8px', borderTop: '1px solid var(--text-pure)', borderRight: '1px solid var(--text-pure)' }}>
+                                Error Tipo I ({renderKatex('\\alpha')})
+                            </th>
+                            <td style={{ padding: '8px', borderTop: '1px solid var(--text-pure)' }}>
+                                {isRechazo ? (
+                                    <>
+                                        Existe una probabilidad máxima del <strong>{alphaPct}%</strong> ({renderKatex(`\\alpha = ${alphaVal}`)}) de haber cometido un <strong>Error Tipo I</strong> al rechazar {renderKatex('H_0')} siendo esta verdadera.
+                                    </>
+                                ) : (
+                                    <>
+                                        <strong>No se comete Error Tipo I.</strong> Al aceptar {renderKatex('H_0')}, este error no ocurre (el nivel fijado era {renderKatex(`\\alpha = ${alphaVal}`)} o <strong>{alphaPct}%</strong>).
+                                    </>
+                                )}
                             </td>
                         </tr>
                     </tbody>

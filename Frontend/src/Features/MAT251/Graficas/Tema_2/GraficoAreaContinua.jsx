@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, useYAxisScale } from 'recharts';
 import { compile } from 'mathjs';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -34,7 +34,7 @@ const CustomKatexLabel = (props) => {
 const YAxisKatexLabel = ({ viewBox, value }) => {
     if (!viewBox) return null;
     const { x, y, height } = viewBox;
-    const cx = x + 15;
+    const cx = x - 9;
     const cy = y + height / 2;
     return (
         <foreignObject x={cx - 50} y={cy - 50} width={100} height={100} style={{ overflow: 'visible', pointerEvents: 'none' }}>
@@ -51,7 +51,7 @@ const XAxisKatexLabel = ({ viewBox, value }) => {
     if (!viewBox) return null;
     const { x, y, width, height } = viewBox;
     const cx = x + width / 2;
-    const cy = y + height - 5;
+    const cy = y + height + 10;
     return (
         <foreignObject x={cx - 100} y={cy - 12} width={200} height={30} style={{ overflow: 'visible', pointerEvents: 'none' }}>
             <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-pure)', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', gap: '4px' }}>
@@ -59,6 +59,29 @@ const XAxisKatexLabel = ({ viewBox, value }) => {
                 <span dangerouslySetInnerHTML={{ __html: katex.renderToString(value, { throwOnError: false }) }} />
             </div>
         </foreignObject>
+    );
+};
+
+const MarcaEjeX = ({ x, y, payload, debajo }) => {
+    const escalaY = useYAxisScale();
+    const cero = escalaY?.(0) ?? y;
+    const direccion = debajo ? 1 : -1;
+
+    return (
+        <g fill="var(--text-pure)" fontSize={11} fontWeight={500}>
+            <line x1={x} x2={x} y1={cero} y2={cero + direccion * 4} stroke="var(--text-main)" />
+            <text
+                x={x}
+                y={cero + direccion * 12}
+                textAnchor="middle"
+                dominantBaseline="central"
+                paintOrder="stroke"
+                stroke="var(--bg-card)"
+                strokeWidth={3}
+            >
+                {payload.value}
+            </text>
+        </g>
     );
 };
 
@@ -185,34 +208,33 @@ export default function GraficoAreaContinua({ datos, modoPDF = false }) {
         return { domain: [start - 0.2, end + 0.2], ticks: t };
     }, [dataGrafica]);
 
-    const maxFx = useMemo(() => {
-        if (!dataGrafica || dataGrafica.length === 0) return 0;
-        return Math.max(...dataGrafica.map(d => d.fx));
+    const { minFx, maxFx } = useMemo(() => {
+        let minFx = 0;
+        let maxFx = 0;
+        for (const { fx } of dataGrafica) {
+            if (!Number.isFinite(fx)) continue;
+            minFx = Math.min(minFx, fx);
+            maxFx = Math.max(maxFx, fx);
+        }
+        return { minFx, maxFx };
     }, [dataGrafica]);
 
     const yAxisConfig = useMemo(() => {
         const areaVal = datos && datos.area !== undefined && datos.area !== null ? Number(datos.area) : 1;
         const esAreaUno = Math.abs(areaVal - 1) < 0.05 || (datos && datos.modo === 'acumulada');
 
-        if (esAreaUno && maxFx <= 1) {
+        if (esAreaUno && minFx >= 0 && maxFx <= 1) {
             return {
                 domain: [0, 1],
                 ticks: [0, 0.2, 0.4, 0.6, 0.8, 1.0]
             };
         }
 
-        if (maxFx > 0) {
-            return {
-                domain: [0, 'auto'],
-                ticks: undefined
-            };
-        }
-
         return {
-            domain: ['auto', 'auto'],
+            domain: [minFx * 1.08, minFx === 0 && maxFx === 0 ? 1 : maxFx * 1.08],
             ticks: undefined
         };
-    }, [datos, maxFx]);
+    }, [datos, minFx, maxFx]);
 
     if (!datos || dataGrafica.length === 0) return null;
 
@@ -237,18 +259,19 @@ export default function GraficoAreaContinua({ datos, modoPDF = false }) {
         && datos.eX <= calculatedDomainAndTicks.domain[1];
     const altoPDF = 288;
     const margenSuperiorPDF = esperanzaVisible ? 24 : 8;
+    const marcasEnCero = !modoPDF && minFx < 0;
 
     const grafico = (
         <AreaChart
         width={modoPDF ? 640 : undefined}
         height={modoPDF ? altoPDF : undefined}
         data={dataGrafica}
-        margin={{ top: modoPDF ? margenSuperiorPDF : 36, right: 30, left: modoPDF ? 20 : -5, bottom: modoPDF ? 0 : 25 }}
+        margin={{ top: modoPDF ? margenSuperiorPDF : 36, right: 30, left: modoPDF ? 20 : 24, bottom: modoPDF ? 0 : 25 }}
     >
         <CartesianGrid strokeDasharray="3 3" stroke={modoPDF ? '#d1d5db' : 'var(--border-color)'} />
         <ReferenceLine y={0} stroke={modoPDF ? '#000000' : 'var(--text-main)'} strokeWidth={2} />
         
-        {datos.eX !== undefined && (
+        {esperanzaVisible && (
             <ReferenceLine 
                 x={datos.eX} 
                 stroke="#ef4444" 
@@ -260,9 +283,9 @@ export default function GraficoAreaContinua({ datos, modoPDF = false }) {
         
         <XAxis 
             dataKey="x" 
-            orientation={maxFx <= 0 ? 'top' : 'bottom'}
-            tick={{ fontSize: 11, fill: modoPDF ? '#000000' : 'var(--text-pure)', fontWeight: 500 }}
-            tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main)', strokeWidth: 2 }}
+            orientation="bottom"
+            tick={marcasEnCero ? <MarcaEjeX debajo={maxFx < -minFx * 0.1} /> : { fontSize: 11, fill: modoPDF ? '#000000' : 'var(--text-pure)', fontWeight: 500 }}
+            tickLine={marcasEnCero ? false : { stroke: modoPDF ? '#000000' : 'var(--text-main)', strokeWidth: 2 }}
             axisLine={{ stroke: 'transparent' }}
             type="number"
             domain={calculatedDomainAndTicks.domain}
@@ -277,10 +300,11 @@ export default function GraficoAreaContinua({ datos, modoPDF = false }) {
             tick={{ fontSize: 11, fill: modoPDF ? '#000000' : 'var(--text-pure)', fontWeight: 500 }}
             tickLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main)' }}
             axisLine={{ stroke: modoPDF ? '#000000' : 'var(--text-main)', strokeWidth: 2 }}
-            tickFormatter={(val) => val.toFixed(2)}
-            width={55}
+            tickFormatter={(val) => Number(val.toPrecision(4)).toString()}
+            width={modoPDF ? 55 : 65}
             domain={yAxisConfig.domain}
             ticks={yAxisConfig.ticks}
+            allowDataOverflow
             label={modoPDF ? undefined : <YAxisKatexLabel value={datos.modo === 'acumulada' ? 'F(x)' : 'f(x)'} />}
         />
         
@@ -332,7 +356,7 @@ export default function GraficoAreaContinua({ datos, modoPDF = false }) {
             
             {/* Mensaje explicativo situado debajo de la gráfica */}
             <div style={{ textAlign: 'center', fontSize: FS.sl, color: 'var(--text-main)', marginTop: '8px' }}>
-                El área sombreada bajo la curva entre <InlineMath math={`a = ${datos.a}`} /> y <InlineMath math={`b = ${datos.b}`} /> representa la probabilidad total (<InlineMath math={`\\text{Área} = ${datos.area != null ? datos.area.toFixed(4) : '1.0000'}`} />).
+                Área sombreada entre <InlineMath math={`a = ${datos.a}`} /> y <InlineMath math={`b = ${datos.b}`} /> (<InlineMath math={`\\text{Área} = ${datos.area != null ? datos.area.toFixed(4) : '1.0000'}`} />).
             </div>
         </div>
     );

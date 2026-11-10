@@ -261,6 +261,17 @@
     background: rgba(156, 163, 175, 0.9);
 }
 
+@supports selector(::-webkit-scrollbar) {
+    :where(.mat251) :is(#tour-continua-desarrollo-area, #tour-continua-desarrollo-esperanza, #tour-continua-desarrollo-varianza) .formula-scroll-container {
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+    }
+
+    :where(.mat251) :is(#tour-continua-desarrollo-area, #tour-continua-desarrollo-esperanza, #tour-continua-desarrollo-varianza) .formula-scroll-container::-webkit-scrollbar {
+        height: 4px;
+    }
+}
+
 /* --- TAMAÑOS EN PC (DESKTOP) IDÉNTICOS A PROBABILIDAD TOTAL --- */
 :where(.mat251) .formula-general-box {
     font-size: 1rem;

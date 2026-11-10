@@ -88,79 +88,84 @@ export const generarPDFReporteMAT251 = async (elementId, nombreArchivo = "Report
         const fecha = getFieldValue('Fecha');
         const hora = getFieldValue('Hora');
 
-        const secciones = Array.from(cuerpo.querySelectorAll('.pdf-section'));
-        const cuerpoRect = cuerpo.getBoundingClientRect();
-        const cuerpoTop = cuerpoRect.top + window.scrollY;
-        const seccionesInfo = secciones.flatMap(seccion => {
-            const rect = seccion.getBoundingClientRect();
-            const top = rect.top + window.scrollY - cuerpoTop;
-            if (seccion.dataset.pdfDivisible === 'formulas') {
-                const renglones = [];
-                seccion.querySelectorAll('.katex-display').forEach(formula => {
-                    const tabla = formula.querySelector('.katex-html .mtable');
-                    if (!tabla) return;
-                    const columnas = Array.from(tabla.children).filter(columna =>
-                        columna.matches('.col-align-l, .col-align-r, .col-align-c')
-                    );
-                    const filas = columnas.map(columna => Array.from(columna.querySelectorAll(
-                        ':scope > .vlist-t > .vlist-r:first-child > .vlist > span > .mord'
-                    )));
-                    const cantidad = Math.max(0, ...filas.map(columna => columna.length));
-                    for (let i = 0; i < cantidad; i++) {
-                        const celdas = filas.map(columna => columna[i]?.getBoundingClientRect())
-                            .filter(celda => celda && celda.width > 0 && celda.height > 0);
-                        if (celdas.length) renglones.push({
-                            top: Math.min(...celdas.map(celda => celda.top)),
-                            bottom: Math.max(...celdas.map(celda => celda.bottom))
+        // Medir el mismo DOM que se captura, una vez aplicados sus estilos finales.
+        // El padding de KaTeX puede desplazar todas las secciones posteriores.
+        const medirSecciones = cuerpoCaptura => {
+            const secciones = Array.from(cuerpoCaptura.querySelectorAll('.pdf-section'));
+            const cuerpoRect = cuerpoCaptura.getBoundingClientRect();
+            const cuerpoTop = cuerpoRect.top + window.scrollY;
+            return secciones.flatMap(seccion => {
+                const rect = seccion.getBoundingClientRect();
+                const top = rect.top + window.scrollY - cuerpoTop;
+                if (seccion.dataset.pdfDivisible === 'formulas') {
+                    const renglones = [];
+                    seccion.querySelectorAll('.katex-display').forEach(formula => {
+                        const tabla = formula.querySelector('.katex-html .mtable');
+                        if (!tabla) return;
+                        const columnas = Array.from(tabla.children).filter(columna =>
+                            columna.matches('.col-align-l, .col-align-r, .col-align-c')
+                        );
+                        const filas = columnas.map(columna => Array.from(columna.querySelectorAll(
+                            ':scope > .vlist-t > .vlist-r:first-child > .vlist > span > .mord'
+                        )));
+                        const cantidad = Math.max(0, ...filas.map(columna => columna.length));
+                        for (let i = 0; i < cantidad; i++) {
+                            const celdas = filas.map(columna => columna[i]?.getBoundingClientRect())
+                                .filter(celda => celda && celda.width > 0 && celda.height > 0);
+                            if (celdas.length) renglones.push({
+                                top: Math.min(...celdas.map(celda => celda.top)),
+                                bottom: Math.max(...celdas.map(celda => celda.bottom))
+                            });
+                        }
+                    });
+                    // Las fracciones y los límites permanecen completos; el título
+                    // y la fórmula general acompañan al primer paso del desarrollo.
+                    const grupos = [];
+                    renglones.sort((a, b) => a.top - b.top).forEach(renglon => {
+                        const anterior = grupos[grupos.length - 1];
+                        if (anterior && renglon.top <= anterior.bottom + 1) {
+                            anterior.bottom = Math.max(anterior.bottom, renglon.bottom);
+                        } else {
+                            grupos.push({ ...renglon });
+                        }
+                    });
+                    if (grupos.length) {
+                        const cortes = [rect.top, ...grupos.slice(1).map((grupo, i) =>
+                            (grupos[i].bottom + grupo.top) / 2
+                        ), rect.bottom];
+                        return grupos.map((_, i) => ({
+                            top: cortes[i] + window.scrollY - cuerpoTop,
+                            height: cortes[i + 1] - cortes[i]
+                        }));
+                    }
+                }
+                if (seccion.dataset.pdfDivisible === 'filas') {
+                    const filas = Array.from(seccion.querySelectorAll('tbody > tr'));
+                    if (filas.length > 0) {
+                        // El título y la cabecera acompañan a la primera fila;
+                        // el total acompaña a la última. El resto puede cambiar de página.
+                        return filas.map((fila, indice) => {
+                            const filaRect = fila.getBoundingClientRect();
+                            const inicio = indice === 0 ? rect.top : filaRect.top;
+                            const fin = indice === filas.length - 1 ? rect.bottom : filaRect.bottom;
+                            const borde = fila.cells[0] ? window.getComputedStyle(fila.cells[0]) : null;
+                            return {
+                                top: inicio + window.scrollY - cuerpoTop,
+                                height: fin - inicio,
+                                bordeContinuacion: indice > 0 ? {
+                                    izquierda: filaRect.left - cuerpoRect.left,
+                                    ancho: filaRect.width,
+                                    grosor: parseFloat(borde?.borderTopWidth) || 1,
+                                    color: borde?.borderTopColor || '#000000'
+                                } : null
+                            };
                         });
                     }
-                });
-                // Las fracciones y los límites permanecen completos; el título
-                // y la fórmula general acompañan al primer paso del desarrollo.
-                const grupos = [];
-                renglones.sort((a, b) => a.top - b.top).forEach(renglon => {
-                    const anterior = grupos[grupos.length - 1];
-                    if (anterior && renglon.top <= anterior.bottom + 1) {
-                        anterior.bottom = Math.max(anterior.bottom, renglon.bottom);
-                    } else {
-                        grupos.push({ ...renglon });
-                    }
-                });
-                if (grupos.length) {
-                    const cortes = [rect.top, ...grupos.slice(1).map((grupo, i) =>
-                        (grupos[i].bottom + grupo.top) / 2
-                    ), rect.bottom];
-                    return grupos.map((_, i) => ({
-                        top: cortes[i] + window.scrollY - cuerpoTop,
-                        height: cortes[i + 1] - cortes[i]
-                    }));
                 }
-            }
-            if (seccion.dataset.pdfDivisible === 'filas') {
-                const filas = Array.from(seccion.querySelectorAll('tbody > tr'));
-                if (filas.length > 0) {
-                    // El título y la cabecera acompañan a la primera fila;
-                    // el total acompaña a la última. El resto puede cambiar de página.
-                    return filas.map((fila, indice) => {
-                        const filaRect = fila.getBoundingClientRect();
-                        const inicio = indice === 0 ? rect.top : filaRect.top;
-                        const fin = indice === filas.length - 1 ? rect.bottom : filaRect.bottom;
-                        const borde = fila.cells[0] ? window.getComputedStyle(fila.cells[0]) : null;
-                        return {
-                            top: inicio + window.scrollY - cuerpoTop,
-                            height: fin - inicio,
-                            bordeContinuacion: indice > 0 ? {
-                                izquierda: filaRect.left - cuerpoRect.left,
-                                ancho: filaRect.width,
-                                grosor: parseFloat(borde?.borderTopWidth) || 1,
-                                color: borde?.borderTopColor || '#000000'
-                            } : null
-                        };
-                    });
-                }
-            }
-            return [{ top, height: rect.height }];
-        });
+                return [{ top, height: rect.height }];
+            });
+        };
+        let seccionesInfo = [];
 
         // ── 3. Captura html2canvas (operación pesada ~2-4 s) ────────────
         alerta.cargando("Capturando contenido...", "Procesando tablas y fórmulas...", toastId);
@@ -187,6 +192,9 @@ export const generarPDFReporteMAT251 = async (elementId, nombreArchivo = "Report
                         child.style.setProperty('color', '#07865b', 'important');
                     });
                 });
+                const cuerpoCaptura = clonedDoc.getElementById(elementId)?.querySelector('#pdf-cuerpo-mat251');
+                if (!cuerpoCaptura) throw new Error('No se encontró el cuerpo del reporte en la captura PDF.');
+                seccionesInfo = medirSecciones(cuerpoCaptura);
             }
         });
         await pausaUI(60);

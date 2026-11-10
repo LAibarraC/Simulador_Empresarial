@@ -757,21 +757,17 @@ export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, p
             });
         }
     }
-    const factorial = (num) => {
-        if (num <= 1) return 1;
-        let res = 1;
-        for (let i = 2; i <= num; i++) res *= i;
-        return res;
-    };
-
     const N = poblacion.length;
     const combinacionesTotales = conReemplazo 
         ? Math.pow(N, n) 
         : factorial(N) / (factorial(n) * factorial(N - n));
 
-    if (combinacionesTotales > 70000) {
+    if (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 2000000) {
+        const cantStr = !Number.isFinite(combinacionesTotales) || combinacionesTotales > 1e15
+            ? 'más de 10¹⁵'
+            : Math.round(combinacionesTotales).toLocaleString();
         return { 
-            error: 'Límite excedido (máx. 70,000 muestras). Usa la Calculadora de Probabilidades.'
+            error: `Límite excedido: se intentó generar ${cantStr} muestras (máx. ${(2000000).toLocaleString()}). Usa la Calculadora de Probabilidades.`
         };
     }
 

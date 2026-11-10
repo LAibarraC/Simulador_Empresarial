@@ -910,8 +910,8 @@ const Principal = forwardRef(function Principal({ usuario, selectedFile, setSele
         setConfiguracionMuestral(prev => ({ ...prev, distribucion }));
         setResultadoMuestral(null);
     };
-    const calcularMuestral = (evaluarCondicion = false) => {
-        const calculo = calcularRecetaMuestral(crearRecetaMuestral(datosMuestralesActuales, evaluarCondicion));
+    const calcularMuestral = async (evaluarCondicion = false) => {
+        const calculo = await calcularRecetaMuestral(crearRecetaMuestral(datosMuestralesActuales, evaluarCondicion));
         if (calculo.resultado) setResultadoMuestral(calculo.resultado);
         return calculo;
     };
@@ -930,9 +930,9 @@ const Principal = forwardRef(function Principal({ usuario, selectedFile, setSele
         operacionMuestralAnteriorRef.current = operacion;
         if (!esHistorial && (cambioOperacion || !['distribuciones_muestrales', 'tyf'].includes(operacion))) setResultadoMuestral(null);
     }, [operacion, varSeleccionada?.id, esHistorial]);
-    const restaurarMuestral = snapshot => {
+    const restaurarMuestral = async snapshot => {
         const receta = leerRecetaMuestral(snapshot);
-        const calculo = calcularRecetaMuestral(receta);
+        const calculo = await calcularRecetaMuestral(receta);
         restauracionDatosMuestralRef.current = firmaDatosModelosDiscretos(receta.varSeleccionada, receta.filas, receta.nombreEncabezadoManual);
         setConfiguracionMuestral(estadoRestauradoMuestral(receta));
         setFilas(receta.filas);
