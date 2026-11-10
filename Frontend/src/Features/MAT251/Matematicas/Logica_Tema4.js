@@ -1145,12 +1145,12 @@ export function calcularDistribucionMuestralWorker(poblacionStr, nStr, conReempl
                         combinacionesTotales = Math.round(combinacionesTotales);
                     }
 
-                    if (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 2000000) {
+                    if (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 5000000) {
                         const cantStr = (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 1e15)
                             ? 'más de 10¹⁵'
                             : Math.round(combinacionesTotales).toLocaleString();
                         self.postMessage({
-                            error: 'Límite excedido: se intentó generar ' + cantStr + ' muestras (máx. ' + (2000000).toLocaleString() + '). Usa la Calculadora de Probabilidades.'
+                            error: 'Límite excedido: se intentó generar ' + cantStr + ' muestras (máx. ' + (5000000).toLocaleString() + '). Usa la Calculadora de Probabilidades.'
                         });
                         return;
                     }

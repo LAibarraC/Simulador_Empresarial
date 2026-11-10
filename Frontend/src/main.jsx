@@ -30,8 +30,8 @@ window.fetch = async (url, options = {}) => {
   // Si expira el token o es inválido (401), se limpia la sesión y se redirige
   if (response.status === 401 && !urlString.includes("/login_local")) {
     localStorage.removeItem("token");
-    if (!window.location.pathname.includes("/login")) {
-      window.location.href = "/login";
+    if (!window.location.hash.includes("/login")) {
+      window.location.href = "/#/login";
     }
   }
 

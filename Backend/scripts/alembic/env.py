@@ -26,7 +26,7 @@ if DATABASE_URL.startswith("mysql+asyncmy://"):
 elif DATABASE_URL.startswith("mysql://"):
     DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+pymysql://", 1)
 
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%"))
 
 # SSL para Aiven (produccion)
 connect_args = {}

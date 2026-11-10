@@ -762,12 +762,12 @@ export const calcularDistribucionMuestral = (poblacionStr, nStr, conReemplazo, p
         ? Math.pow(N, n) 
         : factorial(N) / (factorial(n) * factorial(N - n));
 
-    if (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 2000000) {
+    if (!Number.isFinite(combinacionesTotales) || combinacionesTotales > 5000000) {
         const cantStr = !Number.isFinite(combinacionesTotales) || combinacionesTotales > 1e15
             ? 'más de 10¹⁵'
             : Math.round(combinacionesTotales).toLocaleString();
         return { 
-            error: `Límite excedido: se intentó generar ${cantStr} muestras (máx. ${(2000000).toLocaleString()}). Usa la Calculadora de Probabilidades.`
+            error: `Límite excedido: se intentó generar ${cantStr} muestras (máx. ${(5000000).toLocaleString()}). Usa la Calculadora de Probabilidades.`
         };
     }
 

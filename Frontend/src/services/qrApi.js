@@ -21,7 +21,7 @@ export const qrApi = {
   /** Genera un QR cuya vigencia es la fecha límite de su clase. */
   generarQR: async (claseId) => {
     const body = { clase_id: claseId };
-    const res = await fetch(`${BASE_URL}/api/qr/generar`, {
+    const res = await fetch(`${BASE_URL}/qr/generar`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...tokenHeader() },
       body: JSON.stringify(body),
@@ -34,7 +34,7 @@ export const qrApi = {
    * @param {string} token
    */
   infoQR: async (token) => {
-    const res = await fetch(`${BASE_URL}/api/qr/info/${encodeURIComponent(token)}`);
+    const res = await fetch(`${BASE_URL}/qr/info/${encodeURIComponent(token)}`);
     return handle(res);
   },
 
@@ -43,7 +43,7 @@ export const qrApi = {
    * @param {string} token
    */
   matricularPorQR: async (token) => {
-    const res = await fetch(`${BASE_URL}/api/qr/matricular`, {
+    const res = await fetch(`${BASE_URL}/qr/matricular`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...tokenHeader() },
       body: JSON.stringify({ token }),
@@ -61,7 +61,7 @@ export const qrApi = {
   },
 
   cerrarMatricula: async (claseId) => {
-    const res = await fetch(`${BASE_URL}/api/qr/cerrar-matricula/${claseId}`, {
+    const res = await fetch(`${BASE_URL}/qr/cerrar-matricula/${claseId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", ...tokenHeader() },
     });
@@ -73,7 +73,7 @@ export const qrApi = {
    * @param {number} qrId
    */
   desactivarQR: async (qrId) => {
-    const res = await fetch(`${BASE_URL}/api/qr/desactivar/${qrId}`, {
+    const res = await fetch(`${BASE_URL}/qr/desactivar/${qrId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...tokenHeader() },
     });
@@ -84,7 +84,7 @@ export const qrApi = {
    * Lista los QRs del docente autenticado.
    */
   listarMisQRs: async () => {
-    const res = await fetch(`${BASE_URL}/api/qr/mis-qrs`, {
+    const res = await fetch(`${BASE_URL}/qr/mis-qrs`, {
       method: "GET",
       headers: { "Content-Type": "application/json", ...tokenHeader() },
     });

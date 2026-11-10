@@ -108,11 +108,11 @@ export const calcularRecetaMuestral = async receta => {
         for (let i = 1; i <= Math.min(p.n, valores.length - p.n); i++) cantidad *= (valores.length - i + 1) / i;
         cantidad = Math.round(cantidad);
       }
-      if (!Number.isFinite(cantidad) || cantidad > 2000000) {
+      if (!Number.isFinite(cantidad) || cantidad > 5000000) {
         const cantStr = !Number.isFinite(cantidad) || cantidad > 1e15
           ? 'más de 10¹⁵'
           : Math.round(cantidad).toLocaleString();
-        return fallo(`Límite excedido: se intentó generar ${cantStr} muestras (máx. ${(2000000).toLocaleString()}). Usa la Calculadora de Probabilidades.`);
+        return fallo(`Límite excedido: se intentó generar ${cantStr} muestras (máx. ${(5000000).toLocaleString()}). Usa la Calculadora de Probabilidades.`);
       }
       resultados = await calcularDistribucionMuestralWorker(valores.join(', '), p.n, p.conReemplazo, p.parametroCalculo, p.atributoExito);
       if (resultados?.error) return resultados;
