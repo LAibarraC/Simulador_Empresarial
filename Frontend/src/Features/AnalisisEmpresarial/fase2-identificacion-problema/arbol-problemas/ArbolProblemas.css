@@ -1,0 +1,1756 @@
+/* =========================================================================
+   ESTILOS PARA EL ÁRBOL DE PROBLEMAS (METODOLOGÍA MARCO LÓGICO)
+   Sistema unificado con AnalisisEmpresarial, Lluvia de Ideas y Doctor Estrategia
+   ========================================================================= */
+
+.arbol-problemas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* =========================================================================
+   CONTENEDOR Y SILUETA DEL ÁRBOL LITERAL
+   Todos los elementos están colocados estrictamente DENTRO del árbol
+   ========================================================================= */
+
+.arbol-literal-view {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0.25rem 0;
+}
+
+.arbol-tree-structure {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  min-height: 760px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 32%, #fef3c7 62%, #381a08 100%);
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 0 16px rgba(16, 185, 129, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1rem 1.5rem 1rem;
+  box-sizing: border-box;
+  gap: 0.55rem;
+}
+
+.arbol-svg-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.arbol-svg-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+}
+
+/* 1. SECCIÓN COPA (DENTRO DEL FOLLAJE) */
+.arbol-canopy-section {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.2rem;
+}
+
+.canopy-integrated-header,
+.roots-integrated-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 780px;
+  gap: 0.75rem;
+}
+
+.tree-zone-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.pill-canopy {
+  background: rgba(255, 255, 255, 0.88);
+  color: #065f46;
+  border: 1.5px solid rgba(16, 185, 129, 0.45);
+}
+
+.pill-roots {
+  background: rgba(255, 255, 255, 0.88);
+  color: #92400e;
+  border: 1.5px solid rgba(217, 119, 6, 0.45);
+}
+
+.btn-tree-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btn-tree-efecto {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1.5px solid #10b981;
+  color: #047857;
+}
+
+.btn-tree-efecto:hover {
+  background: #10b981;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.btn-tree-causa {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1.5px solid #d97706;
+  color: #b45309;
+}
+
+.btn-tree-causa:hover {
+  background: #d97706;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+}
+
+.btn-tree-problema {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1.5px solid #eab308;
+  color: #a16207;
+}
+
+.btn-tree-problema:hover {
+  background: #eab308;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.35);
+}
+
+html.dark .btn-tree-problema {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1.5px solid rgba(234, 179, 8, 0.6);
+  color: #fde047;
+}
+
+html.dark .btn-tree-problema:hover {
+  background: #eab308;
+  color: #1e293b;
+}
+
+/* CONECTORES VERTICALES DE SAVIA DENTRO DEL TRONCO */
+.tree-vertical-sap {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 16px;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+
+.sap-upper {
+  background: rgba(254, 243, 199, 0.75);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #b45309;
+}
+
+.sap-lower {
+  background: rgba(254, 243, 199, 0.75);
+  border: 1px solid rgba(217, 119, 6, 0.4);
+  color: #92400e;
+}
+
+.sap-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+
+.sap-arrow {
+  animation: bounceUp 1.8s infinite ease-in-out;
+}
+
+.sap-label {
+  font-size: 0.66rem;
+}
+
+/* Grilla de Ramas de la Copa y Canales de Raíces - EXACTO MISMO TAMAÑO */
+.canopy-boughs-grid,
+.roots-channels-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 780px;
+  position: relative;
+  z-index: 2;
+}
+
+.tree-bough {
+  background: rgba(255, 255, 255, 0.52);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+
+.tree-bough:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.08);
+}
+
+.bough-direct {
+  border-top: 3.5px solid #ef4444;
+}
+
+.bough-indirect {
+  border-top: 3.5px solid #f59e0b;
+}
+
+.bough-header,
+.channel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  min-height: 38px;
+  gap: 0.5rem;
+}
+
+.bough-title-box,
+.channel-title-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.bough-leaf-icon,
+.channel-root-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.bough-name,
+.channel-name {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-main, #1e293b);
+  line-height: 1.25;
+}
+
+.bough-desc,
+.channel-desc {
+  font-size: 0.68rem;
+  color: var(--text-muted, #64748b);
+  display: block;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.bough-counter,
+.channel-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 0.35rem;
+  border-radius: 11px;
+  background: var(--bg-main, #f1f5f9);
+  border: 1px solid var(--border-color, #cbd5e1);
+  color: var(--text-main, #1e293b);
+  font-size: 0.72rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.bough-nodes-container,
+.channel-nodes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-height: 50px;
+}
+
+/* Tarjetas de Frutos / Efectos en las Ramas */
+.tree-fruit-card,
+.tree-root-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 9px;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.tree-fruit-card:hover,
+.tree-root-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
+  border-color: #cbd5e1;
+}
+
+.fruit-efecto {
+  border-left: 3.5px solid #ef4444;
+}
+
+.root-causa {
+  border-left: 3.5px solid #10b981;
+}
+
+.tree-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.nodo-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-node-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-node-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  color: #ef4444;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-node-danger:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+}
+
+.btn-node-edit {
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(202, 138, 4, 0.38);
+  color: #a16207;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-node-edit:hover {
+  background: #eab308 !important;
+  border-color: #ca8a04 !important;
+  color: #ffffff !important;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.45);
+}
+
+html.dark .btn-node-edit {
+  background: rgba(234, 179, 8, 0.2);
+  border-color: rgba(234, 179, 8, 0.5);
+  color: #fde047;
+}
+
+html.dark .btn-node-edit:hover {
+  background: #eab308 !important;
+  border-color: #facc15 !important;
+  color: #1e293b !important;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.5);
+}
+
+html.dark .btn-node-danger {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #f87171;
+}
+
+html.dark .btn-node-danger:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.nodo-badge-cat {
+  display: inline-flex;
+  align-items: center;
+  padding: 1.5px 6px;
+  border-radius: 5px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  background: rgba(234, 88, 12, 0.1);
+  color: #ea580c;
+  border: 1px solid rgba(234, 88, 12, 0.2);
+  letter-spacing: 0.02em;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+}
+
+.fruit-efecto .nodo-badge-cat {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.root-causa .nodo-badge-cat {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+html.dark .fruit-efecto .nodo-badge-cat {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+html.dark .root-causa .nodo-badge-cat {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.tree-card-text {
+  margin: 0.15rem 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-main, #1e293b);
+  font-weight: 600;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  white-space: normal;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.tree-card-desc {
+  margin: 0.2rem 0 0.1rem 0;
+  font-size: 0.73rem;
+  line-height: 1.35;
+  color: var(--text-muted, #64748b);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+html.dark .tree-card-desc {
+  color: #94a3b8;
+}
+
+.tree-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  padding-top: 0.2rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tree-origin-pill {
+  color: var(--text-muted, #64748b);
+  font-style: italic;
+  font-size: 0.66rem;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-bough-tag {
+  font-weight: 700;
+  color: #dc2626;
+  font-size: 0.66rem;
+}
+
+.tree-root-tag {
+  font-weight: 700;
+  color: #059669;
+  font-size: 0.66rem;
+}
+
+html.dark .tree-root-tag {
+  color: #34d399;
+}
+
+/* Empty States en Ramas y Raíces */
+.tree-empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px dashed var(--border-color, #cbd5e1);
+  border-radius: 9px;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.3);
+  min-height: 50px;
+}
+
+.empty-tree-icon {
+  opacity: 0.6;
+}
+
+/* 2. PUENTES Y CONECTORES DE SAVIA */
+.tree-sap-bridge {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.35rem 0;
+}
+
+@keyframes bounceUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* 3. TRONCO DEL ÁRBOL - PROBLEMA CENTRAL */
+.arbol-trunk-section {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.trunk-bark-pillar {
+  width: 100%;
+  max-width: calc((780px - 0.75rem) / 2);
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.trunk-channel {
+  border-top: 3.5px solid #d97706 !important;
+  border-color: rgba(217, 119, 6, 0.25);
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.trunk-channel:hover {
+  border-color: rgba(217, 119, 6, 0.45);
+  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.08);
+}
+
+.trunk-card {
+  border-left: 3.5px solid #d97706;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.trunk-card .tree-card-text {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-main, #1e293b);
+  font-weight: 600;
+  margin: 0.3rem 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  white-space: normal;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.nodo-badge-tronco {
+  background: rgba(217, 119, 6, 0.1);
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.25);
+}
+
+.trunk-statement-desc {
+  margin: 0.25rem 0 0.1rem 0;
+  font-size: 0.74rem;
+  color: #78350f;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  white-space: normal;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+html.dark .trunk-card .tree-card-text {
+  color: #f1f5f9;
+}
+
+html.dark .trunk-statement-desc {
+  color: #fed7aa;
+}
+
+.btn-tree-problema {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1.5px solid #d97706;
+  color: #b45309;
+}
+
+.btn-tree-problema:hover {
+  background: #d97706;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+}
+
+/* 4. LÍNEA DE TIERRA Y ESTRATO */
+.tree-ground-stratum {
+  position: relative;
+  z-index: 2;
+  margin: 0.15rem 0;
+}
+
+/* 5. SISTEMA DE RAÍCES SUBTERRÁNEAS */
+.arbol-roots-section {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.roots-halo-badge {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.7rem;
+  background: rgba(120, 53, 15, 0.15);
+  border: 1px solid rgba(120, 53, 15, 0.35);
+  color: #78350f;
+  border-radius: 16px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 6px rgba(120, 53, 15, 0.1);
+}
+
+.roots-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0 0.5rem;
+}
+
+.roots-title-wrap {
+  flex: 1;
+  min-width: 220px;
+}
+
+.roots-main-title {
+  margin: 0 0 0.15rem 0;
+  font-size: 1rem;
+  font-weight: 850;
+  color: #451a03;
+  letter-spacing: -0.01em;
+}
+
+.roots-subtitle {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #78350f;
+  opacity: 0.9;
+}
+
+.tree-root-channel {
+  background: rgba(255, 255, 255, 0.52);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(120, 53, 15, 0.2);
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+
+.tree-root-channel:hover {
+  border-color: rgba(120, 53, 15, 0.45);
+  box-shadow: 0 6px 20px rgba(120, 53, 15, 0.08);
+}
+
+.channel-direct {
+  border-bottom: 3.5px solid #10b981;
+}
+
+.channel-indirect {
+  border-bottom: 3.5px solid #0d9488;
+}
+
+/* =========================================================================
+   ADAPTACIÓN EXCLUSIVA A TEMA OSCURO (HTML.DARK)
+   ========================================================================= */
+
+html.dark .pill-canopy {
+  background: rgba(6, 78, 59, 0.75);
+  color: #6ee7b7;
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+html.dark .pill-roots {
+  background: rgba(69, 26, 3, 0.75);
+  color: #fed7aa;
+  border-color: rgba(217, 119, 6, 0.45);
+}
+
+html.dark .btn-tree-efecto {
+  background: rgba(6, 78, 59, 0.65);
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+html.dark .btn-tree-efecto:hover {
+  background: #10b981;
+  color: #ffffff;
+}
+
+html.dark .btn-tree-causa {
+  background: rgba(69, 26, 3, 0.65);
+  border-color: #d97706;
+  color: #fed7aa;
+}
+
+html.dark .btn-tree-causa:hover {
+  background: #d97706;
+  color: #ffffff;
+}
+
+html.dark .sap-upper,
+html.dark .sap-lower {
+  background: rgba(30, 20, 10, 0.75);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+
+html.dark .arbol-tree-structure {
+  background: linear-gradient(180deg, rgba(4, 31, 23, 0.45) 0%, rgba(8, 22, 34, 0.25) 30%, rgba(21, 17, 14, 0.35) 65%, rgba(13, 10, 8, 0.5) 100%);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(16, 185, 129, 0.1);
+}
+
+html.dark .arbol-svg-backdrop {
+  filter: contrast(1.2) brightness(1.25);
+}
+
+html.dark .arbol-view-selector-group {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .tree-bough,
+html.dark .tree-root-channel {
+  background: rgba(24, 24, 27, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .bough-name,
+html.dark .channel-name {
+  color: #f1f5f9;
+}
+
+html.dark .bough-desc,
+html.dark .channel-desc {
+  color: #94a3b8;
+}
+
+html.dark .bough-counter,
+html.dark .channel-counter {
+  background: #18181b;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+html.dark .tree-fruit-card,
+html.dark .tree-root-card,
+html.dark .trunk-card {
+  background: #18181b;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+html.dark .tree-fruit-card:hover,
+html.dark .tree-root-card:hover,
+html.dark .trunk-card:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: #27272a;
+}
+
+html.dark .tree-card-text {
+  color: #f8fafc;
+}
+
+html.dark .tree-card-bottom {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark .btn-node-danger {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #f87171;
+}
+
+html.dark .btn-node-danger:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.55);
+}
+
+html.dark .tree-empty-card {
+  background: rgba(24, 24, 27, 0.45);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+html.dark .trunk-channel,
+html.dark .trunk-heartwood-plaque {
+  background: rgba(10, 15, 24, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-top-color: #f59e0b;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .btn-tree-problema {
+  background: rgba(69, 26, 3, 0.65);
+  border-color: #d97706;
+  color: #fed7aa;
+}
+
+html.dark .btn-tree-problema:hover {
+  background: #d97706;
+  color: #ffffff;
+}
+
+html.dark .trunk-fruit-card {
+  border-left-color: #f59e0b;
+}
+
+html.dark .trunk-statement-desc {
+  color: #d1d5db;
+}
+
+html.dark .roots-halo-badge {
+  background: rgba(217, 119, 6, 0.2);
+  border-color: rgba(217, 119, 6, 0.4);
+  color: #fbbf24;
+}
+
+html.dark .roots-main-title {
+  color: #fed7aa;
+}
+
+html.dark .roots-subtitle {
+  color: #fdba74;
+}
+
+/* Modales y Formularios en Modo Oscuro */
+
+html.dark .radio-pill {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+html.dark .radio-pill.selected {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+html.dark .nodo-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark .nodo-text {
+  color: #f8fafc;
+}
+
+html.dark .btn-node-icon:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+/* =========================================================================
+   MENÚ LATERAL IZQUIERDO Y ESPACIO DE TRABAJO EN GRID (IDÉNTICO A POAM)
+   ========================================================================= */
+
+.arbol-workspace-grid {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+  width: 100%;
+  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.arbol-workspace-grid.tray-collapsed {
+  grid-template-columns: 56px 1fr;
+}
+
+/* Menú lateral de factores del Árbol de Problemas */
+.arbol-sidebar-tray {
+  position: sticky;
+  top: 1.25rem;
+  z-index: 10;
+  height: fit-content;
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 10px 10px 8px 10px !important;
+  box-sizing: border-box;
+}
+
+.arbol-sidebar-tray.colapsada {
+  width: 56px;
+  min-width: 56px;
+  padding: 12px 6px !important;
+}
+
+.arbol-sidebar-tray .foda-tray-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.arbol-sidebar-tray .foda-tray-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 26px;
+}
+
+.arbol-sidebar-tray .poam-tray-type-tabs {
+  display: flex;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+}
+
+.arbol-sidebar-tray .poam-tray-tab {
+  flex: 1;
+  padding: 3px 6px;
+  font-size: 0.69rem;
+  border-radius: 6px;
+}
+
+.arbol-sidebar-tray .poam-tray-search-input-wrap {
+  position: relative;
+  margin-top: 1px;
+}
+
+.arbol-sidebar-tray .poam-tray-search-input {
+  width: 100%;
+  height: 28px;
+  padding: 3px 24px 3px 26px;
+  font-size: 0.73rem;
+  box-sizing: border-box;
+}
+
+.arbol-main-board-area {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* BARRA SUPERIOR DE HERRAMIENTAS DEL ÁRBOL */
+.arbol-top-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 10px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.arbol-top-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.arbol-top-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.84rem;
+  font-weight: 750;
+  color: var(--text-primary, #0f172a);
+}
+
+.arbol-top-counter {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #ea580c;
+  background: rgba(234, 88, 12, 0.1);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid rgba(234, 88, 12, 0.2);
+}
+
+.arbol-top-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* SOPORTE MODO OSCURO PARA LA BARRA SUPERIOR */
+html.dark .arbol-top-toolbar,
+[data-theme="dark"] .arbol-top-toolbar,
+.dark .arbol-top-toolbar {
+  background: var(--bg-card, #1e293b) !important;
+  border-color: var(--border-color, #334155) !important;
+}
+
+html.dark .arbol-top-badge,
+[data-theme="dark"] .arbol-top-badge,
+.dark .arbol-top-badge,
+html.dark .arbol-top-badge span,
+[data-theme="dark"] .arbol-top-badge span,
+.dark .arbol-top-badge span {
+  color: #ffffff !important;
+}
+
+/* Guía de arrastre en la bandeja idéntica a POAM */
+.arbol-tray-drag-hint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  background: var(--bg-body);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px dashed var(--border-color);
+}
+
+.arbol-tray-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+  padding: 2px 0 0 0;
+  margin: 0;
+}
+
+.arbol-sidebar-tray .foda-tray-cards-container {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  gap: 0 !important;
+}
+
+.arbol-sidebar-tray .foda-tray-cards-viewport {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 220px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 3px !important;
+  margin: 0 0 4px 0 !important;
+}
+
+.arbol-sidebar-tray .foda-tray-cards-viewport::-webkit-scrollbar {
+  width: 4px;
+}
+
+.arbol-sidebar-tray .foda-tray-cards-viewport::-webkit-scrollbar-thumb {
+  background: var(--border-color, #cbd5e1);
+  border-radius: 4px;
+}
+
+.arbol-tray-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 1px 1px 4px 1px;
+  margin: 0;
+}
+
+.arbol-draggable-card {
+  background: var(--bg-card, #ffffff);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-left: 4px solid var(--accent-color, #ea580c);
+  border-radius: 7px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.arbol-draggable-card:hover {
+  border-color: var(--accent-color, #ea580c);
+  border-left-color: var(--accent-color, #ea580c);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.12);
+}
+
+.arbol-draggable-card.is-dragging {
+  opacity: 0.2;
+  cursor: grabbing;
+  transform: scale(0.97);
+  border-style: dashed;
+  border-color: var(--accent-color, #ea580c);
+}
+
+.arbol-draggable-card .noticia-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding-bottom: 2px;
+  border-bottom: 1px dashed var(--border-color, #e2e8f0);
+}
+
+.arbol-draggable-card .foda-header-tags-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 4px;
+}
+
+.arbol-draggable-card .foda-origen-etiqueta {
+  font-size: 0.63rem;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.arbol-draggable-card .noticia-categoria-badge {
+  font-size: 0.63rem;
+  padding: 1px 5px;
+  border-radius: 4px;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.noticia-texto-extracto {
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--text-main, #1e293b);
+  font-weight: 500;
+  margin: 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  display: block;
+}
+
+.arbol-card-ubicar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: 1px dashed var(--border-color, #e2e8f0);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Selector para mover nodo dentro del árbol */
+
+/* =========================================================================
+   ZONAS DROP INTERACTIVAS EN EL ÁRBOL (EFECTOS, TRONCO Y RAÍCES)
+   ========================================================================= */
+
+.tree-bough,
+.trunk-heartwood-plaque,
+.tree-root-channel {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tree-bough.zone-drag-over {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 8px 24px rgba(16, 185, 129, 0.2) !important;
+  transform: scale(1.015);
+}
+
+.trunk-heartwood-plaque.zone-drag-over {
+  border-color: #d97706 !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.35), 0 10px 30px rgba(217, 119, 6, 0.25) !important;
+  transform: scale(1.02);
+}
+
+.tree-root-channel.zone-drag-over {
+  border-color: #b45309 !important;
+  background: rgba(180, 83, 9, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.3), 0 8px 24px rgba(180, 83, 9, 0.2) !important;
+  transform: scale(1.015);
+}
+
+/* ANTI-FLICKERING: Prevenir parpadeo durante el arrastre sobre elementos internos */
+.tree-bough.zone-drag-over *,
+.trunk-heartwood-plaque.zone-drag-over *,
+.tree-root-channel.zone-drag-over *,
+.arbol-col.zone-drag-over *,
+.tronco-card-inner.zone-drag-over *,
+.drag-zone-guide,
+.drag-zone-guide * {
+  pointer-events: none !important;
+}
+
+/* Indicador visual que aparece al arrastrar sobre una zona */
+.drag-zone-guide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-align: center;
+  margin-bottom: 10px;
+  animation: pulseGlow 1.2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.99); opacity: 0.85; }
+  100% { transform: scale(1.01); opacity: 1; }
+}
+
+.direct-effect-guide {
+  background: rgba(16, 185, 129, 0.2);
+  color: #047857;
+  border: 1.5px dashed #059669;
+}
+
+.indirect-effect-guide {
+  background: rgba(5, 150, 105, 0.2);
+  color: #065f46;
+  border: 1.5px dashed #047857;
+}
+
+.trunk-guide {
+  background: rgba(245, 158, 11, 0.25);
+  color: #92400e;
+  border: 1.5px dashed #b45309;
+}
+
+.direct-cause-guide {
+  background: rgba(180, 83, 9, 0.2);
+  color: #78350f;
+  border: 1.5px dashed #92400e;
+}
+
+.indirect-cause-guide {
+  background: rgba(146, 64, 14, 0.2);
+  color: #451a03;
+  border: 1.5px dashed #78350f;
+}
+
+/* Responsividad para la vista Grid */
+@media (max-width: 1024px) {
+  .arbol-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+  .arbol-workspace-grid.tray-collapsed {
+    grid-template-columns: 1fr;
+  }
+  .arbol-sidebar-tray {
+    position: static;
+    max-height: none;
+  }
+  .arbol-sidebar-tray.colapsada {
+    width: 100%;
+    min-width: 100%;
+  }
+  .arbol-sidebar-tray .foda-tray-cards-viewport {
+    max-height: 380px;
+  }
+}
+
+/* =========================================================================
+   SOPORTE TEMA OSCURO (COLORES EXACTOS DE LA MATRIZ POAM)
+   ========================================================================= */
+
+html.dark .arbol-sidebar-tray {
+  background: #18181b !important;
+  border-color: #27272a !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-tray-collapsed-dock {
+  background: #18181b !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-tray-collapsed-text {
+  color: #a1a1aa !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-tray-header {
+  border-bottom-color: #27272a !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-accent-icon {
+  color: #f97316 !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-tray-counter-pill {
+  background: rgba(234, 88, 12, 0.2) !important;
+  color: #fb923c !important;
+  border-color: rgba(234, 88, 12, 0.4) !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-type-tabs {
+  background: #09090b !important;
+  border-color: #27272a !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-tab {
+  color: #a1a1aa !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-tab:hover {
+  color: #ffffff !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-tab.active {
+  background: #27272a !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-tab.int.active {
+  color: #60a5fa !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-tab.ext.active {
+  color: #34d399 !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-search-input {
+  background: #09090b !important;
+  border-color: #27272a !important;
+  color: #f4f4f5 !important;
+}
+
+html.dark .arbol-sidebar-tray .poam-tray-search-input:focus {
+  border-color: #ea580c !important;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.2) !important;
+}
+
+html.dark .arbol-sidebar-tray .arbol-tray-drag-hint {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: #333333 !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .arbol-draggable-card {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-left: 4px solid #ea580c !important;
+  color: #f4f4f5 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .arbol-draggable-card:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: #ea580c !important;
+  border-left-color: #f97316 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .arbol-draggable-card.is-dragging {
+  opacity: 0.2 !important;
+  background: #09090b !important;
+  border-style: dashed !important;
+  border-color: #ea580c !important;
+}
+
+html.dark .arbol-draggable-card .noticia-texto-extracto {
+  color: #f4f4f5 !important;
+}
+
+html.dark .arbol-card-ubicar-toolbar {
+  border-top-color: #27272a !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-tray-cards-viewport::-webkit-scrollbar-thumb {
+  background: #27272a !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-tray-cards-viewport::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46 !important;
+}
+
+html.dark .direct-effect-guide {
+  background: rgba(16, 185, 129, 0.25);
+  color: #a7f3d0;
+  border-color: #34d399;
+}
+
+html.dark .indirect-effect-guide {
+  background: rgba(5, 150, 105, 0.25);
+  color: #a7f3d0;
+  border-color: #10b981;
+}
+
+html.dark .trunk-guide {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fde68a;
+  border-color: #fbbf24;
+}
+
+html.dark .direct-cause-guide {
+  background: rgba(180, 83, 9, 0.25);
+  color: #fed7aa;
+  border-color: #f97316;
+}
+
+html.dark .indirect-cause-guide {
+  background: rgba(146, 64, 14, 0.25);
+  color: #fed7aa;
+  border-color: #ea580c;
+}
+
+/* =========================================================================
+   MODALES DE GESTIÓN Y FORMULARIOS DEL ÁRBOL DE PROBLEMAS
+   ========================================================================= */
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.radio-pills-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.radio-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.radio-pill input {
+  display: none;
+}
+
+.radio-pill:hover {
+  border-color: #f97316;
+  color: #ea580c;
+  background: rgba(234, 88, 12, 0.04);
+}
+
+.radio-pill.selected {
+  border-color: #ea580c;
+  background: rgba(234, 88, 12, 0.1);
+  color: #ea580c;
+  font-weight: 700;
+}
+
+/* Adaptación a tema oscuro para modales */
+
+html.dark .radio-pill {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+html.dark .radio-pill:hover {
+  border-color: #f97316;
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+}
+
+html.dark .radio-pill.selected {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+/* =========================================================================
+   PAGINADOR INFERIOR DE LA BANDEJA DEL ÁRBOL DE PROBLEMAS
+   ========================================================================= */
+
+.arbol-sidebar-tray .foda-tray-paginator {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 8px 4px 8px !important;
+  border-top: 1px solid var(--border-color, #e2e8f0) !important;
+  background: var(--bg-card, #ffffff) !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  position: relative !important;
+  z-index: 10 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.arbol-sidebar-tray .foda-btn-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  background: var(--bg-card, #ffffff);
+  color: var(--text-main, #1e293b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.arbol-sidebar-tray .foda-btn-page:hover:not(:disabled) {
+  border-color: var(--accent-color, #ea580c);
+  color: var(--accent-color, #ea580c);
+  background: rgba(234, 88, 12, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15);
+}
+
+.arbol-sidebar-tray .foda-btn-page:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: var(--border-color, #e2e8f0);
+  color: var(--text-muted, #94a3b8);
+}
+
+.arbol-sidebar-tray .foda-paginator-text {
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: var(--text-main, #1e293b);
+  min-width: 85px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* Modo oscuro para paginador de bandeja */
+html.dark .arbol-sidebar-tray .foda-tray-paginator {
+  background: #18181b !important;
+  border-top-color: #27272a !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-btn-page {
+  background: #27272a !important;
+  border-color: #3f3f46 !important;
+  color: #f4f4f5 !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-btn-page:hover:not(:disabled) {
+  border-color: #ea580c !important;
+  color: #f97316 !important;
+  background: rgba(234, 88, 12, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-btn-page:disabled {
+  opacity: 0.2 !important;
+  border-color: #27272a !important;
+  color: #71717a !important;
+}
+
+html.dark .arbol-sidebar-tray .foda-paginator-text {
+  color: #f4f4f5 !important;
+}
+
+/* Estado deshabilitado para botón guardar en modales */
+.lluvia-modal-btn-submit:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: grayscale(0.7) !important;
+}
+
+/* Nodos ubicados dentro del árbol habilitados para arrastrar a otros contenedores */
+.tree-draggable-node {
+  cursor: grab !important;
+  user-select: none;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.tree-draggable-node:active {
+  cursor: grabbing !important;
+}
+
+.tree-draggable-node.is-dragging {
+  opacity: 0.35 !important;
+  border-style: dashed !important;
+  transform: scale(0.97);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+html.dark .tree-draggable-node.is-dragging {
+  opacity: 0.3 !important;
+  background: #09090b !important;
+  border-style: dashed !important;
+}
+

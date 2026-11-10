@@ -1,0 +1,185 @@
+/* Sistema visual compartido para todos los reportes PDF de Análisis Empresarial. */
+.reporte-fase2-pdf-document,
+.poam-pdf-document {
+  --pdf-text: #1f2937;
+  --pdf-muted: #64748b;
+  --pdf-border: #e2e8f0;
+  --pdf-surface: #f8fafc;
+  --pdf-accent: #b45309;
+  color: var(--pdf-text) !important;
+  background: #fff !important;
+  font-family: Inter, "Segoe UI", Arial, sans-serif !important;
+  font-size: 10px;
+  line-height: 1.4 !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+.reporte-fase2-pdf-document {
+  width: 900px;
+  padding: 32px 36px;
+}
+
+.poam-pdf-document { width: 900px !important; }
+.poam-pdf-page {
+  width: 900px !important;
+  min-height: 760px;
+  padding: 32px 36px 24px !important;
+}
+
+.reporte-fase2-pdf-document .reporte-pdf-header,
+.poam-pdf-document .reporte-pdf-header {
+  border-bottom: 1px solid var(--pdf-border) !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 14px !important;
+}
+.reporte-pdf-header-top { gap: 12px !important; margin-bottom: 10px !important; }
+.reporte-pdf-brand { gap: 10px !important; }
+.reporte-pdf-logo-box {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  background: var(--pdf-accent) !important;
+  font-size: 16px !important;
+}
+.reporte-pdf-title-block h1 {
+  color: var(--pdf-text) !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  letter-spacing: -.02em !important;
+}
+.reporte-pdf-title-block p {
+  color: var(--pdf-muted) !important;
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  letter-spacing: .06em !important;
+}
+.reporte-pdf-badge-tag {
+  padding: 5px 9px !important;
+  border: 1px solid var(--pdf-border) !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: var(--pdf-muted) !important;
+  font-size: 9px !important;
+}
+.reporte-pdf-meta-grid {
+  gap: 12px 18px !important;
+  padding: 10px 12px !important;
+  border: 1px solid var(--pdf-border) !important;
+  border-radius: 7px !important;
+  background: var(--pdf-surface) !important;
+}
+.reporte-pdf-meta-label {
+  color: var(--pdf-muted) !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  letter-spacing: .05em !important;
+}
+.reporte-pdf-meta-value { color: var(--pdf-text) !important; font-size: 10px !important; font-weight: 600 !important; }
+.reporte-pdf-section { margin-bottom: 18px !important; }
+.reporte-pdf-factores-banner {
+  background: var(--pdf-surface) !important;
+  border: 1px solid var(--pdf-border) !important;
+  border-left: 3px solid var(--pdf-accent) !important;
+  border-radius: 6px !important;
+  padding: 8px 11px !important;
+  margin: 12px 0 !important;
+}
+.reporte-pdf-factores-titulo {
+  color: var(--pdf-text) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+.reporte-pdf-factores-tag { background: #f1f5f9 !important; color: var(--pdf-text) !important; font-size: 9px !important; }
+.reporte-pdf-section-title { border-bottom: 1px solid var(--pdf-border) !important; margin-bottom: 12px !important; }
+.reporte-pdf-section-title h2 { color: var(--pdf-text) !important; font-size: 14px !important; font-weight: 700 !important; }
+.reporte-pdf-section-subtitle { color: var(--pdf-muted) !important; background: var(--pdf-surface) !important; border: 1px solid var(--pdf-border) !important; font-size: 9px !important; }
+
+/* Componentes de contenido conservan señal semántica con colores atenuados. */
+.reporte-fase2-pdf-document .reporte-pdf-carril,
+.reporte-fase2-pdf-document .reporte-pdf-porter-card,
+.reporte-fase2-pdf-document .reporte-pdf-pestel-card {
+  border-color: var(--pdf-border) !important;
+  border-radius: 7px !important;
+  box-shadow: none !important;
+}
+.reporte-fase2-pdf-document .reporte-pdf-carril { background: #fff !important; }
+.reporte-fase2-pdf-document .reporte-pdf-criterios-box,
+.reporte-fase2-pdf-document .reporte-pdf-porter-factors-box,
+.reporte-fase2-pdf-document .reporte-pdf-criterios-items {
+  border-color: var(--pdf-border) !important;
+  background: var(--pdf-surface) !important;
+}
+.reporte-pdf-pestel-grid { gap: 10px !important; }
+.reporte-pdf-pestel-card { background: #fff !important; }
+.reporte-pdf-criterio-text,
+.reporte-pdf-factor-text,
+.reporte-pdf-porter-factor-text,
+.reporte-pdf-porter-desc,
+.reporte-pdf-dim-guia { color: #475569 !important; font-size: 9px !important; line-height: 1.4 !important; }
+
+/* Tablas POAM y MPC comparten densidad, cabecera neutra y ajuste de texto. */
+.poam-pdf-table,
+.reporte-pdf-mpc-table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
+  border: 1px solid var(--pdf-border) !important;
+  border-collapse: collapse !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: var(--pdf-text) !important;
+  font-family: Inter, "Segoe UI", Arial, sans-serif !important;
+  font-size: 9px !important;
+  line-height: 1.35 !important;
+}
+.poam-pdf-table th,
+.reporte-pdf-mpc-table thead th {
+  padding: 7px 6px !important;
+  color: #334155 !important;
+  background: #f1f5f9 !important;
+  border: 1px solid var(--pdf-border) !important;
+  border-bottom: 1px solid #cbd5e1 !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+.poam-pdf-table td,
+.reporte-pdf-mpc-table tbody td,
+.reporte-pdf-mpc-table tfoot td {
+  padding: 6px !important;
+  color: #334155 !important;
+  border: 1px solid var(--pdf-border) !important;
+  vertical-align: top !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+.poam-pdf-table tbody tr:nth-child(even),
+.reporte-pdf-mpc-table tbody tr:nth-child(even) { background: #fafbfc !important; }
+.reporte-pdf-mpc-table thead,
+.reporte-pdf-mpc-table tfoot .totals-row { background: #f1f5f9 !important; }
+.reporte-pdf-mpc-table tfoot .totals-row { border-top: 1px solid #cbd5e1 !important; }
+.reporte-pdf-mpc-table .fce-code,
+.reporte-pdf-mpc-table .peso-val,
+.reporte-pdf-mpc-table .total-label-main,
+.reporte-pdf-mpc-table .total-peso,
+.reporte-pdf-mpc-table .rank-pos { color: var(--pdf-accent) !important; }
+.reporte-pdf-mpc-table .fce-name,
+.reporte-pdf-mpc-table .comp-name,
+.reporte-pdf-mpc-table .total-score { color: var(--pdf-text) !important; }
+.reporte-pdf-mpc-table .comp-badge.propia { background: var(--pdf-accent) !important; }
+.reporte-pdf-mpc-table .comp-badge.rival { color: #475569 !important; background: #f1f5f9 !important; border-color: var(--pdf-border) !important; }
+.reporte-pdf-mpc-table .col-comp.propia { background: #f8fafc !important; }
+.reporte-pdf-mpc-table .col-comp.lider { box-shadow: inset 0 0 0 1px #94a3b8 !important; }
+.poam-pdf-table-heading { color: var(--pdf-text) !important; background: var(--pdf-surface) !important; border-color: var(--pdf-border) !important; border-radius: 6px !important; font-size: 10px !important; }
+.poam-pdf-table-heading span { color: var(--pdf-muted) !important; }
+.poam-pdf-footer,
+.reporte-pdf-mpc-footer { color: var(--pdf-muted) !important; font-size: 8px !important; }
+.poam-pdf-factor small { color: var(--pdf-muted) !important; }
+.reporte-fase2-pdf-document *,
+.poam-pdf-document * { max-width: 100%; box-sizing: border-box; }

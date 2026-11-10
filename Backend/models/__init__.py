@@ -7,6 +7,7 @@ from .notificacion import Notificacion
 from config.database import Base
 from .clase_qr import ClaseQR
 from .tarea import Tarea, EntregaTarea
+from .caso_empresarial import CasoEmpresarial
 
 # De esta manera, cuando hagas 'from models import Usuario' en tu aplicación,
 # Python sabrá dónde encontrar la clase.

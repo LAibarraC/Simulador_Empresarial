@@ -8,7 +8,7 @@
   import { useNotificaciones } from "../hooks/useNotificaciones";
   import { Megaphone } from "lucide-react";
   import { 
-    IconoCandado, IconoEstadisticaGeneral, IconoEstadisticaMatematica,
+    IconoCandado, IconoEstadisticaGeneral, IconoEstadisticaMatematica, IconoAnalisisEmpresarial,
     IconoInicio, IconoArchivos, IconoCalculadoraMenu, IconoChevron, 
     IconoGrupos, IconoGestionGrupos, IconoGestionAlumnos, IconoHistorial, 
     IconoTareas, IconoEstadisticasDocente, IconoAdmin, IconoCampana
@@ -107,10 +107,9 @@
     const esAdmin = usuario?.rol === "Administrador";
     const tieneMAT151 = esAdmin || modulosUsuario.includes("MAT151");
     const tieneMAT251 = esAdmin || modulosUsuario.includes("MAT251");
-    const tieneCualquierModulo = tieneMAT151 || tieneMAT251;
 
     // Detectamos si estamos en alguna de las páginas de la calculadora
-    const isCalculadoraActive = location.pathname === '/calculadora' || location.pathname === '/MAT251';
+    const isCalculadoraActive = location.pathname === '/calculadora' || location.pathname === '/MAT251' || location.pathname === '/analisis-empresarial';
     const isGruposActive = location.pathname === '/grupos' || location.pathname === '/gestion-docente' || location.pathname === '/reportes-docente';
     const isMasActive = ['/tareas', '/reportes-docente', '/admin'].includes(location.pathname);
 
@@ -194,30 +193,29 @@
               </span>
 
               <ul className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
-                {!tieneCualquierModulo ? (
-                  <li className="dropdown-li dropdown-empty">
-                    Sin asignaturas
+                {tieneMAT151 && (
+                  <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
+                    <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
+                      <IconoEstadisticaGeneral style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                      Estadística General
+                    </NavLink>
                   </li>
-                ) : (
-                  <>
-                    {tieneMAT151 && (
-                      <li className="dropdown-li" style={{ transitionDelay: '0.05s' }}>
-                        <NavLink to="/calculadora" onClick={() => { sessionStorage.removeItem("tarea_contexto_calculadora"); closeMenu(); }} className="dropdown-item">
-                          <IconoEstadisticaGeneral style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
-                          Estadística General
-                        </NavLink>
-                      </li>
-                    )}
-                    {tieneMAT251 && (
-                      <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
-                        <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
-                          <IconoEstadisticaMatematica style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
-                          Estadística Matemática
-                        </NavLink>
-                      </li>
-                    )}
-                  </>
                 )}
+                {tieneMAT251 && (
+                  <li className="dropdown-li" style={{ transitionDelay: '0.1s' }}>
+                    <NavLink to="/MAT251" onClick={closeMenu} className="dropdown-item">
+                      <IconoEstadisticaMatematica style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                      Estadística Matemática
+                    </NavLink>
+                  </li>
+                )}
+                {/* Análisis Empresarial no depende de una asignatura asignada: está disponible para todos */}
+                <li className="dropdown-li" style={{ transitionDelay: '0.15s' }}>
+                  <NavLink to="/analisis-empresarial" onClick={closeMenu} className="dropdown-item">
+                    <IconoAnalisisEmpresarial style={{ marginRight: '8px', verticalAlign: 'text-bottom' }} />
+                    Análisis Empresarial
+                  </NavLink>
+                </li>
               </ul>
             </li>
 

@@ -4,18 +4,19 @@ import Pie_pagina from "./ui/Pie_pagina";
 import { useState, useEffect } from "react";
 import { sileo, Toaster } from "sileo";
 
-import Inicio from "./features/start/Inicio";
-import Archivos from "./features/archives/Archivos";
-import Calculadora from "./features/MAT151/pages/Calculadora";
-import Login from "./features/auth/Login";
-import MAT251 from "./features/MAT251/pages/EstadisticaMatematica";
-import Registro from "./features/auth/Registro";
-import Perfil from "./features/auth/Perfil";
-import ForgotPassword from "./features/auth/ForgotPassword";
-import ResetPassword from "./features/auth/ResetPassword";
-import Admin from "./features/admin/Admin";
-import GestionDocente from "./features/user/docentes/GestionDocente";
-import ReportesDocente from "./features/user/docentes/ReportesDocente";
+import Inicio from "./Features/Start/Inicio";
+import Archivos from "./Features/Archives/Archivos";
+import Calculadora from "./Features/MAT151/pages/Calculadora";
+import Login from "./Features/auth/Login";
+import MAT251 from "./Features/MAT251/pages/EstadisticaMatematica";
+import AnalisisEmpresarial from "./Features/AnalisisEmpresarial/AnalisisEmpresarial";
+import Registro from "./Features/auth/Registro";
+import Perfil from "./Features/auth/Perfil";
+import ForgotPassword from "./Features/auth/ForgotPassword";
+import ResetPassword from "./Features/auth/ResetPassword";
+import Admin from "./Features/Admin/Admin";
+import GestionDocente from "./Features/User/docentes/GestionDocente";
+import ReportesDocente from "./Features/User/docentes/ReportesDocente";
 
 import SelectorRol from './ui/SelectorRol';
 import ModalSeleccionRolInicial from './ui/ModalSeleccionRolInicial';
@@ -174,6 +175,7 @@ function App() {
                       <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/lti-tester" element={<LtiTester onLogin={setUsuario} />} />
                       <Route path="/matricular/:token" element={<Matricular />} />
+                      <Route path="/analisis-empresarial" element={<AnalisisEmpresarial usuario={usuario} />} />
                       <Route path="*" element={<Navigate to="/" />} />
                     </>
                   ) : (
@@ -216,6 +218,12 @@ function App() {
                         ) : (
                           <ModuloNoAsignado modulo="MAT251" rol={usuario?.rol} />
                         )
+                      } />
+
+                      <Route path="/analisis-empresarial" element={
+                        <ActiveModuleContext.Provider value="analisis_empresarial">
+                          <AnalisisEmpresarial usuario={usuario} />
+                        </ActiveModuleContext.Provider>
                       } />
 
                       <Route path="/perfil" element={<Perfil usuario={usuario} setUsuario={setUsuario} />} />

@@ -1,0 +1,192 @@
+/* ==========================================================================
+   ESTILOS UNIFICADOS · FASE 4 (DIAGNÓSTICO INTERNO) Y FASE 5 (RESÚMENES)
+   Una sola apariencia para todas las herramientas: colores, bordes, radios,
+   tipografía, tarjetas, campos, botones, tablas, modales y PDF.
+   - Solo cambia la apariencia: no toca la estructura ni la funcionalidad.
+   - Se importa al final de cada herramienta; los selectores van acotados al
+     contenedor de la herramienta para imponerse a las hojas propias.
+   - Sin color-mix(): html2canvas 1.4 no lo interpreta (PDF).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens de diseño comunes
+   -------------------------------------------------------------------------- */
+.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay, .hf-report, .cjm-report, .avh-report {
+  --f45-accent: #ea580c;
+  --f45-accent-hover: #c2410c;
+  --f45-soft: rgba(234, 88, 12, .09);
+  --f45-soft-2: rgba(234, 88, 12, .04);
+  --f45-line: rgba(234, 88, 12, .28);
+  --f45-ok: #059669;
+  --f45-warn: #d97706;
+  --f45-bad: #dc2626;
+  --f45-info: #2563eb;
+  --f45-radius: 12px;
+  --f45-radius-sm: 8px;
+  --f45-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+  --f45-shadow-hover: 0 6px 16px rgba(15, 23, 42, .08);
+
+  /* Cada familia de herramientas usa los mismos valores */
+  --hf-accent: var(--f45-accent); --hf-soft: var(--f45-soft); --hf-soft-2: var(--f45-soft-2); --hf-line: var(--f45-line);
+  --cjm-accent: var(--f45-accent); --cjm-soft: var(--f45-soft); --cjm-soft-2: var(--f45-soft-2); --cjm-line: var(--f45-line);
+}
+.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay {
+  --avh-accent: var(--f45-accent); --avh-accent-soft: var(--f45-soft); --avh-accent-line: var(--f45-line); --avh-tint: var(--f45-soft-2);
+  --avh-radius: var(--f45-radius);
+}
+
+/* --------------------------------------------------------------------------
+   2. Barra superior, tarjetas y textos
+   -------------------------------------------------------------------------- */
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-toolbar, .cjm-toolbar, .avh-toolbar) {
+  padding: 8px 14px; border: 1px solid var(--border-color); border-radius: var(--f45-radius); background: var(--bg-card); box-shadow: var(--f45-shadow);
+}
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-toolbar-badge, .cjm-toolbar-badge, .avh-toolbar-badge) {
+  gap: 6px; color: var(--f45-accent); font-size: .8rem; font-weight: 800; letter-spacing: 0;
+}
+
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-card, .cjm-card, .avh-card) {
+  padding: 14px 16px; border: 1px solid var(--border-color); border-radius: var(--f45-radius); background: var(--bg-card); box-shadow: var(--f45-shadow);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-card, .cjm-card, .avh-card):hover { border-color: var(--f45-line); }
+
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-card-title, .cjm-card-title, .avh-card-title),
+.r5 .r5-rep-head h3 {
+  margin: 0; color: var(--text-main); font-size: .92rem; font-weight: 850; line-height: 1.25; letter-spacing: -.01em;
+}
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-card-title, .cjm-card-title, .avh-card-title) svg { color: var(--f45-accent); }
+
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-statement, .cjm-statement) {
+  padding: 6px 10px; border: 1px solid var(--border-color); border-left: 3px solid var(--f45-accent); border-radius: var(--f45-radius-sm);
+  color: var(--text-muted); background: var(--f45-soft-2); font-size: .74rem; line-height: 1.5;
+}
+:is(.hf-container, .cjm-container, .avh-container) .avh-card-desc { color: var(--text-muted); font-size: .74rem; line-height: 1.5; }
+
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-section-label, .cjm-section-label, .hf-field-label, .cjm-field-label),
+.avh-container .avh-field > span {
+  color: var(--text-muted); font-size: .64rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+}
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-section-label, .cjm-section-label, .hf-field-label, .cjm-field-label) svg,
+.avh-container .avh-field > span svg { color: var(--f45-accent); }
+
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-muted, .cjm-muted) { color: var(--text-muted); font-size: .74rem; line-height: 1.45; }
+
+/* --------------------------------------------------------------------------
+   3. Campos de formulario
+   -------------------------------------------------------------------------- */
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-input, .cjm-input, .avh-input) {
+  min-height: 34px; padding: 6px 10px !important; border: 1.5px solid var(--border-color) !important; border-radius: var(--f45-radius-sm) !important;
+  color: var(--text-main) !important; background: var(--bg-input, var(--bg-card)) !important; font-size: .8rem; font-weight: 500; line-height: 1.45;
+}
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-input, .cjm-input, .avh-input):hover { border-color: var(--f45-line) !important; }
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-input, .cjm-input, .avh-input):focus {
+  outline: none; border-color: var(--f45-accent) !important; box-shadow: 0 0 0 3px rgba(234, 88, 12, .14);
+}
+
+/* --------------------------------------------------------------------------
+   4. Botones (todas las clases contienen "btn-")
+   -------------------------------------------------------------------------- */
+/* Principal */
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-add, .cjm-btn-add, .avh-btn-primary) {
+  min-height: 32px; padding: 6px 13px; border: 1px solid var(--f45-accent); border-radius: var(--f45-radius-sm); color: #fff; background: var(--f45-accent);
+  font-size: .76rem; font-weight: 750; box-shadow: 0 1px 4px rgba(234, 88, 12, .25);
+}
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-add, .cjm-btn-add, .avh-btn-primary):hover:not(:disabled) {
+  border-color: var(--f45-accent-hover); background: var(--f45-accent-hover); filter: none; transform: translateY(-1px);
+}
+/* Secundario (contorno) */
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-outline, .cjm-btn-outline, .avh-btn-outline) {
+  min-height: 32px; padding: 6px 13px; border: 1.5px solid var(--f45-line); border-radius: var(--f45-radius-sm); color: var(--f45-accent); background: var(--f45-soft-2);
+  font-size: .76rem; font-weight: 750; box-shadow: none;
+}
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-outline, .cjm-btn-outline, .avh-btn-outline):hover:not(:disabled) {
+  border-color: var(--f45-accent); color: var(--f45-accent); background: var(--f45-soft); box-shadow: none; transform: translateY(-1px);
+}
+.avh-container .avh-btn-outline.active { border-color: var(--f45-accent); color: #fff; background: var(--f45-accent); }
+/* Ícono */
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-icon, .cjm-btn-icon, .avh-btn-icon) {
+  width: 30px; height: 30px; border: 1px solid var(--border-color); border-radius: var(--f45-radius-sm); color: var(--text-muted); background: var(--bg-card);
+}
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-icon, .cjm-btn-icon, .avh-btn-icon):hover:not(:disabled) { border-color: var(--f45-accent); color: var(--f45-accent); background: var(--bg-card); }
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-icon, .cjm-btn-icon, .avh-btn-icon).danger { border-color: rgba(220, 38, 38, .35); color: var(--f45-bad); }
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-icon, .cjm-btn-icon, .avh-btn-icon).danger:hover:not(:disabled) { border-color: var(--f45-bad); color: #fff; background: var(--f45-bad); }
+:is(.hf-container, .cjm-container, .avh-container) .hf-btn-icon.sm { width: 26px; height: 26px; }
+/* Fantasma */
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-ghost, .cjm-btn-ghost, .avh-btn-ghost) {
+  padding: 3px 8px; border: 1px solid transparent; border-radius: 6px; color: var(--f45-accent); background: transparent; font-size: .7rem; font-weight: 750;
+}
+:is(.hf-container, .cjm-container, .avh-container, .cjm-modal-overlay) :is(.hf-btn-ghost, .cjm-btn-ghost, .avh-btn-ghost):hover { border-color: var(--f45-line); background: var(--f45-soft-2); }
+/* Exportar a PDF */
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-btn-pdf, .cjm-btn-pdf, .avh-btn-pdf) {
+  padding: 6.5px 14px; border: 1px solid #b91c1c; border-radius: var(--f45-radius-sm); color: #fff !important; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  font-size: .78rem; font-weight: 750; box-shadow: 0 2px 8px rgba(220, 38, 38, .25);
+}
+/* Navegación entre herramientas */
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-btn-back, .cjm-btn-back, .avh-btn-back, .hf-btn-next, .cjm-btn-next, .avh-btn-next) {
+  padding: 7px 15px; border-radius: var(--f45-radius-sm); font-size: .78rem; font-weight: 750;
+}
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-btn-back, .cjm-btn-back, .avh-btn-back) { border: 1.5px solid var(--border-color); color: var(--text-muted); background: transparent; }
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-btn-back, .cjm-btn-back, .avh-btn-back):hover { border-color: var(--f45-accent); color: var(--f45-accent); background: var(--f45-soft); }
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-btn-next, .cjm-btn-next, .avh-btn-next) { border: 1.5px solid var(--f45-accent); color: #fff; background: var(--f45-accent); box-shadow: 0 2px 10px rgba(234, 88, 12, .25); }
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-btn-next, .cjm-btn-next, .avh-btn-next):hover { border-color: var(--f45-accent-hover); background: var(--f45-accent-hover); filter: none; }
+
+/* Pie con navegación */
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-footer, .cjm-footer, .avh-footer, .efi-footer) {
+  padding: 12px 18px; border: 1px solid var(--border-color); border-radius: var(--f45-radius); background: var(--bg-card); box-shadow: var(--f45-shadow);
+}
+
+/* --------------------------------------------------------------------------
+   5. Estados vacíos, etiquetas y zonas para adjuntar
+   -------------------------------------------------------------------------- */
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-empty, .cjm-empty, .avh-empty) {
+  padding: 28px 16px; border: 1.5px dashed var(--border-color); border-radius: var(--f45-radius); color: var(--text-muted); font-size: .8rem;
+}
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-empty, .cjm-empty, .avh-empty) > svg { color: var(--f45-accent); }
+
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-pill, .cjm-pill, .avh-pill) {
+  padding: 1px 8px; border-radius: 20px; font-size: .6rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase;
+}
+
+:is(.hf-container, .cjm-container, .avh-container) :is(.cjm-dropzone, .avh-dropzone) {
+  padding: 14px 16px; border: 1.5px dashed var(--f45-line); border-radius: var(--f45-radius); background: var(--f45-soft-2);
+}
+:is(.hf-container, .cjm-container, .avh-container) :is(.cjm-dropzone, .avh-dropzone).over { border-color: var(--f45-accent); background: var(--f45-soft); }
+
+/* --------------------------------------------------------------------------
+   6. Tablas: encabezado con el color de acento en todas
+   -------------------------------------------------------------------------- */
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-table-wrap, .r5-rep-table-wrap, .avh-table-card) { border: 1px solid var(--border-color); border-radius: 10px; }
+:is(.hf-container, .cjm-container, .avh-container) :is(.hf-table th, .r5-rep-table th, .cjm-compare-table th),
+.avh-container .avh-table thead tr:not(.avh-thead-group) th {
+  color: var(--f45-accent); background: var(--f45-soft); font-size: .62rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   7. Modales (compartidos por todas las herramientas)
+   -------------------------------------------------------------------------- */
+.cjm-modal-overlay .cjm-modal { border-radius: 14px; }
+.cjm-modal-overlay .cjm-modal-head h3 { font-size: 1rem; font-weight: 850; }
+.cjm-modal-overlay .cjm-modal-head p { font-size: .74rem; }
+
+/* --------------------------------------------------------------------------
+   8. PDF: misma tipografía, títulos, tablas y notas en todos los reportes
+   -------------------------------------------------------------------------- */
+:is(.hf-report, .cjm-report, .avh-report) { color: #1f2937; background: #fff; font: 11px/1.45 Inter, "Segoe UI", Arial, sans-serif; }
+:is(.hf-report, .cjm-report, .avh-report) [data-pdf-block] { padding: 6px 2px; background: #fff; }
+:is(.hf-report, .cjm-report, .avh-report) h2 { margin: 4px 0 8px; padding-left: 8px; border-left: 4px solid #ea580c; color: #1f2937; font-size: 15px; font-weight: 800; }
+:is(.hf-report, .cjm-report, .avh-report) p { color: #475569; font-size: 11px; }
+:is(.hf-pdf-header, .cjm-pdf-header, .avh-pdf-header) { padding-bottom: 12px; border-bottom: 2px solid #ea580c; }
+:is(.hf-pdf-brand, .cjm-pdf-brand, .avh-pdf-brand) { width: 40px; height: 40px; border-radius: 9px; color: #fff; background: #ea580c; font-size: 14px; font-weight: 800; }
+:is(.hf-pdf-header, .cjm-pdf-header, .avh-pdf-header) h1 { margin: 0; font-size: 20px; font-weight: 800; }
+:is(.hf-pdf-tag, .cjm-pdf-tag, .avh-pdf-tag) { padding: 5px 10px; border: 1px solid #e2e8f0; border-radius: 6px; color: #64748b; font-size: 9px; font-weight: 700; letter-spacing: .06em; }
+:is(.hf-pdf-meta, .cjm-pdf-meta, .avh-pdf-meta) { margin: 12px 0; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
+:is(.hf-pdf-meta, .cjm-pdf-meta, .avh-pdf-meta) small { color: #64748b; font-size: 8.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+:is(.hf-pdf-table, .cjm-pdf-table) th, .avh-report .avh-table thead tr:not(.avh-thead-group) th {
+  color: #9a3412; background: #fff7ed; font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+}
+:is(.hf-pdf-table, .cjm-pdf-table) :is(th, td) { border: 1px solid #e2e8f0; }
+:is(.hf-pdf-notes, .cjm-pdf-notes, .avh-pdf-notes) {
+  padding: 10px 12px; border: 1px solid #e2e8f0; border-left: 3px solid #ea580c; border-radius: 8px; color: #1f2937 !important; background: #f8fafc;
+  font-size: 11px !important; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere;
+}
