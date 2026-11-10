@@ -347,7 +347,9 @@ async def matricular_por_qr_db(
     mod_clase = getattr(clase, 'modulo', None)
     if not mod_clase:
         nombre_upper = (clase_nombre or "").upper()
-        if "MAT251" in nombre_upper:
+        if "EMP300" in nombre_upper or "ANALISIS" in nombre_upper or "EMPRESARIAL" in nombre_upper:
+            mod_clase = "EMP300"
+        elif "MAT251" in nombre_upper:
             mod_clase = "MAT251"
         elif "MAT151" in nombre_upper:
             mod_clase = "MAT151"

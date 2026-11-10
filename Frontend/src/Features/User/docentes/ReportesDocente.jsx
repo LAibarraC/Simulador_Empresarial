@@ -287,6 +287,12 @@ function CustomSelectFiltroReportes({ value, onChange, options = [], placeholder
   );
 }
 
+const etiquetasAsignaturas = {
+  MAT151: 'MAT151 - Estadística General',
+  MAT251: 'MAT251 - Estadística Matemática',
+  EMP300: 'EMP300 - Análisis Empresarial',
+};
+
 export default function ReportesDocente({ usuario }) {
   const [estadisticas, setEstadisticas] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -321,18 +327,22 @@ export default function ReportesDocente({ usuario }) {
   const clasesConModulo = useMemo(() => {
     return (clases_disponibles || []).map(c => ({
       ...c,
-      modulo: c.modulo || (c.nombre?.toUpperCase().includes('MAT251') ? 'MAT251' : 'MAT151')
+      modulo: c.modulo || (c.nombre?.toUpperCase().includes('EMP300') || c.nombre?.toUpperCase().includes('EMPRESARIAL') ? 'EMP300' : c.nombre?.toUpperCase().includes('MAT251') ? 'MAT251' : 'MAT151')
     }));
   }, [clases_disponibles]);
 
   // Lista de materias / módulos únicos presentes en los grupos
+  const esAdmin = usuario?.rol === 'Administrador' || usuario?.isAdmin === true;
   const modulosDisponibles = useMemo(() => {
-    const mods = new Set();
+    const mods = new Set(esAdmin ? Object.keys(etiquetasAsignaturas) : []);
     clasesConModulo.forEach(c => {
       if (c.modulo) mods.add(c.modulo);
     });
-    return Array.from(mods).sort();
-  }, [clasesConModulo]);
+    return [
+      ...Object.keys(etiquetasAsignaturas).filter(m => mods.has(m)),
+      ...Array.from(mods).filter(m => !Object.hasOwn(etiquetasAsignaturas, m)).sort(),
+    ];
+  }, [clasesConModulo, esAdmin]);
 
   // Cursos filtrados por la materia seleccionada
   const clasesFiltradasPorMateria = useMemo(() => {
@@ -970,12 +980,13 @@ export default function ReportesDocente({ usuario }) {
         border: '1px solid var(--border-color)',
         boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flex: '1 1 auto', minWidth: 0 }}>
           {/* Selector de Grupo / Clase con Icono */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
+            width: '100%',
             flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)' }}>
@@ -996,14 +1007,14 @@ export default function ReportesDocente({ usuario }) {
                   setClaseSeleccionadaId('');
                 }}
                 options={[
-                  { value: 'TODAS', label: 'Todas las Asignaturas' },
+                  { value: 'TODAS', label: 'Todas las asignaturas' },
                   ...modulosDisponibles.map(m => ({
                     value: m,
-                    label: m
+                    label: etiquetasAsignaturas[m] ?? m
                   }))
                 ]}
-                placeholder="Todas las Asignaturas"
-                minWidth="180px"
+                placeholder="Todas las asignaturas"
+                minWidth="280px"
               />
             )}
 

@@ -17,12 +17,25 @@ const moduloDelCurso = (curso) => {
   const modulo = String(curso.modulo || "").trim().toUpperCase();
   if (modulo) return modulo;
   const nombre = String(curso.nombre || "").toUpperCase();
+  if (nombre.includes("EMP300") || nombre.includes("ANALISIS") || nombre.includes("EMPRESARIAL")) return "EMP300";
   if (nombre.includes("MAT251")) return "MAT251";
   if (nombre.includes("MAT151")) return "MAT151";
   return "SIN_MODULO";
 };
 
 const nombreModulo = (modulo) => modulo === "SIN_MODULO" ? "Sin módulo asignado" : modulo;
+const etiquetasAsignatura = {
+  MAT151: "MAT151 - Estadística General",
+  MAT251: "MAT251 - Estadística Matemática",
+  EMP300: "EMP300 - Análisis Empresarial",
+};
+const ordenarAsignaturasDeCursos = cursos => {
+  const modulos = new Set(cursos.map(curso => curso.modulo));
+  return [
+    ...Object.keys(etiquetasAsignatura).filter(modulo => modulos.has(modulo)),
+    ...Array.from(modulos).filter(modulo => !Object.hasOwn(etiquetasAsignatura, modulo)).sort(),
+  ];
+};
 
 function SelectorArchivos({ id, value, onChange, options, disabled, placeholder }) {
   const [abierto, setAbierto] = useState(false);
@@ -203,7 +216,7 @@ export default function Archivos({ usuario }) {
   const [misCursos, setMisCursos] = useState([]);
   const [moduloSeleccionado, setModuloSeleccionado] = useState("");
   const [cargandoCursos, setCargandoCursos] = useState(true);
-  const modulosDisponibles = [...new Set(misCursos.map((curso) => curso.modulo))].sort();
+  const modulosDisponibles = ordenarAsignaturasDeCursos(misCursos);
   const cursosDelModulo = misCursos.filter((curso) => curso.modulo === moduloSeleccionado);
   const cursoActual = cursosDelModulo.find((curso) => String(curso.id) === cursoSeleccionado);
 
@@ -252,7 +265,7 @@ export default function Archivos({ usuario }) {
         const cursos = (Array.isArray(data) ? data : []).map((curso) => ({
           ...curso, modulo: moduloDelCurso(curso),
         }));
-        const modulos = [...new Set(cursos.map((curso) => curso.modulo))].sort();
+        const modulos = ordenarAsignaturasDeCursos(cursos);
         const cursoReabrir = cursos.find((curso) => String(curso.id) === cursoInicial);
         setMisCursos(cursos);
         setModuloSeleccionado((actual) => cursoReabrir?.modulo ||
@@ -568,12 +581,15 @@ export default function Archivos({ usuario }) {
               {tabActiva === "cursos" && (
                 <div className="archivos-selectores-curso">
                   <div className="archivos-campo-curso archivos-campo-modulo">
-                    <label htmlFor="archivos-modulo">Módulo:</label>
+                    <label htmlFor="archivos-modulo">Asignatura:</label>
                     <SelectorArchivos id="archivos-modulo" value={moduloSeleccionado}
                       onChange={cambiarModulo}
                       disabled={cargandoCursos || modulosDisponibles.length === 0}
-                      placeholder={cargandoCursos ? "Cargando módulos..." : "Sin cursos disponibles"}
-                      options={modulosDisponibles.map((modulo) => ({ value: modulo, label: nombreModulo(modulo) }))}
+                      placeholder={cargandoCursos ? "Cargando asignaturas..." : "Sin cursos disponibles"}
+                      options={modulosDisponibles.map((modulo) => ({
+                        value: modulo,
+                        label: etiquetasAsignatura[modulo] ?? nombreModulo(modulo),
+                      }))}
                     />
                   </div>
                   <div className="archivos-campo-curso">

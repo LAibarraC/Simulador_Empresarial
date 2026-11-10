@@ -68,7 +68,9 @@ async def crear_precuenta_docente_logic(nombre: str, email: str, password: str, 
     try:
         await db.flush()
         if modulos:
-            modulos_validos = {"MAT151", "MAT251"}
+            res_mods = await db.execute(select(models.Modulo.codigo).filter(models.Modulo.activo == True))
+            cods = res_mods.scalars().all()
+            modulos_validos = set(cods) if cods else {"MAT151", "MAT251", "EMP300"}
             for mod in modulos:
                 if mod in modulos_validos:
                     db.add(models.DocenteModulo(
@@ -313,7 +315,9 @@ async def asignar_modulos_docente_logic(docente_id: int, modulos_nuevos: list[st
         if not usuario:
             raise HTTPException(status_code=404, detail="Docente no encontrado")
 
-        modulos_validos = {"MAT151", "MAT251"}
+        res_mods = await db.execute(select(models.Modulo.codigo).filter(models.Modulo.activo == True))
+        cods = res_mods.scalars().all()
+        modulos_validos = set(cods) if cods else {"MAT151", "MAT251", "EMP300"}
         modulos_filtrados = [m for m in modulos_nuevos if m in modulos_validos]
 
         # Reemplazo limpio atómico
@@ -356,4 +360,22 @@ async def obtener_todos_docentes_con_modulos_logic(db: AsyncSession):
         return mapa
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener asignaciones: {str(e)}")
+
+
+async def obtener_modulos_disponibles_logic(db: AsyncSession):
+    try:
+        result = await db.execute(
+            select(models.Modulo).filter(models.Modulo.activo == True).order_by(models.Modulo.id)
+        )
+        modulos = result.scalars().all()
+        if not modulos:
+            return [
+                {"id": 1, "codigo": "MAT151", "nombre": "Estadística General", "activo": True},
+                {"id": 2, "codigo": "MAT251", "nombre": "Estadística Matemática", "activo": True},
+                {"id": 3, "codigo": "EMP300", "nombre": "Análisis Empresarial", "activo": True},
+            ]
+        return [{"id": m.id, "codigo": m.codigo, "nombre": m.nombre, "activo": m.activo} for m in modulos]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener módulos: {str(e)}")
+
 

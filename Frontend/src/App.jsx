@@ -126,6 +126,7 @@ function App() {
   const isAuth = usuario !== null;
   const tieneMAT151 = usuario?.rol === "Administrador" || (usuario?.modulos || []).includes("MAT151");
   const tieneMAT251 = usuario?.rol === "Administrador" || (usuario?.modulos || []).includes("MAT251");
+  const tieneEMP300 = usuario?.rol === "Administrador" || (usuario?.modulos || []).includes("EMP300");
 
   if (cargandoSesion) {
     return (
@@ -221,9 +222,13 @@ function App() {
                       } />
 
                       <Route path="/analisis-empresarial" element={
-                        <ActiveModuleContext.Provider value="analisis_empresarial">
-                          <AnalisisEmpresarial usuario={usuario} />
-                        </ActiveModuleContext.Provider>
+                        tieneEMP300 ? (
+                          <ActiveModuleContext.Provider value="analisis_empresarial">
+                            <AnalisisEmpresarial usuario={usuario} />
+                          </ActiveModuleContext.Provider>
+                        ) : (
+                          <ModuloNoAsignado modulo="EMP300" rol={usuario?.rol} />
+                        )
                       } />
 
                       <Route path="/perfil" element={<Perfil usuario={usuario} setUsuario={setUsuario} />} />

@@ -40,7 +40,13 @@ const IconoTrash = ({ width = 16, height = 16, style = {} }) => (
 );
 
 // --- COMPONENTE SELECTOR DE MATERIAS (REGLAS_MAT251) ---
-function CustomSelectMateria({ value, onChange, options = [], placeholder = 'Todas las materias' }) {
+const etiquetasAsignaturas = {
+  MAT151: 'MAT151 - Estadística General',
+  MAT251: 'MAT251 - Estadística Matemática',
+  EMP300: 'EMP300 - Análisis Empresarial',
+};
+
+function CustomSelectMateria({ value, onChange, options = [], placeholder = 'Todas las asignaturas' }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -57,7 +63,7 @@ function CustomSelectMateria({ value, onChange, options = [], placeholder = 'Tod
   const selectedOption = options.find((opt) => String(opt.value) === String(value));
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', minWidth: '200px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div ref={dropdownRef} style={{ position: 'relative', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <div
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -257,7 +263,7 @@ export default function GestionDocente({ usuario }) {
       const clasesData = await api.obtenerClasesDocente();
       const clasesConModulo = (clasesData || []).map(c => ({
         ...c,
-        modulo: c.modulo || (c.nombre?.toUpperCase().includes('MAT251') ? 'MAT251' : c.nombre?.toUpperCase().includes('MAT151') ? 'MAT151' : null)
+        modulo: c.modulo || (c.nombre?.toUpperCase().includes('EMP300') || c.nombre?.toUpperCase().includes('EMPRESARIAL') ? 'EMP300' : c.nombre?.toUpperCase().includes('MAT251') ? 'MAT251' : c.nombre?.toUpperCase().includes('MAT151') ? 'MAT151' : null)
       }));
       setClases(clasesConModulo);
 
@@ -351,13 +357,17 @@ export default function GestionDocente({ usuario }) {
   };
 
   // Materias únicas disponibles
+  const esAdmin = usuario?.rol === 'Administrador' || usuario?.isAdmin === true;
   const modulosDisponibles = useMemo(() => {
-    const mods = new Set();
+    const mods = new Set(esAdmin ? Object.keys(etiquetasAsignaturas) : []);
     clases.forEach(c => {
       if (c.modulo) mods.add(c.modulo);
     });
-    return Array.from(mods).sort();
-  }, [clases]);
+    return [
+      ...Object.keys(etiquetasAsignaturas).filter(m => mods.has(m)),
+      ...Array.from(mods).filter(m => !Object.hasOwn(etiquetasAsignaturas, m)).sort(),
+    ];
+  }, [clases, esAdmin]);
 
   // Clases filtradas por materia seleccionada
   const clasesFiltradasPorMateria = useMemo(() => {
@@ -583,7 +593,7 @@ export default function GestionDocente({ usuario }) {
 
         {/* SELECTOR DE MATERIA (Solo si el docente tiene más de 1 materia/módulo) */}
         {modulosDisponibles.length > 1 && (
-          <div style={{ flex: '0 0 auto', minWidth: '200px' }}>
+          <div style={{ flex: '0 0 auto', width: '280px', maxWidth: '100%' }}>
             <CustomSelectMateria
               value={filtroMateria}
               onChange={(val) => {
@@ -592,10 +602,10 @@ export default function GestionDocente({ usuario }) {
                 setCurrentPage(1);
               }}
               options={[
-                { value: 'TODAS', label: 'Todas las materias' },
-                ...modulosDisponibles.map(m => ({ value: m, label: m }))
+                { value: 'TODAS', label: 'Todas las asignaturas' },
+                ...modulosDisponibles.map(m => ({ value: m, label: etiquetasAsignaturas[m] ?? m }))
               ]}
-              placeholder="Todas las materias"
+              placeholder="Todas las asignaturas"
             />
           </div>
         )}

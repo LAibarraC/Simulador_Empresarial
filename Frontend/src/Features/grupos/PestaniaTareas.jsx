@@ -205,6 +205,12 @@ function CustomSelectTareas({ value, onChange, options = [], placeholder = "Sele
   );
 }
 
+const etiquetasAsignaturas = {
+  MAT151: "MAT151 - Estadística General",
+  MAT251: "MAT251 - Estadística Matemática (En desarrollo)",
+  EMP300: "EMP300 - Análisis Empresarial (En desarrollo)",
+};
+
 export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin = false }) {
   const [filtroMateria, setFiltroMateria] = useState("TODAS");
   const [cursoFiltro, setCursoFiltro] = useState("todos");
@@ -217,13 +223,16 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
 
   // Módulos/materias únicos presentes en los cursos
   const modulosDisponibles = useMemo(() => {
-    const mods = new Set();
+    const mods = new Set(esAdmin ? Object.keys(etiquetasAsignaturas) : []);
     cursos.forEach((c) => {
       const mod = c.modulo || (c.nombre?.toUpperCase().includes("MAT251") ? "MAT251" : c.nombre?.toUpperCase().includes("MAT151") ? "MAT151" : null);
       if (mod) mods.add(mod);
     });
-    return Array.from(mods).sort();
-  }, [cursos]);
+    return [
+      ...Object.keys(etiquetasAsignaturas).filter(m => mods.has(m)),
+      ...Array.from(mods).filter(m => !Object.hasOwn(etiquetasAsignaturas, m)).sort(),
+    ];
+  }, [cursos, esAdmin]);
 
   // Cursos que pertenecen a materias configuradas para tareas (actualmente MAT151)
   const cursosHabilitadosParaTareas = useMemo(() => {
@@ -610,7 +619,7 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
 
         {/* SELECTOR DE MATERIAS (Solo si el usuario tiene más de 1 materia/módulo) */}
         {modulosDisponibles.length > 1 && (
-          <div style={{ flex: "0 0 auto", minWidth: "180px" }}>
+          <div style={{ flex: "0 0 auto", width: "390px", maxWidth: "100%" }}>
             <CustomSelectTareas
               value={filtroMateria}
               onChange={(val) => {
@@ -618,14 +627,14 @@ export default function PestaniaTareas({ cursos = [], esDocente = false, esAdmin
                 setCursoFiltro("todos");
               }}
               options={[
-                { value: "TODAS", label: "Todas las materias" },
+                { value: "TODAS", label: "Todas las asignaturas" },
                 ...modulosDisponibles.map((m) => ({ 
                   value: m, 
-                  label: m === "MAT251" ? `${m} (En desarrollo)` : m 
+                  label: etiquetasAsignaturas[m] ?? m
                 }))
               ]}
-              placeholder="Todas las materias"
-              minWidth="180px"
+              placeholder="Todas las asignaturas"
+              minWidth="0"
             />
           </div>
         )}

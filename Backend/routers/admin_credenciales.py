@@ -6,7 +6,8 @@ from config.database import get_db
 from controllers.admin_credenciales import (
     cargar_credenciales_logic, obtener_credenciales_logic, crear_credencial_logic,
     eliminar_credencial_logic, crear_precuenta_docente_logic,
-    obtener_modulos_docente_logic, asignar_modulos_docente_logic, obtener_todos_docentes_con_modulos_logic
+    obtener_modulos_docente_logic, asignar_modulos_docente_logic, obtener_todos_docentes_con_modulos_logic,
+    obtener_modulos_disponibles_logic
 )
 from middlewares.auth import require_role
 from validators.modulos import AsignarModulosDocente
@@ -50,4 +51,9 @@ async def obtener_modulos_docente(docente_id: int, db: AsyncSession = Depends(ge
 @router.put("/admin/docentes/{docente_id}/modulos", dependencies=[Depends(require_role("Administrador"))])
 async def asignar_modulos_docente(docente_id: int, datos: AsignarModulosDocente, db: AsyncSession = Depends(get_db)):
     return await asignar_modulos_docente_logic(docente_id, datos.modulos, db)
+
+@router.get("/admin/modulos-disponibles", dependencies=[Depends(require_role("Administrador"))])
+async def obtener_modulos_disponibles(db: AsyncSession = Depends(get_db)):
+    return await obtener_modulos_disponibles_logic(db)
+
 

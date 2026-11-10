@@ -256,7 +256,9 @@ async def obtener_modulos_usuario_logic(usuario: models.Usuario, db: AsyncSessio
     if not usuario:
         return []
     if usuario.rol == "Administrador":
-        return ["MAT151", "MAT251"]
+        res_mods = await db.execute(select(models.Modulo.codigo).filter(models.Modulo.activo == True))
+        codigos = [c for c in res_mods.scalars().all()]
+        return codigos if codigos else ["MAT151", "MAT251", "EMP300"]
     if usuario.rol == "Docente":
         result = await db.execute(
             select(models.DocenteModulo).filter(

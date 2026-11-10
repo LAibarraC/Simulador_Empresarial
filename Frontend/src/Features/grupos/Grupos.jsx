@@ -340,7 +340,16 @@ export default function Grupos() {
   const esAdmin = usuario.rol === "Administrador" || usuario.isAdmin === true;
   const esDocente = usuario.rol === "Docente";
   const esEstudiante = usuario.rol === "Estudiante";
-  const modulosDocente = esAdmin ? ["MAT151", "MAT251"] : (usuario?.modulos || []);
+  const etiquetasAsignaturas = {
+    MAT151: "MAT151 - Estadística General",
+    MAT251: "MAT251 - Estadística Matemática",
+    EMP300: "EMP300 - Análisis Empresarial",
+  };
+  const modulosAutorizados = usuario?.modulos || [];
+  const modulosDocente = esAdmin ? Object.keys(etiquetasAsignaturas) : [
+    ...Object.keys(etiquetasAsignaturas).filter(m => modulosAutorizados.includes(m)),
+    ...modulosAutorizados.filter(m => !Object.hasOwn(etiquetasAsignaturas, m)),
+  ];
 
   // 1. CARGAR DATOS DESDE MYSQL AL ABRIR LA PÁGINA
   const cargarCursos = async () => {
@@ -459,6 +468,10 @@ export default function Grupos() {
     });
     return Array.from(mods).sort();
   }, [listaBase]);
+  const asignaturasFiltro = [
+    ...Object.keys(etiquetasAsignaturas).filter(m => esAdmin || modulosDisponibles.includes(m)),
+    ...modulosDisponibles.filter(m => !Object.hasOwn(etiquetasAsignaturas, m)),
+  ];
 
   const filteredCursos = listaBase.filter((curso) => {
     const nombreMatch = curso.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -867,8 +880,8 @@ export default function Grupos() {
         )}
 
         {/* SELECTOR DE MATERIAS (Solo si hay más de 1 materia/módulo) */}
-        {modulosDisponibles.length > 1 && (
-          <div style={{ flex: "0 0 auto", minWidth: "200px" }}>
+        {asignaturasFiltro.length > 1 && (
+          <div style={{ flex: "0 0 auto", width: "280px", maxWidth: "100%" }}>
             <CustomSelectGrupos
               value={filtroMateria}
               onChange={(val) => {
@@ -876,10 +889,10 @@ export default function Grupos() {
                 setCurrentPage(1);
               }}
               options={[
-                { value: "TODAS", label: "Todas las materias" },
-                ...modulosDisponibles.map((m) => ({ value: m, label: m }))
+                { value: "TODAS", label: "Todas las asignaturas" },
+                ...asignaturasFiltro.map((m) => ({ value: m, label: etiquetasAsignaturas[m] ?? m }))
               ]}
-              placeholder="Todas las materias"
+              placeholder="Todas las asignaturas"
             />
           </div>
         )}
@@ -1235,7 +1248,7 @@ export default function Grupos() {
                     onChange={(val) => setNuevoModulo(val)}
                     options={modulosDocente.map((mod) => ({
                       value: mod,
-                      label: mod === 'MAT151' ? 'MAT151 - Estadística General' : mod === 'MAT251' ? 'MAT251 - Estadística Matemática' : mod
+                      label: etiquetasAsignaturas[mod] ?? mod
                     }))}
                   />
                 )}

@@ -48,6 +48,16 @@ async def lifespan(app: FastAPI):
             await conn.execute(text("ALTER TABLE clases ADD COLUMN modulo VARCHAR(50) NULL"))
         except Exception:
             pass
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("""
+                INSERT IGNORE INTO modulos (codigo, nombre, activo) VALUES
+                ('MAT151', 'Estadística General', 1),
+                ('MAT251', 'Estadística Matemática', 1),
+                ('EMP300', 'Análisis Empresarial', 1)
+            """))
+        except Exception:
+            pass
     try:
         yield
     finally:

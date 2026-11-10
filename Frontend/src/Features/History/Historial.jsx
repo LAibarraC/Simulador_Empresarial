@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useData } from "../../components/gestion_datos/DataContext";
 import { api } from "../../services/api";
 import {
@@ -130,6 +130,39 @@ export default function Historial() {
   const [filtroModulo, setFiltroModulo] = useState("TODOS");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // 10 registros por página
+
+  const esAdmin = usuario?.rol === "Administrador";
+  const modulosUsuario = usuario?.modulos || [];
+  const modulosPermitidos = useMemo(() => {
+    if (esAdmin) return ["MAT151", "MAT251", "EMP300"];
+    return modulosUsuario;
+  }, [esAdmin, modulosUsuario]);
+
+  const opcionesModulo = useMemo(() => {
+    const opts = [];
+    if (modulosPermitidos.length > 1 || esAdmin) {
+      opts.push({ value: "TODOS", label: "Todas las asignaturas" });
+    }
+    const nombres = {
+      MAT151: "Estadística General",
+      MAT251: "Estadística Matemática",
+      EMP300: "Análisis Empresarial",
+    };
+    const modulosOrdenados = [
+      ...Object.keys(nombres).filter(m => modulosPermitidos.includes(m)),
+      ...modulosPermitidos.filter(m => !Object.hasOwn(nombres, m)),
+    ];
+    modulosOrdenados.forEach(m => {
+      opts.push({ value: m, label: nombres[m] ? `${m} - ${nombres[m]}` : m });
+    });
+    return opts;
+  }, [modulosPermitidos, esAdmin]);
+
+  useEffect(() => {
+    if (opcionesModulo.length > 0 && !opcionesModulo.some(opcion => opcion.value === filtroModulo)) {
+      setFiltroModulo(opcionesModulo[0].value);
+    }
+  }, [opcionesModulo, filtroModulo]);
 
   const iniciarTour = () => {
     const tourSteps = [
@@ -263,6 +296,10 @@ export default function Historial() {
 
   // --- LÓGICA DE BÚSQUEDA Y PAGINACIÓN ---
   const filteredRegistros = registros.filter((reg) => {
+    // Si no es admin, solo ver registros de sus materias permitidas
+    if (!esAdmin && modulosPermitidos.length > 0 && !modulosPermitidos.includes(reg.modulo)) {
+      return false;
+    }
     const term = searchTerm.toLowerCase();
     const nombreCalculoMAT251 = reg.modulo === "MAT251"
       ? obtenerNombreCalculoHistorial(reg).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
@@ -390,20 +427,18 @@ export default function Historial() {
             disabled={cargando}
             style={{ width: "100%", padding: "10px 15px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-input)", color: "var(--text-main)", outline: "none", fontSize: "0.95rem" }}
           />
-          <SelectorModuloHistorial
-            id="historial-filtro-modulo"
-            value={filtroModulo}
-            onChange={(modulo) => {
-              setFiltroModulo(modulo);
-              setCurrentPage(1);
-            }}
-            disabled={cargando}
-            options={[
-              { value: "TODOS", label: "Todos los módulos" },
-              { value: "MAT151", label: "MAT151" },
-              { value: "MAT251", label: "MAT251" },
-            ]}
-          />
+          {opcionesModulo.length > 0 && (
+            <SelectorModuloHistorial
+              id="historial-filtro-modulo"
+              value={filtroModulo}
+              onChange={(modulo) => {
+                setFiltroModulo(modulo);
+                setCurrentPage(1);
+              }}
+              disabled={cargando}
+              options={opcionesModulo}
+            />
+          )}
         </div>
       )}
 

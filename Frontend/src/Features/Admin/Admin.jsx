@@ -134,6 +134,11 @@ export default function Admin() {
   const [modalModulosDocente, setModalModulosDocente] = useState(null);
   const [modulosSeleccionados, setModulosSeleccionados] = useState([]);
   const [guardandoModulos, setGuardandoModulos] = useState(false);
+  const [modulosCatalogo, setModulosCatalogo] = useState([
+    { codigo: 'MAT151', nombre: 'Estadística General' },
+    { codigo: 'MAT251', nombre: 'Estadística Matemática' },
+    { codigo: 'EMP300', nombre: 'Análisis Empresarial' }
+  ]);
 
   // Modal de confirmación para eliminar usuario
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
@@ -157,12 +162,16 @@ export default function Admin() {
     try {
       setCargando(true);
       await new Promise(resolve => setTimeout(resolve, 800));
-      const [dataUsuarios, dataModulos] = await Promise.all([
+      const [dataUsuarios, dataModulos, dataCatalogo] = await Promise.all([
         api.obtenerUsuarios(),
-        api.obtenerTodosDocentesModulos().catch(() => ({}))
+        api.obtenerTodosDocentesModulos().catch(() => ({})),
+        api.obtenerModulosDisponibles().catch(() => null)
       ]);
       setUsuarios(dataUsuarios);
       setDocentesModulos(dataModulos || {});
+      if (dataCatalogo && dataCatalogo.length > 0) {
+        setModulosCatalogo(dataCatalogo);
+      }
     } catch (error) {
       alerta.error("Error", error.message || "No se pudieron cargar los usuarios");
     } finally {
@@ -1177,22 +1186,20 @@ export default function Admin() {
                   <GraduationCap size={16} /> Asignaturas autorizadas (Módulos)
                   <small>Materias que gestionará el docente</small>
                 </span>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '2px' }}>
-                  {[
-                    { id: 'MAT151', label: 'MAT151', desc: 'Estadística General' },
-                    { id: 'MAT251', label: 'MAT251', desc: 'Estadística Matemática' }
-                  ].map((item) => {
-                    const checkeado = (nuevaCredencial.modulos || []).includes(item.id);
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginTop: '2px' }}>
+                  {modulosCatalogo.map((item) => {
+                    const modCodigo = item.codigo || item.id;
+                    const checkeado = (nuevaCredencial.modulos || []).includes(modCodigo);
                     return (
                       <div
-                        key={item.id}
+                        key={modCodigo}
                         onClick={() => {
                           setInvitacionCopiada(false);
                           setNuevaCredencial(prev => {
                             const curr = prev.modulos || [];
-                            const updated = curr.includes(item.id)
-                              ? curr.filter(m => m !== item.id)
-                              : [...curr, item.id];
+                            const updated = curr.includes(modCodigo)
+                              ? curr.filter(m => m !== modCodigo)
+                              : [...curr, modCodigo];
                             return { ...prev, modulos: updated };
                           });
                         }}
@@ -1217,10 +1224,10 @@ export default function Admin() {
                         />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 'bold', fontSize: '0.86rem', color: checkeado ? 'var(--primary-color)' : 'var(--text-main)', lineHeight: 1.2 }}>
-                            {item.label}
+                            {modCodigo}
                           </div>
                           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {item.desc}
+                            {item.nombre || item.desc}
                           </div>
                         </div>
                       </div>
@@ -1256,16 +1263,14 @@ export default function Admin() {
             </p>
 
             <form onSubmit={handleGuardarModulosDocente}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-                {[
-                  { id: 'MAT151', label: 'MAT151', desc: 'Estadística General' },
-                  { id: 'MAT251', label: 'MAT251', desc: 'Estadística Matemática' }
-                ].map((item) => {
-                  const checkeado = modulosSeleccionados.includes(item.id);
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '20px' }}>
+                {modulosCatalogo.map((item) => {
+                  const modCodigo = item.codigo || item.id;
+                  const checkeado = modulosSeleccionados.includes(modCodigo);
                   return (
                     <div
-                      key={item.id}
-                      onClick={() => handleToggleModulo(item.id)}
+                      key={modCodigo}
+                      onClick={() => handleToggleModulo(modCodigo)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -1287,10 +1292,10 @@ export default function Admin() {
                       />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 'bold', fontSize: '0.86rem', color: checkeado ? 'var(--primary-color)' : 'var(--text-main)', lineHeight: 1.2 }}>
-                          {item.label}
+                          {modCodigo}
                         </div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {item.desc}
+                          {item.nombre || item.desc}
                         </div>
                       </div>
                     </div>

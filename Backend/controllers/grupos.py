@@ -18,6 +18,8 @@ def inferir_modulo_clase(clase):
     if getattr(clase, 'modulo', None):
         return clase.modulo
     nombre_upper = (clase.nombre or "").upper()
+    if "EMP300" in nombre_upper or "ANALISIS" in nombre_upper or "EMPRESARIAL" in nombre_upper:
+        return "EMP300"
     if "MAT251" in nombre_upper:
         return "MAT251"
     if "MAT151" in nombre_upper:
@@ -630,7 +632,7 @@ async def obtener_estadisticas_docente_db(db: AsyncSession, current_user: Usuari
                 "id": c.id, 
                 "nombre": c.nombre, 
                 "codigo": c.codigo_acceso,
-                "modulo": c.modulo or ("MAT251" if "MAT251" in (c.nombre or "").upper() else "MAT151")
+                "modulo": c.modulo or inferir_modulo_clase(c) or "MAT151"
             }
             for c in todas_clases
         ]
@@ -654,7 +656,7 @@ async def obtener_estadisticas_docente_db(db: AsyncSession, current_user: Usuari
                 "codigo": clases_filtradas[0].codigo_acceso,
                 "activa": clases_filtradas[0].activa,
                 "fecha_limite": clases_filtradas[0].fecha_limite_matriculacion,
-                "modulo": clases_filtradas[0].modulo or ("MAT251" if "MAT251" in (clases_filtradas[0].nombre or "").upper() else "MAT151")
+                "modulo": clases_filtradas[0].modulo or inferir_modulo_clase(clases_filtradas[0]) or "MAT151"
             }
         elif modulo and str(modulo).upper() not in ["TODAS", "ALL", ""]:
             mod_filtro = str(modulo).upper().strip()

@@ -1072,6 +1072,24 @@ async def obtener_historial_db(db: AsyncSession, current_user: models.Usuario, m
             .filter(models.HistorialCalculo.usuario_id == current_user.id)
         )
 
+        if current_user.rol != "Administrador":
+            if current_user.rol == "Docente":
+                res_mods = await db.execute(
+                    select(models.DocenteModulo.modulo).filter(
+                        models.DocenteModulo.docente_id == current_user.id,
+                        models.DocenteModulo.activo == True
+                    )
+                )
+            else:
+                res_mods = await db.execute(
+                    select(models.EstudianteModulo.modulo).filter(
+                        models.EstudianteModulo.estudiante_id == current_user.id
+                    )
+                )
+            mods_permitidos = [m for m in res_mods.scalars().all()]
+            if mods_permitidos:
+                query = query.filter(models.HistorialCalculo.modulo.in_(mods_permitidos))
+
         if modulo and modulo.upper() != "TODOS":
             query = query.filter(models.HistorialCalculo.modulo == modulo.upper())
 

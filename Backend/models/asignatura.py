@@ -32,5 +32,14 @@ class EstudianteModulo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     estudiante_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
-    modulo = Column(String(50), nullable=False) # 'MAT151', 'MAT251'
-    fecha_habilitacion = Column(DateTime, default=func.now())
+    modulo = Column(String(50), nullable=False) # 'MAT151', 'MAT251', 'EMP300'
+    fecha_habilitacion = Column(DateTime, default=func.now())
+
+class Modulo(Base):
+    __tablename__ = "modulos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    codigo = Column(String(50), unique=True, nullable=False, index=True) # Ej: MAT151, MAT251, EMP300
+    nombre = Column(String(100), nullable=False)                         # Ej: Estadística General
+    activo = Column(Boolean, default=True, nullable=False)
+
