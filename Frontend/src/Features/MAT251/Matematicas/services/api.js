@@ -2,6 +2,16 @@ const hostActual = window.location.hostname;
 const BASE_URL = import.meta.env.VITE_API_URL || `http://${hostActual}:8000`;
 
 export const mat251Api = {
+  obtenerGruposReporte: async () => {
+    const token = localStorage.getItem("token");
+    const respuesta = await fetch(`${BASE_URL}/clases/mat251/grupos-reporte`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!respuesta.ok) throw new Error("No se pudieron consultar los grupos de MAT 251.");
+
+    return respuesta.json();
+  },
+
   // Simulación de Estimación Puntual (Tema 5)
   ejecutarSimulacionPuntual: async (payload) => {
     const response = await fetch(`${BASE_URL}/mat251/tema5/simulacion`, {
@@ -79,7 +89,7 @@ export const mat251Api = {
   // Tema 2: Variables Aleatorias Continuas
   // ==========================================
   resolucionK: async (payload) => {
-    const response = await fetch(`${BASE_URL}/api/mat251/resolucion_k`, {
+    const response = await fetch(`${BASE_URL}/mat251/resolucion_k`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -88,7 +98,7 @@ export const mat251Api = {
   },
 
   resolucionContinua: async (payload) => {
-    const response = await fetch(`${BASE_URL}/api/mat251/resolucion_continua`, {
+    const response = await fetch(`${BASE_URL}/mat251/resolucion_continua`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

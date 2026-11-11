@@ -44,7 +44,7 @@ const buscarCorteEntreRenglones = (canvas, limite, inicioSeccion, escalaCanvasAP
  * @param {string} elementId ID del contenedor del reporte
  * @param {string} nombreArchivo Nombre base del archivo descargado
  */
-export const generarPDFReporteMAT251 = async (elementId, nombreArchivo = "Reporte_MAT251_Tema1") => {
+export const generarPDFReporteMAT251 = async (elementId, nombreArchivo = "Reporte_MAT251_Tema1", datosCurso = {}) => {
     const input = document.getElementById(elementId);
     const cuerpo = input?.querySelector('#pdf-cuerpo-mat251');
     if (!input || !cuerpo) {
@@ -81,9 +81,9 @@ export const generarPDFReporteMAT251 = async (elementId, nombreArchivo = "Report
             return labelNode?.parentElement?.textContent.replace(labelNode.textContent, '').trim() || '';
         };
 
-        const docente = getFieldValue('Docente');
+        const docente = datosCurso.docente?.trim() || getFieldValue('Docente');
         const estudiante = getFieldValue('Estudiante');
-        const grupo = getFieldValue('Grupo');
+        const grupo = datosCurso.grupo?.trim() || getFieldValue('Grupo');
         const tema = getFieldValue('Tema');
         const fecha = getFieldValue('Fecha');
         const hora = getFieldValue('Hora');
@@ -166,6 +166,7 @@ export const generarPDFReporteMAT251 = async (elementId, nombreArchivo = "Report
             });
         };
         let seccionesInfo = [];
+        let llavesMuestrales = [];
 
         // ── 3. Captura html2canvas (operación pesada ~2-4 s) ────────────
         alerta.cargando("Capturando contenido...", "Procesando tablas y fórmulas...", toastId);
@@ -195,8 +196,46 @@ export const generarPDFReporteMAT251 = async (elementId, nombreArchivo = "Report
                 const cuerpoCaptura = clonedDoc.getElementById(elementId)?.querySelector('#pdf-cuerpo-mat251');
                 if (!cuerpoCaptura) throw new Error('No se encontró el cuerpo del reporte en la captura PDF.');
                 seccionesInfo = medirSecciones(cuerpoCaptura);
+                const cuerpoRect = cuerpoCaptura.getBoundingClientRect();
+                llavesMuestrales = Array.from(cuerpoCaptura.querySelectorAll('[data-pdf-llave]'), llave => {
+                    const rect = llave.getBoundingClientRect();
+                    llave.style.visibility = 'hidden';
+                    return {
+                        x: rect.left - cuerpoRect.left,
+                        y: rect.top - cuerpoRect.top,
+                        ancho: rect.width,
+                        alto: rect.height,
+                        derecha: llave.dataset.pdfLlave === 'derecho'
+                    };
+                });
             }
         });
+        if (llavesMuestrales.length) {
+            // La exportación dibuja cada llave como un solo trazo antes de paginar.
+            const contexto = canvas.getContext('2d');
+            contexto.save();
+            contexto.setTransform(escalaCaptura, 0, 0, escalaCaptura, 0, 0);
+            contexto.strokeStyle = '#000000';
+            contexto.lineWidth = 1.3;
+            contexto.lineCap = 'round';
+            for (const { x, y, ancho, alto, derecha } of llavesMuestrales) {
+                if (ancho <= 0 || alto <= 2) continue;
+                const centroX = x + ancho / 2;
+                const centroY = y + alto / 2;
+                const extremo = (derecha ? -1 : 1) * Math.max(0, ancho / 2 - 1);
+                const curva = Math.min(8, (alto - 2) / 4);
+                contexto.beginPath();
+                contexto.moveTo(centroX + extremo, y + 1);
+                contexto.quadraticCurveTo(centroX, y + 1, centroX, y + 1 + curva);
+                contexto.lineTo(centroX, centroY - curva);
+                contexto.quadraticCurveTo(centroX, centroY, centroX - extremo, centroY);
+                contexto.quadraticCurveTo(centroX, centroY, centroX, centroY + curva);
+                contexto.lineTo(centroX, y + alto - 1 - curva);
+                contexto.quadraticCurveTo(centroX, y + alto - 1, centroX + extremo, y + alto - 1);
+                contexto.stroke();
+            }
+            contexto.restore();
+        }
         await pausaUI(60);
 
         // ── 4. Construir PDF (post-captura) ─────────────────────────────

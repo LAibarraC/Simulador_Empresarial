@@ -124,7 +124,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
     // ── soporte teclado físico ───────────────────────────────────────────────
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (!editorActivoRef.current) return;
+            if (!editorActivoRef.current || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
             const campoPotencia = e.target.dataset?.campoPotencia;
             const haciaIzquierda = e.key === 'ArrowLeft';
             const flechaHorizontal = haciaIzquierda || e.key === 'ArrowRight';
@@ -269,11 +269,24 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
 
                 buscarYEjecutar(newBloques, (list, i) => {
                     const b = list[i];
-                    if (focusSlotRef.current && focusSlotRef.current.parentId === b.id) {
+                    // Al escribir delante de un número, conservarlo como un solo bloque.
+                    const inicioRaiz = activeIdRef.current === 'START' && list === newBloques && i === 0;
+                    const inicioCasilla = activeIdRef.current === 'START_SLOT' && focusSlotRef.current?.parentId === b.id;
+                    const siguiente = inicioRaiz ? b : inicioCasilla ? b[focusSlotRef.current.slot][0] : null;
+                    if (siguiente?.tipo === 'constante' && /^\d*\.?\d*$/.test(siguiente.coef)) {
+                        if (e.key !== '.' || !siguiente.coef.includes('.')) {
+                            siguiente.coef = e.key + siguiente.coef;
+                        }
+                        setActiveIdSync(siguiente.id);
+                        appended = true;
+                        return true;
+                    }
+                    if (activeIdRef.current === null && focusSlotRef.current?.parentId === b.id) {
                         const targetArr = b[focusSlotRef.current.slot];
                         if (targetArr.length > 0) {
                             const lastBlock = targetArr[targetArr.length - 1];
                             if (['constante', 'termino_lineal', 'termino_cuadratico', 'termino_potencia'].includes(lastBlock.tipo)) {
+                                if (e.key === '.' && String(lastBlock.coef).includes('.')) { appended = true; return true; }
                                 targetArr[targetArr.length - 1].coef += e.key;
                                 appended = true;
                                 return true;
@@ -281,6 +294,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                         }
                     }
                     if (activeIdRef.current === b.id && ['constante', 'termino_lineal', 'termino_cuadratico', 'termino_potencia'].includes(b.tipo)) {
+                        if (e.key === '.' && String(b.coef).includes('.')) { appended = true; return true; }
                         b.coef += e.key;
                         appended = true;
                         return true;
@@ -288,6 +302,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     return false;
                 });
 
+                e.preventDefault();
                 if (appended) {
                     setBloquesSync(newBloques);
                 } else {
@@ -341,6 +356,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             } else if (e.key === ']') {
                 agregarBloque('corchete_cierra');
             } else if (e.key === 'Backspace') {
+                e.preventDefault();
                 borrarBloque();
             } else if (e.key === '/') {
                 agregarBloque('fraccion');
@@ -357,7 +373,53 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
     };
 
     // ── mutaciones del estado recursivo ───────────────────────────────────────
+    const casillaFraccionVacia = (lista) => lista.length === 0
+        || lista.every(bloque => bloque.tipo === 'constante' && String(bloque.coef ?? '').trim() === '');
+
     const agregarBloque = (tipo, valor = '') => {
+        if (tipo === 'fraccion') {
+            const objetivo = focusSlotRef.current?.parentId ?? activeIdRef.current;
+            let pendiente = null;
+            buscarYEjecutar(deepClone(bloquesRef.current), (lista, indice, padre) => {
+                const bloque = lista[indice];
+                if (bloque.id !== objetivo) return false;
+                const fraccion = bloque.tipo === 'fraccion' ? bloque : padre;
+                if (fraccion?.tipo !== 'fraccion') return true;
+                if (casillaFraccionVacia(fraccion.numerador)) {
+                    pendiente = { parentId: fraccion.id, slot: 'numerador' };
+                } else if (casillaFraccionVacia(fraccion.denominador)) {
+                    pendiente = { parentId: fraccion.id, slot: 'denominador' };
+                }
+                return true;
+            });
+            if (pendiente) {
+                setActiveIdSync(null);
+                setFocusSlotSync(pendiente);
+                return;
+            }
+        }
+        // Un número seguido de x, x² o xⁿ pasa a ser su coeficiente.
+        if (['termino_lineal', 'termino_cuadratico', 'termino_potencia'].includes(tipo)) {
+            const nuevos = deepClone(bloquesRef.current);
+            let convertido = false;
+            buscarYEjecutar(nuevos, (lista, indice) => {
+                const actual = lista[indice];
+                const alFinal = activeIdRef.current === null && !focusSlotRef.current
+                    && lista === nuevos && indice === lista.length - 1;
+                if ((actual.id === activeIdRef.current || alFinal) && actual.tipo === 'constante'
+                    && actual.coef.trim() !== '' && Number.isFinite(Number(actual.coef))) {
+                    actual.tipo = tipo;
+                    setActiveIdSync(actual.id);
+                    convertido = true;
+                    return true;
+                }
+                return false;
+            });
+            if (convertido) {
+                setBloquesSync(nuevos);
+                return;
+            }
+        }
         const b = crearBloque(tipo, valor);
         const currentBloques = deepClone(bloquesRef.current);
         let inserted = false;
@@ -443,6 +505,8 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             }
             setBloquesSync(newArr);
         } else {
+            setActiveIdSync(null);
+            setFocusSlotSync({ parentId: b.id, slot: tipo === 'fraccion' ? 'denominador' : 'numerador' });
             setBloquesSync(currentBloques);
         }
     };
@@ -467,17 +531,24 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
     };
 
     const borrarBloque = () => {
-        if (activeIdRef.current === 'START_SLOT') return;
+        if (activeIdRef.current === 'START' || activeIdRef.current === 'START_SLOT') return;
         const currentBloques = deepClone(bloquesRef.current);
         let deleted = false;
 
         buscarYEjecutar(currentBloques, (list, i, parentBlock, slotName) => {
             const b = list[i];
             if (activeIdRef.current === b.id) {
+                if (['constante', 'termino_lineal', 'termino_cuadratico', 'termino_potencia'].includes(b.tipo) && b.coef) {
+                    b.coef = String(b.coef).slice(0, -1);
+                    if (b.coef || b.tipo !== 'constante') {
+                        deleted = true;
+                        return true;
+                    }
+                }
                 list.splice(i, 1);
                 if (i > 0) {
                     setActiveIdSync(list[i - 1].id);
-                    setFocusSlotSync(null);
+                    setFocusSlotSync(parentBlock ? { parentId: parentBlock.id, slot: slotName } : null);
                 } else {
                     if (parentBlock) {
                         setActiveIdSync(list.length ? 'START_SLOT' : null);
@@ -510,7 +581,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             return false;
         });
 
-        if (!deleted && currentBloques.length > 0) {
+        if (!deleted && !focusSlotRef.current && activeIdRef.current === null && currentBloques.length > 0) {
             const last = currentBloques[currentBloques.length - 1];
             if (['constante', 'termino_lineal', 'termino_cuadratico', 'termino_potencia'].includes(last.tipo)) {
                 last.coef = last.coef.slice(0, -1);
@@ -541,6 +612,24 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
 
     // ── validacion ────────────────────────────────────────────────────────────
     const manejarValidacion = async () => {
+        let errorFraccion = '';
+        buscarYEjecutar(deepClone(bloquesRef.current), (lista, indice) => {
+            const bloque = lista[indice];
+            if (bloque.tipo !== 'fraccion') return false;
+            if (casillaFraccionVacia(bloque.numerador) || casillaFraccionVacia(bloque.denominador)) {
+                errorFraccion = 'Completa el numerador y el denominador de cada fracción antes de calcular.';
+            } else {
+                const [valor] = bloque.denominador;
+                if (bloque.denominador.length === 1 && valor.tipo === 'constante' && Number(valor.coef) === 0) {
+                    errorFraccion = 'El denominador de una fracción no puede ser cero.';
+                }
+            }
+            return Boolean(errorFraccion);
+        });
+        if (errorFraccion) {
+            setError(errorFraccion);
+            return;
+        }
         const calculo = await onCalcular();
         if (!calculo?.cancelado) setError(calculo?.error || '');
     };
@@ -561,7 +650,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
         setLimiteB('');
     };
 
-    const convertirConstanteEnTermino = (input) => {
+    const convertirConstanteEnTermino = (input, tipo = 'termino_lineal') => {
         const coeficiente = input.value.trim();
         if (coeficiente && !Number.isFinite(Number(coeficiente))) return;
 
@@ -570,13 +659,13 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
         const convertido = buscarYEjecutar(nuevos, (lista, indice) => {
             const bloque = lista[indice];
             if (bloque.id !== id || bloque.tipo !== 'constante') return false;
-            bloque.tipo = 'termino_lineal';
+            bloque.tipo = tipo;
             return true;
         });
         if (!convertido) return;
 
-        input.blur();
         setBloquesSync(nuevos);
+        input.blur();
     };
 
     const handleBtnMouseDown = (e, charToAppend, blockAction) => {
@@ -594,7 +683,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
         }
 
         // Si el usuario está tecleando en ALGÚN input (límites, coeficientes, exponentes)
-        if (a && a.tagName === 'INPUT') {
+        if (a && a.tagName === 'INPUT' && lienzoRef.current?.contains(a)) {
             if (a.hasAttribute('data-exponente') && charToAppend === 'Backspace'
                 && a.selectionStart === 0 && a.selectionEnd === 0) {
                 updateBlockById(activeIdRef.current, 'exp', a.value);
@@ -604,8 +693,8 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                 updateBlockById(activeIdRef.current, 'exp', (charToAppend === '-' ? '-' : '') + a.value);
                 return;
             }
-            if (blockAction === 'termino_lineal' && a.hasAttribute('data-constante-numerica')) {
-                convertirConstanteEnTermino(a);
+            if (['termino_lineal', 'termino_cuadratico', 'termino_potencia'].includes(blockAction) && a.hasAttribute('data-constante-numerica')) {
+                convertirConstanteEnTermino(a, blockAction);
                 return;
             }
             if (charToAppend === 'Backspace') {
@@ -693,6 +782,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                 }
             }
         } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            if (e.shiftKey || e.target.selectionStart !== e.target.selectionEnd) return;
             if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) {
                 e.preventDefault();
                 e.target.blur();
@@ -727,6 +817,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             },
             onClick: (e) => {
                 e.stopPropagation();
+                e.currentTarget.focus();
                 seleccionar();
             },
         };
@@ -753,6 +844,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
         lista.forEach((bloque, index) => {
             const clickBloque = (e) => {
                 e.stopPropagation();
+                if (e.type === 'click' && document.activeElement?.tagName === 'INPUT') document.activeElement.blur();
                 setActiveIdSync(bloque.id);
                 setFocusSlotSync(null);
             };
@@ -783,7 +875,26 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
             } else if (bloque.tipo === 'constante') {
                 blockJSX = (
                     <div key={bloque.id} onClick={clickBloque} style={{ display: 'inline-flex', cursor: 'pointer', padding: '1px' }}>
-                        <input type="text" inputMode="decimal" step="any" className="ghost-input" data-constante-numerica value={bloque.coef} onChange={(e) => updateBlockById(bloque.id, 'coef', e.target.value)} onClick={(e) => e.stopPropagation()} onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }} onBlur={(e) => { e.target.style.border = '1px solid transparent'; setIsTyping(false); }} onKeyDown={(e) => {
+                        <input type="text" inputMode="decimal" step="any" className="ghost-input" data-constante-numerica aria-label="Constante numérica" placeholder="□" value={bloque.coef} onChange={(e) => updateBlockById(bloque.id, 'coef', e.target.value)} onClick={(e) => e.stopPropagation()} onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }} onBlur={(e) => {
+                            e.target.style.border = '1px solid transparent';
+                            setIsTyping(false);
+                            if (e.target.value !== '') return;
+
+                            const nuevos = deepClone(bloquesRef.current);
+                            let eliminado = false;
+                            buscarYEjecutar(nuevos, (lista, indice, parentBlock, slotName) => {
+                                const actual = lista[indice];
+                                if (actual.id !== bloque.id || actual.tipo !== 'constante' || actual.coef !== '') return false;
+                                lista.splice(indice, 1);
+                                if (activeIdRef.current === actual.id) {
+                                    setActiveIdSync(indice > 0 ? lista[indice - 1].id : parentBlock ? (lista.length ? 'START_SLOT' : null) : 'START');
+                                    setFocusSlotSync(parentBlock ? { parentId: parentBlock.id, slot: slotName } : null);
+                                }
+                                eliminado = true;
+                                return true;
+                            });
+                            if (eliminado) setBloquesSync(nuevos);
+                        }} onKeyDown={(e) => {
                             if (e.key.toLowerCase() === activeVariable && !e.ctrlKey && !e.metaKey && !e.altKey) {
                                 e.preventDefault();
                                 convertirConstanteEnTermino(e.currentTarget);
@@ -802,8 +913,6 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     </div>
                 );
             } else if (['termino_lineal', 'termino_cuadratico', 'termino_potencia'].includes(bloque.tipo)) {
-                const isActive = activeId === bloque.id;
-                const hideCoef = bloque.coef === '' && !isActive;
                 const varStr = modo === 'acumulada' ? 't' : 'x';
                 const exponente = String(bloque.exp ?? '');
                 const negativo = exponente.startsWith('-');
@@ -811,9 +920,9 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
 
                 blockJSX = (
                     <div key={bloque.id} onClick={clickBloque} style={{ display: 'flex', alignItems: 'baseline', cursor: 'pointer', padding: '1px' }}>
-                        {!hideCoef && (
-                            <input type="text" inputMode="decimal" step="any" className="ghost-input" placeholder="c" value={bloque.coef} onChange={(e) => updateBlockById(bloque.id, 'coef', e.target.value)} onClick={(e) => e.stopPropagation()} onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }} onBlur={handleBlur} onKeyDown={(e) => handleInputKeyDown(e, bloque.id)} style={{ ...baseInputStyle, width: getAnchoInput(bloque.coef, 1), fontSize: '0.8em', padding: '0', border: bloque.coef === '' ? '1.5px dashed #3b82f6' : '1px solid transparent', background: bloque.coef === '' ? 'rgba(59, 130, 246, 0.05)' : 'white' }} />
-                        )}
+                        {
+                            <input type="text" inputMode="decimal" step="any" className="ghost-input coeficiente-input" aria-label="Coeficiente del término" placeholder="1" value={bloque.coef} onChange={(e) => updateBlockById(bloque.id, 'coef', e.target.value)} onClick={(e) => e.stopPropagation()} onFocus={(e) => { handleFocus(e); setActiveIdSync(bloque.id); setFocusSlotSync(null); }} onBlur={handleBlur} onKeyDown={(e) => handleInputKeyDown(e, bloque.id)} style={{ ...baseInputStyle, width: getAnchoInput(bloque.coef, 1), fontSize: '0.8em', padding: '0', border: bloque.coef === '' ? '1.5px dashed #3b82f6' : '1px solid transparent', background: 'transparent' }} />
+                        }
                         <div
                             tabIndex={bloque.tipo === 'termino_potencia' ? -1 : undefined}
                             data-potencia-id={bloque.tipo === 'termino_potencia' ? bloque.id : undefined}
@@ -911,14 +1020,14 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
 
                 if (bloque.tipo === 'fraccion') {
                     blockJSX = (
-                        <div key={bloque.id} className="fraction-block" onClick={clickBloque} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 4px', cursor: 'pointer', border: activeId === bloque.id && !focusSlot ? '1.5px solid #3b82f6' : '1px solid transparent' }}>
-                            <div className={`ghost-slot ${bloque.numerador.length === 0 ? 'empty-slot' : ''} ${isNum ? 'focused-slot' : ''}`} {...propsCasilla(bloque.id, 'numerador', 'Escribir en el numerador')} style={{ ...sStyle(isNum, 'numerador'), border: isNum ? '2px solid #2563eb' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
-                                {bloque.numerador.length === 0 ? <span className="ghost-text" style={{ transition: 'opacity 0.2s', visibility: 'hidden' }}>&nbsp;&nbsp;</span> : renderListaBloques(bloque.numerador, false, isNestedInExponent, bloque.id, 'numerador')}
+                        <div key={bloque.id} className="fraction-block" onClick={clickBloque} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 4px', cursor: 'pointer', border: '1px solid transparent' }}>
+                            <div className={`ghost-slot ${bloque.numerador.length === 0 ? 'empty-slot' : ''} ${isNum ? 'focused-slot' : ''}`} {...propsCasilla(bloque.id, 'numerador', 'Escribir en el numerador')} style={{ ...sStyle(isNum, 'numerador'), border: isNum ? '1px dashed currentColor' : (bloque.numerador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
+                                {bloque.numerador.length === 0 ? <span aria-hidden="true">&nbsp;</span> : renderListaBloques(bloque.numerador, false, isNestedInExponent, bloque.id, 'numerador')}
                                 {isNum && (activeId === null || activeId === bloque.id) && <CursorMain height="16px" />}
                             </div>
-                            <div style={{ width: '100%', height: '1.5px', background: isNum || isDen || activeId === bloque.id ? '#3b82f6' : 'var(--text-main)', margin: '2px 0', flexShrink: 0 }} />
-                            <div className={`ghost-slot ${bloque.denominador.length === 0 ? 'empty-slot' : ''} ${isDen ? 'focused-slot' : ''}`} {...propsCasilla(bloque.id, 'denominador', 'Escribir en el denominador')} style={{ ...sStyle(isDen, 'denominador'), border: isDen ? '2px solid #2563eb' : (bloque.denominador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
-                                {bloque.denominador.length === 0 ? <span className="ghost-text" style={{ transition: 'opacity 0.2s', visibility: 'hidden' }}>&nbsp;&nbsp;</span> : renderListaBloques(bloque.denominador, false, isNestedInExponent, bloque.id, 'denominador')}
+                            <div style={{ width: '100%', height: '1.5px', background: 'currentColor', margin: '2px 0', flexShrink: 0 }} />
+                            <div className={`ghost-slot ${bloque.denominador.length === 0 ? 'empty-slot' : ''} ${isDen ? 'focused-slot' : ''}`} {...propsCasilla(bloque.id, 'denominador', 'Escribir en el denominador')} style={{ ...sStyle(isDen, 'denominador'), border: isDen ? '1px dashed currentColor' : (bloque.denominador.length === 0 ? '1px dashed #94a3b8' : '1px solid transparent'), flexShrink: 0 }}>
+                                {bloque.denominador.length === 0 ? <span aria-hidden="true">&nbsp;</span> : renderListaBloques(bloque.denominador, false, isNestedInExponent, bloque.id, 'denominador')}
                                 {isDen && (activeId === null || activeId === bloque.id) && <CursorMain height="16px" />}
                             </div>
                         </div>
@@ -961,7 +1070,7 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
     };
 
     const obtenerEstadoEntrada = () => {
-        if (!editorActivo) return 'Selecciona una casilla o una posición de la fórmula para editar.';
+        if (!editorActivo) return 'Selecciona una casilla para escribir. Usa ← → para moverte y ↑ ↓ entre numerador y denominador.';
         if (isTyping) return 'Editando el valor seleccionado. Escribe directamente o usa las teclas del panel.';
         if (focusSlot) {
             return 'Casilla activa. Escribe con el teclado o el panel. Usa Tab para pasar al siguiente campo.';
@@ -1022,6 +1131,34 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                 #tour-continua-lienzo-formula:has([data-campo-potencia]:focus) .cursor-formula {
                     display: none;
                 }
+                #tour-continua-lienzo-formula .fraction-block > .ghost-slot {
+                    background: transparent !important;
+                    box-shadow: none !important;
+                }
+                #tour-continua-lienzo-formula .fraction-block > .ghost-slot {
+                    border: 1px dashed transparent !important;
+                }
+                #tour-continua-lienzo-formula .fraction-block > .ghost-slot:is(.empty-slot, .focused-slot),
+                #tour-continua-lienzo-formula .fraction-block > .ghost-slot:has(> div:not(.fraction-block) > input:focus) {
+                    border-color: currentColor !important;
+                }
+                #tour-continua-lienzo-formula .fraction-block > .ghost-slot:focus-visible {
+                    outline: none !important;
+                }
+                #tour-continua-lienzo-formula .fraction-block .ghost-slot input,
+                #tour-continua-lienzo-formula .fraction-block .ghost-slot input:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                    border-color: transparent !important;
+                    border-radius: 0;
+                    background: transparent !important;
+                }
+                #tour-continua-lienzo-formula .fraction-block .cursor-formula {
+                    background: currentColor !important;
+                }
+                :is(html.dark, [data-theme='dark']) #tour-continua-barra-estado {
+                    color: #fff !important;
+                }
                 .teclado-container {
                     background: #f8fafc;
                     border: 1px solid #e2e8f0;
@@ -1036,9 +1173,24 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                     color: var(--text-main);
                     border-radius: 3px;
                 }
-                html.dark .limite-input {
+                :is(html.dark, [data-theme='dark']) #tour-continua-lienzo-formula input {
+                    color-scheme: dark;
+                    background: var(--bg-input, #252525) !important;
+                    color: #fff !important;
+                    -webkit-text-fill-color: #fff !important;
+                    caret-color: #fff;
+                }
+                :is(html.dark, [data-theme='dark']) #tour-continua-lienzo-formula input::placeholder {
+                    color: #94a3b8;
+                    -webkit-text-fill-color: #94a3b8;
+                    opacity: 1;
+                }
+                :is(html.dark, [data-theme='dark']) #tour-continua-lienzo-formula input:autofill {
+                    box-shadow: 0 0 0 1000px var(--bg-input, #252525) inset !important;
+                    -webkit-text-fill-color: #fff !important;
+                }
+                :is(html.dark, [data-theme='dark']) #tour-continua-lienzo-formula .limite-input {
                     border-color: #64748b;
-                    color: var(--text-main);
                 }
                 .teclado-btn:hover {
                     background-color: #f1f5f9;
@@ -1063,18 +1215,27 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
                 .teclado-btn-primary:hover {
                     background-color: #bae6fd;
                 }
+                #tour-continua-lienzo-formula .coeficiente-input:placeholder-shown:not(:focus) {
+                    width: 0.5ch !important;
+                    border-color: transparent !important;
+                    background: transparent !important;
+                }
+                #tour-continua-lienzo-formula .coeficiente-input:not(:focus)::placeholder {
+                    color: transparent !important;
+                    -webkit-text-fill-color: transparent !important;
+                }
                 .ghost-input {
                     transition: opacity 0.2s ease, border 0.2s ease;
                 }
                 .ghost-input:not(:focus):placeholder-shown {
-                    opacity: 0 !important;
-                    pointer-events: auto; /* Aún puede recibir clic aunque no se vea */
+                    opacity: 1 !important;
+                    border: 1px dashed #94a3b8 !important;
                 }
                 .ghost-slot {
                     transition: opacity 0.2s ease, border 0.2s ease;
                 }
                 .ghost-slot.empty-slot:not(.focused-slot) span.ghost-text {
-                    opacity: 0 !important;
+                    opacity: 1 !important;
                 }
             `}</style>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px',flexWrap: 'wrap', gap: '10px'}}>
@@ -1106,8 +1267,8 @@ export default function ControlDistribucionContinua({ onCalcular, configuracion,
 
 
 
-                <div id="tour-continua-barra-estado" role="status" aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '20px', padding: '0 4px', color: focusSlot ? '#1d4ed8' : 'var(--text-muted, #64748b)', fontSize: FS.xs }}>
-                    <span aria-hidden="true" style={{ display: 'inline-flex', width: '18px', height: '18px', flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: focusSlot ? '#dbeafe' : '#e2e8f0', color: focusSlot ? '#1d4ed8' : '#475569', fontWeight: 700 }}>i</span>
+                <div id="tour-continua-barra-estado" role="status" aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '20px', padding: '0 4px', color: 'var(--text-main, #334155)', fontSize: FS.xs }}>
+                    <span aria-hidden="true" style={{ display: 'inline-flex', width: '18px', height: '18px', flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--bg-input, #e2e8f0)', color: 'inherit', fontWeight: 700 }}>i</span>
                     <span>{obtenerEstadoEntrada()}</span>
                 </div>
 

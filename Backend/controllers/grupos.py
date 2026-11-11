@@ -430,6 +430,25 @@ async def obtener_clases_estudiante_db(db: AsyncSession, email: str):
             })
     return clases_inscritas
 
+async def obtener_grupos_reporte_mat251_db(db: AsyncSession, usuario: Usuario):
+    consulta = select(Clase, Usuario.nombre).outerjoin(Usuario, Usuario.id == Clase.docente_id)
+    if usuario.rol == "Estudiante":
+        consulta = consulta.join(Inscripcion, Inscripcion.clase_id == Clase.id).where(
+            Inscripcion.estudiante_id == usuario.id
+        )
+    elif usuario.rol == "Docente":
+        consulta = consulta.where(Clase.docente_id == usuario.id)
+    elif usuario.rol != "Administrador":
+        return []
+
+    resultado = await db.execute(consulta.order_by(Clase.nombre, Clase.id))
+    return [
+        {"id": clase.id, "grupo": clase.nombre, "docente": docente}
+        for clase, docente in resultado.all()
+        if inferir_modulo_clase(clase) == "MAT251"
+    ]
+
+
 async def eliminar_clase_db(db: AsyncSession, clase_id: int, user_email: str):
     result = await db.execute(select(Usuario).filter(Usuario.email == user_email))
     usuario = result.scalars().first()

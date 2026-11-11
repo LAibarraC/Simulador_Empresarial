@@ -73,6 +73,13 @@ async def obtener_clases_docente(email: str, db: AsyncSession = Depends(get_db))
 async def obtener_clases_estudiante(email: str, db: AsyncSession = Depends(get_db)):
     return await grupos_controller.obtener_clases_estudiante_db(db, email)
 
+@router.get("/clases/mat251/grupos-reporte")
+async def obtener_grupos_reporte_mat251(
+    db: AsyncSession = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    return await grupos_controller.obtener_grupos_reporte_mat251_db(db, current_user)
+
 @router.delete("/eliminar_clase/{clase_id}")
 async def eliminar_clase(clase_id: int, user_email: str = Query(...), db: AsyncSession = Depends(get_db)):
     return await grupos_controller.eliminar_clase_db(db, clase_id, user_email)

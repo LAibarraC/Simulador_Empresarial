@@ -373,19 +373,24 @@ const construirEspacioEvaluadoCompuesto = (comps, res) => {
 };
 
 function LlaveMuestralPDF({ lado }) {
-    // Las curvas tienen altura fija: solo se estiran los segmentos verticales.
-    const estiloExtremo = { position: 'absolute', left: 0, width: '12px', height: '10px', overflow: 'visible' };
+    const derecha = lado === 'derecho';
+    const extremo = derecha ? 1 : 11;
+    const punta = derecha ? 11 : 1;
+    const tramo = { flex: '1 1 0', width: '1.3px', backgroundColor: '#000000' };
+
+    // Las curvas conservan su tamaño mientras los dos tramos crecen con la matriz.
     return (
-        <span aria-hidden="true" style={{ position: 'relative', alignSelf: 'stretch', flex: '0 0 12px', minHeight: '22px', transform: lado === 'derecho' ? 'scaleX(-1)' : undefined }}>
-            <svg viewBox="0 0 12 10" style={{ ...estiloExtremo, top: 0 }}>
-                <path d="M11 1 Q6 1 6 10" fill="none" stroke="#000000" strokeWidth="1.3" />
+        <span aria-hidden="true" data-pdf-llave={lado} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'stretch', flex: '0 0 12px' }}>
+            <svg width="12" height="10" viewBox="0 0 12 10" style={{ flexShrink: 0 }}>
+                <path d={`M${extremo} 1 Q6 1 6 10`} fill="none" stroke="#000000" strokeWidth="1.3" />
             </svg>
-            <span style={{ position: 'absolute', left: '5.35px', top: '10px', bottom: '10px', borderLeft: '1.3px solid #000000' }} />
-            <svg viewBox="0 0 12 14" style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '12px', height: '14px', backgroundColor: '#ffffff' }}>
-                <path d="M6 0 Q6 7 1 7 Q6 7 6 14" fill="none" stroke="#000000" strokeWidth="1.3" />
+            <span style={tramo} />
+            <svg width="12" height="14" viewBox="0 0 12 14" style={{ flexShrink: 0 }}>
+                <path d={`M6 0 Q6 7 ${punta} 7 Q6 7 6 14`} fill="none" stroke="#000000" strokeWidth="1.3" />
             </svg>
-            <svg viewBox="0 0 12 10" style={{ ...estiloExtremo, bottom: 0, transform: 'rotate(180deg)' }}>
-                <path d="M1 1 Q6 1 6 10" fill="none" stroke="#000000" strokeWidth="1.3" />
+            <span style={tramo} />
+            <svg width="12" height="10" viewBox="0 0 12 10" style={{ flexShrink: 0 }}>
+                <path d={`M6 0 Q6 9 ${extremo} 9`} fill="none" stroke="#000000" strokeWidth="1.3" />
             </svg>
         </span>
     );

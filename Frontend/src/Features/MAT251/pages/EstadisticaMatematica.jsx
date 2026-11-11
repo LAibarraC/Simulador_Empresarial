@@ -12,6 +12,7 @@ import { iniciarGuiaMAT251 } from '../utils/Guia';
 import { IconoPDF, IconoGuardar } from "../../../ui/iconos";
 import { generarPDFReporteMAT251 } from "../utils/exportUtilsMAT251";
 import { alerta } from "../../../utils/Notificaciones";
+import { mat251Api } from "../Matematicas/services/api";
 import "../styles/pages/Pantalla.css";
 import "../styles/pages/CalculosMat251.css";
 import "../styles/GuiaMAT251.css";
@@ -102,6 +103,14 @@ export default function Pantalla() {
   const _stats = useCalculadoraExcel(selectedFile, selectedSheet);
 
   const [exportandoPDF, setExportandoPDF] = useState(false);
+  const [gruposReporte, setGruposReporte] = useState([]);
+  const dialogoGrupoRef = useRef(null);
+
+  const descargarReportePDF = (datosCurso) => {
+    const reporte = document.getElementById("reporte-formal-mat251");
+    const nombre = reporte?.getAttribute("data-nombre-archivo") || "Reporte_MAT251_Tema1";
+    return generarPDFReporteMAT251("reporte-formal-mat251", nombre, datosCurso);
+  };
 
   const handleExportarPDF = async () => {
     setMenuAbierto(false);
@@ -123,10 +132,32 @@ export default function Pantalla() {
       );
       return;
     }
-    const nombreArchivo = reporteEl.getAttribute("data-nombre-archivo") || "Reporte_MAT251_Tema1";
+    setExportandoPDF(true);
     try {
-      setExportandoPDF(true);
-      await generarPDFReporteMAT251("reporte-formal-mat251", nombreArchivo);
+      const grupos = await mat251Api.obtenerGruposReporte();
+      if (grupos.length > 1) {
+        setGruposReporte(grupos);
+        dialogoGrupoRef.current?.showModal();
+        return;
+      }
+      await descargarReportePDF(grupos[0]);
+    } catch {
+      alerta.error("No se pudo preparar el PDF", "No se pudieron consultar los grupos de MAT 251. Intenta nuevamente.");
+    } finally {
+      setExportandoPDF(false);
+    }
+  };
+
+  const exportarGrupoSeleccionado = async (evento) => {
+    evento.preventDefault();
+    const grupoId = new FormData(evento.currentTarget).get("grupo");
+    const grupo = gruposReporte.find(item => String(item.id) === grupoId);
+    if (!grupo) return;
+
+    dialogoGrupoRef.current.close();
+    setExportandoPDF(true);
+    try {
+      await descargarReportePDF(grupo);
     } finally {
       setExportandoPDF(false);
     }
@@ -514,6 +545,27 @@ export default function Pantalla() {
           <span className="fab-tooltip">{historialOrigen ? "Guía del historial" : "Guía Rápida"}</span>
         </button>
       </div>
+
+      <dialog ref={dialogoGrupoRef} aria-labelledby="titulo-grupo-pdf-mat251"
+        style={{ color: "var(--text-main)", background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", maxWidth: "min(90vw, 480px)" }}>
+        <form onSubmit={exportarGrupoSeleccionado}>
+          <h3 id="titulo-grupo-pdf-mat251">Grupo del reporte</h3>
+          <label htmlFor="grupo-pdf-mat251">Selecciona el grupo de MAT 251</label>
+          <select id="grupo-pdf-mat251" name="grupo" defaultValue="" required
+            style={{ display: "block", width: "100%", margin: "8px 0 16px" }}>
+            <option value="" disabled>Selecciona un grupo</option>
+            {gruposReporte.map(grupo => (
+              <option key={grupo.id} value={grupo.id}>
+                {[grupo.grupo, grupo.docente].filter(Boolean).join(" — ")}
+              </option>
+            ))}
+          </select>
+          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+            <button type="button" onClick={() => dialogoGrupoRef.current.close()}>Cancelar</button>
+            <button type="submit">Descargar PDF</button>
+          </div>
+        </form>
+      </dialog>
 
       {/* MODAL DE GESTIÓN DE DATOS */}
       {mostrarDatos && (
